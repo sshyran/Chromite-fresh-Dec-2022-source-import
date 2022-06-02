@@ -28,12 +28,6 @@ class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase):
     self.PatchObject(osutils.TempDir, '__enter__', return_value=self.tempdir)
     self.PatchObject(portage_util, 'GetBoardUseFlags', return_value='')
 
-  def testCommand(self):
-    """Test the build_image command."""
-    image.Build('board', [constants.IMAGE_TYPE_BASE])
-    self.assertCommandContains(
-        [Path(constants.CROSUTILS_DIR) / 'build_image.sh'])
-
   def testBuildBoardHandling(self):
     """Test the argument handling."""
     # No board should raise an error.
@@ -42,10 +36,6 @@ class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase):
 
     with self.assertRaises(image.InvalidArgumentError):
       image.Build('', [constants.IMAGE_TYPE_BASE])
-
-    # Should be using the passed board.
-    image.Build('board', [constants.IMAGE_TYPE_BASE])
-    self.assertCommandContains(['--board', 'board'])
 
   def testBuildImageTypes(self):
     """Test the image type handling."""
@@ -79,79 +69,201 @@ class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase):
     self.assertEqual(build_result.return_code, errno.EINVAL)
 
 
-class BuildConfigTest(cros_test_lib.MockTestCase):
+class BuildImageCommandTest(cros_test_lib.MockTestCase):
   """BuildConfig tests."""
 
-  def testGetArguments(self):
+  def testBuildImageCommand(self):
     """GetArguments tests."""
-    config = image.BuildConfig()
-    self.assertIn('--script-is-run-only-by-chromite-and-not-users',
-                  config.GetArguments())
+    cmd = image.GetBuildImageCommand(image.BuildConfig(),
+                                     [constants.BASE_IMAGE_BIN], 'testBoard')
+    expected = {
+        Path(constants.CROSUTILS_DIR) / 'build_image.sh',
+        '--script-is-run-only-by-chromite-and-not-users',
+        '--board',
+        'testBoard',
+    }
+    self.assertTrue(expected.issubset(set(cmd)))
 
     # Make sure each arg produces the correct argument individually.
-    config = image.BuildConfig(builder_path='test_builder_path')
-    self.assertIn('--builder_path', config.GetArguments())
-    self.assertIn('test_builder_path', config.GetArguments())
+    cmd = image.GetBuildImageCommand(
+        image.BuildConfig(builder_path='test_builder_path'),
+        [constants.BASE_IMAGE_BIN], 'testBoard')
+    expected = {
+        '--builder_path',
+        'testBoard',
+    }
+    self.assertTrue(expected.issubset(set(cmd)))
 
-    config = image.BuildConfig(disk_layout='disk')
-    self.assertIn('--disk_layout', config.GetArguments())
-    self.assertIn('disk', config.GetArguments())
+    # disk_layout
+    cmd = image.GetBuildImageCommand(
+        image.BuildConfig(disk_layout='disk'), [constants.BASE_IMAGE_BIN],
+        'testBoard')
+    expected = {
+        '--disk_layout',
+        'disk',
+    }
+    self.assertTrue(expected.issubset(set(cmd)))
 
-    config = image.BuildConfig(enable_rootfs_verification=False)
-    self.assertIn('--noenable_rootfs_verification', config.GetArguments())
+    # enable_rootfs_verification
+    self.assertIn(
+        '--noenable_rootfs_verification',
+        image.GetBuildImageCommand(
+            image.BuildConfig(enable_rootfs_verification=False),
+            [constants.BASE_IMAGE_BIN], 'testBoard'))
+    self.assertIn(
+        '--noenable_rootfs_verification',
+        image.GetBuildImageCommand(
+            image.BuildConfig(enable_rootfs_verification=True),
+            [constants.FACTORY_IMAGE_BIN], 'testBoard'))
 
-    config = image.BuildConfig(replace=True)
-    self.assertIn('--replace', config.GetArguments())
+    # replace
+    self.assertIn(
+        '--replace',
+        image.GetBuildImageCommand(
+            image.BuildConfig(replace=True), [constants.BASE_IMAGE_BIN],
+            'testBoard'))
 
-    config = image.BuildConfig(version='build_version')
-    self.assertIn('--version', config.GetArguments())
-    self.assertIn('build_version', config.GetArguments())
+    # build_version
+    cmd = image.GetBuildImageCommand(
+        image.BuildConfig(version='build_version'), [constants.BASE_IMAGE_BIN],
+        'testBoard')
+    expected = {
+        '--version',
+        'build_version',
+    }
+    self.assertTrue(expected.issubset(set(cmd)))
 
-    config = image.BuildConfig(build_attempt=12)
-    self.assertIn('--build_attempt', config.GetArguments())
-    self.assertIn('12', config.GetArguments())
+    # build_attempt
+    cmd = image.GetBuildImageCommand(
+        image.BuildConfig(build_attempt=12), [constants.BASE_IMAGE_BIN],
+        'testBoard')
+    expected = {
+        '--build_attempt',
+        '12',
+    }
+    self.assertTrue(expected.issubset(set(cmd)))
 
-    config = image.BuildConfig(symlink='test_symlink')
-    self.assertIn('--symlink', config.GetArguments())
-    self.assertIn('test_symlink', config.GetArguments())
+    # symlink
+    cmd = image.GetBuildImageCommand(
+        image.BuildConfig(symlink='test_symlink'), [constants.BASE_IMAGE_BIN],
+        'testBoard')
+    expected = {
+        '--symlink',
+        'test_symlink',
+    }
+    self.assertTrue(expected.issubset(set(cmd)))
 
-    config = image.BuildConfig(output_dir_suffix='test_output_suffix')
-    self.assertIn('--output_suffix', config.GetArguments())
-    self.assertIn('test_output_suffix', config.GetArguments())
+    # output_dir_suffix
+    cmd = image.GetBuildImageCommand(
+        image.BuildConfig(output_dir_suffix='test_output_suffix'),
+        [constants.BASE_IMAGE_BIN], 'testBoard')
+    expected = {
+        '--output_suffix',
+        'test_output_suffix',
+    }
+    self.assertTrue(expected.issubset(set(cmd)))
 
-    config = image.BuildConfig(adjust_partition='ROOT-A:+1G')
-    self.assertIn('--adjust_part', config.GetArguments())
-    self.assertIn('ROOT-A:+1G', config.GetArguments())
+    # adjust_partition
+    cmd = image.GetBuildImageCommand(
+        image.BuildConfig(adjust_partition='ROOT-A:+1G'),
+        [constants.BASE_IMAGE_BIN], 'testBoard')
+    expected = {
+        '--adjust_part',
+        'ROOT-A:+1G',
+    }
+    self.assertTrue(expected.issubset(set(cmd)))
 
+    # boot_args
     config = image.BuildConfig(boot_args='initrd')
-    self.assertIn('--boot_args', config.GetArguments())
-    self.assertIn('initrd', config.GetArguments())
+    cmd = image.GetBuildImageCommand(config, [constants.BASE_IMAGE_BIN],
+                                     'testBoard')
+    expected = {
+        '--boot_args',
+        'initrd',
+    }
+    self.assertTrue(expected.issubset(set(cmd)))
 
+    cmd = image.GetBuildImageCommand(config, [constants.FACTORY_IMAGE_BIN],
+                                     'testBoard')
+    expected = {
+        '--boot_args',
+        'initrd cros_factory_install',
+    }
+    self.assertTrue(expected.issubset(set(cmd)))
+
+    # enable_bootcache
     config = image.BuildConfig(enable_bootcache=True)
-    self.assertIn('--enable_bootcache', config.GetArguments())
+    self.assertIn(
+        '--enable_bootcache',
+        image.GetBuildImageCommand(config, [constants.BASE_IMAGE_BIN],
+                                   'testBoard'))
+    self.assertNotIn(
+        '--enable_bootcache',
+        image.GetBuildImageCommand(config, [constants.FACTORY_IMAGE_BIN],
+                                   'testBoard'))
 
-    config = image.BuildConfig(output_root='test/output/dir')
-    self.assertIn('--output_root', config.GetArguments())
-    self.assertIn('test/output/dir', config.GetArguments())
+    # output_root
+    cmd = image.GetBuildImageCommand(
+        image.BuildConfig(output_root='test/output/dir'),
+        [constants.BASE_IMAGE_BIN], 'testBoard')
+    expected = {
+        '--output_root',
+        'test/output/dir',
+    }
+    self.assertTrue(expected.issubset(set(cmd)))
 
-    config = image.BuildConfig(build_root='test/build/dir')
-    self.assertIn('--build_root', config.GetArguments())
-    self.assertIn('test/build/dir', config.GetArguments())
+    # build_root
+    cmd = image.GetBuildImageCommand(
+        image.BuildConfig(build_root='test/build/dir'),
+        [constants.BASE_IMAGE_BIN], 'testBoard')
+    expected = {
+        '--build_root',
+        'test/build/dir',
+    }
+    self.assertTrue(expected.issubset(set(cmd)))
 
-    config = image.BuildConfig(enable_serial='ttyS1')
-    self.assertIn('--enable_serial', config.GetArguments())
-    self.assertIn('ttyS1', config.GetArguments())
+    # enable_serial
+    cmd = image.GetBuildImageCommand(
+        image.BuildConfig(enable_serial='ttyS1'), [constants.BASE_IMAGE_BIN],
+        'testBoard')
+    expected = {
+        '--enable_serial',
+        'ttyS1',
+    }
+    self.assertTrue(expected.issubset(set(cmd)))
 
-    config = image.BuildConfig(kernel_loglevel=4)
-    self.assertIn('--loglevel', config.GetArguments())
-    self.assertIn('4', config.GetArguments())
+    # kernel_loglevel
+    cmd = image.GetBuildImageCommand(
+        image.BuildConfig(kernel_loglevel=4), [constants.BASE_IMAGE_BIN],
+        'testBoard')
+    expected = {
+        '--loglevel',
+        '4',
+    }
+    self.assertTrue(expected.issubset(set(cmd)))
 
-    config = image.BuildConfig(jobs=40)
-    self.assertIn('--jobs', config.GetArguments())
-    self.assertIn('40', config.GetArguments())
+    # jobs
+    cmd = image.GetBuildImageCommand(
+        image.BuildConfig(jobs=40), [constants.BASE_IMAGE_BIN], 'testBoard')
+    expected = {
+        '--jobs',
+        '40',
+    }
+    self.assertTrue(expected.issubset(set(cmd)))
 
-    config = image.BuildConfig(eclean=False)
-    self.assertIn('--noeclean', config.GetArguments())
+    # eclean
+    self.assertIn(
+        '--noeclean',
+        image.GetBuildImageCommand(
+            image.BuildConfig(eclean=False), [constants.BASE_IMAGE_BIN],
+            'testBoard'))
+
+    # image_name
+    config = image.BuildConfig()
+    for image_name in constants.IMAGE_NAME_TO_TYPE.keys():
+      self.assertIn(
+          image_name,
+          image.GetBuildImageCommand(config, [image_name], 'testBoard'))
 
 
 class CreateVmTest(cros_test_lib.RunCommandTestCase):

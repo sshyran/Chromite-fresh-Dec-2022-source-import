@@ -89,39 +89,66 @@ class BuildConfig(NamedTuple):
   eclean: bool = True
   base_is_recovery: bool = False
 
-  def GetArguments(self):
-    """Get the build_image arguments for the configuration."""
-    args = ['--script-is-run-only-by-chromite-and-not-users']
 
-    if self.builder_path:
-      args.extend(['--builder_path', self.builder_path])
-    if not self.enable_rootfs_verification:
-      args.append('--noenable_rootfs_verification')
-    if self.replace:
-      args.append('--replace')
-    if self.version:
-      args.extend(['--version', self.version])
-    if self.output_dir_suffix:
-      args.extend(['--output_suffix', self.output_dir_suffix])
-    if self.adjust_partition:
-      args.extend(['--adjust_part', self.adjust_partition])
-    if self.enable_bootcache:
-      args.append('--enable_bootcache')
-    if self.enable_serial:
-      args.extend(['--enable_serial', self.enable_serial])
-    if not self.eclean:
-      args.append('--noeclean')
-    args.extend(
-        ['--disk_layout', self.disk_layout if self.disk_layout else 'default'])
-    args.extend(['--build_attempt', f'{self.build_attempt}'])
-    args.extend(['--symlink', self.symlink])
-    args.extend(['--boot_args', self.boot_args])
-    args.extend(['--output_root', self.output_root])
-    args.extend(['--build_root', self.build_root])
-    args.extend(['--loglevel', f'{self.kernel_loglevel}'])
-    args.extend(['--jobs', f'{self.jobs}'])
+# TODO(b/232566937): Remove the argument generation function, once the
+# build_image.sh is removed.
+def GetBuildImageCommand(config: BuildConfig, image_names: List[str],
+                         board: str) -> List[Union[str, os.PathLike]]:
+  """Get the build_image command for the configuration.
 
-    return args
+  Args:
+    config: BuildConfig to use to generate the command.
+    image_names: A set of image names that needs to be built.
+    board: The board for which the image to be built.
+
+  Returns:
+    List with build_image command with arguments.
+  """
+  cmd = [
+      Path(constants.CROSUTILS_DIR) / 'build_image.sh',
+      '--script-is-run-only-by-chromite-and-not-users',
+      '--board',
+      board,
+  ]
+
+  _config = config._asdict()
+  if constants.FACTORY_IMAGE_BIN in image_names:
+    _config['boot_args'] += ' cros_factory_install'
+    _config['enable_rootfs_verification'] = False
+    _config['enable_bootcache'] = False
+
+  if _config['builder_path']:
+    cmd.extend(['--builder_path', _config['builder_path']])
+  if not _config['enable_rootfs_verification']:
+    cmd.append('--noenable_rootfs_verification')
+  if _config['replace']:
+    cmd.append('--replace')
+  if _config['version']:
+    cmd.extend(['--version', _config['version']])
+  if _config['output_dir_suffix']:
+    cmd.extend(['--output_suffix', _config['output_dir_suffix']])
+  if _config['adjust_partition']:
+    cmd.extend(['--adjust_part', _config['adjust_partition']])
+  if _config['enable_bootcache']:
+    cmd.append('--enable_bootcache')
+  if _config['enable_serial']:
+    cmd.extend(['--enable_serial', _config['enable_serial']])
+  if not _config['eclean']:
+    cmd.append('--noeclean')
+  cmd.extend([
+      '--disk_layout',
+      _config['disk_layout'] if _config['disk_layout'] else 'default',
+  ])
+  cmd.extend(['--build_attempt', f"{_config['build_attempt']}"])
+  cmd.extend(['--symlink', _config['symlink']])
+  cmd.extend(['--boot_args', _config['boot_args']])
+  cmd.extend(['--output_root', _config['output_root']])
+  cmd.extend(['--build_root', _config['build_root']])
+  cmd.extend(['--loglevel', f"{_config['kernel_loglevel']}"])
+  cmd.extend(['--jobs', f"{_config['jobs']}"])
+
+  cmd.extend(image_names)
+  return cmd
 
 
 class BuildResult(object):
@@ -226,11 +253,7 @@ def Build(board: str,
     return build_result
   logging.info('The following images will be built %s', ' '.join(image_names))
 
-  cmd = [Path(constants.CROSUTILS_DIR) / 'build_image.sh']
-  cmd.extend(config.GetArguments())
-  cmd.extend(['--board', board])
-  cmd.extend(image_names)
-
+  cmd = GetBuildImageCommand(config, image_names, board)
   extra_env_local = image_lib.GetBuildImageEnvvars(image_names, board,
                                                    extra_env)
 
