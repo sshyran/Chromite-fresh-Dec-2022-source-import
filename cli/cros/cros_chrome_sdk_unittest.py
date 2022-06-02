@@ -419,7 +419,7 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
 
   def testUseRBE(self):
     """Verify that we do not add Goma to the PATH."""
-    self.SetupCommandMock(extra_args=['--use-rbe'])
+    self.SetupCommandMock(extra_args=['--use-remoteexec'])
     self.cmd_mock.inst.Run()
 
     self.assertIn('use_goma = false', self.cmd_mock.env['GN_ARGS'])
@@ -432,7 +432,7 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
 
   def testUseRBELacros(self):
     """Verify that we do not add Goma to the PATH."""
-    self.SetupCommandMock(extra_args=['--use-rbe',
+    self.SetupCommandMock(extra_args=['--use-remoteexec',
                                       '--is-lacros', '--version=1234.0.0'])
     lkgm_file = os.path.join(self.chrome_src_dir, constants.PATH_TO_CHROME_LKGM)
     osutils.Touch(lkgm_file, makedirs=True)

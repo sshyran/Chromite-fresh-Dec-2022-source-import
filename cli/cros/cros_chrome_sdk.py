@@ -962,7 +962,7 @@ class ChromeSDKCommand(command.CliCommand):
         '--gomadir', type='path',
         help='Use the goma installation at the specified PATH.')
     parser.add_argument(
-        '--use-rbe', action='store_true', default=False,
+        '--use-remoteexec', action='store_true', default=False,
         help='Enable RBE client for the build. '
              'This automatically disables Goma.')
     parser.add_argument(
@@ -1360,11 +1360,11 @@ class ChromeSDKCommand(command.CliCommand):
     # adjustment made in _SetupTCEnvironment is for split debug which
     # is done with 'use_debug_fission'.
 
-    if options.use_rbe:
+    if options.use_remoteexec:
       gn_args['use_remoteexec'] = True
 
     # Enable goma if requested.
-    if not options.goma or options.use_rbe:
+    if not options.goma or options.use_remoteexec:
       # If --nogoma option is explicitly set, disable goma, even if it is
       # used in the original GN_ARGS.
       gn_args['use_goma'] = False
@@ -1654,7 +1654,7 @@ class ChromeSDKCommand(command.CliCommand):
 
     goma_dir = None
     goma_port = None
-    if self.options.goma and not self.options.use_rbe:
+    if self.options.goma and not self.options.use_remoteexec:
       try:
         goma_dir, goma_port = self._SetupGoma()
       except GomaError as e:
