@@ -28,7 +28,8 @@ _EXT_TOOL_MAP = {
     frozenset({'.md'}): (formatters.whitespace.Data,),
     frozenset({'.rs'}): (formatters.rust.Data,),
     frozenset({'.xml'}): (formatters.xml.Data,),
-    frozenset({'.cfg', '.conf', '.txt'}): (formatters.whitespace.Data,),
+    frozenset({'.cfg', '.conf', '.rules', '.txt'}): (
+        formatters.whitespace.Data,),
 }
 
 
