@@ -78,7 +78,7 @@ def _AddProjectsToManifestGroups(options, new_group):
   git_config = options.git_config
 
   cmd = ['config', '-f', git_config, '--get', 'manifest.groups']
-  enabled_groups = git.RunGit('.', cmd, check=False).output.split(',')
+  enabled_groups = git.RunGit('.', cmd, check=False).output.rstrip().split(',')
 
   # Note that ordering actually matters, thus why the following code
   # is written this way.
