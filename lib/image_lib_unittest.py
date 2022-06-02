@@ -623,6 +623,8 @@ class GetBuildImageEnvvarTests(cros_test_lib.MockTestCase):
     expected_envvar = {
         'INSTALL_MASK': ('\n'.join(constants.DEFAULT_INSTALL_MASK) + '\n' +
                          '\n'.join(constants.SYSTEMD_INSTALL_MASK)),
+        'PRISTINE_IMAGE_NAME': constants.BASE_IMAGE_BIN,
+        'BASE_PACKAGE': 'virtual/target-os',
     }
     image_to_test = [
         constants.BASE_IMAGE_BIN, constants.DEV_IMAGE_BIN,
@@ -645,6 +647,8 @@ class GetBuildImageEnvvarTests(cros_test_lib.MockTestCase):
         'INSTALL_MASK': ('\n'.join(constants.FACTORY_SHIM_INSTALL_MASK) + '\n' +
                          '\n'.join(constants.SYSTEMD_INSTALL_MASK)),
         'USE': image_lib._FACTORY_SHIM_USE_FLAGS,
+        'PRISTINE_IMAGE_NAME': constants.FACTORY_IMAGE_BIN,
+        'BASE_PACKAGE': 'virtual/target-os-factory-shim',
     }
     envar = image_lib.GetBuildImageEnvvars(
         set([constants.FACTORY_IMAGE_BIN]), 'betty')

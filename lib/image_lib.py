@@ -703,12 +703,16 @@ def GetBuildImageEnvvars(
   if not env_var_init:
     env_var_init = {}
   env_var_init['INSTALL_MASK'] = '\n'.join(constants.DEFAULT_INSTALL_MASK)
+  env_var_init['PRISTINE_IMAGE_NAME'] = constants.BASE_IMAGE_BIN
+  env_var_init['BASE_PACKAGE'] = 'virtual/target-os'
 
   if constants.FACTORY_IMAGE_BIN in image_names:
     env_var_init['INSTALL_MASK'] = '\n'.join(
         constants.FACTORY_SHIM_INSTALL_MASK)
     env_var_init['USE'] = (env_var_init.get('USE', '') + ' ' +
                            _FACTORY_SHIM_USE_FLAGS).strip()
+    env_var_init['PRISTINE_IMAGE_NAME'] = constants.FACTORY_IMAGE_BIN
+    env_var_init['BASE_PACKAGE'] = 'virtual/target-os-factory-shim'
 
   # Mask systemd directories if this is not a systemd image.
   if 'systemd' not in portage_util.GetBoardUseFlags(board):
