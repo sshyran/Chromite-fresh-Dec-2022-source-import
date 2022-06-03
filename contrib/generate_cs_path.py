@@ -53,8 +53,10 @@ class Gitiles(CodeSearch):
   @classmethod
   def format(cls, attrs, opts, checkout_path, relative_path):
     line = f'#{opts.line}' if opts.line else ''
-    return (f'{attrs.get("push_url")}/+/{attrs.get("revision")}/'
-            + f'{relative_path}{line}')
+    sha = git.RunGit(
+        attrs['local_path'], ['rev-parse', 'HEAD']
+    ).stdout.strip()
+    return f'{attrs.get("push_url")}/+/{sha}/{relative_path}{line}'
 
 
 class PublicCS(CodeSearch):
