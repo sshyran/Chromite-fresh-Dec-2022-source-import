@@ -2411,13 +2411,17 @@ def BranchScheduleConfig():
       '0 3/12 * * *',
   ]
 
+  LTS_SCHEDULE = '19 3 * * 6'
+
   assert len(RELEASES) == len(PFQ_SCHEDULE)
   for ((branch, android_pfq, chrome_pfq, orderfile, afdo, builder),
        android_schedule) in zip(RELEASES, PFQ_SCHEDULE):
     release_num = re.search(r'release-R(\d+)-.*', branch).group(1)
-    # All branches are only triggered by a Chrome uprev, or manually.
+    # All branches except LTS are only triggered by a Chrome uprev, or manually.
+    is_lts = bool(builder == config_lib.LUCI_BUILDER_LTS_RELEASE)
+    schedule = LTS_SCHEDULE if is_lts else 'triggered'
     branch_builds.append([
-        branch, 'master-release', config_lib.DISPLAY_LABEL_RELEASE, 'triggered',
+        branch, 'master-release', config_lib.DISPLAY_LABEL_RELEASE, schedule,
         [[('https://chromium.googlesource.com/chromiumos/' +
            'overlays/chromiumos-overlay'),
           [r'regexp:refs/heads/%s\\..*' % branch],
