@@ -63,6 +63,7 @@ class BuildConfig(NamedTuple):
     kernel_loglevel: The loglevel to add to the kernel command line.
     jobs: Number of packages to process in parallel at maximum.
     eclean: Call eclean before building the image.
+    base_is_recovery: Copy the base image to recovery_image.bin.
   """
   builder_path: Optional[str] = None
   disk_layout: Optional[str] = None
@@ -85,6 +86,7 @@ class BuildConfig(NamedTuple):
   # TODO(rchandrasekar): eclean will not be needed by build_image, after we move
   # all the kernel emerging operations into build_packages.
   eclean: bool = True
+  base_is_recovery: bool = False
 
   def GetArguments(self):
     """Get the build_image arguments for the configuration."""
@@ -250,6 +252,59 @@ def Build(board: str,
   return build_result
 
 
+def _GetResultAndAddImage(board: str, cmd: list,
+                          image_path: Path = None) -> BuildResult:
+  """Add an image to the BuildResult.
+
+  Args:
+    board: The board name.
+    cmd: An array of command-line arguments.
+    image_path: The chrooted path to the image.
+
+  Returns:
+    BuildResult
+  """
+  build_result = BuildResult([constants.IMAGE_TYPE_RECOVERY])
+  result = cros_build_lib.run(cmd, enter_chroot=True, check=False)
+  build_result.return_code = result.returncode
+
+  if result.returncode:
+    return build_result
+
+  image_name = constants.IMAGE_TYPE_TO_NAME[constants.IMAGE_TYPE_RECOVERY]
+  if image_path:
+    recovery_image = image_path.parent / image_name
+  else:
+    image_dir = Path(image_lib.GetLatestImageLink(board))
+    image_path = image_dir / image_name
+    recovery_image = image_path.resolve()
+
+  if recovery_image.exists():
+    build_result.add_image(constants.IMAGE_TYPE_RECOVERY, recovery_image)
+
+  return build_result
+
+
+def CopyBaseToRecovery(board: str, image_path: Path) -> BuildResult:
+  """Copy the first base image to recovery_image.bin.
+
+  For build targets that do not support a recovery image: the base image gets
+  copied to "recovery_image.bin" so images are available in the Chromebook
+  Recovery Utility, GoldenEye and other locations.
+
+  Args:
+    board: The board name.
+    image_path: The chrooted path to the base image.
+
+  Returns:
+    BuildResult
+  """
+  image_name = constants.IMAGE_TYPE_TO_NAME[constants.IMAGE_TYPE_RECOVERY]
+  recovery_image_path = image_path.parent / image_name
+  cmd = ['cp', image_path, recovery_image_path]
+  return _GetResultAndAddImage(board, cmd, recovery_image_path)
+
+
 def BuildRecoveryImage(board: str,
                        image_path: Optional[Path] = None) -> BuildResult:
   """Build a recovery image.
@@ -275,26 +330,7 @@ def BuildRecoveryImage(board: str,
   if image_path:
     cmd.extend(['--image', str(image_path)])
 
-  build_result = BuildResult([constants.IMAGE_TYPE_RECOVERY])
-  result = cros_build_lib.run(cmd, enter_chroot=True, check=False)
-  build_result.return_code = result.returncode
-
-  if result.returncode:
-    return build_result
-
-  # Record the image path.
-  image_name = constants.IMAGE_TYPE_TO_NAME[constants.IMAGE_TYPE_RECOVERY]
-  if image_path:
-    recovery_image = image_path.parent / image_name
-  else:
-    image_dir = Path(image_lib.GetLatestImageLink(board))
-    image_path = image_dir / image_name
-    recovery_image = image_path.resolve()
-
-  if recovery_image.exists():
-    build_result.add_image(constants.IMAGE_TYPE_RECOVERY, recovery_image)
-
-  return build_result
+  return _GetResultAndAddImage(board, cmd, image_path)
 
 
 def CreateVm(board: str,

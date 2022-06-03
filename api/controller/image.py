@@ -280,8 +280,13 @@ def Create(input_proto: 'image_pb2.CreateImageRequest',
     for mod_type in image_types.mod_images:
       if mod_type == _RECOVERY_ID:
         base_image_path = core_result.images[constants.IMAGE_TYPE_BASE]
-        result = image.BuildRecoveryImage(
-            board=board, image_path=base_image_path)
+        # For ChromeOS Flex special case.
+        if build_config.base_is_recovery:
+          result = image.CopyBaseToRecovery(
+              board=board, image_path=base_image_path)
+        else:
+          result = image.BuildRecoveryImage(
+              board=board, image_path=base_image_path)
         if result.all_built:
           _add_image_to_proto(output_proto,
                               result.images[_IMAGE_MAPPING[mod_type]], mod_type,
@@ -355,6 +360,7 @@ def _ParseCreateBuildConfig(input_proto):
   version = input_proto.version or None
   disk_layout = input_proto.disk_layout or None
   builder_path = input_proto.builder_path or None
+  base_is_recovery = input_proto.base_is_recovery or False
   return image.BuildConfig(
       enable_rootfs_verification=enable_rootfs_verification,
       replace=True,
@@ -362,6 +368,7 @@ def _ParseCreateBuildConfig(input_proto):
       disk_layout=disk_layout,
       builder_path=builder_path,
       symlink=LOCATION_CORE,
+      base_is_recovery=base_is_recovery,
   )
 
 
