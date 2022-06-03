@@ -374,18 +374,6 @@
       ]
     },
     {
-      "name": "skyrim",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": true,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "skyrim-kernelnext",
       "configs": [
         {
@@ -10291,6 +10279,47 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 259,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "skyrim",
+      "reference_board_name": "skyrim",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "skyrim",
+          "name": "skyrim15w",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7218,
+          "is_active": true
+        },
+        {
+          "board_name": "skyrim",
+          "name": "skyrim15w360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7218,
+          "is_active": true
+        },
+        {
+          "board_name": "skyrim",
+          "name": "skyrim6w",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7218,
+          "is_active": true
+        },
+        {
+          "board_name": "skyrim",
+          "name": "skyrim6w360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7218,
           "is_active": true
         }
       ]
