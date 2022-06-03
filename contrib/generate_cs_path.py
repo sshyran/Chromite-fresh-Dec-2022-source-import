@@ -53,10 +53,7 @@ class Gitiles(CodeSearch):
   @classmethod
   def format(cls, attrs, opts, checkout_path, relative_path):
     line = f'#{opts.line}' if opts.line else ''
-    sha = git.RunGit(
-        attrs['local_path'], ['rev-parse', 'HEAD']
-    ).stdout.strip()
-    return f'{attrs.get("push_url")}/+/{sha}/{relative_path}{line}'
+    return f'{attrs["push_url"]}/+/{attrs["sha"]}/{relative_path}{line}'
 
 
 class PublicCS(CodeSearch):
@@ -64,9 +61,10 @@ class PublicCS(CodeSearch):
   @classmethod
   def format(cls, attrs, opts, checkout_path, relative_path):
     line = f';l={opts.line}' if opts.line else ''
+    sha = attrs['sha'] if opts.upstream_sha else 'HEAD'
     # HEAD is the ref for the codesearch repo, not the project itself.
     return ('https://source.chromium.org/chromiumos/chromiumos/codesearch/+/'
-            + f'HEAD:{checkout_path}/{relative_path}{line}')
+            + f'{sha}:{checkout_path}/{relative_path}{line}')
 
 
 class InternalCS(CodeSearch):
@@ -74,7 +72,9 @@ class InternalCS(CodeSearch):
   @classmethod
   def format(cls, attrs, opts, checkout_path, relative_path):
     line = f';l={opts.line}' if opts.line else ''
-    return f'http://cs/chromeos_public/{checkout_path}/{relative_path}{line}'
+    sha = f';rcl={attrs["sha"]}' if opts.upstream_sha else ''
+    return ('http://cs/chromeos_public/'
+            + f'{checkout_path}/{relative_path}{line}{sha}')
 
 
 class PrivateCS(CodeSearch):
@@ -82,7 +82,9 @@ class PrivateCS(CodeSearch):
   @classmethod
   def format(cls, attrs, opts, checkout_path, relative_path):
     line = f';l={opts.line}' if opts.line else ''
-    return f'http://cs/chromeos_internal/{checkout_path}/{relative_path}{line}'
+    sha = f';rcl={attrs["sha"]}' if opts.upstream_sha else ''
+    return ('http://cs/chromeos_internal/'
+            + f'{checkout_path}/{relative_path}{line}{sha}')
 
 
 def GetParser():
@@ -113,6 +115,9 @@ def GetParser():
   )
 
   parser.add_argument('-l', '--line', type=int, help='Line number.')
+  parser.add_argument('--upstream-sha', action='store_true',
+                      help='Link to the upstream sha.')
+
 
   action_group = parser.add_mutually_exclusive_group()
   action_group.add_argument(
@@ -162,6 +167,15 @@ def main(argv):
       continue
   else:
     cros_build_lib.Die('No project found for %s.', opts.path)
+
+  if opts.upstream_sha:
+    attrs['sha'] = git.RunGit(
+        attrs['local_path'], ['rev-parse', attrs['tracking_branch']]
+    ).stdout.strip()
+  else:
+    attrs['sha'] = git.RunGit(
+        attrs['local_path'], ['rev-parse', 'HEAD']
+    ).stdout.strip()
 
   if opts.gitiles:
     base = Gitiles
