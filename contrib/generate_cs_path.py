@@ -42,11 +42,45 @@ from chromite.lib import cros_build_lib
 from chromite.lib import git
 
 
-# HEAD is the ref for the codesearch repo, not the project itself.
-_PUBLIC_CS_BASE = (
-    'https://source.chromium.org/chromiumos/chromiumos/codesearch/+/HEAD:')
-_INTERNAL_CS_BASE = 'http://cs/chromeos_public/'
-_INTERNAL_CS_PRIVATE_BASE = 'http://cs/chromeos_internal/'
+class CodeSearch(object):
+  """format returns a url to the code specified"""
+  @classmethod
+  def format(cls, attrs, opts, checkout_path, relative_path):
+    raise NotImplementedError()
+
+class Gitiles(CodeSearch):
+  """format returns a url to the code specified"""
+  @classmethod
+  def format(cls, attrs, opts, checkout_path, relative_path):
+    line = f'#{opts.line}' if opts.line else ''
+    return (f'{attrs.get("push_url")}/+/{attrs.get("revision")}/'
+            + f'{relative_path}{line}')
+
+
+class PublicCS(CodeSearch):
+  """format returns a url to the code specified"""
+  @classmethod
+  def format(cls, attrs, opts, checkout_path, relative_path):
+    line = f';l={opts.line}' if opts.line else ''
+    # HEAD is the ref for the codesearch repo, not the project itself.
+    return ('https://source.chromium.org/chromiumos/chromiumos/codesearch/+/'
+            + f'HEAD:{checkout_path}/{relative_path}{line}')
+
+
+class InternalCS(CodeSearch):
+  """format returns a url to the code specified"""
+  @classmethod
+  def format(cls, attrs, opts, checkout_path, relative_path):
+    line = f';l={opts.line}' if opts.line else ''
+    return f'http://cs/chromeos_public/{checkout_path}/{relative_path}{line}'
+
+
+class PrivateCS(CodeSearch):
+  """format returns a url to the code specified"""
+  @classmethod
+  def format(cls, attrs, opts, checkout_path, relative_path):
+    line = f';l={opts.line}' if opts.line else ''
+    return f'http://cs/chromeos_internal/{checkout_path}/{relative_path}{line}'
 
 
 def GetParser():
@@ -128,20 +162,16 @@ def main(argv):
     cros_build_lib.Die('No project found for %s.', opts.path)
 
   if opts.gitiles:
-    final_link = (f"{attrs.get('push_url')}/+/{attrs.get('revision')}/"
-                  f'{relative_path}#{opts.line}')
+    base = Gitiles
+  elif attrs.get('remote_alias') == 'cros-internal':
+    # Private repos not on public CS, so force internal private.
+    base = InternalCS
+  elif opts.public_link:
+    base = PublicCS
   else:
-    line = f';l={opts.line}' if opts.line else ''
+    base = PrivateCS
 
-    if attrs.get('remote_alias') == 'cros-internal':
-      # Private repos not on public CS, so force internal private.
-      base = _INTERNAL_CS_PRIVATE_BASE
-    elif opts.public_link:
-      base = _PUBLIC_CS_BASE
-    else:
-      base = _INTERNAL_CS_BASE
-
-    final_link = f'{base}{checkout_path}/{relative_path}{line}'
+  final_link = base.format(attrs, opts, checkout_path, relative_path)
 
   is_mac_os = sys.platform.startswith('darwin')
 
