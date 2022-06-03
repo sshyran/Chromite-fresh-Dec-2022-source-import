@@ -8,7 +8,6 @@ import collections
 import logging
 import traceback
 
-from chromite.cbuildbot import manifest_version
 from chromite.cbuildbot.builders import generic_builders
 from chromite.cbuildbot.stages import android_stages
 from chromite.cbuildbot.stages import artifact_stages
@@ -23,6 +22,7 @@ from chromite.cbuildbot.stages import sync_stages
 from chromite.cbuildbot.stages import tast_test_stages
 from chromite.cbuildbot.stages import test_stages
 from chromite.cbuildbot.stages import vm_test_stages
+from chromite.lib import chromeos_version
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import failures_lib
@@ -62,7 +62,7 @@ class SimpleBuilder(generic_builders.Builder):
 
   def GetVersionInfo(self):
     """Returns the CrOS version info from the chromiumos-overlay."""
-    return manifest_version.VersionInfo.from_repo(self._run.buildroot)
+    return chromeos_version.VersionInfo.from_repo(self._run.buildroot)
 
   def _RunHWTests(self, builder_run, board):
     """Run hwtest-related stages for the specified board.

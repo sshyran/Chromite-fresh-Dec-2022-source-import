@@ -7,7 +7,7 @@
 import logging
 import os
 
-from chromite.cbuildbot import manifest_version
+from chromite.lib import chromeos_version
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -377,8 +377,8 @@ def _WorkOnCommit(options, overlays, overlay_tracking_branch,
   """
   # We cleaned up self referential ebuilds by this version, but don't enforce
   # the check on older ones to avoid breaking factory/firmware branches.
-  root_version = manifest_version.VersionInfo.from_repo(options.buildroot)
-  no_self_repos_version = manifest_version.VersionInfo('13099.0.0')
+  root_version = chromeos_version.VersionInfo.from_repo(options.buildroot)
+  no_self_repos_version = chromeos_version.VersionInfo('13099.0.0')
   reject_self_repo = root_version >= no_self_repos_version
 
   overlay_ebuilds = _GetOverlayToEbuildsMap(options, overlays, package_list)
@@ -413,8 +413,8 @@ def _GetOverlayToEbuildsMap(options, overlays, package_list):
   Returns:
     A dict mapping each overlay to a list of ebuilds belonging to it.
   """
-  root_version = manifest_version.VersionInfo.from_repo(options.buildroot)
-  subdir_removal = manifest_version.VersionInfo('10363.0.0')
+  root_version = chromeos_version.VersionInfo.from_repo(options.buildroot)
+  subdir_removal = chromeos_version.VersionInfo('10363.0.0')
   require_subdir_support = root_version < subdir_removal
 
   overlay_ebuilds = {}

@@ -14,9 +14,9 @@ import pytest  # pylint: disable=import-error
 
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot import commands
-from chromite.cbuildbot import manifest_version
 from chromite.cbuildbot.builders import simple_builders
 from chromite.lib import cgroups
+from chromite.lib import chromeos_version
 from chromite.lib import cidb
 from chromite.lib import config_lib_unittest
 from chromite.lib import constants
@@ -59,7 +59,7 @@ class SimpleBuilderTestCase(cros_test_lib.MockTestCase):
   VERSION = '1234.5.6'
 
   def setUp(self):
-    verinfo = manifest_version.VersionInfo(
+    verinfo = chromeos_version.VersionInfo(
         version_string=self.VERSION, chrome_branch=self.CHROME_BRANCH)
 
     self.StartPatcher(BuilderRunMock(verinfo))

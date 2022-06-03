@@ -737,7 +737,7 @@ class _BuilderRunBase(object):
     it could return a confusing value.
 
     Returns:
-      A manifest_version.VersionInfo object.
+      A chromeos_version.VersionInfo object.
 
     Raises:
       VersionNotSetError if the version has not yet been set.

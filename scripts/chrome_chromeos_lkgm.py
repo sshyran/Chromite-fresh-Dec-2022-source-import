@@ -14,7 +14,7 @@ import distutils.version  # pylint: disable=import-error,no-name-in-module
 import logging
 import urllib.parse
 
-from chromite.cbuildbot import manifest_version
+from chromite.lib import chromeos_version
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -70,7 +70,7 @@ class ChromeLKGMCommitter(object):
       self._user_email = '3su6n15k.default@developer.gserviceaccount.com'
 
     # Strip any chrome branch from the lkgm version.
-    self._lkgm = manifest_version.VersionInfo(lkgm).VersionString()
+    self._lkgm = chromeos_version.VersionInfo(lkgm).VersionString()
     self._commit_msg_header = self._COMMIT_MSG_HEADER % {'lkgm': self._lkgm}
     self._old_lkgm = None
 

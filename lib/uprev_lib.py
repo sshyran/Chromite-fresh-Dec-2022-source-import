@@ -13,7 +13,7 @@ import os
 import re
 from typing import Iterable, List, Optional, Tuple, TYPE_CHECKING, Union
 
-from chromite.cbuildbot import manifest_version
+from chromite.lib import chromeos_version
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import git
@@ -485,8 +485,8 @@ class UprevOverlayManager(object):
 
     # We cleaned up self referential ebuilds by this version, but don't enforce
     # the check on older ones to avoid breaking factory/firmware branches.
-    root_version = manifest_version.VersionInfo.from_repo(constants.SOURCE_ROOT)
-    no_self_repos_version = manifest_version.VersionInfo('13099.0.0')
+    root_version = chromeos_version.VersionInfo.from_repo(constants.SOURCE_ROOT)
+    no_self_repos_version = chromeos_version.VersionInfo('13099.0.0')
     self._reject_self_repo = root_version >= no_self_repos_version
 
   @property
@@ -619,8 +619,8 @@ class UprevOverlayManager(object):
       force: Boolean indicating whether or not to consider denylisted ebuilds.
     """
     # See crrev.com/c/1257944 for origins of this.
-    root_version = manifest_version.VersionInfo.from_repo(constants.SOURCE_ROOT)
-    subdir_removal = manifest_version.VersionInfo('10363.0.0')
+    root_version = chromeos_version.VersionInfo.from_repo(constants.SOURCE_ROOT)
+    subdir_removal = chromeos_version.VersionInfo('10363.0.0')
     require_subdir_support = root_version < subdir_removal
 
     if not package_list:

@@ -8,11 +8,11 @@ import os
 from unittest import mock
 
 from chromite.cbuildbot import commands
-from chromite.cbuildbot import manifest_version
 from chromite.cbuildbot.builders import workspace_builders_unittest
 from chromite.cbuildbot.stages import generic_stages
 from chromite.cbuildbot.stages import generic_stages_unittest
 from chromite.cbuildbot.stages import workspace_stages
+from chromite.lib import chromeos_version
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
@@ -40,8 +40,8 @@ class WorkspaceStageBase(
     # Make it a 'repo' for chroot path conversions.
     osutils.SafeMakedirs(os.path.join(self.workspace, '.repo'))
 
-    self.from_repo_mock = self.PatchObject(
-        manifest_version.VersionInfo, 'from_repo')
+    self.from_repo_mock = self.PatchObject(chromeos_version.VersionInfo,
+                                           'from_repo')
     self.SetWorkspaceVersion(self.OLD_VERSION)
 
     self.manifest_versions = os.path.join(
@@ -53,7 +53,7 @@ class WorkspaceStageBase(
 
   def SetWorkspaceVersion(self, version, chrome_branch='1'):
     """Change the "version" of the workspace."""
-    self.from_repo_mock.return_value = manifest_version.VersionInfo(
+    self.from_repo_mock.return_value = chromeos_version.VersionInfo(
         version, chrome_branch=chrome_branch)
 
   def ConstructStage(self):
@@ -788,7 +788,7 @@ class WorkspaceDebugSymbolsStageTest(WorkspaceStageBase):
 
   def ConstructStage(self):
     # Version for the infra branch.
-    self._run.attrs.version_info = manifest_version.VersionInfo(
+    self._run.attrs.version_info = chromeos_version.VersionInfo(
         '10.0.0', chrome_branch='10')
     self._run.attrs.release_tag = 'infra-tag'
 

@@ -8,7 +8,7 @@ import logging
 import os
 from typing import Dict, List, Optional
 
-from chromite.cbuildbot import manifest_version
+from chromite.lib import chromeos_version
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -189,8 +189,8 @@ def _GetOverlayToEbuildsMap(overlays: List[str],
   Returns:
     A dict mapping each overlay to a list of ebuilds belonging to it.
   """
-  root_version = manifest_version.VersionInfo.from_repo(constants.SOURCE_ROOT)
-  subdir_removal = manifest_version.VersionInfo('10363.0.0')
+  root_version = chromeos_version.VersionInfo.from_repo(constants.SOURCE_ROOT)
+  subdir_removal = chromeos_version.VersionInfo('10363.0.0')
   require_subdir_support = root_version < subdir_removal
   use_all = not package_list
 

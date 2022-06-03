@@ -5,20 +5,20 @@
 """Unittests for manifest_version. Needs to be run inside of chroot."""
 
 import os
-import tempfile
 from unittest import mock
 
 from chromite.cbuildbot import build_status
 from chromite.cbuildbot import manifest_version
 from chromite.cbuildbot import repository
 from chromite.lib import builder_status_lib
-from chromite.lib import constants
+from chromite.lib import chromeos_version
 from chromite.lib import cros_test_lib
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import timeout_util
 from chromite.lib.buildstore import BuildIdentifier
 from chromite.lib.buildstore import FakeBuildStore
+from chromite.lib.chromeos_version_unittest import VersionInfoTest
 
 
 FAKE_VERSION = """
@@ -58,132 +58,6 @@ class HelperMethodsTest(cros_test_lib.TempDirTestCase):
     manifest_version.CreateSymlink(srcfile, destfile)
     self.assertTrue(os.path.lexists(destfile),
                     'Unable to create symlink to %s' % destfile)
-
-
-class VersionInfoTest(cros_test_lib.MockTempDirTestCase):
-  """Test methods testing methods in VersionInfo class."""
-
-  @classmethod
-  def WriteFakeVersionFile(cls, version_file, version=None, chrome_branch=None):
-    """Helper method to write a version file from specified version number."""
-    if version is None:
-      version = FAKE_VERSION_STRING
-    if chrome_branch is None:
-      chrome_branch = CHROME_BRANCH
-
-    osutils.SafeMakedirs(os.path.split(version_file)[0])
-    info = manifest_version.VersionInfo(version, chrome_branch)
-    osutils.WriteFile(version_file, FAKE_VERSION % info.__dict__)
-
-  @classmethod
-  def CreateFakeVersionFile(cls, tmpdir, version=None, chrome_branch=None):
-    """Helper method to create a version file from specified version number."""
-    version_file = tempfile.mktemp(dir=tmpdir)
-    cls.WriteFakeVersionFile(version_file, version=version,
-                             chrome_branch=chrome_branch)
-    return version_file
-
-  def testLoadFromFile(self):
-    """Tests whether we can load from a version file."""
-    version_file = self.CreateFakeVersionFile(self.tempdir)
-    info = manifest_version.VersionInfo(version_file=version_file)
-    self.assertEqual(info.VersionString(), FAKE_VERSION_STRING)
-
-  def testLoadFromRepo(self):
-    """Tests whether we can load from a source repo."""
-    version_file = os.path.join(self.tempdir, constants.VERSION_FILE)
-    self.WriteFakeVersionFile(version_file)
-    info = manifest_version.VersionInfo.from_repo(self.tempdir)
-    self.assertEqual(info.VersionString(), FAKE_VERSION_STRING)
-
-  def testLoadFromString(self):
-    """Tests whether we can load from a string."""
-    info = manifest_version.VersionInfo(FAKE_VERSION_STRING, CHROME_BRANCH)
-    self.assertEqual(info.VersionString(), FAKE_VERSION_STRING)
-
-  def CommonTestIncrementVersion(self, incr_type, version, chrome_branch=None):
-    """Common test increment.  Returns path to new incremented file."""
-    message = 'Incrementing cuz I sed so'
-    create_mock = self.PatchObject(git, 'CreateBranch')
-    push_mock = self.PatchObject(manifest_version, '_PushGitChanges')
-    clean_mock = self.PatchObject(git, 'CleanAndCheckoutUpstream')
-
-    version_file = self.CreateFakeVersionFile(
-        self.tempdir, version=version, chrome_branch=chrome_branch)
-    info = manifest_version.VersionInfo(version_file=version_file,
-                                        incr_type=incr_type)
-    info.IncrementVersion()
-    info.UpdateVersionFile(message, dry_run=False)
-
-    create_mock.assert_called_once_with(
-        self.tempdir, manifest_version.PUSH_BRANCH)
-    push_mock.assert_called_once_with(
-        self.tempdir, message, dry_run=False, push_to=None)
-    clean_mock.assert_called_once_with(self.tempdir)
-
-    return version_file
-
-  def testIncrementVersionPatch(self):
-    """Tests whether we can increment a version file by patch number."""
-    version_file = self.CommonTestIncrementVersion('branch', '1.2.3')
-    new_info = manifest_version.VersionInfo(version_file=version_file,
-                                            incr_type='branch')
-    self.assertEqual(new_info.VersionString(), '1.2.4')
-
-  def testIncrementVersionBranch(self):
-    """Tests whether we can increment a version file by branch number."""
-    version_file = self.CommonTestIncrementVersion('branch', '1.2.0')
-    new_info = manifest_version.VersionInfo(version_file=version_file,
-                                            incr_type='branch')
-    self.assertEqual(new_info.VersionString(), '1.3.0')
-
-  def testIncrementVersionBuild(self):
-    """Tests whether we can increment a version file by build number."""
-    version_file = self.CommonTestIncrementVersion('build', '1.0.0')
-    new_info = manifest_version.VersionInfo(version_file=version_file,
-                                            incr_type='build')
-    self.assertEqual(new_info.VersionString(), '2.0.0')
-
-  def testIncrementVersionChrome(self):
-    """Tests whether we can increment the chrome version."""
-    version_file = self.CommonTestIncrementVersion(
-        'chrome_branch', version='1.0.0', chrome_branch='29')
-    new_info = manifest_version.VersionInfo(version_file=version_file)
-    self.assertEqual(new_info.VersionString(), '2.0.0')
-    self.assertEqual(new_info.chrome_branch, '30')
-
-  def testCompareEqual(self):
-    """Verify comparisons of equal versions."""
-    lhs = manifest_version.VersionInfo(version_string='1.2.3')
-    rhs = manifest_version.VersionInfo(version_string='1.2.3')
-    self.assertFalse(lhs < rhs)
-    self.assertTrue(lhs <= rhs)
-    self.assertTrue(lhs == rhs)
-    self.assertFalse(lhs != rhs)
-    self.assertFalse(lhs > rhs)
-    self.assertTrue(lhs >= rhs)
-
-  def testCompareLess(self):
-    """Verify comparisons of less versions."""
-    lhs = manifest_version.VersionInfo(version_string='1.0.3')
-    rhs = manifest_version.VersionInfo(version_string='1.2.3')
-    self.assertTrue(lhs < rhs)
-    self.assertTrue(lhs <= rhs)
-    self.assertFalse(lhs == rhs)
-    self.assertTrue(lhs != rhs)
-    self.assertFalse(lhs > rhs)
-    self.assertFalse(lhs >= rhs)
-
-  def testCompareGreater(self):
-    """Verify comparisons of greater versions."""
-    lhs = manifest_version.VersionInfo(version_string='1.2.4')
-    rhs = manifest_version.VersionInfo(version_string='1.2.3')
-    self.assertFalse(lhs < rhs)
-    self.assertFalse(lhs <= rhs)
-    self.assertFalse(lhs == rhs)
-    self.assertTrue(lhs != rhs)
-    self.assertTrue(lhs > rhs)
-    self.assertTrue(lhs >= rhs)
 
 
 class ResolveHelpersTest(cros_test_lib.TempDirTestCase):
@@ -254,7 +128,7 @@ class BuildSpecFunctionsTest(cros_test_lib.MockTempDirTestCase):
   """Tests for methods related to publishing buildspecs."""
 
   def setUp(self):
-    self.version_info = manifest_version.VersionInfo('1.2.3', '11')
+    self.version_info = chromeos_version.VersionInfo('1.2.3', '11')
 
     self.manifest_versions_int = os.path.join(
         self.tempdir, 'manifest_versions_int')
@@ -364,7 +238,7 @@ class BuildSpecsManagerTest(cros_test_lib.MockTempDirTestCase):
                         'CrOS-Build-Id: %s' % MOCK_BUILD_ID)
     push_mock = self.PatchObject(self.manager, 'PushSpecChanges')
 
-    info = manifest_version.VersionInfo(
+    info = chromeos_version.VersionInfo(
         FAKE_VERSION_STRING, CHROME_BRANCH, incr_type='branch')
 
     # Create a fake manifest file.
@@ -382,7 +256,7 @@ class BuildSpecsManagerTest(cros_test_lib.MockTempDirTestCase):
     expected_message = 'Automatic: Start amd64-generic-release master 1'
     push_mock = self.PatchObject(self.manager, 'PushSpecChanges')
 
-    info = manifest_version.VersionInfo(
+    info = chromeos_version.VersionInfo(
         FAKE_VERSION_STRING, CHROME_BRANCH, incr_type='branch')
 
     # Create a fake manifest file.
@@ -400,7 +274,7 @@ class BuildSpecsManagerTest(cros_test_lib.MockTempDirTestCase):
     expected_message = 'Automatic: Start amd64-generic-release master 1'
     push_mock = self.PatchObject(self.manager, 'PushSpecChanges')
 
-    info = manifest_version.VersionInfo(
+    info = chromeos_version.VersionInfo(
         FAKE_VERSION_STRING, CHROME_BRANCH, incr_type='branch')
 
     # Create a fake manifest file.
@@ -426,7 +300,7 @@ class BuildSpecsManagerTest(cros_test_lib.MockTempDirTestCase):
   def testInitializeManifestVariablesWithUnprocessedBuild(self):
     """Test InitializeManifestVariables with unprocessed build."""
     self.manager = self.BuildManager()
-    info = manifest_version.VersionInfo(
+    info = chromeos_version.VersionInfo(
         FAKE_VERSION_STRING, CHROME_BRANCH, incr_type='branch')
     for_build = os.path.join(self.manager.manifest_dir, 'build-name',
                              self.build_names[0])
@@ -446,7 +320,7 @@ class BuildSpecsManagerTest(cros_test_lib.MockTempDirTestCase):
   def testInitializeManifestVariablesWithPassedBuild(self):
     """Test InitializeManifestVariables with passed build."""
     self.manager = self.BuildManager()
-    info = manifest_version.VersionInfo(
+    info = chromeos_version.VersionInfo(
         FAKE_VERSION_STRING, CHROME_BRANCH, incr_type='branch')
     for_build = os.path.join(self.manager.manifest_dir, 'build-name',
                              self.build_names[0])
@@ -472,7 +346,7 @@ class BuildSpecsManagerTest(cros_test_lib.MockTempDirTestCase):
     """Tests whether we can get sorted specs correctly from a directory."""
     self.manager = self.BuildManager()
     self.PatchObject(git, 'Clone', side_effect=Exception())
-    info = manifest_version.VersionInfo(
+    info = chromeos_version.VersionInfo(
         '99.1.2', CHROME_BRANCH, incr_type='branch')
 
     specs_dir = os.path.join(self.manager.manifest_dir, 'buildspecs',
@@ -496,7 +370,7 @@ class BuildSpecsManagerTest(cros_test_lib.MockTempDirTestCase):
     Tests without pre-existing version in manifest dir.
     """
     self.manager = self.BuildManager()
-    info = manifest_version.VersionInfo(
+    info = chromeos_version.VersionInfo(
         FAKE_VERSION_STRING, CHROME_BRANCH, incr_type='branch')
 
     self.manager.latest = None
@@ -507,10 +381,10 @@ class BuildSpecsManagerTest(cros_test_lib.MockTempDirTestCase):
     """Tests that we create a new version if a previous one exists."""
     self.manager = self.BuildManager()
     self.manager.dry_run = False
-    m = self.PatchObject(manifest_version.VersionInfo, 'UpdateVersionFile')
+    m = self.PatchObject(chromeos_version.VersionInfo, 'UpdateVersionFile')
     version_file = VersionInfoTest.CreateFakeVersionFile(self.tempdir)
-    info = manifest_version.VersionInfo(version_file=version_file,
-                                        incr_type='branch')
+    info = chromeos_version.VersionInfo(
+        version_file=version_file, incr_type='branch')
 
     self.manager.latest = FAKE_VERSION_STRING
     version = self.manager.GetNextVersion(info)
@@ -522,9 +396,9 @@ class BuildSpecsManagerTest(cros_test_lib.MockTempDirTestCase):
   def testGetNextVersionDryRun(self):
     """Tests that we reuse a previous version if it is a dryrun."""
     self.manager = self.BuildManager()
-    m = self.PatchObject(manifest_version.VersionInfo, 'UpdateVersionFile')
+    m = self.PatchObject(chromeos_version.VersionInfo, 'UpdateVersionFile')
     version_file = VersionInfoTest.CreateFakeVersionFile(self.tempdir)
-    info = manifest_version.VersionInfo(
+    info = chromeos_version.VersionInfo(
         version_file=version_file, incr_type='branch')
 
     self.manager.latest = FAKE_VERSION_STRING
@@ -537,7 +411,7 @@ class BuildSpecsManagerTest(cros_test_lib.MockTempDirTestCase):
   def testGetNextBuildSpec(self):
     """End-to-end test of updating the manifest."""
     self.manager = self.BuildManager()
-    my_info = manifest_version.VersionInfo('1.2.3', chrome_branch='4')
+    my_info = chromeos_version.VersionInfo('1.2.3', chrome_branch='4')
     self.PatchObject(manifest_version.BuildSpecsManager,
                      'GetCurrentVersionInfo', return_value=my_info)
     self.PatchObject(repository.RepoRepository, 'Sync')

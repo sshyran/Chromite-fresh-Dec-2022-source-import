@@ -18,7 +18,7 @@ from typing import Iterable, List, NamedTuple, Optional, TYPE_CHECKING, Union
 from chromite.third_party.google.protobuf import json_format
 
 from chromite.api.gen.config import replication_config_pb2
-from chromite.cbuildbot import manifest_version
+from chromite.lib import chromeos_version
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import git
@@ -1256,14 +1256,14 @@ def determine_android_target(board, package=None):
 def determine_platform_version():
   """Returns the platform version from the source root."""
   # Platform version is something like '12575.0.0'.
-  version = manifest_version.VersionInfo.from_repo(constants.SOURCE_ROOT)
+  version = chromeos_version.VersionInfo.from_repo(constants.SOURCE_ROOT)
   return version.VersionString()
 
 
 def determine_milestone_version():
   """Returns the platform version from the source root."""
   # Milestone version is something like '79'.
-  version = manifest_version.VersionInfo.from_repo(constants.SOURCE_ROOT)
+  version = chromeos_version.VersionInfo.from_repo(constants.SOURCE_ROOT)
   return version.chrome_branch
 
 

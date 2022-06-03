@@ -12,11 +12,11 @@ import tempfile
 import traceback
 
 from chromite.cbuildbot import cbuildbot_alerts
-from chromite.cbuildbot import manifest_version
 from chromite.cbuildbot import trybot_patch_pool
 from chromite.cbuildbot.stages import build_stages
 from chromite.cbuildbot.stages import report_stages
 from chromite.cbuildbot.stages import sync_stages
+from chromite.lib import chromeos_version
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -142,13 +142,13 @@ class Builder(object):
     self._run.attrs.version_info = self.GetVersionInfo()
 
   def GetVersionInfo(self):
-    """Returns a manifest_version.VersionInfo object for this build.
+    """Returns a chromeos_version.VersionInfo object for this build.
 
     Chrome OS Subclasses must override this method. Site specific builds which
     don't use Chrome OS versioning should leave this alone.
     """
     # Placeholder version for non-Chrome OS builds.
-    return manifest_version.VersionInfo('1.0.0')
+    return chromeos_version.VersionInfo('1.0.0')
 
   def GetSyncInstance(self):
     """Returns an instance of a SyncStage that should be run.
@@ -366,7 +366,7 @@ class ManifestVersionedBuilder(Builder):
 
   def GetVersionInfo(self):
     """Returns the CrOS version info from the chromiumos-overlay."""
-    return manifest_version.VersionInfo.from_repo(self._run.buildroot)
+    return chromeos_version.VersionInfo.from_repo(self._run.buildroot)
 
   def GetSyncInstance(self):
     """Returns an instance of a SyncStage that should be run."""

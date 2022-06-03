@@ -14,12 +14,12 @@ from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot import commands
-from chromite.cbuildbot import manifest_version
 from chromite.cbuildbot import topology
 from chromite.cbuildbot import topology_unittest
 from chromite.cbuildbot.stages import generic_stages_unittest
 from chromite.cbuildbot.stages import report_stages
 from chromite.lib import alerts
+from chromite.lib import chromeos_version
 from chromite.lib import cidb
 from chromite.lib import config_lib
 from chromite.lib import constants
@@ -52,7 +52,7 @@ class BuildReexecutionStageTest(generic_stages_unittest.AbstractStageTestCase):
 
     release_tag = '4815.0.0-rc1'
     self._run.attrs.release_tag = '4815.0.0-rc1'
-    fake_versioninfo = manifest_version.VersionInfo(release_tag, '39')
+    fake_versioninfo = chromeos_version.VersionInfo(release_tag, '39')
     self.gs_mock = self.StartPatcher(gs_unittest.GSContextMock())
     self.gs_mock.SetDefaultCmdResult()
     self.PatchObject(cbuildbot_run._BuilderRunBase, 'GetVersionInfo',

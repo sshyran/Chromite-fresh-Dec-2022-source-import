@@ -9,11 +9,11 @@ import shutil
 from unittest import mock
 
 from chromite.cbuildbot import commands
-from chromite.cbuildbot import manifest_version
 from chromite.cbuildbot.builders import workspace_builders_unittest
 from chromite.cbuildbot.stages import branch_archive_stages
 from chromite.cbuildbot.stages import generic_stages
 from chromite.cbuildbot.stages import workspace_stages_unittest
+from chromite.lib import chromeos_version
 from chromite.lib import cros_build_lib
 from chromite.lib import gs
 from chromite.lib import gs_unittest
@@ -81,7 +81,7 @@ class FactoryArchiveStageTest(BranchArchiveStageTestBase):
         return_value=None)
 
   def ConstructStage(self):
-    self._run.attrs.version_info = manifest_version.VersionInfo(
+    self._run.attrs.version_info = chromeos_version.VersionInfo(
         '10.0.0', chrome_branch='10')
     self._run.attrs.release_tag = 'infra-tag'
 

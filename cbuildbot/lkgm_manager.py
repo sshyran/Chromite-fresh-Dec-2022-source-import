@@ -11,6 +11,7 @@ import re
 from xml.dom import minidom
 
 from chromite.cbuildbot import manifest_version
+from chromite.lib import chromeos_version
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -30,7 +31,7 @@ class PromoteCandidateException(Exception):
   """Exception thrown for failure to promote manifest candidate."""
 
 
-class _LKGMCandidateInfo(manifest_version.VersionInfo):
+class _LKGMCandidateInfo(chromeos_version.VersionInfo):
   """Class to encapsualte the Chrome OS LKGM candidate info."""
   LKGM_RE = r'(\d+\.\d+\.\d+)(?:-rc(\d+))?'
 

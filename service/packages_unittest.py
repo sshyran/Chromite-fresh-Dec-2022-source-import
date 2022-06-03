@@ -21,8 +21,8 @@ from chromite.api.gen.config.replication_config_pb2 import (
     REPLICATION_TYPE_FILTER,
     ReplicationConfig,
 )
-from chromite.cbuildbot import manifest_version
 from chromite.lib import build_target_lib
+from chromite.lib import chromeos_version
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -1118,10 +1118,10 @@ class PlatformVersionsTest(cros_test_lib.MockTestCase):
     # return it.
     test_platform_version = '12575.0.0'
     test_chrome_branch = '75'
-    version_info_mock = manifest_version.VersionInfo(test_platform_version)
+    version_info_mock = chromeos_version.VersionInfo(test_platform_version)
     version_info_mock.chrome_branch = test_chrome_branch
     self.PatchObject(
-        manifest_version.VersionInfo,
+        chromeos_version.VersionInfo,
         'from_repo',
         return_value=version_info_mock)
     test_full_version = 'R' + test_chrome_branch + '-' + test_platform_version
