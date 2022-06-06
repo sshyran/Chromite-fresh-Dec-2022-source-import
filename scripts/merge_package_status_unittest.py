@@ -81,11 +81,10 @@ class MergeTest(cros_test_lib.OutputTestCase, cros_test_lib.TempDirTestCase):
     return mytable
 
   def _CreateTmpCsvFile(self, table_obj):
-    _fd, path = tempfile.mkstemp(text=True)
-    tmpfile = open(path, 'w')
-    table_obj.WriteCSV(tmpfile)
-    tmpfile.close()
-    return path
+    with tempfile.NamedTemporaryFile(mode='w', delete=False) as f:
+      table_obj.WriteCSV(f)
+      f.flush()
+      return f.name
 
   def _GetFullRowFor(self, row, cols):
     return dict((col, row.get(col, '')) for col in cols)
