@@ -1698,10 +1698,9 @@ class Upgrader(object):
     self._master_table.Sort(PkgSlotSort)
 
     if csv:
-      filehandle = open(csv, 'w')
-      oper.Notice('Writing package status as csv to %s.' % csv)
-      self._master_table.WriteCSV(filehandle)
-      filehandle.close()
+      with open(csv, 'w') as filehandle:
+        oper.Notice('Writing package status as csv to %s.' % csv)
+        self._master_table.WriteCSV(filehandle)
     elif not self._IsInUpgradeMode():
       oper.Notice('Package status report file not requested (--to-csv).')
 
