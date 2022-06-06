@@ -397,8 +397,8 @@ def main(argv):
   # Partial to simplify the arguments to parallel since the first two are the
   # same for every call.
   partial_install = functools.partial(_InstallOne, sysroot, options.debug)
-  pool = multiprocessing.Pool(processes=options.jobs)
-  pool.map(partial_install, args)
+  with multiprocessing.Pool(processes=options.jobs) as pool:
+    pool.map(partial_install, args)
 
   logging.debug('installation done, updating packages index file')
   packages_dir = os.path.join(sysroot, 'packages')
