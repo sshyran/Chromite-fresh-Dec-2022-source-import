@@ -62,11 +62,11 @@ class TestGitRepoWithTempdir(cros_test_lib.TempDirTestCase):
   def setUp(self):
     self.git_dir = os.path.join(self.tempdir, '.git')
 
-    devnull = open(os.devnull, 'w')
-    self.addCleanup(devnull.close)
-
     def call(args, **kwargs):
-      subprocess.check_call(args, stdout=devnull, stderr=devnull, **kwargs)
+      subprocess.check_call(args,
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL,
+                            **kwargs)
 
     with osutils.ChdirContext(self.tempdir):
       call(['git', 'init'])
