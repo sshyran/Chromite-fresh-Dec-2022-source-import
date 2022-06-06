@@ -1380,6 +1380,9 @@ class ChromeSDKCommand(command.CliCommand):
     # we let dcheck_always_on use the default value for Simple Chrome.
     gn_args.pop('dcheck_always_on', None)
 
+    # Always allow LOG()s to be enabled via command line flag.
+    gn_args['use_runtime_vlog'] = True
+
     # Disable ThinLTO and CFI for simplechrome. Tryjob machines do not have
     # enough file descriptors to use. crbug.com/789607
     if not options.thinlto:
