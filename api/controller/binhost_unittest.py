@@ -330,10 +330,9 @@ CPV: virtual/python-enum34-1
       osutils.SafeMakedirs(os.path.join(packages_dir, category))
       package_tbz2_file = os.path.join(packages_dir, package) + '.tbz2'
       osutils.Touch(package_tbz2_file)
-    package_installable_file = open(package_installable_filename, 'w')
-    for package in self.dev_install_packages:
-      package_installable_file.write(package + '\n')
-    package_installable_file.close()
+    with open(package_installable_filename, 'w') as package_installable_file:
+      for package in self.dev_install_packages:
+        package_installable_file.write(package + '\n')
     self.response = binhost_pb2.PrepareDevInstallBinhostUploadsResponse()
 
   def testValidateOnly(self):
