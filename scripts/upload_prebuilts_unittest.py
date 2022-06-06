@@ -56,11 +56,9 @@ class TestUpdateFile(cros_test_lib.TempDirTestCase):
     if not version_file:
       version_file = self.version_file
 
-    version_fh = open(version_file)
-    try:
+    with open(version_file) as version_fh:
       return [line.strip() for line in version_fh.readlines()]
-    finally:
-      version_fh.close()
+
 
   def _verify_key_pair(self, key, val):
     file_contents = self._read_version_file()
