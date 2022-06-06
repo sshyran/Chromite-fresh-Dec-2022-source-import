@@ -62,17 +62,27 @@ class TestUpdateFile(cros_test_lib.TempDirTestCase):
 
   def _verify_key_pair(self, key, val):
     file_contents = self._read_version_file()
-    # ensure key for verify is wrapped on quotes
+
+    # Make sure 'key' entry is only found once.
+    entry_found = False
+
+    # Ensure value is wrapped on quotes.
     if '"' not in val:
       val = '"%s"' % val
+
+    # Inspect file contents.
     for entry in file_contents:
       if '=' not in entry:
         continue
-      file_key, file_val = entry.split('=')
+      file_key, file_val = entry.split('=', maxsplit=1)
       if file_key == key:
         if val == file_val:
-          break
-    else:
+          if entry_found:
+            self.fail(f'Variable {file_key} appears twice')
+          else:
+            entry_found = True
+
+    if not entry_found:
       self.fail('Could not find "%s=%s" in version file' % (key, val))
 
   def testAddVariableThatDoesNotExist(self):
@@ -87,11 +97,26 @@ class TestUpdateFile(cros_test_lib.TempDirTestCase):
 
   def testUpdateVariable(self):
     """Test updating a variable that already exists."""
-    key, val = self.contents_str[2].split('=')
-    new_val = 'test_update'
-    self._verify_key_pair(key, val)
-    prebuilt.UpdateLocalFile(self.version_file, new_val)
-    self._verify_key_pair(key, new_val)
+    binhost_key, binhost_val = self.contents_str[2].split('=')
+    if binhost_key != 'PORTAGE_BINHOST':
+      self.fail('unexpected test input: expected PORTAGE_BINHOST at line[2]')
+    self._verify_key_pair(binhost_key, binhost_val)
+
+    # Confirm that unrelated variable 'PKGDIR' does not change.
+    pkgdir_key, pkgdir_val = self.contents_str[1].split('=')
+    if pkgdir_key != 'PKGDIR':
+      self.fail('unexpected test input: expected PKGDIR at line[1]')
+    self._verify_key_pair(pkgdir_key, pkgdir_val)
+
+    binhost_new_val = 'test_update'
+    prebuilt.UpdateLocalFile(self.version_file, binhost_new_val)
+    self._verify_key_pair(binhost_key, binhost_new_val)
+    self._verify_key_pair(pkgdir_key, pkgdir_val)
+
+    binhost_new_val = 'test_update2'
+    prebuilt.UpdateLocalFile(self.version_file, binhost_new_val)
+    self._verify_key_pair(binhost_key, binhost_new_val)
+    self._verify_key_pair(pkgdir_key, pkgdir_val)
 
   def testUpdateNonExistentFile(self):
     key = 'PORTAGE_BINHOST'

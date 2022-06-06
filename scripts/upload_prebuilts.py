@@ -108,41 +108,49 @@ def UpdateLocalFile(filename, value, key='PORTAGE_BINHOST'):
   Returns:
     True if changes were made to the file.
   """
-  if os.path.exists(filename):
-    file_fh = open(filename)
-  else:
-    file_fh = open(filename, 'w+')
-  file_lines = []
-  found = False
-  made_changes = False
+
   keyval_str = '%(key)s=%(value)s'
-  for line in file_fh:
+
+  # Add quotes around the value, if missing.
+  if not value or value[0] != '"' or value[-1] != '"':
+    value = f'"{value}"'
+
+  # new_lines is the content to be used to overwrite/create the config file
+  # at the end of this function.
+  made_changes = False
+  new_lines = []
+
+  # Read current lines.
+  try:
+    current_lines = osutils.ReadFile(filename).splitlines()
+  except FileNotFoundError:
+    current_lines = []
+    print(f'Creating new file {filename}')
+
+  # Scan current lines, copy all vars to new_lines, change the line with |key|.
+  found = False
+  for line in current_lines:
     # Strip newlines from end of line. We already add newlines below.
     line = line.rstrip('\n')
-
     if len(line.split('=')) != 2:
       # Skip any line that doesn't fit key=val.
-      file_lines.append(line)
+      new_lines.append(line)
       continue
-
     file_var, file_val = line.split('=')
     if file_var == key:
       found = True
-      print('Updating %s=%s to %s="%s"' % (file_var, file_val, key, value))
-      value = '"%s"' % value
+      print(f'Updating {file_var}={file_val} to {key}={value}')
       made_changes |= (file_val != value)
-      file_lines.append(keyval_str % {'key': key, 'value': value})
+      new_lines.append(keyval_str % {'key': key, 'value': value})
     else:
-      file_lines.append(keyval_str % {'key': file_var, 'value': file_val})
-
+      new_lines.append(keyval_str % {'key': file_var, 'value': file_val})
   if not found:
-    value = '"%s"' % value
+    print(f'Adding new variable {key}={value}')
     made_changes = True
-    file_lines.append(keyval_str % {'key': key, 'value': value})
+    new_lines.append(keyval_str % {'key': key, 'value': value})
 
-  file_fh.close()
-  # write out new file
-  osutils.WriteFile(filename, '\n'.join(file_lines) + '\n')
+  # Write out new file.
+  osutils.WriteFile(filename, '\n'.join(new_lines) + '\n')
   return made_changes
 
 
