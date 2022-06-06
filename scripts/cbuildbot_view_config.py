@@ -4,8 +4,6 @@
 
 """Script for dumping build config contents."""
 
-import sys
-
 from chromite.config import chromeos_config
 from chromite.lib import commandline
 from chromite.lib import constants
@@ -27,27 +25,25 @@ def GetParser():
 
   return parser
 
+
 def main(argv):
   parser = GetParser()
   options = parser.parse_args(argv)
 
   site_config = chromeos_config.GetConfig()
 
-  filehandle = sys.stdout
-
+  filename = '/dev/stdout'
   if options.update_config:
-    filehandle = open(constants.CHROMEOS_CONFIG_FILE, 'w')
+    filename = constants.CHROMEOS_CONFIG_FILE
 
-  if options.builder:
-    if options.builder not in site_config:
-      raise Exception('%s: Not a valid build config.' % options.builder)
-    pformat.json(site_config[options.builder], fp=filehandle)
-  elif options.full:
-    filehandle.write(site_config.DumpExpandedConfigToString())
-  elif options.csv:
-    filehandle.write(site_config.DumpConfigCsv())
-  else:
-    filehandle.write(site_config.SaveConfigToString())
-
-  if options.update_config:
-    filehandle.close()
+  with open(filename, 'w') as f:
+    if options.builder:
+      if options.builder not in site_config:
+        raise Exception('%s: Not a valid build config.' % options.builder)
+      pformat.json(site_config[options.builder], fp=f)
+    elif options.full:
+      f.write(site_config.DumpExpandedConfigToString())
+    elif options.csv:
+      f.write(site_config.DumpConfigCsv())
+    else:
+      f.write(site_config.SaveConfigToString())
