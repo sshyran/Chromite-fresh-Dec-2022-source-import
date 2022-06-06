@@ -396,9 +396,10 @@ def main(argv: Optional[List[str]] = None) -> Optional[int]:
     sysroot.BuildPackages(build_target, board_root, opts.build_run_config)
   except sysroot_lib.PackageInstallError as e:
     try:
-      request = urllib.request.urlopen(
-          'https://chromiumos-status.appspot.com/current?format=raw')
-      logging.notice('Tree Status: %s', request.read().decode())
+      with urllib.request.urlopen(
+          'https://chromiumos-status.appspot.com/current?format=raw'
+            ) as request:
+        logging.notice('Tree Status: %s', request.read().decode())
     except urllib.error.HTTPError:
       pass
     cros_build_lib.Die(e)
