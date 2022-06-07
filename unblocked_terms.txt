@@ -4,7 +4,6 @@
 #
 # See repohooks/README.md for more details.
 
-black.?list
 master
 \b(in)?sane(\b|\d)
 sanity
