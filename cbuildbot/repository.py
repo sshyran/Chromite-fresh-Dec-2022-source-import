@@ -527,7 +527,7 @@ class RepoRepository(object):
 
   def Sync(self, local_manifest=None, jobs=None, all_branches=True,
            network_only=False, detach=False,
-           downgrade_repo=False):
+           downgrade_repo: bool = False):
     """Sync/update the source.  Changes manifest if specified.
 
     Args:
@@ -546,7 +546,7 @@ class RepoRepository(object):
         invoking code is fine w/ operating on bare repos, ie .repo/projects/*.
       detach: If true, throw away all local changes, even if on tracking
         branches.
-      downgrade_repo (bool): Bool whether to downgrade repo version.
+      downgrade_repo: Whether to downgrade repo version.
     """
     try:
       if downgrade_repo:
@@ -678,7 +678,7 @@ class RepoRepository(object):
   def IsManifestDifferent(self, other_manifest):
     """Checks whether this manifest is different than another.
 
-    May blacklists certain repos as part of the diff.
+    May ignore certain repos as part of the diff.
 
     Args:
       other_manifest: Second manifest file to compare against.
@@ -689,8 +689,8 @@ class RepoRepository(object):
     """
     logging.debug('Calling IsManifestDifferent against %s', other_manifest)
 
-    black_list = ['="chromium/']
-    blacklist_pattern = re.compile(r'|'.join(black_list))
+    ignore_list = ['="chromium/']
+    ignore_pattern = re.compile(r'|'.join(ignore_list))
     manifest_revision_pattern = re.compile(r'<manifest revision="[a-f0-9]+">',
                                            re.I)
 
@@ -699,7 +699,7 @@ class RepoRepository(object):
       for (line1, line2) in zip(current.splitlines(), manifest2_fh):
         line1 = line1.strip()
         line2 = line2.strip()
-        if blacklist_pattern.search(line1):
+        if ignore_pattern.search(line1):
           logging.debug('%s ignored %s', line1, line2)
           continue
 
