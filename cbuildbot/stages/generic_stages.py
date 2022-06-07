@@ -1126,19 +1126,17 @@ class ArchivingStageMixin(object):
     cbuildbot_alerts.PrintBuildbotLink(text_to_display, url)
     return url
 
-  def _IsInUploadBlacklist(self, filename):
-    """Check if this file is blacklisted to go into a board's extra buckets.
+  def _MayBeUploaded(self, filename):
+    """Check if this file is allowed to go into a board's extra buckets.
 
     Args:
-      filename: The filename of the file we want to check is in the blacklist.
+      filename: The filename of the file we want to check.
 
     Returns:
-      True if the file is blacklisted, False otherwise.
+      True if the file may be uploaded, False otherwise.
     """
-    for blacklisted_file in constants.EXTRA_BUCKETS_FILES_BLACKLIST:
-      if fnmatch.fnmatch(filename, blacklisted_file):
-        return True
-    return False
+    return not any(fnmatch.fnmatch(filename, x)
+                   for x in constants.EXTRA_BUCKETS_FILES_BLOCKLIST)
 
   def _FilterBuildFromMoblab(self, url, bot_id):
     """Deteminine if this is a build that should not be copied to moblab.
@@ -1180,7 +1178,7 @@ class ArchivingStageMixin(object):
       if (builder_run.config['boards'] and
           len(builder_run.config['boards']) == 1):
         board = builder_run.config['boards'][0]
-    if (not self._IsInUploadBlacklist(filename) and
+    if (self._MayBeUploaded(filename) and
         (hasattr(self, '_current_board') or board)):
       board = board or self._current_board
       custom_artifacts_file = portage_util.ReadOverlayFile(

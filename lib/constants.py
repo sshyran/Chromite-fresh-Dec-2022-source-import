@@ -958,12 +958,12 @@ CHROME_GARDENER_REVIEW_EMAIL = 'chrome-os-gardeners-reviews@google.com'
 # approximation.
 EMAIL_REGEX = r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}'
 
-# Blacklist of files not allowed to be uploaded into the Partner Project Google
+# Blocklist of files not allowed to be uploaded into the Partner Project Google
 # Storage Buckets:
 # debug.tgz contains debug symbols.
 # manifest.xml exposes all of our repo names.
 # vm_test_results can contain symbolicated crash dumps.
-EXTRA_BUCKETS_FILES_BLACKLIST = [
+EXTRA_BUCKETS_FILES_BLOCKLIST = [
     'debug.tgz',
     'manifest.xml',
     'vm_test_results_*'
