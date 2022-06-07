@@ -535,7 +535,7 @@ class ColoredFormatter(logging.Formatter):
       args: See logging.Formatter for specifics.
       kwargs: See logging.Formatter for specifics.
       enable_color: Whether to enable colored logging. Defaults
-        to None, where terminal.Color will set to a sane default.
+        to None, where terminal.Color will set to a reasonable default.
     """
     self.color = terminal.Color(enabled=kwargs.pop('enable_color', None))
     super().__init__(*args, **kwargs)

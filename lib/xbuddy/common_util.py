@@ -202,7 +202,7 @@ def GetControlFileList(static_dir, build):
   return '\n'.join(control_files)
 
 
-# Hashlib is strange and doesn't actually define these in a sane way that
+# Hashlib is strange and doesn't actually define these in a reasonable way that
 # pylint can find them. Disable checks for them.
 # pylint: disable=E1101,W0106
 def GetFileHashes(file_path, do_sha256=False, do_md5=False):

@@ -564,7 +564,7 @@ class UnmockedCopyTest(cros_test_lib.TempDirTestCase):
       # Upload the file.
       gen = ctx.Copy(local_src_file, tempuri)
 
-      # Verify the generation is sane.  All we can assume is that it's a valid
+      # Verify the generation is valid.  All we can assume is that it's a valid
       # whole number greater than 0.
       self.assertNotEqual(gen, None)
       self.assertIsInstance(gen, numbers.Integral)
@@ -596,7 +596,7 @@ class UnmockedCopyTest(cros_test_lib.TempDirTestCase):
       # Upload & compress the file.
       gen = ctx.Copy(local_src_file, tempuri, auto_compress=True)
 
-      # Verify the generation is sane.  All we can assume is that it's a valid
+      # Verify the generation is valid.  All we can assume is that it's a valid
       # whole number greater than 0.
       self.assertNotEqual(gen, None)
       self.assertGreater(gen, 0)
@@ -621,7 +621,7 @@ class UnmockedCopyTest(cros_test_lib.TempDirTestCase):
       osutils.WriteFile(local_src_file, 'gen0')
       gen = ctx.Copy(local_src_file, tempuri, version=0)
 
-      # Verify the generation is sane.  All we can assume is that it's a valid
+      # Verify the generation is valid.  All we can assume is that it's a valid
       # whole number greater than 0.
       self.assertNotEqual(gen, None)
       self.assertGreater(gen, 0)

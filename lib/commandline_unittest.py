@@ -389,7 +389,7 @@ class SplitExtendActionTest(cros_test_lib.TestCase):
     self.assertEqual(opts.x, ['f'])
 
   def testNoArgs(self):
-    """This is more of a sanity check for resting state."""
+    """This is more of a confidence check for resting state."""
     self._CheckArgs([], [])
 
   def testEmptyArg(self):

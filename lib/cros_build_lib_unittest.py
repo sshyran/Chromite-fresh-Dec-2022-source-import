@@ -889,7 +889,7 @@ class HelperMethodSimpleTests(cros_test_lib.OutputTestCase):
                      100000.0)
 
   def testGetRandomString(self):
-    """Verify it looks sane."""
+    """Verify it looks valid."""
     data = cros_build_lib.GetRandomString()
     self.assertRegex(data, r'^[a-z0-9]+$')
     self.assertEqual(32, len(data))

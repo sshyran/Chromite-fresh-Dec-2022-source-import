@@ -492,7 +492,7 @@ class LoggingCapturer(object):
 class TestCase(unittest.TestCase, metaclass=StackedSetup):
   """Basic chromite test case.
 
-  Provides sane setUp/tearDown logic so that tearDown is correctly cleaned up.
+  Provides setUp/tearDown logic so that tearDown is correctly cleaned up.
 
   Takes care of saving/restoring process-wide settings like the environment so
   that sub-tests don't have to worry about gettings this right.
