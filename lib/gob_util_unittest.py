@@ -9,6 +9,7 @@ import http.client
 import json
 import tempfile
 import time
+import urllib.request
 
 from chromite.lib import config_lib
 from chromite.lib import cros_test_lib
@@ -53,15 +54,18 @@ class GobTest(cros_test_lib.MockTestCase):
   UTF8_DATA = b'That\xe2\x80\x99s an error. That\xe2\x80\x99s all we know.'
 
   def setUp(self):
-    self.conn = self.PatchObject(gob_util, 'CreateHttpConn', autospec=False)
+    self.PatchObject(gob_util, 'CreateHttpReq', autospec=False)
+    self.conn = self.PatchObject(urllib.request, 'urlopen')
 
   def testUtf8Response(self):
     """Handle gerrit responses w/UTF8 in them."""
-    self.conn.return_value = FakeHTTPResponse(body=self.UTF8_DATA)
+    self.conn.return_value.__enter__.return_value = FakeHTTPResponse(
+        body=self.UTF8_DATA)
     gob_util.FetchUrl('', '')
 
   def testUtf8Response502(self):
-    self.conn.return_value = FakeHTTPResponse(body=self.UTF8_DATA, status=502)
+    self.conn.return_value.__enter__.return_value = FakeHTTPResponse(
+        body=self.UTF8_DATA, status=502)
 
     with self.assertRaises(gob_util.InternalGOBError):
       gob_util.FetchUrl('', '')
@@ -76,7 +80,7 @@ class GobTest(cros_test_lib.MockTestCase):
       time.sleep(30)
       self.fail('Would hang forever.')
 
-    self.conn.side_effect = simulateHang
+    self.conn.return_value.__enter__.side_effect = simulateHang
 
     # Verify that we fail, with expected timeout error.
     with self.assertRaises(timeout_util.TimeoutError):
@@ -113,24 +117,28 @@ Too bad..."""
     body = json.dumps({'change_num': 123456}).encode()
     xss_protection_prefix = b")]}'\n"
     body = xss_protection_prefix + body
-    self.conn.return_value = FakeHTTPResponse(body=body, status=200)
+    self.conn.return_value.__enter__.return_value = FakeHTTPResponse(
+        body=body, status=200)
     change_json = gob_util.CreateChange(
         'some.git.url', 'project', 'branch', 'subject', True)
     self.assertEqual(change_json['change_num'], 123456)
 
   def testChangeEdit(self):
-    self.conn.return_value = FakeHTTPResponse(body={}, status=204)
+    self.conn.return_value.__enter__.return_value = FakeHTTPResponse(
+        body={}, status=204)
     gob_util.ChangeEdit('some.git.url', 123456, 'some/file/path',
                         'some file contents')
 
   def testPublishChangeEdit(self):
-    self.conn.return_value = FakeHTTPResponse(body={}, status=204)
+    self.conn.return_value.__enter__.return_value = FakeHTTPResponse(
+        body={}, status=204)
     gob_util.PublishChangeEdit('some.git.url', 123456)
 
   def testGetFileContents(self):
     expected_contents = 'some file contents'
     body = base64.b64encode(expected_contents.encode())
-    self.conn.return_value = FakeHTTPResponse(body=body, status=200)
+    self.conn.return_value.__enter__.return_value = FakeHTTPResponse(
+        body=body, status=200)
     contents = gob_util.GetFileContentsOnHead('some.git.url',
                                               'some/file/path')
     self.assertEqual(contents, expected_contents)

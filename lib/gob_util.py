@@ -148,7 +148,7 @@ def _QueryString(param_dict, first_param=None):
 def GetCookies(host, path, cookie_paths=None):
   """Returns cookies that should be set on a request.
 
-  Used by CreateHttpConn for any requests that do not already specify a Cookie
+  Used by CreateHttpReq for any requests that do not already specify a Cookie
   header. All requests made by this library are HTTPS.
 
   Args:
@@ -177,13 +177,13 @@ def GetCookies(host, path, cookie_paths=None):
   return cookies
 
 
-def CreateHttpConn(
+def CreateHttpReq(
     host: str,
     path: str,
     reqtype: Optional[str] = 'GET',
     headers: Optional[Dict[str, str]] = None,
-    body: Optional[Union[bytes, str]] = None) -> http.client.HTTPResponse:
-  """Opens an https connection to a gerrit service, and sends a request."""
+    body: Optional[Union[bytes, str]] = None) -> urllib.request.Request:
+  """Returns a https connection request object to a gerrit service."""
   path = '/a/' + path.lstrip('/')
   headers = headers or {}
   if _InAppengine():
@@ -237,9 +237,8 @@ def CreateHttpConn(
       logging.debug('%s: %s', key, val)
     if body:
       logging.debug(body)
-  request = urllib.request.Request(
+  return urllib.request.Request(
       f'https://{host}{path}', data=body, headers=headers, method=reqtype)
-  return urllib.request.urlopen(request)
 
 
 def _InAppengine():
@@ -272,16 +271,32 @@ def FetchUrl(host, path, reqtype='GET', headers=None, body=None,
   def _FetchUrlHelper():
     err_prefix = f'A transient error occured while querying {host}/{path}\n'
     try:
-      response = CreateHttpConn(host, path, reqtype=reqtype, headers=headers,
-                                body=body)
+      _request = CreateHttpReq(host, path, reqtype=reqtype, headers=headers,
+                               body=body)
+      with urllib.request.urlopen(_request) as response:
+        return _ProcessResponse(response, err_prefix)
     except urllib.error.HTTPError as e:
       # Any non-HTTP/2xx status is thrown as an exception even though it's the
       # response.  We handle the actual HTTP codes below.
-      response = e
+      return _ProcessResponse(e, err_prefix)
     except socket.error as ex:
       logging.warning('%s%s', err_prefix, str(ex))
       raise
 
+  def _ProcessResponse(response: http.client.HTTPResponse,
+                       err_prefix: str) -> bytes:
+    """Process the Response object.
+
+    Args:
+      response: the url response object to parse.
+      err_prefix: the prefix to use.
+
+    Returns:
+      The server's reply, as bytes.
+
+    Raises:
+      GOBError with the failure status code and reason.
+    """
     # Normal/good responses.
     response_body = response.read()
     if response.status == 204 and ignore_204:
