@@ -886,14 +886,14 @@ def RunSignerTests(_buildroot, board):
 
 def RunUnitTests(buildroot,
                  board,
-                 blacklist=None,
+                 blocklist=None,
                  extra_env=None,
                  build_stage=True,
                  chroot_args=None):
   cmd = ['cros_run_unit_tests', '--board=%s' % board, '--jobs=10']
 
-  if blacklist:
-    cmd += ['--blacklist_packages=%s' % ' '.join(blacklist)]
+  if blocklist:
+    cmd += ['--skip-packages=%s' % ' '.join(blocklist)]
 
   if not build_stage:
     cmd += ['--assume-empty-sysroot']

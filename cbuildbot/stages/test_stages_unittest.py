@@ -69,7 +69,7 @@ class UnitTestStageTest(generic_stages_unittest.AbstractStageTestCase,
     self.rununittests_mock.assert_called_once_with(
         self.build_root,
         self._current_board,
-        blacklist=[],
+        blocklist=[],
         extra_env=mock.ANY,
         build_stage=True)
 
