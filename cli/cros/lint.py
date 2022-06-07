@@ -294,7 +294,7 @@ class DocStringChecker(pylint.checkers.BaseChecker):
       self.add_message('C9014', node=node, line=node.fromlineno)
 
   def _check_whitespace(self, node, lines):
-    """Verify whitespace is sane"""
+    """Verify whitespace is correct"""
     # Make sure first line doesn't have leading whitespace.
     if lines[0].lstrip() != lines[0]:
       margs = {'offset': 0, 'line': lines[0]}
@@ -447,7 +447,7 @@ class DocStringChecker(pylint.checkers.BaseChecker):
     return sections
 
   def _check_section_lines(self, node, lines, sections, valid_sections):
-    """Verify each section (e.g. Args/Returns/etc...) is sane"""
+    """Verify each section (e.g. Args/Returns/etc...) is correct"""
     indent_len = self._docstring_indent(node)
 
     # Make sure the sections are in the right order.
@@ -680,7 +680,7 @@ class SourceChecker(pylint.checkers.BaseChecker):
         self.add_message('R9204')
 
   def _check_module_name(self, node):
-    """Make sure the module name is sane"""
+    """Make sure the module name is correct"""
     # Catch various typos.
     name = node.name.rsplit('.', 2)[-1]
     if name.rsplit('_', 2)[-1] in ('unittests',):
