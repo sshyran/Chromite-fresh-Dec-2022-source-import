@@ -140,15 +140,15 @@ class GetCookieTests(cros_test_lib.TestCase):
   """Unittests for GetCookies()"""
 
   def testSimple(self):
-    f = tempfile.NamedTemporaryFile(mode='w+')
-    f.write('.googlesource.com\tTRUE\t/f\tTRUE\t2147483647\to\tfoo=bar')
-    f.flush()
-    cookies = gob_util.GetCookies('foo.googlesource.com', '/foo', [f.name])
-    self.assertEqual(cookies, {'o': 'foo=bar'})
-    cookies = gob_util.GetCookies('google.com', '/foo', [f.name])
-    self.assertEqual(cookies, {})
-    cookies = gob_util.GetCookies('foo.googlesource.com', '/', [f.name])
-    self.assertEqual(cookies, {})
+    with tempfile.NamedTemporaryFile(mode='w+') as f:
+      f.write('.googlesource.com\tTRUE\t/f\tTRUE\t2147483647\to\tfoo=bar')
+      f.flush()
+      cookies = gob_util.GetCookies('foo.googlesource.com', '/foo', [f.name])
+      self.assertEqual(cookies, {'o': 'foo=bar'})
+      cookies = gob_util.GetCookies('google.com', '/foo', [f.name])
+      self.assertEqual(cookies, {})
+      cookies = gob_util.GetCookies('foo.googlesource.com', '/', [f.name])
+      self.assertEqual(cookies, {})
 
 
 @cros_test_lib.pytestmark_network_test
