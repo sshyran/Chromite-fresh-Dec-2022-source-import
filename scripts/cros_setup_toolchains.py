@@ -1334,7 +1334,7 @@ def GetParser():
   parser = commandline.ArgumentParser(description=__doc__)
   parser.add_argument('-u', '--nousepkg',
                       action='store_false', dest='usepkg', default=True,
-                      help='Use prebuilt packages if possible')
+                      help='Do not use prebuilt packages')
   parser.add_argument('-d', '--deleteold',
                       action='store_true', dest='deleteold', default=False,
                       help='Unmerge deprecated packages')
