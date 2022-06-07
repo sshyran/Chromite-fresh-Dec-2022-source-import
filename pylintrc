@@ -14,12 +14,8 @@
 # Profiled execution.
 #profile=no
 
-# Add <file or directory> to the black list. It should be a base name, not a
-# path. You may set this option multiple times.
-#ignore=CVS
-
-# Add files or directories matching the regex patterns to the blacklist. The
-# regex matches against base names, not paths.
+# Do not lint files or directories matching the regex patterns.
+# It matches against base names, not paths.
 ignore-patterns=
     .*_pb2\.py$,
     .*third_party\/.*.py$
