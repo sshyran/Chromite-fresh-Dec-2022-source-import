@@ -7498,7 +7498,9 @@
     ],
     "models": [
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"corsola\",\n  \"name\": \"kingler\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"corsola\",\n  \"name\": \"krabby\",\n  \"test_suites\": []\n}"
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"corsola\",\n  \"name\": \"krabby\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"corsola\",\n  \"name\": \"rusty\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"corsola\",\n  \"name\": \"steelix\",\n  \"test_suites\": []\n}"
     ],
     "sign_types": [
       "recovery",
@@ -7526,7 +7528,9 @@
     "luci_builder": "Try",
     "models": [
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"corsola\",\n  \"name\": \"kingler\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"corsola\",\n  \"name\": \"krabby\",\n  \"test_suites\": []\n}"
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"corsola\",\n  \"name\": \"krabby\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"corsola\",\n  \"name\": \"rusty\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"corsola\",\n  \"name\": \"steelix\",\n  \"test_suites\": []\n}"
     ],
     "paygen": false,
     "push_image": false,
