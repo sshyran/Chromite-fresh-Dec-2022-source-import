@@ -243,7 +243,8 @@ class DevServerWrapper(multiprocessing.Process):
     """Returns the HTTP response of a URL."""
     logging.debug('Retrieving %s', url)
     try:
-      res = urllib.request.urlopen(url, timeout=timeout)
+      with urllib.request.urlopen(url, timeout=timeout) as res:
+        return res.read()
     except (urllib.error.HTTPError, http.client.HTTPException) as e:
       logging.error('Devserver responded with HTTP error (%s)', e)
       raise DevServerResponseError(e)
@@ -251,8 +252,6 @@ class DevServerWrapper(multiprocessing.Process):
       if not ignore_url_error:
         logging.error('Cannot connect to devserver (%s)', e)
         raise DevServerConnectionError(e)
-    else:
-      return res.read()
 
   @classmethod
   def CreateStaticDirectory(cls, static_dir=DEFAULT_STATIC_DIR):
