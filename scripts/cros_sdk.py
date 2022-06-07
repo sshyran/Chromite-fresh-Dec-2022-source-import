@@ -193,6 +193,14 @@ def EnterChroot(chroot_path, cache_dir, chrome_root, chrome_root_mount,
     cmd.append('--')
     cmd.extend(additional_args)
 
+  # Some systems set the soft limit too low.  Bump it up to the hard limit.
+  # We don't override the hard limit because it's something the admins put
+  # in place and we want to respect such configs.  http://b/234353695
+  soft, hard = resource.getrlimit(resource.RLIMIT_NPROC)
+  if soft != resource.RLIM_INFINITY and soft < 4096:
+    if soft < hard or hard == resource.RLIM_INFINITY:
+      resource.setrlimit(resource.RLIMIT_NPROC, (hard, hard))
+
   # ThinLTO opens lots of files at the same time.
   # Set rlimit and vm.max_map_count to accommodate this.
   file_limit = 262144
