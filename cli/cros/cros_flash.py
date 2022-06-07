@@ -105,7 +105,7 @@ Examples:
         help='Answer yes to any prompt. Use with caution.')
     update.add_argument(
         '--force', action='store_true',
-        help='Ignore sanity checks, just do it. Implies --yes.')
+        help='Ignore confidence checks, just do it. Implies --yes.')
     update.add_argument(
         '--no-reboot', action='store_false', dest='reboot', default=True,
         help='Do not reboot after update. Default is always reboot.')

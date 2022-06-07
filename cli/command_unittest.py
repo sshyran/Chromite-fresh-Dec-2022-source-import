@@ -124,7 +124,7 @@ class CommandTest(cros_test_lib.MockTestCase):
     load_mock.assert_called_with(module_path)
 
   def testListCrosCommands(self):
-    """Tests we get a sane `cros` list back."""
+    """Tests we get a correct `cros` list back."""
     cros_commands = command.ListCommands()
     # Pick some commands that are likely to not go away.
     self.assertIn('chrome-sdk', cros_commands)

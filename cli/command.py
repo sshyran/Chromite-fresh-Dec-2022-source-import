@@ -82,11 +82,11 @@ def ListCommands():
 
 
 class InvalidCommandError(Exception):
-  """Error that occurs when command class fails sanity checks."""
+  """Error that occurs when command class fails validity checks."""
 
 
 def command_decorator(name):
-  """Decorator that sanity checks and adds class to list of usable commands."""
+  """Decorator to check validity and add class to list of usable commands."""
 
   def inner_decorator(original_class):
     """Inner Decorator that actually wraps the class."""

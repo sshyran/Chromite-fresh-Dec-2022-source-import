@@ -217,7 +217,7 @@ class USBImager(object):
     # dd likely didn't put the backup GPT in the last block. sfdisk fixes this
     # up for us with a 'write' command, so we have a standards-conforming GPT.
     # Ignore errors because sfdisk (util-linux < v2.32) isn't always happy to
-    # fix GPT sanity issues.
+    # fix GPT correctness issues.
     cros_build_lib.sudo_run(['sfdisk', device], input='write\n',
                             check=False,
                             debug_level=self.debug_level)
@@ -345,7 +345,7 @@ def Flash(device, image, board=None, version=None,
         |device| scheme only.
     clear_cache: Clear the devserver static directory.
     yes: Assume "yes" for any prompt.
-    force: Ignore sanity checks and prompts. Overrides |yes| if True.
+    force: Ignore confidence checks and prompts. Overrides |yes| if True.
     debug: Print additional debugging messages.
     version: Default version.
     delta: Whether to use delta compression when tranferring image bytes.

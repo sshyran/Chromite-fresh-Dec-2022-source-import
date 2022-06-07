@@ -1158,7 +1158,7 @@ def Deploy(device, packages, board=None, emerge=True, update=False, deep=False,
     emerge_args: Extra arguments to pass to emerge.
     ssh_private_key: Path to an SSH private key file; None to use test keys.
     ping: True to ping the device before trying to connect.
-    force: Ignore sanity checks and prompts.
+    force: Ignore confidence checks and prompts.
     dry_run: Print deployment plan but do not deploy anything.
 
   Raises:
