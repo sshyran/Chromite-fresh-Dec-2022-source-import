@@ -80,7 +80,7 @@ def _ParseArgs(argv, router):
 
   if opts.service_method not in methods:
     # Unknown method, try to match against known methods and make a suggestion.
-    # This is just for developer sanity, e.g. misspellings when testing.
+    # This is just for developer assistance, e.g. misspellings when testing.
     matched = matching.GetMostLikelyMatchedObject(
         methods, opts.service_method, matched_score_threshold=0.6)
     error = 'Unrecognized service name.'

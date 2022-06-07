@@ -12,7 +12,7 @@ from chromite.scripts import build_api
 
 
 def testSmoke(tmp_path, monkeypatch):
-  """Basic sanity check"""
+  """Basic confidence check"""
 
   def stub(*_args, **_kwargs):
     return True

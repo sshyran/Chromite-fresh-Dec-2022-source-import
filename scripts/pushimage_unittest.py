@@ -65,7 +65,7 @@ class InputInsnsTest(cros_test_lib.MockTestCase):
       self.assertEqual(ret, exp)
 
   def testOutputInsnsBasic(self):
-    """Verify output instructions are sane"""
+    """Verify output instructions are correct"""
     exp_content = """[insns]
 channel = dev canary
 keyset = stumpy-mp-v3

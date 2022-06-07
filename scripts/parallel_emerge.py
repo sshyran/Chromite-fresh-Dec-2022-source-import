@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Wrapper script to run emerge, with sane defaults.
+"""Wrapper script to run emerge, with reasonable defaults.
 
 Usage:
  ./parallel_emerge [--board=BOARD] [--workon=PKGS]

@@ -823,7 +823,7 @@ def ParseOptions(argv):
 
 
 def main(argv):
-  # Set umask to a sane value so that files created as root are readable.
+  # Set umask so that files created as root are readable.
   os.umask(0o22)
 
   options, target = ParseOptions(argv)
