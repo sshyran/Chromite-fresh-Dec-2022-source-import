@@ -47,7 +47,7 @@ def SetNS(fd, nstype):
   try:
     fp = None
     if isinstance(fd, str):
-      fp = open(fd)
+      fp = open(fd)  # pylint: disable=consider-using-with
       fd = fp.fileno()
 
     libc = ctypes.CDLL(ctypes.util.find_library('c'), use_errno=True)
@@ -123,8 +123,8 @@ def _ForwardToChildPid(pid, signal_to_forward):
     except ProcessLookupError:
       # The target PID might have already exited, and thus we get a
       # ProcessLookupError when trying to send it a signal.
-      logging.debug(
-        "Can't forward signal %u to pid %u as it doesn't exist", signum, pid)
+      logging.debug("Can't forward signal %u to pid %u as it doesn't exist",
+                    signum, pid)
 
   signal.signal(signal_to_forward, _ForwardingHandler)
 
