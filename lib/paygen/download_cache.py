@@ -317,7 +317,7 @@ class DownloadCache(object):
         with self._CacheFileLock(cache_file, shared=True, blocking=True):
 
           if os.path.exists(cache_file):
-            fd = open(cache_file, 'rb')
+            fd = open(cache_file, 'rb')  # pylint: disable=consider-using-with
 
             # Touch the timestamp on cache file to help purging logic.
             os.utime(cache_file, None)
