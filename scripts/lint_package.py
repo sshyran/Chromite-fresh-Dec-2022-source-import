@@ -50,18 +50,24 @@ def get_arg_parser() -> commandline.ArgumentParser:
   """Creates an argument parser for this script."""
   default_board = cros_build_lib.GetDefaultBoard()
   parser = commandline.ArgumentParser(description=__doc__)
-  parser.add_argument(
-      '--differential',
-      action='store_true',
-      help='only lint lines touched by the last commit')
-  parser.add_argument(
+
+  board_group = parser.add_mutually_exclusive_group(required=not default_board)
+  board_group.add_argument(
       '-b',
       '--board',
       '--build-target',
       dest='board',
       default=default_board,
-      required=not default_board,
       help='The board to emerge packages for')
+  board_group.add_argument(
+      '--fetch-only',
+      action='store_true',
+      help='Fetch lints from previous run without reseting or calling emerge.')
+
+  parser.add_argument(
+      '--differential',
+      action='store_true',
+      help='only lint lines touched by the last commit')
   parser.add_argument(
       '-o',
       '--output',
@@ -78,7 +84,7 @@ def get_arg_parser() -> commandline.ArgumentParser:
       action='store_false',
       help='Disable clang tidy linter.')
   parser.add_argument(
-      'packages', nargs='+', help='package(s) to emerge and retrieve lints for')
+      'packages', nargs='*', help='package(s) to emerge and retrieve lints for')
   return parser
 
 
@@ -87,6 +93,13 @@ def parse_args(argv: List[str]):
   parser = get_arg_parser()
   opts = parser.parse_args(argv)
   opts.Freeze()
+
+  # A package must be specified unless we are in fetch-only mode
+  if not(opts.fetch_only or opts.packages):
+    parser.error('Emerge requires specified package(s).')
+  if opts.fetch_only and opts.packages:
+    parser.error('Cannot specify packages for fetch-only mode.')
+
   return opts
 
 
@@ -101,8 +114,12 @@ def main(argv: List[str]) -> None:
   with workon_helper.WorkonScope(build_target, package_atoms):
     build_linter = toolchain.BuildLinter(packages, build_target.root,
                                          opts.differential)
-    lints = build_linter.emerge_with_linting(
-        use_clippy=opts.clippy, use_tidy=opts.tidy)
+    if opts.fetch_only:
+      lints = build_linter.fetch_findings(
+          use_clippy=opts.clippy, use_tidy=opts.tidy)
+    else:
+      lints = build_linter.emerge_with_linting(
+          use_clippy=opts.clippy, use_tidy=opts.tidy)
 
   with file_util.Open(opts.output, 'w') as output_file:
     json.dump(lints, output_file)
