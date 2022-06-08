@@ -732,6 +732,8 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
   # view of the file.
   log_stdout_to_file = False
   if isinstance(stdout, str):
+    # We explicitly close this handle below before returning.
+    # pylint: disable=consider-using-with
     popen_stdout = open(stdout, stdout_file_mode)
     log_stdout_to_file = True
   elif hasattr(stdout, 'fileno'):
@@ -748,6 +750,8 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
 
   log_stderr_to_file = False
   if isinstance(stderr, str):
+    # We explicitly close this handle below before returning.
+    # pylint: disable=consider-using-with
     popen_stderr = open(stderr, 'w+b')
     log_stderr_to_file = True
   elif hasattr(stderr, 'fileno'):
@@ -1899,11 +1903,17 @@ def MachineDetails():
 
 def UnbufferedTemporaryFile(**kwargs):
   """Handle buffering changes in tempfile.TemporaryFile."""
+  # File handles are closed in tempfile's close() overload or on garbage
+  # collection.
+  # pylint: disable=consider-using-with
   return tempfile.TemporaryFile(buffering=0, **kwargs)
 
 
 def UnbufferedNamedTemporaryFile(**kwargs):
   """Handle buffering changes in tempfile.NamedTemporaryFile."""
+  # File handles are closed in tempfile's close() overload or on garbage
+  # collection.
+  # pylint: disable=consider-using-with
   return tempfile.NamedTemporaryFile(buffering=0, **kwargs)
 
 
