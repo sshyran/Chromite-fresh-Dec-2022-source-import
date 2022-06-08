@@ -33,7 +33,7 @@ class CalculateRootfsHashMock(imagefile.CalculateRootfsHash):
   def __init__(self, image, kern_cmdline, calc_dm_args=None, calc_conf=None):
     self.image = image
     self.kern_cmdline = kern_cmdline
-    self._file = tempfile.NamedTemporaryFile(delete=False)
+    self._file = tempfile.NamedTemporaryFile(delete=False)  # pylint: disable=consider-using-with
     if not calc_dm_args:
       calc_dm_args = '1 vroot none ro 1,0 800 verity alg=sha1'
     self.calculated_dm_config = kernel_cmdline.DmConfig(calc_dm_args)
