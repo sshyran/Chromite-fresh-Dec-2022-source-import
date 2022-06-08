@@ -323,7 +323,7 @@ class RemoteAccess(object):
   @staticmethod
   def _mockable_popen(*args, **kwargs):
     """This wraps subprocess.Popen so it can be mocked in unit tests."""
-    return subprocess.Popen(*args, **kwargs)
+    return subprocess.Popen(*args, **kwargs)  # pylint: disable=consider-using-with
 
   @property
   def target_ssh_url(self):
