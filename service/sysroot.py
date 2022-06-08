@@ -46,6 +46,20 @@ if TYPE_CHECKING:
 # TODO(xcl): Revisit/remove this after the Lacros launch if no longer needed
 _CHROME_PACKAGES = ('chromeos-base/chromeos-chrome', 'chromeos-base/chrome-icu')
 
+# A list of critical system packages that should never be incidentally
+# reinstalled as a side effect of build_packages. All packages in this list
+# are special cased to prefer matching installed versions, overriding the
+# typical logic of upgrading to the newest available version.
+#
+# This list can't include any package that gets installed to a board!
+# Packages such as LLVM or binutils must not be in this list as the normal
+# rebuild logic must still apply to them for board targets.
+#
+# TODO(crbug/1050752): Remove this list once we figure out how to exclude
+# toolchain packages from being upgraded transitively via BDEPEND relations.
+_CRITICAL_SDK_PACKAGES = ('dev-embedded/hps-sdk', 'dev-lang/rust',
+                          'dev-lang/go', 'sys-libs/glibc', 'sys-devel/gcc')
+
 _PACKAGE_LIST = List[Optional[str]]
 
 
@@ -233,21 +247,6 @@ class BuildPackagesRunConfig(object):
     self.factory_image = factory_image
     self.test_image = test_image
     self.debug_version = debug_version
-
-  def GetBuildPackagesArgs(self) -> List[str]:
-    """Get the arguments for build_packages script."""
-    args = []
-
-    if self.use_goma:
-      args.append('--run_goma')
-
-    if self.use_remoteexec:
-      args.append('--run_remoteexec')
-
-    if self.packages:
-      args.extend(self.packages)
-
-    return args
 
   def GetUseFlags(self) -> Optional[str]:
     """Get the use flags as a single string."""
@@ -679,29 +678,8 @@ def BuildPackages(target: 'build_target_lib.BuildTarget',
   cros_build_lib.AssertInsideChroot()
   cros_build_lib.AssertNonRootUser()
 
-  cmd = [
-      'bash',
-      Path(constants.CROSUTILS_DIR) / 'build_packages.sh',
-      '--script-is-run-only-by-chromite-and-not-users',
-      '--board',
-      target.name,
-      '--board_root',
-      sysroot.path,
-  ]
-  cmd += run_configs.GetBuildPackagesArgs()
-  # TODO(xcl): Do not pass in packages directly once cros workon packages
-  # and reverse dependency logic is migrated to Python
-  cmd += run_configs.GetPackages()
-
   extra_env = run_configs.GetExtraEnv()
-  # TODO(xcl): Stop passing force local build packages using envvars
-  # post-migration.
-  rebuild_pkgs = run_configs.GetForceLocalBuildPackages(sysroot)
-  extra_env['BUILD_PACKAGES_FORCE_LOCAL_BUILD_PKGS'] = ' '.join(rebuild_pkgs)
-  # TODO(xcl): Stop passing emerge flags using envvars once reverse dependency
-  # logic is migrated to Python.
-  extra_env['BUILD_PACKAGES_EMERGE_FLAGS'] = ' '.join(
-      run_configs.GetEmergeFlags())
+  extra_env['PKGDIR'] = f'{sysroot.path}/packages'
   with osutils.TempDir() as tempdir, cpupower_helper.ModifyCpuGovernor(
       run_configs.autosetgov, run_configs.autosetgov_sticky):
     extra_env[constants.CROS_METRICS_DIR_ENVVAR] = tempdir
@@ -724,13 +702,30 @@ def BuildPackages(target: 'build_target_lib.BuildTarget',
     if run_configs.eclean:
       _CleanStaleBinpkgs(sysroot.path)
 
-    try:
-      cros_build_lib.run(cmd, extra_env=extra_env)
-      logging.info('Builds complete.')
-    except cros_build_lib.RunCommandError as e:
-      failed_pkgs = portage_util.ParseDieHookStatusFile(tempdir)
-      raise sysroot_lib.PackageInstallError(
-          str(e), e.result, exception=e, packages=failed_pkgs)
+    emerge_cmd = _GetEmergeCommand(sysroot.path)
+    emerge_flags = run_configs.GetEmergeFlags()
+    rebuild_pkgs = ' '.join(run_configs.GetForceLocalBuildPackages(sysroot))
+    if rebuild_pkgs:
+      emerge_flags.extend([
+          f'--reinstall-atoms={rebuild_pkgs}',
+          f'--usepkg-exclude={rebuild_pkgs}',
+      ])
+    sdk_pkgs = ' '.join(_CRITICAL_SDK_PACKAGES)
+    emerge_flags.extend([
+        f'--useoldpkg-atoms={sdk_pkgs}',
+        f'--rebuild-exclude={sdk_pkgs}',
+    ])
+    with RemoteExecution(run_configs.use_goma, run_configs.use_remoteexec):
+      logging.info('Merging board packages now.')
+      try:
+        cros_build_lib.sudo_run(
+            emerge_cmd + emerge_flags + run_configs.GetPackages(),
+            extra_env=extra_env)
+      except cros_build_lib.RunCommandError as e:
+        failed_pkgs = portage_util.ParseDieHookStatusFile(tempdir)
+        raise sysroot_lib.PackageInstallError(
+            str(e), e.result, exception=e, packages=failed_pkgs)
+    logging.info('Builds complete.')
 
     if run_configs.install_debug_symbols:
       logging.info('Fetching the debug symbols.')
@@ -809,7 +804,7 @@ def _GetBaseInstallPackages(sysroot: Union[str, os.PathLike], emerge_flags: str,
   # [binary N] dev-go/containerd ... to /build/eve/ USE="..."
   # [ebuild r U] chromeos-base/tast-build-deps ... to /build/eve/ USE="..."
   # [binary U] chromeos-base/chromeos-chrome ... to /build/eve/ USE="..."
-  cmd = ['parallel_emerge', f'--sysroot={sysroot}', f'--root={sysroot}']
+  cmd = _GetEmergeCommand(sysroot)
   result = cros_build_lib.sudo_run(
       cmd + emerge_flags + packages,
       capture_output=True,
@@ -837,6 +832,20 @@ def _GetBaseInstallPackages(sysroot: Union[str, os.PathLike], emerge_flags: str,
         packages.add(m.group(2))
   return sorted(packages)
 
+
+def _GetEmergeCommand(
+    sysroot: Optional[Union[str, os.PathLike]] = None
+) -> List[Union[str, os.PathLike]]:
+  """Get the emerge command to use with build_packages."""
+  # TODO(xcl): Convert to directly importing and calling a Python lib instead
+  # of calling a binary.
+  cmd = [Path(constants.CHROMITE_BIN_DIR) / 'parallel_emerge']
+  if sysroot:
+    cmd.extend([
+        f'--sysroot={sysroot}',
+        f'--root={sysroot}',
+    ])
+  return cmd
 
 def _CreateSysrootSkeleton(sysroot: sysroot_lib.Sysroot) -> None:
   """Create the sysroot skeleton.
