@@ -123,7 +123,7 @@ class SudoKeepAlive(cros_build_lib.PrimaryPidContextManager):
 
     # We don't use threads here.
     # pylint: disable=bad-option-value,subprocess-popen-preexec-fn
-    self._proc = subprocess.Popen(['bash', '-c', cmd], shell=False,
+    self._proc = subprocess.Popen(['bash', '-c', cmd], shell=False,  # pylint: disable=consider-using-with
                                   close_fds=True, preexec_fn=ignore_sigint,
                                   stdin=subprocess.PIPE)
 
