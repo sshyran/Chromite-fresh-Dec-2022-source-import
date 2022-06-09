@@ -709,7 +709,7 @@ Builder: %s
   if options.cls_baseline:
     baseline_job = add_cls_to_job(builder_job_template, options.cls_baseline,
                                   options.debug)
-    baseline_job = pformat.json(baseline_job)
+    baseline_job = pformat.json(json.loads(baseline_job))
   else:
     # Baseline job does not need any CLs added, but we need to set
     # force_relevant_build=True to prevent pointless build check from
