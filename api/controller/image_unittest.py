@@ -6,6 +6,7 @@
 
 import os
 from pathlib import Path
+from typing import List, Optional
 from unittest import mock
 
 from chromite.api import api_config
@@ -169,34 +170,106 @@ class CreateTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
                         rc)
     self.assertFalse(self.response.failed_packages)
 
+
+class RecoveryImageTest(cros_test_lib.RunCommandTempDirTestCase,
+                        api_config.ApiConfigMixin):
+  """Recovery image tests."""
+
+  def setUp(self):
+    self.response = image_pb2.CreateImageResult()
+    self.types = [common_pb2.IMAGE_TYPE_BASE, common_pb2.IMAGE_TYPE_RECOVERY]
+    self.build_result = self._CreateMockBuildResult(
+        [common_pb2.IMAGE_TYPE_BASE])
+
+    self.PatchObject(
+        image_service,
+        'Build',
+        side_effect=[
+            self.build_result,
+            self._CreateMockBuildResult([common_pb2.IMAGE_TYPE_FACTORY]),
+        ])
+    self.copy_image_mock = self.PatchObject(
+        image_service,
+        'CopyBaseToRecovery',
+        side_effect=[
+            self._CreateMockBuildResult([common_pb2.IMAGE_TYPE_RECOVERY]),
+        ])
+    self.recov_image_mock = self.PatchObject(
+        image_service,
+        'BuildRecoveryImage',
+        side_effect=[
+            self._CreateMockBuildResult([common_pb2.IMAGE_TYPE_RECOVERY]),
+        ])
+
+  def _GetRequest(self,
+                  board=None,
+                  types=None,
+                  version=None,
+                  builder_path=None,
+                  disable_rootfs_verification=False,
+                  base_is_recovery=False):
+    """Helper to build a request instance."""
+    return image_pb2.CreateImageRequest(
+        build_target={'name': board},
+        image_types=types,
+        disable_rootfs_verification=disable_rootfs_verification,
+        version=version,
+        builder_path=builder_path,
+        base_is_recovery=base_is_recovery,
+    )
+
+  def _CreateMockBuildResult(
+      self, image_types: List[int]) -> Optional[image_service.BuildResult]:
+    """Helper to create Mock build_image results.
+
+    Args:
+      image_types: A list of image types for which the mock BuildResult has to
+        be creates.
+
+    Returns:
+      A list of mock BuildResult.
+    """
+    image_types_names = [
+        image_controller.SUPPORTED_IMAGE_TYPES[x]
+        for x in image_types
+        if image_controller.SUPPORTED_IMAGE_TYPES[x] in
+        constants.IMAGE_TYPE_TO_NAME
+    ]
+
+    if not image_types_names:
+      if common_pb2.IMAGE_TYPE_FACTORY in image_types and len(image_types) == 1:
+        image_types_names.append(constants.IMAGE_TYPE_FACTORY_SHIM)
+      else:
+        return None
+
+    _build_result = image_service.BuildResult(image_types_names)
+    _build_result.return_code = 0
+    for image_type in image_types_names:
+      test_image = Path(self.tempdir) / constants.IMAGE_TYPE_TO_NAME[image_type]
+      test_image.touch()
+      _build_result.add_image(image_type, test_image)
+
+    return _build_result
+
   def testBaseIsRecoveryTrue(self):
     """Test that cp is called."""
-    types = [common_pb2.IMAGE_TYPE_BASE,
-             common_pb2.IMAGE_TYPE_RECOVERY]
-    input_proto = self._GetRequest(board='board', types=types,
-                                   base_is_recovery=True)
-    # Images must exist to be added to the result.
-    self.PatchObject(Path, 'exists', return_value=True)
-    rc_mock = cros_test_lib.RunCommandMock()
-    rc_mock.SetDefaultCmdResult(returncode=0)
-    with rc_mock:
-      image_controller.Create(input_proto, self.response, self.api_config)
-    rc_mock.assertCommandContains(['cp', mock.ANY, mock.ANY])
+    input_proto = self._GetRequest(
+        board='board', types=self.types, base_is_recovery=True)
+    image_controller.Create(input_proto, self.response, self.api_config)
+
+    self.copy_image_mock.assert_called_with(
+        board='board',
+        image_path=self.build_result.images[constants.IMAGE_TYPE_BASE])
 
   def testBaseIsRecoveryFalse(self):
     """Test that mod_image_for_recovery.sh is called."""
-    types = [common_pb2.IMAGE_TYPE_BASE,
-             common_pb2.IMAGE_TYPE_RECOVERY]
-    input_proto = self._GetRequest(board='board', types=types,
-                                   base_is_recovery=False)
-    self.PatchObject(Path, 'exists', return_value=True)
-    rc_mock = cros_test_lib.RunCommandMock()
-    rc_mock.SetDefaultCmdResult(returncode=0)
-    with rc_mock:
-      image_controller.Create(input_proto, self.response, self.api_config)
-    mod_script = os.path.join(constants.CROSUTILS_DIR,
-                              'mod_image_for_recovery.sh')
-    rc_mock.assertCommandContains([mod_script, '--board', 'board', mock.ANY])
+    input_proto = self._GetRequest(
+        board='board', types=self.types, base_is_recovery=False)
+    image_controller.Create(input_proto, self.response, self.api_config)
+
+    self.recov_image_mock.assert_called_with(
+        board='board',
+        image_path=self.build_result.images[constants.IMAGE_TYPE_BASE])
 
 
 class ImageSignerTestTest(cros_test_lib.MockTempDirTestCase,

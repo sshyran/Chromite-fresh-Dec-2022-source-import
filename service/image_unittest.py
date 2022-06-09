@@ -193,6 +193,30 @@ class CreateVmTest(cros_test_lib.RunCommandTestCase):
         os.path.join('/tmp', constants.VM_IMAGE_BIN), image.CreateVm('board'))
 
 
+class CopyBaseToRecoveryTest(cros_test_lib.MockTempDirTestCase):
+  """Tests the CopyBaseToRecovery method."""
+
+  def setUp(self):
+    self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=True)
+    self.PatchObject(Path, 'exists', return_value=True)
+    self.base_image = self.tempdir / constants.BASE_IMAGE_BIN
+    self.recovery_image = self.tempdir / constants.RECOVERY_IMAGE_BIN
+
+  def testCopyRecoveryImage(self):
+    self.base_image.touch()
+    result = image.CopyBaseToRecovery('board', self.base_image)
+
+    self.assertEqual(result.return_code, 0)
+    self.assertEqual(result.images[constants.IMAGE_TYPE_RECOVERY],
+                     self.recovery_image)
+    self.assertExists(self.recovery_image)
+
+  def testCopyRecoveryImageInvalid(self):
+    result = image.CopyBaseToRecovery('board', self.base_image)
+
+    self.assertNotEqual(result.return_code, 0)
+    self.assertNotExists(self.recovery_image)
+
 class BuildRecoveryTest(cros_test_lib.RunCommandTestCase):
   """Create recovery image tests."""
 
