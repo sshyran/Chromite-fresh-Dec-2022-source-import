@@ -15,8 +15,21 @@ import os
 import re
 from typing import Dict, Iterable, NamedTuple, Pattern, Tuple
 
+from chromite.lib import constants
+from chromite.lib import image_lib
+from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib.parser import package_info
+
+
+_SUPPORTED_ISCP_PARTITIONS = {
+    constants.IMAGE_TYPE_BASE: [constants.PART_ROOT_A],
+    constants.IMAGE_TYPE_TEST: [constants.PART_ROOT_A, constants.PART_STATE],
+    constants.IMAGE_TYPE_DEV: [constants.PART_ROOT_A, constants.PART_STATE],
+}
+
+_STATEFUL_PARTITION_VDB = 'var_overlay/db/pkg'
+_STATEFUL_PARTITION_INSTALL_PATH = 'dev_image'
 
 
 class PackageVersion(NamedTuple):
@@ -51,6 +64,65 @@ def _get_version_component_regex() -> Pattern:
   minor = rf'(?:\.(?P<minor>\d+){patch})?'
   complete = rf'^(?P<major>\d+){minor}'
   return re.compile(complete)
+
+
+def get_installed_package_data(
+    image_type: str, image_path: os.PathLike
+) -> Dict[str, Dict[PackageIdentifier, portage_util.PackageSizes]]:
+  """Function for mounting an image and setting up a package database.
+
+  Utility method which mounts each supported partition of a given image and
+  produces the dataset of installed packages and their sizes.
+
+  Args:
+    image_type: The type of image being queried (base, dev, test).
+    image_path: The path to the image in question.
+
+  Returns:
+    A mapping of the partition type (stateful, rootfs) to package details.
+  """
+  if image_type not in _SUPPORTED_ISCP_PARTITIONS:
+    logging.warning('Provided image type is not supported.')
+    return dict()
+
+  results = {}
+  installed_package_files = []
+  # We mount the stateful partition in all cases because the stateful partition
+  # contains the package db that we need. We do this once and get installed
+  # packages once for all image types, regardless of whether we care about
+  # what's installed on the stateful partition.
+  with osutils.TempDir() as temp_dir:
+    with image_lib.LoopbackPartitions(image_path, destination=temp_dir) as img:
+      # Get a dict of {partition:mountpoint}, including state always.
+      partitions = list(
+          set(_SUPPORTED_ISCP_PARTITIONS[image_type] + [constants.PART_STATE]))
+      mount_points = {
+          partition: path
+          for partition, path in zip(partitions, img.Mount(partitions))
+      }
+      db = portage_util.PortageDB(
+          root=mount_points[constants.PART_STATE],
+          vdb=_STATEFUL_PARTITION_VDB,
+          package_install_path=_STATEFUL_PARTITION_INSTALL_PATH)
+      installed_packages = db.InstalledPackages()
+      installed_package_files = list(
+          zip(installed_packages,
+              [p.ListContents() for p in installed_packages]))
+
+      # Now that we have the set of installed packages for the image, we mount
+      # each relevant partition that we want to check and calculate the size of
+      # the installed package on the partition (if the package is installed on
+      # that partition).
+      for partition in _SUPPORTED_ISCP_PARTITIONS[image_type]:
+        package_install_path = (
+            _STATEFUL_PARTITION_INSTALL_PATH
+            if partition == constants.PART_STATE else '')
+        package_install_path = os.path.join(mount_points[partition],
+                                            package_install_path)
+        results[partition] = get_package_details_for_partition(
+            package_install_path, installed_package_files)
+      img.Unmount(partitions)
+  return results
 
 
 # TODO(zland): refactor scripts/pkg_size (and this function) to use common

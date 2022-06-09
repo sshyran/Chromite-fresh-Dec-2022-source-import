@@ -8,9 +8,7 @@ import itertools
 import os
 from typing import Dict, List
 
-# pylint: disable=unused-import
-import pytest
-
+from chromite.lib import constants
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib.parser import package_info
@@ -214,6 +212,7 @@ def test_get_package_details_for_partition__stateful(tmp_path):
 
 
 def test_get_package_details_for_partition__bad_install_path(tmp_path):
+  """Test PortageDB read failure mode for an invalid package install path."""
   pkgs = {
       'dev-lang': ['python-3.6.15-r2', 'rust-1.58.1-r1'],
       'chromeos-base': [
@@ -238,3 +237,11 @@ def test_get_package_details_for_partition__bad_install_path(tmp_path):
     # have 0 bytes on the provided partition.
     # TODO(zland): make this mechanism a little less brittle?
     assert result[expected] == (0, 0)
+
+
+def test_get_installed_package_data__bad_image_type(tmp_path, caplog):
+  """Ensure unsupported image types are not mounted and crawled for pkgs."""
+  result = observability.get_installed_package_data(
+      constants.IMAGE_TYPE_FACTORY, tmp_path / 'chromiumos_factory_image.bin')
+  assert 'Provided image type is not supported.' in caplog.text
+  assert result == dict()
