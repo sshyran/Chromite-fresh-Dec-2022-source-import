@@ -951,6 +951,14 @@
           "release_builder_test_pool": "bvt",
           "board_id": 7196,
           "is_active": true
+        },
+        {
+          "board_name": "brask",
+          "name": "kinox",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7196,
+          "is_active": true
         }
       ]
     },
