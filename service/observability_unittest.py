@@ -4,9 +4,15 @@
 
 """Unit tests for service/observability.py methods."""
 
+import itertools
+import os
+from typing import Dict, List
+
 # pylint: disable=unused-import
 import pytest
 
+from chromite.lib import osutils
+from chromite.lib import portage_util
 from chromite.lib.parser import package_info
 from chromite.service import observability
 
@@ -65,3 +71,164 @@ def test_parse_package_name__full_with_suffix():
   assert fake_identifier.package_name.atom == 'cat/test-pkg'
   assert fake_identifier.package_name.category == 'cat'
   assert fake_identifier.package_name.package_name == 'test-pkg'
+
+
+_FAKE_DATA = 'FAKE DATA'
+_FAKE_DATA_SIZE = len(_FAKE_DATA)
+_FAKE_FILES = [
+    ('dir', 'lib64'),
+    ('obj', 'lib64/libext2fs.so.2.4', 'a6723f44cf82f1979e9731043f820d8c',
+     '1390848093'),
+    ('dir', 'dir with spaces'),
+    ('obj', 'dir with spaces/file with spaces',
+     'cd4865bbf122da11fca97a04dfcac258', '1390848093'),
+    ('sym', 'lib64/libe2p.so.2', '->', 'libe2p.so.2.3', '1390850489'),
+    ('foo'),
+]
+_FAKE_EXPECTED_PACKAGE_SIZE = sum(
+    [_FAKE_DATA_SIZE for f in _FAKE_FILES if f[0] == 'obj'])
+
+
+def make_portage_db(tmp_path: os.PathLike,
+                    pkgs: Dict[str, List[str]] = None,
+                    fake_vdb_subdir: str = portage_util.VDB_PATH,
+                    fake_install_subdir: str = ''):
+  """Construct an artificial, ephemeral Portage package database on-disk.
+
+  Useful for testing behavior of ISCP methods which require a usable Portage DB
+  to provide portage_util.InstalledPackage objects and all the trimmings
+  therein.
+
+  Args:
+    tmp_path: A temporary path to build a fake image filesystem in. Provided by
+      calling methods only; can use tmp_path for pytest or some other temporary
+      path.
+    pkgs: A dictionary mapping category to PVR values. If not provided, a set
+      of default values is used.
+    fake_vdb_subdir: A relative path from the mount point's root to the Portage
+      database fileset. Since different partitions use different defaults
+      for the database fileset, allow custom VDB paths to more easily mimic
+      that behavior.
+    fake_install_subdir: A relative path from the mount point's root to the
+      location of the installed package files on the image. Again, different
+      partitions use different defaults, so we want to mimic that behavior if
+      needed.
+  """
+  if pkgs is None:
+    pkgs = {
+        'category1': ['package-1', 'package-2'],
+        'category2': ['package-3', 'package-4'],
+        'with': ['files-1'],
+        'dash-category': ['package-5'],
+    }
+
+  # create a rough approximation of a Portage DB filesystem with the fake data
+  # given above.
+  fake_vdb = tmp_path / fake_vdb_subdir
+
+  for cat, pvrs in pkgs.items():
+    catpath = fake_vdb / cat
+    os.makedirs(catpath)
+    for pkg in pvrs:
+      pkgpath = catpath / pkg
+      os.makedirs(pkgpath)
+      osutils.Touch(pkgpath / (pkg + '.ebuild'))
+      osutils.WriteFile(
+          pkgpath / 'CONTENTS',
+          ''.join(' '.join(entry) + '\n' for entry in _FAKE_FILES))
+
+  # add fake installed files to this new filesystem
+  for fake_file_data in _FAKE_FILES:
+    if fake_file_data[0] == 'obj':
+      fake_filename = tmp_path / fake_install_subdir / fake_file_data[1]
+      osutils.WriteFile(fake_filename, _FAKE_DATA, makedirs=True)
+      print('wrote obj file at %s' % fake_filename)
+
+  db = portage_util.PortageDB(
+      root=tmp_path,
+      vdb=fake_vdb_subdir,
+      package_install_path=fake_install_subdir)
+  return db
+
+
+def convert_pkg_dict_to_package_identifier(pkgs: Dict[str, List[str]]):
+  """Generate PackageIdentifier instances from test data in dictionary."""
+  pkgs_flattened = []
+  for cat, pkg_list in pkgs.items():
+    pkgs_flattened += list(zip(itertools.repeat(cat), pkg_list))
+  pkgs_flattened = [f'{c}/{p}' for c, p in pkgs_flattened]
+  expected_packages = [
+      observability.parse_package_name(package_info.parse(pkg))
+      for pkg in pkgs_flattened
+  ]
+  return expected_packages
+
+
+def test_get_package_details_for_partition__rootfs(tmp_path):
+  """Test PortageDB reads & size calculation for standard (rootfs) db."""
+  pkgs = {
+      'dev-lang': ['python-3.6.15-r2', 'rust-1.58.1-r1'],
+      'chromeos-base': [
+          'chromeos-chrome-104.0.5107.2_rc-r1', 'autotest-0.0.2-r15979'
+      ],
+  }
+  expected_packages = convert_pkg_dict_to_package_identifier(pkgs)
+  db = make_portage_db(tmp_path=tmp_path, pkgs=pkgs)
+  packages = [(pkg, pkg.ListContents()) for pkg in db.InstalledPackages()]
+  print(packages)
+  result = observability.get_package_details_for_partition(
+      installation_path=tmp_path, pkgs=packages)
+  assert len(result) == 4
+  for expected in expected_packages:
+    assert expected in result
+    assert result[expected] == 2 * _FAKE_DATA_SIZE
+
+
+def test_get_package_details_for_partition__stateful(tmp_path):
+  """Test PortageDB reads & size calculation for non-standard (stateful) db."""
+  pkgs = {
+      'dev-lang': ['python-3.6.15-r2', 'rust-1.58.1-r1'],
+      'chromeos-base': [
+          'chromeos-chrome-104.0.5107.2_rc-r1', 'autotest-0.0.2-r15979'
+      ],
+  }
+  expected_packages = convert_pkg_dict_to_package_identifier(pkgs)
+  db = make_portage_db(
+      tmp_path=tmp_path,
+      pkgs=pkgs,
+      fake_vdb_subdir='var_overlay/db/pkg',
+      fake_install_subdir='dev_image')
+  packages = [(pkg, pkg.ListContents()) for pkg in db.InstalledPackages()]
+  result = observability.get_package_details_for_partition(
+      installation_path=(tmp_path / 'dev_image'), pkgs=packages)
+  assert len(result) == 4
+  for expected in expected_packages:
+    assert expected in result
+    assert result[expected] == _FAKE_EXPECTED_PACKAGE_SIZE
+
+
+def test_get_package_details_for_partition__bad_install_path(tmp_path):
+  pkgs = {
+      'dev-lang': ['python-3.6.15-r2', 'rust-1.58.1-r1'],
+      'chromeos-base': [
+          'chromeos-chrome-104.0.5107.2_rc-r1', 'autotest-0.0.2-r15979'
+      ],
+  }
+  expected_packages = convert_pkg_dict_to_package_identifier(pkgs)
+  db = make_portage_db(
+      tmp_path=tmp_path,
+      pkgs=pkgs,
+      fake_vdb_subdir='var_overlay/db/pkg',
+      fake_install_subdir='foo/bar/baz')
+  packages = [(pkg, pkg.ListContents()) for pkg in db.InstalledPackages()]
+  # mismatched custom install path - hilariously, the provided path isn't used
+  # for anything except exception raising, so all data remains the same.
+  result = observability.get_package_details_for_partition(
+      installation_path='bad_path', pkgs=packages)
+  assert len(result) == 4
+  for expected in expected_packages:
+    assert expected in result
+    # Since a bad path was provided, we expect all packages to report back as
+    # have 0 bytes on the provided partition.
+    # TODO(zland): make this mechanism a little less brittle?
+    assert result[expected] == 0

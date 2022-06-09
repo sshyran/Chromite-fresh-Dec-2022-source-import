@@ -9,9 +9,13 @@ data storage. Complementary to chromite.lib.metrics, chromite.api.metrics, and
 related library usage.
 """
 
+import functools
+import logging
+import os
 import re
-from typing import NamedTuple, Pattern
+from typing import Dict, Iterable, NamedTuple, Pattern, Tuple
 
+from chromite.lib import portage_util
 from chromite.lib.parser import package_info
 
 
@@ -38,6 +42,7 @@ class PackageIdentifier(NamedTuple):
   package_version: PackageVersion
 
 
+@functools.lru_cache(maxsize=None)
 def _get_version_component_regex() -> Pattern:
   # Parse version number, expecting up to 4 integer components arranged
   # like: major[.minor[.patch[.extended]]]
@@ -46,6 +51,32 @@ def _get_version_component_regex() -> Pattern:
   minor = rf'(?:\.(?P<minor>\d+){patch})?'
   complete = rf'^(?P<major>\d+){minor}'
   return re.compile(complete)
+
+
+# TODO(zland): refactor scripts/pkg_size (and this function) to use common
+# library. This implementation does not want to recreate metrics records for the
+# base image's rootfs, and we may not want to append all of the partition &
+# image information to metrics, so a simplified approach to
+# chromite/scripts/pkg_size is being used here.
+def get_package_details_for_partition(
+    installation_path: os.PathLike,
+    pkgs: Iterable[Tuple[portage_util.InstalledPackage, Iterable[Tuple[str,
+                                                                       str]]]]
+) -> Dict[PackageIdentifier, int]:
+  """Retrieve package size and format name details for a given set of packages.
+
+  Args:
+    installation_path: The path to the partition's root that the package's
+      installed files are relative to.
+    pkgs: The packages of interest in the partition (typically, the entire
+      contents of the package db).
+  """
+  details = {}
+  for installed_package, pkg_fileset in pkgs:
+    size = portage_util.CalculatePackageSize(pkg_fileset, installation_path)
+    pkg_identifier = parse_package_name(installed_package.package_info)
+    details[pkg_identifier] = size
+  return details
 
 
 def parse_package_name(pkg_info: package_info.PackageInfo) -> PackageIdentifier:
