@@ -235,7 +235,7 @@ def FindChromeCandidates(package_dir):
         else:
           stable_ebuilds.append(ebuild)
 
-  # Apply some sanity checks.
+  # Apply some confidence checks.
   if not unstable_ebuilds:
     raise Exception('Missing 9999 ebuild for %s' % package_dir)
   if not stable_ebuilds:
@@ -398,8 +398,9 @@ def MarkChromeEBuildAsStable(stable_candidate, unstable_ebuild, chrome_pn,
 
   if stable_candidate and chrome_rev in _REV_TYPES_FOR_LINKS:
     cbuildbot_alerts.PrintBuildbotLink('Chromium revisions',
-                              GetChromeRevisionListLink(stable_candidate,
-                                                        new_ebuild, chrome_rev))
+                                       GetChromeRevisionListLink(
+                                           stable_candidate, new_ebuild,
+                                           chrome_rev))
 
   git.RunGit(package_dir, ['add', new_ebuild_path])
   if stable_candidate and not stable_candidate.IsSticky():

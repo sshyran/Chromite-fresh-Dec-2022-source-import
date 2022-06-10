@@ -844,7 +844,7 @@ def main(argv):
   options = parser.parse_args(argv)
   chroot_command = options.commands
 
-  # Some sanity checks first, before we ask for sudo credentials.
+  # Some basic checks first, before we ask for sudo credentials.
   cros_build_lib.AssertOutsideChroot()
 
   host = os.uname()[4]

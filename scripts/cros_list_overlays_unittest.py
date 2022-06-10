@@ -16,7 +16,7 @@ class ListOverlaysTest(cros_test_lib.MockTestCase):
     self.find_mock = self.PatchObject(portage_util, 'FindOverlays')
 
   def testSmoke(self):
-    """Basic sanity check"""
+    """Basic confidence check"""
     cros_list_overlays.main([])
 
   def testAll(self):

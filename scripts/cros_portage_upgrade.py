@@ -547,7 +547,7 @@ class Upgrader(object):
     """
     # Further explanation: this check should always pass, but might not
     # if the copy/upgrade from upstream did not work.  This is just a
-    # sanity check.
+    # confidence check.
     envvars = self._GenPortageEnvvars(self._curr_arch, unstable_ok=False)
 
     equery = self._GetBoardCmd(self.EQUERY_CMD)

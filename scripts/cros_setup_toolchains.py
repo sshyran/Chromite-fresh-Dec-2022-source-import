@@ -1137,7 +1137,7 @@ def _ProcessBinutilsConfig(target, output_dir):
   """Do what binutils-config would have done"""
   binpath = os.path.join('/bin', target + '-')
 
-  # Locate the bin dir holding the linker and perform some sanity checks
+  # Locate the bin dir holding the linker and perform some confidence checks
   binutils_bin_path = os.path.join(output_dir, 'usr', toolchain.GetHostTuple(),
                                    target, 'binutils-bin')
   globpath = os.path.join(binutils_bin_path, '*')

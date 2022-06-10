@@ -82,7 +82,7 @@ def FindAndroidCandidates(package_dir):
     else:
       stable_ebuilds.append(ebuild)
 
-  # Apply some sanity checks.
+  # Apply some confidence checks.
   if not unstable_ebuilds:
     raise Exception('Missing 9999 ebuild for %s' % package_dir)
   if not stable_ebuilds:

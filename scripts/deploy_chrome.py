@@ -194,7 +194,7 @@ class DeployChrome(object):
         return False
 
     logging.info('Removing rootfs verification from %s', self.options.device)
-    # Running in VM's cause make_dev_ssd's firmware sanity checks to fail.
+    # Running in VMs cause make_dev_ssd's firmware confidence checks to fail.
     # Use --force to bypass the checks.
     cmd = ('/usr/share/vboot/bin/make_dev_ssd.sh --partitions %d '
            '--remove_rootfs_verification --force')

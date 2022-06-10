@@ -56,7 +56,7 @@ def FindExpansionOffset(unpack_result):
   if unpack_result.returncode != 0:
     return 0
 
-  # Look for the number of relocations as a sanity check that we got the
+  # Look for the number of relocations as a confidence check that we got the
   # expected output. Note that we don't otherwise care about this value.
   relocations_match = re.search(r'INFO: Relocations +: +(\d+) entries',
                                 unpack_result.output)
