@@ -18473,7 +18473,7 @@
     "boards": [],
     "chrome_sdk": false,
     "master": true,
-    "schedule": "  0 0,12 * * *",
+    "schedule": "  0 0 * * *",
     "slave_configs": [
       "adlnrvp-release",
       "adlrvp-release",
