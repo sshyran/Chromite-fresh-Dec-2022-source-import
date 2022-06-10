@@ -28,6 +28,7 @@ from chromite.api.gen.chromite.api import depgraph_pb2
 from chromite.api.gen.chromite.api import firmware_pb2
 from chromite.api.gen.chromite.api import image_pb2
 from chromite.api.gen.chromite.api import metadata_pb2
+from chromite.api.gen.chromite.api import observability_pb2
 from chromite.api.gen.chromite.api import packages_pb2
 from chromite.api.gen.chromite.api import payload_pb2
 from chromite.api.gen.chromite.api import portage_explorer_pb2
@@ -484,6 +485,7 @@ def RegisterServices(router: Router):
     router.Register(firmware_pb2)
     router.Register(image_pb2)
     router.Register(metadata_pb2)
+    router.Register(observability_pb2)
     router.Register(packages_pb2)
     router.Register(payload_pb2)
     router.Register(portage_explorer_pb2)
