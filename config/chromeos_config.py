@@ -1103,7 +1103,7 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
       (DAILY, 'factory-kukui-14374.B', ['kukui', 'jacuzzi']),
       (WEEKLY, 'factory-cherry-14455.B', ['cherry']),
       (DAILY, 'factory-brya-14517.B', ['brya', 'brask']),
-      (DAILY, 'factory-guybrush-14600.B', ['guybrush']),
+      (DAILY, 'factory-guybrush-14908.B', ['guybrush']),
       # This is intended to create master branch tryjobs, NOT for production
       # builds. Update the associated list of boards as needed.
       (None, 'master', [
