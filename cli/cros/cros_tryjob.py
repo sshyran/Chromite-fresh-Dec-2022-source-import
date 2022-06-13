@@ -584,8 +584,8 @@ List Examples:
              'aborted.  If set to zero, then there is no '
              'timeout.')
     how_group.add_argument(
-        '--sanity-check-build', dest='passthrough', action='append_option',
-        help='Run the build as a sanity check build.')
+        '--confidence-check-build', dest='passthrough', action='append_option',
+        help='Run the build as a confidence check build.')
     how_group.add_argument(
         '--chrome_version', dest='passthrough', action='append_option_value',
         help='Used with SPEC logic to force a particular '
