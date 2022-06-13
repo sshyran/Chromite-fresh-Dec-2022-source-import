@@ -642,7 +642,7 @@ class CBuildBotTest(ChromeosConfigTestBase):
           self.assertEqual(config['overlays'], constants.PUBLIC_OVERLAYS, error)
 
   def testGetSlaves(self):
-    """Make sure every master has a sane list of slaves"""
+    """Make sure every master has a valid list of slaves"""
     for build_name, config in self.site_config.items():
       if config.master:
         configs = self.site_config.GetSlavesForMaster(config)
@@ -659,7 +659,7 @@ class CBuildBotTest(ChromeosConfigTestBase):
     return [self.site_config[n] for n in master_config.slave_configs]
 
   def testGetSlavesOnTrybot(self):
-    """Make sure every master has a sane list of slaves"""
+    """Make sure every master has a valid list of slaves"""
     mock_options = mock.Mock()
     mock_options.remote_trybot = True
     for _, config in self.site_config.items():
@@ -691,7 +691,7 @@ class CBuildBotTest(ChromeosConfigTestBase):
     Ensure now new users are created. See crbug.com/691810.
     """
     for build_name, config in self.site_config.items():
-      # These group builders are whitelisted, for now.
+      # These group builders are allowlisted, for now.
       if not (build_name in ('test-ap-group',
                              'test-ap-group-tryjob',
                              'mixed-wificell-pre-cq') or
@@ -932,7 +932,7 @@ class CBuildBotTest(ChromeosConfigTestBase):
           msg % (build_name, config.build_timeout, expected))
 
   def testBuildTimeouts(self):
-    """Verify that timeout values are sane."""
+    """Verify that timeout values are sensible."""
     for build_name, config in self.site_config.items():
       # Chrome infra has a hard limit of 24h.
       self.assertLessEqual(
