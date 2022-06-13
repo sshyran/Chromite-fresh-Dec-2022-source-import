@@ -830,7 +830,8 @@ class ChrootCreator:
                chroot_path: Path,
                sdk_tarball: Path,
                cache_dir: Path,
-               usepkg: bool = True):
+               usepkg: bool = True,
+               chroot_upgrade: bool = True):
     """Initialize.
 
     Args:
@@ -839,11 +840,13 @@ class ChrootCreator:
       cache_dir: Path to a directory that will be used for caching files.
       usepkg: If False, pass --nousepkg to cros_setup_toolchains inside the
           chroot.
+      chroot_upgrade: If True, upgrade toolchain/SDK when entering the chroot.
     """
     self.chroot_path = chroot_path
     self.sdk_tarball = sdk_tarball
     self.cache_dir = cache_dir
     self.usepkg = usepkg
+    self.chroot_upgrade = chroot_upgrade
 
   def _make_chroot(self):
     """Create the chroot."""
@@ -857,6 +860,11 @@ class ChrootCreator:
 
     if not self.usepkg:
       cmd.append('--nousepkg')
+
+    if not self.chroot_upgrade:
+      logging.warning('Skipping SDK and toolchain update. '
+                      'Chroot is not guaranteed to work.')
+      cmd.append('--skip_chroot_upgrade')
 
     try:
       cros_build_lib.dbg_run(cmd)

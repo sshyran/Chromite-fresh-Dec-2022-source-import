@@ -702,6 +702,13 @@ def _CreateParser(sdk_latest_version, bootstrap_latest_version):
       '--reproxy-cfg-file',
       type='path',
       help="Config file for re-client's reproxy used for remoteexec.")
+  parser.add_argument(
+      '--skip-chroot-upgrade',
+      dest='chroot_upgrade',
+      action='store_false',
+      default=True,
+      help='Skip automatic SDK and toolchain upgrade when entering the chroot. '
+           'Never guaranteed to work, especially as ToT moves forward.')
 
   # Use type=str instead of type='path' to prevent the given path from being
   # transfered to absolute path automatically.
@@ -1168,7 +1175,8 @@ snapshots will be unavailable).""" % ', '.join(missing_image_tools))
             Path(options.chroot),
             Path(sdk_tarball),
             Path(options.cache_dir),
-            usepkg=not options.bootstrap and not options.nousepkg)
+            usepkg=not options.bootstrap and not options.nousepkg,
+            chroot_upgrade=options.chroot_upgrade)
         mounted = True
 
     if options.enter:
