@@ -44,7 +44,8 @@ def get_led() -> Path:
 
   installed_led = shutil.which('led')
   if installed_led is not None:
-    if not os.path.samefile(installed_led, wrong_led):
+    if not os.path.isfile(wrong_led) or not os.path.samefile(
+        installed_led, wrong_led):
       return installed_led
 
   checkout_led = Path(constants.DEPOT_TOOLS_DIR) / 'led'
