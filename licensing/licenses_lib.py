@@ -797,7 +797,7 @@ to assign.  Once you've found it, copy the entire license file to:
     if scan_source_for_licenses:
       self._ExtractLicenses(src_dir, need_copyright_attribution)
 
-    # This shouldn't run, but leaving as sanity check.
+    # This shouldn't run, but leaving as basic smoke check.
     if not self.license_names and not self.license_text_scanned:
       raise AssertionError("Didn't find usable licenses for %s" %
                            self.fullnamerev)
