@@ -200,7 +200,18 @@ def parse_swarming_datetime(ts: str) -> datetime.datetime:
 
   # datetime.strptime() is unable to handle nanoseconds at the end, thus
   # convert nanoseconds or any other precision to microseconds.
-  microsecs = ts_split[1][:6]
+  if len(ts_split) == 1:
+    # Timestamp may look like "2022-06-14T14:55:48Z" and does not contain
+    # microsecs (i.e. microsecs == 0).
+    microsecs = '0'
+    if secs[-1].lower() == 'z':
+      # If there is a trailing 'Z' or 'z', remove it so that the timestamp can
+      # be parse correctly below.
+      secs = secs[:-1]
+  else:
+    # Timestamp may look like "2022-06-14T14:55:48.123456Z" and contains
+    # microsecs.
+    microsecs = ts_split[1][:6]
 
   # 'Z' at the end can be either lower or upper case. Make it always upper.
   if microsecs[-1] == 'Z':
