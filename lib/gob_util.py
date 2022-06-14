@@ -924,7 +924,7 @@ def ResetReviewLabels(host, change, label, value='0', revision=None,
   # This is tricky when working on the "current" revision, because there's
   # always the risk that the "current" revision will change in between API
   # calls.  So, the code dereferences the "current" revision down to a literal
-  # sha1 at the beginning and uses it for all subsequent calls.  As a sanity
+  # sha1 at the beginning and uses it for all subsequent calls.  As a quick
   # check, the "current" revision is dereferenced again at the end, and if it
   # differs from the previous "current" revision, an exception is raised.
   current = (revision == 'current')
