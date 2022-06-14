@@ -412,7 +412,7 @@ class DataSeries0Test(CIDBIntegrationTest):
     self.assertEqual(len(metadatas), 630, 'Did not load expected amount of '
                                           'test data')
 
-    # Perform some sanity check queries against the database, connected
+    # Perform some smoke check queries against the database, connected
     # as the readonly user. Apply schema migrations first to ensure that we can
     # use the latest version or the readonly password.
     db.ApplySchemaMigrations()
