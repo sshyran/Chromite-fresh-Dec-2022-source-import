@@ -26,7 +26,11 @@ _EXT_TOOL_MAP = {
     frozenset({'.json'}): (formatters.json.Data,),
     # TODO(build): Add a formatter for this.
     frozenset({'.md'}): (formatters.whitespace.Data,),
+    # TODO(build): Add a formatter for this (minijail seccomp policies).
+    frozenset({'.policy'}): (formatters.whitespace.Data,),
     frozenset({'.rs'}): (formatters.rust.Data,),
+    # TODO(build): Add a formatter for this (SELinux policies).
+    frozenset({'.te'}): (formatters.whitespace.Data,),
     frozenset({'.xml'}): (formatters.xml.Data,),
     frozenset({'.cfg', '.conf', '.rules', '.txt'}): (
         formatters.whitespace.Data,),

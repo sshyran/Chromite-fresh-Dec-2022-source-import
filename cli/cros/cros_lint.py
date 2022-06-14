@@ -362,6 +362,20 @@ def _OwnersLintFile(path, _output_format, _debug, _relaxed: bool):
   return ret
 
 
+def _WhitespaceLintFile(path, _output_format, _debug, _relaxed: bool):
+  """Returns result of running basic whitespace checks on |path|."""
+  result = cros_build_lib.CommandResult(f'whitespace(internal) "{path}"',
+                                        returncode=0)
+
+  data = osutils.ReadFile(path)
+
+  # Check whitespace.
+  if not whitespace.LintData(path, data):
+    result.returncode = 1
+
+  return result
+
+
 def _BreakoutDataByTool(map_to_return, path):
   """Maps a tool method to the content of the |path|."""
   # Detect by content of the file itself.
@@ -403,7 +417,8 @@ _EXT_TOOL_MAP = {
     frozenset({'.sh'}): (_ShellLintFile,),
     frozenset({'.ebuild', '.eclass', '.bashrc'}): (_GentooShellLintFile,),
     frozenset({'.md'}): (_MarkdownLintFile,),
-    frozenset({'.policy'}): (_SeccompPolicyLintFile,),
+    frozenset({'.policy'}): (_SeccompPolicyLintFile, _WhitespaceLintFile),
+    frozenset({'.te'}): (_WhitespaceLintFile,),
 }
 
 # Map known filenames to a tool function.
