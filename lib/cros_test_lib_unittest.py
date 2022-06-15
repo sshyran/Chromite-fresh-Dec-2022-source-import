@@ -43,8 +43,8 @@ class CrosTestCaseTest(cros_test_lib.TestCase):
 class TruthTableTest(cros_test_lib.TestCase):
   """Test TruthTable functionality."""
 
-  def _TestTableSanity(self, tt, lines):
-    """Run the given truth table through basic sanity checks.
+  def _TestTableSmoke(self, tt, lines):
+    """Run the given truth table through basic smoke checks.
 
     Args:
       tt: A TruthTable object.
@@ -91,7 +91,7 @@ class TruthTableTest(cros_test_lib.TestCase):
     self.assertEqual((True, False), lines[2])
     self.assertEqual((True, True), lines[3])
 
-    self._TestTableSanity(tt, lines)
+    self._TestTableSmoke(tt, lines)
 
   def testFourDimensions(self):
     """Test TruthTable behavior for four boolean inputs."""
@@ -119,7 +119,7 @@ class TruthTableTest(cros_test_lib.TestCase):
     self.assertEqual((False, True, True, True), lines[7])
     self.assertEqual((True, True, True, True), lines[15])
 
-    self._TestTableSanity(tt, lines)
+    self._TestTableSmoke(tt, lines)
 
 
 class VerifyTarballTest(cros_test_lib.MockTempDirTestCase):
