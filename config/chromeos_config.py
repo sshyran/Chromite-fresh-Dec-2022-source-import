@@ -1541,7 +1541,7 @@ def AddNotificationConfigs(site_config):
       logging.warning('ignoring notifier for missing config %s', config_name)
 
 
-def ApplyCustomOverrides(site_config, ge_build_config):
+def ApplyCustomOverrides(site_config):
   """Method with to override specific flags for specific builders.
 
   Generally try really hard to avoid putting anything here that isn't
@@ -1551,7 +1551,6 @@ def ApplyCustomOverrides(site_config, ge_build_config):
   Args:
     site_config: config_lib.SiteConfig containing builds to have their
                  waterfall values updated.
-    ge_build_config: Dictionary containing the decoded GE configuration file.
   """
 
   overwritten_configs = {
@@ -1885,63 +1884,6 @@ def ApplyCustomOverrides(site_config, ge_build_config):
       },
   }
 
-  # Kick off for *-borealis builds the 'av-analysis_trace_per-build'
-  # suite, but for devices in the cros_av_analysis pool only.
-  # TODO(ddmail): Clean up once -borealis gets merged back into their
-  # parent boards.
-  av_analysis_args = {
-      'pool': 'cros_av_analysis',
-      'timeout': 3 * 60 * 60,
-      'retry': False,
-      'max_retries': 0,
-      'blocking': False,
-      'async': True,
-  }
-
-  borealis_test_configs = [
-      config_lib.HWTestConfig('av-analysis_trace_per-build', **av_analysis_args)
-  ]
-
-  _additional_test_config = {
-      'hatch-borealis-release': borealis_test_configs,
-      'puff-borealis-release': borealis_test_configs,
-      'volteer-borealis-release': borealis_test_configs,
-      'zork-borealis-release': borealis_test_configs,
-  }
-
-  # Some Uniboard boards need to run additional tests suites. This means
-  # adding the suites at the model level as well.
-  for config_name, _configs in _additional_test_config.items():
-    config = site_config.get(config_name)
-    if not config:
-      continue
-
-    if config_name not in overwritten_configs:
-      overwritten_configs[config_name] = {}
-
-    hwtests = []
-    if 'hw_tests' in config:
-      hwtests = config['hw_tests'] + _configs
-    else:
-      hwtests = HWTestList(ge_build_config).DefaultList()
-    overwritten_configs[config_name]['hw_tests'] = hwtests
-
-    suites = []
-    for hwtestConfig in _configs:
-      suites += [hwtestConfig.suite]
-
-    if config and 'models' in config:
-      models = []
-      for model in config['models']:
-        models.append(
-            config_lib.ModelTestConfig(
-                model.name,
-                model.lab_board_name,
-                model.test_suites + suites,
-                enable_skylab=model.enable_skylab,
-            ))
-      overwritten_configs[config_name]['models'] = models
-
   # Some Unibuild boards need to have hardware tests disabled.  This means
   # disabling it at the model level as well.
   _unibuild_disabled_hw_tests = frozenset([
@@ -1958,6 +1900,8 @@ def ApplyCustomOverrides(site_config, ge_build_config):
                 model.name,
                 model.lab_board_name, [],
                 enable_skylab=model.enable_skylab))
+      if config_name not in overwritten_configs:
+        overwritten_configs[config_name] = {}
       overwritten_configs[config_name]['models'] = models
 
   # Some devices has limited DUT in the lab and running bvt-tast-informational
@@ -1980,6 +1924,8 @@ def ApplyCustomOverrides(site_config, ge_build_config):
         test for test in config['hw_tests']
         if test.suite != 'bvt-tast-informational'
     ]
+    if config_name not in overwritten_configs:
+      overwritten_configs[config_name] = {}
     overwritten_configs[config_name]['hw_tests'] = hw_tests
 
   # Some boards in toolchain builder are not using the same configuration as
@@ -2529,7 +2475,7 @@ def GetConfig():
 
   AddNotificationConfigs(site_config)
 
-  ApplyCustomOverrides(site_config, ge_build_config)
+  ApplyCustomOverrides(site_config)
 
   chromeos_test.ApplyConfig(site_config, boards_dict, ge_build_config)
 
