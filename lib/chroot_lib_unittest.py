@@ -146,7 +146,7 @@ class ChrootTest(cros_test_lib.MockTempDirTestCase):
     self.assertTrue(chroot.has_path('/some', 'file.txt'))
 
   def testEqual(self):
-    """__eq__ method sanity check."""
+    """__eq__ method check."""
     path = '/chroot/path'
     cache_dir = '/cache/dir'
     chrome_root = '/chrome/root'
