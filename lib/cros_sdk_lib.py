@@ -252,7 +252,7 @@ def FindVolumeGroupForDevice(chroot_path, chroot_dev):
   result = cros_build_lib.sudo_run(
       cmd, capture_output=True, print_cmd=False, encoding='utf-8')
   existing_vgs = set()
-  for line in result.output.strip().splitlines():
+  for line in result.stdout.strip().splitlines():
     # Typical lines are '  vg_name\tpv_name\n'.  Match with a regex
     # instead of split because the first field can be empty or missing when
     # a VG isn't completely set up.
@@ -286,7 +286,7 @@ def _DeviceFromFile(chroot_image):
   result = cros_build_lib.sudo_run(
       cmd, capture_output=True, check=False, print_cmd=False, encoding='utf-8')
   if result.returncode == 0:
-    match = re.match(r'/dev/loop\d+', result.output)
+    match = re.match(r'/dev/loop\d+', result.stdout)
     if match:
       chroot_dev = match.group(0)
   return chroot_dev
@@ -305,7 +305,7 @@ def _AttachDeviceToFile(chroot_image):
   # Result should be '/dev/loopN\n' for whatever loop device is chosen.
   result = cros_build_lib.sudo_run(
       cmd, capture_output=True, print_cmd=False, encoding='utf-8')
-  chroot_dev = result.output.strip()
+  chroot_dev = result.stdout.strip()
 
   # Force rescanning the new device in case lvmetad doesn't pick it up.
   _RescanDeviceLvmMetadata(chroot_dev)
@@ -475,7 +475,7 @@ def FindChrootMountSource(chroot_path, proc_mounts='/proc/mounts'):
       if m.destination == chroot_path
   ]
   if not mount:
-    return (None, None)
+    return None, None
 
   # Take the last mount entry because it's the one currently visible.
   # Expected VG/LV source path is /dev/mapper/cros_XX_NNN-LV.
@@ -483,9 +483,9 @@ def FindChrootMountSource(chroot_path, proc_mounts='/proc/mounts'):
   mount_source = mount[-1].source
   match = re.match(r'/dev.*/(cros[^-]+)-(.+)', mount_source)
   if not match:
-    return (None, None)
+    return None, None
 
-  return (match.group(1), match.group(2))
+  return match.group(1), match.group(2)
 
 
 FileSystemDebugInfo = collections.namedtuple('FileSystemDebugInfo',
@@ -579,7 +579,7 @@ def CleanupChrootMount(chroot=None,
         print_cmd=False,
         encoding='utf-8')
     if result.returncode == 0:
-      chroot_dev = result.output.strip()
+      chroot_dev = result.stdout.strip()
     else:
       vg_name = None
   if not chroot_dev:
@@ -990,7 +990,7 @@ class ChrootCreator:
     if data:
       data += '\n\n'
     # Automatically change to scripts directory.
-    data += ('cd "${CHROOT_CWD:-${HOME}/chromiumos/src/scripts}"\n\n')
+    data += 'cd "${CHROOT_CWD:-${HOME}/chromiumos/src/scripts}"\n\n'
     bash_profile.write_text(data)
 
     osutils.Chown(home, user=uid, group=gid, recursive=True)
