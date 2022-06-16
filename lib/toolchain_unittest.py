@@ -91,7 +91,6 @@ class ToolchainInfoTest(cros_test_lib.MockTestCase):
     self.libc_cpv = package_info.parse('sys-libs/glibc-3.4.5')
     self.go_cpv = package_info.parse('dev-lang/go-6.7-r8')
     self.libcxx_cpv = package_info.parse('sys-libs/libcxx-1.2-r3')
-    self.libcxxabi_cpv = package_info.parse('sys-libs/libcxxabi-4.5-r6')
     self.libgcc_cpv = package_info.parse('sys-libs/llvm-libunwind-7.8-r9')
 
     self.matching_toolchain = toolchain.ToolchainInfo('tc', 'tc')
@@ -116,10 +115,6 @@ class ToolchainInfoTest(cros_test_lib.MockTestCase):
     self.assertEqual('1.2-r3', self.matching_toolchain.libcxx_version)
 
     self.PatchObject(self.matching_toolchain, '_get_pkg',
-                     return_value=self.libcxxabi_cpv)
-    self.assertEqual('4.5-r6', self.matching_toolchain.libcxxabi_version)
-
-    self.PatchObject(self.matching_toolchain, '_get_pkg',
                      return_value=self.libgcc_cpv)
     self.assertEqual('7.8-r9', self.matching_toolchain.libgcc_version)
 
@@ -140,11 +135,6 @@ class ToolchainInfoTest(cros_test_lib.MockTestCase):
     self.PatchObject(self.matching_toolchain, '_get_pkg',
                      return_value=self.libcxx_cpv)
     self.assertEqual(self.libcxx_cpv.cpvr, self.matching_toolchain.libcxx_cpf)
-
-    self.PatchObject(self.matching_toolchain, '_get_pkg',
-                     return_value=self.libcxxabi_cpv)
-    self.assertEqual(self.libcxxabi_cpv.cpvr,
-                     self.matching_toolchain.libcxxabi_cpf)
 
     self.PatchObject(self.matching_toolchain, '_get_pkg',
                      return_value=self.libgcc_cpv)
@@ -184,10 +174,6 @@ class ToolchainInfoTest(cros_test_lib.MockTestCase):
                      return_value=self.go_cpv)
     self.PatchObject(self.not_matching_toolchain, '_get_pkg',
                      return_value=self.go_cpv)
-    self.assertEqual('sys-libs/libcxxabi',
-                     self.matching_toolchain._GetCP('libcxxabi'))
-    self.assertEqual('cross-tc/libcxxabi',
-                     self.not_matching_toolchain._GetCP('libcxxabi'))
 
     self.PatchObject(self.matching_toolchain, '_get_pkg',
                      return_value=self.go_cpv)
@@ -246,7 +232,6 @@ class ToolchainInstallerTest(cros_test_lib.MockTempDirTestCase):
     self.rpcsvc_cpv = package_info.parse('net-libs/rpcsvc-proto-9.10')
 
     self.libcxx_cpv = package_info.parse('sys-libs/libcxx-1.2.3')
-    self.libcxxabi_cpv = package_info.parse('sys-libs/libcxxabi-4.5.6')
     self.libgcc_cpv = package_info.parse('sys-libs/llvm-libunwind-7.8.9')
     # pylint: disable=protected-access
     self.go_toolchain = toolchain.ToolchainInfo('tc', 'tc')
@@ -255,7 +240,6 @@ class ToolchainInstallerTest(cros_test_lib.MockTempDirTestCase):
                                'go': self.go_cpv,
                                'rpcsvc': self.rpcsvc_cpv,
                                'libcxx': self.libcxx_cpv,
-                               'libcxxabi': self.libcxxabi_cpv,
                                'llvm-libunwind': self.libgcc_cpv}
 
     self.no_go_toolchain = toolchain.ToolchainInfo('tc', 'tc')
@@ -264,7 +248,6 @@ class ToolchainInstallerTest(cros_test_lib.MockTempDirTestCase):
                                   'go': None,
                                   'rpcsvc': self.rpcsvc_cpv,
                                   'libcxx': self.libcxx_cpv,
-                                  'libcxxabi': self.libcxxabi_cpv,
                                   'llvm-libunwind': self.libgcc_cpv}
 
     self.different_toolchain = toolchain.ToolchainInfo('nottc', 'tc')
@@ -273,7 +256,6 @@ class ToolchainInstallerTest(cros_test_lib.MockTempDirTestCase):
                                       'go': self.go_cpv,
                                       'rpcsvc': None,
                                       'libcxx': self.libcxx_cpv,
-                                      'libcxxabi': self.libcxxabi_cpv,
                                       'llvm-libunwind': self.libgcc_cpv}
 
     pkgdir = os.path.join(self.tempdir, 'var/lib/portage/pkgs')

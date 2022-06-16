@@ -62,7 +62,6 @@ HOST_PACKAGES = (
     'sys-kernel/linux-headers',
     'sys-libs/glibc',
     'sys-libs/libcxx',
-    'sys-libs/libcxxabi',
     'sys-libs/llvm-libunwind',
 )
 
@@ -115,7 +114,6 @@ TARGET_LLVM_PKGS_ENABLED = (
 
 LLVM_PKGS_TABLE = {
     'ex_llvm-libunwind' : ['--ex-pkg', 'sys-libs/llvm-libunwind'],
-    'ex_libcxxabi' : ['--ex-pkg', 'sys-libs/libcxxabi'],
     'ex_libcxx' : ['--ex-pkg', 'sys-libs/libcxx'],
 }
 
@@ -130,7 +128,6 @@ class Crossdev(object):
       'rust': 'dev-lang',
       'llvm': 'sys-devel',
       'llvm-libunwind': 'sys-libs',
-      'libcxxabi': 'sys-libs',
       'libcxx': 'sys-libs',
       'elfutils': 'dev-libs',
   }

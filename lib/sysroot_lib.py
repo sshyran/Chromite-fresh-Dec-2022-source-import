@@ -100,7 +100,7 @@ _wrapper_dir = '/usr/local/bin'
 
 _IMPLICIT_SYSROOT_DEPS_KEY = 'IMPLICIT_SYSROOT_DEPS'
 _IMPLICIT_SYSROOT_DEPS = ['sys-kernel/linux-headers', 'sys-libs/gcc-libs',
-                          'sys-libs/libcxxabi', 'sys-libs/libcxx']
+                          'sys-libs/libcxx']
 
 _MAKE_CONF = 'etc/make.conf'
 _MAKE_CONF_BOARD_SETUP = 'etc/make.conf.board_setup'

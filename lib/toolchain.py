@@ -336,7 +336,6 @@ class ToolchainInstaller(object):
     if self.configure:
       sysroot.SetCachedField('LIBC_VERSION', tc_info.libc_version)
       sysroot.SetCachedField('LIBCXX_VERSION', tc_info.libcxx_version)
-      sysroot.SetCachedField('LIBCXXABI_VERSION', tc_info.libcxxabi_version)
       sysroot.SetCachedField('LIBGCC_VERSION', tc_info.libgcc_version)
 
   def _UpdateProvided(self, sysroot, tc_info):
@@ -365,7 +364,6 @@ class ToolchainInfo(object):
       _PKG_GCC: 'sys-devel/gcc',
       _PKG_LIBC: 'sys-libs/glibc',
       _PKG_LIBCXX: 'sys-libs/libcxx',
-      _PKG_LIBCXXABI: 'sys-libs/libcxxabi',
       _PKG_LIBGCC: 'sys-libs/llvm-libunwind',
       _PKG_LIBXCRYPT: 'sys-libs/libxcrypt',
       _PKG_GO: 'dev-lang/go',
