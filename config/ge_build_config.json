@@ -947,6 +947,14 @@
           "release_builder_test_pool": "bvt",
           "board_id": 7196,
           "is_active": true
+        },
+        {
+          "board_name": "brask",
+          "name": "moli",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7196,
+          "is_active": true
         }
       ]
     },
@@ -1145,6 +1153,14 @@
             "bvt-tast-informational"
           ],
           "cq_test_enabled": true,
+          "release_builder_test_pool": "bvt",
+          "board_id": 459,
+          "is_active": true
+        },
+        {
+          "board_name": "brya",
+          "name": "mithrax",
+          "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 459,
           "is_active": true
@@ -1410,6 +1426,14 @@
         {
           "board_name": "brya-hibernate",
           "name": "kano",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-hibernate",
+          "name": "mithrax",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7229,
@@ -1852,6 +1876,14 @@
         },
         {
           "board_name": "brya-lvm-stateful",
+          "name": "mithrax",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7214,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-lvm-stateful",
           "name": "osiris",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -2075,6 +2107,14 @@
         {
           "board_name": "brya-manatee",
           "name": "kano",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7187,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-manatee",
+          "name": "mithrax",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7187,
