@@ -39,12 +39,14 @@ from chromite.lib import cros_build_lib
 from chromite.service import image
 
 
-def build_shell_bool_style_args(parser: commandline.ArgumentParser,
-                                name: str,
-                                default_val: bool,
-                                help_str: str,
-                                deprecation_note: str,
-                                alternate_name: Optional[str] = None) -> None:
+def build_shell_bool_style_args(
+    parser: commandline.ArgumentParser,
+    name: str,
+    default_val: bool,
+    help_str: str,
+    deprecation_note: str,
+    alternate_name: Optional[str] = None,
+    additional_neg_options: Optional[List[str]] = None) -> None:
   """Build the shell boolean input argument equivalent.
 
   There are two cases which we will need to handle,
@@ -69,6 +71,7 @@ def build_shell_bool_style_args(parser: commandline.ArgumentParser,
     help_str: The help string for the input argument.
     deprecation_note: A deprecation note to use.
     alternate_name: Alternate argument to be used after deprecation.
+    additional_neg_options: Additional negative alias options to use.
   """
   arg = f'--{name}'
   shell_narg = f'--no{name}'
@@ -78,6 +81,10 @@ def build_shell_bool_style_args(parser: commandline.ArgumentParser,
   default_val_str = f'{help_str} (Default: %(default)s).'
 
   if alternate_name:
+    _alternate_narg_list = [alt_py_narg]
+    if additional_neg_options:
+      _alternate_narg_list.extend(additional_neg_options)
+
     parser.add_argument(
         alt_arg,
         action='store_true',
@@ -85,7 +92,7 @@ def build_shell_bool_style_args(parser: commandline.ArgumentParser,
         dest=name,
         help=default_val_str)
     parser.add_argument(
-        alt_py_narg,
+        *_alternate_narg_list,
         action='store_false',
         dest=name,
         help="Don't " + help_str.lower())
@@ -106,8 +113,12 @@ def build_shell_bool_style_args(parser: commandline.ArgumentParser,
       help=argparse.SUPPRESS)
 
   if not alternate_name:
+    _py_narg_list = [py_narg]
+    if additional_neg_options:
+      _py_narg_list.extend(additional_neg_options)
+
     parser.add_argument(
-        py_narg,
+        *_py_narg_list,
         action='store_false',
         dest=name,
         help="Don't " + help_str.lower())
@@ -205,7 +216,7 @@ def get_parser() -> commandline.ArgumentParser:
   build_shell_bool_style_args(
       group, 'enable_rootfs_verification', True,
       'Make all bootloaders to use kernel based root-fs integrity checking.',
-      deprecation_note, 'enable-rootfs-verification')
+      deprecation_note, 'enable-rootfs-verification', ['-r'])
 
   # Advanced options.
   group = parser.add_argument_group('Advanced Options')
