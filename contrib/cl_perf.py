@@ -696,7 +696,7 @@ def launch_subcommand(options: commandline.ArgumentNamespace) -> None:
 
   baseline_cl_name = 'baseline'
   if options.cls_baseline is not None:
-    baseline_cl_name = ' * \n'.join(options.cls_baseline)
+    baseline_cl_name = '\n * '.join(options.cls_baseline)
   logging.notice(
       """
 Launching %s builds of following CLs:
