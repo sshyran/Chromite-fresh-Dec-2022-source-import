@@ -390,7 +390,7 @@ def RunCurl(curl_args, *args, **kwargs):
   # google storage occasionally.
   # Finally, we do not use curl's --retry option since it generally doesn't
   # actually retry anything; code 18 for example, it will not retry on.
-  retriable_exits = frozenset([5, 6, 7, 15, 18, 22, 26, 28, 35, 52, 56])
+  retriable_exits = frozenset([5, 6, 7, 15, 16, 18, 22, 26, 28, 35, 52, 56])
 
   def _CheckExit(exc):
     """Filter out specific error codes when getting exit 22
