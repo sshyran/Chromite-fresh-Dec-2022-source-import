@@ -11,6 +11,7 @@ from pathlib import Path
 import shutil
 from typing import Iterable, List, NamedTuple, Optional, Union
 
+from chromite.lib import chromeos_version
 from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -253,9 +254,11 @@ def Build(board: str,
     return build_result
   logging.info('The following images will be built %s', ' '.join(image_names))
 
+  version_info = chromeos_version.VersionInfo(
+      version_file=Path(constants.SOURCE_ROOT) / constants.VERSION_FILE)
   cmd = GetBuildImageCommand(config, image_names, board)
   extra_env_local = image_lib.GetBuildImageEnvvars(image_names, board,
-                                                   extra_env)
+                                                   version_info, extra_env)
 
   with osutils.TempDir() as tempdir:
     status_file = os.path.join(tempdir, PARALLEL_EMERGE_STATUS_FILE_NAME)

@@ -8,6 +8,7 @@ import errno
 import os
 from pathlib import Path
 
+from chromite.lib import chromeos_version
 from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -27,6 +28,11 @@ class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase):
         os.path.join(self.tempdir, image.PARALLEL_EMERGE_STATUS_FILE_NAME))
     self.PatchObject(osutils.TempDir, '__enter__', return_value=self.tempdir)
     self.PatchObject(portage_util, 'GetBoardUseFlags', return_value='')
+    self.PatchObject(
+        chromeos_version,
+        'VersionInfo',
+        return_value=chromeos_version.VersionInfo(
+            version_string='1.2.3', chrome_branch='4'))
 
   def testBuildBoardHandling(self):
     """Test the argument handling."""
