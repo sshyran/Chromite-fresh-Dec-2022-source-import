@@ -11,6 +11,7 @@ import os
 import stat
 from unittest import mock
 
+from chromite.lib import chromeos_version
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -650,8 +651,21 @@ class GetBuildImageEnvvarTests(cros_test_lib.MockTestCase):
     expected_envvar['ENV'] = extra_env['ENV']
     envar.clear()
     envar = image_lib.GetBuildImageEnvvars(
-        set([constants.FACTORY_IMAGE_BIN]), 'betty', extra_env)
+        set([constants.FACTORY_IMAGE_BIN]), 'betty', env_var_init=extra_env)
     self.assertDictEqual(envar, expected_envvar)
+
+  def testChromeOSVersion(self):
+    """Test ChromeOS version environment variable."""
+    version_info = chromeos_version.VersionInfo(
+        version_string='1.2.3', chrome_branch='4')
+    envar = image_lib.GetBuildImageEnvvars(
+        set([constants.BASE_IMAGE_BIN]), 'betty', version_info=version_info)
+
+    self.assertEqual(envar['CHROME_BRANCH'], '4')
+    self.assertEqual(envar['CHROMEOS_BUILD'], '1')
+    self.assertEqual(envar['CHROMEOS_BRANCH'], '2')
+    self.assertEqual(envar['CHROMEOS_PATCH'], '3')
+    self.assertEqual(envar['CHROMEOS_VERSION_STRING'], '1.2.3')
 
 
 class UtilsTests(cros_test_lib.TempDirTestCase):

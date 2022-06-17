@@ -11,6 +11,7 @@ import os
 import re
 from typing import Dict, List, Optional, Set, Union
 
+from chromite.lib import chromeos_version
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import git
@@ -698,12 +699,14 @@ def GetImagesToBuild(image_types: List[str]) -> Set[str]:
 def GetBuildImageEnvvars(
     image_names: Set[str],
     board: str,
+    version_info: Optional[chromeos_version.VersionInfo] = None,
     env_var_init: Optional[Dict[str, str]] = None) -> Dict[str, str]:
   """Get the environment variables required to build the given images.
 
   Args:
     image_names: The list of images to build.
     board: The board for which the images will be built.
+    version_info: ChromeOS version information that needs to be populated.
     env_var_init: Initial environment variables to use.
 
   Returns:
@@ -727,6 +730,13 @@ def GetBuildImageEnvvars(
   if 'systemd' not in portage_util.GetBoardUseFlags(board):
     env_var_init['INSTALL_MASK'] += '\n' + '\n'.join(
         constants.SYSTEMD_INSTALL_MASK)
+
+  if version_info:
+    env_var_init['CHROME_BRANCH'] = version_info.chrome_branch
+    env_var_init['CHROMEOS_BUILD'] = version_info.build_number
+    env_var_init['CHROMEOS_BRANCH'] = version_info.branch_build_number
+    env_var_init['CHROMEOS_PATCH'] = version_info.patch_number
+    env_var_init['CHROMEOS_VERSION_STRING'] = version_info.VersionString()
 
   return env_var_init
 
