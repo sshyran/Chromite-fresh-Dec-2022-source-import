@@ -12015,7 +12015,7 @@
     "boards": [
       "ghost"
     ],
-    "important": false,
+    "chrome_sdk_build_chrome": false,
     "vm_tests_override": null
   },
   "ghost-release-tryjob": {
@@ -12023,6 +12023,7 @@
     "boards": [
       "ghost"
     ],
+    "chrome_sdk_build_chrome": false,
     "debug": true,
     "display_label": "tryjob",
     "hw_tests": [
@@ -14964,7 +14965,7 @@
     ],
     "important": false,
     "models": [
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"hatch\",\n  \"name\": \"akemi\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"hatch\",\n  \"name\": \"akemi\",\n  \"test_suites\": [\n    \"sanity\",\n    \"bvt-inline\",\n    \"bvt-tast-cq\",\n    \"bvt-installer\",\n    \"bvt-arc\",\n    \"au\",\n    \"bvt-cq\",\n    \"bvt-perbuild\",\n    \"bvt-tast-informational\"\n  ]\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"hatch\",\n  \"name\": \"dragonair\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"hatch\",\n  \"name\": \"dratini\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"hatch\",\n  \"name\": \"hatch\",\n  \"test_suites\": []\n}",
@@ -14997,7 +14998,7 @@
     "hw_tests_override": null,
     "luci_builder": "Try",
     "models": [
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"hatch\",\n  \"name\": \"akemi\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"hatch\",\n  \"name\": \"akemi\",\n  \"test_suites\": [\n    \"sanity\",\n    \"bvt-inline\",\n    \"bvt-tast-cq\",\n    \"bvt-installer\",\n    \"bvt-arc\",\n    \"au\",\n    \"bvt-cq\",\n    \"bvt-perbuild\",\n    \"bvt-tast-informational\"\n  ]\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"hatch\",\n  \"name\": \"dragonair\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"hatch\",\n  \"name\": \"dratini\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"hatch\",\n  \"name\": \"hatch\",\n  \"test_suites\": []\n}",
