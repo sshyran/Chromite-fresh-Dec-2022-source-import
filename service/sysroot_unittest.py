@@ -360,6 +360,21 @@ class BuildPackagesRunConfigTest(cros_test_lib.RunCommandTestCase,
                                  cros_test_lib.LoggingTestCase):
   """Tests for the BuildPackagesRunConfig."""
 
+  def testGetBuildPackagesArgs(self):
+    """Test the build_packages args building for non-empty values."""
+    packages = ['cat/pkg', 'cat2/pkg2']
+    instance = sysroot.BuildPackagesRunConfig(
+        usepkg=True,
+        install_debug_symbols=True,
+        packages=packages,
+        dryrun=True)
+
+    args = instance.GetBuildPackagesArgs()
+
+    # Packages included.
+    for package in packages:
+      self.assertIn(package, args)
+
   def testGetBuildPackagesExtraEnv(self):
     """Test the build_packages extra env."""
     # Test the default config.
@@ -552,10 +567,13 @@ class BuildPackagesTest(cros_test_lib.RunCommandTestCase,
     self.build_target_name_mock = self.PatchObject(
         sysroot_lib.Sysroot, 'build_target_name', return_value=self.board)
 
+    self.build_packages = Path(constants.CROSUTILS_DIR) / 'build_packages.sh'
     self.base_command = [
-        Path(constants.CHROMITE_BIN_DIR) / 'parallel_emerge',
-        f'--sysroot={self.sysroot.path}',
-        f'--root={self.sysroot.path}',
+        self.build_packages,
+        '--board',
+        self.board,
+        '--board_root',
+        self.sysroot.path,
     ]
 
     # Prevent the test from switching the cpu governor.
@@ -573,9 +591,6 @@ class BuildPackagesTest(cros_test_lib.RunCommandTestCase,
   def testSuccess(self):
     """Test successful run."""
     config = sysroot.BuildPackagesRunConfig()
-    self.PatchObject(
-        config, 'GetForceLocalBuildPackages', return_value=['test/package1'])
-    sdk_pkgs = ' '.join(sysroot._CRITICAL_SDK_PACKAGES)  # pylint: disable=protected-access
 
     with cros_test_lib.LoggingCapturer() as logs:
       sysroot.BuildPackages(self.target, self.sysroot, config)
@@ -584,19 +599,9 @@ class BuildPackagesTest(cros_test_lib.RunCommandTestCase,
       # so just make sure we're calling the right command and pass the args not
       # handled by the run config.
       self.assertCommandContains(self.base_command)
-      self.assertCommandContains(
-          ['--reinstall-atoms=test/package1', '--usepkg-exclude=test/package1'])
-      self.assertCommandContains(
-          [f'--useoldpkg-atoms={sdk_pkgs}', f'--rebuild-exclude={sdk_pkgs}'])
-
-      # Verify the extra environment variables are passed correctly.
-      self.assertCommandContains([f'PKGDIR={self.sysroot.path}/packages'])
-
-      # Check and the logs contain the expected output.
       self.AssertLogsContain(logs, 'PORTAGE_BINHOST')
       self.AssertLogsContain(logs, 'Rebuilding Portage cache.')
       self.AssertLogsContain(logs, 'Cleaning stale binpkgs.')
-      self.AssertLogsContain(logs, 'Merging board packages now.')
 
   def testEcleanBinpkgs(self):
     """Test that eclean is called with the expected packages."""
@@ -637,9 +642,11 @@ class BuildPackagesTest(cros_test_lib.RunCommandTestCase,
     failed = ['cat/pkg', 'foo/bar']
     cpvs = [package_info.SplitCPV(p, strict=False) for p in failed]
     self.PatchObject(portage_util, 'ParseDieHookStatusFile', return_value=cpvs)
-    config = sysroot.BuildPackagesRunConfig()
 
-    result = cros_build_lib.CommandResult(cmd=self.base_command, returncode=1)
+    config = sysroot.BuildPackagesRunConfig()
+    command = self.base_command + config.GetBuildPackagesArgs()
+
+    result = cros_build_lib.CommandResult(cmd=command, returncode=1)
     error = cros_build_lib.RunCommandError('Error', result)
     self.PatchObject(
         cros_build_lib,
