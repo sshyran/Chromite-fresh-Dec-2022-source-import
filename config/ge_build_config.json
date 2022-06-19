@@ -170,18 +170,6 @@
       ]
     },
     {
-      "name": "ghost",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "brya",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "goroh",
       "configs": [
         {
@@ -1658,6 +1646,14 @@
             "bvt-tast-informational"
           ],
           "cq_test_enabled": true,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7230,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-kernelnext",
+          "name": "mithrax",
+          "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7230,
           "is_active": true
@@ -4342,6 +4338,23 @@
           "cq_test_enabled": true,
           "release_builder_test_pool": "bvt",
           "board_id": 353,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "ghost",
+      "reference_board_name": "ghost",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": false,
+      "models": [
+        {
+          "board_name": "ghost",
+          "name": "ghost4adl",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7226,
           "is_active": true
         }
       ]
