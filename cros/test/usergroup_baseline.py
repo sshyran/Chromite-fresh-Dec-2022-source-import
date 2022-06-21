@@ -173,6 +173,7 @@ GROUP_BASELINE = dict((e.group, e) for e in (
                                                        'power',
                                                        'typecd_ec',
                                                        'rgbkbd'}),
+    GroupEntry(group='rgbkbd', gid=20186, users={'rgbkbd', 'power'}),
     GroupEntry(group='virtaccess', gid=418, users={'crosvm', 'wilco_dtc'}),
     GroupEntry(group='crash-access', gid=419, users={'crash', 'secanomaly'}),
     GroupEntry(group='crash-user-access', gid=420,
