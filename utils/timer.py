@@ -97,10 +97,11 @@ def timed(name: Optional[str] = None,
 
 
 @contextlib.contextmanager
-def timer(name: str = None, output: Callable[[str], Any] = logging.info):
+def timer(name: Optional[str] = None,
+          output: Callable[[str], Any] = logging.info):
   """Timer context manager to automatically output results."""
-  try:
-    with Timer(name) as t:
+  with Timer(name) as t:
+    try:
       yield t
-  finally:
-    output(str(t))
+    finally:
+      output(str(t))
