@@ -63,41 +63,20 @@ LOOP_PARTS_LIST = LOOP_PARTS_DICT.values()
 
 class LoopbackPartitionsMock(image_lib.LoopbackPartitions):
   """Mocked loopback partition class to use in unit tests."""
-  # pylint: disable=super-init-not-called
-  def __init__(self, path, destination=None, part_ids=None, mount_opts=None,
-               dev=LOOP_DEV, part_count=0):
-    """Initialize.
 
-    Args:
-      (shared with LoopbackPartitions)
-      path: Path to the image file.
-      destination: destination directory.
-      part_ids: Mount these partitions at context manager entry.
-      mount_opts: Use these mount_opts for mounting |part_ids|.
-      (unique to LoopbackPartitionsMock)
-      dev: Path for the base loopback device.
-      part_count: How many partition device files to make up.  Default: normal
-          partition table.
-    """
-    self.path = path
-    self.dev = dev
-    self.part_ids = part_ids
-    self.mount_opts = mount_opts
-    if destination:
-      self.destination = destination
-    else:
-      self.destination = osutils.TempDir()
-    if part_count:
-      self._gpt_table = [
-          image_lib.PartitionInfo(num, 0, 0, 0, '', 'my-%d' % num, '')
-          for num in range(1, part_count + 1)]
-    else:
-      self._gpt_table = LOOP_PARTITION_INFO
-    self.parts = {p.number: '%sp%s' % (dev, p.number)
-                  for p in self._gpt_table}
+  def _InitGpt(self):
+    """Initialize the GPT info."""
+    self._gpt_table = LOOP_PARTITION_INFO
+
+  def _InitLoopback(self):
+    """Initialize the loopback device."""
     self.enable_rw_called = set()
     self.disable_rw_called = set()
-  # pylint: enable=super-init-not-called
+    self.dev = LOOP_DEV
+    if not self.destination:
+      self.destination = osutils.TempDir()
+    self.parts = {p.number: '%sp%s' % (self.dev, p.number)
+                  for p in self._gpt_table}
 
   def EnableRwMount(self, part_id, offset=0):
     """Stub out enable rw mount."""

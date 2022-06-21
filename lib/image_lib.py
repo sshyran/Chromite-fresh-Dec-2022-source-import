@@ -66,7 +66,7 @@ class LoopbackPartitions(object):
     self.mount_opts = mount_opts
     self.parts = {}
     self._destination_created = False
-    self._gpt_table = GetImageDiskPartitionInfo(path)
+    self._gpt_table = {}
     # Set of _gpt_table elements currently mounted.
     self._mounted = set()
     # Set of dirs that need to be removed in close().
@@ -74,6 +74,21 @@ class LoopbackPartitions(object):
     # Set of symlinks created.
     self._symlinks = set()
 
+    self._InitGpt()
+    self._InitLoopback()
+
+  def _InitGpt(self):
+    """Initialize the GPT info.
+
+    This is a separate function for test mocking purposes.
+    """
+    self._gpt_table = GetImageDiskPartitionInfo(self.path)
+
+  def _InitLoopback(self):
+    """Initialize the loopback device.
+
+    This is a separate function for test mocking purposes.
+    """
     try:
       cmd = ['losetup', '--show', '-f', self.path]
       ret = cros_build_lib.sudo_run(
@@ -91,7 +106,6 @@ class LoopbackPartitions(object):
         cmd = ['partx', '-u', self.dev]
         cros_build_lib.sudo_run(cmd)
 
-      self.parts = {}
       part_devs = glob.glob(self.dev + 'p*')
       if not part_devs:
         logging.warning("Didn't find partition devices nodes for %s.",
