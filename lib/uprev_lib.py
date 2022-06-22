@@ -188,7 +188,7 @@ def find_chrome_ebuilds(
     else:
       stable_ebuilds.append(ebuild)
 
-  # Apply some sanity checks.
+  # Apply some basic checks.
   if not unstable_ebuilds:
     raise NoUnstableEbuildError('Missing 9999 ebuild for %s' % package_dir)
   if not stable_ebuilds:
@@ -536,8 +536,8 @@ class UprevOverlayManager(object):
     self._clean_stale_packages()
 
     if self.output_dir and os.path.exists(self.output_dir):
-      # Write out dumps of the results. This is largely meant for sanity
-      # checking results.
+      # Write out dumps of the results. This is largely meant for validating
+      # results.
       osutils.WriteFile(os.path.join(self.output_dir, 'revved_packages'),
                         '\n'.join(self._revved_packages))
       osutils.WriteFile(os.path.join(self.output_dir, 'new_package_atoms'),
