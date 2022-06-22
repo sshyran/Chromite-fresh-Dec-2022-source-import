@@ -895,7 +895,7 @@ class GitRepoPatch(PatchQuery):
     sha1 = ParseSHA1(sha1, error_ok=False)
 
     if self.sha1 is not None and sha1 != self.sha1:
-      # Even if we know the sha1, still do a sanity check to ensure we
+      # Even if we know the sha1, still do a check to ensure we
       # actually just fetched it.
       raise PatchException(self,
                            'Patch %s specifies sha1 %s, yet in fetching from '
@@ -1309,9 +1309,8 @@ class GitRepoPatch(PatchQuery):
       raise BrokenChangeID(self, 'Missing Change-Id in %s' % (data,),
                            missing=True)
 
-    # Now, validate it.  This has no real effect on actual gerrit patches,
-    # but for local patches the validation is useful for general sanity
-    # enforcement.
+    # Now, validate it. This has no real effect on actual gerrit patches,
+    # but for local patches the validation is useful.
     change_id_match = change_id_match[-1]
     # Note that since we're parsing it from basically a commit message,
     # the gerrit standard format is required- no internal markings.
