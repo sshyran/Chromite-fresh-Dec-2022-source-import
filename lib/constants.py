@@ -320,6 +320,7 @@ ANDROID_BRANCH_TO_BUILD_TARGETS = {
         'X86_64_USERDEBUG_TARGET': 'bertha_x86_64-userdebug',
     },
     ANDROID_VMUDC_BUILD_BRANCH: {
+        'ARM64_USERDEBUG_TARGET': 'bertha_arm64-userdebug',
         'X86_64_USERDEBUG_TARGET': 'bertha_x86_64-userdebug',
     },
 }

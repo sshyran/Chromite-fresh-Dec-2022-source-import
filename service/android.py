@@ -73,6 +73,8 @@ ARTIFACTS_TO_COPY = {
         # For XkbToKcmConverter, see the comment in pi-arc targets.
         # org.chromium.cts.helpers.apk contains helpers needed for CTS.  It is
         # installed on the board, but not into the VM.
+        'bertha_arm64-userdebug': (r'(\.zip|/XkbToKcmConverter'
+                                   r'|/org.chromium.arc.cts.helpers.apk)$'),
         'bertha_x86_64-userdebug': (r'(\.zip|/XkbToKcmConverter'
                                     r'|/org.chromium.arc.cts.helpers.apk)$'),
     },
