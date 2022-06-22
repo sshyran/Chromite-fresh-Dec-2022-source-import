@@ -216,7 +216,7 @@ class ProgressBarOperation(object):
               break
         # Before we exit, parse the output again to update progress bar.
         self.ParseOutput()
-        # Final sanity check to update the progress bar to 100% if it was used
+        # Final check to update the progress bar to 100% if it was used
         # by ParseOutput
         self.Cleanup()
       except:
