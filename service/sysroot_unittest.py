@@ -64,8 +64,8 @@ class SetupBoardTest(cros_test_lib.MockTestCase):
   def testFullRun(self):
     """Test a regular full run.
 
-    This method is basically just a sanity check that it's trying to create the
-    sysroot and install the toolchain by default.
+    This method just checks that it's trying to create the sysroot and install
+    the toolchain by default.
     """
     target_sysroot = sysroot_lib.Sysroot('/build/board')
     create_mock = self.PatchObject(
