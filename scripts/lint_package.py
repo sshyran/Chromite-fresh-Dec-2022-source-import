@@ -38,8 +38,12 @@ def parse_packages(build_target: build_target_lib.BuildTarget,
     parsed = package_info.parse(package)
     if not parsed.category:
       # If a category is not specified, we can get it from the ebuild path.
-      ebuild_path = portage_util.FindEbuildForBoardPackage(
-          package, build_target.name, build_target.root)
+      if build_target.is_host():
+        ebuild_path = portage_util.FindEbuildForPackage(
+            package, build_target.root)
+      else:
+        ebuild_path = portage_util.FindEbuildForBoardPackage(
+            package, build_target.name, build_target.root)
       ebuild_data = portage_util.EBuild(ebuild_path)
       parsed = package_info.parse(ebuild_data.package)
     package_infos.append(parsed)
@@ -59,6 +63,10 @@ def get_arg_parser() -> commandline.ArgumentParser:
       dest='board',
       default=default_board,
       help='The board to emerge packages for')
+  board_group.add_argument(
+      '--host',
+      action='store_true',
+      help='emerge for host instead of board.')
   board_group.add_argument(
       '--fetch-only',
       action='store_true',
@@ -107,7 +115,11 @@ def main(argv: List[str]) -> None:
   cros_build_lib.AssertInsideChroot()
   opts = parse_args(argv)
 
-  build_target = build_target_lib.BuildTarget(opts.board)
+  if opts.host:
+    # BuildTarget interprets None as host target
+    build_target = build_target_lib.BuildTarget(None)
+  else:
+    build_target = build_target_lib.BuildTarget(opts.board)
   packages = parse_packages(build_target, opts.packages)
   package_atoms = [x.atom for x in packages]
 
