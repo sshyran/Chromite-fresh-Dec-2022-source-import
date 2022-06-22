@@ -204,17 +204,7 @@ class LoopbackPartitions(object):
   def _IsExt2(self, part_id, offset=0):
     """Is the given partition an ext2 file system?"""
     dev = self.GetPartitionDevName(part_id)
-    magic_ofs = offset + 0x438
-    # We shouldn't need the sync here, but we sometimes see flakes with some
-    # kernels where it looks like the metadata written isn't seen when we try
-    # to mount later on.  Adding a sync for 1 byte shouldn't be too bad.
-    ret = cros_build_lib.sudo_run(
-        ['dd', 'if=%s' % dev, 'skip=%d' % magic_ofs,
-         'conv=notrunc,fsync', 'count=2', 'bs=1'],
-        debug_level=logging.DEBUG, capture_output=True, check=False)
-    if ret.returncode:
-      return False
-    return ret.output == b'\x53\xef'
+    return IsExt2Image(dev, offset=offset)
 
   def EnableRwMount(self, part_id, offset=0):
     """Enable RW mounts of the specified partition."""
@@ -739,3 +729,24 @@ def GetBuildImageEnvvars(
         constants.SYSTEMD_INSTALL_MASK)
 
   return env_var_init
+
+
+def IsSquashfsImage(path):
+  """Returns true if |path| is a squashfs filesystem."""
+  MAGIC = b'\x68\x73\x71\x73'
+
+  logging.debug('Checking if image is squashfs: %s', path)
+  # Read the magic number in the file's superblock.
+  return osutils.ReadFile(path, mode='rb', size=len(MAGIC), sudo=True) == MAGIC
+
+
+def IsExt2Image(path, offset=0):
+  """Returns true if |path| is an ext2/ext3/ext4 filesystem."""
+  MAGIC = b'\x53\xef'
+  SB_OFFSET = 0x438
+
+  logging.debug('Checking if image is ext2/3/4: %s', path)
+  # Read the magic number in the file's superblock.
+  return osutils.ReadFile(
+      path, mode='rb', seek=offset + SB_OFFSET, size=len(MAGIC),
+      sudo=True) == MAGIC

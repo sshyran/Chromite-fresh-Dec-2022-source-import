@@ -279,18 +279,16 @@ class LoopbackPartitionsTest(cros_test_lib.MockTempDirTestCase):
 
   def testIsExt2OnVarious(self):
     """Test _IsExt2 works with the various partition types."""
-    FS_PARTITIONS = (1, 3, 8)
     # STATE, ROOT-A, and OEM generally have ext2 filesystems.
-    for x in FS_PARTITIONS:
-      self.rc_mock.AddCmdResult(
-          partial_mock.In('if=%sp%d' % (LOOP_DEV, x)),
-          output=b'\x53\xef')
-    # Throw errors on all of the partitions that are < 1000 bytes.
-    for part in LOOP_PARTITION_INFO:
-      if part.size < 1000:
-        self.rc_mock.AddCmdResult(
-            partial_mock.In('if=%sp%d' % (LOOP_DEV, part.number)),
-            returncode=1, error='Seek failed\n')
+    FS_PARTITIONS = (1, 3, 8)
+
+    def ext_mock(path, offset=0):  # pylint: disable=unused-argument
+      for num in FS_PARTITIONS:
+        if path.endswith(f'p{num}'):
+          return True
+      return False
+    self.PatchObject(image_lib, 'IsExt2Image', side_effect=ext_mock)
+
     lb = image_lib.LoopbackPartitions(FAKE_PATH, destination=self.tempdir)
     # We expect that only the partitions in FS_PARTITIONS are ext2.
     self.assertEqual(
@@ -654,3 +652,37 @@ class GetBuildImageEnvvarTests(cros_test_lib.MockTestCase):
     envar = image_lib.GetBuildImageEnvvars(
         set([constants.FACTORY_IMAGE_BIN]), 'betty', extra_env)
     self.assertDictEqual(envar, expected_envvar)
+
+
+class UtilsTests(cros_test_lib.TempDirTestCase):
+  """Test simple util funcs."""
+
+  def testIsSquashfsImageFails(self):
+    """Test SquashFS identification on non-images."""
+    image = self.tempdir / 'img.squashfs'
+    osutils.AllocateFile(image, 1024 * 1024)
+    self.assertFalse(image_lib.IsSquashfsImage(image))
+
+  def testIsSquashfsImage(self):
+    """Tests we correctly identify a SquashFS image."""
+    image = self.tempdir / 'img.squashfs'
+    root = self.tempdir / 'root'
+    root.mkdir()
+    cros_build_lib.run(['mksquashfs', root.name, image.name], cwd=self.tempdir)
+    self.assertTrue(image_lib.IsSquashfsImage(image))
+
+  def testIsExt4Image(self):
+    """Tests we correctly identify an Ext4 image."""
+    for ver in (2, 3, 4):
+      image = self.tempdir / f'rootfs.ext{ver}'
+      # 2 MiB is big enough for ext3/ext4 specific features.
+      osutils.AllocateFile(image, 2 * 1024 * 1024)
+
+      # Tests failure to identify.
+      self.assertFalse(image_lib.IsExt2Image(image))
+
+      # Make a real ext2/ext3/ext4 images.
+      cros_build_lib.run(
+          [f'mkfs.ext{ver}', image],
+          extra_env={'PATH': '/sbin:/usr/sbin:%s' % os.environ['PATH']})
+      self.assertTrue(image_lib.IsExt2Image(image))

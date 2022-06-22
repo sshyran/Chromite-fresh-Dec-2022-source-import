@@ -47,36 +47,6 @@ class PartitionLibTest(cros_test_lib.MockTempDirTestCase):
         extra_env={'PATH': '/sbin:/usr/sbin:%s' % os.environ['PATH']})
     self.assertEqual(partition_lib.Ext2FileSystemSize(root), 1024 * 1024)
 
-  def testIsSquashfsImageFails(self):
-    """Test SquashFS identification on non-images."""
-    image = self.tempdir / 'img.squashfs'
-    osutils.AllocateFile(image, 1024 * 1024)
-    self.assertFalse(partition_lib.IsSquashfsImage(image))
-
-  def testIsSquashfsImage(self):
-    """Tests we correctly identify a SquashFS image."""
-    image = self.tempdir / 'img.squashfs'
-    root = self.tempdir / 'root'
-    root.mkdir()
-    cros_build_lib.run(['mksquashfs', root.name, image.name], cwd=self.tempdir)
-    self.assertTrue(partition_lib.IsSquashfsImage(image))
-
-  def testIsExt4Image(self):
-    """Tests we correctly identify an Ext4 image."""
-    for ver in (2, 3, 4):
-      image = self.tempdir / f'rootfs.ext{ver}'
-      # 2 MiB is big enough for ext3/ext4 specific features.
-      osutils.AllocateFile(image, 2 * 1024 * 1024)
-
-      # Tests failure to identify.
-      self.assertFalse(partition_lib.IsExt4Image(image))
-
-      # Make a real ext2/ext3/ext4 images.
-      cros_build_lib.run(
-          [f'mkfs.ext{ver}', image],
-          extra_env={'PATH': '/sbin:/usr/sbin:%s' % os.environ['PATH']})
-      self.assertTrue(partition_lib.IsExt4Image(image))
-
 
 class PartitionLibMockTest(cros_test_lib.RunCommandTempDirTestCase):
   """Test partition_lib functions with run() mocked."""
@@ -118,8 +88,8 @@ class PartitionLibMockTest(cros_test_lib.RunCommandTempDirTestCase):
     """Tests we correctly identify different image types."""
     image = '/foo/image'
     is_gpt = self.PatchObject(partition_lib, 'IsGptImage')
-    is_squashfs = self.PatchObject(partition_lib, 'IsSquashfsImage')
-    is_ext4 = self.PatchObject(partition_lib, 'IsExt4Image')
+    is_squashfs = self.PatchObject(image_lib, 'IsSquashfsImage')
+    is_ext2 = self.PatchObject(image_lib, 'IsExt2Image')
 
     is_gpt.return_value = True
     self.assertEqual(partition_lib.LookupImageType(image),
@@ -131,11 +101,11 @@ class PartitionLibMockTest(cros_test_lib.RunCommandTempDirTestCase):
                      partition_lib.DLC_IMAGE)
 
     is_squashfs.return_value = False
-    is_ext4.return_value = True
+    is_ext2.return_value = True
     self.assertEqual(partition_lib.LookupImageType(image),
                      partition_lib.DLC_IMAGE)
 
-    is_ext4.return_value = False
+    is_ext2.return_value = False
     self.assertIsNone(partition_lib.LookupImageType(image))
 
   def testHasMiniOSPartitions(self):

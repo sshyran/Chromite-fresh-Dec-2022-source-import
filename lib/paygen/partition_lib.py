@@ -109,7 +109,7 @@ def ExtractRoot(image, root_out, truncate=True):
   # We only update the filesystem part of the partition, which is stored in the
   # gpt script. So we need to truncated it to the file system size if asked for.
   # Currently we only support truncating ext filesystems.
-  if not IsExt4Image(root_out):
+  if not image_lib.IsExt2Image(root_out):
     logging.warning('Not truncating rootfs due to unsupported filesystem.')
     return
 
@@ -131,26 +131,6 @@ def ExtractMiniOS(image, minios_out):
   ExtractPartition(image, constants.PART_MINIOS_A, minios_out)
 
 
-def IsSquashfsImage(image):
-  """Returns true if the image is detected to be Squashfs."""
-  MAGIC = b'\x68\x73\x71\x73'
-
-  logging.debug('Checking if image is squashfs: %s', image)
-  # Read the magic number in the file's superblock.
-  return osutils.ReadFile(image, mode='rb', size=len(MAGIC), sudo=True) == MAGIC
-
-
-def IsExt4Image(image):
-  """Returns true if the image is detected to be ext2/ext3/ext4."""
-  MAGIC = b'\x53\xef'
-  SB_OFFSET = 0x438
-
-  logging.debug('Checking if image is ext2/3/4: %s', image)
-  # Read the magic number in the file's superblock.
-  return osutils.ReadFile(
-      image, mode='rb', seek=SB_OFFSET, size=len(MAGIC), sudo=True) == MAGIC
-
-
 def IsGptImage(image):
   """Returns true if the image is a GPT image."""
   try:
@@ -170,7 +150,7 @@ def LookupImageType(image):
   """
   if IsGptImage(image):
     return CROS_IMAGE
-  elif IsExt4Image(image) or IsSquashfsImage(image):
+  elif image_lib.IsExt2Image(image) or image_lib.IsSquashfsImage(image):
     return DLC_IMAGE
 
   return None
