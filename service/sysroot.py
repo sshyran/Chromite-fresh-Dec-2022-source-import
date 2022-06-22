@@ -238,12 +238,6 @@ class BuildPackagesRunConfig(object):
     """Get the arguments for build_packages script."""
     args = []
 
-    if self.use_goma:
-      args.append('--run_goma')
-
-    if self.use_remoteexec:
-      args.append('--run_remoteexec')
-
     if self.packages:
       args.extend(self.packages)
 
@@ -724,13 +718,14 @@ def BuildPackages(target: 'build_target_lib.BuildTarget',
     if run_configs.eclean:
       _CleanStaleBinpkgs(sysroot.path)
 
-    try:
-      cros_build_lib.run(cmd, extra_env=extra_env)
-      logging.info('Builds complete.')
-    except cros_build_lib.RunCommandError as e:
-      failed_pkgs = portage_util.ParseDieHookStatusFile(tempdir)
-      raise sysroot_lib.PackageInstallError(
-          str(e), e.result, exception=e, packages=failed_pkgs)
+    with RemoteExecution(run_configs.use_goma, run_configs.use_remoteexec):
+      try:
+        cros_build_lib.run(cmd, extra_env=extra_env)
+        logging.info('Builds complete.')
+      except cros_build_lib.RunCommandError as e:
+        failed_pkgs = portage_util.ParseDieHookStatusFile(tempdir)
+        raise sysroot_lib.PackageInstallError(
+            str(e), e.result, exception=e, packages=failed_pkgs)
 
     if run_configs.install_debug_symbols:
       logging.info('Fetching the debug symbols.')
@@ -1223,7 +1218,9 @@ def RemoteExecution(use_goma: bool, use_remoteexec: bool) -> Iterator[None]:
     Iterator.
   """
   goma_dir = Path(os.environ.get('GOMA_DIR', Path.home() / 'goma'))
+  goma_tmp_dir = os.environ.get('GOMA_TMP_DIR')
   goma_service_json = os.environ.get('GOMA_SERVICE_ACCOUNT_JSON_FILE')
+  glog_log_dir = os.environ.get('GLOG_log_dir')
   reclient_dir = os.environ.get('RECLIENT_DIR')
   reproxy_cfg_file = os.environ.get('REPROXY_CFG')
   remoteexec_instance = None
@@ -1237,7 +1234,11 @@ def RemoteExecution(use_goma: bool, use_remoteexec: bool) -> Iterator[None]:
     elif use_goma:
       logging.info('Starting goma compiler_proxy.')
       goma_instance = goma_lib.Goma(
-          goma_dir, goma_service_json, stage_name='BuildPackages')
+          goma_dir,
+          goma_service_json,
+          goma_tmp_dir,
+          stage_name='BuildPackages',
+          log_dir=glog_log_dir)
   except ValueError:
     logging.warning('Remote execution initialization error.')
 

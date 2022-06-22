@@ -1031,12 +1031,18 @@ class RemoteExecutionTest(cros_test_lib.MockLoggingTestCase):
     """Test the case where GOMA env variable is defined."""
     os.environ.update({
         'GOMA_DIR': 'goma/path',
+        'GOMA_TMP_DIR': 'goma/tmp/dir',
         'GOMA_SERVICE_ACCOUNT_JSON_FILE': 'goma_account.json',
+        'GLOG_log_dir': 'glog/log/dir'
     })
 
     with sysroot.RemoteExecution(use_goma=True, use_remoteexec=False):
       self.goma_mock.assert_called_once_with(
-          Path('goma/path'), 'goma_account.json', stage_name='BuildPackages')
+          Path('goma/path'),
+          'goma_account.json',
+          'goma/tmp/dir',
+          stage_name='BuildPackages',
+          log_dir='glog/log/dir')
     self.goma_instance.Restart.assert_called_once()
     self.goma_instance.Stop.assert_called_once()
     self.remoteexec_mock.assert_not_called()
@@ -1047,7 +1053,11 @@ class RemoteExecutionTest(cros_test_lib.MockLoggingTestCase):
 
     with sysroot.RemoteExecution(use_goma=True, use_remoteexec=False):
       self.goma_mock.assert_called_once_with(
-          Path('home/goma'), None, stage_name='BuildPackages')
+          Path('home/goma'),
+          None,
+          None,
+          stage_name='BuildPackages',
+          log_dir=None)
     self.goma_instance.Restart.assert_called_once()
     self.goma_instance.Stop.assert_called_once()
     self.remoteexec_mock.assert_not_called()
