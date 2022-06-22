@@ -27,7 +27,7 @@ class MetricsTest(cros_test_lib.TestCase):
       @metrics_lib.collect_metrics
       def measure_things():
         # Now, in here, we should have set up this env-var. This is a bit of
-        # invasive white-box testing for sanity purposes.
+        # invasive white-box testing.
         self.assertTrue(os.environ.get(metrics_lib.UTILS_METRICS_LOG_ENVVAR))
 
         # Now, with our pretend timer, let's record some events.
