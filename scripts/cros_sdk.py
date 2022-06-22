@@ -107,7 +107,7 @@ def GetArchStageTarballs(version):
   extension = {'bz2': 'tbz2', 'xz': 'tar.xz'}
   return [
       GetSdkURL(
-          suburl='cros-sdk-%s.%s' % (version, extension[compressor]))
+          suburl='%s.%s' % (version, extension[compressor]))
       for compressor in COMPRESSION_PREFERENCE
   ]
 
