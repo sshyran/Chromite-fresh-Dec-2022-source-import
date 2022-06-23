@@ -134,7 +134,8 @@ def ReadAll(fd, wait=0.03):
     if e.errno != errno.EAGAIN:
       raise
   data = b''.join(data)
-  logging.debug(data)
+  if data:
+    logging.debug(data.decode('ascii', errors='replace'))
   return data
 
 
@@ -203,6 +204,9 @@ def main(argv):
              'and that you have GBB_FLAG_FORCE_DEV_SWITCH_ON (0x8) set.)')
       with timeout_util.Timeout(5, msg):
         while not re.search(_PTRN_GDB, data):
+          # Some delay to avoid spamming the console too hard while not being
+          # long enough to cause a user-visible slowdown.
+          time.sleep(0.5)
           # Send a CTRL+G to tell depthcharge to trap into GDB.
           logging.debug('[Ctrl+G]')
           os.write(fd, b'\x07')
