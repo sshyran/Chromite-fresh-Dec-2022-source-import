@@ -295,6 +295,7 @@
     senor-release
     sentry-release
     shadowkeep-release
+    shotzo-release
     skolas-release
     skyrim-chausie-release
     skyrim-kernelnext-release
@@ -1248,6 +1249,7 @@
     senor-release-tryjob
     sentry-release-tryjob
     shadowkeep-release-tryjob
+    shotzo-release-tryjob
     skolas-release-tryjob
     skyrim-chausie-release-tryjob
     skyrim-kernelnext-release-tryjob
@@ -1482,6 +1484,11 @@
   shadowkeep-llvm-toolchain-tryjob
   shadowkeep-payloads-tryjob
   shadowkeep-release-tryjob
+  shotzo-full-tryjob
+  shotzo-llvm-next-toolchain-tryjob
+  shotzo-llvm-toolchain-tryjob
+  shotzo-payloads-tryjob
+  shotzo-release-tryjob
   skolas-full-tryjob
   skolas-llvm-next-toolchain-tryjob
   skolas-llvm-toolchain-tryjob
