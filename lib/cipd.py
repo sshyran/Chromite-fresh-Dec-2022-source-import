@@ -205,7 +205,7 @@ def InstallPackage(cipd_path,
     f.write(('%s %s' % (package, version)).encode('utf-8'))
     f.flush()
 
-    cros_build_lib.run(
+    cros_build_lib.dbg_run(
         [cipd_path, 'ensure', '-root', destination, '-list', f.name] +
         service_account_flag,
         capture_output=True)
