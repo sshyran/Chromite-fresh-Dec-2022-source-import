@@ -934,12 +934,11 @@ class ProgressWatcher(threading.Thread):
     dev_size = int(output)
 
     # Using lsof to find out which process is writing to the target rootfs.
-    cmd = f'lsof 2>/dev/null | grep {self._target_root}'
+    cmd = ['lsof', '-t', self._target_root]
     while not self._ShouldExit():
       try:
-        output = self._device.run(cmd, capture_output=True,
-                                  shell=True).stdout.strip()
-        if output:
+        pid = self._device.run(cmd, capture_output=True).stdout.strip()
+        if pid:
           break
       except cros_build_lib.RunCommandError:
         continue
@@ -949,7 +948,6 @@ class ProgressWatcher(threading.Thread):
     # Now that we know which process is writing to it, we can look the fdinfo of
     # stdout of that process to get its offset. We're assuming there will be no
     # seek, which is correct.
-    pid = output.split()[1]
     cmd = ['cat', f'/proc/{pid}/fdinfo/1']
     while not self._ShouldExit():
       try:

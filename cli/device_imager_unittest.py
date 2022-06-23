@@ -593,8 +593,8 @@ class ProgressWatcherTest(cros_test_lib.MockTestCase):
       self.rsh_mock.AddCmdResult(
           [self.path_env, 'blockdev', '--getsize64', target_root], stdout='100')
       self.rsh_mock.AddCmdResult(
-          self.path_env + f' lsof 2>/dev/null | grep {target_root}',
-          stdout='xz 999')
+          [self.path_env, 'lsof', '-t', target_root],
+          stdout='999')
       self.rsh_mock.AddCmdResult([self.path_env, 'cat', '/proc/999/fdinfo/1'],
                                  stdout='pos:   10\nflags:  foo')
       pw = device_imager.ProgressWatcher(device, target_root)
