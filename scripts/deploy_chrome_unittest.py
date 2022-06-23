@@ -302,17 +302,17 @@ class TestUiJobStarted(DeployTest):
 
   def testUiJobStartedFalse(self):
     """Correct results with a stopped job."""
-    self.MockStatusUiCmd(output='ui stop/waiting')
+    self.MockStatusUiCmd(stdout='ui stop/waiting')
     self.assertFalse(self.deploy._CheckUiJobStarted())
 
   def testNoUiJob(self):
     """Correct results when the job doesn't exist."""
-    self.MockStatusUiCmd(error='start: Unknown job: ui', returncode=1)
+    self.MockStatusUiCmd(stderr='start: Unknown job: ui', returncode=1)
     self.assertFalse(self.deploy._CheckUiJobStarted())
 
   def testCheckRootfsWriteableTrue(self):
     """Correct results with a running job."""
-    self.MockStatusUiCmd(output='ui start/running, process 297')
+    self.MockStatusUiCmd(stdout='ui start/running, process 297')
     self.assertTrue(self.deploy._CheckUiJobStarted())
 
 

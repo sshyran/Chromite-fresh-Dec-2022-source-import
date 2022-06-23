@@ -59,13 +59,13 @@ def FindExpansionOffset(unpack_result):
   # Look for the number of relocations as a confidence check that we got the
   # expected output. Note that we don't otherwise care about this value.
   relocations_match = re.search(r'INFO: Relocations +: +(\d+) entries',
-                                unpack_result.output)
+                                unpack_result.stdout)
   if not relocations_match:
-    raise OffsetDiscoveryError('No Relocations in: %s' % unpack_result.output)
+    raise OffsetDiscoveryError('No Relocations in: %s' % unpack_result.stdout)
 
   # An "Expansion" line is only written if the value is nonzero.
   offset_match = re.search(r'INFO: Expansion +: +(\d+) bytes',
-                           unpack_result.output)
+                           unpack_result.stdout)
   if not offset_match:
     return 0
 

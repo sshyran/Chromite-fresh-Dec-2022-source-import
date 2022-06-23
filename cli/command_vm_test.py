@@ -136,7 +136,7 @@ class CommandVMTest(object):
     read_cmd = cmd + ['--', 'cat %s' % path]
     result = cros_build_lib.run(read_cmd, capture_output=True, encoding='utf-8',
                                 check=False)
-    if result.returncode or result.output.rstrip() != content:
+    if result.returncode or result.stdout.rstrip() != content:
       logging.error('Failed to read the file on the VM device.')
       raise CommandError(result.error)
 

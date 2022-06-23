@@ -125,7 +125,7 @@ def FetchRemoteTarballs(storage_dir, urls):
                                 debug_level=logging.NOTICE,
                                 capture_output=True)
     successful = False
-    for header in result.output.splitlines():
+    for header in result.stdout.splitlines():
       # We must walk the output to find the 200 code for use cases where
       # a proxy is involved and may have pushed down the actual header.
       if status_re.match(header):
@@ -407,7 +407,7 @@ def ListChrootSnapshots(chroot_vg, chroot_lv):
   # valid snapshots.
   snapshots = []
   snapshot_attrs = re.compile(r'^V.....t.{2,}')  # Matches a thin volume.
-  for line in result.output.splitlines():
+  for line in result.stdout.splitlines():
     lv_name, pool_lv, lv_attr = line.lstrip().split('\t')
     if (lv_name == chroot_lv or lv_name == cros_sdk_lib.CHROOT_THINPOOL_NAME or
         pool_lv != cros_sdk_lib.CHROOT_THINPOOL_NAME or

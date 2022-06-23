@@ -180,7 +180,7 @@ class SDKFetcherMock(partial_mock.PartialMock):
     self.gs_mock.SetDefaultCmdResult()
     self.gs_mock.AddCmdResult(
         partial_mock.ListRegex('cat .*/%s' % constants.METADATA_JSON),
-        output=self.FAKE_METADATA)
+        stdout=self.FAKE_METADATA)
     return self.backup['_GetMetadata'](inst, *args, **kwargs)
 
   @_DependencyMockCtx
@@ -263,7 +263,7 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
     self.PatchObject(osutils, 'SourceEnvironment',
                      autospec=True, side_effect=self.SourceEnvironmentMock)
     self.rc_mock.AddCmdResult(cros_chrome_sdk.ChromeSDKCommand.GOMACC_PORT_CMD,
-                              output='8088')
+                              stdout='8088')
 
     # Initialized by SetupCommandMock.
     self.cmd_mock = None
@@ -766,7 +766,7 @@ class VersionTest(cros_test_lib.MockTempDirTestCase,
     self.sdk_mock.UnMockAttr('GetFullVersion')
     self.gs_mock.AddCmdResult(
         partial_mock.ListRegex('cat .*/LATEST-%s' % self.VERSION),
-        output=self.FULL_VERSION)
+        stdout=self.FULL_VERSION)
     self.assertEqual(
         self.FULL_VERSION,
         self.sdk.GetFullVersion(self.FULL_VERSION))
@@ -776,7 +776,7 @@ class VersionTest(cros_test_lib.MockTempDirTestCase,
     self.sdk_mock.UnMockAttr('GetFullVersion')
     self.gs_mock.AddCmdResult(
         partial_mock.ListRegex('cat .*/LATEST-%s' % self.VERSION),
-        output=self.FULL_VERSION)
+        stdout=self.FULL_VERSION)
     self.assertEqual(
         self.FULL_VERSION,
         self.sdk.GetFullVersion(self.VERSION))
@@ -795,7 +795,7 @@ class VersionTest(cros_test_lib.MockTempDirTestCase,
         side_effect=_RaiseGSNoSuchKey)
     self.gs_mock.AddCmdResult(
         partial_mock.ListRegex('cat .*/LATEST-%s' % self.RECENT_VERSION_FOUND),
-        output=self.FULL_VERSION_RECENT)
+        stdout=self.FULL_VERSION_RECENT)
 
   def testNoFallbackVersion(self):
     """Test that all versions are checked before raising an exception."""
@@ -836,7 +836,7 @@ class VersionTest(cros_test_lib.MockTempDirTestCase,
     self.sdk_mock.UnMockAttr('GetFullVersion')
     self.gs_mock.AddCmdResult(
         partial_mock.ListRegex('cat .*/LATEST-%s' % self.VERSION),
-        output=self.FULL_VERSION)
+        stdout=self.FULL_VERSION)
     self.assertEqual(
         self.FULL_VERSION,
         self.sdk.GetFullVersion(self.VERSION))
@@ -851,7 +851,7 @@ class VersionTest(cros_test_lib.MockTempDirTestCase,
     self.sdk.board += '2'
     self.gs_mock.AddCmdResult(
         partial_mock.ListRegex('cat .*/LATEST-%s' % self.VERSION),
-        output=self.FULL_VERSION + '2')
+        stdout=self.FULL_VERSION + '2')
     self.assertEqual(
         self.FULL_VERSION + '2',
         self.sdk.GetFullVersion(self.VERSION))
@@ -861,10 +861,10 @@ class VersionTest(cros_test_lib.MockTempDirTestCase,
     self.sdk_mock.UnMockAttr('GetFullVersion')
     self.gs_mock.AddCmdResult(
         partial_mock.ListRegex('cat .*/LATEST-*'),
-        output='', error=self.CAT_ERROR, returncode=1)
+        stdout='', stderr=self.CAT_ERROR, returncode=1)
     self.gs_mock.AddCmdResult(
         partial_mock.ListRegex('ls .*%s' % self.VERSION),
-        output='', error=self.LS_ERROR, returncode=1)
+        stdout='', stderr=self.LS_ERROR, returncode=1)
     self.assertRaises(cros_chrome_sdk.MissingSDK, self.sdk.GetFullVersion,
                       self.VERSION)
 
@@ -873,7 +873,7 @@ class VersionTest(cros_test_lib.MockTempDirTestCase,
     self.sdk_mock.UnMockAttr('GetFullVersion')
     self.gs_mock.AddCmdResult(
         partial_mock.ListRegex('cat .*/LATEST-%s' % self.NON_CANARY_VERSION),
-        output=self.FULL_VERSION_NON_CANARY)
+        stdout=self.FULL_VERSION_NON_CANARY)
     self.assertEqual(
         self.FULL_VERSION_NON_CANARY,
         self.sdk.GetFullVersion(self.NON_CANARY_VERSION))
@@ -883,10 +883,10 @@ class VersionTest(cros_test_lib.MockTempDirTestCase,
     self.sdk_mock.UnMockAttr('GetFullVersion')
     self.gs_mock.AddCmdResult(
         partial_mock.ListRegex('cat .*/LATEST-%s' % self.NON_CANARY_VERSION),
-        output='', error=self.CAT_ERROR, returncode=1)
+        stdout='', stderr=self.CAT_ERROR, returncode=1)
     # Set any other query to return a valid version, but we don't expect that
     # to occur for non canary versions.
-    self.gs_mock.SetDefaultCmdResult(output=self.FULL_VERSION_NON_CANARY)
+    self.gs_mock.SetDefaultCmdResult(stdout=self.FULL_VERSION_NON_CANARY)
     self.assertRaises(cros_chrome_sdk.MissingSDK, self.sdk.GetFullVersion,
                       self.NON_CANARY_VERSION)
 

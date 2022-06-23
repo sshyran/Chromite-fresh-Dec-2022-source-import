@@ -148,7 +148,7 @@ def GenerateBreakpadSymbol(elf_file, debug_file=None, breakpad_dir=None,
         else:
           num_errors.value += 1
           logging.error('dumping symbols for %s failed:\n%s', elf_file,
-                        result.error.decode('utf-8'))
+                        result.stderr.decode('utf-8'))
         os.unlink(temp.name)
         return num_errors.value
 

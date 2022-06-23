@@ -340,7 +340,7 @@ class FileSystemMetaDataTest(image_test_lib.ImageTestCase):
     # So we need to ignore the first line.
     ret = cros_build_lib.sudo_run(cmd, capture_output=True,
                                   extra_env={'LC_ALL': 'C'})
-    fs_stat = dict(line.split(':', 1) for line in ret.output.splitlines()
+    fs_stat = dict(line.split(':', 1) for line in ret.stdout.splitlines()
                    if ':' in line)
     free_inodes = int(fs_stat['Free inodes'])
     free_blocks = int(fs_stat['Free blocks'])
@@ -897,7 +897,7 @@ class IntelWifiTest(image_test_lib.ImageTestCase):
       logging.warning('stderr: %s', e.stderr)
       return []
 
-    return modinfo.output.splitlines()
+    return modinfo.stdout.splitlines()
 
   def _GetLinuxFirmwareIwlwifiFlags(self):
     """Extract 'iwlwifi-*' flags from LINUX_FIRMWARE."""

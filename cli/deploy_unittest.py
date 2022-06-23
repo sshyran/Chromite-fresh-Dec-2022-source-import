@@ -71,7 +71,7 @@ class ChromiumOSDeviceHandlerFake(object):
       self.remote_sh_output = None
 
     def RemoteSh(self, *_args, **_kwargs):
-      return cros_build_lib.CommandResult(output=self.remote_sh_output)
+      return cros_build_lib.CommandResult(stdout=self.remote_sh_output)
 
   def __init__(self, *_args, **_kwargs):
     self._agent = self.RemoteAccessFake()

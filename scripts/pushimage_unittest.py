@@ -341,7 +341,7 @@ class PushImageTests(gs_unittest.AbstractGSContextTest):
   def testGsError(self):
     """Verify random GS errors don't make us blow up entirely"""
     self.gs_mock.AddCmdResult(partial_mock.In('stat'), returncode=1,
-                              output='gobblety gook\n')
+                              stdout='gobblety gook\n')
     with cros_test_lib.LoggingCapturer('chromite'):
       self.assertRaises(pushimage.PushError, pushimage.PushImage, '/src',
                         'test.board', 'R34-5126.0.0')

@@ -670,7 +670,7 @@ def SelectActiveToolchains(targets, root='/'):
       result = cros_build_lib.run(
           cmd, print_cmd=False, stdout=True, encoding='utf-8',
           extra_env=extra_env)
-      current = result.output.splitlines()[0]
+      current = result.stdout.splitlines()[0]
 
       # Do not reconfig when the current is live or nothing needs to be done.
       extra_env = {'ROOT': root} if root != '/' else None

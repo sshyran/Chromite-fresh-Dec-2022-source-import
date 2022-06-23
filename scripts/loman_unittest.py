@@ -135,15 +135,15 @@ class IncludeXmlTest(cros_test_lib.MockOutputTestCase, ManifestTest):
 
     self.git_mock = self.StartPatcher(RunGitMock())
     self.git_mock.AddCmdResult(
-        ['symbolic-ref', '-q', 'HEAD'], output='default')
+        ['symbolic-ref', '-q', 'HEAD'], stdout='default')
     self.git_mock.AddCmdResult(
         ['config', '--get-regexp', 'branch\\.default\\.(remote|merge)'],
-        output='branch.default.merge firmware-branch')
+        stdout='branch.default.merge firmware-branch')
 
     self.git_mock.AddCmdResult(
         ['config',
          '-f', os.path.join(self.tempdir, '.repo', 'manifests.git', 'config'),
-         '--get', 'manifest.groups'], output='group1,group2')
+         '--get', 'manifest.groups'], stdout='group1,group2')
 
   def testAddExistingProject(self):
     """Add an existing project, check no local_manifest.xml are created."""

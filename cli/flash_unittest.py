@@ -165,7 +165,7 @@ class UsbImagerOperationTest(cros_test_lib.RunCommandTestCase):
     op = flash.UsbImagerOperation('foo')
     self.PatchObject(osutils, 'IsChildProcess', return_value=True)
     self.rc.AddCmdResult(partial_mock.Ignore(),
-                         output='%d\n10\n' % expected_pid)
+                         stdout=f'{expected_pid}\n10\n')
 
     pid = op._GetDDPid()
 
@@ -177,7 +177,7 @@ class UsbImagerOperationTest(cros_test_lib.RunCommandTestCase):
     expected_pid = -1
     op = flash.UsbImagerOperation('foo')
     self.PatchObject(osutils, 'IsChildProcess', return_value=False)
-    self.rc.AddCmdResult(partial_mock.Ignore(), output='5\n10\n')
+    self.rc.AddCmdResult(partial_mock.Ignore(), stdout='5\n10\n')
 
     pid = op._GetDDPid()
 

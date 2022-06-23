@@ -201,7 +201,7 @@ class Upgrader(object):
     result = self._RunGit(self._stable_repo, ['status', '-s'], stdout=True)
     if result.returncode == 0:
       statuses = {}
-      for line in result.output.strip().split('\n'):
+      for line in result.stdout.strip().split('\n'):
         if not line:
           continue
 
@@ -218,7 +218,7 @@ class Upgrader(object):
       self._stable_repo_status = statuses
     else:
       raise RuntimeError('Unable to run "git status -s" in %s:\n%s' %
-                         (self._stable_repo, result.output))
+                         (self._stable_repo, result.stdout))
 
     self._stable_repo_stashed = False
 
@@ -247,7 +247,7 @@ class Upgrader(object):
     """Raise exception if |self._stable_repo| is not on a branch now."""
     result = self._RunGit(self._stable_repo, ['branch'], stdout=True)
     if result.returncode == 0:
-      for line in result.output.split('\n'):
+      for line in result.stdout.split('\n'):
         match = re.search(r'^\*\s+(.+)$', line)
         if match:
           # Found current branch, see if it is a real branch.
@@ -451,7 +451,7 @@ class Upgrader(object):
         encoding='utf-8')
 
     if cmd_result.returncode == 0:
-      ebuild_path = cmd_result.output.strip()
+      ebuild_path = cmd_result.stdout.strip()
       (_overlay, cat, _pn, pv) = self._SplitEBuildPath(ebuild_path)
       return os.path.join(cat, pv)
     else:
@@ -484,7 +484,7 @@ class Upgrader(object):
         cmd, check=False, extra_env=envvars, print_cmd=False,
         stdout=True, stderr=subprocess.STDOUT, encoding='utf-8')
 
-    return (result.returncode == 0, ' '.join(cmd), result.output)
+    return (result.returncode == 0, ' '.join(cmd), result.stdout)
 
   def _FindCurrentCPV(self, pkg):
     """Returns current cpv on |_curr_board| that matches |pkg|, or None."""
@@ -497,7 +497,7 @@ class Upgrader(object):
         stdout=True, stderr=subprocess.STDOUT, encoding='utf-8')
 
     if cmd_result.returncode == 0:
-      ebuild_path = cmd_result.output.strip()
+      ebuild_path = cmd_result.stdout.strip()
       (_overlay, cat, _pn, pv) = self._SplitEBuildPath(ebuild_path)
       return os.path.join(cat, pv)
     else:
@@ -514,7 +514,7 @@ class Upgrader(object):
         cmd, check=False, extra_env=envvars, print_cmd=False,
         stdout=True, stderr=subprocess.STDOUT, encoding='utf-8')
 
-    output = result.output
+    output = result.stdout
     if result.returncode:
       raise RuntimeError('equery failed on us:\n %s\noutput:\n %s'
                          % (' '.join(cmd), output))
@@ -556,7 +556,7 @@ class Upgrader(object):
         cmd, check=False, extra_env=envvars, print_cmd=False,
         stdout=True, stderr=subprocess.STDOUT, encoding='utf-8')
 
-    ebuild_path = result.output.strip()
+    ebuild_path = result.stdout.strip()
     (overlay, _cat, _pn, _pv) = self._SplitEBuildPath(ebuild_path)
     if overlay != expected_overlay:
       if was_overwrite:
@@ -601,7 +601,7 @@ class Upgrader(object):
         stdout=True, stderr=subprocess.STDOUT, encoding='utf-8')
 
     if result.returncode != 0:
-      output = result.output.strip()
+      output = result.stdout.strip()
 
       # _missing_eclass_re works line by line.
       for line in output.split('\n'):
@@ -1047,7 +1047,7 @@ class Upgrader(object):
     # First get the body of the last commit message.
     git_cmd = ['show', '-s', '--format=%b']
     result = self._RunGit(self._stable_repo, git_cmd, stdout=True)
-    body = result.output
+    body = result.stdout
 
     remaining_lines = []
     # Extract the upgrade_lines of last commit.  Everything after the

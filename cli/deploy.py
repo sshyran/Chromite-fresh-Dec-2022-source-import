@@ -386,11 +386,11 @@ print(json.dumps(pkg_info))
       result = device.GetAgent().RemoteSh(['python'], remote_sudo=True,
                                           input=get_vartree_script)
     except cros_build_lib.RunCommandError as e:
-      logging.error('Cannot get target vartree:\n%s', e.result.error)
+      logging.error('Cannot get target vartree:\n%s', e.result.stderr)
       raise
 
     try:
-      self.target_db = self._BuildDB(json.loads(result.output),
+      self.target_db = self._BuildDB(json.loads(result.stdout),
                                      process_rdeps, process_rev_rdeps)
     except ValueError as e:
       raise self.VartreeError(str(e))
@@ -842,7 +842,7 @@ def _Emerge(device, pkg_paths, root, extra_args=None):
 
     pattern = ('A requested package will not be merged because '
                'it is listed in package.provided')
-    output = result.error.replace('\n', ' ').replace('\r', '')
+    output = result.stderr.replace('\n', ' ').replace('\r', '')
     if pattern in output:
       error = ('Package failed to emerge: %s\n'
                'Remove %s from /etc/portage/make.profile/'
@@ -1052,7 +1052,7 @@ def _DeployDLCImage(device, sysroot, board, dlc_id, dlc_package):
     device.run(['dlcservice_util', '--uninstall', '--id=%s' % dlc_id])
   except cros_build_lib.RunCommandError as e:
     logging.info('Failed to uninstall DLC:%s. Continue anyway.',
-                 e.result.error)
+                 e.result.stderr)
   except Exception:
     logging.error('Failed to uninstall DLC.')
     raise

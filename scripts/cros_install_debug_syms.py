@@ -299,7 +299,7 @@ def GetInstallArgsList(argv):
   # package when a package is given.
   cmd = [argv[0]] + ['--list'] + argv[1:]
   result = cros_build_lib.run(cmd, capture_output=True, encoding='utf-8')
-  lines = result.output.splitlines()
+  lines = result.stdout.splitlines()
   return [line.split() for line in lines if line]
 
 

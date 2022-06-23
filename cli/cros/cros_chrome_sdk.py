@@ -1068,7 +1068,7 @@ class ChromeSDKCommand(command.CliCommand):
     """
     current_ps1 = cros_build_lib.run(
         ['bash', '-l', '-c', 'echo "$PS1"'], print_cmd=False, encoding='utf-8',
-        capture_output=True).output.splitlines()
+        capture_output=True).stdout.splitlines()
     if current_ps1:
       current_ps1 = current_ps1[-1]
     if not current_ps1:
@@ -1529,7 +1529,7 @@ class ChromeSDKCommand(command.CliCommand):
     """Returns current active Goma port."""
     port = cros_build_lib.run(
         self.GOMACC_PORT_CMD, cwd=goma_dir, debug_level=logging.DEBUG,
-        check=False, encoding='utf-8', capture_output=True).output.strip()
+        check=False, encoding='utf-8', capture_output=True).stdout.strip()
     return port
 
   def _GomaDir(self, goma_dir):

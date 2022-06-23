@@ -91,7 +91,7 @@ class FindTargetTests(cros_test_lib.TempDirTestCase):
   def _run_tests(self, prog: Path, verify=None, **kwargs):
     """Run |prog| in the different fun ways."""
     if verify is None:
-      verify = lambda result: self.assertEqual('hi []\n', result.output)
+      verify = lambda result: self.assertEqual('hi []\n', result.stdout)
 
     # Execute absolute path.
     result = self.run_script([prog], **kwargs)

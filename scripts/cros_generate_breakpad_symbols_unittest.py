@@ -237,7 +237,7 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
     # Not needed as the code itself should create it as needed.
     self.breakpad_dir = os.path.join(self.debug_dir, 'breakpad')
 
-    self.rc.SetDefaultCmdResult(output='MODULE OS CPU ID NAME')
+    self.rc.SetDefaultCmdResult(stdout='MODULE OS CPU ID NAME')
     self.assertCommandContains = self.rc.assertCommandContains
     self.sym_file = os.path.join(self.breakpad_dir, 'NAME/ID/NAME.sym')
 

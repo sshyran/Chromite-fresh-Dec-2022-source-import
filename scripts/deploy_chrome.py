@@ -152,7 +152,7 @@ class DeployChrome(object):
 
   def _GetRemoteMountFree(self, remote_dir):
     result = self.device.run(DF_COMMAND % remote_dir)
-    line = result.output.splitlines()[1]
+    line = result.stdout.splitlines()[1]
     value = line.split()[3]
     multipliers = {
         'G': 1024 * 1024 * 1024,
@@ -164,13 +164,13 @@ class DeployChrome(object):
   def _GetRemoteDirSize(self, remote_dir):
     result = self.device.run('du -ks %s' % remote_dir,
                              capture_output=True, encoding='utf-8')
-    return int(result.output.split()[0])
+    return int(result.stdout.split()[0])
 
   def _GetStagingDirSize(self):
     result = cros_build_lib.dbg_run(['du', '-ks', self.staging_dir],
                                     stdout=True, capture_output=True,
                                     encoding='utf-8')
-    return int(result.output.split()[0])
+    return int(result.stdout.split()[0])
 
   def _ChromeFileInUse(self):
     result = self.device.run(LSOF_COMMAND_CHROME % (self.options.target_dir,),
@@ -219,12 +219,12 @@ class DeployChrome(object):
       result = self.device.run('status ui', capture_output=True,
                                encoding='utf-8')
     except cros_build_lib.RunCommandError as e:
-      if 'Unknown job' in e.result.error:
+      if 'Unknown job' in e.result.stderr:
         return False
       else:
         raise e
 
-    return result.output.split()[1].split('/')[0] == 'start'
+    return result.stdout.split()[1].split('/')[0] == 'start'
 
   def _KillLacrosChrome(self):
     """This method kills lacros-chrome on the device, if it's running."""
@@ -373,7 +373,7 @@ class DeployChrome(object):
     if r.returncode != 0:
       raise DeployFailure('Unable to ls contents of %s' % _CHROME_TEST_BIN_DIR)
     binaries_to_copy = []
-    for f in r.output.splitlines():
+    for f in r.stdout.splitlines():
       binaries_to_copy.append(
           chrome_util.Path(os.path.basename(f), exe=True, optional=True))
 

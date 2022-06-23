@@ -120,7 +120,7 @@ class CrosSdkSnapshotTest(cros_test_lib.TempDirTestCase):
     except cros_build_lib.RunCommandError as e:
       raise SystemExit('Running %r failed!: %s' % (cmd, e))
 
-    return result.returncode, result.output
+    return result.returncode, result.stdout
 
   def testSnapshotsRequireImage(self):
     code, output = self._crosSdk(['--snapshot-list', '--nouse-image'])
