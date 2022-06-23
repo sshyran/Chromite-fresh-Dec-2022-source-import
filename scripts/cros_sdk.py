@@ -12,6 +12,7 @@ If given args those are passed to the chroot environment, and executed.
 """
 
 import argparse
+import ast
 import glob
 import logging
 import os
@@ -192,6 +193,9 @@ def EnterChroot(chroot_path, cache_dir, chrome_root, chrome_root_mount,
   if additional_args:
     cmd.append('--')
     cmd.extend(additional_args)
+
+  if 'CHROMEOS_SUDO_RLIMITS' in os.environ:
+    _SetRlimits(os.environ.pop('CHROMEOS_SUDO_RLIMITS'))
 
   # Some systems set the soft limit too low.  Bump it up to the hard limit.
   # We don't override the hard limit because it's something the admins put
@@ -417,6 +421,42 @@ def ListChrootSnapshots(chroot_vg, chroot_lv):
   return snapshots
 
 
+# The rlimits we will lookup & pass down, in order.
+RLIMITS_TO_PASS = (
+    resource.RLIMIT_AS,
+    resource.RLIMIT_CORE,
+    resource.RLIMIT_CPU,
+    resource.RLIMIT_FSIZE,
+    resource.RLIMIT_MEMLOCK,
+    resource.RLIMIT_NICE,
+    resource.RLIMIT_NOFILE,
+    resource.RLIMIT_NPROC,
+    resource.RLIMIT_RSS,
+    resource.RLIMIT_STACK,
+)
+
+
+def _GetRlimits() -> str:
+  """Serialize current rlimits."""
+  return str(tuple(resource.getrlimit(x) for x in RLIMITS_TO_PASS))
+
+
+def _SetRlimits(limits: str) -> None:
+  """Deserialize rlimits."""
+  for rlim, limit in zip(RLIMITS_TO_PASS, ast.literal_eval(limits)):
+    cur_limit = resource.getrlimit(rlim)
+    if cur_limit != limit:
+      # Turn the number into a symbolic name for logging.
+      name = 'RLIMIT_???'
+      for name, num in resource.__dict__.items():
+        if name.startswith('RLIMIT_') and num == rlim:
+          break
+      logging.debug('Restoring user rlimit %s from %r to %r',
+                    name, cur_limit, limit)
+
+      resource.setrlimit(rlim, limit)
+
+
 def _SudoCommand():
   """Get the 'sudo' command, along with all needed environment variables."""
 
@@ -433,6 +473,9 @@ def _SudoCommand():
   # will take care of initializing PATH to the right value then.  But we can't
   # override the system's default PATH for root as that will hide /sbin.
   cmd += ['CHROMEOS_SUDO_PATH=%s' % os.environ.get('PATH', '')]
+
+  # Pass along current rlimit settings so we can restore them.
+  cmd += [f'CHROMEOS_SUDO_RLIMITS={_GetRlimits()}']
 
   # Pass in the path to the depot_tools so that users can access them from
   # within the chroot.
