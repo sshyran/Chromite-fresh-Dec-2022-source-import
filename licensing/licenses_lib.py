@@ -469,7 +469,7 @@ class PackageInfo(object):
       self.ebuild_path = self._FindEbuildPath()
       self._RunEbuildPhases(self.ebuild_path, ['clean', 'fetch'])
       raw_output = self._RunEbuildPhases(self.ebuild_path, ['unpack'])
-      output = raw_output.output.splitlines()
+      output = raw_output.stdout.splitlines()
       # Output is spammy, it looks like this:
       #  * gc-7.2d.tar.gz RMD160 SHA1 SHA256 size ;-) ...                 [ ok ]
       #  * checking gc-7.2d.tar.gz ;-) ...                                [ ok ]
@@ -615,7 +615,7 @@ to assign.  Once you've found it, copy the entire license file to:
     args = [equery_cmd, '-q', '-C', 'which', self.fullnamerev]
     try:
       path = cros_build_lib.run(args, print_cmd=True, encoding='utf-8',
-                                stdout=True).output.strip()
+                                stdout=True).stdout.strip()
     except cros_build_lib.RunCommandError:
       path = None
 
@@ -1490,7 +1490,7 @@ def ListInstalledPackages(sysroot, all_packages=False):
     equery_cmd = cros_build_lib.GetSysrootToolPath(sysroot, 'equery')
     args = [equery_cmd, 'list', '*']
     packages = cros_build_lib.run(args, encoding='utf-8',
-                                  stdout=True).output.splitlines()
+                                  stdout=True).stdout.splitlines()
   else:
     # The following returns all packages that were part of the build tree
     # (many get built or used during the build, but do not get shipped).
@@ -1500,7 +1500,7 @@ def ListInstalledPackages(sysroot, all_packages=False):
     args = [emerge_cmd, '--with-bdeps=y', '--usepkgonly',
             '--emptytree', '--pretend', '--color=n', 'virtual/target-os']
     emerge = cros_build_lib.run(args, encoding='utf-8',
-                                stdout=True).output.splitlines()
+                                stdout=True).stdout.splitlines()
     # Another option which we've decided not to use, is bdeps=n.  This outputs
     # just the packages we ship, but does not packages that were used to build
     # them, including a package like flex which generates a .a that is included
