@@ -32,13 +32,13 @@ class FetchTarballsTest(cros_test_lib.MockTempDirTestCase):
     gs_mock = self.StartPatcher(gs_unittest.GSContextMock())
     gs_mock.SetDefaultCmdResult()
     uri = 'gs://foo/bar'
-    packages_uri = '{}/Packages'.format(uri)
+    packages_uri = f'{uri}/Packages'
     packages_file = """URI: gs://foo
 
 CPV: boo/baz
 PATH boo/baz.tbz2
 """
-    gs_mock.AddCmdResult(['cat', packages_uri], output=packages_file)
+    gs_mock.AddCmdResult(['cat', packages_uri], stdout=packages_file)
 
     binpkg.FetchTarballs([uri], self.tempdir)
 

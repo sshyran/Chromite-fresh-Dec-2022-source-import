@@ -266,7 +266,7 @@ class GerritTestCase(cros_test_lib.MockTempDirTestCase):
         print_cmd=False, capture_output=True, encoding='utf-8')
     sha1 = None
     change_id = None
-    for line in log_proc.output.splitlines():
+    for line in log_proc.stdout.splitlines():
       match = re.match(r'^commit ([0-9a-fA-F]{40})$', line)
       if match:
         sha1 = match.group(1)

@@ -257,7 +257,7 @@ class SchemaDumpTest(CIDBIntegrationTest):
     result = cros_build_lib.run(cmd, capture_output=True, quiet=True)
 
     # Strip out comment lines, to avoid dumping a problematic timestamp.
-    lines = [l for l in result.output.splitlines() if not l.startswith('--')]
+    lines = [l for l in result.stdout.splitlines() if not l.startswith('--')]
     return '\n'.join(lines)
 
   def testDump(self):

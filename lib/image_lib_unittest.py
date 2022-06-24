@@ -107,7 +107,7 @@ class LoopbackPartitionsTest(cros_test_lib.MockTempDirTestCase):
     self.rc_mock = cros_test_lib.RunCommandMock()
     self.StartPatcher(self.rc_mock)
     self.rc_mock.SetDefaultCmdResult()
-    self.rc_mock.AddCmdResult(partial_mock.In('--show'), output=LOOP_DEV)
+    self.rc_mock.AddCmdResult(partial_mock.In('--show'), stdout=LOOP_DEV)
 
     self.PatchObject(image_lib, 'GetImageDiskPartitionInfo',
                      return_value=LOOP_PARTITION_INFO)
@@ -523,7 +523,7 @@ EEC571FFB6E1)
   def testCgpt(self):
     """Tests that we can list all partitions with `cgpt` correctly."""
     self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=True)
-    self.rc.AddCmdResult(partial_mock.Ignore(), output=self.SAMPLE_CGPT)
+    self.rc.AddCmdResult(partial_mock.Ignore(), stdout=self.SAMPLE_CGPT)
     partitions = image_lib.GetImageDiskPartitionInfo('...')
     part_dict = {p.name: p for p in partitions}
     self.assertEqual(part_dict['STATE'].start, 983564288)
@@ -538,7 +538,7 @@ EEC571FFB6E1)
 
   def testNormalPath(self):
     self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=False)
-    self.rc.AddCmdResult(partial_mock.Ignore(), output=self.SAMPLE_PARTED)
+    self.rc.AddCmdResult(partial_mock.Ignore(), stdout=self.SAMPLE_PARTED)
     partitions = image_lib.GetImageDiskPartitionInfo('_ignored')
     part_dict = {p.name: p for p in partitions}
     self.assertEqual(12, len(partitions))
@@ -547,7 +547,7 @@ EEC571FFB6E1)
 
   def testKeyedByNumber(self):
     self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=False)
-    self.rc.AddCmdResult(partial_mock.Ignore(), output=self.SAMPLE_PARTED)
+    self.rc.AddCmdResult(partial_mock.Ignore(), stdout=self.SAMPLE_PARTED)
     partitions = image_lib.GetImageDiskPartitionInfo(
         '_ignored'
     )
@@ -560,7 +560,7 @@ EEC571FFB6E1)
 
   def testChangeUnitInsideChroot(self):
     self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=True)
-    self.rc.AddCmdResult(partial_mock.Ignore(), output=self.SAMPLE_CGPT)
+    self.rc.AddCmdResult(partial_mock.Ignore(), stdout=self.SAMPLE_CGPT)
     partitions = image_lib.GetImageDiskPartitionInfo('_ignored')
     part_dict = {p.name: p for p in partitions}
     self.assertEqual(part_dict['STATE'].start, 983564288)

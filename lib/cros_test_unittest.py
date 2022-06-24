@@ -47,7 +47,7 @@ class CrOSTesterBase(cros_test_lib.RunCommandTempDirTestCase):
     osutils.Touch(tester._device.image_path)
     version_str = ('QEMU emulator version 2.6.0, Copyright (c) '
                    '2003-2008 Fabrice Bellard')
-    self.rc.AddCmdResult(partial_mock.In('--version'), output=version_str)
+    self.rc.AddCmdResult(partial_mock.In('--version'), stdout=version_str)
     return tester
 
   def setUp(self):
@@ -183,10 +183,10 @@ class CrOSTester(CrOSTesterBase):
                            '_DeployLacrosLauncherScript') as mock_deploy:
       self._tester.Run()
       self.assertCommandContains([
-        'deploy_chrome', '--force', '--build-dir', self._tester.build_dir,
-        '--process-timeout', '180', '--device',
-        self._tester._device.device + ':9222', '--cache-dir',
-        self._tester.cache_dir, '--board', 'amd64-generic'
+          'deploy_chrome', '--force', '--build-dir', self._tester.build_dir,
+          '--process-timeout', '180', '--device',
+          self._tester._device.device + ':9222', '--cache-dir',
+          self._tester.cache_dir, '--board', 'amd64-generic',
       ])
       self.assertCommandContains([
           'deploy_chrome', '--force', '--build-dir',
@@ -548,7 +548,7 @@ class CrOSTesterChromeTest(CrOSTesterBase):
     # Mocks the output by providing necessary runtime files.
     self.rc.AddCmdResult(
         partial_mock.InOrder(['gn', 'desc', test_label]),
-        output='\n'.join(runtime_deps))
+        stdout='\n'.join(runtime_deps))
 
   def CheckChromeTestCommands(self, test_exe, test_label, build_dir,
                               test_args=None):

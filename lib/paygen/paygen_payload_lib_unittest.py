@@ -254,7 +254,7 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
         enter_chroot=True,
         stderr=subprocess.STDOUT)
 
-    self.assertIn(mock_result.output,
+    self.assertIn(mock_result.stdout,
                   osutils.ReadFile(os.path.join(self.tempdir, 'delta.log'),
                                    mode='rb'))
 
@@ -269,7 +269,7 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
         enter_chroot=True,
         stderr=subprocess.STDOUT)
 
-    self.assertIn(mock_result.output,
+    self.assertIn(mock_result.stdout,
                   osutils.ReadFile(os.path.join(self.tempdir, 'delta.log'),
                                    mode='rb'))
 

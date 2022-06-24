@@ -28,18 +28,18 @@ class RemoteNebraskaWrapperTest(cros_test_lib.MockTempDirTestCase):
     remote_device_mock = self.PatchObject(remote_access, 'RemoteDevice')
     self._nebraska = nebraska_wrapper.RemoteNebraskaWrapper(remote_device_mock)
 
-  def _PatchRemoteCommand(self, return_code=0, output=None, side_effect=None):
+  def _PatchRemoteCommand(self, return_code=0, stdout=None, side_effect=None):
     """Creates a RunCommand mock.
 
     Args:
       return_code: Look at cros_build_lib.run.
-      output: Look at cros_build_lib.run.
+      stdout: Look at cros_build_lib.run.
       side_effect: Lookt at mock.side_effect.
     """
     return self.PatchObject(
         nebraska_wrapper.RemoteNebraskaWrapper, '_RemoteCommand',
         return_value=cros_build_lib.CommandResult(returncode=return_code,
-                                                  output=output),
+                                                  stdout=stdout),
         side_effect=side_effect)
 
   def testIsReady(self):
@@ -77,7 +77,7 @@ class RemoteNebraskaWrapperTest(cros_test_lib.MockTempDirTestCase):
 
     # The success case.
     self.PatchObject(timeout_util, 'WaitForReturnTrue')
-    run_command_mock = self._PatchRemoteCommand(output='10')
+    run_command_mock = self._PatchRemoteCommand(stdout='10')
     self._nebraska._ReadPortNumber()
     run_command_mock.assert_called_once_with(['cat', '/run/nebraska/port'],
                                              capture_output=True)
@@ -110,7 +110,7 @@ class RemoteNebraskaWrapperTest(cros_test_lib.MockTempDirTestCase):
 
     # The success case.
     self.PatchObject(timeout_util, 'WaitForReturnTrue')
-    run_command_mock = self._PatchRemoteCommand(output='10')
+    run_command_mock = self._PatchRemoteCommand(stdout='10')
     self._nebraska._WaitUntilStarted()
     # TODO(crbug/1065172): Invalid assertion that had previously been mocked.
     # read_port_number_mock.assert_called_once()
@@ -120,14 +120,14 @@ class RemoteNebraskaWrapperTest(cros_test_lib.MockTempDirTestCase):
 
   def testPrintLog(self):
     """Tests PrintLog."""
-    run_command_mock = self._PatchRemoteCommand(output='helloworld',
+    run_command_mock = self._PatchRemoteCommand(stdout='helloworld',
                                                 return_code=1)
     log = self._nebraska.PrintLog()
     run_command_mock.assert_called_once_with(
         ['test', '-f', '/tmp/nebraska.log'], check=False)
     self.assertIsNone(log)
 
-    run_command_mock = self._PatchRemoteCommand(output='blah blah')
+    run_command_mock = self._PatchRemoteCommand(stdout='blah blah')
     log = self._nebraska.PrintLog()
     self.assertTrue('blah blah' in log)
 

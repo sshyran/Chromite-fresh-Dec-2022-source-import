@@ -37,7 +37,7 @@ class TestLoas(cros_test_lib.MockTestCase):
     """Verify that errors from gcertstatus result in an e-mail."""
     self.rc_mock.AddCmdResult(
         partial_mock.In('gcertstatus'), returncode=1,
-        error='WARNING no LOAS2 certificate found')
+        stderr='WARNING no LOAS2 certificate found')
     self.loas.Status()
     self.assertEqual(self.email_mock.call_count, 1)
 
@@ -45,7 +45,7 @@ class TestLoas(cros_test_lib.MockTestCase):
     """Verify that up-to-date certs delay further checks for a while."""
     self.rc_mock.AddCmdResult(
         partial_mock.In('gcertstatus'), returncode=0,
-        error='LOAS2 expires in 1234h')
+        stderr='LOAS2 expires in 1234h')
 
     # This should invoke gcertstatus.
     self.loas.Status()

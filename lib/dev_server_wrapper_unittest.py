@@ -36,7 +36,7 @@ qlen 1000
 
   def testGetIPv4AddressParseResult(self):
     """Verifies we can parse the output and get correct IP address."""
-    self.rc.AddCmdResult(partial_mock.In('ip'), output=self.IP_GLOBAL_OUTPUT)
+    self.rc.AddCmdResult(partial_mock.In('ip'), stdout=self.IP_GLOBAL_OUTPUT)
     self.assertEqual(dev_server_wrapper.GetIPv4Address(), '111.11.11.111')
 
   def testGetIPv4Address(self):

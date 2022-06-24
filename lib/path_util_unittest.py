@@ -71,7 +71,7 @@ class DetermineCheckoutTest(cros_test_lib.MockTempDirTestCase):
   def testGitUnderGclient(self):
     """Recognizes a chrome git checkout by gclient."""
     self.rc_mock.AddCmdResult(
-        partial_mock.In('config'), output=constants.CHROMIUM_GOB_URL)
+        partial_mock.In('config'), stdout=constants.CHROMIUM_GOB_URL)
     dir_struct = [
         'a/.gclient',
         'a/src/.git/',
@@ -83,7 +83,7 @@ class DetermineCheckoutTest(cros_test_lib.MockTempDirTestCase):
   def testGitUnderRepo(self):
     """Recognizes a chrome git checkout by repo."""
     self.rc_mock.AddCmdResult(
-        partial_mock.In('config'), output=constants.CHROMIUM_GOB_URL)
+        partial_mock.In('config'), stdout=constants.CHROMIUM_GOB_URL)
     dir_struct = [
         'a/.repo/',
         'a/b/.git/',

@@ -57,14 +57,14 @@ class ToolchainTest(cros_test_lib.MockTempDirTestCase):
     noarch = """target=foo
 category=bla
 """
-    rc_mock.SetDefaultCmdResult(output=noarch)
+    rc_mock.SetDefaultCmdResult(stdout=noarch)
     with rc_mock:
       self.assertEqual(None, toolchain.GetArchForTarget('fake_target'))
 
     amd64arch = """arch=amd64
 target=foo
 """
-    rc_mock.SetDefaultCmdResult(output=amd64arch)
+    rc_mock.SetDefaultCmdResult(stdout=amd64arch)
     with rc_mock:
       self.assertEqual('amd64', toolchain.GetArchForTarget('fake_target'))
 

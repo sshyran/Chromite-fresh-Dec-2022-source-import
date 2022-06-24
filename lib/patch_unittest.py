@@ -271,7 +271,7 @@ I am the first commit.
     if cwd is None:
       cwd = self.default_cwd
 
-    return cros_build_lib.run(cmd, cwd=cwd, **kwargs).output.strip()
+    return cros_build_lib.run(cmd, cwd=cwd, **kwargs).stdout.strip()
 
   def _GetSha1(self, cwd, refspec):
     return self._run(['git', 'rev-list', '-n1', refspec], cwd=cwd)

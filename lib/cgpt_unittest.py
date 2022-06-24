@@ -71,7 +71,7 @@ class TestDisk(cros_test_lib.RunCommandTestCase):
 
   def getMockDisk(self):
     """Returns new Disk based on CGPT_SHOW_OUTPUT."""
-    self.rc.SetDefaultCmdResult(output=CGPT_SHOW_OUTPUT)
+    self.rc.SetDefaultCmdResult(stdout=CGPT_SHOW_OUTPUT)
     return cgpt.Disk.FromImage('foo')
 
   def testDiskFromImageEmpty(self):
