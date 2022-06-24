@@ -23,7 +23,7 @@ class TestSignerConfig(cros_test_lib.TestCase):
                       versionrev='R24-1.2.3.4', keyset='link-mp', channel='dev',
                       input_files=('foo.bin'),
                       output_files=('@ROOTNAME@-@VERSION@.bin')):
-    """Returns SignerConfig, providing sane defaults."""
+    """Returns SignerConfig, providing the defaults."""
     return(signer.SignerInstructionConfig(archive=archive,
                                           board=board,
                                           artifact_type=artifact_type,
