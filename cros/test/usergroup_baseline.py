@@ -111,7 +111,7 @@ GROUP_BASELINE = dict((e.group, e) for e in (
                                              'dlm', 'rtanalytics', 'crosvm',
                                              'cfm-monitor', 'runtime_probe',
                                              'smdisplay', 'cdm-oemcrypto',
-                                             'cros_healthd'}),
+                                             'cros_healthd', 'nvpd'}),
     GroupEntry(group='cdrw', gid=80, users={'cros-disks'}),
     GroupEntry(group='usb', gid=85, users={'mtp', 'brltty', 'dlm', 'modem',
                                            'fwupd'}),
@@ -230,6 +230,7 @@ GROUP_BASELINE = dict((e.group, e) for e in (
     GroupEntry(group='android-everybody', gid=665357,
                users={'chronos', 'cros-disks', 'seneschal'}),
     GroupEntry(group='android-root', gid=655360, users={'android-root'}),
+    GroupEntry(group='nvpd', gid=20190, users={'nvpd'}),
 ))
 
 GROUP_BASELINE_LAKITU = dict((e.group, e) for e in (
