@@ -371,7 +371,7 @@ class BuildPackagesStageTest(AllConfigsTestCase,
       # A mixed RO+RW image will have separate "(RW) version" fields.
       rc.AddCmdResult(
           partial_mock.ListRegex('chromeos-firmwareupdate'),
-          output='BIOS (RW) version: %s\nEC (RW) version: %s' %
+          stdout='BIOS (RW) version: %s\nEC (RW) version: %s' %
           (expected_main_firmware_version, expected_ec_firmware_version))
 
     self._update_metadata = True
@@ -402,7 +402,7 @@ class BuildPackagesStageTest(AllConfigsTestCase,
     def _HookRunCommandFirmwareUpdate(rc):
       rc.AddCmdResult(
           partial_mock.ListRegex('chromeos-firmwareupdate'),
-          output='BIOS version: %s\nEC version: %s' %
+          stdout='BIOS version: %s\nEC version: %s' %
           (expected_main_firmware_version, expected_ec_firmware_version))
 
     self._update_metadata = True
@@ -430,11 +430,11 @@ class BuildPackagesStageTest(AllConfigsTestCase,
 
     def _HookRunCommand(rc):
       rc.AddCmdResult(
-          partial_mock.In('list-models'), output='reef\npyro\nelectro')
-      rc.AddCmdResult(partial_mock.In('get'), output='key-123')
+          partial_mock.In('list-models'), stdout='reef\npyro\nelectro')
+      rc.AddCmdResult(partial_mock.In('get'), stdout='key-123')
       rc.AddCmdResult(
           partial_mock.ListRegex('chromeos-firmwareupdate'),
-          output="""
+          stdout="""
 Model:        reef
 BIOS image:
 BIOS version: Google_Reef.9042.87.1
@@ -495,7 +495,7 @@ EC (RW) version: reef_v1.1.5909-bd1f0c9
     """Test that unified builds are marked as such."""
 
     def _HookRunCommandCrosConfigHost(rc):
-      rc.AddCmdResult(partial_mock.ListRegex('cros_config_host'), output='reef')
+      rc.AddCmdResult(partial_mock.ListRegex('cros_config_host'), stdout='reef')
 
     self._update_metadata = True
     cros_config_host = os.path.join(self.build_root,

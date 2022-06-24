@@ -129,7 +129,7 @@ def RefreshManifestCheckout(manifest_dir, manifest_repo):
     result = git.RunGit(manifest_dir, ['config', 'remote.origin.url'],
                         check=False)
     if (result.returncode == 0 and
-        result.output.rstrip() == manifest_repo):
+        result.stdout.rstrip() == manifest_repo):
       logging.info('Updating manifest-versions checkout.')
       try:
         git.RunGit(manifest_dir, ['gc', '--auto'])

@@ -742,7 +742,7 @@ class PatchSeries(object):
     resets = []
     for project_dir in project_state:
       current_sha1 = git.RunGit(
-          project_dir, ['rev-list', '-n1', 'HEAD']).output.strip()
+          project_dir, ['rev-list', '-n1', 'HEAD']).stdout.strip()
       resets.append((project_dir, current_sha1))
       assert current_sha1
 

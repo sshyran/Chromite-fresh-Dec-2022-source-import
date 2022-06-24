@@ -243,7 +243,7 @@ def ListChrootSnapshots(buildroot):
 
   cmd_snapshots = RunBuildScript(
       buildroot, cmd, chromite_cmd=True, stdout=True)
-  return cmd_snapshots.output.splitlines()
+  return cmd_snapshots.stdout.splitlines()
 
 
 def RevertChrootToSnapshot(buildroot, snapshot_name):
@@ -510,9 +510,9 @@ def VerifyBinpkg(buildroot, board, pkg, packages, extra_env=None):
       enter_chroot=True,
       extra_env=extra_env)
   pattern = r'^\[(ebuild|binary).*%s' % re.escape(pkg)
-  m = re.search(pattern, result.output, re.MULTILINE)
+  m = re.search(pattern, result.stdout, re.MULTILINE)
   if m and m.group(1) == 'ebuild':
-    logging.info('(output):\n%s', result.output)
+    logging.info('(output):\n%s', result.stdout)
     msg = 'Cannot find prebuilts for %s on %s' % (pkg, board)
     raise MissingBinpkg(msg)
 
@@ -774,10 +774,10 @@ def RunCrosConfigHost(buildroot, board, args, log_output=True):
       check=False)
   if result.returncode:
     # Show the output for debugging purposes.
-    if 'No such file or directory' not in result.error:
-      print('cros_config_host failed: %s\n' % result.error, file=sys.stderr)
+    if 'No such file or directory' not in result.stderr:
+      print('cros_config_host failed: %s\n' % result.stderr, file=sys.stderr)
     return None
-  return result.output.strip().splitlines()
+  return result.stdout.strip().splitlines()
 
 
 def GetModels(buildroot, board, log_output=True):
@@ -1034,7 +1034,7 @@ def RunHWTestSuite(build,
     if not result.HasValidSummary():
       # swarming client has failed.
       logging.error('No valid task summary json generated, output:%s',
-                    result.output)
+                    result.stdout)
       if result.task_summary_json:
         logging.error('Invalid task summary json:\n%s',
                       pformat.json(result.task_summary_json))
@@ -1045,7 +1045,7 @@ def RunHWTestSuite(build,
       logging.error(
           'Encountered swarming internal error:\n'
           'stdout: \n%s\n'
-          'summary json content:\n%s', result.output,
+          'summary json content:\n%s', result.stdout,
           str(result.task_summary_json))
       to_raise = failures_lib.SwarmingProxyFailure(
           '** Failed to fullfill request with proxy server, code(%d) **' %
@@ -1285,7 +1285,7 @@ def RunSkylabHWTestSuite(
 
   try:
     output = cros_build_lib.run(cmd, stdout=True)
-    report = json.loads(output.output)
+    report = json.loads(output.stdout)
     task_id = report['task_id']
     task_url = report['task_url']
 
@@ -1298,9 +1298,9 @@ def RunSkylabHWTestSuite(
         task_id, timeout_mins=timeout_mins)
     output = cros_build_lib.run(wait_cmd, stdout=True)
     try:
-      report = json.loads(output.output)
+      report = json.loads(output.stdout)
     except:
-      logging.error('Error when json parsing:\n%s', output.output)
+      logging.error('Error when json parsing:\n%s', output.stdout)
       raise
 
     logging.info(
@@ -1399,14 +1399,14 @@ def RunSkylabHWTestPlan(test_plan=None,
 
     task_url = ''
     try:
-      report = json.loads(result.output)
+      report = json.loads(result.stdout)
       task_url = report.get('task_url')
 
       logging.info('Launched test plan task %s', task_url)
       cbuildbot_alerts.PrintBuildbotLink('Test plan task', task_url)
 
     except ValueError:
-      logging.warning('Unable to parse output:\n%s', result.output)
+      logging.warning('Unable to parse output:\n%s', result.stdout)
 
     return HWTestSuiteResult(None, None)
   except cros_build_lib.RunCommandError as e:
@@ -1617,7 +1617,7 @@ def _HWTestCreate(cmd, debug=False, **kwargs):
     for output in result.GetValue('outputs', ''):
       sys.stdout.write(output)
     sys.stdout.flush()
-    m = re.search(r'Created task id: (?P<job_id>.*)', result.output)
+    m = re.search(r'Created task id: (?P<job_id>.*)', result.stdout)
     if m:
       return m.group('job_id')
   return None
@@ -1857,7 +1857,7 @@ def GenerateStackTraces(buildroot, board, test_results_dir, archive_dir,
             encoding='utf-8',
             extra_env={'LLVM_SYMBOLIZER_PATH': '/usr/bin/llvm-symbolizer'})
         cros_build_lib.run(['c++filt'],
-                           input=raw.output,
+                           input=raw.stdout,
                            debug_level=logging.DEBUG,
                            cwd=buildroot,
                            stderr=True,
@@ -2017,7 +2017,7 @@ def MarkChromeAsStable(buildroot,
       enter_chroot=True,
       chroot_args=chroot_args,
       extra_env=extra_env,
-      encoding='utf-8').output.rstrip()
+      encoding='utf-8').stdout.rstrip()
   chrome_atom = None
   if portage_atom_string:
     chrome_atom = portage_atom_string.splitlines()[-1].partition('=')[-1]
@@ -3761,7 +3761,7 @@ def GetTargetChromiteApiVersion(buildroot, validate_version=True):
   # option; assume 0:0 (ie, initial state).
   major = minor = 0
   if api.returncode == 0:
-    major, minor = (int(x) for x in api.output.strip().split('.', 1))
+    major, minor = (int(x) for x in api.stdout.strip().split('.', 1))
 
   if validate_version and major != constants.REEXEC_API_MAJOR:
     raise ApiMismatchError(

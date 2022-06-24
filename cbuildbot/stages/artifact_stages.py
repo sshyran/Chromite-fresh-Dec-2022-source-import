@@ -463,8 +463,8 @@ class CPEExportStage(generic_stages.BoardSpecificBuilderStage,
     results_filename = os.path.join(self.archive_path,
                                     'cpe-chromeos-%s.json' % board)
 
-    osutils.WriteFile(warnings_filename, result.error)
-    osutils.WriteFile(results_filename, result.output)
+    osutils.WriteFile(warnings_filename, result.stderr)
+    osutils.WriteFile(results_filename, result.stdout)
 
     logging.info('Uploading CPE files.')
     self.UploadArtifact(os.path.basename(warnings_filename), archive=False)

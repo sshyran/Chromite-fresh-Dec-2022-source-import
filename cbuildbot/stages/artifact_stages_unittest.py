@@ -209,7 +209,7 @@ class CPEExportStageTest(generic_stages_unittest.AbstractStageTestCase,
     self.StartPatcher(parallel_unittest.ParallelMock())
 
     self.rc_mock = self.StartPatcher(cros_test_lib.RunCommandMock())
-    self.rc_mock.SetDefaultCmdResult(output='')
+    self.rc_mock.SetDefaultCmdResult(stdout='')
 
     self.stage = None
     self.buildstore = FakeBuildStore()
@@ -257,7 +257,7 @@ class DebugSymbolsStageTest(generic_stages_unittest.AbstractStageTestCase,
     self.tar_mock = self.PatchObject(commands, 'GenerateDebugTarball')
 
     self.rc_mock = self.StartPatcher(cros_test_lib.RunCommandMock())
-    self.rc_mock.SetDefaultCmdResult(output='')
+    self.rc_mock.SetDefaultCmdResult(stdout='')
 
     self.stage = None
 

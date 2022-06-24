@@ -116,7 +116,7 @@ class RunBuildStagesTest(cros_test_lib.RunCommandTempDirTestCase,
 
     self.rc.AddCmdResult(
         [constants.PATH_TO_CBUILDBOT, '--reexec-api-version'],
-        output=constants.REEXEC_API_VERSION)
+        stdout=constants.REEXEC_API_VERSION)
 
   def tearDown(self):
     # Mimic exiting a 'with' statement.

@@ -108,7 +108,7 @@ def WriteTagMetadata(builder_run):
   try:
     cmd_result = cros_build_lib.run(['git', '--version'], capture_output=True,
                                     encoding='utf-8')
-    tags['git_version'] = cmd_result.output.strip()
+    tags['git_version'] = cmd_result.stdout.strip()
   except cros_build_lib.RunCommandError:
     pass  # If we fail, just don't include the tag.
 
@@ -126,7 +126,7 @@ def WriteTagMetadata(builder_run):
     # git version 2.8.0.rc3.226.g39d4020
     # Python 2.7.6 (default, Jun 22 2015, 17:58:13)
     # [GCC 4.8.2]
-    tags['repo_version'] = cmd_result.output.splitlines()[0].split(' ')[-1]
+    tags['repo_version'] = cmd_result.stdout.splitlines()[0].split(' ')[-1]
   except (cros_build_lib.RunCommandError, IndexError):
     pass  # If we fail, just don't include the tag.
 
