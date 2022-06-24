@@ -626,13 +626,13 @@ wheel: <
         result = self.DoCommand(cmd, stdout=True, stderr=subprocess.STDOUT)
 
         # Expect output like: 'gsutil version 3.35' or 'gsutil version: 4.5'.
-        match = re.search(r'^\s*gsutil\s+version:?\s+([\d.]+)', result.output,
+        match = re.search(r'^\s*gsutil\s+version:?\s+([\d.]+)', result.stdout,
                           re.IGNORECASE)
         if match:
           self._gsutil_version = match.group(1)
         else:
           raise GSContextException('Unexpected output format from "%s":\n%s.' %
-                                   (result.cmdstr, result.output))
+                                   (result.cmdstr, result.stdout))
 
     return self._gsutil_version
 
@@ -656,8 +656,8 @@ wheel: <
 
     # Did we fail with an authentication error?
     if (result.returncode == 1 and
-        any(e in result.error for e in self.AUTHORIZATION_ERRORS)):
-      logging.warning('gsutil authentication failure msg: %s', result.error)
+        any(e in result.stderr for e in self.AUTHORIZATION_ERRORS)):
+      logging.warning('gsutil authentication failure msg: %s', result.stderr)
       return False
 
     return True
@@ -699,7 +699,7 @@ wheel: <
     elif self.dry_run:
       return b'' if encoding is None else ''
     else:
-      return self.DoCommand(['cat', path], **kwargs).output
+      return self.DoCommand(['cat', path], **kwargs).stdout
 
   def StreamingCat(self, path, chunksize=0x100000):
     """Returns the content of a GS file as a stream.
@@ -841,7 +841,7 @@ wheel: <
       return ErrorDetails(type='received_signal', message_pattern=sig_name,
                           retriable=False)
 
-    error = e.result.error
+    error = e.result.stderr
     if error:
       # Since the captured error will use the encoding the user requested,
       # normalize to bytes for testing below.
@@ -1036,7 +1036,7 @@ wheel: <
 
         # Now we parse the output for the current generation number.  Example:
         #   Created: gs://chromeos-throw-away-bucket/foo#1360630664537000.1
-        m = re.search(r'Created: .*#(\d+)([.](\d+))?\n', result.error)
+        m = re.search(r'Created: .*#(\d+)([.](\d+))?\n', result.stderr)
         if m:
           return int(m.group(1))
         else:
@@ -1090,7 +1090,7 @@ wheel: <
       kwargs['capture_output'] = True
       kwargs.setdefault('encoding', 'utf-8')
       result = cros_build_lib.run(['ls', path], **kwargs)
-      return result.output.splitlines()
+      return result.stdout.splitlines()
     else:
       return [x.url for x in self.List(path, **kwargs)]
 
@@ -1128,7 +1128,7 @@ wheel: <
     # We always request the extended details as the overhead compared to a plain
     # listing is negligible.
     kwargs['stdout'] = True
-    lines = self.DoCommand(cmd, **kwargs).output.splitlines()
+    lines = self.DoCommand(cmd, **kwargs).stdout.splitlines()
 
     if details:
       # The last line is expected to be a summary line.  Ignore it.
@@ -1317,9 +1317,9 @@ wheel: <
       # Example lines:
       # No URLs matched gs://bucket/file
       # Some more msg: No URLs matched gs://bucket/file
-      if (e.result.error and
+      if (e.result.stderr and
           any(x.startswith('No URLs matched')
-              for x in e.result.error.splitlines())):
+              for x in e.result.stderr.splitlines())):
         raise GSNoSuchKey('Stat Error: No URLs matched %s.' % path)
 
       # No idea what this is, so just choke.
@@ -1353,18 +1353,18 @@ wheel: <
     #     Generation:         1408776800850000
     #     Metageneration:     1
 
-    if not res.output.startswith('gs://'):
-      raise GSContextException('Unexpected stat output: %s' % res.output)
+    if not res.stdout.startswith('gs://'):
+      raise GSContextException(f'Unexpected stat output: {res.stdout}')
 
     def _GetField(name, optional=False):
-      m = re.search(r'%s:\s*(.+)' % re.escape(name), res.output)
+      m = re.search(r'%s:\s*(.+)' % re.escape(name), res.stdout)
       if m:
         return m.group(1)
       elif optional:
         return None
       else:
         raise GSContextException('Field "%s" missing in "%s"' %
-                                 (name, res.output))
+                                 (name, res.stdout))
 
     return GSStatResult(
         creation_time=datetime.datetime.strptime(

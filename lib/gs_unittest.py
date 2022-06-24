@@ -80,8 +80,8 @@ PreconditionException: 412 Precondition Failed"""
 
     rc_mock = cros_test_lib.RunCommandMock()
     rc_mock.AddCmdResult(
-        partial_mock.ListRegex('gsutil'), result.returncode, result.output,
-        result.error)
+        partial_mock.ListRegex('gsutil'), result.returncode,
+        stdout=result.stdout, stderr=result.stderr)
 
     with rc_mock:
       try:
