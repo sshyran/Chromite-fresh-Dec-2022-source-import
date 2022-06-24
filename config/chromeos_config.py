@@ -1869,6 +1869,14 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'sign_types': ['recovery', 'factory'],
       },
 
+      'shotzo-release': {
+          'sign_types': ['recovery', 'factory'],
+          # Shotzo has no DUTs in the lab (b/236920312).
+          'hw_tests': [],
+          'hw_tests_override': [],
+          'hw_tests_disabled_bug': 'b/236920312',
+      },
+
       # --- end from here ---
 
       # Enable distributed ThinLTO (crbug/877722) only on nocturne for now.
