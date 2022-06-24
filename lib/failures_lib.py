@@ -96,8 +96,8 @@ class CompoundFailure(StepFailure):
       # By default, print all stored ExceptInfo objects. This is the
       # preferred behavior because we'd always have the full
       # tracebacks to debug the failure.
-      message = '\n'.join('{e.type}: {e.str}\n{e.traceback}'.format(e=ex)
-                          for ex in self.exc_infos)
+      message = '\n'.join(
+          f'{ex.type}: {ex.str}\n{ex.traceback}' for ex in self.exc_infos)
     self.msg = message
 
     super().__init__(message)
@@ -127,20 +127,20 @@ class CompoundFailure(StepFailure):
     return (not self.HasEmptyList() and
             all(issubclass(x.type, cls) for x in self.exc_infos))
 
-  def HasFatalFailure(self, whitelist=None):
-    """Determine if there are non-whitlisted failures.
+  def HasFatalFailure(self, exempt_exception_list=None):
+    """Determine if there are non-exempted failures.
 
     Args:
-      whitelist: A list of whitelisted exception types.
+      exempt_exception_list: A list of exempted exception types.
 
     Returns:
-      Returns True if any failure is not in |whitelist|.
+      Returns True if any failure is not in |exempt_exception_list|.
     """
-    if not whitelist:
+    if not exempt_exception_list:
       return not self.HasEmptyList()
 
     for ex in self.exc_infos:
-      if all(not issubclass(ex.type, cls) for cls in whitelist):
+      if all(not issubclass(ex.type, cls) for cls in exempt_exception_list):
         return True
 
     return False

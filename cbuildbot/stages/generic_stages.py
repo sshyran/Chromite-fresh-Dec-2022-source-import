@@ -1222,8 +1222,10 @@ class ArchivingStageMixin(object):
           acl=self.acl)
     except failures_lib.GSUploadFailure as e:
       cbuildbot_alerts.PrintBuildbotStepText('Upload failed')
-      if e.HasFatalFailure(
-          whitelist=[gs.GSContextException, timeout_util.TimeoutError]):
+      if e.HasFatalFailure(exempt_exception_list=[
+          gs.GSContextException,
+          timeout_util.TimeoutError,
+      ]):
         raise
       elif strict:
         raise

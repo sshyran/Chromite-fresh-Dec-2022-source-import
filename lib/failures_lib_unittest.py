@@ -69,8 +69,9 @@ class CompoundFailureTest(cros_test_lib.TestCase):
     exc_infos.extend(self._CreateExceptInfos(ValueError))
     exc = failures_lib.CompoundFailure(exc_infos=exc_infos)
     self.assertTrue(exc.HasFatalFailure())
-    self.assertTrue(exc.HasFatalFailure(whitelist=[KeyError]))
-    self.assertFalse(exc.HasFatalFailure(whitelist=[KeyError, ValueError]))
+    self.assertTrue(exc.HasFatalFailure(exempt_exception_list=[KeyError]))
+    self.assertFalse(
+        exc.HasFatalFailure(exempt_exception_list=[KeyError, ValueError]))
 
     exc = failures_lib.CompoundFailure()
     self.assertFalse(exc.HasFatalFailure())
