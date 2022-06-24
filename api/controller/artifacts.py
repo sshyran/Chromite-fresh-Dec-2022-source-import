@@ -547,7 +547,7 @@ def BundleSimpleChromeArtifacts(input_proto, output_proto, _config):
   full_sysroot_path = os.path.join(chroot.path, sysroot_path.lstrip(os.sep))
   sysroot = sysroot_lib.Sysroot(full_sysroot_path)
 
-  # Quick sanity check that the sysroot exists before we go on.
+  # Check that the sysroot exists before we go on.
   if not sysroot.Exists():
     cros_build_lib.Die('The sysroot does not exist.')
 
