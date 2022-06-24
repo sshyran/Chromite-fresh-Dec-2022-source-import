@@ -468,7 +468,7 @@ class TestCreateFactoryImageZip(cros_test_lib.MockTempDirTestCase):
     zip_contents = cros_build_lib.run(['zipinfo', '-1', output_file],
                                       cwd=self.output_dir,
                                       stdout=True)
-    zip_files = sorted(zip_contents.output.decode('UTF-8').strip().split('\n'))
+    zip_files = sorted(zip_contents.stdout.decode('UTF-8').strip().split('\n'))
     expected_files = sorted([
         'factory_shim_dir/netboot/',
         'factory_shim_dir/netboot/bar',
@@ -482,4 +482,4 @@ class TestCreateFactoryImageZip(cros_test_lib.MockTempDirTestCase):
     # Check contents of BUILD_VERSION.
     cmd = ['unzip', '-p', output_file, 'BUILD_VERSION']
     version_file = cros_build_lib.run(cmd, cwd=self.output_dir, stdout=True)
-    self.assertEqual(version_file.output.decode('UTF-8').strip(), version)
+    self.assertEqual(version_file.stdout.decode('UTF-8').strip(), version)

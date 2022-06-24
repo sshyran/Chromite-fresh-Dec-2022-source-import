@@ -871,7 +871,7 @@ class GetAllFirmwareVersionsTest(cros_test_lib.RunCommandTempDirTestCase):
 
   def setUp(self):
     self.board = 'test-board'
-    self.rc.SetDefaultCmdResult(output="""
+    self.rc.SetDefaultCmdResult(stdout="""
 
 flashrom(8): 68935ee2fcfcffa47af81b966269cd2b */build/reef/usr/sbin/flashrom
              ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, for GNU/Linux 2.6.32, BuildID[sha1]=e102cc98d45300b50088999d53775acbeff407dc, stripped
@@ -991,7 +991,7 @@ class GetFirmwareVersionsTest(cros_test_lib.RunCommandTempDirTestCase):
 
   def setUp(self):
     self.board = 'test-board'
-    self.rc.SetDefaultCmdResult(output="""
+    self.rc.SetDefaultCmdResult(stdout="""
 
 flashrom(8): a8f99c2e61e7dc09c4b25ef5a76ef692 */build/kevin/usr/sbin/flashrom
              ELF 32-bit LSB executable, ARM, EABI5 version 1 (SYSV), statically linked, for GNU/Linux 2.d
@@ -1235,7 +1235,7 @@ class GetModelsTest(cros_test_lib.RunCommandTempDirTestCase):
 
   def setUp(self):
     self.board = 'test-board'
-    self.rc.SetDefaultCmdResult(output='pyro\nreef\nsnappy\n')
+    self.rc.SetDefaultCmdResult(stdout='pyro\nreef\nsnappy\n')
     self.monkeypatch.setattr(constants, 'SOURCE_ROOT', self.tempdir)
     build_bin = os.path.join(self.tempdir, constants.DEFAULT_CHROOT_DIR, 'usr',
                              'bin')

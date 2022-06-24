@@ -778,8 +778,8 @@ def _GetCrosWorkonPackages(
   result = cros_build_lib.run(
       cmd, print_cmd=False, capture_output=True, encoding='utf-8')
   logging.info('Detected cros_workon modified packages: %s',
-               result.output.rstrip())
-  packages = result.output.split()
+               result.stdout.rstrip())
+  packages = result.stdout.split()
 
   if os.environ.get('CHROME_ORIGIN'):
     packages.extend(_CHROME_PACKAGES)
@@ -822,7 +822,7 @@ def _GetBaseInstallPackages(sysroot: Union[str, os.PathLike], emerge_flags: str,
 
   # Filter and sort the output and remove any duplicate entries.
   packages = set()
-  for line in result.output.splitlines():
+  for line in result.stdout.splitlines():
     if 'to /build/' in line and any(x in line for x in include_patterns):
       # Use regex to get substrings that matches a
       # '[ebuild ...] <some characters> ' pattern. The second matching group

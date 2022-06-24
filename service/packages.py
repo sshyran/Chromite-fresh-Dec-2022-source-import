@@ -1549,7 +1549,7 @@ def _run_cros_config_host(
       check=False)
   if result.returncode:
     # Show the output for debugging purposes.
-    if 'No such file or directory' not in result.error:
-      logging.error('cros_config_host failed: %s\n', result.error)
+    if 'No such file or directory' not in result.stderr:
+      logging.error('cros_config_host failed: %s\n', result.stderr)
     return None
-  return result.output.strip().splitlines()
+  return result.stdout.strip().splitlines()
