@@ -102,7 +102,7 @@ def main(argv):
   serializer = message_util.JsonSerializer()
 
   endpoint_re = re.compile(r'(chromite\.api\.\w+/\w+)')
-  reader = csv.DictReader(result.output.split('\r\n'))
+  reader = csv.DictReader(result.stdout.split('\r\n'))
   for row in reader:
     # Each row will have a step_name, and all the requests, but only one request
     # will actually be populated.
