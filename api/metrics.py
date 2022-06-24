@@ -83,7 +83,7 @@ def deserialize_metrics_log(output_events, prefix=None):
     output_event.gauge = value
     output_event.timestamp_milliseconds = counter_times[counter]
 
-  # This is a sanity-check for unclosed timers.
+  # Check for any unhandled timers.
   # TODO(wbbradley): Turn this back into an assert https://crbug.com/1001909.
   if timers:
     logging.error('excess timer metric data left over: %s', timers)
