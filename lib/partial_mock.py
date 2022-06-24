@@ -588,11 +588,9 @@ class PartialCmdMock(PartialMock):
 
   DEFAULT_ATTR = None
 
-  # TODO(crbug.com/1006587): Drop redundant arguments & backwards compat APIs.
-  # Delete this by Jan 2023.
   @CheckAttr
   def SetDefaultCmdResult(self, returncode=0, stdout='', stderr='',
-                          side_effect=None, mock_attr=None, **kwargs):
+                          side_effect=None, mock_attr=None):
     """Specify the default command result if no command is matched.
 
     Args:
@@ -602,30 +600,18 @@ class PartialCmdMock(PartialMock):
       side_effect: See MockedCallResults.AddResultForParams
       mock_attr: Which attributes's mock is being referenced.
     """
-    # TODO(b/187789262): Handle deprecated arguments for now.
-    # Delete this by Jan 2023.
-    assert 'output' not in kwargs, 'output= is deprecated -- use stdout='
-    assert 'error' not in kwargs, 'error= is deprecated -- use stderr='
-    if kwargs:
-      raise TypeError(f'got an unexpected keyword arguments {kwargs}')
-
     result = cros_build_lib.CommandResult(
         returncode=returncode, stdout=stdout, stderr=stderr)
     self._results[mock_attr].SetDefaultResult(result, side_effect)
 
-  # TODO(crbug.com/1006587): Drop redundant arguments & backwards compat APIs.
-  # Delete this by Jan 2023.
   @CheckAttr
-  def AddCmdResult(self, cmd, returncode=0, output=None, error=None,
-                   stdout='', stderr='', kwargs=None, strict=False,
-                   side_effect=None, mock_attr=None):
+  def AddCmdResult(self, cmd, returncode=0, stdout='', stderr='', kwargs=None,
+                   strict=False, side_effect=None, mock_attr=None):
     """Specify the result to simulate for a given command.
 
     Args:
       cmd: The command string or list to record a result for.
       returncode: The returncode of the command (on the command line).
-      output: (Deprecated) Alias to stdout.
-      error: (Deprecated) Alias to stderr.
       stdout: The stdout output of the command.
       stderr: The stderr output of the command.
       kwargs: Keyword arguments that the function needs to be invoked with.
@@ -633,11 +619,6 @@ class PartialCmdMock(PartialMock):
       side_effect: See MockedCallResults.AddResultForParams
       mock_attr: Which attributes's mock is being referenced.
     """
-    # TODO(b/187789262): Handle deprecated arguments for now.
-    # Delete this by Jan 2023.
-    assert output is None, 'output= is deprecated -- use stdout='
-    assert error is None, 'error= is deprecated -- use stderr='
-
     result = cros_build_lib.CommandResult(
         returncode=returncode, stdout=stdout, stderr=stderr)
     self._results[mock_attr].AddResultForParams(
