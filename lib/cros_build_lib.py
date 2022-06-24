@@ -247,9 +247,13 @@ class CommandResult(CompletedProcess):
     # Handle deprecated arguments for now.
     output = error = None
     if 'output' in kwargs:
+      # TODO(b/187789262): Break unittests, but allow production for now.
+      assert 'PYTEST_CURRENT_TEST' not in os.environ
       warnings.warn('output= is deprecated -- use stdout=', DeprecationWarning)
       output = kwargs.pop('output')
     if 'error' in kwargs:
+      # TODO(b/187789262): Break unittests, but allow production for now.
+      assert 'PYTEST_CURRENT_TEST' not in os.environ
       warnings.warn('error= is deprecated -- use stderr=', DeprecationWarning)
       error = kwargs.pop('error')
     if kwargs:
@@ -275,12 +279,16 @@ class CommandResult(CompletedProcess):
   @property
   def output(self):
     """Backwards compat API."""
+    # TODO(b/187789262): Break unittests, but allow production for now.
+    assert 'PYTEST_CURRENT_TEST' not in os.environ
     warnings.warn('CommandResult.output is now .stdout', DeprecationWarning)
     return self.stdout
 
   @property
   def error(self):
     """Backwards compat API."""
+    # TODO(b/187789262): Break unittests, but allow production for now.
+    assert 'PYTEST_CURRENT_TEST' not in os.environ
     warnings.warn('CommandResult.error is now .stderr', DeprecationWarning)
     return self.stderr
 
