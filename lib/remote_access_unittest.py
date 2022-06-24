@@ -122,7 +122,8 @@ class RemoteShMock(partial_mock.PartialCmdMock):
     # Run the real RemoteSh with run mocked out.
     rc_mock = cros_test_lib.RunCommandMock()
     rc_mock.AddCmdResult(
-        partial_mock.Ignore(), result.returncode, result.stdout, result.stderr)
+        partial_mock.Ignore(), result.returncode,
+        stdout=result.stdout, stderr=result.stderr)
 
     with rc_mock:
       result = self.backup['RemoteSh'](inst, cmd, *args, **kwargs)

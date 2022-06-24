@@ -422,7 +422,7 @@ class RemoteAccess(object):
            and not check)):
         return e.result
       elif e.result.returncode == SSH_ERROR_CODE:
-        raise SSHConnectionError(e.result.error)
+        raise SSHConnectionError(e.result.stderr)
       else:
         raise
     finally:
@@ -482,14 +482,14 @@ class RemoteAccess(object):
       if result.returncode == SSH_ERROR_CODE:
         return None
       elif result.returncode == 0:
-        return result.output.rstrip()
+        return result.stdout.rstrip()
       else:
         raise Exception('Unexpected error code %s getting boot ID.'
                         % result.returncode)
     else:
       result = self.RemoteSh(['cat', '/proc/sys/kernel/random/boot_id'],
                              log_output=True)
-      return result.output.rstrip()
+      return result.stdout.rstrip()
 
 
   def CheckIfRebooted(self, old_boot_id):
@@ -705,7 +705,7 @@ class RemoteAccess(object):
     """
     result = cros_build_lib.run(producer_cmd, print_cmd=False,
                                 capture_output=True)
-    return self.RemoteSh(cmd, input=kwargs.pop('input', result.output),
+    return self.RemoteSh(cmd, input=kwargs.pop('input', result.stdout),
                          **kwargs)
 
 
@@ -845,7 +845,7 @@ class RemoteDevice(object):
       self._work_dir = self.BaseRunCommand(
           ['mkdir', '-p', self._base_dir, '&&',
            'mktemp', '-d', '--tmpdir=%s' % self._base_dir],
-          capture_output=True).output.strip()
+          capture_output=True).stdout.strip()
       logging.debug('The temporary working directory on the device is %s',
                     self._work_dir)
       self.RegisterCleanupCmd(['rm', '-rf', self._work_dir])
@@ -876,7 +876,7 @@ class RemoteDevice(object):
     """
     result = self.GetAgent().RemoteSh(['ethtool', 'eth0'], check=False,
                                       capture_output=True)
-    return re.search(r'Speed: \d+000Mb/s', result.output)
+    return re.search(r'Speed: \d+000Mb/s', result.stdout)
 
   @memoize.MemoizedSingleCall
   def IsSELinuxAvailable(self):
@@ -1078,7 +1078,7 @@ class RemoteDevice(object):
     """
     cmd = ['du', '-Lb', '--max-depth=0', path]
     result = self.BaseRunCommand(cmd, remote_sudo=True, capture_output=True)
-    return int(result.output.split()[0])
+    return int(result.stdout.split()[0])
 
   def CatFile(self, path, max_size=1000000, encoding='utf-8'):
     """Reads the file on device to string if its size is less than |max_size|.
@@ -1109,7 +1109,7 @@ class RemoteDevice(object):
                            capture_output=True, encoding=encoding)
     if result.returncode:
       raise CatFileError('Failed to read file "%s" on the device' % path)
-    return result.output
+    return result.stdout
 
   def DeletePath(self, path, relative_to_work_dir=False, recursive=False):
     """Deletes a path on the remote device.
@@ -1156,9 +1156,9 @@ class RemoteDevice(object):
       result = self.GetAgent().RemoteSh(cmd, check=False,
                                         capture_output=True)
       try:
-        return [int(pid) for pid in result.output.splitlines()]
+        return [int(pid) for pid in result.stdout.splitlines()]
       except ValueError:
-        logging.error('Parsing output failed:\n%s', result.output)
+        logging.error('Parsing output failed:\n%s', result.stdout)
         raise RunningPidsError('Unable to get running pids of %s' % exe)
     except SSHConnectionError:
       logging.error('Error connecting to device %s', self.hostname)
@@ -1334,10 +1334,10 @@ class ChromiumOSDevice(RemoteDevice):
       try:
         result = self.BaseRunCommand(['echo', '${PATH}'])
       except cros_build_lib.RunCommandError as e:
-        logging.error('Failed to get $PATH on the device: %s', e.result.error)
+        logging.error('Failed to get $PATH on the device: %s', e.result.stderr)
         raise
 
-      self._orig_path = result.output.strip()
+      self._orig_path = result.stdout.strip()
 
     return self._orig_path
 
@@ -1410,7 +1410,7 @@ class ChromiumOSDevice(RemoteDevice):
   def _RootfsIsReadOnly(self):
     """Returns True if rootfs on is mounted as read-only."""
     r = self.run(self.LIST_MOUNTS_CMD, capture_output=True)
-    for line in r.output.splitlines():
+    for line in r.stdout.splitlines():
       if not line:
         continue
 
