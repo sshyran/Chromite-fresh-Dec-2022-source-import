@@ -49,7 +49,8 @@ class CreateArguments(object):
                use_image: bool = True,
                chroot_path: Optional[str] = None,
                cache_dir: Optional[str] = None,
-               sdk_version: Optional[str] = None):
+               sdk_version: Optional[str] = None,
+               skip_chroot_upgrade: Optional[bool] = False):
     """Create arguments init.
 
     Args:
@@ -60,6 +61,8 @@ class CreateArguments(object):
       chroot_path: Path to where the chroot should be reside.
       cache_dir: Alternative directory to use as a cache for the chroot.
       sdk_version: Specific SDK version to use, e.g. 2022.01.20.073008.
+      skip_chroot_upgrade: Whether or not to skip any chroot upgrades (using
+        the --skip-chroot-upgrade arg to cros_sdk).
     """
     self.replace = replace
     self.bootstrap = bootstrap
@@ -67,6 +70,7 @@ class CreateArguments(object):
     self.chroot_path = chroot_path
     self.cache_dir = cache_dir
     self.sdk_version = sdk_version
+    self.skip_chroot_upgrade = skip_chroot_upgrade
 
   def GetArgList(self) -> List[str]:
     """Get the list of the corresponding command line arguments.
@@ -97,6 +101,9 @@ class CreateArguments(object):
 
     if self.sdk_version:
       args.extend(['--sdk-version', self.sdk_version])
+
+    if self.skip_chroot_upgrade:
+      args.append('--skip-chroot-upgrade')
 
     return args
 
