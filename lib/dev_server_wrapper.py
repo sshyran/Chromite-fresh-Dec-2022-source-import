@@ -136,10 +136,10 @@ def GetIPv4Address(dev=None, global_ip=True):
 
   result = cros_build_lib.run(cmd, print_cmd=False, capture_output=True,
                               encoding='utf-8')
-  matches = re.findall(r'\binet (\d+\.\d+\.\d+\.\d+).*', result.output)
+  matches = re.findall(r'\binet (\d+\.\d+\.\d+\.\d+).*', result.stdout)
   if matches:
     return matches[0]
-  logging.warning('Failed to find ip address in %r', result.output)
+  logging.warning('Failed to find ip address in %r', result.stdout)
   return None
 
 
@@ -363,7 +363,7 @@ class DevServerWrapper(multiprocessing.Process):
              '--- Start output from the devserver startup command ---\n'
              '%s'
              '--- End output from the devserver startup command ---' %
-             result.output)
+             result.stdout)
       logging.error(msg)
 
   def Start(self):
@@ -410,7 +410,7 @@ class DevServerWrapper(multiprocessing.Process):
       result = self._RunCommand(['tail', '-n', str(num_lines), fname],
                                 capture_output=True, encoding='utf-8')
       output = '--- Start output from %s ---' % fname
-      output += result.output
+      output += result.stdout
       output += '--- End output from %s ---' % fname
       return output
 

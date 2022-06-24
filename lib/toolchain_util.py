@@ -1742,7 +1742,7 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         ['clang', '--version'],
         enter_chroot=True,
         stdout=True,
-        encoding='utf-8').output.splitlines()[0].strip()
+        encoding='utf-8').stdout.splitlines()[0].strip()
     # TODO(crbug.com/1132918): There's a git-r3 bug that caused the LLVM build
     # failed to find the upstream URL, so use the string contains the local
     # path to clang source instead.

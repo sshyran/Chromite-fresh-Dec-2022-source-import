@@ -58,10 +58,10 @@ class Disk(object):
                                     encoding='utf-8')
 
     # Covert output to a file for processing via readline().
-    cgpt_result = iter(cmd_result.output.splitlines())
+    cgpt_result = iter(cmd_result.stdout.splitlines())
 
     # Read header.
-    if (not cmd_result.output
+    if (not cmd_result.stdout
         or next(cgpt_result).split() != ['start', 'size', 'part', 'contents']):
       raise Error('Unable to find header in cgpt output')
 

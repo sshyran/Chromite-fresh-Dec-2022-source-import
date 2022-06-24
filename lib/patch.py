@@ -989,7 +989,7 @@ class GitRepoPatch(PatchQuery):
       if e.result.returncode != 128:
         raise
       return {}
-    lines = lines.output.splitlines()
+    lines = lines.stdout.splitlines()
     return dict(line.split('\t', 1)[::-1] for line in lines)
 
   def _AmendCommitMessage(self, git_repo):
@@ -1075,7 +1075,7 @@ class GitRepoPatch(PatchQuery):
                             ['diff', '--name-only', '--diff-filter=U'])
 
         # Output is one line per filename.
-        conflicts = result.output.splitlines()
+        conflicts = result.stdout.splitlines()
         if not conflicts:
           # No conflicts means the git repo is in a pristine state.
           reset_target = None
@@ -1140,7 +1140,7 @@ class GitRepoPatch(PatchQuery):
     # is checked out and rebased onto upstream.  If HEAD differs from upstream,
     # then there are already other patches that have been applied.
     upstream, head = [
-        git.RunGit(git_repo, ['rev-list', '-n1', x]).output.strip()
+        git.RunGit(git_repo, ['rev-list', '-n1', x]).stdout.strip()
         for x in (upstream, 'HEAD')]
     inflight = (head != upstream)
 
@@ -1365,7 +1365,7 @@ class GitRepoPatch(PatchQuery):
       return []
 
     cmd = ['ls-tree', '--full-name', '--name-only', '-z', tree_revision, '--']
-    output = git.RunGit(git_repo, cmd + files, check=False).output
+    output = git.RunGit(git_repo, cmd + files, check=False).stdout
     existing_filenames = output.split('\0')[:-1]
     return [x for x in files if x not in existing_filenames]
 
@@ -1437,7 +1437,7 @@ class GitRepoPatch(PatchQuery):
     query = 'Change-Id: %s' % self.change_id
     cmd = ['log', '-F', '--all-match', '--grep', query,
            '--format=%H', '%s..HEAD' % revision]
-    output = git.RunGit(git_repo, cmd).output.split()
+    output = git.RunGit(git_repo, cmd).stdout.split()
     if len(output) == 1:
       return output[0]
     elif len(output) > 1:
@@ -1457,7 +1457,7 @@ class GitRepoPatch(PatchQuery):
     self.Fetch(git_repo)
 
     cmd = ['show', '--format=%P', '-s', self.sha1]
-    parents = git.RunGit(git_repo, cmd).output.split()
+    parents = git.RunGit(git_repo, cmd).stdout.split()
     return parents
 
   def IsMerge(self, git_repo):
@@ -1557,7 +1557,7 @@ class LocalPatch(GitRepoPatch):
          field_value['parent_hash']],
         extra_env=extra_env, input=commit_body)
 
-    new_sha1 = result.output.strip()
+    new_sha1 = result.stdout.strip()
     if new_sha1 == self.sha1:
       raise PatchException(
           self,
@@ -1607,7 +1607,7 @@ class LocalPatch(GitRepoPatch):
     # stderr.  Just combine them so we don't have to worry about it.
     result = git.RunGit(self.project_url, cmd, capture_output=True,
                         stderr=subprocess.STDOUT)
-    lines = result.output.splitlines()
+    lines = result.stdout.splitlines()
     urls = []
     for num, line in enumerate(lines):
       # Look for output like:
@@ -2146,7 +2146,7 @@ def GeneratePatchesFromRepo(git_repo, project, tracking_branch, branch, remote,
       git_repo,
       ['rev-list', '--reverse', '%s..%s' % (tracking_branch, branch)])
 
-  sha1s = result.output.splitlines()
+  sha1s = result.stdout.splitlines()
   if not sha1s:
     if not allow_empty:
       cros_build_lib.Die('No changes found in %s:%s' % (project, branch))

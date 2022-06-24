@@ -400,8 +400,8 @@ def RunCurl(curl_args, *args, **kwargs):
     """
     assert isinstance(exc, cros_build_lib.RunCommandError)
     if exc.result.returncode == 22:
-      logging.debug('curl stderr %s', exc.result.error)
-      matched = CURL_STATUS_RE.search(exc.result.error)
+      logging.debug('curl stderr %s', exc.result.stderr)
+      matched = CURL_STATUS_RE.search(exc.result.stderr)
       if not matched:
         # Unexpected stderr.  It may not be error output from --fail.
         return True
@@ -422,4 +422,4 @@ def RunCurl(curl_args, *args, **kwargs):
       raise DownloadError(
           'Download failed with certificate error? Try "sudo c_rehash".')
     raise DownloadError('Curl failed w/ exit code %i: %s' %
-                        (e.result.returncode, e.result.error))
+                        (e.result.returncode, e.result.stderr))

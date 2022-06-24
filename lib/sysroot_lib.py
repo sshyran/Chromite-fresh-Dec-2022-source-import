@@ -937,7 +937,7 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
                        'synchronously instead. This may take a minute.')
         return self.Delete(background=False)
 
-      tempdir = result.output.strip()
+      tempdir = result.stdout.strip()
       cros_build_lib.sudo_run(['mv', self.path, tempdir], quiet=True)
       if not os.fork():
         # Child process, just delete the sysroot root and _exit.
@@ -946,7 +946,7 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
         if result.returncode:
           # Log it so it can be handled manually.
           logging.warning('Unable to delete old sysroot now at %s: %s', tempdir,
-                          result.error)
+                          result.stderr)
         # pylint: disable=protected-access
         os._exit(result.returncode)
     else:

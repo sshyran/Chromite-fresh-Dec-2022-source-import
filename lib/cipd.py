@@ -168,7 +168,7 @@ def GetInstanceID(cipd_path, package, version, service_account_json=None):
       encoding='utf-8')
   # An example output of resolve is like:
   #   Packages:\n package:instance_id
-  return result.output.splitlines()[-1].split(':')[-1]
+  return result.stdout.splitlines()[-1].split(':')[-1]
 
 
 @memoize.Memoize

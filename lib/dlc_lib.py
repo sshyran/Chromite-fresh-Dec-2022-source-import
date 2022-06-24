@@ -511,7 +511,7 @@ class DlcGenerator(object):
           'salt=random'
       ],
                                   capture_output=True)
-      table = result.output
+      table = result.stdout
 
       # Append the merkle tree to the image.
       osutils.WriteFile(

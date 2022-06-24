@@ -575,7 +575,7 @@ def GetChromeRuntimeDeps(build_dir, build_target):
       raise GetRuntimeDepsError(
           'Failed to get runtime deps for: %s' % build_target)
 
-    runtime_deps = result.output.splitlines()
+    runtime_deps = result.stdout.splitlines()
 
   # |runtime_deps| is relative to |build_dir|. Make them relative to |src_dir|.
   src_dir = os.path.dirname(os.path.dirname(build_dir))

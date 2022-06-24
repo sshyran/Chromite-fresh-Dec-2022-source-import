@@ -129,7 +129,7 @@ def Token(service_account_json=None):
   if result.returncode:
     raise AccessTokenError('Failed at getting the access token, may retry.')
 
-  return result.output.strip()
+  return result.stdout.strip()
 
 
 def _TokenAndLoginIfNeed(service_account_json=None, force_token_renew=False):

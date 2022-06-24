@@ -59,7 +59,7 @@ def _UpdateAlternatesDir(alternates_root, reference_maps, projects):
     result = git.RunGit(base, ['config', '--local', '--get', 'repo.mirror'],
                         check=False)
     is_mirror[reference] = (result.returncode == 0 and
-                            result.output.strip() == 'true')
+                            result.stdout.strip() == 'true')
 
   for project in projects:
     alt_path = os.path.join(alternates_root, project)
@@ -145,7 +145,7 @@ def _GetProjects(repo_root):
       encoding='utf-8')
 
   # Drop the leading ./ and the trailing .git
-  data = [x[2:-4] for x in data.output.splitlines() if x]
+  data = [x[2:-4] for x in data.stdout.splitlines() if x]
 
   with open(cache_path, 'w') as f:
     f.write('\n'.join(sorted(data)))
@@ -218,7 +218,7 @@ def WalkReferences(repo_root, max_depth=5, suppress=()):
                    'repo.reference configuration' %
                    (result.returncode, base))
 
-    repo_root = result.output.strip()
+    repo_root = result.stdout.strip()
     if not repo_root:
       break
 

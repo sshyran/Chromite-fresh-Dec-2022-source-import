@@ -503,7 +503,7 @@ class PaygenPayload(object):
         raise result
       elif isinstance(result, cros_build_lib.CommandResult):
         self._StoreLog('Output of command: ' + result.cmdstr)
-        self._StoreLog(result.output.decode('utf-8', 'replace'))
+        self._StoreLog(result.stdout.decode('utf-8', 'replace'))
       else:
         raise cros_build_lib.RunCommandError(
             'return type from _inner_run unknown')

@@ -1195,7 +1195,7 @@ class PrepareLocalPatchesTests(cros_test_lib.RunCommandTestCase):
   def PrepareLocalPatches(self, output):
     """Check the returned GitRepoPatchInfo against golden values."""
     output_obj = mock.MagicMock()
-    output_obj.output = output
+    output_obj.stdout = output
     self.PatchObject(cros_patch.LocalPatch, 'Fetch', return_value=output_obj)
     self.PatchObject(git, 'RunGit', return_value=output_obj)
     patch_info = cros_patch.PrepareLocalPatches(self.manifest, self.patches)[0]

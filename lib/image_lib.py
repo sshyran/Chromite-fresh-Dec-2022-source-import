@@ -97,7 +97,7 @@ class LoopbackPartitions(object):
       cmd = ['losetup', '--show', '-f', self.path]
       ret = cros_build_lib.sudo_run(
           cmd, debug_level=logging.DEBUG, capture_output=True, encoding='utf-8')
-      self.dev = ret.output.strip()
+      self.dev = ret.stdout.strip()
       cmd = ['partx', '-d', self.dev]
       cros_build_lib.sudo_run(cmd, quiet=True, check=False)
       cmd = ['partx', '-a', self.dev]
