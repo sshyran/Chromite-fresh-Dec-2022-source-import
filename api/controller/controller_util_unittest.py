@@ -121,7 +121,7 @@ class PackageInfoToCPVTest(cros_test_lib.TestCase):
   """PackageInfoToCPV tests."""
 
   def testAllFields(self):
-    """Quick sanity check it's working properly."""
+    """Quick check CPV fields."""
     pi = common_pb2.PackageInfo()
     pi.package_name = 'pkg'
     pi.category = 'cat'
