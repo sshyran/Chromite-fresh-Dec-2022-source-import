@@ -183,6 +183,8 @@ def _deploy_ssh(build_target: build_target_lib.BuildTarget,
 
   logging.info('connecting to: %s\n', ip)
   id_filename = '/mnt/host/source/chromite/ssh_keys/testing_rsa'
+  tmpfile = tempfile.NamedTemporaryFile()
+  shutil.copyfile(id_filename, tmpfile.name)
 
   if use_flashrom and fw_config.flash_extra_flags_flashrom:
     if passthrough_args:
@@ -202,11 +204,9 @@ def _deploy_ssh(build_target: build_target_lib.BuildTarget,
     else:
       passthrough_args = fw_config.flash_extra_flags_futility
 
-  with tempfile.NamedTemporaryFile() as tmpfile:
-    shutil.copyfile(id_filename, tmpfile.name)
-    scp_cmd, flash_cmd = _build_flash_ssh_cmds(not flashrom, ip, port, image,
-                                               tmpfile.name, verbose,
-                                               passthrough_args)
+  scp_cmd, flash_cmd = _build_flash_ssh_cmds(not flashrom, ip, port, image,
+                                             tmpfile.name, verbose,
+                                             passthrough_args)
   try:
     cros_build_lib.run(scp_cmd, print_cmd=verbose, check=True, dryrun=dryrun)
   except cros_build_lib.CalledProcessError as e:
@@ -356,10 +356,11 @@ def ssh_read(path: str, verbose: bool, ip: str, port: int, dryrun: bool,
   """
   logging.info('Connecting to: %s\n', ip)
   id_filename = '/mnt/host/source/chromite/ssh_keys/testing_rsa'
-  with tempfile.NamedTemporaryFile() as tmpfile:
-    shutil.copyfile(id_filename, tmpfile.name)
-    scp_cmd, flash_cmd = _build_read_ssh_cmds(ip, port, path, tmpfile.name,
-                                              verbose, region)
+  tmpfile = tempfile.NamedTemporaryFile()
+  shutil.copyfile(id_filename, tmpfile.name)
+
+  scp_cmd, flash_cmd = _build_read_ssh_cmds(ip, port, path, tmpfile.name,
+                                            verbose, region)
 
   logging.info('Reading now, may take several minutes.')
   try:
