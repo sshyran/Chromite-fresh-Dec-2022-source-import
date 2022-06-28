@@ -257,8 +257,24 @@ def Build(board: str,
   version_info = chromeos_version.VersionInfo(
       version_file=Path(constants.SOURCE_ROOT) / constants.VERSION_FILE)
   cmd = GetBuildImageCommand(config, image_names, board)
+
+  try:
+    build_dir, output_dir = image_lib.CreateBuildDir(
+        config.build_root,
+        config.output_root,
+        version_info.chrome_branch,
+        config.version or version_info.VersionString(),
+        board,
+        config.replace,
+        config.build_attempt,
+        config.output_dir_suffix)
+  except FileExistsError:
+    build_result.return_code = errno.EEXIST
+    return build_result
+
   extra_env_local = image_lib.GetBuildImageEnvvars(image_names, board,
-                                                   version_info, extra_env)
+                                                   version_info, build_dir,
+                                                   output_dir, extra_env)
 
   with osutils.TempDir() as tempdir:
     status_file = os.path.join(tempdir, PARALLEL_EMERGE_STATUS_FILE_NAME)

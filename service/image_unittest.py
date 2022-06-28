@@ -33,6 +33,10 @@ class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase):
         'VersionInfo',
         return_value=chromeos_version.VersionInfo(
             version_string='1.2.3', chrome_branch='4'))
+    self.config = image.BuildConfig(
+        build_root=self.tempdir / 'build',
+        output_root=self.tempdir / 'output',
+        replace=True)
 
   def testBuildBoardHandling(self):
     """Test the argument handling."""
@@ -49,7 +53,7 @@ class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase):
     assert result.all_built and not result.build_run
 
     # Should be using the argument when passed.
-    image.Build('board', [constants.IMAGE_TYPE_DEV])
+    image.Build('board', [constants.IMAGE_TYPE_DEV], config=self.config)
     self.assertCommandContains(
         [constants.IMAGE_TYPE_TO_NAME[constants.IMAGE_TYPE_DEV]])
 
@@ -59,12 +63,12 @@ class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase):
         constants.IMAGE_TYPE_DEV,
         constants.IMAGE_TYPE_TEST,
     ]
-    image.Build('board', multi)
+    image.Build('board', multi, config=self.config)
     for x in multi:
       self.assertCommandContains([constants.IMAGE_TYPE_TO_NAME[x]])
 
     # Building RECOVERY only should cause base to be built.
-    image.Build('board', [constants.IMAGE_TYPE_RECOVERY])
+    image.Build('board', [constants.IMAGE_TYPE_RECOVERY], config=self.config)
     self.assertCommandContains(
         [constants.IMAGE_TYPE_TO_NAME[constants.IMAGE_TYPE_BASE]])
 
@@ -73,6 +77,16 @@ class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase):
     build_result = image.Build(
         'board', [constants.IMAGE_TYPE_BASE, constants.FACTORY_IMAGE_BIN])
     self.assertEqual(build_result.return_code, errno.EINVAL)
+
+  def testBuildDir(self):
+    """Test the case if build directory exists."""
+    config = image.BuildConfig(
+        build_root=self.tempdir / 'build', output_root=self.tempdir / 'output')
+    build_result = image.Build(
+        'board', [constants.IMAGE_TYPE_DEV], config=config)
+    build_result = image.Build(
+        'board', [constants.IMAGE_TYPE_DEV], config=config)
+    self.assertEqual(build_result.return_code, errno.EEXIST)
 
 
 class BuildImageCommandTest(cros_test_lib.MockTestCase):
