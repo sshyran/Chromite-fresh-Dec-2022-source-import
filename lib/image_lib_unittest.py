@@ -8,6 +8,7 @@ import collections
 import gc
 import glob
 import os
+from pathlib import Path
 import stat
 from unittest import mock
 
@@ -666,6 +667,125 @@ class GetBuildImageEnvvarTests(cros_test_lib.MockTestCase):
     self.assertEqual(envar['CHROMEOS_BRANCH'], '2')
     self.assertEqual(envar['CHROMEOS_PATCH'], '3')
     self.assertEqual(envar['CHROMEOS_VERSION_STRING'], '1.2.3')
+
+  def testBuildAndOutputDir(self):
+    """Test BUILD_DIR and OUTPUT_DIR environment variable."""
+    build_dir = 'build/dir'
+    output_dir = Path('ouput/dir')
+    envar = image_lib.GetBuildImageEnvvars(
+        set([constants.BASE_IMAGE_BIN]),
+        'betty',
+        build_dir=build_dir,
+        output_dir=output_dir)
+
+    self.assertEqual(envar['BUILD_DIR'], build_dir)
+    self.assertEqual(envar['OUTPUT_DIR'], str(output_dir))
+
+
+class CreateBuildDirTests(cros_test_lib.TempDirTestCase):
+  """Test CreateBuildDir."""
+
+  def setUp(self):
+    self.build_top_dir = self.tempdir / 'build'
+    self.output_top_dir = self.tempdir / 'output'
+    self.testBoard = 'TestBoard'
+    self.version_info = chromeos_version.VersionInfo(
+        version_string='1.2.3', chrome_branch='4')
+    self.attempt = 5
+    self.result_build_dir = self.build_top_dir / self.testBoard
+    self.result_output_dir = self.output_top_dir / self.testBoard
+    self.image_dir = (f'R{self.version_info.chrome_branch}-' +
+                      f'{self.version_info.VersionString()}')
+    self.image_dir_attempt = self.image_dir + f'-a{self.attempt}'
+
+  def testChromeBranchVersion(self):
+    """Test with chrome_branch and version string."""
+    build_dir, output_dir = image_lib.CreateBuildDir(
+        self.build_top_dir,
+        self.output_top_dir, self.version_info.chrome_branch,
+        self.version_info.VersionString(), self.testBoard)
+
+    self.assertExists(build_dir)
+    self.assertExists(output_dir)
+    self.assertEqual(build_dir, self.result_build_dir / self.image_dir)
+    self.assertExists(output_dir, self.result_output_dir / self.image_dir)
+
+    # Now test the case where the build directory already exists.
+    build_dir, output_dir = image_lib.CreateBuildDir(
+        self.build_top_dir,
+        self.output_top_dir,
+        self.version_info.chrome_branch,
+        self.version_info.VersionString(),
+        self.testBoard,
+        replace=True)
+
+    self.assertExists(build_dir)
+    self.assertExists(output_dir)
+    self.assertEqual(build_dir, self.result_build_dir / self.image_dir)
+    self.assertExists(output_dir, self.result_output_dir / self.image_dir)
+
+    # Now test the case where the build directory already exists with replace as
+    # false.
+    with self.assertRaises(FileExistsError):
+      build_dir, output_dir = image_lib.CreateBuildDir(
+          self.build_top_dir,
+          self.output_top_dir, self.version_info.chrome_branch,
+          self.version_info.VersionString(), self.testBoard)
+
+  def testBuildAttempt(self):
+    """Test with chrome_branch, version string and build attempt."""
+    build_dir, output_dir = image_lib.CreateBuildDir(
+        self.build_top_dir,
+        self.output_top_dir,
+        self.version_info.chrome_branch,
+        self.version_info.VersionString(),
+        self.testBoard,
+        build_attempt=self.attempt)
+
+    self.assertExists(build_dir)
+    self.assertExists(output_dir)
+    self.assertEqual(build_dir, self.result_build_dir / self.image_dir_attempt)
+    self.assertExists(output_dir,
+                      self.result_output_dir / self.image_dir_attempt)
+
+  def testOutputSuffix(self):
+    """Test with output suffix."""
+    output_suffix = 'test-suffix'
+    build_dir, output_dir = image_lib.CreateBuildDir(
+        self.build_top_dir,
+        self.output_top_dir,
+        self.version_info.chrome_branch,
+        self.version_info.VersionString(),
+        self.testBoard,
+        build_attempt=self.attempt,
+        output_suffix=output_suffix)
+
+    self.assertExists(build_dir)
+    self.assertExists(output_dir)
+    self.assertEqual(
+        build_dir,
+        self.result_build_dir / (self.image_dir_attempt + '-' + output_suffix))
+    self.assertExists(
+        output_dir,
+        self.result_output_dir / (self.image_dir_attempt + '-' + output_suffix))
+
+    # Test the case without build_attempt.
+    build_dir, output_dir = image_lib.CreateBuildDir(
+        self.build_top_dir,
+        self.output_top_dir,
+        self.version_info.chrome_branch,
+        self.version_info.VersionString(),
+        self.testBoard,
+        output_suffix=output_suffix)
+
+    self.assertExists(build_dir)
+    self.assertExists(output_dir)
+    self.assertEqual(
+        build_dir,
+        self.result_build_dir / (self.image_dir + '-' + output_suffix))
+    self.assertExists(
+        output_dir,
+        self.result_output_dir / (self.image_dir + '-' + output_suffix))
 
 
 class UtilsTests(cros_test_lib.TempDirTestCase):

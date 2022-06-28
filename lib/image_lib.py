@@ -5,11 +5,13 @@
 """Utilities for manipulating ChromeOS images."""
 
 import collections
+import errno
 import glob
 import logging
 import os
+from pathlib import Path
 import re
-from typing import Dict, List, Optional, Set, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 from chromite.lib import chromeos_version
 from chromite.lib import constants
@@ -700,6 +702,8 @@ def GetBuildImageEnvvars(
     image_names: Set[str],
     board: str,
     version_info: Optional[chromeos_version.VersionInfo] = None,
+    build_dir: Optional[Union[str, os.PathLike]] = None,
+    output_dir: Optional[Union[str, os.PathLike]] = None,
     env_var_init: Optional[Dict[str, str]] = None) -> Dict[str, str]:
   """Get the environment variables required to build the given images.
 
@@ -707,6 +711,8 @@ def GetBuildImageEnvvars(
     image_names: The list of images to build.
     board: The board for which the images will be built.
     version_info: ChromeOS version information that needs to be populated.
+    build_dir: Directory in which to compose the image.
+    output_dir: Directory in which to place image result.
     env_var_init: Initial environment variables to use.
 
   Returns:
@@ -738,7 +744,69 @@ def GetBuildImageEnvvars(
     env_var_init['CHROMEOS_PATCH'] = version_info.patch_number
     env_var_init['CHROMEOS_VERSION_STRING'] = version_info.VersionString()
 
+  # TODO(rchandrasekar): Remove 'BUILD_DIR' and 'OUTPUT_DIR' env variables after
+  # image creation is moved out of build_image.sh script.
+  if build_dir:
+    env_var_init['BUILD_DIR'] = str(build_dir)
+
+  if output_dir:
+    env_var_init['OUTPUT_DIR'] = str(output_dir)
+
   return env_var_init
+
+
+def CreateBuildDir(
+    build_root: Union[str, os.PathLike],
+    output_root: Union[str, os.PathLike],
+    chrome_branch: str,
+    version: str,
+    board: str,
+    replace: bool = False,
+    build_attempt: Optional[int] = None,
+    output_suffix: Optional[str] = None) -> Tuple[Path, Path]:
+  """Create the build directory based on input arguments.
+
+  Args:
+    build_root: Directory in which to compose the image.
+    output_root: Directory in which to place the image result.
+    chrome_branch: Chrome branch number to use.
+    version: The version string to use for the output directory.
+    board: The board for which the image is generated.
+    replace: Whether to remove and replace the existing directory.
+    build_attempt: build attempt count to append to directory name.
+    output_suffix: Any user given output suffix to append to directory name.
+
+  Returns:
+    A tuple of build directory and output directory.
+
+  Raises:
+    FileExistsError when the output build directory already exists.
+  """
+  image_dir = f'R{chrome_branch}-{version}'
+
+  if build_attempt:
+    image_dir += f'-a{build_attempt}'
+
+  if output_suffix:
+    image_dir += f'-{output_suffix}'
+
+  board_dir = Path(board) / image_dir
+  build_dir = Path(build_root) / board_dir
+  output_dir = Path(output_root) / board_dir
+
+  if replace and build_dir.exists():
+    osutils.RmDir(build_dir, sudo=True)
+
+  if build_dir.exists():
+    logging.error('Directory %s already exists.', build_dir)
+    logging.error('Use --build_attempt option to specify an unused attempt.')
+    logging.error('Or use --replace if you want to overwrite this directory.')
+    raise FileExistsError(errno.EEXIST, 'Unwilling to overwrite %s', build_dir)
+
+  osutils.SafeMakedirs(build_dir)
+  osutils.SafeMakedirs(output_dir)
+
+  return [build_dir, output_dir]
 
 
 def IsSquashfsImage(path):
