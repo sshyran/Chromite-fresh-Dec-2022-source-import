@@ -253,7 +253,7 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
         self.elf_file, self.debug_file, self.breakpad_dir)
     self.assertEqual(ret, self.sym_file)
     self.assertEqual(self.rc.call_count, 1)
-    self.assertCommandArgs(0, ['dump_syms', '-v', '-d', self.elf_file,
+    self.assertCommandArgs(0, ['dump_syms', '-v', self.elf_file,
                                self.debug_dir])
     self.assertExists(self.sym_file)
 
@@ -290,14 +290,13 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
 
   def testLargeDebugFail(self):
     """Running w/large .debug failed, but retry worked"""
-    self.rc.AddCmdResult(['dump_syms', '-v', '-d', self.elf_file,
-                          self.debug_dir],
+    self.rc.AddCmdResult(['dump_syms', '-v', self.elf_file, self.debug_dir],
                          returncode=1)
     ret = cros_generate_breakpad_symbols.GenerateBreakpadSymbol(
         self.elf_file, self.debug_file, self.breakpad_dir)
     self.assertEqual(ret, self.sym_file)
     self.assertEqual(self.rc.call_count, 2)
-    self.assertCommandArgs(0, ['dump_syms', '-v', '-d', self.elf_file,
+    self.assertCommandArgs(0, ['dump_syms', '-v', self.elf_file,
                                self.debug_dir])
     self.assertCommandArgs(
         1, ['dump_syms', '-v', '-c', '-r', self.elf_file, self.debug_dir])
@@ -305,8 +304,7 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
 
   def testDebugFail(self):
     """Running w/.debug always failed, but works w/out"""
-    self.rc.AddCmdResult(['dump_syms', '-v', '-d', self.elf_file,
-                          self.debug_dir],
+    self.rc.AddCmdResult(['dump_syms', '-v', self.elf_file, self.debug_dir],
                          returncode=1)
     self.rc.AddCmdResult(['dump_syms', '-v', '-c', '-r', self.elf_file,
                           self.debug_dir],
@@ -315,7 +313,7 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
         self.elf_file, self.debug_file, self.breakpad_dir)
     self.assertEqual(ret, self.sym_file)
     self.assertEqual(self.rc.call_count, 3)
-    self.assertCommandArgs(0, ['dump_syms', '-v', '-d', self.elf_file,
+    self.assertCommandArgs(0, ['dump_syms', '-v', self.elf_file,
                                self.debug_dir])
     self.assertCommandArgs(
         1, ['dump_syms', '-v', '-c', '-r', self.elf_file, self.debug_dir])
