@@ -4,14 +4,16 @@
 
 """Toolchain-related operations."""
 
+import logging
 import os
 from pathlib import Path
 import re
-from typing import Dict, List, NamedTuple, Text, Tuple
+from typing import Dict, Iterable, List, NamedTuple, Text, Tuple
 
 from chromite.lib import chroot_util
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
+from chromite.lib import portage_util
 from chromite.lib.parser import package_info
 
 
@@ -138,8 +140,15 @@ class BuildLinter:
   def _filter_linter_findings(
       self, findings: List[LinterFinding]) -> List[LinterFinding]:
     """Filters findings to keep only those concerning modified lines."""
+    repo_paths = self._get_git_repo_paths()
+    if not repo_paths:
+      # If sources aren't found for one or more packages,
+      # return unfiltered findings.
+      return findings
+    repo_paths_dict = {repo_path:'HEAD' for repo_path in repo_paths}
+
     new_findings = []
-    new_lines = self._get_added_lines({BuildLinter.GIT_REPO_PATH: 'HEAD'})
+    new_lines = self._get_added_lines(repo_paths_dict)
     for finding in findings:
       for loc in finding.locations:
         for (addition_start, addition_end) in new_lines.get(loc.filepath, []):
@@ -149,7 +158,7 @@ class BuildLinter:
 
   def _get_added_lines(
       self, git_repos: Dict[Text, str]) -> Dict[Text, Tuple[int, int]]:
-    """Parses the lines with additions from fit diff for the provided repos.
+    """Parses the lines with additions from git diff for the provided repos.
 
     Args:
       git_repos: a dictionary mapping repo paths to hashes for `git diff`
@@ -264,3 +273,22 @@ class BuildLinter:
     # Such as: "**/<package>-9999/work/<package>-9999/"
     #      or: "**/<package>-0.24.52-r9/work/<package>-0.24.52/"
     return re.sub(r'(.*/)?[^/]+/work/[^/]+/+', '', file_path)
+
+  def _get_git_repo_paths(self) -> Iterable[str]:
+    """Gets the Git repo paths needed for performing differential linting."""
+    repo_paths = []
+    package_names = [pkg_info.package for pkg_info in self.packages]
+    ebuild_paths = portage_util.FindEbuildsForPackages(
+        package_names, self.sysroot)
+    for pkg, ebuild_path in ebuild_paths.items():
+      sources = [repo.srcdir for repo in
+                 portage_util.GetRepositoryForEbuild(ebuild_path, self.sysroot)]
+      if not sources:
+        logging.warning('Differential linting not possible for %s.'
+                        'Skipping differential linting.', pkg.package)
+        return set()
+
+      repo_paths.extend(sources)
+
+    # Remove duplicates from different packages having the same source repo
+    return set(repo_paths)
