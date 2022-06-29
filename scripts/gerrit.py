@@ -12,6 +12,7 @@ with the prefix "UserAct".
 import argparse
 import collections
 import configparser
+import enum
 import functools
 import inspect
 import json
@@ -100,6 +101,25 @@ GERRIT_SUMMARY_MAP = {
     'NEW': 'NEW',
     'WIP': 'WIP',
 }
+
+
+class OutputFormat(enum.Enum):
+  """Type for the requested output format.
+
+  AUTO: Automatically determine the format based on what the user
+    might want.  For now, this is just PRETTY, but this behavior is
+    subject to change.
+  RAW: Output CLs one per line, suitable for mild scripting.
+  JSON: JSON-encoded output, suitable for spicy scripting.
+  MARKDOWN: Suitable for posting in a bug or CL comment.
+  PRETTY: Suitable for viewing in a color terminal.
+  """
+  AUTO = 0
+  AUTOMATIC = AUTO
+  RAW = 1
+  JSON = 2
+  MARKDOWN = 3
+  PRETTY = 4
 
 
 def red(s):
@@ -225,7 +245,7 @@ def PrettyPrintCl(opts, cl, lims=None, show_approvals=True):
         functor = green
       status += functor('%s:%2s ' % (cat, approvs[cat]))
 
-  if opts.markdown:
+  if opts.format is OutputFormat.MARKDOWN:
     print('* %s - %s' % (uri_lib.ShortenUri(cl['url']), cl['subject']))
   else:
     print('%s %s%-*s %s' % (blue('%-*s' % (lims['url'], cl['url'])), status,
@@ -242,7 +262,7 @@ def PrettyPrintCl(opts, cl, lims=None, show_approvals=True):
 
 def PrintCls(opts, cls, lims=None, show_approvals=True):
   """Print all results based on the requested format."""
-  if opts.raw:
+  if opts.format is OutputFormat.RAW:
     site_params = config_lib.GetSiteParams()
     pfx = ''
     # Special case internal Chrome GoB as that is what most devs use.
@@ -252,7 +272,7 @@ def PrintCls(opts, cls, lims=None, show_approvals=True):
     for cl in cls:
       print('%s%s' % (pfx, cl['number']))
 
-  elif opts.json:
+  elif opts.format is OutputFormat.JSON:
     json.dump(cls, sys.stdout)
 
   else:
@@ -430,7 +450,7 @@ class ActionDeps(_ActionSearchQuery):
     # This is a hack to avoid losing GoB host for each CL.  The PrintCls
     # function assumes the GoB host specified by the user is the only one
     # that is ever used, but the deps command walks across hosts.
-    if opts.raw:
+    if opts.format is OutputFormat.RAW:
       print('\n'.join(x.PatchLink() for x in transitives))
     else:
       transitives_raw = [cl.patch_dict for cl in transitives]
@@ -898,7 +918,7 @@ class ActionCherryPick(UserAction):
         ret = helper.CherryPick(cl, branch, rev=opts.rev, msg=opts.msg,
                                 dryrun=opts.dryrun, notify=opts.notify)
         logging.debug('Response: %s', ret)
-        if opts.raw:
+        if opts.format is OutputFormat.RAW:
           print(ret['_number'])
         else:
           uri = f'https://{helper.host}/c/{ret["_number"]}'
@@ -1002,7 +1022,8 @@ class ActionAccount(_ActionSimpleParallelCLs):
 
     def print_one(header, data):
       print(f'### {header}')
-      print(pformat.json(data, compact=opts.json).rstrip())
+      compact = opts.format is OutputFormat.JSON
+      print(pformat.json(data, compact=compact).rstrip())
 
     def task(arg):
       detail = gob_util.FetchUrlJson(helper.host, f'accounts/{arg}/detail')
@@ -1191,12 +1212,35 @@ Actions:
   group = parser.add_argument_group('CL options')
   _AddCommonOptions(parser, group)
 
-  parser.add_argument('--raw', default=False, action='store_true',
-                      help='Return raw results (suitable for scripting)')
-  parser.add_argument('--json', default=False, action='store_true',
-                      help='Return results in JSON (suitable for scripting)')
-  parser.add_argument('--markdown', default=False, action='store_true',
-                      help='Return results in markdown (for pasting in a bug)')
+  group = parser.add_mutually_exclusive_group()
+  parser.set_defaults(format=OutputFormat.AUTO)
+  group.add_argument(
+      '--format',
+      action='enum',
+      enum=OutputFormat,
+      help='Output format to use.',
+  )
+  group.add_argument(
+      '--raw',
+      action='store_const',
+      dest='format',
+      const=OutputFormat.RAW,
+      help='Alias for --format=raw.',
+  )
+  group.add_argument(
+      '--json',
+      action='store_const',
+      dest='format',
+      const=OutputFormat.JSON,
+      help='Alias for --format=json.',
+  )
+  group.add_argument(
+      '--markdown',
+      action='store_const',
+      dest='format',
+      const=OutputFormat.MARKDOWN,
+      help='Alias for --format=markdown.',
+  )
   return parser
 
 
@@ -1244,6 +1288,9 @@ def main(argv):
 
   # A cache of gerrit helpers we'll load on demand.
   opts.gerrit = {}
+
+  if opts.format is OutputFormat.AUTO:
+    opts.format = OutputFormat.PRETTY
 
   opts.Freeze()
 
