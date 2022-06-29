@@ -742,6 +742,10 @@ def BuildPackages(target: 'build_target_lib.BuildTarget',
       except cros_build_lib.RunCommandError as e:
         logging.error('Unable to install debug symbols: %s', e)
 
+    # Remove any broken or outdated binpkgs.
+    if run_configs.eclean:
+      portage_util.CleanOutdatedBinaryPackages(sysroot.path, deep=True)
+
 
 def _CleanStaleBinpkgs(sysroot: Union[str, os.PathLike]) -> None:
   """Clean any accumulated stale binpkgs.
@@ -762,7 +766,7 @@ def _CleanStaleBinpkgs(sysroot: Union[str, os.PathLike]) -> None:
     f.write('\n'.join(exclude_pkgs))
     f.flush()
     portage_util.CleanOutdatedBinaryPackages(
-        sysroot, deep=False, exclusion_file=f.name)
+        sysroot, deep=True, exclusion_file=f.name)
 
 
 def _GetCrosWorkonPackages(

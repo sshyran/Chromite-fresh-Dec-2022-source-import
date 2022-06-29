@@ -8,6 +8,7 @@ from operator import attrgetter
 import os
 from pathlib import Path
 import shutil
+from typing import Optional, Union
 from unittest import mock
 
 from chromite.lib import binpkg
@@ -601,12 +602,16 @@ class BuildPackagesTest(cros_test_lib.RunCommandTestCase,
   def testEcleanBinpkgs(self):
     """Test that eclean is called with the expected packages."""
 
-    def assert_file_contents(sysroot_path, deep, exclusion_file):
-      contents = osutils.ReadFile(exclusion_file)
+    def assert_file_contents(
+        sysroot_path: Union[str, os.PathLike],
+        deep: bool,
+        exclusion_file: Optional[Union[str, os.PathLike]] = None):
+      if exclusion_file:
+        contents = osutils.ReadFile(exclusion_file)
+        self.assertEqual('cross-dev/package', contents)
 
       self.assertEqual(self.sysroot.path, sysroot_path)
-      self.assertFalse(deep)
-      self.assertEqual('cross-dev/package', contents)
+      self.assertTrue(deep)
 
     self.PatchObject(os.path, 'exists', return_value=True)
     self.installed_packages_mock.return_value = [
