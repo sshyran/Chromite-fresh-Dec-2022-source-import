@@ -67,10 +67,6 @@ class TestProcMetrics(cros_test_lib.TestCase):
                        '--provision', '--job-labels',
                        'cros-version:winky-release/R61-9741.0.0']
           ),
-          _mock_process(
-              name='apache2',
-              cmdline=['/usr/sbin/apache2', '-k', 'start'],
-          ),
           _mock_forked_process(
               name='autoserv',
               cmdline=['/usr/bin/python',
@@ -85,7 +81,7 @@ class TestProcMetrics(cros_test_lib.TestCase):
                        'cros-version:winky-release/R61-9741.0.0']
           ),
           _mock_process(
-              name='gs_offloader',
+              name='gs_offloader.py',
               cmdline=['/usr/bin/python',
                        '/usr/local/autotest/site_utils/gs_offloader.py',
                        '-s', '--parallelism=30']
@@ -98,45 +94,8 @@ class TestProcMetrics(cros_test_lib.TestCase):
                        '-m', 'chromite.scripts.sysmon', '--interval', '60']
           ),
           _mock_process(
-              name='python',
-              cmdline=[('/usr/local/google/home/chromeos-test/.cache/cros_venv'
-                        '/venv-2.7.6-5addca6cf590166d7b70e22a95bea4a0'
-                        '/bin/python'),
-                       '-m', 'lucifer.cmd.job_aborter',
-                       '--jobdir', '/usr/local/autotest/leases']
-          ),
-          _mock_process(
-              name='python',
-              cmdline=[('/usr/local/google/home/chromeos-test/.cache/cros_venv'
-                        '/venv-2.7.6-5addca6cf590166d7b70e22a95bea4a0'
-                        '/bin/python'),
-                       '-m', 'lucifer.cmd.job_reporter',
-                       '--run-job-path',
-                       '/opt/infra-tools/usr/bin/lucifer_run_job',
-                       '--jobdir', '/usr/local/autotest/leases',
-                       '--job-id', '167263377',
-                       '--autoserv-exit', '0',
-                       '--',
-                       '-resultsdir',
-                       ('/usr/local/autotest/results/167263377-chromeos-test/'
-                        'chromeos2-row11-rack6-host5'),
-                       '-autotestdir', '/usr/local/autotest',
-                       '-watcherpath',
-                       '/opt/infra-tools/usr/bin/lucifer_watcher']
-          ),
-          _mock_process(
-              name='lucifer',
-              cmdline=['/opt/infra-tools/usr/bin/lucifer',
-                       '-resultsdir',
-                       ('/usr/local/autotest/results/167263377-chromeos-test/'
-                        'chromeos2-row11-rack6-host5'),
-                       '-autotestdir', '/usr/local/autotest',
-                       '-watcherpath',
-                       '/opt/infra-tools/usr/bin/lucifer_watcher']
-          ),
-          _mock_process(
               name='lxc-start',
-              cmdline=['[lcx monitor] /usr/local/autotest/containers'
+              cmdline=['[lxc monitor] /usr/local/autotest/containers'
                        ' test_196499100_1525673902_240543]']
           ),
           _mock_process(
@@ -156,20 +115,54 @@ class TestProcMetrics(cros_test_lib.TestCase):
               name='getty',
               cmdline=['/sbin/getty', '-8', '38400', 'console',]
           ),
+          _mock_process(
+              name='sshd',
+              cmdline=['sshd:', 'chromeos-test', '[priv]']
+          ),
+          _mock_process(
+              name='python3.8',
+              cmdline=['/usr/bin/python3.8',
+                       '/home/chromeos-test/skylab_bots/'
+                       'c6-r16-r17-h13.2757785382/swarming_bot.1.zip',
+                       'start_bot']
+          ),
+          _mock_process(
+              name='curl',
+              cmdline=['curl', 'server:port/path']
+          ),
+          _mock_process(
+              name='python',
+              cmdline=['python', '-m', 'gs_archive_server', '-p', '18000',
+                       '-c', '127.0.0.1:8082']
+          ),
+          _mock_process(
+              name='java',
+              cmdline=['java', '-Xmx4g', '...']
+          ),
+          _mock_process(
+              name='python',
+              cmdline=['python',
+                       '/tmp/chromeos-cache/common/gsutil_4.57.tar.gz/'
+                       'gsutil/gsutil',
+                       '-o', 'Boto:num_retries=10',
+                       'cat', 'gs://eve-release/R100-14488.0.0/file']
+          ),
       ]
       proc_metrics.collect_proc_info()
 
     setter = self.store.set
     calls = []
-    calls.extend(_expected_calls_for('apache'))
     calls.extend(_expected_calls_for('autoserv'))
+    calls.extend(_expected_calls_for('curl'))
     calls.extend(_expected_calls_for('getty'))
+    calls.extend(_expected_calls_for('gs_archive_server'))
     calls.extend(_expected_calls_for('gs_offloader'))
-    calls.extend(_expected_calls_for('job_aborter'))
-    calls.extend(_expected_calls_for('job_reporter'))
-    calls.extend(_expected_calls_for('lucifer'))
-    calls.extend(_expected_calls_for('lxc-start'))
+    calls.extend(_expected_calls_for('gsutil'))
+    calls.extend(_expected_calls_for('java'))
     calls.extend(_expected_calls_for('lxc-attach'))
+    calls.extend(_expected_calls_for('lxc-start'))
+    calls.extend(_expected_calls_for('sshd'))
+    calls.extend(_expected_calls_for('swarming_bot'))
     calls.extend(_expected_calls_for('sysmon'))
     calls.extend(_expected_calls_for('other'))
     setter.assert_has_calls(calls)
