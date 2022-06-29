@@ -351,7 +351,9 @@ def EmergeWithLinting(input_proto: 'toolchain_pb2.LinterRequest',
       input_proto.sysroot.path,
       differential=input_proto.filter_modified)
 
-  findings = build_linter.emerge_with_linting(use_clippy=True, use_tidy=True)
+  findings = build_linter.emerge_with_linting(use_clippy=True,
+                                              use_tidy=True,
+                                              use_golint=True)
 
   for finding in findings:
     locations = []

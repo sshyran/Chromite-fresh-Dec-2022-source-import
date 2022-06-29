@@ -92,6 +92,11 @@ def get_arg_parser() -> commandline.ArgumentParser:
       action='store_false',
       help='Disable clang tidy linter.')
   parser.add_argument(
+      '--no-golint',
+      dest='golint',
+      action='store_false',
+      help='Disable golint linter.')
+  parser.add_argument(
       'packages', nargs='*', help='package(s) to emerge and retrieve lints for')
   return parser
 
@@ -128,10 +133,10 @@ def main(argv: List[str]) -> None:
                                          opts.differential)
     if opts.fetch_only:
       lints = build_linter.fetch_findings(
-          use_clippy=opts.clippy, use_tidy=opts.tidy)
+          use_clippy=opts.clippy, use_tidy=opts.tidy, use_golint=opts.golint)
     else:
       lints = build_linter.emerge_with_linting(
-          use_clippy=opts.clippy, use_tidy=opts.tidy)
+          use_clippy=opts.clippy, use_tidy=opts.tidy, use_golint=opts.golint)
 
   with file_util.Open(opts.output, 'w') as output_file:
     json.dump(lints, output_file)
