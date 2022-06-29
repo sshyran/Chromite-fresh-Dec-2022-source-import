@@ -257,9 +257,28 @@ def get_parser() -> commandline.ArgumentParser:
   build_shell_string_style_args(group, 'output_suffix', None,
                                 'Add custom suffix to output directory.',
                                 deprecation_note, 'output-suffix')
-  build_shell_bool_style_args(group, 'eclean', True,
-                              'Call eclean before building the image.',
-                              deprecation_note)
+  group.add_argument(
+      '--eclean',
+      action='store_true',
+      default=True,
+      dest='eclean',
+      deprecated=('eclean is being removed from build_images. Argument will be '
+                  'removed January, 2023.'),
+      help=argparse.SUPPRESS)
+  group.add_argument(
+      '--noeclean',
+      action='store_false',
+      dest='eclean',
+      deprecated=('eclean is being removed from build_images. Argument will be '
+                  'removed January, 2023.'),
+      help=argparse.SUPPRESS)
+  group.add_argument(
+      '--no-eclean',
+      action='store_false',
+      dest='eclean',
+      deprecated=('eclean is being removed from build_images. Argument will be '
+                  'removed January, 2023.'),
+      help=argparse.SUPPRESS)
 
   parser.add_argument(
       'images',
@@ -303,7 +322,6 @@ def parse_args(
       symlink=opts.symlink,
       version=opts.version,
       output_dir_suffix=opts.output_suffix,
-      eclean=opts.eclean,
   )
   opts.Freeze()
 

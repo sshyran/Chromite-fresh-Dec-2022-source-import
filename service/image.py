@@ -64,7 +64,6 @@ class BuildConfig(NamedTuple):
     enable_serial: Enable serial port for printks. Example values: ttyS0
     kernel_loglevel: The loglevel to add to the kernel command line.
     jobs: Number of packages to process in parallel at maximum.
-    eclean: Call eclean before building the image.
     base_is_recovery: Copy the base image to recovery_image.bin.
   """
   builder_path: Optional[str] = None
@@ -85,9 +84,6 @@ class BuildConfig(NamedTuple):
   enable_serial: Optional[str] = None
   kernel_loglevel: int = 7
   jobs: int = os.cpu_count()
-  # TODO(rchandrasekar): eclean will not be needed by build_image, after we move
-  # all the kernel emerging operations into build_packages.
-  eclean: bool = True
   base_is_recovery: bool = False
 
 
@@ -134,8 +130,6 @@ def GetBuildImageCommand(config: BuildConfig, image_names: List[str],
     cmd.append('--enable_bootcache')
   if _config['enable_serial']:
     cmd.extend(['--enable_serial', _config['enable_serial']])
-  if not _config['eclean']:
-    cmd.append('--noeclean')
   cmd.extend([
       '--disk_layout',
       _config['disk_layout'] if _config['disk_layout'] else 'default',

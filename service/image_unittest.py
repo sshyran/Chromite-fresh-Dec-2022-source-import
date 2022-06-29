@@ -271,13 +271,6 @@ class BuildImageCommandTest(cros_test_lib.MockTestCase):
     }
     self.assertTrue(expected.issubset(set(cmd)))
 
-    # eclean
-    self.assertIn(
-        '--noeclean',
-        image.GetBuildImageCommand(
-            image.BuildConfig(eclean=False), [constants.BASE_IMAGE_BIN],
-            'testBoard'))
-
     # image_name
     config = image.BuildConfig()
     for image_name in constants.IMAGE_NAME_TO_TYPE.keys():
