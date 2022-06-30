@@ -5,6 +5,7 @@
 """Provide a namespace for our helpers."""
 
 from chromite.format.formatters import cpp
+from chromite.format.formatters import gn
 from chromite.format.formatters import json
 from chromite.format.formatters import repo_manifest
 from chromite.format.formatters import rust

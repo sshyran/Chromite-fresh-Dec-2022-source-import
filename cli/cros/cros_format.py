@@ -24,6 +24,7 @@ from chromite.lib import parallel
 # Map file extensions to a formatter function.
 _EXT_TOOL_MAP = {
     frozenset({'.c', '.cc', '.cpp', '.cxx', '.h'}): (formatters.cpp.Data,),
+    frozenset({'.gn', '.gni'}): (formatters.gn.Data,),
     frozenset({'.json'}): (formatters.json.Data,),
     # TODO(build): Add a formatter for this.
     frozenset({'.md'}): (formatters.whitespace.Data,),
@@ -45,8 +46,6 @@ _FILENAME_PATTERNS_TOOL_MAP = {
         '.clang-format',
         '.gitignore',
         '.gitmodules',
-        '*.gn',
-        '*.gni',
         'COPYING*',
         'LICENSE*',
         'make.defaults',
