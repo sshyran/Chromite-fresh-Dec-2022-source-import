@@ -207,7 +207,8 @@ class CleanCommand(command.CliCommand):
     def Empty(path):
       """Helper wrapper for the dry-run checks"""
       if self.options.dry_run:
-        logging.notice('would have emptied: %s (%s)', path, _GetSize(path))
+        if os.path.exists(path):
+          logging.notice('would have emptied: %s (%s)', path, _GetSize(path))
       else:
         osutils.EmptyDir(path, ignore_missing=True, sudo=True)
 
