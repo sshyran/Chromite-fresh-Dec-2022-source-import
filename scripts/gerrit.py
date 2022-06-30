@@ -17,9 +17,12 @@ import functools
 import inspect
 import json
 import logging
+import os
 from pathlib import Path
 import re
 import shlex
+import signal
+import subprocess
 import sys
 
 from chromite.lib import chromite_config
@@ -62,6 +65,9 @@ class UserAction(object):
 
   # The name of the command the user types in.
   COMMAND = None
+
+  # Should output be paged?
+  USE_PAGER = False
 
   @staticmethod
   def init_subparser(parser):
@@ -330,6 +336,8 @@ def FilteredQuery(opts, query, helper=None):
 
 class _ActionSearchQuery(UserAction):
   """Base class for actions that perform searches."""
+
+  USE_PAGER = True
 
   @staticmethod
   def init_subparser(parser):
@@ -1008,6 +1016,7 @@ class ActionAccount(_ActionSimpleParallelCLs):
   """Get user account information"""
 
   COMMAND = 'account'
+  USE_PAGER = True
 
   @staticmethod
   def init_subparser(parser):
@@ -1064,6 +1073,7 @@ class ActionHelp(UserAction):
   """An alias to --help for CLI symmetry"""
 
   COMMAND = 'help'
+  USE_PAGER = True
 
   @staticmethod
   def init_subparser(parser):
@@ -1086,6 +1096,7 @@ class ActionHelpAll(UserAction):
   """Show all actions help output at once."""
 
   COMMAND = 'help-all'
+  USE_PAGER = True
 
   @staticmethod
   def __call__(opts):
@@ -1234,6 +1245,20 @@ Actions:
       const=OutputFormat.JSON,
       help='Alias for --format=json.',
   )
+
+  group = parser.add_mutually_exclusive_group()
+  group.add_argument(
+      '--pager',
+      action='store_true',
+      default=sys.stdout.isatty(),
+      help='Enable pager.',
+  )
+  group.add_argument(
+      '--no-pager',
+      action='store_false',
+      dest='pager',
+      help='Disable pager.'
+  )
   return parser
 
 
@@ -1260,6 +1285,39 @@ def GetParser(parser: commandline.ArgumentParser = None) -> (
   return parser
 
 
+def start_pager():
+  """Re-spawn ourselves attached to a pager."""
+  pager = os.environ.get('PAGER', 'less')
+  os.environ.setdefault('LESS', 'FRX')
+  with subprocess.Popen(
+      # sys.argv can have some edge cases: we may not necessarily use
+      # sys.executable if the script is executed as "python path/to/script".
+      # If we upgrade to Python 3.10+, this should be changed to sys.orig_argv
+      # for full accuracy.
+      sys.argv,
+      stdout=subprocess.PIPE,
+      stderr=subprocess.STDOUT,
+      env={'GERRIT_RESPAWN_FOR_PAGER': '1', **os.environ},
+  ) as gerrit_proc:
+    with subprocess.Popen(
+        pager,
+        shell=True,
+        stdin=gerrit_proc.stdout,
+    ) as pager_proc:
+      # Send SIGINT to just the gerrit process, not the pager too.
+      def _sighandler(signum, _frame):
+        gerrit_proc.send_signal(signum)
+
+      signal.signal(signal.SIGINT, _sighandler)
+
+      pager_proc.communicate()
+      # If the pager exits, and the gerrit process is still running, we
+      # must terminate it.
+      if gerrit_proc.poll() is None:
+        gerrit_proc.terminate()
+      sys.exit(gerrit_proc.wait())
+
+
 def main(argv):
   base_parser = GetBaseParser()
   opts, subargs = base_parser.parse_known_args(argv)
@@ -1275,6 +1333,13 @@ def main(argv):
 
   parser = GetParser(parser=base_parser)
   opts = parser.parse_args(argv)
+
+  # If we're running as a re-spawn for the pager, from this point on
+  # we'll pretend we're attached to a TTY.  This will give us colored
+  # output when requested.
+  if os.environ.pop('GERRIT_RESPAWN_FOR_PAGER', None) is not None:
+    opts.pager = False
+    sys.stdout.isatty = lambda: True
 
   # In case the action wants to throw a parser error.
   opts.parser = parser
@@ -1293,7 +1358,10 @@ def main(argv):
 
   # Now look up the requested user action and run it.
   actions = _GetActions()
-  obj = actions[opts.action]()
+  action_class = actions[opts.action]
+  if action_class.USE_PAGER and opts.pager:
+    start_pager()
+  obj = action_class()
   try:
     obj(opts)
   except (cros_build_lib.RunCommandError, gerrit.GerritException,
