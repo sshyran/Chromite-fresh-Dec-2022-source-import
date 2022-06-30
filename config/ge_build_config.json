@@ -158,6 +158,18 @@
       ]
     },
     {
+      "name": "coral-arc-r",
+      "configs": [
+        {
+          "builder": "RELEASE",
+          "experimental": true,
+          "leader_board": false,
+          "board_group": "",
+          "arch": "X86_INTERNAL"
+        }
+      ]
+    },
+    {
       "name": "corsola64",
       "configs": [
         {
@@ -285,6 +297,18 @@
           "experimental": false,
           "leader_board": true,
           "board_group": "vm builds",
+          "arch": "X86_INTERNAL"
+        }
+      ]
+    },
+    {
+      "name": "reef-arc-r",
+      "configs": [
+        {
+          "builder": "RELEASE",
+          "experimental": true,
+          "leader_board": false,
+          "board_group": "",
           "arch": "X86_INTERNAL"
         }
       ]

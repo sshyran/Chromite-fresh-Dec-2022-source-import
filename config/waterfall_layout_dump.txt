@@ -203,6 +203,7 @@
     chell-release
     cherry-release
     cherry64-release
+    coral-arc-r-release
     coral-kernelnext-release
     coral-release
     corsola-release
@@ -283,6 +284,7 @@
     rammus-arc-r-release
     rammus-arc-r-userdebug-release
     rammus-release
+    reef-arc-r-release
     reef-release
     reven-release
     reven-vmtest-release
@@ -572,6 +574,11 @@
   chromiumos-sdk-llvm-next-tryjob
   chromiumos-sdk-tryjob
   config-updater-tryjob
+  coral-arc-r-full-tryjob
+  coral-arc-r-llvm-next-toolchain-tryjob
+  coral-arc-r-llvm-toolchain-tryjob
+  coral-arc-r-payloads-tryjob
+  coral-arc-r-release-tryjob
   coral-factory-coral-10122.B-factorybranch-tryjob
   coral-full-tryjob
   coral-kernelnext-full-tryjob
@@ -1157,6 +1164,7 @@
     chell-release-tryjob
     cherry-release-tryjob
     cherry64-release-tryjob
+    coral-arc-r-release-tryjob
     coral-kernelnext-release-tryjob
     coral-release-tryjob
     corsola-release-tryjob
@@ -1237,6 +1245,7 @@
     rammus-arc-r-release-tryjob
     rammus-arc-r-userdebug-release-tryjob
     rammus-release-tryjob
+    reef-arc-r-release-tryjob
     reef-release-tryjob
     reven-release-tryjob
     reven-vmtest-release-tryjob
@@ -1414,6 +1423,11 @@
   rammus-master-factorybranch-tryjob
   rammus-payloads-tryjob
   rammus-release-tryjob
+  reef-arc-r-full-tryjob
+  reef-arc-r-llvm-next-toolchain-tryjob
+  reef-arc-r-llvm-toolchain-tryjob
+  reef-arc-r-payloads-tryjob
+  reef-arc-r-release-tryjob
   reef-factory-reef-8811.B-factorybranch-tryjob
   reef-full-tryjob
   reef-llvm-next-toolchain-tryjob
