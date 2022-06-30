@@ -23,6 +23,7 @@ from chromite.lib import parallel
 
 # Map file extensions to a formatter function.
 _EXT_TOOL_MAP = {
+    frozenset({'.c', '.cc', '.cpp', '.cxx', '.h'}): (formatters.cpp.Data,),
     frozenset({'.json'}): (formatters.json.Data,),
     # TODO(build): Add a formatter for this.
     frozenset({'.md'}): (formatters.whitespace.Data,),
