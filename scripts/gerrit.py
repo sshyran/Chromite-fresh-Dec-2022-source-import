@@ -113,8 +113,8 @@ class OutputFormat(enum.Enum):
   """Type for the requested output format.
 
   AUTO: Automatically determine the format based on what the user
-    might want.  For now, this is just PRETTY, but this behavior is
-    subject to change.
+    might want.  This is PRETTY if attached to a terminal, RAW
+    otherwise.
   RAW: Output CLs one per line, suitable for mild scripting.
   JSON: JSON-encoded output, suitable for spicy scripting.
   MARKDOWN: Suitable for posting in a bug or CL comment.
@@ -1348,7 +1348,10 @@ def main(argv):
   opts.gerrit = {}
 
   if opts.format is OutputFormat.AUTO:
-    opts.format = OutputFormat.PRETTY
+    if sys.stdout.isatty():
+      opts.format = OutputFormat.PRETTY
+    else:
+      opts.format = OutputFormat.RAW
 
   opts.Freeze()
 
