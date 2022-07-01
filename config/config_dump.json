@@ -23378,7 +23378,6 @@
     "boards": [
       "rex"
     ],
-    "important": false,
     "vm_tests_override": null
   },
   "rex-release-tryjob": {
