@@ -7150,6 +7150,26 @@
       "coral-arc-r"
     ],
     "important": false,
+    "models": [
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"astronaut\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"babymega\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"babytiger\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"blacktip\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"blacktip360\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"blacktiplte\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"blue\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"bruce\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"epaulette\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"lava\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"nasher\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"nasher360\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"porbeagle\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"rabbid\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"robo\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"robo360\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"santa\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"whitetip\",\n  \"test_suites\": []\n}"
+    ],
     "vm_tests_override": null
   },
   "coral-arc-r-release-tryjob": {
@@ -7170,6 +7190,26 @@
     ],
     "hw_tests_override": null,
     "luci_builder": "Try",
+    "models": [
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"astronaut\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"babymega\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"babytiger\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"blacktip\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"blacktip360\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"blacktiplte\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"blue\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"bruce\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"epaulette\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"lava\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"nasher\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"nasher360\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"porbeagle\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"rabbid\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"robo\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"robo360\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"santa\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": false,\n  \"lab_board_name\": \"coral\",\n  \"name\": \"whitetip\",\n  \"test_suites\": []\n}"
+    ],
     "paygen": false,
     "push_image": false,
     "suite_scheduling": false,
@@ -7617,7 +7657,9 @@
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"corsola\",\n  \"name\": \"kingler\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"corsola\",\n  \"name\": \"krabby\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"corsola\",\n  \"name\": \"rusty\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"corsola\",\n  \"name\": \"steelix\",\n  \"test_suites\": []\n}"
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"corsola\",\n  \"name\": \"steelix\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"corsola\",\n  \"name\": \"tentacool\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"corsola\",\n  \"name\": \"tentacruel\",\n  \"test_suites\": []\n}"
     ],
     "sign_types": [
       "recovery",
@@ -7647,7 +7689,9 @@
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"corsola\",\n  \"name\": \"kingler\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"corsola\",\n  \"name\": \"krabby\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"corsola\",\n  \"name\": \"rusty\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"corsola\",\n  \"name\": \"steelix\",\n  \"test_suites\": []\n}"
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"corsola\",\n  \"name\": \"steelix\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"corsola\",\n  \"name\": \"tentacool\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"corsola\",\n  \"name\": \"tentacruel\",\n  \"test_suites\": []\n}"
     ],
     "paygen": false,
     "push_image": false,
@@ -22668,6 +22712,10 @@
       "reef-arc-r"
     ],
     "important": false,
+    "models": [
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"reef\",\n  \"name\": \"basking\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"reef\",\n  \"name\": \"electro\",\n  \"test_suites\": []\n}"
+    ],
     "vm_tests_override": null
   },
   "reef-arc-r-release-tryjob": {
@@ -22688,6 +22736,10 @@
     ],
     "hw_tests_override": null,
     "luci_builder": "Try",
+    "models": [
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"reef\",\n  \"name\": \"basking\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"reef\",\n  \"name\": \"electro\",\n  \"test_suites\": []\n}"
+    ],
     "paygen": false,
     "push_image": false,
     "suite_scheduling": false,

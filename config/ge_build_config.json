@@ -158,18 +158,6 @@
       ]
     },
     {
-      "name": "coral-arc-r",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "corsola64",
       "configs": [
         {
@@ -297,18 +285,6 @@
           "experimental": false,
           "leader_board": true,
           "board_group": "vm builds",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "reef-arc-r",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
           "arch": "X86_INTERNAL"
         }
       ]
@@ -2652,6 +2628,159 @@
       ]
     },
     {
+      "name": "coral-arc-r",
+      "reference_board_name": "coral-arc-r",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "coral-arc-r",
+          "name": "astronaut",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7234,
+          "is_active": true
+        },
+        {
+          "board_name": "coral-arc-r",
+          "name": "babymega",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7234,
+          "is_active": true
+        },
+        {
+          "board_name": "coral-arc-r",
+          "name": "babytiger",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7234,
+          "is_active": true
+        },
+        {
+          "board_name": "coral-arc-r",
+          "name": "blacktip",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7234,
+          "is_active": true
+        },
+        {
+          "board_name": "coral-arc-r",
+          "name": "blacktip360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7234,
+          "is_active": true
+        },
+        {
+          "board_name": "coral-arc-r",
+          "name": "blacktiplte",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7234,
+          "is_active": true
+        },
+        {
+          "board_name": "coral-arc-r",
+          "name": "blue",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7234,
+          "is_active": true
+        },
+        {
+          "board_name": "coral-arc-r",
+          "name": "bruce",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7234,
+          "is_active": true
+        },
+        {
+          "board_name": "coral-arc-r",
+          "name": "epaulette",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7234,
+          "is_active": true
+        },
+        {
+          "board_name": "coral-arc-r",
+          "name": "lava",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7234,
+          "is_active": true
+        },
+        {
+          "board_name": "coral-arc-r",
+          "name": "nasher",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7234,
+          "is_active": true
+        },
+        {
+          "board_name": "coral-arc-r",
+          "name": "nasher360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7234,
+          "is_active": true
+        },
+        {
+          "board_name": "coral-arc-r",
+          "name": "porbeagle",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7234,
+          "is_active": true
+        },
+        {
+          "board_name": "coral-arc-r",
+          "name": "rabbid",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7234,
+          "is_active": true
+        },
+        {
+          "board_name": "coral-arc-r",
+          "name": "robo",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7234,
+          "is_active": true
+        },
+        {
+          "board_name": "coral-arc-r",
+          "name": "robo360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7234,
+          "is_active": true
+        },
+        {
+          "board_name": "coral-arc-r",
+          "name": "santa",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7234,
+          "is_active": true
+        },
+        {
+          "board_name": "coral-arc-r",
+          "name": "whitetip",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7234,
+          "is_active": true
+        }
+      ]
+    },
+    {
       "name": "coral-kernelnext",
       "reference_board_name": "coral-kernelnext",
       "arch": "X86_INTERNAL",
@@ -2980,6 +3109,22 @@
         {
           "board_name": "corsola",
           "name": "steelix",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7211,
+          "is_active": true
+        },
+        {
+          "board_name": "corsola",
+          "name": "tentacool",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7211,
+          "is_active": true
+        },
+        {
+          "board_name": "corsola",
+          "name": "tentacruel",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7211,
@@ -10055,6 +10200,31 @@
           "cq_test_enabled": true,
           "release_builder_test_pool": "bvt",
           "board_id": 283,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "reef-arc-r",
+      "reference_board_name": "reef-arc-r",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "reef-arc-r",
+          "name": "basking",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7235,
+          "is_active": true
+        },
+        {
+          "board_name": "reef-arc-r",
+          "name": "electro",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7235,
           "is_active": true
         }
       ]
