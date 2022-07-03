@@ -900,8 +900,10 @@ def _PrepareStagingDir(options, tempdir, staging_dir, copy_paths=None,
         shutil.move(filename, staging_dir)
       osutils.RmDir(os.path.join(staging_dir, 'system'), ignore_missing=True)
     else:
+      compression = cros_build_lib.CompressionDetectType(pkg_path)
+      compressor = cros_build_lib.FindCompressor(compression)
       cros_build_lib.dbg_run(
-          ['tar', '--strip-components', '4', '--extract',
+          ['tar', '--strip-components', '4', '--extract', '-I', compressor,
            '--preserve-permissions', '--file', pkg_path, '.%s' % chrome_dir],
           cwd=staging_dir)
 
