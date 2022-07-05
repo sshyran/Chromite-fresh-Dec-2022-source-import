@@ -14,7 +14,7 @@ import json
 import os
 import re
 import sys
-from typing import Optional
+from typing import List, Optional
 
 
 class Converter:
@@ -63,9 +63,9 @@ class Converter:
 
     # Remove a few compiler options that might not be available in the
     # potentially older clang version outside the chroot.
-    # TODO(oka): Cover this logic with unit test.
     if option in ['-fdebug-info-for-profiling', '-mretpoline',
-                  '-mretpoline-external-thunk', '-mfentry']:
+                  '-mretpoline-external-thunk', '-mfentry',
+                  '-mno-sched-prolog', '-fconserve-stack']:
       return None
 
     if '=' in option:
@@ -76,8 +76,8 @@ class Converter:
       raise Exception(f'Unknown flag that suffixes a filepath: {option}')
     return option
 
-  def convert_command(self, command: str) -> str:
-    exe, *options = command.split(' ')
+  def convert_command_list(self, command: List[str]) -> List[str]:
+    exe, *options = command
 
     # We should call clang directly instead of using CrOS wrappers.
     converted_exe: str
@@ -85,6 +85,8 @@ class Converter:
       if exe.endswith(x):
         converted_exe = x
         break
+    if exe == 'cc':
+      converted_exe = exe
     if not converted_exe:
       raise Exception(f'Unexpected executable name: {exe}')
 
@@ -98,9 +100,19 @@ class Converter:
 
     # Add "-stdlib=libc++" so that the clang outside the chroot can
     # find built-in headers like <string> and <memory>
-    converted_options.append('-stdlib=libc++')
+    if 'clang' in converted_exe:
+      converted_options.append('-stdlib=libc++')
 
-    return converted_exe + ' ' + ' '.join(converted_options)
+    return [converted_exe, *converted_options]
+
+  def convert_command(self, command: str) -> str:
+    return ' '.join(self.convert_command_list(command.split(' ')))
+
+DIRECTORY = 'directory'
+COMMAND = 'command'
+FILE = 'file'
+OUTPUT = 'output'
+ARGUMENTS = 'arguments'
 
 def generate(data, external_trunk_path):
   """Generates non-chroot version of the compilation database"""
@@ -108,18 +120,25 @@ def generate(data, external_trunk_path):
   converter = Converter(external_trunk_path)
 
   converted = []
-  for x in data:
-    directory = x['directory']
-    command = x['command']
-    filepath = x['file']
-    output = x['output']
+  for item in data:
+    converted_item = {}
 
-    converted.append({
-        'directory': converter.convert_filepath(directory),
-        'command': converter.convert_command(command),
-        'file': converter.convert_filepath(filepath),
-        'output': converter.convert_filepath(output),
-    })
+    if ARGUMENTS in item:
+      converted_item[ARGUMENTS] = converter.convert_command_list(
+          item[ARGUMENTS])
+
+    converted_item[DIRECTORY] = converter.convert_filepath(item[DIRECTORY])
+
+    if COMMAND in item:
+      converted_item[COMMAND] = converter.convert_command(item[COMMAND])
+
+    converted_item[FILE] = converter.convert_filepath(item[FILE])
+
+    if OUTPUT in item:
+      converted_item[OUTPUT] = converter.convert_filepath(item[OUTPUT])
+
+    converted.append(converted_item)
+
   return converted
 
 def main():
