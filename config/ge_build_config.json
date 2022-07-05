@@ -158,18 +158,6 @@
       ]
     },
     {
-      "name": "corsola64",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "corsola",
-          "arch": "ARM_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "goroh",
       "configs": [
         {
@@ -3128,6 +3116,31 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7211,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "corsola64",
+      "reference_board_name": "corsola64",
+      "arch": "ARM_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "corsola64",
+          "name": "rusty",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7231,
+          "is_active": true
+        },
+        {
+          "board_name": "corsola64",
+          "name": "steelix",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7231,
           "is_active": true
         }
       ]
