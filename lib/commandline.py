@@ -419,6 +419,46 @@ class _AppendOptionValue(argparse.Action):
     getattr(namespace, self.dest).extend([option_string, str(values)])
 
 
+class _EnumAction(argparse.Action):
+  """Allows adding enums as an argument with minimal syntax.
+
+  For example:
+      class Size(enum.Enum):
+           SMALL = 0
+           MEDIUM = 1
+           LARGE = 2
+      ...
+      parser.add_argument(
+          "--size",
+          action="enum",
+          enum=Size,
+          help="The size to use (either small, medium, or large)",
+      )
+  """
+  def __init__(self, *args, **kwargs):
+    """Init override to extract the "enum" argument."""
+    self.enum = kwargs.pop('enum', None)
+    if self.enum:
+      kwargs.setdefault('choices', self.enum.__members__.values())
+
+      valid_inputs = [x.lower() for x in self.enum.__members__]
+      kwargs.setdefault('metavar', '{%s}' % ','.join(valid_inputs))
+
+      def _parse_arg(arg):
+        if arg not in valid_inputs:
+          raise argparse.ArgumentTypeError(
+              f'{arg!r} is not recognized.  Choose from {valid_inputs!r}'
+          )
+        return self.enum[arg.upper()]
+
+      kwargs.setdefault('type', _parse_arg)
+
+    super().__init__(*args, **kwargs)
+
+  def __call__(self, parser, namespace, values, option_string=None):
+    setattr(namespace, self.dest, values)
+
+
 class _SplitExtendAction(argparse.Action):
   """Callback to split the argument and extend existing value.
 
@@ -448,6 +488,7 @@ VALID_TYPES = {
 VALID_ACTIONS = {
     'append_option': _AppendOption,
     'append_option_value': _AppendOptionValue,
+    'enum': _EnumAction,
     'split_extend': _SplitExtendAction,
 }
 
