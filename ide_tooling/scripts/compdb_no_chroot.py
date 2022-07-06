@@ -16,6 +16,8 @@ import re
 import sys
 from typing import List, Optional
 
+import detect_indent
+
 
 class Converter:
   """Converts compilation database to work outside chroot"""
@@ -142,11 +144,13 @@ def generate(data, external_trunk_path):
   return converted
 
 def main():
-  data = json.load(sys.stdin)
+  text = sys.stdin.read()
+  data = json.loads(text)
   external_trunk_path = sys.argv[1]
   if not os.path.exists(external_trunk_path):
     raise Exception(f'{external_trunk_path} should be trunk path')
-  json.dump(generate(data, sys.argv[1]), sys.stdout, indent=2)
+  indent = detect_indent.detect_indentation(text)
+  json.dump(generate(data, sys.argv[1]), sys.stdout, indent=indent)
 
 if __name__ == '__main__':
   main()
