@@ -1234,13 +1234,6 @@ Actions:
       const=OutputFormat.JSON,
       help='Alias for --format=json.',
   )
-  group.add_argument(
-      '--markdown',
-      action='store_const',
-      dest='format',
-      const=OutputFormat.MARKDOWN,
-      help='Alias for --format=markdown.',
-  )
   return parser
 
 
