@@ -240,6 +240,7 @@
     hatch-kernelnext-release
     hatch-release
     herobrine-release
+    herobrine-userdebug-release
     jacuzzi-kernelnext-release
     jacuzzi-release
     jacuzzi64-release
@@ -305,6 +306,7 @@
     trogdor-connectivitynext-release
     trogdor-kernelnext-release
     trogdor-release
+    trogdor-userdebug-release
     trogdor-zephyr-release
     trogdor64-release
     volteer-borealis-release
@@ -947,6 +949,11 @@
   herobrine-llvm-toolchain-tryjob
   herobrine-payloads-tryjob
   herobrine-release-tryjob
+  herobrine-userdebug-full-tryjob
+  herobrine-userdebug-llvm-next-toolchain-tryjob
+  herobrine-userdebug-llvm-toolchain-tryjob
+  herobrine-userdebug-payloads-tryjob
+  herobrine-userdebug-release-tryjob
   jacuzzi-factory-kukui-12587.B-factorybranch-tryjob
   jacuzzi-factory-kukui-14374.B-factorybranch-tryjob
   jacuzzi-full-tryjob
@@ -1162,6 +1169,7 @@
     hatch-kernelnext-release-tryjob
     hatch-release-tryjob
     herobrine-release-tryjob
+    herobrine-userdebug-release-tryjob
     jacuzzi-kernelnext-release-tryjob
     jacuzzi-release-tryjob
     jacuzzi64-release-tryjob
@@ -1227,6 +1235,7 @@
     trogdor-connectivitynext-release-tryjob
     trogdor-kernelnext-release-tryjob
     trogdor-release-tryjob
+    trogdor-userdebug-release-tryjob
     trogdor-zephyr-release-tryjob
     trogdor64-release-tryjob
     volteer-borealis-release-tryjob
@@ -1535,6 +1544,11 @@
   trogdor-llvm-toolchain-tryjob
   trogdor-payloads-tryjob
   trogdor-release-tryjob
+  trogdor-userdebug-full-tryjob
+  trogdor-userdebug-llvm-next-toolchain-tryjob
+  trogdor-userdebug-llvm-toolchain-tryjob
+  trogdor-userdebug-payloads-tryjob
+  trogdor-userdebug-release-tryjob
   trogdor-zephyr-full-tryjob
   trogdor-zephyr-llvm-next-toolchain-tryjob
   trogdor-zephyr-llvm-toolchain-tryjob
