@@ -5,6 +5,9 @@
       "name": "arm-generic"
     },
     {
+      "name": "arm64-generic"
+    },
+    {
       "name": "asuka",
       "configs": [
         {
