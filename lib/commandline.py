@@ -688,9 +688,13 @@ class BaseParser(object):
             dest='log_level', help='Alias for `--log-level=debug`. '
             'Useful for debugging bugs/failures.')
       self.add_common_argument_to_group(
-          self.debug_group, '--nocolor', action='store_false', dest='color',
+          self.debug_group, '--color', action='store_true',
           default=None,
-          help='Do not use colorized output (or `export NOCOLOR=true`)')
+          help='Colorize output (default: auto-detect).')
+      self.add_common_argument_to_group(
+          self.debug_group, '--no-color', '--nocolor',
+          action='store_false', dest='color',
+          help='Do not colorize output (or `export NOCOLOR=true`).')
 
     if self.caching:
       self.caching_group = self.add_argument_group('Caching Options')
