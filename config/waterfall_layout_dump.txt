@@ -174,7 +174,6 @@
     asuka-release
     asurada-connectivitynext-release
     asurada-release
-    atlas-blueznext-release
     atlas-connectivitynext-release
     atlas-kernelnext-release
     atlas-release
@@ -195,10 +194,8 @@
     brya-release
     brya-zephyr-release
     bubs-release
-    caroline-arc64-release
     caroline-ndktranslation-release
     caroline-release
-    caroline-userdebug-release
     cave-release
     chell-release
     cherry-release
@@ -239,10 +236,7 @@
     hatch-arc-r-release
     hatch-arc-r-userdebug-release
     hatch-arc-t-release
-    hatch-blueznext-release
     hatch-borealis-release
-    hatch-connectivitynext-release
-    hatch-diskswap-release
     hatch-kernelnext-release
     hatch-release
     herobrine-release
@@ -263,7 +257,6 @@
     lars-kernelnext-release
     lars-release
     majolica-release
-    mushu-release
     nami-kernelnext-release
     nami-release
     nautilus-release
@@ -277,7 +270,6 @@
     octopus-release
     palkia-release
     puff-borealis-release
-    puff-macrophage-release
     puff-moblab-release
     puff-release
     pyro-release
@@ -396,11 +388,6 @@
   asurada-llvm-toolchain-tryjob
   asurada-payloads-tryjob
   asurada-release-tryjob
-  atlas-blueznext-full-tryjob
-  atlas-blueznext-llvm-next-toolchain-tryjob
-  atlas-blueznext-llvm-toolchain-tryjob
-  atlas-blueznext-payloads-tryjob
-  atlas-blueznext-release-tryjob
   atlas-connectivitynext-full-tryjob
   atlas-connectivitynext-llvm-next-toolchain-tryjob
   atlas-connectivitynext-llvm-toolchain-tryjob
@@ -523,11 +510,6 @@
   buddy-factory-auron-6459.B-factorybranch-tryjob
   buddy-factory-auron-6772.B-factorybranch-tryjob
   candy-factory-rambi-6420.B-factorybranch-tryjob
-  caroline-arc64-full-tryjob
-  caroline-arc64-llvm-next-toolchain-tryjob
-  caroline-arc64-llvm-toolchain-tryjob
-  caroline-arc64-payloads-tryjob
-  caroline-arc64-release-tryjob
   caroline-factory-glados-7828.B-factorybranch-tryjob
   caroline-full-tryjob
   caroline-llvm-next-toolchain-tryjob
@@ -539,11 +521,6 @@
   caroline-ndktranslation-release-tryjob
   caroline-payloads-tryjob
   caroline-release-tryjob
-  caroline-userdebug-full-tryjob
-  caroline-userdebug-llvm-next-toolchain-tryjob
-  caroline-userdebug-llvm-toolchain-tryjob
-  caroline-userdebug-payloads-tryjob
-  caroline-userdebug-release-tryjob
   cave-factory-glados-7828.B-factorybranch-tryjob
   cave-full-tryjob
   cave-llvm-next-toolchain-tryjob
@@ -948,26 +925,11 @@
   hatch-arc-t-llvm-toolchain-tryjob
   hatch-arc-t-payloads-tryjob
   hatch-arc-t-release-tryjob
-  hatch-blueznext-full-tryjob
-  hatch-blueznext-llvm-next-toolchain-tryjob
-  hatch-blueznext-llvm-toolchain-tryjob
-  hatch-blueznext-payloads-tryjob
-  hatch-blueznext-release-tryjob
   hatch-borealis-full-tryjob
   hatch-borealis-llvm-next-toolchain-tryjob
   hatch-borealis-llvm-toolchain-tryjob
   hatch-borealis-payloads-tryjob
   hatch-borealis-release-tryjob
-  hatch-connectivitynext-full-tryjob
-  hatch-connectivitynext-llvm-next-toolchain-tryjob
-  hatch-connectivitynext-llvm-toolchain-tryjob
-  hatch-connectivitynext-payloads-tryjob
-  hatch-connectivitynext-release-tryjob
-  hatch-diskswap-full-tryjob
-  hatch-diskswap-llvm-next-toolchain-tryjob
-  hatch-diskswap-llvm-toolchain-tryjob
-  hatch-diskswap-payloads-tryjob
-  hatch-diskswap-release-tryjob
   hatch-factory-hatch-12692.B-factorybranch-tryjob
   hatch-full-tryjob
   hatch-kernelnext-full-tryjob
@@ -1134,7 +1096,6 @@
     asuka-release-tryjob
     asurada-connectivitynext-release-tryjob
     asurada-release-tryjob
-    atlas-blueznext-release-tryjob
     atlas-connectivitynext-release-tryjob
     atlas-kernelnext-release-tryjob
     atlas-release-tryjob
@@ -1155,10 +1116,8 @@
     brya-release-tryjob
     brya-zephyr-release-tryjob
     bubs-release-tryjob
-    caroline-arc64-release-tryjob
     caroline-ndktranslation-release-tryjob
     caroline-release-tryjob
-    caroline-userdebug-release-tryjob
     cave-release-tryjob
     chell-release-tryjob
     cherry-release-tryjob
@@ -1199,10 +1158,7 @@
     hatch-arc-r-release-tryjob
     hatch-arc-r-userdebug-release-tryjob
     hatch-arc-t-release-tryjob
-    hatch-blueznext-release-tryjob
     hatch-borealis-release-tryjob
-    hatch-connectivitynext-release-tryjob
-    hatch-diskswap-release-tryjob
     hatch-kernelnext-release-tryjob
     hatch-release-tryjob
     herobrine-release-tryjob
@@ -1223,7 +1179,6 @@
     lars-kernelnext-release-tryjob
     lars-release-tryjob
     majolica-release-tryjob
-    mushu-release-tryjob
     nami-kernelnext-release-tryjob
     nami-release-tryjob
     nautilus-release-tryjob
@@ -1237,7 +1192,6 @@
     octopus-release-tryjob
     palkia-release-tryjob
     puff-borealis-release-tryjob
-    puff-macrophage-release-tryjob
     puff-moblab-release-tryjob
     puff-release-tryjob
     pyro-release-tryjob
@@ -1288,11 +1242,6 @@
     zork-release-tryjob
   mistral-factory-mistral-12361.B-factorybranch-tryjob
   mistral-master-factorybranch-tryjob
-  mushu-full-tryjob
-  mushu-llvm-next-toolchain-tryjob
-  mushu-llvm-toolchain-tryjob
-  mushu-payloads-tryjob
-  mushu-release-tryjob
   nami-factory-nami-10715.B-factorybranch-tryjob
   nami-full-tryjob
   nami-kernelnext-full-tryjob
@@ -1385,11 +1334,6 @@
   puff-full-tryjob
   puff-llvm-next-toolchain-tryjob
   puff-llvm-toolchain-tryjob
-  puff-macrophage-full-tryjob
-  puff-macrophage-llvm-next-toolchain-tryjob
-  puff-macrophage-llvm-toolchain-tryjob
-  puff-macrophage-payloads-tryjob
-  puff-macrophage-release-tryjob
   puff-moblab-factory-puff-13329.B-factorybranch-tryjob
   puff-moblab-full-tryjob
   puff-moblab-llvm-next-toolchain-tryjob
