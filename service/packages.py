@@ -392,7 +392,7 @@ def uprev_virglrenderer(_build_targets, refs, _chroot):
 
   updated_files = uprev_manager.modified_ebuilds
   result = uprev_lib.UprevVersionedPackageResult()
-  result.add_result(refs[0].revision, updated_files)
+  result.add_result(refs[-1].revision, updated_files)
   return result
 
 @uprevs_versioned_package('chromeos-base/drivefs')
