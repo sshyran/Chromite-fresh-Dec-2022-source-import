@@ -2,6 +2,9 @@
   "metadata_version": "1.0",
   "boards": [
     {
+      "name": "arm-generic"
+    },
+    {
       "name": "asuka",
       "configs": [
         {
