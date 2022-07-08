@@ -300,6 +300,7 @@
     soraka-release
     strongbad-kernelnext-release
     strongbad-release
+    strongbad-userdebug-release
     tael-release
     tatl-release
     trogdor-arc-r-release
@@ -1229,6 +1230,7 @@
     soraka-release-tryjob
     strongbad-kernelnext-release-tryjob
     strongbad-release-tryjob
+    strongbad-userdebug-release-tryjob
     tael-release-tryjob
     tatl-release-tryjob
     trogdor-arc-r-release-tryjob
@@ -1507,6 +1509,11 @@
   strongbad-llvm-toolchain-tryjob
   strongbad-payloads-tryjob
   strongbad-release-tryjob
+  strongbad-userdebug-full-tryjob
+  strongbad-userdebug-llvm-next-toolchain-tryjob
+  strongbad-userdebug-llvm-toolchain-tryjob
+  strongbad-userdebug-payloads-tryjob
+  strongbad-userdebug-release-tryjob
   success-build
   sumo-factory-rambi-6420.B-factorybranch-tryjob
   swanky-factory-rambi-5517.B-factorybranch-tryjob
