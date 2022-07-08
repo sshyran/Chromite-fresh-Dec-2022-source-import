@@ -323,7 +323,8 @@ def _GetProfileInfoDict(profile_info: 'toolchain_pb2.ArtifactProfileInfo'):
 
 LINTER_CODES = {
     'clang_tidy': toolchain_pb2.LinterFinding.CLANG_TIDY,
-    'cargo_clippy': toolchain_pb2.LinterFinding.CARGO_CLIPPY
+    'cargo_clippy': toolchain_pb2.LinterFinding.CARGO_CLIPPY,
+    'go_lint': toolchain_pb2.LinterFinding.GO_LINT
 }
 
 
