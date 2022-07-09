@@ -339,18 +339,6 @@
       ]
     },
     {
-      "name": "strongbad-userdebug",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "ARM_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "tael",
       "configs": [
         {
@@ -10671,6 +10659,55 @@
         }
       ],
       "rubik_target_milestone": 103
+    },
+    {
+      "name": "strongbad-userdebug",
+      "reference_board_name": "strongbad-userdebug",
+      "arch": "ARM_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "strongbad-userdebug",
+          "name": "coachz",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7240,
+          "is_active": true
+        },
+        {
+          "board_name": "strongbad-userdebug",
+          "name": "homestar",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7240,
+          "is_active": true
+        },
+        {
+          "board_name": "strongbad-userdebug",
+          "name": "mrbland",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7240,
+          "is_active": true
+        },
+        {
+          "board_name": "strongbad-userdebug",
+          "name": "quackingstick",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7240,
+          "is_active": true
+        },
+        {
+          "board_name": "strongbad-userdebug",
+          "name": "wormdingler",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7240,
+          "is_active": true
+        }
+      ]
     },
     {
       "name": "trogdor",
