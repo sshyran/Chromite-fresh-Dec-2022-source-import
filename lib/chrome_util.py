@@ -412,6 +412,7 @@ _COPY_PATHS_CHROME = (
         cond=C.GnSetTo(_IS_COMPONENT_BUILD, True)),
     Path('locales/*.pak', optional=True),
     Path('locales/*.pak.gz', optional=True),
+    Path('metadata.json', optional=True),
     Path('mojo_service_manager/', optional=True),
     Path('Packages/chrome_content_browser/manifest.json', optional=True),
     Path('Packages/chrome_content_gpu/manifest.json', optional=True),
