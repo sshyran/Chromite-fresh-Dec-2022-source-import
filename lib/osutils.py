@@ -552,8 +552,14 @@ class BadPathsException(Exception):
   """Raised by various osutils path manipulation functions on bad input."""
 
 
-def CopyDirContents(from_dir, to_dir, symlinks=False, allow_nonempty=False):
-  """Copy contents of from_dir to to_dir. Both should exist.
+def _CopyDirContents(from_dir: Union[str, os.PathLike],
+                     to_dir: Union[str, os.PathLike],
+                     symlinks: bool = False,
+                     allow_nonempty: bool = False,
+                     move: bool = False) -> None:
+  """Copy contents of from_dir to to_dir.
+
+  Both must exist.
 
   shutil.copytree allows one to copy a rooted directory tree along with the
   containing directory. OTOH, this function copies the contents of from_dir to
@@ -578,13 +584,83 @@ def CopyDirContents(from_dir, to_dir, symlinks=False, allow_nonempty=False):
     y.py
 
   Args:
-    from_dir: The directory whose contents should be copied. Must exist. Either
-      a |Path| or a |str|.
+    from_dir: The directory whose contents should be copied. Must exist.
     to_dir: The directory to which contents should be copied. Must exist.
-      Either a |Path| or a |str|.
     symlinks: Whether symlinks should be copied or dereferenced. When True, all
-        symlinks will be copied as symlinks into the destination. When False,
-        the symlinks will be dereferenced and the contents copied over.
+      symlinks will be copied as symlinks into the destination. When False, the
+      symlinks will be dereferenced and the contents copied over.
+    allow_nonempty: If True, do not die when to_dir is nonempty.
+    move: Move the contents instead of copying them.
+
+  Raises:
+    BadPathsException: if the source / target directories don't exist, or if
+        target directory is non-empty when allow_nonempty=False.
+    OSError: on esoteric permission errors.
+  """
+  from_dir = Path(from_dir).resolve()
+  to_dir = Path(to_dir).resolve()
+
+  if not from_dir.is_dir():
+    raise BadPathsException(f'Source directory {from_dir} does not exist.')
+  if not to_dir.is_dir():
+    raise BadPathsException(f'Destination directory {to_dir} does not exist.')
+  if os.listdir(to_dir) and not allow_nonempty:
+    raise BadPathsException(f'Destination directory {to_dir} is not empty.')
+
+  if from_dir == to_dir:
+    return
+
+  for from_path in from_dir.iterdir():
+    # Copy/Move the contents.
+    to_path = to_dir / from_path.name
+
+    if symlinks and from_path.is_symlink():
+      to_path.symlink_to(os.readlink(from_path))
+    elif from_path.is_dir():
+      if move:
+        if to_path.is_dir():
+          # if a destination directory already exists, recursively check for the
+          # individual files and directories in from path to be moved, so that
+          # we overwrite or copy the files to destination directory.
+          _CopyDirContents(
+              from_path,
+              to_path,
+              symlinks=symlinks,
+              allow_nonempty=allow_nonempty,
+              move=move)
+        else:
+          # If it is a file or symbolic link, remove the destination file and
+          # then move the content.
+          if to_path.is_file():
+            SafeUnlink(to_path)
+          # TODO(rchandrasekar): In python 3.9, shutil.move() accepts Path
+          # object. Remove the typecast to string, once python version moves
+          # to 3.9.
+          shutil.move(
+              str(from_path), str(to_path), copy_function=shutil.copytree)
+      else:
+        shutil.copytree(from_path, to_path, symlinks=symlinks)
+    elif from_path.is_file():
+      if move:
+        shutil.move(from_path, to_path)
+      else:
+        shutil.copy2(from_path, to_path)
+
+
+def CopyDirContents(from_dir: Union[str, os.PathLike],
+                    to_dir: Union[str, os.PathLike],
+                    symlinks: bool = False,
+                    allow_nonempty: bool = False) -> None:
+  """Copy contents of from_dir to to_dir.
+
+  Both should exist.
+
+  Args:
+    from_dir: The directory whose contents should be copied. Must exist.
+    to_dir: The directory to which contents should be copied. Must exist.
+    symlinks: Whether symlinks should be copied or dereferenced. When True, all
+      symlinks will be copied as symlinks into the destination. When False, the
+      symlinks will be dereferenced and the contents copied over.
     allow_nonempty: If True, do not die when to_dir is nonempty.
 
   Raises:
@@ -592,22 +668,39 @@ def CopyDirContents(from_dir, to_dir, symlinks=False, allow_nonempty=False):
         target directory is non-empty when allow_nonempty=False.
     OSError: on esoteric permission errors.
   """
-  if not os.path.isdir(from_dir):
-    raise BadPathsException('Source directory %s does not exist.' % from_dir)
-  if not os.path.isdir(to_dir):
-    raise BadPathsException('Destination directory %s does not exist.' % to_dir)
-  if os.listdir(to_dir) and not allow_nonempty:
-    raise BadPathsException('Destination directory %s is not empty.' % to_dir)
+  _CopyDirContents(
+      from_dir, to_dir, symlinks=symlinks, allow_nonempty=allow_nonempty)
 
-  for name in os.listdir(from_dir):
-    from_path = os.path.join(from_dir, name)
-    to_path = os.path.join(to_dir, name)
-    if symlinks and os.path.islink(from_path):
-      os.symlink(os.readlink(from_path), to_path)
-    elif os.path.isdir(from_path):
-      shutil.copytree(from_path, to_path, symlinks=symlinks)
-    elif os.path.isfile(from_path):
-      shutil.copy2(from_path, to_path)
+
+def MoveDirContents(from_dir: Union[str, os.PathLike],
+                    to_dir: Union[str, os.PathLike],
+                    remove_from_dir: bool = False,
+                    allow_nonempty: bool = False) -> None:
+  """Move contents of from_dir to to_dir.
+
+  Both should exist.
+
+  Args:
+    from_dir: The directory whose contents should be moved. Must exist.
+    to_dir: The directory to which contents should be moved. Must exist.
+    remove_from_dir: Remove the from directory after the contents are moved.
+    allow_nonempty: If True, do not die when to_dir is nonempty.
+
+  Raises:
+    BadPathsException: if the source / target directories don't exist, or if
+      target directory is non-empty when allow_nonempty is False.
+    OSError: on esoteric permission errors.
+  """
+  from_dir = Path(from_dir).resolve()
+  to_dir = Path(to_dir).resolve()
+
+  _CopyDirContents(
+      from_dir,
+      to_dir,
+      allow_nonempty=allow_nonempty,
+      move=True)
+  if remove_from_dir and from_dir != to_dir:
+    RmDir(from_dir)
 
 
 def RmDir(path, ignore_missing=False, sudo=False):

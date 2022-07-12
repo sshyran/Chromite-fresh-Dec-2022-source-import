@@ -1240,6 +1240,125 @@ class IsInsideVmTest(cros_test_lib.MockTempDirTestCase):
     self.assertFalse(osutils.IsInsideVm())
 
 
+class MoveDirContentsTestCase(cros_test_lib.TempDirTestCase):
+  """Test MoveDirContents."""
+
+  def setUp(self):
+    self.from_dir = self.tempdir / 'from'
+    self.to_dir = self.tempdir / 'to'
+    osutils.SafeMakedirs(self.from_dir)
+    osutils.SafeMakedirs(self.to_dir)
+
+  def testMoveEmptyDir(self):
+    """Move empty from directory."""
+    osutils.MoveDirContents(self.from_dir, self.to_dir)
+    self.assertExists(self.from_dir)
+    osutils.MoveDirContents(self.from_dir, self.to_dir, remove_from_dir=True)
+    self.assertNotExists(self.from_dir)
+    self.assertListEqual(os.listdir(self.to_dir), [])
+
+  def testMoveFiles(self):
+    """Move files from source to destination."""
+    osutils.WriteFile(self.from_dir / 'a.txt', 'aaa')
+    osutils.WriteFile(self.from_dir / 'b.txt', 'bbb')
+    osutils.WriteFile(self.from_dir / '.hidden', 'hiden')
+
+    osutils.MoveDirContents(self.from_dir, self.to_dir)
+    self.assertFileContents(self.to_dir / 'a.txt', 'aaa')
+    self.assertFileContents(self.to_dir / 'b.txt', 'bbb')
+    self.assertFileContents(self.to_dir / '.hidden', 'hiden')
+    self.assertExists(self.from_dir)
+    self.assertNotExists(self.from_dir / 'a.txt')
+    self.assertNotExists(self.from_dir / 'b.txt')
+    self.assertNotExists(self.from_dir / '.hidden')
+
+  def testMoveFilesAndDelete(self):
+    """Move files from source to destination and delete source."""
+    osutils.WriteFile(self.from_dir / 'a.txt', 'aaa')
+    osutils.WriteFile(self.from_dir / 'b.txt', 'bbb')
+    osutils.MoveDirContents(self.from_dir, self.to_dir, remove_from_dir=True)
+    self.assertNotExists(self.from_dir)
+
+  def testNonEmptyDestination(self):
+    """Move files from source to destination, which has contents."""
+    osutils.WriteFile(self.to_dir / 'a.txt', 'aaa')
+    osutils.WriteFile(self.to_dir / 'b.txt', 'bbb')
+    with self.assertRaises(osutils.BadPathsException):
+      osutils.MoveDirContents(self.from_dir, self.to_dir)
+    osutils.MoveDirContents(self.from_dir, self.to_dir, allow_nonempty=True)
+
+  def testMoveDir(self):
+    """Move files and directory from source to destination."""
+    osutils.WriteFile(self.from_dir / 'a.txt', 'aaa')
+    osutils.SafeMakedirs(self.from_dir / 'b')
+    osutils.WriteFile(self.from_dir / 'b' / 'b.txt', 'bbb')
+
+    osutils.MoveDirContents(self.from_dir, self.to_dir)
+    self.assertFileContents(self.to_dir / 'a.txt', 'aaa')
+    self.assertFileContents(self.to_dir / 'b' / 'b.txt', 'bbb')
+    self.assertExists(self.from_dir)
+    self.assertNotExists(self.from_dir / 'b' / 'b.txt')
+
+  def testSymlink(self):
+    """Move symlink from source to destination."""
+    osutils.WriteFile(self.tempdir / 'a.txt', 'aaa')
+    (self.from_dir / 'sym.txt').symlink_to(self.tempdir / 'a.txt')
+    osutils.MoveDirContents(self.from_dir, self.to_dir)
+    self.assertTrue((self.to_dir / 'sym.txt').is_symlink())
+    self.assertEqual(
+        os.readlink(self.to_dir / 'sym.txt'), str(self.tempdir / 'a.txt'))
+
+  def testOverWriteFiles(self):
+    """Move files with same name from source to destination."""
+    # test dotfiles in top and multiple level directories.
+    D = cros_test_lib.Directory
+    src_layout = (
+        D('a', ['a.txt']),
+        D('b', ['b.txt']),
+        'top.txt',
+        '.hidden',
+    )
+    dest_layout = (
+        D('a', ['a.txt', '.hidden', 'b.txt']),
+        'top.txt',
+        '.hidden',
+        # test a directory in source directory having a file with same name in
+        # destination.
+        'b',
+    )
+    cros_test_lib.CreateOnDiskHierarchy(self.from_dir, src_layout)
+    cros_test_lib.CreateOnDiskHierarchy(self.to_dir, dest_layout)
+    osutils.WriteFile(self.from_dir / 'top.txt', 'aaa')
+    osutils.WriteFile(self.from_dir / '.hidden', 'hidden')
+    osutils.WriteFile(self.from_dir / 'a' / 'a.txt', 'aaa')
+
+    osutils.MoveDirContents(self.from_dir, self.to_dir, allow_nonempty=True)
+    self.assertFileContents(self.to_dir / 'top.txt', 'aaa')
+    self.assertFileContents(self.to_dir / '.hidden', 'hidden')
+    self.assertFileContents(self.to_dir / 'a' / 'a.txt', 'aaa')
+    self.assertExists(self.to_dir / 'a' / '.hidden')
+    self.assertExists(self.to_dir / 'a' / 'b.txt')
+    self.assertTrue((self.to_dir / 'b').is_dir())
+    self.assertExists(self.to_dir / 'b' / 'b.txt')
+
+  def testSameDirectory(self):
+    """Test source and destination directory are the same."""
+    osutils.MoveDirContents(self.from_dir, self.from_dir)
+    self.assertExists(self.from_dir)
+    osutils.MoveDirContents(self.from_dir, self.from_dir, remove_from_dir=True)
+    self.assertExists(self.from_dir)
+
+  def testMissingDirectory(self):
+    """Test source and destination directory missing case."""
+    osutils.RmDir(self.from_dir)
+    with self.assertRaises(osutils.BadPathsException):
+      osutils.MoveDirContents(self.from_dir, self.to_dir)
+    osutils.RmDir(self.to_dir)
+    osutils.SafeMakedirs(self.from_dir)
+    with self.assertRaises(osutils.BadPathsException):
+      osutils.MoveDirContents(self.from_dir, self.to_dir)
+
+
 class CopyDirContentsTestCase(cros_test_lib.TempDirTestCase):
   """Test CopyDirContents."""
 

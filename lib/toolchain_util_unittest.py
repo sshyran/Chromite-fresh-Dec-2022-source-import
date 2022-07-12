@@ -12,6 +12,7 @@ import glob
 import io
 import json
 import os
+from pathlib import Path
 import shutil
 import time
 from unittest import mock
@@ -664,7 +665,7 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
     self.SetUpBundle('UnverifiedChromeLlvmOrderfile')
     artifact = os.path.join(self.outdir, 'artifact')
     self.assertEqual([artifact], self.obj.Bundle())
-    self.copy2.assert_called_once_with(mock.ANY, artifact)
+    self.copy2.assert_called_once_with(mock.ANY, Path(artifact))
 
   def testBundleVerifiedChromeLlvmOrderfileExists(self):
     """Test that BundleVerfiedChromeLlvmOrderfile works."""
