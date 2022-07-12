@@ -761,9 +761,10 @@ def CreateBuildDir(
     chrome_branch: str,
     version: str,
     board: str,
+    symlink: str,
     replace: bool = False,
     build_attempt: Optional[int] = None,
-    output_suffix: Optional[str] = None) -> Tuple[Path, Path]:
+    output_suffix: Optional[str] = None) -> Tuple[Path, Path, Path]:
   """Create the build directory based on input arguments.
 
   Args:
@@ -772,12 +773,13 @@ def CreateBuildDir(
     chrome_branch: Chrome branch number to use.
     version: The version string to use for the output directory.
     board: The board for which the image is generated.
+    symlink: The output directory symlink to be created.
     replace: Whether to remove and replace the existing directory.
     build_attempt: build attempt count to append to directory name.
     output_suffix: Any user given output suffix to append to directory name.
 
   Returns:
-    A tuple of build directory and output directory.
+    A tuple of build directory, output directory and symlink directory.
 
   Raises:
     FileExistsError when the output build directory already exists.
@@ -793,6 +795,7 @@ def CreateBuildDir(
   board_dir = Path(board) / image_dir
   build_dir = Path(build_root) / board_dir
   output_dir = Path(output_root) / board_dir
+  symlink_dir = Path(output_root) / board / symlink
 
   if replace and build_dir.exists():
     osutils.RmDir(build_dir, sudo=True)
@@ -805,8 +808,9 @@ def CreateBuildDir(
 
   osutils.SafeMakedirs(build_dir)
   osutils.SafeMakedirs(output_dir)
+  osutils.SafeSymlink(image_dir, symlink_dir)
 
-  return [build_dir, output_dir]
+  return [build_dir, output_dir, symlink_dir]
 
 
 def IsSquashfsImage(path):

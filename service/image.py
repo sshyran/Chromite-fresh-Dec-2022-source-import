@@ -253,12 +253,13 @@ def Build(board: str,
   cmd = GetBuildImageCommand(config, image_names, board)
 
   try:
-    build_dir, output_dir = image_lib.CreateBuildDir(
+    build_dir, output_dir, image_dir = image_lib.CreateBuildDir(
         config.build_root,
         config.output_root,
         version_info.chrome_branch,
         config.version or version_info.VersionString(),
         board,
+        config.symlink,
         config.replace,
         config.build_attempt,
         config.output_dir_suffix)
@@ -285,8 +286,6 @@ def Build(board: str,
       build_result.failed_packages = content.split() if content else None
 
   # Save the path to each image that was built.
-  image_dir = Path(
-      image_lib.GetLatestImageLink(board, pointer=config.symlink))
   for image_type in images:
     filename = constants.IMAGE_TYPE_TO_NAME[image_type]
     image_path = (image_dir / filename).resolve()
