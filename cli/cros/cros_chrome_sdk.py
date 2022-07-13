@@ -230,6 +230,29 @@ class SDKFetcher(object):
       osutils.SafeSymlink(rel_source_path, link_name_path)
       ref.SetDefault(link_name_path, lock=True)
 
+  def _GetBuildReport(self, version):
+    """Return build_report.json (in the form of a dict) for a given version."""
+    raw_json = None
+    version_base = self._GetVersionGSBase(version)
+    report_path = os.path.join(version_base, constants.BUILD_REPORT_JSON)
+    with self.misc_cache.Lookup(
+        self._GetTarballCacheKey(constants.BUILD_REPORT_JSON,
+                                 report_path)) as ref:
+      if ref.Exists(lock=True):
+        raw_json = osutils.ReadFile(ref.path)
+      else:
+        try:
+          raw_json = self.gs_ctx.Cat(report_path,
+                                     debug_level=logging.DEBUG,
+                                     encoding='utf-8')
+        except gs.GSNoSuchKey:
+          # Make this fatal once we stop using metadata.json from old cbuildbot
+          # builders.
+          return
+        ref.AssignText(raw_json)
+
+    return json.loads(raw_json)
+
   def _GetMetadata(self, version):
     """Return metadata (in the form of a dict) for a given version."""
     raw_json = None
@@ -409,7 +432,9 @@ class SDKFetcher(object):
     Returns:
       sdk_version, e.g. 2018.06.04.200410
     """
-    return self._GetMetadata(version)['sdk-version']
+    metadata = self._GetMetadata(version)
+    build_report = self._GetBuildReport(version)
+    return metadata.get('sdk-version') or build_report.get('sdkVersion')
 
   def _GetManifest(self, version):
     """Get the build manifest from the cache, downloading it if necessary.
@@ -722,9 +747,22 @@ class SDKFetcher(object):
     self._InstallZstdFromCipd()
 
     if not target_tc or not toolchain_url:
+      # Look-up the toolchain data in both metadata.json and build_report.json.
+      # We can stop using metadata.json once no one needs to build Simple Chrome
+      # using artifacts released from a cbuildbot build. Likely ~2023.
       metadata = self._GetMetadata(version)
-      target_tc = target_tc or metadata['toolchain-tuple'][0]
-      toolchain_url = toolchain_url or metadata['toolchain-url']
+      build_report = self._GetBuildReport(version)
+      if not target_tc:
+        if 'toolchain-tuple' in metadata:
+          target_tc = metadata['toolchain-tuple'][0]
+        elif build_report and 'toolchains' in build_report:
+          target_tc = build_report['toolchains'][0]
+
+      if not toolchain_url:
+        if 'toolchain-url' in metadata:
+          toolchain_url = metadata['toolchain-url']
+        elif build_report and 'toolchainUrl' in build_report:
+          toolchain_url = build_report['toolchainUrl']
 
     # Fetch toolchains from separate location.
     if self.TARGET_TOOLCHAIN_KEY in components:
