@@ -81,7 +81,7 @@ class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase):
   def testBuildDir(self):
     """Test the case if build directory exists."""
     config = image.BuildConfig(
-        build_root=self.tempdir / 'build', output_root=self.tempdir / 'output')
+        build_root=self.tempdir / 'build', output_root=self.tempdir / 'build')
     build_result = image.Build(
         'board', [constants.IMAGE_TYPE_DEV], config=config)
     build_result = image.Build(
@@ -136,53 +136,6 @@ class BuildImageCommandTest(cros_test_lib.MockTestCase):
             image.BuildConfig(enable_rootfs_verification=True),
             [constants.FACTORY_IMAGE_BIN], 'testBoard'))
 
-    # replace
-    self.assertIn(
-        '--replace',
-        image.GetBuildImageCommand(
-            image.BuildConfig(replace=True), [constants.BASE_IMAGE_BIN],
-            'testBoard'))
-
-    # build_version
-    cmd = image.GetBuildImageCommand(
-        image.BuildConfig(version='build_version'), [constants.BASE_IMAGE_BIN],
-        'testBoard')
-    expected = {
-        '--version',
-        'build_version',
-    }
-    self.assertTrue(expected.issubset(set(cmd)))
-
-    # build_attempt
-    cmd = image.GetBuildImageCommand(
-        image.BuildConfig(build_attempt=12), [constants.BASE_IMAGE_BIN],
-        'testBoard')
-    expected = {
-        '--build_attempt',
-        '12',
-    }
-    self.assertTrue(expected.issubset(set(cmd)))
-
-    # symlink
-    cmd = image.GetBuildImageCommand(
-        image.BuildConfig(symlink='test_symlink'), [constants.BASE_IMAGE_BIN],
-        'testBoard')
-    expected = {
-        '--symlink',
-        'test_symlink',
-    }
-    self.assertTrue(expected.issubset(set(cmd)))
-
-    # output_dir_suffix
-    cmd = image.GetBuildImageCommand(
-        image.BuildConfig(output_dir_suffix='test_output_suffix'),
-        [constants.BASE_IMAGE_BIN], 'testBoard')
-    expected = {
-        '--output_suffix',
-        'test_output_suffix',
-    }
-    self.assertTrue(expected.issubset(set(cmd)))
-
     # adjust_partition
     cmd = image.GetBuildImageCommand(
         image.BuildConfig(adjust_partition='ROOT-A:+1G'),
@@ -221,26 +174,6 @@ class BuildImageCommandTest(cros_test_lib.MockTestCase):
         '--enable_bootcache',
         image.GetBuildImageCommand(config, [constants.FACTORY_IMAGE_BIN],
                                    'testBoard'))
-
-    # output_root
-    cmd = image.GetBuildImageCommand(
-        image.BuildConfig(output_root='test/output/dir'),
-        [constants.BASE_IMAGE_BIN], 'testBoard')
-    expected = {
-        '--output_root',
-        'test/output/dir',
-    }
-    self.assertTrue(expected.issubset(set(cmd)))
-
-    # build_root
-    cmd = image.GetBuildImageCommand(
-        image.BuildConfig(build_root='test/build/dir'),
-        [constants.BASE_IMAGE_BIN], 'testBoard')
-    expected = {
-        '--build_root',
-        'test/build/dir',
-    }
-    self.assertTrue(expected.issubset(set(cmd)))
 
     # enable_serial
     cmd = image.GetBuildImageCommand(

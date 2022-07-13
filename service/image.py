@@ -11,6 +11,7 @@ from pathlib import Path
 import shutil
 from typing import Iterable, List, NamedTuple, Optional, Union
 
+from chromite.lib import build_target_lib
 from chromite.lib import chromeos_version
 from chromite.lib import chroot_lib
 from chromite.lib import constants
@@ -118,12 +119,6 @@ def GetBuildImageCommand(config: BuildConfig, image_names: List[str],
     cmd.extend(['--builder_path', _config['builder_path']])
   if not _config['enable_rootfs_verification']:
     cmd.append('--noenable_rootfs_verification')
-  if _config['replace']:
-    cmd.append('--replace')
-  if _config['version']:
-    cmd.extend(['--version', _config['version']])
-  if _config['output_dir_suffix']:
-    cmd.extend(['--output_suffix', _config['output_dir_suffix']])
   if _config['adjust_partition']:
     cmd.extend(['--adjust_part', _config['adjust_partition']])
   if _config['enable_bootcache']:
@@ -134,11 +129,7 @@ def GetBuildImageCommand(config: BuildConfig, image_names: List[str],
       '--disk_layout',
       _config['disk_layout'] if _config['disk_layout'] else 'default',
   ])
-  cmd.extend(['--build_attempt', f"{_config['build_attempt']}"])
-  cmd.extend(['--symlink', _config['symlink']])
   cmd.extend(['--boot_args', _config['boot_args']])
-  cmd.extend(['--output_root', _config['output_root']])
-  cmd.extend(['--build_root', _config['build_root']])
   cmd.extend(['--loglevel', f"{_config['kernel_loglevel']}"])
   cmd.extend(['--jobs', f"{_config['jobs']}"])
 
@@ -284,6 +275,29 @@ def Build(board: str,
       pass
     else:
       build_result.failed_packages = content.split() if content else None
+
+  if build_result.return_code != 0:
+    return build_result
+
+  # Move the completed image to the output_root.
+  osutils.MoveDirContents(
+      build_dir, output_dir, remove_from_dir=True, allow_nonempty=True)
+
+  # TODO(rchandrasekar): move build_dlc to a module that we can import.
+  # Copy DLC images to the output_root directory.
+  dlc_dir = output_dir / 'dlc'
+  dlc_cmd = [
+      'build_dlc',
+      '--sysroot',
+      build_target_lib.get_default_sysroot_path(board),
+      '--install-root-dir',
+      dlc_dir,
+      '--board',
+      board,
+  ]
+  result = cros_build_lib.run(dlc_cmd, enter_chroot=True, check=False)
+  if result.returncode:
+    logging.warning('Copying DLC images to %s failed.', dlc_dir)
 
   # Save the path to each image that was built.
   for image_type in images:
