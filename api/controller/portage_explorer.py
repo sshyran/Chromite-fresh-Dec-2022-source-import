@@ -26,3 +26,7 @@ def RunSpiders(_input_proto, output_proto, _config_proto):
   for build_target in spider_output.build_targets:
     proto_build_target = output_proto.build_targets.add()
     proto_build_target.name = build_target.name
+  for overlay in spider_output.overlays:
+    proto_overlay = output_proto.overlays.add()
+    proto_overlay.path = str(overlay.path)
+    proto_overlay.name = overlay.name
