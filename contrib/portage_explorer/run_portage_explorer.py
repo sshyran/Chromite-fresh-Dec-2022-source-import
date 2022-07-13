@@ -5,6 +5,7 @@
 """Call all the spiders in the correct order for them to fill out the output."""
 
 from chromite.contrib.portage_explorer import get_boards_spider
+from chromite.contrib.portage_explorer import get_overlays_spider
 from chromite.contrib.portage_explorer import spiderlib
 
 
@@ -16,4 +17,5 @@ def execute():
   """
   output = spiderlib.SpiderOutput()
   get_boards_spider.execute(output)
+  get_overlays_spider.execute(output)
   return output
