@@ -11,6 +11,7 @@
 """
 
 import dataclasses
+from pathlib import Path
 from typing import List
 
 
@@ -21,10 +22,22 @@ class BuildTarget:
 
 
 @dataclasses.dataclass
+class Overlay:
+  """An overlay."""
+  path: Path
+  name: str
+
+
+@dataclasses.dataclass
 class SpiderOutput:
-  """Output from all the spiders which is used for the output proto.
+  """Output from all the spiders.
+
+  The output from all the spiders will be used to fill in the output proto of
+  the RunSpiders endpoint for the PortageExplorerService.
 
   Attributes:
     build_targets: List of build targets. Default value is an empty list.
+    overlays: List of overlays. Default value is an empty list.
   """
   build_targets: List[BuildTarget] = dataclasses.field(default_factory=list)
+  overlays: List[Overlay] = dataclasses.field(default_factory=list)
