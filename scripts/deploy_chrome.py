@@ -187,7 +187,7 @@ class DeployChrome(object):
     if not self.options.force:
       logging.error('Detected that the device has rootfs verification enabled.')
       logging.info('This script can automatically remove the rootfs '
-                   'verification, which requires that it reboot the device.')
+                   'verification, which requires it to reboot the device.')
       logging.info('Make sure the device is in developer mode!')
       logging.info('Skip this prompt by specifying --force.')
       if not cros_build_lib.BooleanPrompt('Remove rootfs verification?', False):
