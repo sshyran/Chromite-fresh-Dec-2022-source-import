@@ -41,7 +41,8 @@
           "board_group": "",
           "arch": "X86_INTERNAL"
         }
-      ]
+      ],
+      "rubik_target_milestone": 103
     },
     {
       "name": "betty-arc-t",
@@ -54,7 +55,7 @@
           "arch": "X86_INTERNAL"
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "betty-arc-u",
@@ -67,7 +68,7 @@
           "arch": "X86_INTERNAL"
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "betty-kernelnext",
@@ -129,7 +130,7 @@
           "arch": "X86_INTERNAL"
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "chell",
@@ -240,7 +241,8 @@
           "board_group": "",
           "arch": "X86_INTERNAL"
         }
-      ]
+      ],
+      "rubik_target_milestone": 103
     },
     {
       "name": "novato",
@@ -276,7 +278,8 @@
           "board_group": "",
           "arch": "X86_INTERNAL"
         }
-      ]
+      ],
+      "rubik_target_milestone": 103
     },
     {
       "name": "reven-vmtest",
@@ -288,7 +291,8 @@
           "board_group": "",
           "arch": "X86_INTERNAL"
         }
-      ]
+      ],
+      "rubik_target_milestone": 103
     },
     {
       "name": "rex",
@@ -300,7 +304,8 @@
           "board_group": "",
           "arch": "X86_INTERNAL"
         }
-      ]
+      ],
+      "rubik_target_milestone": 103
     },
     {
       "name": "senor",
@@ -324,7 +329,8 @@
           "board_group": "",
           "arch": "X86_INTERNAL"
         }
-      ]
+      ],
+      "rubik_target_milestone": 103
     },
     {
       "name": "shotzo",
@@ -403,7 +409,8 @@
           "board_id": 7227,
           "is_active": true
         }
-      ]
+      ],
+      "rubik_target_milestone": 103
     },
     {
       "name": "adlrvp",
@@ -452,7 +459,8 @@
           "board_id": 7168,
           "is_active": true
         }
-      ]
+      ],
+      "rubik_target_milestone": 103
     },
     {
       "name": "ambassador",
@@ -493,7 +501,8 @@
           "board_id": 466,
           "is_active": true
         }
-      ]
+      ],
+      "rubik_target_milestone": 103
     },
     {
       "name": "asurada",
@@ -573,7 +582,8 @@
           "board_id": 7204,
           "is_active": true
         }
-      ]
+      ],
+      "rubik_target_milestone": 103
     },
     {
       "name": "atlas",
@@ -618,7 +628,8 @@
           "board_id": 7209,
           "is_active": true
         }
-      ]
+      ],
+      "rubik_target_milestone": 103
     },
     {
       "name": "atlas-kernelnext",
@@ -744,7 +755,8 @@
           "board_id": 7183,
           "is_active": true
         }
-      ]
+      ],
+      "rubik_target_milestone": 103
     },
     {
       "name": "aurora-borealis",
@@ -841,7 +853,8 @@
           "board_id": 7184,
           "is_active": true
         }
-      ]
+      ],
+      "rubik_target_milestone": 103
     },
     {
       "name": "bob",
@@ -1458,7 +1471,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "brya-kernelnext",
@@ -1970,7 +1983,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "brya-manatee",
@@ -2224,7 +2237,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "brya-zephyr",
@@ -2266,7 +2279,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "cave",
@@ -2394,7 +2407,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "coral",
@@ -3224,7 +3237,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "dedede",
@@ -4180,7 +4193,8 @@
           "board_id": 7207,
           "is_active": true
         }
-      ]
+      ],
+      "rubik_target_milestone": 103
     },
     {
       "name": "elm-kernelnext",
@@ -4226,7 +4240,8 @@
           "board_id": 428,
           "is_active": true
         }
-      ]
+      ],
+      "rubik_target_milestone": 103
     },
     {
       "name": "eve",
@@ -4283,7 +4298,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "eve-arm64",
@@ -4301,7 +4316,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "eve-userdebug",
@@ -4319,7 +4334,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "excelsior",
@@ -4336,7 +4351,8 @@
           "board_id": 410,
           "is_active": true
         }
-      ]
+      ],
+      "rubik_target_milestone": 103
     },
     {
       "name": "fizz",
@@ -4548,7 +4564,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "fizz-moblab",
@@ -4590,7 +4606,8 @@
           "board_id": 7226,
           "is_active": true
         }
-      ]
+      ],
+      "rubik_target_milestone": 103
     },
     {
       "name": "grunt",
@@ -4908,7 +4925,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "grunt-kernelnext",
@@ -5503,7 +5520,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "hatch-arc-r-userdebug",
@@ -5601,7 +5618,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "hatch-arc-t",
@@ -5715,7 +5732,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "hatch-borealis",
@@ -5825,7 +5842,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "hatch-kernelnext",
@@ -6722,7 +6739,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "kalista",
@@ -6768,7 +6785,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "kalista-kernelnext",
@@ -6989,7 +7006,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "kevin64",
@@ -7007,7 +7024,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "kukui",
@@ -7153,7 +7170,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "kukui-kernelnext",
@@ -8777,7 +8794,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "octopus-kernelnext",
@@ -9519,7 +9536,8 @@
           "board_id": 427,
           "is_active": true
         }
-      ]
+      ],
+      "rubik_target_milestone": 103
     },
     {
       "name": "puff",
@@ -9759,7 +9777,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "puff-moblab",
@@ -9895,7 +9913,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "rammus-arc-r-userdebug",
@@ -9921,7 +9939,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "reef",
@@ -10324,7 +10342,8 @@
           "board_id": 7218,
           "is_active": true
         }
-      ]
+      ],
+      "rubik_target_milestone": 103
     },
     {
       "name": "skyrim-chausie",
@@ -10365,7 +10384,8 @@
           "board_id": 7219,
           "is_active": true
         }
-      ]
+      ],
+      "rubik_target_milestone": 103
     },
     {
       "name": "skyrim-kernelnext",
@@ -10542,7 +10562,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "strongbad",
@@ -10936,7 +10956,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "trogdor-connectivitynext",
@@ -10993,7 +11013,8 @@
           "board_id": 7203,
           "is_active": true
         }
-      ]
+      ],
+      "rubik_target_milestone": 103
     },
     {
       "name": "trogdor-kernelnext",
@@ -11153,7 +11174,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "trogdor64",
@@ -11222,7 +11243,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "volteer",
@@ -11747,7 +11768,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "volteer-kernelnext",
@@ -12114,7 +12135,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "zork",
@@ -12492,7 +12513,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "zork-borealis",
@@ -12614,7 +12635,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "zork-connectivitynext",
@@ -12735,7 +12756,8 @@
           "board_id": 7202,
           "is_active": true
         }
-      ]
+      ],
+      "rubik_target_milestone": 103
     },
     {
       "name": "zork-floss",
@@ -12857,7 +12879,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     },
     {
       "name": "zork-kernelnext",
@@ -13112,7 +13134,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 105
+      "rubik_target_milestone": 103
     }
   ]
 }
