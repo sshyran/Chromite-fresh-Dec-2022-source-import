@@ -1139,7 +1139,7 @@ class ChromeSDKCommand(command.CliCommand):
           'rbe_cros_cc_wrapper',
           'system_libdir',
           'target_sysroot',
-          'arm_(arch|float_abi|use_neon)',
+          'arm_(float_abi|use_neon)',
       ]))
       toolchain_gn_args = {k: v for k, v in gn_args.items()
                            if toolchain_key_pattern.match(k)}
