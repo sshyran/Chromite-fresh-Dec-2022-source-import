@@ -527,7 +527,7 @@ def GeneralTemplates(site_config):
           config_lib.TastVMTestConfig(
               'tast_vm_canary_critical',
               ['("group:mainline" && !informational)'],
-              timeout=150 * 60),
+              timeout=210 * 60),
       ],
   )
   site_config.AddTemplate(
