@@ -100,8 +100,8 @@ def timed(name: Optional[str] = None,
 def timer(name: Optional[str] = None,
           output: Callable[[str], Any] = logging.info):
   """Timer context manager to automatically output results."""
-  with Timer(name) as t:
-    try:
+  try:
+    with Timer(name) as t:
       yield t
-    finally:
-      output(str(t))
+  finally:
+    output(str(t))
