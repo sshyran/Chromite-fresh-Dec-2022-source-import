@@ -37,6 +37,7 @@ from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.service import image
+from chromite.utils import timer
 
 
 def build_shell_bool_style_args(
@@ -328,6 +329,7 @@ def parse_args(
   return parser, opts
 
 
+@timer.timed('Elapsed time (build_image)')
 def main(argv: Optional[List[str]] = None) -> Optional[int]:
   commandline.RunInsideChroot()
   parser, opts = parse_args(argv)

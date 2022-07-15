@@ -8,6 +8,7 @@ import errno
 import os
 from pathlib import Path
 
+from chromite.lib import build_target_lib
 from chromite.lib import chromeos_version
 from chromite.lib import chroot_lib
 from chromite.lib import constants
@@ -20,7 +21,8 @@ from chromite.lib import sysroot_lib
 from chromite.service import image
 
 
-class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase):
+class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase,
+                     cros_test_lib.LoggingTestCase):
   """Build Image tests."""
 
   def setUp(self):
@@ -36,7 +38,19 @@ class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase):
     self.config = image.BuildConfig(
         build_root=self.tempdir / 'build',
         output_root=self.tempdir / 'output',
-        replace=True)
+        replace=True,
+        build_attempt=1)
+    self.build_dir, self.output_dir, self.image_dir = image_lib.CreateBuildDir(
+        self.config.build_root,
+        self.config.output_root,
+        '4',
+        '1.2.3',
+        'board',
+        'latest',
+        replace=True,
+        build_attempt=1,
+    )
+    self.MoveDir_mock = self.PatchObject(osutils, 'MoveDirContents')
 
   def testBuildBoardHandling(self):
     """Test the argument handling."""
@@ -87,6 +101,84 @@ class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase):
     build_result = image.Build(
         'board', [constants.IMAGE_TYPE_DEV], config=config)
     self.assertEqual(build_result.return_code, errno.EEXIST)
+
+  def testDlcCommand(self):
+    """Test if DLC installation is called."""
+    image.Build('board', [constants.IMAGE_TYPE_DEV], config=self.config)
+    self.assertCommandContains([
+        'build_dlc',
+        '--sysroot',
+        build_target_lib.get_default_sysroot_path('board'),
+        '--install-root-dir',
+        self.output_dir / 'dlc',
+        '--board',
+        'board',
+    ])
+
+  def testMoveDir(self):
+    """Test if MoveDirContents is called."""
+    image.Build('board', [constants.IMAGE_TYPE_DEV], config=self.config)
+    self.MoveDir_mock.assert_called_once_with(
+        self.build_dir,
+        self.output_dir,
+        remove_from_dir=True,
+        allow_nonempty=True)
+
+  def testSummary(self):
+    """Test if summary text is printed correctly."""
+    base_image_path = os.path.relpath(self.output_dir /
+                                      constants.BASE_IMAGE_BIN)
+    dev_image_path = os.path.relpath(self.output_dir / constants.DEV_IMAGE_BIN)
+    test_image_path = os.path.relpath(self.output_dir /
+                                      constants.TEST_IMAGE_BIN)
+
+    with cros_test_lib.LoggingCapturer() as logs:
+      image.Build(
+          'board', [
+              constants.IMAGE_TYPE_BASE, constants.IMAGE_TYPE_DEV,
+              constants.IMAGE_TYPE_TEST,
+          ],
+          config=self.config)
+      # pylint: disable=protected-access
+      # Base Image summary text.
+      self.AssertLogsContain(
+          logs,
+          (f'{image._IMAGE_TYPE_DESCRIPTION[constants.BASE_IMAGE_BIN]} image '
+           f'created as {constants.BASE_IMAGE_BIN}'),
+      )
+      self.AssertLogsContain(logs, f'cros flash usb:// {base_image_path}')
+      self.AssertLogsContain(logs,
+                             f'cros flash YOUR_DEVICE_IP {base_image_path}')
+      self.AssertLogsContain(
+          logs,
+          f'cros_vm --start --image-path={base_image_path} --board=board',
+          inverted=True)
+      # Dev Image summary text.
+      self.AssertLogsContain(
+          logs,
+          (f'{image._IMAGE_TYPE_DESCRIPTION[constants.DEV_IMAGE_BIN]} image '
+           f'created as {constants.DEV_IMAGE_BIN}'),
+      )
+      self.AssertLogsContain(logs, f'cros flash usb:// {dev_image_path}')
+      self.AssertLogsContain(logs,
+                             f'cros flash YOUR_DEVICE_IP {dev_image_path}')
+      self.AssertLogsContain(
+          logs,
+          f'cros_vm --start --image-path={dev_image_path} --board=board',
+      )
+      # Test Image summary text.
+      self.AssertLogsContain(
+          logs,
+          (f'{image._IMAGE_TYPE_DESCRIPTION[constants.TEST_IMAGE_BIN]} image '
+           f'created as {constants.TEST_IMAGE_BIN}'),
+      )
+      self.AssertLogsContain(logs, f'cros flash usb:// {test_image_path}')
+      self.AssertLogsContain(logs,
+                             f'cros flash YOUR_DEVICE_IP {test_image_path}')
+      self.AssertLogsContain(
+          logs,
+          f'cros_vm --start --image-path={test_image_path} --board=board',
+      )
 
 
 class BuildImageCommandTest(cros_test_lib.MockTestCase):

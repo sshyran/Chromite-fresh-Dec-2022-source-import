@@ -25,6 +25,13 @@ from chromite.lib.parser import package_info
 
 PARALLEL_EMERGE_STATUS_FILE_NAME = 'status_file'
 
+_IMAGE_TYPE_DESCRIPTION = {
+    constants.BASE_IMAGE_BIN: 'Non-developer Chromium OS',
+    constants.DEV_IMAGE_BIN: 'Developer',
+    constants.TEST_IMAGE_BIN: 'Test',
+    constants.FACTORY_IMAGE_BIN: 'Chromium OS Factory install shim',
+}
+
 
 class Error(Exception):
   """Base module error."""
@@ -299,12 +306,32 @@ def Build(board: str,
   if result.returncode:
     logging.warning('Copying DLC images to %s failed.', dlc_dir)
 
+  logging.info('Done. Image(s) created in %s\n', output_dir)
+
   # Save the path to each image that was built.
   for image_type in images:
     filename = constants.IMAGE_TYPE_TO_NAME[image_type]
     image_path = (image_dir / filename).resolve()
     logging.debug('%s Resolved Image Path: %s', image_type, image_path)
     build_result.add_image(image_type, image_path)
+
+    if image_type is constants.IMAGE_TYPE_RECOVERY:
+      continue
+    # Get the image path relative to the CWD.
+    image_path = os.path.relpath(image_path)
+    msg = (f'{_IMAGE_TYPE_DESCRIPTION[filename]} image created as {filename}\n'
+           'To copy the image to a USB key, use:\n'
+           f'  cros flash usb:// {image_path}\n'
+           'To flash the image to a Chrome OS device, use:\n'
+           f'  cros flash YOUR_DEVICE_IP {image_path}\n'
+           'Note that the device must be accessible over the network.\n'
+           'A base image will not work in this mode, but a test or dev image'
+           ' will.\n')
+    if any(filename == x
+           for x in [constants.DEV_IMAGE_BIN, constants.TEST_IMAGE_BIN]):
+      msg += ('To run the image in a virtual machine, use:\n'
+              f'  cros_vm --start --image-path={image_path} --board={board}\n')
+    logging.info(msg)
 
   return build_result
 
