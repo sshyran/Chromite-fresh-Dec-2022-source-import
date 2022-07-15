@@ -937,7 +937,6 @@ SYSTEMD_INSTALL_MASK = {
     '/usr/lib/systemd/system',
 }
 
-BUILD_REPORT_JSON = 'build_report.json'
 METADATA_JSON = 'metadata.json'
 PARTIAL_METADATA_JSON = 'partial-metadata.json'
 METADATA_TAGS = 'tags'

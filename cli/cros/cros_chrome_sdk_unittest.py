@@ -110,8 +110,7 @@ class SDKFetcherMock(partial_mock.PartialMock):
 
   TARGET = 'chromite.cli.cros.cros_chrome_sdk.SDKFetcher'
   ATTRS = ('__init__', 'GetFullVersion', '_GetMetadata', '_UpdateTarball',
-           '_GetManifest', 'UpdateDefaultVersion', '_GetTarballCacheKey',
-           '_GetBuildReport')
+           '_GetManifest', 'UpdateDefaultVersion', '_GetTarballCacheKey')
 
   FAKE_METADATA = """
 {
@@ -124,13 +123,6 @@ class SDKFetcherMock(partial_mock.PartialMock):
   "toolchain-url": "2013/01/%(target)s-2013.01.23.003823.tar.xz",
   "sdk-version": "2013.01.23.003823"
 }"""
-  FAKE_BUILD_REPORT = """
-{
-  "sdkVersion": "2013.01.23.003823",
-  "toolchainUrl": "2013/01/%(target)s-2013.01.23.003823.tar.xz",
-  "toolchains": ["i686-pc-linux-gnu"]
-}
-"""
 
   BOARD = 'eve'
   # These are boards that Lacros is currently supporting.
@@ -190,14 +182,6 @@ class SDKFetcherMock(partial_mock.PartialMock):
         partial_mock.ListRegex('cat .*/%s' % constants.METADATA_JSON),
         stdout=self.FAKE_METADATA)
     return self.backup['_GetMetadata'](inst, *args, **kwargs)
-
-  @_DependencyMockCtx
-  def _GetBuildReport(self, inst, *args, **kwargs):
-    self.gs_mock.SetDefaultCmdResult()
-    self.gs_mock.AddCmdResult(
-        partial_mock.ListRegex('cat .*/%s' % constants.BUILD_REPORT_JSON),
-        stdout=self.FAKE_BUILD_REPORT)
-    return self.backup['_GetBuildReport'](inst, *args, **kwargs)
 
   @_DependencyMockCtx
   def _GetManifest(self, _inst, _version):
@@ -366,25 +350,12 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
       returncode = self.cmd_mock.inst.Run()
       self.assertEqual(returncode, 5)
 
-  def testEmptyMetadata(self):
-    """Tests the use of build_report.json when metadata.json is empty."""
-    sdk_dir = os.path.join(self.tempdir, 'sdk_dir')
-    osutils.SafeMakedirs(sdk_dir)
-    osutils.WriteFile(os.path.join(sdk_dir, constants.METADATA_JSON), '{}')
-    osutils.WriteFile(os.path.join(sdk_dir, constants.BUILD_REPORT_JSON),
-                      SDKFetcherMock.FAKE_BUILD_REPORT)
-    self.SetupCommandMock(extra_args=['--sdk-path', sdk_dir])
-    with cros_test_lib.LoggingCapturer():
-      self.cmd_mock.inst.Run()
-
   def testLocalSDKPath(self):
     """Fetch components from a local --sdk-path."""
     sdk_dir = os.path.join(self.tempdir, 'sdk_dir')
     osutils.SafeMakedirs(sdk_dir)
     osutils.WriteFile(os.path.join(sdk_dir, constants.METADATA_JSON),
                       SDKFetcherMock.FAKE_METADATA)
-    osutils.WriteFile(os.path.join(sdk_dir, constants.BUILD_REPORT_JSON),
-                      SDKFetcherMock.FAKE_BUILD_REPORT)
     self.SetupCommandMock(extra_args=['--sdk-path', sdk_dir])
     with cros_test_lib.LoggingCapturer():
       self.cmd_mock.inst.Run()
