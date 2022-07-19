@@ -49,6 +49,13 @@ def ProcessShellFlags(defines):
   return _NameValueListToDict(shlex.split(defines))
 
 
+def ProcessVersionFile(src_dir):
+  """Returns the contents of //chrome/VERSION encoded as a dictionary."""
+  version_file = os.path.join(src_dir, 'chrome', 'VERSION')
+  version_contents = osutils.ReadFile(version_file).strip().splitlines()
+  return _NameValueListToDict(version_contents)
+
+
 class Conditions(object):
   """Functions that return conditions used to construct Path objects.
 

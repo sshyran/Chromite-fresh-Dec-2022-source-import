@@ -664,6 +664,7 @@ VERSION_FILE = os.path.join(CHROMIUMOS_OVERLAY_DIR,
 SDK_VERSION_FILE = os.path.join(PUBLIC_BINHOST_CONF_DIR,
                                 'host/sdk_version.conf')
 SDK_GS_BUCKET = 'chromiumos-sdk'
+RELEASE_GS_BUCKET = 'chromeos-build-release-console'
 
 PUBLIC = 'public'
 PRIVATE = 'private'

@@ -22,6 +22,7 @@ from chromite.third_party.gn_helpers import gn_helpers
 
 from chromite.cli import command
 from chromite.lib import cache
+from chromite.lib import chrome_util
 from chromite.lib import chromite_config
 from chromite.lib import cipd
 from chromite.lib import config_lib
@@ -133,8 +134,6 @@ class SDKFetcher(object):
       fallback_versions: The number of versions to consider.
       is_lacros: whether it's Lacros-Chrome build or not.
     """
-    site_config = config_lib.GetConfig()
-
     self.cache_base = os.path.join(cache_dir, COMMAND_NAME)
     if clear_cache:
       logging.warning('Clearing the SDK cache.')
@@ -148,9 +147,6 @@ class SDKFetcher(object):
     self.cipd_cache = cache.DiskCache(
         os.path.join(self.cache_base, self.CIPD_CACHE))
     self.board = board
-    self.config = site_config.FindCanonicalConfigForBoard(
-        board, allow_internal=not use_external_config)
-    self.gs_base = f'gs://chromeos-image-archive/{self.config.name}'
     self.clear_cache = clear_cache
     self.chrome_src = chrome_src
     self.sdk_path = sdk_path
@@ -159,16 +155,64 @@ class SDKFetcher(object):
     self.silent = silent
     self.is_lacros = is_lacros
 
-    # For external configs, there is no need to run 'gsutil config', because
-    # the necessary files are all accessible to anonymous users.
-    internal = self.config['internal']
-    self.gs_ctx = gs.GSContext(cache_dir=cache_dir, init_boto=internal)
+    self.gs_ctx = gs.GSContext(cache_dir=cache_dir, init_boto=False)
 
     if self.sdk_path is None:
       self.sdk_path = os.environ.get(self.SDK_PATH_ENV)
 
     if self.toolchain_path is None:
       self.toolchain_path = 'gs://%s' % constants.SDK_GS_BUCKET
+
+    if use_external_config or not self._HasInternalConfig():
+      self.config_name = f'{board}-{config_lib.CONFIG_TYPE_FULL}'
+    else:
+      self.config_name = f'{board}-{config_lib.CONFIG_TYPE_RELEASE}'
+    self.gs_base = f'gs://chromeos-image-archive/{self.config_name}'
+
+  def _HasInternalConfig(self):
+    """Determines if the SDK we need is provided by an internal builder.
+
+    A given board can have a public and/or an internal builder that publishes
+    its Simple Chrome SDK. e.g. "amd64-generic" only has a public builder,
+    "scarlet" only has an internal builder, "octopus" has both. So if we haven't
+    explicitly passed "--use-external-config", we need to figure out if we want
+    to use a public or internal builder.
+
+    This fetches the configs files in constants.RELEASE_CONFIG_GS_BUCKET to
+    determine if the internal release builders support the given board. If
+    they don't, we fall back to trying to use the public builders.
+
+    Returns:
+      True if there's an internal builder available that publishes SDKs for the
+      board.
+    """
+    try:
+      configs = self.gs_ctx.LS(f'gs://{constants.RELEASE_GS_BUCKET}', retries=0)
+    except gs.GSCommandError:
+      # If we can't list the config files, assume that means we don't have the
+      # needed credentials and that we want a public config.
+      return False
+
+    # If we're on a release branch, we don't want to use ToT's config, so read
+    # //chrome/VERSION to determine which branch we're on and use the
+    # corresponding config file.
+    chrome_version = chrome_util.ProcessVersionFile(self.chrome_src)['MAJOR']
+    relevant_config = None
+    for config in configs:
+      if f'-R{chrome_version}-' in config:
+        relevant_config = config
+        break
+    if not relevant_config:
+      # If no config was found for our branch, assume that means we want ToT.
+      relevant_config = (
+          f'gs://{constants.RELEASE_GS_BUCKET}/build_config.ToT.json')
+
+    config = json.loads(self.gs_ctx.Cat(relevant_config))
+    for board in (config.get('boards', []) +
+                  config.get('reference_board_unified_builds', [])):
+      if board.get('name') == self.board and board.get('builder') == 'RELEASE':
+        return True
+    return False
 
   def _InstallZstdFromCipd(self):
     """Install zstd from cipd if the system doesn't have it."""
@@ -677,7 +721,7 @@ class SDKFetcher(object):
         full_version = self._GetFullVersionFromLatest(version)
 
         if full_version is None:
-          raise MissingSDK(self.config.name, version)
+          raise MissingSDK(self.config_name, version)
 
         ref.AssignText(full_version)
         return full_version

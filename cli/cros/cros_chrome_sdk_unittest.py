@@ -5,6 +5,7 @@
 """This module tests the cros image command."""
 
 import copy
+import json
 import os
 import shutil
 import threading
@@ -111,7 +112,7 @@ class SDKFetcherMock(partial_mock.PartialMock):
   TARGET = 'chromite.cli.cros.cros_chrome_sdk.SDKFetcher'
   ATTRS = ('__init__', 'GetFullVersion', '_GetMetadata', '_UpdateTarball',
            '_GetManifest', 'UpdateDefaultVersion', '_GetTarballCacheKey',
-           '_GetBuildReport')
+           '_GetBuildReport', '_HasInternalConfig')
 
   FAKE_METADATA = """
 {
@@ -155,6 +156,14 @@ class SDKFetcherMock(partial_mock.PartialMock):
     self.env = None
     self.tarball_cache_key_map = {}
     self.tarball_fetch_lock = threading.Lock()
+
+  @_DependencyMockCtx
+  def _HasInternalConfig(self, inst, *args, **kwargs):
+    self.gs_mock.SetDefaultCmdResult()
+    self.gs_mock.AddCmdResult(
+        partial_mock.ListRegex(f'ls .*gs://{constants.RELEASE_GS_BUCKET}'),
+        side_effect=gs.GSCommandError('some ACL error'))
+    return self.backup['_HasInternalConfig'](inst, *args, **kwargs)
 
   @_DependencyMockCtx
   def _target__init__(self, inst, *args, **kwargs):
@@ -289,6 +298,9 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
     self.chrome_src_dir = os.path.join(self.chrome_root, 'src')
     osutils.SafeMakedirs(self.chrome_src_dir)
     osutils.Touch(os.path.join(self.chrome_root, '.gclient'))
+    osutils.SafeMakedirs(os.path.join(self.chrome_src_dir, 'chrome'))
+    osutils.WriteFile(
+        os.path.join(self.chrome_src_dir, 'chrome', 'VERSION'), 'MAJOR=123')
 
   @property
   def cache(self):
@@ -743,6 +755,94 @@ class GomaTest(cros_test_lib.MockTempDirTestCase,
     self.assertTrue(bool(goma_dir))
 
 
+class HasInternalConfigTest(cros_test_lib.MockTempDirTestCase):
+  """Tests the various GS calls in _HasInternalConfig()."""
+
+  def setUp(self):
+    self.src_dir = os.path.join(self.tempdir, 'src')
+    osutils.SafeMakedirs(os.path.join(self.src_dir, 'chrome'))
+    self.gs_mock = self.StartPatcher(gs_unittest.GSContextMock())
+    self.gs_mock.SetDefaultCmdResult()
+
+    self.sdk = cros_chrome_sdk.SDKFetcher(
+        os.path.join(self.tempdir, 'cache'), SDKFetcherMock.BOARD,
+        chrome_src=self.src_dir,
+        use_external_config=True)
+
+  def testNotAuthed(self):
+    """Covers the case when the initial ls of the release bucket fails."""
+    self.gs_mock.AddCmdResult(
+        partial_mock.ListRegex(f'ls .*gs://{constants.RELEASE_GS_BUCKET}'),
+        side_effect=gs.GSCommandError('some ACL error'))
+    self.assertFalse(self.sdk._HasInternalConfig())
+
+  def testFoundInToTConfig(self):
+    """Covers the case when the board is found in the ToT file."""
+    osutils.WriteFile(
+        os.path.join(self.src_dir, 'chrome', 'VERSION'), 'MAJOR=123')
+    # No 'ls' results should make it fallback to using the ToT file.
+    self.gs_mock.AddCmdResult(
+        partial_mock.ListRegex('ls .*gs://{constants.RELEASE_GS_BUCKET}'),
+        stdout='')
+    config_contents = json.dumps({
+        'boards': [
+            {
+                'name': SDKFetcherMock.BOARD,
+                'builder': 'RELEASE',
+            }
+        ]
+    })
+    self.gs_mock.AddCmdResult(
+        partial_mock.ListRegex('cat .*/build_config.ToT.json'),
+        stdout=config_contents)
+    # Our board was listed in the ToT file, so should return True.
+    self.assertTrue(self.sdk._HasInternalConfig())
+
+  def testFoundInBranchConfig(self):
+    """Covers the case when the board is found in a branch file."""
+    osutils.WriteFile(
+        os.path.join(self.src_dir, 'chrome', 'VERSION'), 'MAJOR=123')
+    branch_config_file = 'build_config.release-R123-12345.B.json'
+    self.gs_mock.AddCmdResult(
+        partial_mock.ListRegex(f'ls .*gs://{constants.RELEASE_GS_BUCKET}'),
+        stdout=f'gs://{constants.RELEASE_GS_BUCKET}/{branch_config_file}')
+    config_contents = json.dumps({
+        'boards': [
+            {
+                'name': SDKFetcherMock.BOARD,
+                'builder': 'RELEASE',
+            }
+        ]
+    })
+    self.gs_mock.AddCmdResult(
+        partial_mock.ListRegex(
+            f'cat .*gs://{constants.RELEASE_GS_BUCKET}/{branch_config_file}'),
+        stdout=config_contents)
+    # Our board was listed in the branch file, so should return True.
+    self.assertTrue(self.sdk._HasInternalConfig())
+
+  def testNotFoundInConfig(self):
+    """Covers the case when the board is not found in a config file."""
+    osutils.WriteFile(
+        os.path.join(self.src_dir, 'chrome', 'VERSION'), 'MAJOR=123')
+    self.gs_mock.AddCmdResult(
+        partial_mock.ListRegex('ls .*gs://{constants.RELEASE_GS_BUCKET}'),
+        stdout='')
+    config_contents = json.dumps({
+        'boards': [
+            {
+                'name': 'not-our-board',
+                'builder': 'RELEASE',
+            }
+        ]
+    })
+    self.gs_mock.AddCmdResult(
+        partial_mock.ListRegex('cat .*/build_config.ToT.json'),
+        stdout=config_contents)
+    # Our board wasn't listed in the ToT file, so should return False.
+    self.assertFalse(self.sdk._HasInternalConfig())
+
+
 class VersionTest(cros_test_lib.MockTempDirTestCase,
                   cros_test_lib.LoggingTestCase):
   """Tests the determination of which SDK version to use."""
@@ -972,7 +1072,8 @@ class ClearOldItemsTest(cros_test_lib.MockTempDirTestCase,
     self.gs_mock = self.StartPatcher(gs_unittest.GSContextMock())
     self.gs_mock.SetDefaultCmdResult()
 
-    self.sdk_fetcher = cros_chrome_sdk.SDKFetcher(self.tempdir, None)
+    self.sdk_fetcher = cros_chrome_sdk.SDKFetcher(
+        self.tempdir, None, use_external_config=True)
 
   def testBrokenSymlinkCleared(self):
     """Adds a broken symlink and ensures it gets removed."""
