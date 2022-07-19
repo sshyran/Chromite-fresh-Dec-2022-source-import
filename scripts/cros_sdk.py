@@ -21,8 +21,10 @@ import pwd
 import random
 import re
 import resource
+import shlex
 import subprocess
 import sys
+from typing import List
 import urllib.parse
 
 from chromite.cbuildbot import cbuildbot_alerts
@@ -666,16 +668,24 @@ def _ProxySimSetup(options):
   process_util.ExitAsStatus(os.waitpid(pid, 0)[1])
 
 
-def _ReExecuteIfNeeded(argv):
+def _BuildReExecCommand(argv, opts) -> List[str]:
+  """Generate new command for self-reexec."""
+  # Make sure to preserve the active Python executable in case the version
+  # we're running as is not the default one found via the (new) $PATH.
+  cmd = _SudoCommand() + ['--']
+  if opts.strace:
+    cmd += ['strace'] + shlex.split(opts.strace_arguments) + ['--']
+  return cmd + [sys.executable] + argv
+
+
+def _ReExecuteIfNeeded(argv, opts):
   """Re-execute cros_sdk as root.
 
   Also unshare the mount namespace so as to ensure that processes outside
   the chroot can't mess with our mounts.
   """
   if osutils.IsNonRootUser():
-    # Make sure to preserve the active Python executable in case the version
-    # we're running as is not the default one found via the (new) $PATH.
-    cmd = _SudoCommand() + ['--'] + [sys.executable] + argv
+    cmd = _BuildReExecCommand(argv, opts)
     logging.debug('Reexecing self via sudo:\n%s', cros_build_lib.CmdToStr(cmd))
     os.execvp(cmd[0], cmd)
 
@@ -871,6 +881,17 @@ def _CreateParser(sdk_latest_version, bootstrap_latest_version):
         action='store_false',
         help=f'Do not create a new {ns} namespace.')
 
+  # Debug options.
+  group = parser.debug_group
+  group.add_argument(
+      '--strace',
+      action='store_true',
+      help='Run cros_sdk through strace after re-exec via sudo')
+  group.add_argument(
+      '--strace-arguments',
+      default='',
+      help='Extra strace options (shell quoting permitted)')
+
   # Internal options.
   group = parser.add_argument_group(
       'Internal Chromium OS Build Team Options',
@@ -939,7 +960,7 @@ def main(argv):
     parser.error('Cannot --snapshot_delete the same snapshot you are '
                  'restoring with --snapshot_restore.')
 
-  _ReExecuteIfNeeded([sys.argv[0]] + argv)
+  _ReExecuteIfNeeded([sys.argv[0]] + argv, options)
 
   lock_path = os.path.dirname(options.chroot)
   lock_path = os.path.join(
