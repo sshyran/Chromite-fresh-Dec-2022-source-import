@@ -116,7 +116,8 @@ class SDKFetcher(object):
   def __init__(self, cache_dir, board, clear_cache=False, chrome_src=None,
                sdk_path=None, toolchain_path=None, silent=False,
                use_external_config=None,
-               fallback_versions=VERSIONS_TO_CONSIDER, is_lacros=False):
+               fallback_versions=VERSIONS_TO_CONSIDER, is_lacros=False,
+               use_new_public_bucket=False):
     """Initialize the class.
 
     Args:
@@ -135,6 +136,7 @@ class SDKFetcher(object):
         are available.
       fallback_versions: The number of versions to consider.
       is_lacros: whether it's Lacros-Chrome build or not.
+      use_new_public_bucket: Uses the new release bucket for public SDKs.
     """
     self.cache_base = os.path.join(cache_dir, COMMAND_NAME)
     if clear_cache:
@@ -166,10 +168,15 @@ class SDKFetcher(object):
       self.toolchain_path = 'gs://%s' % constants.SDK_GS_BUCKET
 
     if use_external_config or not self._HasInternalConfig():
-      self.config_name = f'{board}-{config_lib.CONFIG_TYPE_FULL}'
+      if use_new_public_bucket:
+        self.config_name = f'{board}-{config_lib.CONFIG_TYPE_PUBLIC}'
+        self.gs_base = f'gs://chromiumos-image-archive/{self.config_name}'
+      else:
+        self.config_name = f'{board}-{config_lib.CONFIG_TYPE_FULL}'
+        self.gs_base = f'gs://chromeos-image-archive/{self.config_name}'
     else:
       self.config_name = f'{board}-{config_lib.CONFIG_TYPE_RELEASE}'
-    self.gs_base = f'gs://chromeos-image-archive/{self.config_name}'
+      self.gs_base = f'gs://chromeos-image-archive/{self.config_name}'
 
   def _HasInternalConfig(self):
     """Determines if the SDK we need is provided by an internal builder.
@@ -1071,6 +1078,10 @@ class ChromeSDKCommand(command.CliCommand):
              'added to work around a Lacros CrOS toolchain bug due to version '
              'skew, and should be removed once Lacros is swiched to use '
              'Chromium toolchain: crbug.com/1275386.')
+    # TODO(crbug.com/1330762): Remove this arg.
+    parser.add_argument(
+        '--use-new-public-bucket', action='store_true', default=False,
+        help='Whether to use the new GS bucket for public images and SDKs.')
 
     parser.caching_group.add_argument(
         '--clear-sdk-cache', action='store_true',
@@ -1728,7 +1739,8 @@ class ChromeSDKCommand(command.CliCommand):
         silent=self.silent,
         use_external_config=self.options.use_external_config,
         fallback_versions=self.options.fallback_versions,
-        is_lacros=self.options.is_lacros
+        is_lacros=self.options.is_lacros,
+        use_new_public_bucket=self.options.use_new_public_bucket,
     )
 
     prepare_version = self.options.version

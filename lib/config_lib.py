@@ -22,6 +22,7 @@ GS_PATH_DEFAULT = 'default'  # Means gs://chromeos-image-archive/ + bot_id
 CONFIG_TYPE_RELEASE = 'release'
 CONFIG_TYPE_FULL = 'full'
 CONFIG_TYPE_FACTORY = 'factory'
+CONFIG_TYPE_PUBLIC = 'public'
 CONFIG_TYPE_TOOLCHAIN = 'toolchain'
 
 # DISPLAY labels are used to group related builds together in the GE UI.
