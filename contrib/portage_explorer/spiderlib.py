@@ -12,13 +12,22 @@
 
 import dataclasses
 from pathlib import Path
-from typing import List
+from typing import List, Optional
+
+
+@dataclasses.dataclass
+class Profile:
+  """A profile."""
+  id_: str
+  path: Path
+  name: str
 
 
 @dataclasses.dataclass
 class BuildTarget:
   """A build target."""
   name: str
+  profile: Optional[Profile] = None
 
 
 @dataclasses.dataclass
@@ -26,6 +35,7 @@ class Overlay:
   """An overlay."""
   path: Path
   name: str
+  profiles: List[Profile] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass
