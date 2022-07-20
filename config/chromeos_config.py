@@ -1799,6 +1799,13 @@ def ApplyCustomOverrides(site_config):
       'volteer-release': {
           'sign_types': ['recovery', 'factory'],
       },
+      'ghost-release': {
+          'sign_types': ['recovery', 'factory'],
+          # Ghost has no DUTs in the lab (b/237833835).
+          'hw_tests': [],
+          'hw_tests_override': [],
+          'hw_tests_disabled_bug': 'b/237833835',
+      },
 
       # See go/cros-fingerprint-firmware-branching-and-signing for details on
       # accessory_rwsig signing.
