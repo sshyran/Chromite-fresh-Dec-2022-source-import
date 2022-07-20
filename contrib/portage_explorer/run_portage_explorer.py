@@ -6,6 +6,7 @@
 
 from chromite.contrib.portage_explorer import get_boards_spider
 from chromite.contrib.portage_explorer import get_overlays_spider
+from chromite.contrib.portage_explorer import get_profiles_spider
 from chromite.contrib.portage_explorer import spiderlib
 
 
@@ -18,4 +19,5 @@ def execute():
   output = spiderlib.SpiderOutput()
   get_boards_spider.execute(output)
   get_overlays_spider.execute(output)
+  get_profiles_spider.execute(output)
   return output
