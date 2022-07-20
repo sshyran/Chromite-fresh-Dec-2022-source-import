@@ -85,18 +85,20 @@ class InterfaceTest(cros_test_lib.OutputTestCase):
 
   def testLacros(self):
     """Test basic lacros invocation."""
-    argv = ['--lacros', '--nostrip', '--build-dir', '/path/to/nowhere',
-            '--device', 'monkey']
+    argv = ['--lacros', '--build-dir', '/path/to/nowhere',
+            '--device', 'monkey', '--board', 'atlas']
     options = _ParseCommandLine(argv)
     self.assertTrue(options.lacros)
     self.assertEqual(options.target_dir, deploy_chrome.LACROS_DIR)
 
-  def testLacrosRequiresNostrip(self):
-    """Lacros requires --nostrip"""
-    argv = ['--lacros', '--build-dir', '/path/to/nowhere', '--device',
-            'monkey']
-    self.assertRaises2(SystemExit, _ParseCommandLine, argv,
-                       check_attrs={'code': 2})
+  def testLacrosNoStrip(self):
+    """Test lacros invocation with nostrip."""
+    argv = ['--lacros', '--nostrip', '--build-dir', '/path/to/nowhere',
+            '--device', 'monkey']
+    options = _ParseCommandLine(argv)
+    self.assertTrue(options.lacros)
+    self.assertFalse(options.dostrip)
+    self.assertEqual(options.target_dir, deploy_chrome.LACROS_DIR)
 
   def assertParseError(self, argv):
     with self.OutputCapturer():

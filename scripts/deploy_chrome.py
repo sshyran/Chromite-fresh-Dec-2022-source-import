@@ -714,13 +714,8 @@ def _ParseCommandLine(argv):
     parser.error('Cannot specify both --build_dir and '
                  '--gs-path/--local-pkg-patch')
   if options.lacros:
-    if options.board:
-      parser.error('--board is not supported with --lacros')
-    # The stripping implemented in this file rely on the cros-chrome-sdk, which
-    # is inappropriate for Lacros. Lacros stripping is currently not
-    # implemented.
-    if options.dostrip:
-      parser.error('--lacros requires --nostrip')
+    if options.dostrip and not options.board:
+      parser.error('Please specify --board.')
     if options.mount_dir or options.mount:
       parser.error('--lacros does not support --mount or --mount-dir')
     if options.deploy_test_binaries:
