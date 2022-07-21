@@ -235,9 +235,8 @@ class TestMountChroot(cros_test_lib.MockTempDirTestCase):
   _LVM_SUCCESS_CODE = 0  # Shell exit code when lvm commands succeed.
 
   def _makeImageFile(self, chroot_img):
-    with open(chroot_img, 'w') as f:
-      f.seek(2**30)
-      f.write('\0')
+    # Create a 1GiB sparse disk image.
+    osutils.AllocateFile(chroot_img, 1024 * 1024 * 1024)
 
   def _mockFindVolumeGroupForDevice(self):
     m = self.PatchObject(cros_sdk_lib, 'FindVolumeGroupForDevice')
