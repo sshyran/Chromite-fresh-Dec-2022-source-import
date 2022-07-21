@@ -5,13 +5,17 @@
 """Spider to find all board names."""
 
 import re
-from typing import Pattern
 
 from chromite.contrib.portage_explorer import spiderlib
 from chromite.lib import portage_util
 
 
-def get_board_name(regex: Pattern[str], overlay_path: str) -> str:
+BOARD_NAME_RE = re.compile(r'(?<!-)(?=overlay-.*-private)overlay-'
+                           r'(?P<board_from_private>.*)-private|(?<!-)overlay-'
+                           r'(?P<board_from_public>.*)')
+
+
+def get_board_name(overlay_path: str) -> str:
   """Parse overlay path with regex to find board name.
 
   Args:
@@ -21,7 +25,7 @@ def get_board_name(regex: Pattern[str], overlay_path: str) -> str:
   Returns:
     The board name as a string.
   """
-  board = regex.search(overlay_path)
+  board = BOARD_NAME_RE.search(overlay_path)
   if board:
     if board.group('board_from_private'):
       return board.group('board_from_private')
@@ -35,13 +39,10 @@ def execute(output: spiderlib.SpiderOutput):
   Args:
     output: SpiderOutput representing the final output from all the spiders.
   """
-  regex = re.compile(r'(?<!-)(?=overlay-.*-private)overlay-'
-                     r'(?P<board_from_private>.*)-private|(?<!-)overlay-'
-                     r'(?P<board_from_public>.*)')
   overlays = portage_util.FindOverlays('both')
   boards = set()
   for overlay_path in overlays:
-    board_name = get_board_name(regex, overlay_path)
+    board_name = get_board_name(overlay_path)
     if board_name:
       boards.add(board_name)
   for board in sorted(boards):

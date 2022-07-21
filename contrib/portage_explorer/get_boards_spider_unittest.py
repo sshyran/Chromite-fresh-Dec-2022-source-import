@@ -4,7 +4,6 @@
 
 """Unit test for get_boards_spider."""
 
-import re
 from unittest import mock
 
 from chromite.contrib.portage_explorer import get_boards_spider
@@ -13,13 +12,10 @@ from chromite.contrib.portage_explorer import spiderlib
 
 def test_get_board_name():
   """Test that get_board_name returns the correct board name."""
-  regex = re.compile(r'(?<!-)(?=overlay-.*-private)overlay-'
-                     r'(?P<board_from_private>.*)-private|(?<!-)overlay-'
-                     r'(?P<board_from_public>.*)')
-  assert get_boards_spider.get_board_name(regex, 'overlay-brya') == 'brya'
-  assert get_boards_spider.get_board_name(regex, 'overlay-oak-private') == 'oak'
-  assert get_boards_spider.get_board_name(regex, 'chromeos-overlay-oak') == ''
-  assert get_boards_spider.get_board_name(regex, 'baseboard-asuka') == ''
+  assert get_boards_spider.get_board_name('overlay-brya') == 'brya'
+  assert get_boards_spider.get_board_name('overlay-oak-private') == 'oak'
+  assert get_boards_spider.get_board_name('chromeos-overlay-oak') == ''
+  assert get_boards_spider.get_board_name('baseboard-asuka') == ''
 
 
 def test_execute():
