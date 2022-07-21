@@ -10751,6 +10751,10 @@
         {
           "board_name": "strongbad-kernelnext",
           "name": "quackingstick",
+          "test_suites": [
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7213,
@@ -10759,6 +10763,10 @@
         {
           "board_name": "strongbad-kernelnext",
           "name": "wormdingler",
+          "test_suites": [
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7213,
@@ -11053,6 +11061,10 @@
         {
           "board_name": "trogdor-kernelnext",
           "name": "kingoftown",
+          "test_suites": [
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7159,
@@ -11092,6 +11104,10 @@
         {
           "board_name": "trogdor-kernelnext",
           "name": "pazquel",
+          "test_suites": [
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7159,
