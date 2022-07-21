@@ -18,7 +18,8 @@ class ChromeLKGMCommitterTester(cros_test_lib.RunCommandTestCase,
 
   def setUp(self):
     """Common set up method for all tests."""
-    self.committer = chrome_chromeos_lkgm.ChromeLKGMCommitter('1001.0.0')
+    self.committer = chrome_chromeos_lkgm.ChromeLKGMCommitter('1001.0.0',
+                                                              'main')
     self.old_lkgm = None
 
   @mock.patch('chromite.lib.gob_util.GetFileContentsOnHead')
@@ -51,7 +52,9 @@ class ChromeLKGMCommitterTester(cros_test_lib.RunCommandTestCase,
   @mock.patch('chromite.lib.gob_util.GetFileContentsOnHead')
   def testVersionWithChromeBranch(self, mock_get_file):
     """Tests passing a version with a chrome branch strips the branch."""
-    self.committer = chrome_chromeos_lkgm.ChromeLKGMCommitter('1003.0.0-rc2')
+    branch = 'refs/branch-heads/5000'
+    self.committer = chrome_chromeos_lkgm.ChromeLKGMCommitter('1003.0.0-rc2',
+                                                              branch)
     mock_get_file.return_value = '1002.0.0'
 
     with mock.patch.object(self.committer._gerrit_helper, 'CreateChange') as cg:
@@ -62,6 +65,7 @@ class ChromeLKGMCommitterTester(cros_test_lib.RunCommandTestCase,
           with mock.patch.object(self.committer._gerrit_helper, 'SetHashtags'):
             # Check the file was actually written out correctly.
             self.committer.UpdateLKGM()
+            cg.assert_called_once_with('chromium/src', branch, mock.ANY, False)
             ce.assert_called_once_with(123456, 'chromeos/CHROMEOS_LKGM',
                                        '1003.0.0')
             bc.assert_called_once_with(123456, labels={'Bot-Commit': 1},
