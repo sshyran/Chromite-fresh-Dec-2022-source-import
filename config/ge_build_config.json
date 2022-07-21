@@ -333,18 +333,6 @@
       "rubik_target_milestone": 103
     },
     {
-      "name": "shotzo",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": true,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "tael",
       "configs": [
         {
@@ -10321,6 +10309,23 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 259,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "shotzo",
+      "reference_board_name": "shotzo",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": false,
+      "models": [
+        {
+          "board_name": "shotzo",
+          "name": "shotzo",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7233,
           "is_active": true
         }
       ]
