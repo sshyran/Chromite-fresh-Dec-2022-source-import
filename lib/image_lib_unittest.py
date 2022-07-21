@@ -62,6 +62,7 @@ LOOP_PARTITION_INFO = [
 LOOP_PARTS_DICT = {
     p.number: '%sp%d' % (LOOP_DEV, p.number) for p in LOOP_PARTITION_INFO}
 LOOP_PARTS_LIST = LOOP_PARTS_DICT.values()
+FAKE_DATE_STRING = '2022_07_20_203326'
 
 class LoopbackPartitionsMock(image_lib.LoopbackPartitions):
   """Mocked loopback partition class to use in unit tests."""
@@ -682,10 +683,14 @@ class GetBuildImageEnvvarTests(cros_test_lib.MockTestCase):
     self.assertEqual(envar['OUTPUT_DIR'], str(output_dir))
 
 
-class CreateBuildDirTests(cros_test_lib.TempDirTestCase):
+class CreateBuildDirTests(cros_test_lib.MockTempDirTestCase):
   """Test CreateBuildDir."""
 
   def setUp(self):
+    self.PatchObject(
+        chromeos_version.VersionInfo,
+        '_GetDateTime',
+        return_value=FAKE_DATE_STRING)
     self.build_top_dir = self.tempdir / 'build'
     self.output_top_dir = self.tempdir / 'output'
     self.testBoard = 'TestBoard'
@@ -697,6 +702,9 @@ class CreateBuildDirTests(cros_test_lib.TempDirTestCase):
     self.image_dir = (f'R{self.version_info.chrome_branch}-' +
                       f'{self.version_info.VersionString()}')
     self.image_dir_attempt = self.image_dir + f'-a{self.attempt}'
+    self.image_dir_date = (f'R{self.version_info.chrome_branch}-' +
+                           f'{self.version_info.VersionStringWithDateTime()}')
+    self.image_dir_date_attempt = f'{self.image_dir_date}-a{self.attempt}'
     self.symlink = 'latest'
 
   def testChromeBranchVersion(self):
@@ -738,6 +746,21 @@ class CreateBuildDirTests(cros_test_lib.TempDirTestCase):
           self.output_top_dir, self.version_info.chrome_branch,
           self.version_info.VersionString(), self.testBoard, self.symlink)
 
+  def testChromeBranchVersionDate(self):
+    """Test with chrome_branch and version string with date."""
+    build_dir, output_dir, symlink_dir = image_lib.CreateBuildDir(
+        self.build_top_dir, self.output_top_dir,
+        self.version_info.chrome_branch,
+        self.version_info.VersionStringWithDateTime(), self.testBoard,
+        self.symlink)
+
+    self.assertExists(build_dir)
+    self.assertExists(output_dir)
+    self.assertEqual(build_dir, self.result_build_dir / self.image_dir_date)
+    self.assertExists(output_dir, self.result_output_dir / self.image_dir_date)
+    self.assertTrue(symlink_dir.is_symlink())
+    self.assertEqual(self.image_dir_date, os.readlink(symlink_dir))
+
   def testBuildAttempt(self):
     """Test with chrome_branch, version string and build attempt."""
     build_dir, output_dir, symlink_dir = image_lib.CreateBuildDir(
@@ -756,6 +779,26 @@ class CreateBuildDirTests(cros_test_lib.TempDirTestCase):
                       self.result_output_dir / self.image_dir_attempt)
     self.assertTrue(symlink_dir.is_symlink())
     self.assertEqual(self.image_dir_attempt, os.readlink(symlink_dir))
+
+  def testBuildAttemptDate(self):
+    """Test with chrome_branch, version string with date and build attempt."""
+    build_dir, output_dir, symlink_dir = image_lib.CreateBuildDir(
+        self.build_top_dir,
+        self.output_top_dir,
+        self.version_info.chrome_branch,
+        self.version_info.VersionStringWithDateTime(),
+        self.testBoard,
+        self.symlink,
+        build_attempt=self.attempt)
+
+    self.assertExists(build_dir)
+    self.assertExists(output_dir)
+    self.assertEqual(build_dir,
+                     self.result_build_dir / self.image_dir_date_attempt)
+    self.assertExists(output_dir,
+                      self.result_output_dir / self.image_dir_date_attempt)
+    self.assertTrue(symlink_dir.is_symlink())
+    self.assertEqual(self.image_dir_date_attempt, os.readlink(symlink_dir))
 
   def testOutputSuffix(self):
     """Test with output suffix."""
@@ -802,6 +845,53 @@ class CreateBuildDirTests(cros_test_lib.TempDirTestCase):
         self.result_output_dir / (self.image_dir + '-' + output_suffix))
     self.assertTrue(symlink_dir.is_symlink())
     self.assertEqual(self.image_dir + '-' + output_suffix,
+                     os.readlink(symlink_dir))
+
+  def testOutputSuffixWithDate(self):
+    """Test with output suffix with date."""
+    output_suffix = 'test-suffix'
+    build_dir, output_dir, symlink_dir = image_lib.CreateBuildDir(
+        self.build_top_dir,
+        self.output_top_dir,
+        self.version_info.chrome_branch,
+        self.version_info.VersionStringWithDateTime(),
+        self.testBoard,
+        self.symlink,
+        build_attempt=self.attempt,
+        output_suffix=output_suffix)
+
+    self.assertExists(build_dir)
+    self.assertExists(output_dir)
+    self.assertEqual(
+        build_dir, self.result_build_dir /
+        f'{self.image_dir_date_attempt}-{output_suffix}')
+    self.assertExists(
+        output_dir, self.result_output_dir /
+        f'{self.image_dir_date_attempt}-{output_suffix}')
+    self.assertTrue(symlink_dir.is_symlink())
+    self.assertEqual(f'{self.image_dir_date_attempt}-{output_suffix}',
+                     os.readlink(symlink_dir))
+
+    # Test the case without build_attempt.
+    build_dir, output_dir, symlink_dir = image_lib.CreateBuildDir(
+        self.build_top_dir,
+        self.output_top_dir,
+        self.version_info.chrome_branch,
+        self.version_info.VersionStringWithDateTime(),
+        self.testBoard,
+        self.symlink,
+        output_suffix=output_suffix)
+
+    self.assertExists(build_dir)
+    self.assertExists(output_dir)
+    self.assertEqual(
+        build_dir,
+        self.result_build_dir / f'{self.image_dir_date}-{output_suffix}')
+    self.assertExists(
+        output_dir,
+        self.result_output_dir / f'{self.image_dir_date}-{output_suffix}')
+    self.assertTrue(symlink_dir.is_symlink())
+    self.assertEqual(f'{self.image_dir_date}-{output_suffix}',
                      os.readlink(symlink_dir))
 
 
