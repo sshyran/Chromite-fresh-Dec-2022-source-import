@@ -16,6 +16,7 @@ from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib.parser import package_info
 
+
 if cros_build_lib.IsInsideChroot():
   # Only used for linting in chroot and requires yaml which is only in chroot
   from chromite.scripts import tricium_cargo_clippy
@@ -354,7 +355,7 @@ class BuildLinter:
 
   def _clean_file_path(self, file_path: Text) -> str:
     """Remove git repo and work directories from file_paths."""
-    file_path = re.sub('^' + BuildLinter.GIT_REPO_PATH, '/', str(file_path))
+    file_path = re.sub('^' + BuildLinter.GIT_REPO_PATH, '', str(file_path))
     # Remove ebuild work directories from prefix
     # Such as: "**/<package>-9999/work/<package>-9999/"
     #      or: "**/<package>-0.24.52-r9/work/<package>-0.24.52/"
