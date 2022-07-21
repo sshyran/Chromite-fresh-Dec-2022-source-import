@@ -4,6 +4,7 @@
 
 """Utilities for reading and manipulating chromeos_version.sh script."""
 
+from datetime import datetime
 import logging
 import os
 from pathlib import Path
@@ -37,6 +38,7 @@ class VersionInfo(object):
   VER_PATTERN = r'(\d+).(\d+).(\d+)(?:-R(\d+))*'
   KEY_VALUE_PATTERN = r'%s=(\d+)\s*$'
   VALID_INCR_TYPES = ('chrome_branch', 'build', 'branch', 'patch')
+  DATE_TIME_FORMAT = '%Y_%m_%d_%H%M%S'
 
   def __init__(self,
                version_string: Optional[str] = None,
@@ -66,6 +68,7 @@ class VersionInfo(object):
       self.build_number = match.group(1)
       self.branch_build_number = match.group(2)
       self.patch_number = match.group(3)
+      self.patch_number_with_date_time = self.patch_number
       self.chrome_branch = chrome_branch
       self.version_file = None
 
@@ -75,6 +78,9 @@ class VersionInfo(object):
   def from_repo(cls, source_repo: Union[str, os.PathLike], **kwargs):
     kwargs['version_file'] = Path(source_repo) / constants.VERSION_FILE
     return cls(**kwargs)
+
+  def _GetDateTime(self):
+    return datetime.now().strftime(self.DATE_TIME_FORMAT)
 
   def _LoadFromFile(self):
     """Read the version file and set the version components"""
@@ -106,7 +112,13 @@ class VersionInfo(object):
         match = self.FindValue('CHROMEOS_PATCH', line)
         if match:
           self.patch_number = match
+          self.patch_number_with_date_time = self.patch_number
+          # For developer builds, append a date and time string.
+          if os.environ.get('CHROMEOS_OFFICIAL') != '1':
+            self.patch_number_with_date_time += f'-d{self._GetDateTime()}'
           logging.debug('Set the patch version to:%s', self.patch_number)
+          logging.debug('Set the patch version with date to:%s',
+                        self.patch_number_with_date_time)
           continue
 
     logging.debug(self.VersionString())
@@ -222,8 +234,13 @@ class VersionInfo(object):
 
   def VersionString(self):
     """returns the version string"""
-    return '%s.%s.%s' % (self.build_number, self.branch_build_number,
-                         self.patch_number)
+    return (f'{self.build_number}.{self.branch_build_number}.'
+            f'{self.patch_number}')
+
+  def VersionStringWithDateTime(self):
+    """returns the version string with date and time."""
+    return (f'{self.build_number}.{self.branch_build_number}.'
+            f'{self.patch_number_with_date_time}')
 
   def VersionComponents(self):
     """Return an array of ints of the version fields for comparing."""

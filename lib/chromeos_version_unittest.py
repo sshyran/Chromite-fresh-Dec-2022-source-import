@@ -23,6 +23,8 @@ CHROME_BRANCH=%(chrome_branch)s
 
 FAKE_VERSION_STRING = '1.2.3'
 CHROME_BRANCH = '13'
+FAKE_DATE_STRING = '2022_07_20_203326'
+FAKE_DEV_VERSION_STRING = f'{FAKE_VERSION_STRING}-d{FAKE_DATE_STRING}'
 
 
 class VersionInfoTest(cros_test_lib.MockTempDirTestCase):
@@ -48,23 +50,44 @@ class VersionInfoTest(cros_test_lib.MockTempDirTestCase):
         version_file, version=version, chrome_branch=chrome_branch)
     return version_file
 
+  def setUp(self):
+    self.PatchObject(
+        chromeos_version.VersionInfo,
+        '_GetDateTime',
+        return_value=FAKE_DATE_STRING)
+
   def testLoadFromFile(self):
     """Tests whether we can load from a version file."""
     version_file = self.CreateFakeVersionFile(self.tempdir)
+    # Test for Dev/Local Builds.
     info = chromeos_version.VersionInfo(version_file=version_file)
     self.assertEqual(info.VersionString(), FAKE_VERSION_STRING)
+    self.assertEqual(info.VersionStringWithDateTime(), FAKE_DEV_VERSION_STRING)
+    # Test for Official.
+    os.environ['CHROMEOS_OFFICIAL'] = '1'
+    info = chromeos_version.VersionInfo(version_file=version_file)
+    self.assertEqual(info.VersionString(), FAKE_VERSION_STRING)
+    self.assertEqual(info.VersionStringWithDateTime(), FAKE_VERSION_STRING)
 
   def testLoadFromRepo(self):
     """Tests whether we can load from a source repo."""
     version_file = os.path.join(self.tempdir, constants.VERSION_FILE)
     self.WriteFakeVersionFile(version_file)
+    # Test for Dev/Local Builds.
     info = chromeos_version.VersionInfo.from_repo(self.tempdir)
     self.assertEqual(info.VersionString(), FAKE_VERSION_STRING)
+    self.assertEqual(info.VersionStringWithDateTime(), FAKE_DEV_VERSION_STRING)
+    # Test for Official.
+    os.environ['CHROMEOS_OFFICIAL'] = '1'
+    info = chromeos_version.VersionInfo.from_repo(self.tempdir)
+    self.assertEqual(info.VersionString(), FAKE_VERSION_STRING)
+    self.assertEqual(info.VersionStringWithDateTime(), FAKE_VERSION_STRING)
 
   def testLoadFromString(self):
     """Tests whether we can load from a string."""
     info = chromeos_version.VersionInfo(FAKE_VERSION_STRING, CHROME_BRANCH)
     self.assertEqual(info.VersionString(), FAKE_VERSION_STRING)
+    self.assertEqual(info.VersionStringWithDateTime(), FAKE_VERSION_STRING)
 
   def CommonTestIncrementVersion(self, incr_type, version, chrome_branch=None):
     """Common test increment.  Returns path to new incremented file."""
