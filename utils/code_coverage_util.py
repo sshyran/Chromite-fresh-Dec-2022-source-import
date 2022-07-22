@@ -8,6 +8,7 @@ import json
 import logging
 import os
 from pathlib import Path
+import pprint
 from typing import Dict, List, Tuple
 
 from chromite.lib import osutils
@@ -186,6 +187,173 @@ def _ShouldExclude(file: str, exclude_files: List[str],
   return should_exclude
 
 
+def _ValidatePathMappingEntryList(data: Dict) -> None:
+  """Function to validate path mapping json.
+
+  Args:
+    data: Dict of path mapping entries.
+
+  Returns:
+    Nothing. Throws exception in case the entry is invalid.
+  """
+  if not data:
+    raise ValueError('Data input is not defined in'
+                     '_ValidatePathMappingEntryList')
+  if 'mapping' not in data:
+    error_message = (f'Missing mapping key in {json.dumps(data)}')
+    logging.error(error_message)
+    raise ValueError(error_message)
+
+  for entry in data['mapping']:
+    if ('src_path' not in entry or 'build_dest_path' not in entry):
+      error_message = ('Missing required keys (src_path, build_dest_path)'
+                       f' in {json.dumps(entry)}.')
+      raise ValueError(error_message)
+
+
+def _CleanLlvmFileName(filename: str,
+                       path_mapping_list: List,
+                       source_root: str) -> str:
+  """Clean LLVM generated file name.
+
+     Convert the destination work directory paths into
+     paths relative to src root. LLVM generated coverage reports
+     contains filepaths under work directory. Something like
+     " /build/nami/tmp/portage/<category>/<packagename>/work
+     /<packagename>/abc.cc". It needs to be cleaned and mapped
+     to corresponding chromeos src file path. This method achieves
+     this by using |path_mapping_list|. LLVM also reports coverage
+     for generated files. So this method discards any file that does
+     not exists in chromeos codebase.
+
+  Args:
+    filename: file name that needs to be cleaned.
+    path_mapping_list: Path mapping list.
+    source_root: source root path.
+
+  Returns:
+    Cleaned filename, None if the unable to clean file.
+  """
+
+  if not filename:
+    return None
+
+  filename = os.path.normpath(filename)
+  for entry in path_mapping_list:
+    build_dest_path = entry['build_dest_path']
+    src_path = entry['src_path']
+    if filename.startswith(build_dest_path):
+      relative_src_path = filename.replace(build_dest_path, src_path)
+      absolute_src_path = os.path.join(source_root, relative_src_path)
+      if os.path.exists(absolute_src_path):
+        return relative_src_path
+  logging.info('Not able to clean filename %s.', filename)
+  return None
+
+
+def CleanLlvmFileNames(coverage_json: Dict,
+                       source_root: str,
+                       path_mapping_list: Dict) -> Dict:
+  """Clean LLVM generated file names.
+
+     Method to convert the destination work directory paths into
+     paths relative to src root. LLVM generated coverage reports
+     contains filepaths under work directory. Something like
+     " /build/nami/tmp/portage/<category>/<packagename>/work
+     /<packagename>/abc.cc". It needs to be cleaned and mapped
+     to corresponding chromeos src file path. LLVM also reports coverage
+     for generated files. So this method discards any file that does
+     not exists in chromeos codebase.
+
+  Args:
+    coverage_json: llvm coverage json.
+    source_root: source root path.
+    path_mapping_list: List of src and work destination dir tuple.
+
+  Returns:
+    llvm coverage json after required cleaning up the file names.
+  """
+
+  if not coverage_json:
+    return None
+
+  coverage_data = _ExtractLlvmCoverageData(coverage_json)
+  result_coverage_data = []
+
+  for entry in coverage_data:
+    cleaned_file_name = _CleanLlvmFileName(entry['filename'],
+                                           path_mapping_list,
+                                           source_root)
+    if cleaned_file_name:
+      entry['filename'] = cleaned_file_name
+      result_coverage_data.append(entry)
+  return CreateLlvmCoverageJson(result_coverage_data)
+
+
+def GatherPathMapping(search_directory: str) -> List:
+  """Method to gather path mapping json.
+
+     Walk through search_directory and read and merge all
+     json files containing mapping of src to build destination.
+
+  Args:
+    search_directory: Directory to look for path mapping json.
+
+  Returns:
+    List of path mapping entries.
+  """
+  if not os.path.exists(search_directory):
+    logging.warning('The path in GatherPathMapping does not exists %s.',
+                    search_directory)
+    return None
+  if not os.path.isdir(search_directory):
+    raise ValueError('The path is not a directory: ', search_directory)
+  temp = []
+  for dirpath, _, files in os.walk(search_directory):
+    for f in files:
+      path_to_file = os.path.join(dirpath, f)
+      if os.path.basename(path_to_file) != 'src_to_build_dest_map.json':
+        continue
+      data = json.loads(osutils.ReadFile(path_to_file))
+      _ValidatePathMappingEntryList(data)
+      temp.extend(data['mapping'])
+
+  result = []
+  for entry in temp:
+    result.extend([{
+        'build_dest_path': os.path.normpath(entry['build_dest_path']),
+        'src_path': os.path.normpath(entry['src_path'])
+    }])
+  result.extend([{
+      'build_dest_path':'/mnt/host/source/',
+      'src_path':''
+  }])
+  result.sort(reverse=True, key=lambda x: len(x['build_dest_path']))
+  return result
+
+
+def LogLlvmCoverageJsonInformation(coverage_json: Dict, message: str):
+  """Log useful information regarding coverage json.
+
+  Method to log list of file paths in the coverage json.
+
+  Args:
+    coverage_json: llvm coverage json.
+    message: Logging message.
+
+  Returns:
+    llvm coverage json after required entries are removed.
+  """
+  if not coverage_json:
+    return
+
+  filenames = ExtractFilenames(coverage_json)
+  logging.info('%s\nNumber of entries: %d\n%s',
+               message,
+               len(filenames),
+               pprint.pformat(filenames))
+
+
 def GetLLVMCoverageWithFilesExcluded(coverage_json: Dict,
                                      exclude_files_suffixes: Tuple[str]
                                     ) -> Dict:
@@ -210,7 +378,7 @@ def GetLLVMCoverageWithFilesExcluded(coverage_json: Dict,
     if not entry['filename'].endswith(exclude_files_suffixes):
       result_coverage_data.append(entry)
     else:
-      logging.info('skipping file %s from zero coverage.',
+      logging.info('Excluding file %s from coverage report.',
                    entry['filename'])
   return CreateLlvmCoverageJson(result_coverage_data)
 

@@ -10,6 +10,7 @@ import json
 import logging
 import os
 import shutil
+import traceback
 from typing import Dict, Iterable, List, NamedTuple, Optional, TYPE_CHECKING
 
 from chromite.cbuildbot import commands
@@ -18,6 +19,7 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
+from chromite.lib import path_util
 from chromite.lib import portage_util
 from chromite.utils import code_coverage_util
 
@@ -444,17 +446,33 @@ def BundleCodeCoverageLlvmJson(build_target: 'build_target_lib.BuildTarget',
 
     # Gather all LLVM compiler generated coverage data into single coverage.json
     coverage_dir = os.path.join(base_path, 'build/coverage_data')
-    llvm_generated_cov_json = GatherCodeCoverageLlvmJsonFile(coverage_dir)
+    coverage_dir = path_util.FromChrootPath(coverage_dir)
+
+    llvm_generated_cov_json = GatherCodeCoverageLlvmJsonFile(
+        coverage_dir)
 
     llvm_generated_cov_json = (
         code_coverage_util.GetLLVMCoverageWithFilesExcluded(
             llvm_generated_cov_json,
             constants.ZERO_COVERAGE_EXCLUDE_FILES_SUFFIXES))
+    search_directory = os.path.join(base_path,
+                                    'var/lib/chromeos/package-artifacts')
+    search_directory = path_util.FromChrootPath(search_directory)
+    path_mapping = code_coverage_util.GatherPathMapping(search_directory)
+
+    cleaned_cov_json = code_coverage_util.CleanLlvmFileNames(
+        coverage_json=llvm_generated_cov_json,
+        source_root=constants.SOURCE_ROOT,
+        path_mapping_list=path_mapping)
+
+    code_coverage_util.LogLlvmCoverageJsonInformation(
+        cleaned_cov_json,
+        'LLVM generated coverage after files cleaned:')
 
     # Generate zero coverage for all src files, excluding those which are
-    # already present in llvm_generated_cov_json
+    # already present in cleaned_cov_json.
     files_with_cov = code_coverage_util.ExtractFilenames(
-        llvm_generated_cov_json)
+        cleaned_cov_json)
     zero_coverage_json = code_coverage_util.GenerateZeroCoverageLlvm(
         # TODO(b/227649725): Input path_to_src_directories and language specific
         # src_file_extensions and exclude_line_prefixes from GetArtifact API
@@ -465,12 +483,19 @@ def BundleCodeCoverageLlvmJson(build_target: 'build_target_lib.BuildTarget',
         exclude_files=files_with_cov,
         exclude_files_suffixes=constants.ZERO_COVERAGE_EXCLUDE_FILES_SUFFIXES,
         src_prefix_path=constants.SOURCE_ROOT)
+
+    code_coverage_util.LogLlvmCoverageJsonInformation(
+        zero_coverage_json,
+        'Zero coverage files:')
+
     # Merge generated zero coverage data and
     # llvm compiler generated coverage data.
     merged_coverage_json = code_coverage_util.MergeLLVMCoverageJson(
-        llvm_generated_cov_json, zero_coverage_json)
-
-    with chroot.tempdir() as dest_tmpdir:
+        cleaned_cov_json, zero_coverage_json)
+    code_coverage_util.LogLlvmCoverageJsonInformation(
+        merged_coverage_json,
+        'merged_coverage_json:')
+    with osutils.TempDir() as dest_tmpdir:
       osutils.WriteFile(
           os.path.join(dest_tmpdir, constants.CODE_COVERAGE_LLVM_FILE_NAME),
           json.dumps(merged_coverage_json))
@@ -483,7 +508,9 @@ def BundleCodeCoverageLlvmJson(build_target: 'build_target_lib.BuildTarget',
                       result.returncode, tarball_path, dest_tmpdir)
         return None
       return tarball_path
+
   except Exception as e:
+    logging.error(traceback.format_exc())
     logging.error('BundleCodeCoverageLlvmJson failed %s', e)
     return None
 

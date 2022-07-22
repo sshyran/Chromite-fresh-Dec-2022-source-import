@@ -803,7 +803,10 @@ ZERO_COVERAGE_EXCLUDE_FILES_SUFFIXES = (
     'tests.c',
     'tests.cc',
     'test.cpp',
-    'tests.cpp'
+    'tests.cpp',
+    'fuzzer.c',
+    'fuzzer.cc',
+    'fuzzer.cpp'
 )
 
 DEBUG_SYMBOLS_NAME = 'debug'

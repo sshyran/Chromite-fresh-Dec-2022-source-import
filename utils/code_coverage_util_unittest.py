@@ -69,6 +69,18 @@ USE_CASE_4_FILE_NAME = 'USE_CASE_4.cc'
 USE_CASE_5_FILE_NAME = 'USE_CASE_5.cc'
 USE_CASE_5_HEADER_FILE_NAME = 'USE_CASE_5.h'
 PYTHON_FILE_NAME = 'USE_CASE_3.py'
+SHILL_FILE = 'src/platform2/shill/net/shill_time.cc'
+GESTURES_FILE = 'src/platform/gestures/include/activity_log.h'
+
+def extractCovDataForFile(file_name: str, coverage_data: List):
+  """Extreact cov data from file"""
+  filter_result = [
+      coverage for coverage in coverage_data
+      if coverage['filename'].find(file_name) != -1
+  ]
+  if not filter_result:
+    return None
+  return filter_result[0]
 
 
 class GetLlvmJsonCoverageDataIfValidTest(cros_test_lib.TempDirTestCase):
@@ -113,16 +125,6 @@ class GetLlvmJsonCoverageDataIfValidTest(cros_test_lib.TempDirTestCase):
 class GenerateZeroCoverageLlvmTest(cros_test_lib.TempDirTestCase):
   """Unit tests for GenerateZeroCoverageLlvm"""
 
-  def extractCovDataForFile(self, file_name: str, coverage_data: List):
-    """Extreact cov data from file"""
-    filter_result = [
-        coverage for coverage in coverage_data
-        if coverage['filename'].find(file_name) != -1
-    ]
-    if not filter_result:
-      return None
-    return filter_result[0]
-
   def testGenerateZeroCoverageLlvmSuccess(self):
     """Verify that zero code coverage is being generated for all src files."""
 
@@ -166,16 +168,16 @@ class GenerateZeroCoverageLlvmTest(cros_test_lib.TempDirTestCase):
 
     self.assertEqual(3, len(coverage_data))
 
-    usecase_1_cov_data = self.extractCovDataForFile(USE_CASE_1_FILE_NAME,
-                                                    coverage_data)
-    usecase_2_cov_data = self.extractCovDataForFile(USE_CASE_2_FILE_NAME,
-                                                    coverage_data)
-    usecase_3_cov_data = self.extractCovDataForFile(USE_CASE_3_FILE_NAME,
-                                                    coverage_data)
-    usecase_4_cov_data = self.extractCovDataForFile(USE_CASE_4_FILE_NAME,
-                                                    coverage_data)
-    usecase_5_cov_data = self.extractCovDataForFile(USE_CASE_5_FILE_NAME,
-                                                    coverage_data)
+    usecase_1_cov_data = extractCovDataForFile(USE_CASE_1_FILE_NAME,
+                                               coverage_data)
+    usecase_2_cov_data = extractCovDataForFile(USE_CASE_2_FILE_NAME,
+                                               coverage_data)
+    usecase_3_cov_data = extractCovDataForFile(USE_CASE_3_FILE_NAME,
+                                               coverage_data)
+    usecase_4_cov_data = extractCovDataForFile(USE_CASE_4_FILE_NAME,
+                                               coverage_data)
+    usecase_5_cov_data = extractCovDataForFile(USE_CASE_5_FILE_NAME,
+                                               coverage_data)
 
     self.assertIsNotNone(usecase_1_cov_data,
                          'Zero cov should be generated for usercase 1')
@@ -311,11 +313,11 @@ class GenerateZeroCoverageLlvmTest(cros_test_lib.TempDirTestCase):
 
     self.assertEqual(1, len(coverage_data))
 
-    usecase_1_cov_data = self.extractCovDataForFile(USE_CASE_1_FILE_NAME,
-                                                    coverage_data)
-    usecase_5_cov_data = self.extractCovDataForFile(USE_CASE_5_FILE_NAME,
-                                                    coverage_data)
-    usecase_5_header_cov_data = self.extractCovDataForFile(
+    usecase_1_cov_data = extractCovDataForFile(USE_CASE_1_FILE_NAME,
+                                               coverage_data)
+    usecase_5_cov_data = extractCovDataForFile(USE_CASE_5_FILE_NAME,
+                                               coverage_data)
+    usecase_5_header_cov_data = extractCovDataForFile(
         USE_CASE_5_HEADER_FILE_NAME,
         coverage_data)
 
@@ -326,3 +328,100 @@ class GenerateZeroCoverageLlvmTest(cros_test_lib.TempDirTestCase):
                       'Zero cov should not be generated for excluded src file')
     self.assertIsNone(usecase_5_header_cov_data,
                       str('Zero cov should not be generated for header file'))
+
+
+class CleanLlvmFileNamesTest(cros_test_lib.TempDirTestCase):
+  """Unit tests for  CleanLlvmFileNames"""
+
+  def testGatherPathMappingInvalidPathMappingEntry(self):
+    """Verify thrown exception on invalid path mapping entry"""
+
+    with self.assertRaises(Exception) as context:
+
+      path_mapping_json = {
+          'version': 1,
+          'mapping': [{}]
+      }
+      path = os.path.join(self.tempdir, 'src_to_build_dest_map.json')
+
+      osutils.WriteFile(path, json.dumps(path_mapping_json), makedirs=True)
+      code_coverage_util.GatherPathMapping(self.tempdir)
+
+    self.assertTrue('Missing required keys'
+                    in str(context.exception))
+
+  def testGatherPathMapping(self):
+    """Verify path mapping is properly read"""
+
+    path_mapping_json = {
+        'version': 1,
+        'mapping': [{
+            'src_path': 'src/third_party/../platform2',
+            'build_dest_path': ('/build/nami/../tmp2/tmp/portage/chromeos-base/'
+                                'shill-net-0.0.1-r1072/work/'
+                                'shill-net-0.0.1')
+        }]
+    }
+
+    path = os.path.join(self.tempdir, 'src_to_build_dest_map.json')
+
+    osutils.WriteFile(path, json.dumps(path_mapping_json), makedirs=True)
+    result = code_coverage_util.GatherPathMapping(self.tempdir)
+    self.assertEqual(len(result), 2)
+    result1 = [x for x in result if x['src_path'] == 'src/platform2'][0]
+    result2 = [x for x in result if x['src_path'] == ''][0]
+    self.assertEqual(('/build/tmp2/tmp/portage/chromeos-base/'
+                      'shill-net-0.0.1-r1072/work/shill-net-0.0.1'),
+                     result1['build_dest_path'])
+    self.assertEqual('/mnt/host/source/', result2['build_dest_path'])
+
+  def testCleanLlvmFileNamesSuccess(self):
+    """Verify cleaned file paths are correct"""
+
+    coverage_json = code_coverage_util.CreateLlvmCoverageJson(
+        [
+            {
+                'filename': ('/build/brya/tmp/portage/chromeos-base/'
+                             'shill-net-0.0.1-r1072/work/shill-net-0.0.1/'
+                             'shill/net/shill_time.cc')
+            },
+            {
+                'filename': ('/build/brya/tmp/portage/chromeos-base/'
+                             'gestures-0.0.1-r623/work/gestures'
+                             '/include/activity_log.h')
+            }
+        ]
+    )
+    source_root = self.tempdir
+
+    shill_file = os.path.join(source_root, SHILL_FILE)
+    gestures_file = os.path.join(source_root, GESTURES_FILE)
+
+    osutils.WriteFile(shill_file, 'Awesome shill code.', makedirs=True)
+    osutils.WriteFile(gestures_file, 'Awesome gestures code.', makedirs=True)
+
+    path_mapping_list = [
+        {
+            'src_path':'src/platform2',
+            'build_dest_path':('/build/brya/tmp/portage/chromeos-base/'
+                               'shill-net-0.0.1-r1072/work/shill-net-0.0.1')
+        },
+        {
+            'src_path':'src/platform/gestures',
+            'build_dest_path':('/build/brya/tmp/portage/chromeos-base'
+                               '/gestures-0.0.1-r623/work/gestures')
+        }
+    ]
+
+    cleaned_json = code_coverage_util.CleanLlvmFileNames(
+        coverage_json, source_root, path_mapping_list)
+
+    coverage_data = cleaned_json['data'][0]['files']
+    print(coverage_data)
+    cleaned_shill_time_file = extractCovDataForFile(SHILL_FILE, coverage_data)
+    cleaned_gestures_time_file = extractCovDataForFile(
+        GESTURES_FILE,
+        coverage_data)
+
+    self.assertEqual(cleaned_gestures_time_file['filename'], GESTURES_FILE)
+    self.assertEqual(cleaned_shill_time_file['filename'], SHILL_FILE)
