@@ -160,7 +160,7 @@ class Overlay(object):
       formatted_parents = []
       for parent in profile.parents:
         formatted_parents.append(str(parent.overlay) + ':' + str(parent.path))
-      osutils.WriteFile(self.path / 'profiles' / profile.path / 'parents',
+      osutils.WriteFile(self.path / 'profiles' / profile.path / 'parent',
                         '\n'.join(formatted_parents) + '\n')
 
 
