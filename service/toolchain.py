@@ -257,6 +257,9 @@ class BuildLinter:
       if filename.endswith('.json'):
         invocation_result = tricium_clang_tidy.parse_tidy_invocation(
             BuildLinter.TIDY_BASE_DIR / filename)
+        if isinstance(invocation_result, tricium_clang_tidy.ExceptionData):
+          logging.exception(invocation_result)
+          continue
         meta, complaints = invocation_result
         assert not meta.exit_code, (
             f'Invoking clang-tidy on {meta.lint_target} with flags '
