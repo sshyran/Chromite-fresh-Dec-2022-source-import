@@ -2340,11 +2340,20 @@ def BranchScheduleConfig():
            'chrome-airmont-release-afdo-verify',
            'chrome-broadwell-release-afdo-verify'
        ], config_lib.LUCI_BUILDER_LTS_RELEASE),
+      # BOT-TAG:NO_PRUNE
+      ('release-R102-14695.B',
+       ['kevin-android-pi-pre-flight-branch',
+        'hatch-android-rvc-pre-flight-branch'],
+       '',
+       [],
+       [],
+       config_lib.LUCI_BUILDER_LEGACY_RELEASE),
   ]
   # BOT-TAG:RELEASES_END
 
   PFQ_SCHEDULE = [
       '0 3,7,11,15,19,23 * * *',
+      '0 2,6,10,14,18,22 * * *',
       '0 2,6,10,14,18,22 * * *',
       '0 2,6,10,14,18,22 * * *',
       '0 2,6,10,14,18,22 * * *',
