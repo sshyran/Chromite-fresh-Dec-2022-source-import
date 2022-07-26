@@ -534,7 +534,8 @@ def CreateChange(host: str, project: str, branch: str, subject: str,
   if not publish:
     body['work_in_progress'] = 'true'
     body['notify'] = 'NONE'
-  return FetchUrlJson(host, path, body=body, reqtype='POST', ignore_404=False)
+  return FetchUrlJson(host, path, body=body, reqtype='POST', expect=201,
+                      ignore_404=False)
 
 
 def ChangeEdit(host: str, change: str, filepath: str,
