@@ -93,7 +93,7 @@ def ModifyCpuGovernor(perf_governor: bool, sticky: bool) -> Iterator[None]:
   try:
     governors = governor_path.read_text(encoding='utf-8').split()
   except FileNotFoundError as e:
-    logging.warning('Error reading CPU scaling governor file: %s', e)
+    logging.debug('Error reading CPU scaling governor file: %s', e)
     governors = []
 
   try:
