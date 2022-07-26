@@ -107,8 +107,11 @@ class BuildLinter:
     if use_golint:
       extra_env['ENABLE_GO_LINT'] = '1'
 
+    emerge_onlydeps_command, emerge_command = self._emerge_commands()
     cros_build_lib.sudo_run(
-        self._emerge_command(), preserve_env=True, extra_env=extra_env)
+        emerge_onlydeps_command, preserve_env=True)
+    cros_build_lib.sudo_run(
+        emerge_command, preserve_env=True, extra_env=extra_env)
 
     return self.fetch_findings(use_clippy, use_tidy, use_golint)
 
@@ -139,9 +142,15 @@ class BuildLinter:
       findings = self._filter_linter_findings(findings)
     return findings
 
-  def _emerge_command(self) -> List[str]:
-    """Get the emerge command for emerging {packages} in {sysroot}."""
-    return chroot_util.GetEmergeCommand(self.sysroot) + self.package_atoms
+  def _emerge_commands(self) -> Tuple[List[str], List[str]]:
+    """Get the emerge commands for emerging {packages} in {sysroot}."""
+    emerge = chroot_util.GetEmergeCommand(self.sysroot)
+    return (
+        # First build the dependencies separately without linting flags to
+        # prevent unsupported packages from being linted.
+        emerge + ['--onlydeps'] + self.package_atoms,
+        emerge + self.package_atoms
+    )
 
   def _reset_temporary_files_for_linting(self) -> None:
     """Prepares for linting by rming prior linter findings and caches."""
