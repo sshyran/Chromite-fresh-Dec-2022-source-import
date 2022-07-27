@@ -33,7 +33,7 @@ def GetClient(creds_file, project_id=None, namespace=None):
       project_id = json.load(f)['project_id']
 
   return datastore.Client.from_service_account_json(
-      creds_file, project_id, namespace=namespace), project_id
+      creds_file, project=project_id, namespace=namespace), project_id
 
 
 def ChunkedBatchWrite(entities, client, batch_size=_BATCH_CHUNK_SIZE):
