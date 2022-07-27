@@ -92,13 +92,13 @@ class ScheduleSlavesStageTest(generic_stages_unittest.AbstractStageTestCase):
                      return_value=('buildbucket_id', None))
 
     slave_config_map = {
-        'slave_1': config_lib.BuildConfig(important=False),
-        'slave_2': config_lib.BuildConfig(important=True),
-        'child_3': config_lib.BuildConfig(important=True)}
+        'target1-release': config_lib.BuildConfig(important=False),
+        'target2-full': config_lib.BuildConfig(important=True),
+        'target3-release': config_lib.BuildConfig(important=True)}
     self.PatchObject(generic_stages.BuilderStage, '_GetSlaveConfigMap',
                      return_value=slave_config_map)
     self.PatchObject(constants, 'LEGACY_RELEASE_ALLOWLIST',
-                     new=['slave_1', 'slave_2'])
+                     new=['target1-release'])
 
     stage.ScheduleSlaveBuildsViaBuildbucket(important_only=False, dryrun=True)
 
