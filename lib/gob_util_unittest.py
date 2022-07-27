@@ -123,6 +123,12 @@ Too bad..."""
         'some.git.url', 'project', 'branch', 'subject', True)
     self.assertEqual(change_json['change_num'], 123456)
 
+    self.conn.return_value.__enter__.return_value = FakeHTTPResponse(
+        body=body, status=201)
+    change_json = gob_util.CreateChange(
+        'some.git.url', 'project', 'branch', 'subject', True)
+    self.assertEqual(change_json['change_num'], 123456)
+
   def testChangeEdit(self):
     self.conn.return_value.__enter__.return_value = FakeHTTPResponse(
         body={}, status=204)
