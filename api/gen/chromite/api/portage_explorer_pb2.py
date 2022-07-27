@@ -21,51 +21,11 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z6go.chromium.org/chromiumos/infra/proto/go/chromite/api',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n#chromite/api/portage_explorer.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\x1a\x17\x63hromiumos/common.proto\"7\n\x11RunSpidersRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x82\x0b\n\x12RunSpidersResponse\x12\x43\n\rbuild_targets\x18\x01 \x03(\x0b\x32,.chromite.api.RunSpidersResponse.BuildTarget\x12:\n\x08overlays\x18\x02 \x03(\x0b\x32(.chromite.api.RunSpidersResponse.Overlay\x1aY\n\x0b\x42uildTarget\x12\x0c\n\x04name\x18\x01 \x01(\t\x12<\n\nprofile_id\x18\x02 \x01(\x0b\x32(.chromite.api.RunSpidersResponse.Profile\x1a\xb4\x01\n\x07Profile\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04path\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12>\n\tuse_flags\x18\x04 \x03(\x0b\x32+.chromite.api.RunSpidersResponse.ProfileUse\x12\x41\n\x0fparent_profiles\x18\x05 \x03(\x0b\x32(.chromite.api.RunSpidersResponse.Profile\x1a\xd6\x01\n\x07Overlay\x12\x0c\n\x04path\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12:\n\x08profiles\x18\x03 \x03(\x0b\x32(.chromite.api.RunSpidersResponse.Profile\x12\x38\n\x07\x65\x62uilds\x18\x04 \x03(\x0b\x32\'.chromite.api.RunSpidersResponse.Ebuild\x12\x39\n\x08\x65\x63lasses\x18\x05 \x03(\x0b\x32\'.chromite.api.RunSpidersResponse.Eclass\x1a\xfa\x02\n\x06\x45\x62uild\x12\x0c\n\x04path\x18\x01 \x01(\t\x12-\n\x0cpackage_info\x18\x02 \x01(\x0b\x32\x17.chromiumos.PackageInfo\x12\x0f\n\x07version\x18\x03 \x01(\t\x12\x10\n\x08revision\x18\x04 \x01(\x05\x12\x0c\n\x04\x65\x61pi\x18\x05 \x01(\x05\x12\x13\n\x0b\x64\x65scription\x18\x06 \x01(\t\x12\x10\n\x08homepage\x18\x07 \x01(\t\x12\x0f\n\x07license\x18\x08 \x01(\t\x12\x0c\n\x04slot\x18\t \x01(\t\x12\x0f\n\x07src_uri\x18\n \x01(\t\x12\x10\n\x08restrict\x18\x0b \x01(\t\x12\x41\n\x0c\x64\x65pendencies\x18\x0c \x03(\x0b\x32+.chromite.api.RunSpidersResponse.Dependency\x12=\n\tuse_flags\x18\r \x03(\x0b\x32*.chromite.api.RunSpidersResponse.EbuildUse\x12\x17\n\x0f\x65\x63lass_inherits\x18\x0e \x03(\t\x1a\xe2\x01\n\nDependency\x12H\n\x04type\x18\x01 \x01(\x0e\x32:.chromite.api.RunSpidersResponse.Dependency.DependencyType\x12-\n\x0cpackage_info\x18\x02 \x01(\x0b\x32\x17.chromiumos.PackageInfo\"[\n\x0e\x44\x65pendencyType\x12\x16\n\x12\x44\x45PEND_UNSPECIFIED\x10\x00\x12\n\n\x06\x44\x45PEND\x10\x01\x12\x0b\n\x07RDEPEND\x10\x02\x12\x0b\n\x07\x42\x44\x45PEND\x10\x03\x12\x0b\n\x07PDEPEND\x10\x04\x1a=\n\x06\x45\x63lass\x12\x0c\n\x04path\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x17\n\x0f\x65\x63lass_inherits\x18\x03 \x03(\t\x1a+\n\nProfileUse\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x65nabled\x18\x02 \x01(\x08\x1a\x32\n\tEbuildUse\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x17\n\x0f\x64\x65\x66\x61ult_enabled\x18\x02 \x01(\x08\x32\x83\x01\n\x16PortageExplorerService\x12O\n\nRunSpiders\x12\x1f.chromite.api.RunSpidersRequest\x1a .chromite.api.RunSpidersResponse\x1a\x18\xc2\xed\x1a\x14\n\x10portage_explorer\x10\x01\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3'
+  serialized_pb=b'\n#chromite/api/portage_explorer.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\x1a\x17\x63hromiumos/common.proto\"7\n\x11RunSpidersRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x9d\t\n\x12RunSpidersResponse\x12\x43\n\rbuild_targets\x18\x01 \x03(\x0b\x32,.chromite.api.RunSpidersResponse.BuildTarget\x12:\n\x08overlays\x18\x02 \x03(\x0b\x32(.chromite.api.RunSpidersResponse.Overlay\x1aY\n\x0b\x42uildTarget\x12\x0c\n\x04name\x18\x01 \x01(\t\x12<\n\nprofile_id\x18\x02 \x01(\x0b\x32(.chromite.api.RunSpidersResponse.Profile\x1a\xb4\x01\n\x07Profile\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04path\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12>\n\tuse_flags\x18\x04 \x03(\x0b\x32+.chromite.api.RunSpidersResponse.ProfileUse\x12\x41\n\x0fparent_profiles\x18\x05 \x03(\x0b\x32(.chromite.api.RunSpidersResponse.Profile\x1a\xd6\x01\n\x07Overlay\x12\x0c\n\x04path\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12:\n\x08profiles\x18\x03 \x03(\x0b\x32(.chromite.api.RunSpidersResponse.Profile\x12\x38\n\x07\x65\x62uilds\x18\x04 \x03(\x0b\x32\'.chromite.api.RunSpidersResponse.Ebuild\x12\x39\n\x08\x65\x63lasses\x18\x05 \x03(\x0b\x32\'.chromite.api.RunSpidersResponse.Eclass\x1a\xfa\x02\n\x06\x45\x62uild\x12\x0c\n\x04path\x18\x01 \x01(\t\x12-\n\x0cpackage_info\x18\x02 \x01(\x0b\x32\x17.chromiumos.PackageInfo\x12\x0f\n\x07version\x18\x03 \x01(\t\x12\x10\n\x08revision\x18\x04 \x01(\x05\x12\x0c\n\x04\x65\x61pi\x18\x05 \x01(\x05\x12\x13\n\x0b\x64\x65scription\x18\x06 \x01(\t\x12\x10\n\x08homepage\x18\x07 \x01(\t\x12\x0f\n\x07license\x18\x08 \x01(\t\x12\x0c\n\x04slot\x18\t \x01(\t\x12\x0f\n\x07src_uri\x18\n \x01(\t\x12\x10\n\x08restrict\x18\x0b \x01(\t\x12\x0e\n\x06\x64\x65pend\x18\x0c \x01(\t\x12\x0f\n\x07rdepend\x18\r \x01(\t\x12\x0f\n\x07\x62\x64\x65pend\x18\x0e \x01(\t\x12\x0f\n\x07pdepend\x18\x0f \x01(\t\x12=\n\tuse_flags\x18\x10 \x03(\x0b\x32*.chromite.api.RunSpidersResponse.EbuildUse\x12\x17\n\x0f\x65\x63lass_inherits\x18\x11 \x03(\t\x1a=\n\x06\x45\x63lass\x12\x0c\n\x04path\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x17\n\x0f\x65\x63lass_inherits\x18\x03 \x03(\t\x1a+\n\nProfileUse\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x65nabled\x18\x02 \x01(\x08\x1a\x32\n\tEbuildUse\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x17\n\x0f\x64\x65\x66\x61ult_enabled\x18\x02 \x01(\x08\x32\x83\x01\n\x16PortageExplorerService\x12O\n\nRunSpiders\x12\x1f.chromite.api.RunSpidersRequest\x1a .chromite.api.RunSpidersResponse\x1a\x18\xc2\xed\x1a\x14\n\x10portage_explorer\x10\x01\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3'
   ,
   dependencies=[chromite_dot_api_dot_build__api__pb2.DESCRIPTOR,chromiumos_dot_common__pb2.DESCRIPTOR,])
 
 
-
-_RUNSPIDERSRESPONSE_DEPENDENCY_DEPENDENCYTYPE = _descriptor.EnumDescriptor(
-  name='DependencyType',
-  full_name='chromite.api.RunSpidersResponse.Dependency.DependencyType',
-  filename=None,
-  file=DESCRIPTOR,
-  create_key=_descriptor._internal_create_key,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='DEPEND_UNSPECIFIED', index=0, number=0,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DEPEND', index=1, number=1,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='RDEPEND', index=2, number=2,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='BDEPEND', index=3, number=3,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='PDEPEND', index=4, number=4,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=1325,
-  serialized_end=1416,
-)
-_sym_db.RegisterEnumDescriptor(_RUNSPIDERSRESPONSE_DEPENDENCY_DEPENDENCYTYPE)
 
 
 _RUNSPIDERSREQUEST = _descriptor.Descriptor(
@@ -342,22 +302,43 @@ _RUNSPIDERSRESPONSE_EBUILD = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='dependencies', full_name='chromite.api.RunSpidersResponse.Ebuild.dependencies', index=11,
-      number=12, type=11, cpp_type=10, label=3,
+      name='depend', full_name='chromite.api.RunSpidersResponse.Ebuild.depend', index=11,
+      number=12, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='rdepend', full_name='chromite.api.RunSpidersResponse.Ebuild.rdepend', index=12,
+      number=13, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='bdepend', full_name='chromite.api.RunSpidersResponse.Ebuild.bdepend', index=13,
+      number=14, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='pdepend', full_name='chromite.api.RunSpidersResponse.Ebuild.pdepend', index=14,
+      number=15, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='use_flags', full_name='chromite.api.RunSpidersResponse.Ebuild.use_flags', index=15,
+      number=16, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='use_flags', full_name='chromite.api.RunSpidersResponse.Ebuild.use_flags', index=12,
-      number=13, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='eclass_inherits', full_name='chromite.api.RunSpidersResponse.Ebuild.eclass_inherits', index=13,
-      number=14, type=9, cpp_type=9, label=3,
+      name='eclass_inherits', full_name='chromite.api.RunSpidersResponse.Ebuild.eclass_inherits', index=16,
+      number=17, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -376,45 +357,6 @@ _RUNSPIDERSRESPONSE_EBUILD = _descriptor.Descriptor(
   ],
   serialized_start=809,
   serialized_end=1187,
-)
-
-_RUNSPIDERSRESPONSE_DEPENDENCY = _descriptor.Descriptor(
-  name='Dependency',
-  full_name='chromite.api.RunSpidersResponse.Dependency',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='type', full_name='chromite.api.RunSpidersResponse.Dependency.type', index=0,
-      number=1, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='package_info', full_name='chromite.api.RunSpidersResponse.Dependency.package_info', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-    _RUNSPIDERSRESPONSE_DEPENDENCY_DEPENDENCYTYPE,
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1190,
-  serialized_end=1416,
 )
 
 _RUNSPIDERSRESPONSE_ECLASS = _descriptor.Descriptor(
@@ -458,8 +400,8 @@ _RUNSPIDERSRESPONSE_ECLASS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1418,
-  serialized_end=1479,
+  serialized_start=1189,
+  serialized_end=1250,
 )
 
 _RUNSPIDERSRESPONSE_PROFILEUSE = _descriptor.Descriptor(
@@ -496,8 +438,8 @@ _RUNSPIDERSRESPONSE_PROFILEUSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1481,
-  serialized_end=1524,
+  serialized_start=1252,
+  serialized_end=1295,
 )
 
 _RUNSPIDERSRESPONSE_EBUILDUSE = _descriptor.Descriptor(
@@ -534,8 +476,8 @@ _RUNSPIDERSRESPONSE_EBUILDUSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1526,
-  serialized_end=1576,
+  serialized_start=1297,
+  serialized_end=1347,
 )
 
 _RUNSPIDERSRESPONSE = _descriptor.Descriptor(
@@ -563,7 +505,7 @@ _RUNSPIDERSRESPONSE = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_RUNSPIDERSRESPONSE_BUILDTARGET, _RUNSPIDERSRESPONSE_PROFILE, _RUNSPIDERSRESPONSE_OVERLAY, _RUNSPIDERSRESPONSE_EBUILD, _RUNSPIDERSRESPONSE_DEPENDENCY, _RUNSPIDERSRESPONSE_ECLASS, _RUNSPIDERSRESPONSE_PROFILEUSE, _RUNSPIDERSRESPONSE_EBUILDUSE, ],
+  nested_types=[_RUNSPIDERSRESPONSE_BUILDTARGET, _RUNSPIDERSRESPONSE_PROFILE, _RUNSPIDERSRESPONSE_OVERLAY, _RUNSPIDERSRESPONSE_EBUILD, _RUNSPIDERSRESPONSE_ECLASS, _RUNSPIDERSRESPONSE_PROFILEUSE, _RUNSPIDERSRESPONSE_EBUILDUSE, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -573,7 +515,7 @@ _RUNSPIDERSRESPONSE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=166,
-  serialized_end=1576,
+  serialized_end=1347,
 )
 
 _RUNSPIDERSREQUEST.fields_by_name['chroot'].message_type = chromiumos_dot_common__pb2._CHROOT
@@ -587,13 +529,8 @@ _RUNSPIDERSRESPONSE_OVERLAY.fields_by_name['ebuilds'].message_type = _RUNSPIDERS
 _RUNSPIDERSRESPONSE_OVERLAY.fields_by_name['eclasses'].message_type = _RUNSPIDERSRESPONSE_ECLASS
 _RUNSPIDERSRESPONSE_OVERLAY.containing_type = _RUNSPIDERSRESPONSE
 _RUNSPIDERSRESPONSE_EBUILD.fields_by_name['package_info'].message_type = chromiumos_dot_common__pb2._PACKAGEINFO
-_RUNSPIDERSRESPONSE_EBUILD.fields_by_name['dependencies'].message_type = _RUNSPIDERSRESPONSE_DEPENDENCY
 _RUNSPIDERSRESPONSE_EBUILD.fields_by_name['use_flags'].message_type = _RUNSPIDERSRESPONSE_EBUILDUSE
 _RUNSPIDERSRESPONSE_EBUILD.containing_type = _RUNSPIDERSRESPONSE
-_RUNSPIDERSRESPONSE_DEPENDENCY.fields_by_name['type'].enum_type = _RUNSPIDERSRESPONSE_DEPENDENCY_DEPENDENCYTYPE
-_RUNSPIDERSRESPONSE_DEPENDENCY.fields_by_name['package_info'].message_type = chromiumos_dot_common__pb2._PACKAGEINFO
-_RUNSPIDERSRESPONSE_DEPENDENCY.containing_type = _RUNSPIDERSRESPONSE
-_RUNSPIDERSRESPONSE_DEPENDENCY_DEPENDENCYTYPE.containing_type = _RUNSPIDERSRESPONSE_DEPENDENCY
 _RUNSPIDERSRESPONSE_ECLASS.containing_type = _RUNSPIDERSRESPONSE
 _RUNSPIDERSRESPONSE_PROFILEUSE.containing_type = _RUNSPIDERSRESPONSE
 _RUNSPIDERSRESPONSE_EBUILDUSE.containing_type = _RUNSPIDERSRESPONSE
@@ -640,13 +577,6 @@ RunSpidersResponse = _reflection.GeneratedProtocolMessageType('RunSpidersRespons
     })
   ,
 
-  'Dependency' : _reflection.GeneratedProtocolMessageType('Dependency', (_message.Message,), {
-    'DESCRIPTOR' : _RUNSPIDERSRESPONSE_DEPENDENCY,
-    '__module__' : 'chromite.api.portage_explorer_pb2'
-    # @@protoc_insertion_point(class_scope:chromite.api.RunSpidersResponse.Dependency)
-    })
-  ,
-
   'Eclass' : _reflection.GeneratedProtocolMessageType('Eclass', (_message.Message,), {
     'DESCRIPTOR' : _RUNSPIDERSRESPONSE_ECLASS,
     '__module__' : 'chromite.api.portage_explorer_pb2'
@@ -676,7 +606,6 @@ _sym_db.RegisterMessage(RunSpidersResponse.BuildTarget)
 _sym_db.RegisterMessage(RunSpidersResponse.Profile)
 _sym_db.RegisterMessage(RunSpidersResponse.Overlay)
 _sym_db.RegisterMessage(RunSpidersResponse.Ebuild)
-_sym_db.RegisterMessage(RunSpidersResponse.Dependency)
 _sym_db.RegisterMessage(RunSpidersResponse.Eclass)
 _sym_db.RegisterMessage(RunSpidersResponse.ProfileUse)
 _sym_db.RegisterMessage(RunSpidersResponse.EbuildUse)
@@ -691,8 +620,8 @@ _PORTAGEEXPLORERSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=b'\302\355\032\024\n\020portage_explorer\020\001',
   create_key=_descriptor._internal_create_key,
-  serialized_start=1579,
-  serialized_end=1710,
+  serialized_start=1350,
+  serialized_end=1481,
   methods=[
   _descriptor.MethodDescriptor(
     name='RunSpiders',
