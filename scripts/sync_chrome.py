@@ -46,7 +46,10 @@ def SyncChrome(gclient_path, options):
                           options.internal, options.version,
                           options.gclient_template, options.use_cache,
                           git_cache_dir=options.git_cache_dir)
-  gclient.Sync(gclient_path, options.chrome_root, reset=options.reset)
+  try:
+    gclient.Sync(gclient_path, options.chrome_root, reset=options.reset)
+  except cros_build_lib.RunCommandError as e:
+    cros_build_lib.Die(f'gclient sync exited {e.returncode}')
 
 
 def main(argv):
