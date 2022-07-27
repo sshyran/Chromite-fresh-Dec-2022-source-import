@@ -305,6 +305,7 @@ class BuildPackagesRunConfig(object):
 
     return packages
 
+  @metrics_lib.timed('service.sysroot.GetForceLocalBuildPackages')
   def GetForceLocalBuildPackages(self,
                                  sysroot: sysroot_lib.Sysroot) -> _PACKAGE_LIST:
     """Get the set of force local build packages for this config.
@@ -326,6 +327,7 @@ class BuildPackagesRunConfig(object):
     sysroot_path = Path(sysroot.path)
     force_local_build_packages = set()
     packages = self.GetPackages()
+    metrics_prefix = 'service.sysroot.GetForceLocalBuildPackages'
 
     if 'virtual/target-os-test' in packages:
       # chromeos-ssh-testkeys may generate ssh keys if the right USE flag is
@@ -343,10 +345,12 @@ class BuildPackagesRunConfig(object):
       if cros_workon_packages:
         force_local_build_packages.update(cros_workon_packages)
 
-        reverse_dependencies = [
-            x.atom for x in portage_util.GetReverseDependencies(
-                cros_workon_packages, sysroot_path)
-        ]
+        with metrics_lib.timer(
+            f'{metrics_prefix}.CrosWorkonReverseDependencies'):
+          reverse_dependencies = [
+              x.atom for x in portage_util.GetReverseDependencies(
+                  cros_workon_packages, sysroot_path)
+          ]
         logging.info(
             'The following packages depend directly on an active cros_workon '
             'package and will be rebuilt: %s', ' '.join(reverse_dependencies))
@@ -386,8 +390,9 @@ class BuildPackagesRunConfig(object):
         force_local_build_packages.update(revdeps_packages)
         logging.info('Calculating reverse dependencies on packages: %s',
                      ' '.join(revdeps_packages))
-        r_revdeps_packages = portage_util.GetReverseDependencies(
-            revdeps_packages, sysroot_path, indirect=True)
+        with metrics_lib.timer(f'{metrics_prefix}.ReverseDependencies'):
+          r_revdeps_packages = portage_util.GetReverseDependencies(
+              revdeps_packages, sysroot_path, indirect=True)
 
         exclude_patterns = ['virtual/']
         exclude_patterns.extend(_CHROME_PACKAGES)
@@ -661,7 +666,7 @@ def InstallToolchain(target: 'build_target_lib.BuildTarget',
     _InstallToolchain(sysroot, target, local_init=local_init)
 
 
-@metrics_lib.timed('service.sysroot.BuildPackages.RunCommand')
+@metrics_lib.timed('service.sysroot.BuildPackages')
 def BuildPackages(target: 'build_target_lib.BuildTarget',
                   sysroot: sysroot_lib.Sysroot,
                   run_configs: BuildPackagesRunConfig) -> None:
@@ -677,6 +682,7 @@ def BuildPackages(target: 'build_target_lib.BuildTarget',
   """
   cros_build_lib.AssertInsideChroot()
   cros_build_lib.AssertNonRootUser()
+  metrics_prefix = 'service.sysroot.BuildPackages'
 
   extra_env = run_configs.GetExtraEnv()
   extra_env['PKGDIR'] = f'{sysroot.path}/packages'
@@ -693,8 +699,9 @@ def BuildPackages(target: 'build_target_lib.BuildTarget',
     # Before running any emerge operations, regenerate the Portage dependency
     # cache in parallel.
     logging.info('Rebuilding Portage cache.')
-    portage_util.RegenDependencyCache(
-        sysroot=sysroot.path, jobs=run_configs.jobs)
+    with metrics_lib.timer(f'{metrics_prefix}.RegenPortageCache'):
+      portage_util.RegenDependencyCache(
+          sysroot=sysroot.path, jobs=run_configs.jobs)
 
     # Clean out any stale binpkgs we've accumulated. This is done immediately
     # after regenerating the cache in case ebuilds have been removed (e.g. from
@@ -719,10 +726,11 @@ def BuildPackages(target: 'build_target_lib.BuildTarget',
     with RemoteExecution(run_configs.use_goma, run_configs.use_remoteexec):
       logging.info('Merging board packages now.')
       try:
-        cros_build_lib.sudo_run(
-            emerge_cmd + emerge_flags + run_configs.GetPackages(),
-            preserve_env=True,
-            extra_env=extra_env)
+        with metrics_lib.timer(f'{metrics_prefix}.emerge'):
+          cros_build_lib.sudo_run(
+              emerge_cmd + emerge_flags + run_configs.GetPackages(),
+              preserve_env=True,
+              extra_env=extra_env)
         logging.info('Builds complete.')
       except cros_build_lib.RunCommandError as e:
         failed_pkgs = portage_util.ParseDieHookStatusFile(tempdir)
@@ -769,8 +777,7 @@ def _CleanStaleBinpkgs(sysroot: Union[str, os.PathLike]) -> None:
         sysroot, deep=True, exclusion_file=f.name)
 
 
-def _GetCrosWorkonPackages(
-    sysroot: Union[str, os.PathLike]) -> _PACKAGE_LIST:
+def _GetCrosWorkonPackages(sysroot: Union[str, os.PathLike]) -> _PACKAGE_LIST:
   """Get cros_workon packages.
 
   Args:
@@ -812,9 +819,7 @@ def _GetBaseInstallPackages(sysroot: Union[str, os.PathLike], emerge_flags: str,
   # [binary U] chromeos-base/chromeos-chrome ... to /build/eve/ USE="..."
   cmd = _GetEmergeCommand(sysroot)
   result = cros_build_lib.sudo_run(
-      cmd + emerge_flags + packages,
-      capture_output=True,
-      encoding='utf-8')
+      cmd + emerge_flags + packages, capture_output=True, encoding='utf-8')
 
   # Filter to a heuristic set of packages known to have incorrectly specified
   # dependencies that will be installed to the board sysroot.
