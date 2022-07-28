@@ -130,7 +130,11 @@ class CreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
 
     # Default value checks.
     rc_patch.assert_called_with(
-        force=force, upgrade_chroot=upgrade_chroot, package_indexes=[])
+        force=force,
+        upgrade_chroot=upgrade_chroot,
+        package_indexes=[],
+        backtrack=sysroot_controller.DEFAULT_BACKTRACK,
+    )
     self.assertEqual(board, out_proto.sysroot.build_target.name)
     self.assertEqual(sysroot_path, out_proto.sysroot.path)
 
@@ -170,7 +174,9 @@ class CreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         package_indexes=[
             binpkg.PackageIndexInfo.from_protobuf(x) for x in package_indexes
         ],
-        upgrade_chroot=upgrade_chroot)
+        upgrade_chroot=upgrade_chroot,
+        backtrack=sysroot_controller.DEFAULT_BACKTRACK,
+    )
     self.assertEqual(board, out_proto.sysroot.build_target.name)
     self.assertEqual(sysroot_path, out_proto.sysroot.path)
 
@@ -653,7 +659,9 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
         use_goma=False,
         use_remoteexec=False,
         incremental_build=False,
-        dryrun=False)
+        dryrun=False,
+        backtrack=sysroot_controller.DEFAULT_BACKTRACK,
+    )
 
   def testSuccessWithGomaLogs(self):
     """Test successful call with goma."""

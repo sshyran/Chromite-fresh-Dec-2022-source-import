@@ -27,6 +27,8 @@ from chromite.service import sysroot
 
 _ACCEPTED_LICENSES = '@CHROMEOS'
 
+DEFAULT_BACKTRACK = 30
+
 
 def _GetGomaLogDirectory():
   """Get goma's log directory based on the env variables.
@@ -145,6 +147,7 @@ def Create(input_proto, output_proto, _config):
       force=replace_sysroot,
       upgrade_chroot=update_chroot,
       package_indexes=package_indexes,
+      backtrack=DEFAULT_BACKTRACK,
   )
 
   try:
@@ -280,7 +283,9 @@ def InstallPackages(input_proto, output_proto, _config):
       use_goma=use_goma,
       use_remoteexec=use_remoteexec,
       incremental_build=False,
-      dryrun=dryrun)
+      dryrun=dryrun,
+      backtrack=DEFAULT_BACKTRACK,
+  )
 
   try:
     sysroot.BuildPackages(build_target, target_sysroot, build_packages_config)
