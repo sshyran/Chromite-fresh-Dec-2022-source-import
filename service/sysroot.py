@@ -62,6 +62,9 @@ _CRITICAL_SDK_PACKAGES = ('dev-embedded/hps-sdk', 'dev-lang/rust',
 
 _PACKAGE_LIST = List[Optional[str]]
 
+# The default to use for --backtrack everywhere. Must be manually changed in
+# update_chroot.
+BACKTRACK_DEFAULT = 10
 
 class Error(Exception):
   """Base error class for the module."""
@@ -100,7 +103,9 @@ class SetupBoardRunConfig(object):
       local_build: bool = False,
       toolchain_changed: bool = False,
       package_indexes: Optional[List['binpkg.PackageIndexInfo']] = None,
-      expanded_binhost_inheritance: bool = False):
+      expanded_binhost_inheritance: bool = False,
+      backtrack: int = BACKTRACK_DEFAULT,
+  ):
     """Initialize method.
 
     Args:
@@ -118,6 +123,7 @@ class SetupBoardRunConfig(object):
       package_indexes: List of information about available prebuilts, youngest
           first, or None.
       expanded_binhost_inheritance: Allow expanded binhost inheritance.
+      backtrack: emerge --backtrack value.
     """
     self.set_default = set_default
     self.force = force or toolchain_changed
@@ -131,6 +137,7 @@ class SetupBoardRunConfig(object):
     self.local_build = local_build
     self.package_indexes = package_indexes or []
     self.expanded_binhost_inheritance = expanded_binhost_inheritance
+    self.backtrack = backtrack
 
   def GetUpdateChrootArgs(self) -> List[str]:
     """Create a list containing the relevant update_chroot arguments.
@@ -182,7 +189,9 @@ class BuildPackagesRunConfig(object):
       dev_image: bool = True,
       factory_image: bool = True,
       test_image: bool = True,
-      debug_version: bool = True):
+      debug_version: bool = True,
+      backtrack: int = BACKTRACK_DEFAULT,
+  ):
     """Init method.
 
     Args:
@@ -221,6 +230,7 @@ class BuildPackagesRunConfig(object):
       factory_image: Build factory installer.
       test_image: Build packages required for testing.
       debug_version: Build debug versions of Chromium-OS-specific packages.
+      backtrack: emerge --backtrack value.
     """
     self.usepkg = usepkg
     self.install_debug_symbols = install_debug_symbols
@@ -247,6 +257,7 @@ class BuildPackagesRunConfig(object):
     self.factory_image = factory_image
     self.test_image = test_image
     self.debug_version = debug_version
+    self.backtrack = backtrack
 
   def GetUseFlags(self) -> Optional[str]:
     """Get the use flags as a single string."""
@@ -409,7 +420,13 @@ class BuildPackagesRunConfig(object):
 
   def GetEmergeFlags(self) -> List[str]:
     """Get the emerge flags for this config."""
-    flags = ['-uDNv', '--backtrack=30', '--newrepo', '--with-test-deps', 'y']
+    flags = [
+        '-uDNv',
+        f'--backtrack={self.backtrack}',
+        '--newrepo',
+        '--with-test-deps',
+        'y',
+    ]
 
     if self.use_any_chrome:
       for pkg in _CHROME_PACKAGES:

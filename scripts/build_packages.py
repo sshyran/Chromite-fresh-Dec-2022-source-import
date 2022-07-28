@@ -92,8 +92,7 @@ def build_shell_bool_style_args(parser: commandline.ArgumentParser,
       shell_narg,
       action='store_false',
       dest=name,
-      deprecated=deprecation_note %
-      (alt_py_narg if alternate_name else py_narg),
+      deprecated=deprecation_note % alt_py_narg if alternate_name else py_narg,
       help=argparse.SUPPRESS)
 
   if not alternate_name:
@@ -187,7 +186,8 @@ def get_parser() -> commandline.ArgumentParser:
       deprecation_note)
   build_shell_bool_style_args(
       group, 'chrome', False, 'Ensure chrome instead of chromium. Alias for '
-      '--internal --no-use-any-chrome.', deprecation_note)
+                              '--internal --no-use-any-chrome.',
+      deprecation_note)
 
   # Setup board related options.
   group = parser.add_argument_group('Setup Board Config Options')
@@ -264,6 +264,12 @@ def get_parser() -> commandline.ArgumentParser:
   build_shell_bool_style_args(group, 'expandedbinhosts', True,
                               'Allow expanded binhost inheritance.',
                               deprecation_note)
+  group.add_argument(
+      '--backtrack',
+      type=int,
+      default=sysroot.BACKTRACK_DEFAULT,
+      help='See emerge --backtrack.')
+
   # The --reuse-pkgs-from-local-boards flag tells Portage to share binary
   # packages between boards that are built locally, so that the total time
   # required to build several boards is reduced. This flag is only useful
@@ -341,7 +347,9 @@ def parse_args(argv: List[str]) -> Tuple[commandline.ArgumentParser,
       update_toolchain=not opts.skip_toolchain_update,
       upgrade_chroot=not opts.skip_chroot_upgrade,
       local_build=opts.reuse_pkgs_from_local_boards,
-      expanded_binhost_inheritance=opts.expandedbinhosts)
+      expanded_binhost_inheritance=opts.expandedbinhosts,
+      backtrack=opts.backtrack,
+  )
   opts.build_run_config = sysroot.BuildPackagesRunConfig(
       usepkg=opts.usepkg,
       install_debug_symbols=opts.withdebugsymbols,
@@ -365,7 +373,9 @@ def parse_args(argv: List[str]) -> Tuple[commandline.ArgumentParser,
       dev_image=opts.withdev,
       factory_image=opts.withfactory,
       test_image=opts.withtest,
-      debug_version=opts.withdebug)
+      debug_version=opts.withdebug,
+      backtrack=opts.backtrack,
+  )
   opts.Freeze()
   return parser, opts
 

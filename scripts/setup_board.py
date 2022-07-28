@@ -101,6 +101,11 @@ def GetParser():
                      action='store_true', default=False,
                      deprecated=deprecated % '--reuse-pkgs-from-local-boards',
                      help='Deprecated form of --reuse-pkgs-from-local-boards.')
+  build.add_argument(
+      '--backtrack',
+      type=int,
+      default=sysroot.BACKTRACK_DEFAULT,
+      help='See emerge --backtrack.')
 
   parser.add_argument(
       '--fewer-binhosts',
@@ -135,6 +140,7 @@ def _ParseArgs(args):
       init_board_pkgs=not opts.skip_board_pkg_init,
       local_build=opts.reuse_local,
       expanded_binhost_inheritance=opts.expanded_binhost_inheritance,
+      backtrack=opts.backtrack,
   )
 
   opts.Freeze()
