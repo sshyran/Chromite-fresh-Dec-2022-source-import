@@ -21,6 +21,7 @@ class Profile:
   id_: str
   path: Path
   name: str
+  parent_profiles: List[str] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass
