@@ -38,7 +38,12 @@ def _GetGomaLogDirectory():
   # TODO(crbug.com/1045001): Replace environment variable with query to
   # goma object after goma refactoring allows this.
   candidates = [
-      'GLOG_log_dir', 'GOOGLE_LOG_DIR', 'TEST_TMPDIR', 'TMPDIR', 'TMP']
+      'GLOG_log_dir',
+      'GOOGLE_LOG_DIR',
+      'TEST_TMPDIR',
+      'TMPDIR',
+      'TMP',
+  ]
   for candidate in candidates:
     value = os.environ.get(candidate)
     if value and os.path.isdir(value):
@@ -80,8 +85,8 @@ def ExampleGetResponse():
 
 def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Sysroot,
                  chroot: chroot_lib.Chroot, sysroot_class: sysroot_lib.Sysroot,
-                 build_target: build_target_lib.BuildTarget, output_dir: str
-                 ) -> list:
+                 build_target: build_target_lib.BuildTarget,
+                 output_dir: str) -> list:
   """Builds and copies sysroot artifacts to specified output_dir.
 
   Copies sysroot artifacts to output_dir, returning a list of (output_dir: str)
@@ -101,10 +106,12 @@ def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Sysroot,
   artifact_types = {
       in_proto.ArtifactType.SIMPLE_CHROME_SYSROOT:
           sysroot.CreateSimpleChromeSysroot,
-      in_proto.ArtifactType.CHROME_EBUILD_ENV: sysroot.CreateChromeEbuildEnv,
+      in_proto.ArtifactType.CHROME_EBUILD_ENV:
+          sysroot.CreateChromeEbuildEnv,
       in_proto.ArtifactType.BREAKPAD_DEBUG_SYMBOLS:
           sysroot.BundleBreakpadSymbols,
-      in_proto.ArtifactType.DEBUG_SYMBOLS: sysroot.BundleDebugSymbols,
+      in_proto.ArtifactType.DEBUG_SYMBOLS:
+          sysroot.BundleDebugSymbols,
   }
 
   for output_artifact in in_proto.output_artifacts:
@@ -135,12 +142,14 @@ def Create(input_proto, output_proto, _config):
       for x in input_proto.package_indexes
   ]
   run_configs = sysroot.SetupBoardRunConfig(
-      force=replace_sysroot, upgrade_chroot=update_chroot,
-      package_indexes=package_indexes)
+      force=replace_sysroot,
+      upgrade_chroot=update_chroot,
+      package_indexes=package_indexes,
+  )
 
   try:
-    created = sysroot.Create(build_target, run_configs,
-                             accept_licenses=_ACCEPTED_LICENSES)
+    created = sysroot.Create(
+        build_target, run_configs, accept_licenses=_ACCEPTED_LICENSES)
   except sysroot.Error as e:
     cros_build_lib.Die(e)
 
@@ -163,8 +172,7 @@ def GenerateArchive(input_proto, output_proto, _config):
 
   with osutils.TempDir(delete=False) as temp_output_dir:
     sysroot_tar_path = sysroot.GenerateArchive(temp_output_dir,
-                                               build_target_name,
-                                               pkg_list)
+                                               build_target_name, pkg_list)
 
   # By assigning this Path variable to the tar path, the tar file will be
   # copied out to the input_proto's ResultPath location.
@@ -244,8 +252,9 @@ def InstallPackages(input_proto, output_proto, _config):
 
   # Get the package atom for each specified package. The field is optional, so
   # error only when we cannot parse an atom for each of the given packages.
-  packages = [controller_util.PackageInfoToCPV(x).cp
-              for x in input_proto.packages]
+  packages = [
+      controller_util.PackageInfoToCPV(x).cp for x in input_proto.packages
+  ]
 
   package_indexes = [
       binpkg.PackageIndexInfo.from_protobuf(x)
@@ -311,8 +320,8 @@ def InstallPackages(input_proto, output_proto, _config):
 
 def _LogBinhost(board):
   """Log the portage binhost for the given board."""
-  binhost = portage_util.PortageqEnvvar('PORTAGE_BINHOST', board=board,
-                                        allow_undefined=True)
+  binhost = portage_util.PortageqEnvvar(
+      'PORTAGE_BINHOST', board=board, allow_undefined=True)
   if not binhost:
     logging.warning('Portage Binhost not found.')
   else:
