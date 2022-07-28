@@ -1134,6 +1134,7 @@ LEGACY_RELEASE_ALLOWLIST = [
     'pyro-release',
     'rammus-release',
     'reef-release',
+    'reven-vmtest-release', # b/240524235
     'sand-release',
     'sarien-release',
     'scarlet-release',
