@@ -17,7 +17,7 @@ from chromite.lint.linters import whitespace
 
 DOC_RESOURCE_URL = (
     'https://dev.chromium.org/chromium-os/chromiumos-design-docs/'
-    'boot-design#TOC-Runtime-Resource-Limits')
+    'boot-design/#runtime-resource-limits')
 AUDITED_SHELL_COMMAND_REGEX = re.compile(
     # Match comment lines so they can be excluded.
     r'(?P<comment>^\s*#.*$)|'
