@@ -183,8 +183,6 @@ def _deploy_ssh(build_target: build_target_lib.BuildTarget,
 
   logging.info('connecting to: %s\n', ip)
   id_filename = '/mnt/host/source/chromite/ssh_keys/testing_rsa'
-  tmpfile = tempfile.NamedTemporaryFile()
-  shutil.copyfile(id_filename, tmpfile.name)
 
   if use_flashrom and fw_config.flash_extra_flags_flashrom:
     if passthrough_args:
@@ -204,23 +202,26 @@ def _deploy_ssh(build_target: build_target_lib.BuildTarget,
     else:
       passthrough_args = fw_config.flash_extra_flags_futility
 
-  scp_cmd, flash_cmd = _build_flash_ssh_cmds(not flashrom, ip, port, image,
-                                             tmpfile.name, verbose,
-                                             passthrough_args)
-  try:
-    cros_build_lib.run(scp_cmd, print_cmd=verbose, check=True, dryrun=dryrun)
-  except cros_build_lib.CalledProcessError as e:
-    logging.error('Could not copy image to dut.')
-    raise e
+  with tempfile.NamedTemporaryFile() as tmpfile:
+    shutil.copyfile(id_filename, tmpfile.name)
+    scp_cmd, flash_cmd = _build_flash_ssh_cmds(not flashrom, ip, port, image,
+                                               tmpfile.name, verbose,
+                                               passthrough_args)
+    try:
+      cros_build_lib.run(scp_cmd, print_cmd=verbose, check=True, dryrun=dryrun)
+    except cros_build_lib.CalledProcessError as e:
+      logging.error('Could not copy image to dut.')
+      raise e
 
-  logging.info('Flashing now, may take several minutes.')
-  try:
-    cros_build_lib.run(flash_cmd, print_cmd=verbose, check=True, dryrun=dryrun)
-  except cros_build_lib.CalledProcessError as e:
-    logging.error('Flashing over SSH failed. Try using a servo instead.')
-    raise e
+    logging.info('Flashing now, may take several minutes.')
+    try:
+      cros_build_lib.run(flash_cmd, print_cmd=verbose, check=True,
+                         dryrun=dryrun)
+    except cros_build_lib.CalledProcessError as e:
+      logging.error('Flashing over SSH failed. Try using a servo instead.')
+      raise e
 
-  logging.notice('ssh flash successful. Exiting flash_ap')
+    logging.notice('ssh flash successful. Exiting flash_ap')
 
 
 def _build_flash_ssh_cmds(futility: bool,
@@ -356,26 +357,27 @@ def ssh_read(path: str, verbose: bool, ip: str, port: int, dryrun: bool,
   """
   logging.info('Connecting to: %s\n', ip)
   id_filename = '/mnt/host/source/chromite/ssh_keys/testing_rsa'
-  tmpfile = tempfile.NamedTemporaryFile()
-  shutil.copyfile(id_filename, tmpfile.name)
+  with tempfile.NamedTemporaryFile() as tmpfile:
+    shutil.copyfile(id_filename, tmpfile.name)
 
-  scp_cmd, flash_cmd = _build_read_ssh_cmds(ip, port, path, tmpfile.name,
-                                            verbose, region)
+    scp_cmd, flash_cmd = _build_read_ssh_cmds(ip, port, path, tmpfile.name,
+                                              verbose, region)
 
-  logging.info('Reading now, may take several minutes.')
-  try:
-    cros_build_lib.run(flash_cmd, print_cmd=verbose, check=True, dryrun=dryrun)
-  except cros_build_lib.CalledProcessError:
-    logging.error('Read failed.')
-    return False
+    logging.info('Reading now, may take several minutes.')
+    try:
+      cros_build_lib.run(flash_cmd, print_cmd=verbose, check=True,
+                         dryrun=dryrun)
+    except cros_build_lib.CalledProcessError:
+      logging.error('Read failed.')
+      return False
 
-  try:
-    cros_build_lib.run(scp_cmd, print_cmd=verbose, check=True, dryrun=dryrun)
-  except cros_build_lib.CalledProcessError:
-    logging.error('Could not copy image from dut.')
-    return False
+    try:
+      cros_build_lib.run(scp_cmd, print_cmd=verbose, check=True, dryrun=dryrun)
+    except cros_build_lib.CalledProcessError:
+      logging.error('Could not copy image from dut.')
+      return False
 
-  return True
+    return True
 
 
 def _build_read_ssh_cmds(ip: str, port: int, path: str, tmp_file_name: str,
