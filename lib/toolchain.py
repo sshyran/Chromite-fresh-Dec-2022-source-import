@@ -353,7 +353,6 @@ class ToolchainInfo(object):
   _PKG_GCC = 'gcc'
   _PKG_LIBC = 'glibc'
   _PKG_LIBCXX = 'libcxx'
-  _PKG_LIBCXXABI = 'libcxxabi'
   _PKG_LIBGCC = 'llvm-libunwind'
   _PKG_LIBXCRYPT = 'libxcrypt'
   _PKG_GO = 'go'
@@ -404,18 +403,6 @@ class ToolchainInfo(object):
   @property
   def libcxx_pkg_info(self) -> 'package_info.PackageInfo':
     return self._get_pkg(self._PKG_LIBCXX)
-
-  @property
-  def libcxxabi_version(self) -> str:
-    return self._GetVersion(self._PKG_LIBCXXABI)
-
-  @property
-  def libcxxabi_cpf(self) -> str:
-    return self._GetCPF(self._PKG_LIBCXXABI)
-
-  @property
-  def libcxxabi_pkg_info(self) -> 'package_info.PackageInfo':
-    return self._get_pkg(self._PKG_LIBCXXABI)
 
   @property
   def libgcc_version(self) -> str:
