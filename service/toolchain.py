@@ -8,6 +8,7 @@ import logging
 import os
 from pathlib import Path
 import re
+import subprocess
 from typing import Dict, Iterable, List, NamedTuple, Text, Tuple
 
 from chromite.lib import chroot_util
@@ -97,21 +98,49 @@ class BuildLinter:
       LinterFinding named tuples. These lints will be filtered if differential
       linting is enabled.
     """
+    if not (use_clippy or use_tidy or use_golint):
+      return []
+
     self._reset_temporary_files_for_linting()
 
+    # First build the dependencies separately without linting flags to
+    # prevent unsupported packages from being linted.
+    emerge = chroot_util.GetEmergeCommand(self.sysroot)
+    cros_build_lib.sudo_run(
+        emerge + ['--onlydeps'] + self.package_atoms, preserve_env=True)
+
+    # Packages outside of platform2 are currently only supported for golint
+    platform2_packages = [
+        p for p in self.package_atoms if self.is_package_platform2(p)
+    ]
+    nonplatform2_packages = [
+        p for p in self.package_atoms if p not in platform2_packages
+    ]
+
+    for pkg in nonplatform2_packages:
+      if use_clippy:
+        logging.warning(
+            "Not using Clippy to lint %s since it's not in platform2.", pkg)
+      if use_tidy:
+        logging.warning(
+            "Not using Tidy to lint %s since it's not in platform2.", pkg)
+
     extra_env = {}
-    if use_clippy:
-      extra_env['ENABLE_RUST_CLIPPY'] = '1'
-    if use_tidy:
-      extra_env['WITH_TIDY'] = 'tricium'
     if use_golint:
       extra_env['ENABLE_GO_LINT'] = '1'
+      if nonplatform2_packages:
+        cros_build_lib.sudo_run(
+            emerge + nonplatform2_packages,
+            preserve_env=True,
+            extra_env=extra_env)
 
-    emerge_onlydeps_command, emerge_command = self._emerge_commands()
-    cros_build_lib.sudo_run(
-        emerge_onlydeps_command, preserve_env=True)
-    cros_build_lib.sudo_run(
-        emerge_command, preserve_env=True, extra_env=extra_env)
+    if platform2_packages:
+      if use_clippy:
+        extra_env['ENABLE_RUST_CLIPPY'] = '1'
+      if use_tidy:
+        extra_env['WITH_TIDY'] = 'tricium'
+      cros_build_lib.sudo_run(
+          emerge + platform2_packages, preserve_env=True, extra_env=extra_env)
 
     return self.fetch_findings(use_clippy, use_tidy, use_golint)
 
@@ -141,16 +170,6 @@ class BuildLinter:
     if self.differential:
       findings = self._filter_linter_findings(findings)
     return findings
-
-  def _emerge_commands(self) -> Tuple[List[str], List[str]]:
-    """Get the emerge commands for emerging {packages} in {sysroot}."""
-    emerge = chroot_util.GetEmergeCommand(self.sysroot)
-    return (
-        # First build the dependencies separately without linting flags to
-        # prevent unsupported packages from being linted.
-        emerge + ['--onlydeps'] + self.package_atoms,
-        emerge + self.package_atoms
-    )
 
   def _reset_temporary_files_for_linting(self) -> None:
     """Prepares for linting by rming prior linter findings and caches."""
@@ -394,3 +413,26 @@ class BuildLinter:
 
     # Remove duplicates from different packages having the same source repo
     return set(repo_paths)
+
+  def is_package_platform2(self, package_atom: Text) -> bool:
+    """Returns whether or not a package is part of platform2.
+
+    This is done by inspecting the output of ebuild $(equery w <package>) info.
+    """
+    cros_build_lib.AssertInsideChroot()
+
+    ebuild = portage_util.FindEbuildForPackage(package_atom, self.sysroot)
+    cmd = ['ebuild', ebuild, 'info']
+    output = cros_build_lib.run(
+        cmd, stdout=subprocess.PIPE, encoding='utf-8').output
+
+    # Example output:
+    #   CROS_WORKON_SRCDIR=("/mnt/host/source/src/platform2")
+    #   CROS_WORKON_PROJECT=("chromiumos/platform2")
+    for line in output.split():
+      if line in [
+          'CROS_WORKON_SRCDIR=("/mnt/host/source/src/platform2")',
+          'CROS_WORKON_PROJECT=("chromiumos/platform2")'
+      ]:
+        return True
+    return False
