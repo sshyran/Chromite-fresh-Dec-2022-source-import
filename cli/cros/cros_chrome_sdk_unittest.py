@@ -784,8 +784,28 @@ class HasInternalConfigTest(cros_test_lib.MockTempDirTestCase):
     self.gs_mock.AddCmdResult(
         partial_mock.ListRegex('ls .*gs://{constants.RELEASE_GS_BUCKET}'),
         stdout='')
+
+    # Check against the top-level 'boards' key.
     config_contents = json.dumps({
         'boards': [
+            {
+                'name': SDKFetcherMock.BOARD,
+                'configs': [
+                    {
+                        'builder': 'RELEASE',
+                    }
+                ],
+            }
+        ]
+    })
+    self.gs_mock.AddCmdResult(
+        partial_mock.ListRegex('cat .*/build_config.ToT.json'),
+        stdout=config_contents)
+    self.assertTrue(self.sdk._HasInternalConfig())
+
+    # Check against the top-level 'reference_board_unified_builds' key.
+    config_contents = json.dumps({
+        'reference_board_unified_builds': [
             {
                 'name': SDKFetcherMock.BOARD,
                 'builder': 'RELEASE',
@@ -795,7 +815,6 @@ class HasInternalConfigTest(cros_test_lib.MockTempDirTestCase):
     self.gs_mock.AddCmdResult(
         partial_mock.ListRegex('cat .*/build_config.ToT.json'),
         stdout=config_contents)
-    # Our board was listed in the ToT file, so should return True.
     self.assertTrue(self.sdk._HasInternalConfig())
 
   def testFoundInBranchConfig(self):
@@ -807,7 +826,7 @@ class HasInternalConfigTest(cros_test_lib.MockTempDirTestCase):
         partial_mock.ListRegex(f'ls .*gs://{constants.RELEASE_GS_BUCKET}'),
         stdout=f'gs://{constants.RELEASE_GS_BUCKET}/{branch_config_file}')
     config_contents = json.dumps({
-        'boards': [
+        'reference_board_unified_builds': [
             {
                 'name': SDKFetcherMock.BOARD,
                 'builder': 'RELEASE',

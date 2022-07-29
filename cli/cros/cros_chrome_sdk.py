@@ -208,8 +208,12 @@ class SDKFetcher(object):
           f'gs://{constants.RELEASE_GS_BUCKET}/build_config.ToT.json')
 
     config = json.loads(self.gs_ctx.Cat(relevant_config))
-    for board in (config.get('boards', []) +
-                  config.get('reference_board_unified_builds', [])):
+    for board in config.get('boards', []):
+      if board.get('name') != self.board:
+        continue
+      if any(c.get('builder') == 'RELEASE' for c in board.get('configs', [])):
+        return True
+    for board in config.get('reference_board_unified_builds', []):
       if board.get('name') == self.board and board.get('builder') == 'RELEASE':
         return True
     return False
