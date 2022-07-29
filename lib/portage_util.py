@@ -27,6 +27,7 @@ from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib.parser import package_info
 from chromite.utils import key_value_store
+from chromite.utils import pms
 
 
 # The parsed output of running `ebuild <ebuild path> info`.
@@ -1043,7 +1044,8 @@ class EBuild(object):
     else:
       return '"%s"' % unformatted_list[0]
 
-  def RevWorkOnEBuild(self, srcroot, manifest, reject_self_repo=True):
+  def RevWorkOnEBuild(self, srcroot, manifest, reject_self_repo=True,
+                      new_version=None):
     """Revs a workon ebuild given the git commit hash.
 
     By default this class overwrites a new ebuild given the normal
@@ -1055,6 +1057,7 @@ class EBuild(object):
       manifest: git.ManifestCheckout object.
       reject_self_repo: Whether to abort if the ebuild lives in the same git
           repo as it is tracking for uprevs.
+      new_version: The new version number for this ebuild. No revision number.
 
     Returns:
       If the revved package is different than the old ebuild, return a tuple
@@ -1066,6 +1069,12 @@ class EBuild(object):
       OSError: Error occurred while creating a new ebuild.
       IOError: Error occurred while writing to the new revved ebuild file.
     """
+    if new_version is not None:
+      if not pms.version_valid(new_version):
+        raise ValueError(f'Invalid version {new_version}')
+      if re.search(r'-r[0-9]+$', new_version):
+        raise ValueError(f'Revision is not allowed, given {new_version}')
+
     if self.is_stable:
       starting_pv = self.version_no_rev
     else:
@@ -1081,9 +1090,13 @@ class EBuild(object):
     old_version = '%s-r%d' % (stable_version_no_rev, self.current_revision)
     old_stable_ebuild_path = '%s-%s.ebuild' % (self._ebuild_path_no_version,
                                                old_version)
-    new_version = '%s-r%d' % (stable_version_no_rev, self.current_revision + 1)
+
+    revision = (1 if new_version is not None
+                and new_version != stable_version_no_rev
+                else self.current_revision + 1)
+    version = f'{new_version or stable_version_no_rev}-r{revision}'
     new_stable_ebuild_path = '%s-%s.ebuild' % (self._ebuild_path_no_version,
-                                               new_version)
+                                               version)
 
     info = self.GetSourceInfo(
         srcroot, manifest, reject_self_repo=reject_self_repo)
@@ -1164,7 +1177,7 @@ class EBuild(object):
       logging.info('Creating new stable ebuild %s', new_stable_ebuild_path)
       logging.info('New ebuild commit id: %s', self.FormatBashArray(commit_ids))
       ebuild_path_to_remove = old_ebuild_path if self.is_stable else None
-      return ('%s-%s' % (self.package, new_version), new_stable_ebuild_path,
+      return ('%s-%s' % (self.package, version), new_stable_ebuild_path,
               ebuild_path_to_remove)
 
   def _ShouldRevEBuild(self, commit_ids, srcdirs, subdirs_to_rev):

@@ -555,11 +555,15 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
 
   def setUp(self):
     self.overlay = os.path.join(self.tempdir, 'overlay')
-    package_name = os.path.join(self.overlay,
-                                'category/test_package/test_package-0.0.1')
-    ebuild_path = package_name + '-r1.ebuild'
+    package_name_no_version = os.path.join(self.overlay,
+                                           'category/test_package/test_package')
+    package_name_version = package_name_no_version + '-0.0.1'
+    package_name_forced_version = package_name_no_version + '-777.0.0'
+    ebuild_path = package_name_version + '-r1.ebuild'
     self.m_ebuild = StubEBuild(ebuild_path, False)
-    self.revved_ebuild_path = package_name + '-r2.ebuild'
+    self.revved_ebuild_path = package_name_version + '-r2.ebuild'
+    self.revved_ebuild_path_forced_version = (package_name_forced_version +
+                                              '-r1.ebuild')
     self.git_files_changed = []
 
   def createRevWorkOnMocks(self, ebuild_content, rev, multi=False):
@@ -771,6 +775,40 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
     self.assertExists(self.revved_ebuild_path)
     self.assertEqual(self._revved_ebuild,
                      osutils.ReadFile(self.revved_ebuild_path))
+
+  def testRevForceStableVersionEBuild(self):
+    """Test force stable version uprev of a ebuild."""
+    self.createRevWorkOnMocks(self._mock_ebuild, rev=True)
+    result = self.m_ebuild.RevWorkOnEBuild(
+        self.tempdir, MANIFEST, new_version='777.0.0')
+    self.assertEqual(result[0], 'category/test_package-777.0.0-r1')
+    self.assertExists(self.revved_ebuild_path_forced_version)
+    self.assertEqual(self._revved_ebuild,
+                     osutils.ReadFile(self.revved_ebuild_path_forced_version))
+
+  def testRevForceStableVersionSameVersionEBuild(self):
+    """Test force stable version uprev of a ebuild with same version."""
+    self.createRevWorkOnMocks(self._mock_ebuild, rev=True)
+    result = self.m_ebuild.RevWorkOnEBuild(self.tempdir, MANIFEST,
+                                           new_version='0.0.1')
+    self.assertEqual(result[0], 'category/test_package-0.0.1-r2')
+    self.assertExists(self.revved_ebuild_path)
+    self.assertEqual(self._revved_ebuild,
+                     osutils.ReadFile(self.revved_ebuild_path))
+
+  def testRevInvalidVersionWithRevisionEBuild(self):
+    """Test force stable version uprev of a ebuild with same version."""
+    self.createRevWorkOnMocks(self._mock_ebuild, rev=True)
+    with self.assertRaises(ValueError):
+      self.m_ebuild.RevWorkOnEBuild(self.tempdir, MANIFEST,
+                                    new_version='0.0.1-r777')
+
+  def testRevInvalidGibberishVersionEBuild(self):
+    """Test force stable version uprev of a ebuild with same version."""
+    self.createRevWorkOnMocks(self._mock_ebuild, rev=True)
+    with self.assertRaises(ValueError):
+      self.m_ebuild.RevWorkOnEBuild(self.tempdir, MANIFEST,
+                                    new_version='gibberish-version-0000')
 
   def testCommitChange(self):
     m = self.PatchObject(portage_util.EBuild, '_RunGit', return_value='')

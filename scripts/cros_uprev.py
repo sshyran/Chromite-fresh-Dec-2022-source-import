@@ -36,6 +36,8 @@ def GetParser() -> commandline.ArgumentParser:
   parser.add_argument('--force', action='store_true',
                       help='Force the stabilization of manually uprevved '
                            'packages. (only compatible with -p)')
+  parser.add_argument('--force-version', type=str,
+                      help='Force the version of manually uprevved packages.')
   parser.add_argument('--overlay-type', required=True,
                       choices=['public', 'private', 'both'],
                       help='Populates --overlays based on "public", "private", '
@@ -161,7 +163,8 @@ def _WorkOnCommit(options: commandline.ArgumentNamespace, overlays: List[str],
     removed_ebuild_files = manager.list()
 
     inputs = [[manifest, [overlay], overlay_ebuilds, revved_packages,
-               new_package_atoms, new_ebuild_files, removed_ebuild_files]
+               new_package_atoms, new_ebuild_files, removed_ebuild_files,
+               options]
               for overlay in overlays]
     parallel.RunTasksInProcessPool(_UprevOverlays, inputs)
 
@@ -208,7 +211,8 @@ def _GetOverlayToEbuildsMap(overlays: List[str],
 def _UprevOverlays(manifest: git.ManifestCheckout, overlays: List[str],
                    overlay_ebuilds: Dict, revved_packages: List[str],
                    new_package_atoms: List[str], new_ebuild_files: List[str],
-                   removed_ebuild_files: List[str]) -> None:
+                   removed_ebuild_files: List[str],
+                   options: commandline.ArgumentNamespace) -> None:
   """Execute uprevs for overlays in sequence.
 
   Args:
@@ -219,6 +223,7 @@ def _UprevOverlays(manifest: git.ManifestCheckout, overlays: List[str],
     new_package_atoms: A shared list of new package atoms.
     new_ebuild_files: New stable ebuild paths.
     removed_ebuild_files: Old ebuild paths that were removed.
+    options: The options object returned by the argument parser.
   """
   for overlay in overlays:
     if not os.path.isdir(overlay):
@@ -235,7 +240,7 @@ def _UprevOverlays(manifest: git.ManifestCheckout, overlays: List[str],
 
       inputs = [[overlay, ebuild, manifest, new_ebuild_files,
                  removed_ebuild_files, messages, revved_packages,
-                 new_package_atoms] for ebuild in ebuilds]
+                 new_package_atoms, options] for ebuild in ebuilds]
       parallel.RunTasksInProcessPool(_WorkOnEbuild, inputs)
 
 
@@ -243,7 +248,8 @@ def _WorkOnEbuild(overlay: str, ebuild: portage_util.EBuild,
                   manifest: git.ManifestCheckout, new_ebuild_files: List[str],
                   removed_ebuild_files: List[str], messages: List[str],
                   revved_packages: List[str],
-                  new_package_atoms: List[str]) -> None:
+                  new_package_atoms: List[str],
+                  options: commandline.ArgumentNamespace) -> None:
   """Work on a single ebuild.
 
   Args:
@@ -255,12 +261,14 @@ def _WorkOnEbuild(overlay: str, ebuild: portage_util.EBuild,
     messages: A share list of commit messages.
     revved_packages: A shared list of revved packages.
     new_package_atoms: A shared list of new package atoms.
+    options: The options object returned by the argument parser.
   """
   logging.debug('Working on %s, info %s', ebuild.package,
                 ebuild.cros_workon_vars)
   try:
-    result = ebuild.RevWorkOnEBuild(os.path.join(constants.SOURCE_ROOT, 'src'),
-                                    manifest)
+    result = ebuild.RevWorkOnEBuild(
+        os.path.join(constants.SOURCE_ROOT, 'src'), manifest,
+        new_version=options.force_version)
   except portage_util.InvalidUprevSourceError as e:
     logging.error('An error occurred while uprevving %s: %s',
                   ebuild.package, e)
