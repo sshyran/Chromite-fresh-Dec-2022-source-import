@@ -1095,6 +1095,7 @@ LEGACY_RELEASE_ALLOWLIST = [
     'asuka-release',
     'asurada-release',
     'atlas-release',
+    'betty-pi-arc-release', # b/240524235
     'betty-release',
     'bob-release',
     'brask-release',
