@@ -3180,6 +3180,14 @@
         },
         {
           "board_name": "corsola",
+          "name": "magneton",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7211,
+          "is_active": true
+        },
+        {
+          "board_name": "corsola",
           "name": "rusty",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
