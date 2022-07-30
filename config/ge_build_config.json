@@ -5983,6 +5983,14 @@
       "models": [
         {
           "board_name": "herobrine",
+          "name": "evoker",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7166,
+          "is_active": true
+        },
+        {
+          "board_name": "herobrine",
           "name": "herobrine",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -6012,6 +6020,14 @@
             "bvt-tast-informational"
           ],
           "cq_test_enabled": true,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7166,
+          "is_active": true
+        },
+        {
+          "board_name": "herobrine",
+          "name": "zoglin",
+          "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7166,
           "is_active": true
@@ -7658,6 +7674,14 @@
         {
           "board_name": "nissa",
           "name": "craask",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7206,
+          "is_active": true
+        },
+        {
+          "board_name": "nissa",
+          "name": "craaskbowl",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7206,
