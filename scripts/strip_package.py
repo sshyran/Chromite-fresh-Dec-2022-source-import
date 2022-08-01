@@ -10,9 +10,8 @@ from typing import List
 
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
-from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import osutils
+from chromite.lib import install_mask
 
 
 # The builder module lives in the devserver path.
@@ -20,8 +19,6 @@ from chromite.lib import osutils
 sys.path.append('/usr/lib/devserver/')
 import builder
 
-
-_DEFAULT_MASK = 'DEFAULT_INSTALL_MASK'
 
 def create_parser() -> commandline.ArgumentParser:
   """Creates the cmdline argparser, populates the options and description."""
@@ -47,19 +44,6 @@ def create_parser() -> commandline.ArgumentParser:
   return parser
 
 
-def populate_install_mask() -> bool:
-  """Extract the default install mask and populate the local environment."""
-  env_var_value = osutils.SourceEnvironment(
-      os.path.join(constants.CROSUTILS_DIR, 'common.sh'),
-      [_DEFAULT_MASK],
-      multiline=True)
-
-  if _DEFAULT_MASK not in env_var_value:
-    return False
-  os.environ[_DEFAULT_MASK] = env_var_value[_DEFAULT_MASK]
-  return True
-
-
 def main(argv: List[str]) -> int:
   """Main function."""
   cros_build_lib.AssertInsideChroot()
@@ -72,8 +56,9 @@ def main(argv: List[str]) -> int:
   else:
     sysroot = build_target_lib.get_default_sysroot_path(options.board)
 
-  if not populate_install_mask():
-    return False
+  os.environ['DEFAULT_INSTALL_MASK'] = '\n'.join(
+      install_mask.DEFAULT_INSTALL_MASK)
+
   if not builder.UpdateGmergeBinhost(sysroot, options.packages, options.deep):
     return 1
   return 0
