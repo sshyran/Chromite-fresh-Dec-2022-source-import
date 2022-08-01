@@ -18,6 +18,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import git
 from chromite.lib import image_lib
+from chromite.lib import install_mask
 from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import portage_util
@@ -601,8 +602,8 @@ class GetBuildImageEnvvarTests(cros_test_lib.MockTestCase):
   def testStandardImage(self):
     """Test with standard base/dev/test image name."""
     expected_envvar = {
-        'INSTALL_MASK': ('\n'.join(constants.DEFAULT_INSTALL_MASK) + '\n' +
-                         '\n'.join(constants.SYSTEMD_INSTALL_MASK)),
+        'INSTALL_MASK': ('\n'.join(install_mask.DEFAULT) + '\n' +
+                         '\n'.join(install_mask.SYSTEMD)),
         'PRISTINE_IMAGE_NAME': constants.BASE_IMAGE_BIN,
         'BASE_PACKAGE': 'virtual/target-os',
     }
@@ -616,7 +617,8 @@ class GetBuildImageEnvvarTests(cros_test_lib.MockTestCase):
 
     # Validate scenario with systemd in USE flag
     self.use_flag_mock.return_value = 'cros_debug systemd'
-    expected_envvar['INSTALL_MASK'] = '\n'.join(constants.DEFAULT_INSTALL_MASK)
+    expected_envvar['INSTALL_MASK'] = '\n'.join(
+        install_mask.DEFAULT)
     for image in image_to_test:
       envar = image_lib.GetBuildImageEnvvars(set([image]), 'test_board')
       self.assertDictEqual(envar, expected_envvar)
@@ -624,8 +626,8 @@ class GetBuildImageEnvvarTests(cros_test_lib.MockTestCase):
   def testFactoryImage(self):
     """Test with factory image name."""
     expected_envvar = {
-        'INSTALL_MASK': ('\n'.join(constants.FACTORY_SHIM_INSTALL_MASK) + '\n' +
-                         '\n'.join(constants.SYSTEMD_INSTALL_MASK)),
+        'INSTALL_MASK': ('\n'.join(install_mask.FACTORY_SHIM) +
+                         '\n' + '\n'.join(install_mask.SYSTEMD)),
         'USE': image_lib._FACTORY_SHIM_USE_FLAGS,
         'PRISTINE_IMAGE_NAME': constants.FACTORY_IMAGE_BIN,
         'BASE_PACKAGE': 'virtual/target-os-factory-shim',
@@ -637,7 +639,7 @@ class GetBuildImageEnvvarTests(cros_test_lib.MockTestCase):
     # Validate scenario with systemd in USE flag
     self.use_flag_mock.return_value = 'cros_debug systemd'
     expected_envvar['INSTALL_MASK'] = '\n'.join(
-        constants.FACTORY_SHIM_INSTALL_MASK)
+        install_mask.FACTORY_SHIM)
     envar.clear()
     envar = image_lib.GetBuildImageEnvvars(
         set([constants.FACTORY_IMAGE_BIN]), 'betty')
