@@ -647,9 +647,9 @@ class TestRunCommand(cros_test_lib.MockTestCase):
   def testExceptionEquality(self):
     """Verify equality methods for RunCommandError"""
 
-    c1 = cros_build_lib.CommandResult(cmd=['ls', 'arg'], returncode=1)
-    c2 = cros_build_lib.CommandResult(cmd=['ls', 'arg1'], returncode=1)
-    c3 = cros_build_lib.CommandResult(cmd=['ls', 'arg'], returncode=2)
+    c1 = cros_build_lib.CommandResult(['ls', 'arg'], returncode=1)
+    c2 = cros_build_lib.CommandResult(['ls', 'arg1'], returncode=1)
+    c3 = cros_build_lib.CommandResult(['ls', 'arg'], returncode=2)
     e1 = cros_build_lib.RunCommandError('Message 1', c1)
     e2 = cros_build_lib.RunCommandError('Message 1', c1)
     e_diff_msg = cros_build_lib.RunCommandError('Message 2', c1)

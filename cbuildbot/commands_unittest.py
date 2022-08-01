@@ -674,7 +674,7 @@ The suite job has another 2:39:39.789250 till timeout.
     ])
 
     def fail_swarming_cmd(cmd, *_args, **_kwargs):
-      result = swarming_lib.SwarmingCommandResult(None, cmd=cmd,
+      result = swarming_lib.SwarmingCommandResult(None, args=cmd,
                                                   stderr='injected error',
                                                   stdout='', returncode=3)
       raise cros_build_lib.RunCommandError('injected swarming failure',

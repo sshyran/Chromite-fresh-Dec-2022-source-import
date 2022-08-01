@@ -956,8 +956,8 @@ class GSRetryFilterTest(cros_test_lib.TestCase):
 
   def _getException(self, cmd, error, returncode=RETURN_CODE):
     result = cros_build_lib.CommandResult(
+        args=cmd,
         stderr=error,
-        cmd=cmd,
         returncode=returncode)
     return cros_build_lib.RunCommandError('blah', result)
 

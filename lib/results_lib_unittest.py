@@ -372,7 +372,7 @@ class BuildStagesResultsTest(cros_test_lib.TestCase):
     results_lib.Results.Record('Test', FailStage.FAIL_EXCEPTION, time=3)
     results_lib.Results.Record('SignerTests', results_lib.Results.SKIPPED)
     result = cros_build_lib.CommandResult(
-        cmd=['/bin/false', '/nosuchdir'], returncode=2)
+        ['/bin/false', '/nosuchdir'], returncode=2)
     results_lib.Results.Record(
         'Archive',
         cros_build_lib.RunCommandError(
@@ -413,7 +413,7 @@ class BuildStagesResultsTest(cros_test_lib.TestCase):
     results_lib.Results.Record(
         'Test', FailStage.FAIL_EXCEPTION, 'failException Msg\nLine 2', time=3)
     result = cros_build_lib.CommandResult(
-        cmd=['/bin/false', '/nosuchdir'], returncode=2)
+        ['/bin/false', '/nosuchdir'], returncode=2)
     results_lib.Results.Record(
         'Archive',
         cros_build_lib.RunCommandError(

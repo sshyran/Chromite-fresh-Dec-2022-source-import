@@ -87,7 +87,7 @@ class RepoInitTests(cros_test_lib.TempDirTestCase, cros_test_lib.MockTestCase):
     self.PatchObject(repository.RepoRepository, '_RepoSelfupdate')
     mock_cleanup = self.PatchObject(repository.RepoRepository,
                                     '_CleanUpRepoManifest')
-    error_result = cros_build_lib.CommandResult(cmd=['cmd'], returncode=1)
+    error_result = cros_build_lib.CommandResult(['cmd'], returncode=1)
     ex = cros_build_lib.RunCommandError('error_msg', error_result)
     mock_init = self.PatchObject(cros_build_lib, 'run', side_effect=ex)
 
@@ -139,7 +139,7 @@ class RepoSyncTests(cros_test_lib.TempDirTestCase, cros_test_lib.MockTestCase):
     """Test Sync retry on repo network sync failure"""
     # Return value here isn't super important.
     result = cros_build_lib.CommandResult(
-        cmd=['cmd'], returncode=0, stderr='error')
+        ['cmd'], returncode=0, stderr='error')
     ex = cros_build_lib.RunCommandError('msg', result)
 
     run_cmd_mock = self.PatchObject(cros_build_lib, 'run', side_effect=ex)

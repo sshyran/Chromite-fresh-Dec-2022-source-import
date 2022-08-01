@@ -644,7 +644,7 @@ class BuildPackagesTest(cros_test_lib.RunCommandTestCase,
     self.PatchObject(portage_util, 'ParseDieHookStatusFile', return_value=cpvs)
     config = sysroot.BuildPackagesRunConfig()
 
-    result = cros_build_lib.CommandResult(cmd=self.base_command, returncode=1)
+    result = cros_build_lib.CommandResult(self.base_command, returncode=1)
     error = cros_build_lib.RunCommandError('Error', result)
     self.PatchObject(
         cros_build_lib,

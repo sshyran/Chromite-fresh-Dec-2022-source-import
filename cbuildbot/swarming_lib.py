@@ -235,7 +235,7 @@ class SwarmingCommandResult(cros_build_lib.CommandResult):
     task_summary_json = SwarmingCommandResult.LoadJsonSummary(
         task_summary_json_path)
     return SwarmingCommandResult(task_summary_json=task_summary_json,
-                                 cmd=command_result.cmd,
+                                 args=command_result.cmd,
                                  stderr=command_result.stderr,
                                  stdout=command_result.stdout,
                                  returncode=command_result.returncode)
