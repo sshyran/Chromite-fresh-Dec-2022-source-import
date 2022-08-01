@@ -236,7 +236,7 @@ class BuildLinter:
     for git_repo, git_hash in git_repos.items():
       cmd = f'git -C {git_repo} diff -U0 {git_hash}^...{git_hash}'
       diff = cros_build_lib.run(
-          cmd, capture_output=True, shell=True, encoding='utf-8').output
+          cmd, stdout=subprocess.PIPE, shell=True, encoding='utf-8').stdout
       current_file = ''
       for line in diff.splitlines():
         file_path_match = re.match(file_path_pattern, str(line))
@@ -424,7 +424,7 @@ class BuildLinter:
     ebuild = portage_util.FindEbuildForPackage(package_atom, self.sysroot)
     cmd = ['ebuild', ebuild, 'info']
     output = cros_build_lib.run(
-        cmd, stdout=subprocess.PIPE, encoding='utf-8').output
+        cmd, stdout=subprocess.PIPE, encoding='utf-8').stdout
 
     # Example output:
     #   CROS_WORKON_SRCDIR=("/mnt/host/source/src/platform2")
