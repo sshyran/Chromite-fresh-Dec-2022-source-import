@@ -24,6 +24,7 @@ import sys
 import tempfile
 import time
 from typing import List, Optional, Union
+import warnings
 
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import constants
@@ -238,19 +239,19 @@ class CommandResult(CompletedProcess):
   This is akin to subprocess.CompletedProcess.
   """
 
-  # The linter is confused by the getattr usage above.
-  # TODO(vapier): Drop this once we're Python 3-only and we drop getattr.
-  # pylint: disable=bad-option-value,super-on-old-class
-  def __init__(self, cmd=None, returncode=None, args=None, stdout=None,
-               stderr=None):
+  def __init__(self, args=None, returncode=None, stdout=None, stderr=None,
+               **kwargs):
     # TODO(b/187789262): Handle deprecated arguments for now.
-    if args is None:
-      args = cmd
-    elif cmd is not None:
-      raise TypeError('Only specify |args|, not |cmd|')
+    # Drop this by Jan 2023.
+    if 'cmd' in kwargs:
+      # Break unittests, but allow production for now.
+      assert 'PYTEST_CURRENT_TEST' not in os.environ
+      warnings.warn('cmd= is deprecated -- use args=', DeprecationWarning)
+      assert args is None, 'Only specify |args|, not |cmd|'
+      args = kwargs.pop('cmd')
+    assert not kwargs, f'Unknown args {kwargs}'
 
-    super().__init__(args=args, stdout=stdout, stderr=stderr,
-                     returncode=returncode)
+    super().__init__(args, returncode, stdout=stdout, stderr=stderr)
 
 
 class CalledProcessError(subprocess.CalledProcessError):
