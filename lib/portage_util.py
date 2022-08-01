@@ -15,7 +15,7 @@ import os
 from pathlib import Path
 import re
 import shutil
-from typing import Dict, Iterator, List, Optional, Union
+from typing import Dict, Iterable, Iterator, List, Optional, Tuple, Union
 
 from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
@@ -2740,24 +2740,52 @@ def GeneratePackageSizes(db, root, installed_packages):
     assert package_cpv not in visited_cpvs
     visited_cpvs.add(package_cpv)
 
-    total_package_filesize = 0
     if not installed_package:
       raise PackageNotFoundError('Unable to locate installed_package %s in %s' %
                                  (package_cpv, root))
-    for content_type, path in installed_package.ListContents():
-      if content_type == InstalledPackage.OBJ:
-        filename = os.path.join(db.package_install_path, path)
-        try:
-          filesize = os.path.getsize(filename)
-        except OSError as e:
-          logging.warning('unable to compute the size of %s (skipping): %s',
-                          filename, e)
-          continue
-        logging.debug('size of %s = %d', filename, filesize)
-        total_package_filesize += filesize
+    total_package_filesize = CalculatePackageSize(
+        installed_package.ListContents(), db.package_install_path)
     logging.debug('%s installed_package size is %d', package_cpv,
                   total_package_filesize)
     yield package_cpv, total_package_filesize
+
+
+def CalculatePackageSize(files_in_package: Iterable[Tuple[str, str]],
+                         package_install_path: os.PathLike) -> int:
+  """Given a fileset for a Portage package, calculate the apparent package size.
+
+  This function provides the apparent size of the given package on disk. It is
+  provided in bytes (not blocks). It does not account for overall disk usage;
+  by implication, the size does not include allocated blocks when files are very
+  small, or when the apparent size is much larger than allocated blocks on disk
+  (as is the case with sparse files).
+
+  This function also only calculates the size of package files which are actual
+  OBJ-type files listed in the CONTENTS file for the package in the package db.
+  As such, the storage needs for any existing symlinks or relevant inodes is
+  not accounted for in this function.
+
+  Args:
+    files_in_package: A list of file information for all files installed by a
+      single package.
+    package_install_path: The path prefix for the installation location.
+
+  Returns:
+    The total apparent size of the installed package, in bytes.
+  """
+  total_package_filesize = 0
+  for content_type, path in files_in_package:
+    if content_type == InstalledPackage.OBJ:
+      filename = os.path.join(package_install_path, path)
+      try:
+        filesize = os.path.getsize(filename)
+      except OSError as e:
+        logging.warning('unable to compute the size of %s (skipping): %s',
+                        filename, e)
+        continue
+      logging.debug('size of %s = %d bytes', filename, filesize)
+      total_package_filesize += filesize
+  return total_package_filesize
 
 
 def UpdateEbuildManifest(
