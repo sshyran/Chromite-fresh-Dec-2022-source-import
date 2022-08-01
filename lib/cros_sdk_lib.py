@@ -17,6 +17,7 @@ from typing import List, Optional, Union
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
+from chromite.lib import metrics_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import timeout_util
@@ -848,6 +849,7 @@ class ChrootCreator:
     self.usepkg = usepkg
     self.chroot_upgrade = chroot_upgrade
 
+  @metrics_lib.timed('cros_sdk_lib.ChrootCreator._make_chroot')
   def _make_chroot(self):
     """Create the chroot."""
     cmd = [
@@ -1085,6 +1087,7 @@ you may end up deleting your source tree too.  To unmount & delete cleanly, use:
 $ cros_sdk --delete%s
 """, chroot_opt, chroot_opt)
 
+  @metrics_lib.timed('cros_sdk_lib.ChrootCreator.run')
   def run(self,
           user: str = None,
           uid: int = None,
@@ -1100,15 +1103,18 @@ $ cros_sdk --delete%s
     """
     logging.notice('Creating chroot. This may take a few minutes...')
 
-    # Unpack the chroot.
-    self.chroot_path.mkdir(mode=0o755, parents=True, exist_ok=True)
-    cros_build_lib.ExtractTarball(self.sdk_tarball, self.chroot_path)
+    metrics_prefix = 'cros_sdk_lib.ChrootCreator.run'
+    with metrics_lib.timer(f'{metrics_prefix}.ExtractSdkTarball'):
+      # Unpack the chroot.
+      self.chroot_path.mkdir(mode=0o755, parents=True, exist_ok=True)
+      cros_build_lib.ExtractTarball(self.sdk_tarball, self.chroot_path)
 
-    self.init_timezone()
-    self.init_user(user=user, uid=uid, gid=gid)
-    self.init_group(user=user, group=group, gid=gid)
-    self.init_filesystem_basic()
-    self.init_etc(user=user)
+    with metrics_lib.timer(f'{metrics_prefix}.init'):
+      self.init_timezone()
+      self.init_user(user=user, uid=uid, gid=gid)
+      self.init_group(user=user, group=group, gid=gid)
+      self.init_filesystem_basic()
+      self.init_etc(user=user)
 
     MountChrootPaths(self.chroot_path)
 
@@ -1120,6 +1126,7 @@ $ cros_sdk --delete%s
     self.print_success_summary()
 
 
+@metrics_lib.timed('cros_sdk_lib.CreateChroot')
 def CreateChroot(*args, **kwargs):
   """Convenience method."""
   ChrootCreator(*args, **kwargs).run()
