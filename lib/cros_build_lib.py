@@ -192,24 +192,15 @@ def CmdToStr(cmd):
                      (type(cmd), repr(cmd)))
 
 
-class CompletedProcess(getattr(subprocess, 'CompletedProcess', object)):
+class CompletedProcess(subprocess.CompletedProcess):
   """An object to store various attributes of a child process.
 
-  This is akin to subprocess.CompletedProcess.
+  This is the same as subprocess.CompletedProcess except we allow None defaults
+  for |args| and |returncode|.
   """
 
-  # The linter is confused by the getattr usage above.
-  # TODO(vapier): Drop this once we're Python 3-only and we drop getattr.
-  # pylint: disable=bad-option-value,super-on-old-class
-  def __init__(self, args=None, returncode=None, stdout=None, stderr=None):
-    if sys.version_info.major < 3:
-      self.args = args
-      self.stdout = stdout
-      self.stderr = stderr
-      self.returncode = returncode
-    else:
-      super().__init__(
-          args=args, returncode=returncode, stdout=stdout, stderr=stderr)
+  def __init__(self, args=None, returncode=None, **kwargs):
+    super().__init__(args=args, returncode=returncode, **kwargs)
 
   @property
   def cmd(self):
