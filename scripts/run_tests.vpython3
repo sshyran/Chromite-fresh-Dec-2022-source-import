@@ -36,6 +36,28 @@ wheel: <
   version: "version:2.3.75"
 >
 
+# devserver dependency on cherrypy.
+wheel: <
+  name: "infra/python/wheels/cherrypy-py3"
+  version: "version:14.2.0"
+>
+wheel: <
+  name: "infra/python/wheels/cheroot-py3"
+  version: "version:6.2.4"
+>
+wheel: <
+  name: "infra/python/wheels/backports_functools_lru_cache-py3"
+  version: "version:1.5"
+>
+wheel: <
+  name: "infra/python/wheels/portend-py3"
+  version: "version:2.2"
+>
+wheel: <
+  name: "infra/python/wheels/tempora-py3"
+  version: "version:1.11"
+>
+
 # gsutil deps.
 wheel: <
   name: "infra/python/wheels/crcmod/${vpython_platform}"
