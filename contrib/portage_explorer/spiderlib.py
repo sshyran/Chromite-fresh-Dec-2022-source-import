@@ -11,8 +11,22 @@
 """
 
 import dataclasses
+import enum
 from pathlib import Path
 from typing import List, Optional
+
+
+class UseState(enum.Enum):
+  """Disabled or enabled state for use flags."""
+  DISABLED = False
+  ENABLED = True
+
+
+@dataclasses.dataclass
+class ProfileUse:
+  """USE flags used for profiles."""
+  name: str
+  enabled: UseState
 
 
 @dataclasses.dataclass
@@ -22,6 +36,14 @@ class Profile:
   path: Path
   name: str
   parent_profiles: List[str] = dataclasses.field(default_factory=list)
+  use_flags: List[ProfileUse] = dataclasses.field(default_factory=list)
+
+
+  def set_enabled(self, flag: str, enabled: bool = True):
+    """Set the enabled state for a specified use flag in this profile."""
+    for use_flag in self.use_flags:
+      if use_flag.name == flag:
+        use_flag.enabled = UseState(enabled)
 
 
 @dataclasses.dataclass

@@ -35,7 +35,8 @@ def create_overlays(tmp_path: Path, name: str) -> Tuple[cr.test.Overlay,
 def create_profiles(
     tmp_path: Path, test_overlay: cr.test.Overlay,
     profile_names: List[str],
-    parent_profiles: Optional[Dict[str, cr.test.Profile]] = None
+    parent_profiles: Optional[Dict[str, cr.test.Profile]] = None,
+    make_defaults: Optional[Dict[str, Dict[str, str]]] = None
     ) -> Tuple[Dict[str, cr.test.Profile], Dict[str, spiderlib.Profile],
                Dict[str, spiderlib.Profile]]:
   """Create test profiles for unittesting spiders.
@@ -49,6 +50,9 @@ def create_profiles(
     profile_names: List of strings representing profile names for this overlay
     parent_profiles: Dict of profile names matched to corresponding
         portage_testables profile.
+    make_defaults: Dict of profile names matched to corresponding make_defaults
+        from portage_testables when creating profiles, which is a dict of the
+        variable and its value.
 
   Returns:
     A tuple containing the cr.test.Profiles, the profiles to run through the
@@ -59,10 +63,13 @@ def create_profiles(
   populated_profiles = {}
   if not parent_profiles:
     parent_profiles = {}
+  if not make_defaults:
+    make_defaults = {}
   for profile_name in profile_names:
     test_profile = test_overlay.create_profile(
         Path(profile_name),
-        profile_parents=parent_profiles.get(profile_name, []))
+        profile_parents=parent_profiles.get(profile_name, []),
+        make_defaults=make_defaults.get(profile_name, {}))
     test_profiles[profile_name] = test_profile
     unpopulated_spider_profile = spiderlib.Profile(
         f'{test_profile.overlay}:{profile_name}',
@@ -74,5 +81,13 @@ def create_profiles(
     for parent in parent_profiles.get(profile_name, []):
       populated_spider_profile.parent_profiles.append(
           f'{parent.overlay}:{parent.path}')
+    spider_flags = []
+    for flag in make_defaults.get(profile_name, {}).get('USE', '').split():
+      flag_name = flag.strip('-')
+      spider_use = spiderlib.ProfileUse(
+          flag_name, spiderlib.UseState(not flag.startswith('-')))
+      spider_flags.append(spider_use)
+    populated_spider_profile.use_flags = sorted(
+        spider_flags, key=lambda use_flag: use_flag.name)
     populated_profiles[profile_name] = populated_spider_profile
   return (test_profiles, unpopulated_profiles, populated_profiles)
