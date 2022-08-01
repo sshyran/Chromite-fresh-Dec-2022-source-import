@@ -24,6 +24,7 @@ import sys
 import tempfile
 import time
 from typing import List, Optional, Union
+import warnings
 
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import constants
@@ -242,15 +243,54 @@ class CommandResult(CompletedProcess):
   # TODO(vapier): Drop this once we're Python 3-only and we drop getattr.
   # pylint: disable=bad-option-value,super-on-old-class
   def __init__(self, cmd=None, returncode=None, args=None, stdout=None,
-               stderr=None):
-    # TODO(b/187789262): Handle deprecated arguments for now.
+               stderr=None, **kwargs):
+    # Handle deprecated arguments for now.
+    output = error = None
+    if 'output' in kwargs:
+      # TODO(b/187789262): Break unittests, but allow production for now.
+      assert 'PYTEST_CURRENT_TEST' not in os.environ
+      warnings.warn('output= is deprecated -- use stdout=', DeprecationWarning)
+      output = kwargs.pop('output')
+    if 'error' in kwargs:
+      # TODO(b/187789262): Break unittests, but allow production for now.
+      assert 'PYTEST_CURRENT_TEST' not in os.environ
+      warnings.warn('error= is deprecated -- use stderr=', DeprecationWarning)
+      error = kwargs.pop('error')
+    if kwargs:
+      raise TypeError(
+          f'got an unexpected keyword arguments {sorted(kwargs.keys())}')
+
     if args is None:
       args = cmd
     elif cmd is not None:
       raise TypeError('Only specify |args|, not |cmd|')
+    if stdout is None:
+      stdout = output
+    elif output is not None:
+      raise TypeError('Only specify |stdout|, not |output|')
+    if stderr is None:
+      stderr = error
+    elif error is not None:
+      raise TypeError('Only specify |stderr|, not |error|')
 
     super().__init__(args=args, stdout=stdout, stderr=stderr,
                      returncode=returncode)
+
+  @property
+  def output(self):
+    """Backwards compat API."""
+    # TODO(b/187789262): Break unittests, but allow production for now.
+    assert 'PYTEST_CURRENT_TEST' not in os.environ
+    warnings.warn('CommandResult.output is now .stdout', DeprecationWarning)
+    return self.stdout
+
+  @property
+  def error(self):
+    """Backwards compat API."""
+    # TODO(b/187789262): Break unittests, but allow production for now.
+    assert 'PYTEST_CURRENT_TEST' not in os.environ
+    warnings.warn('CommandResult.error is now .stderr', DeprecationWarning)
+    return self.stderr
 
 
 class CalledProcessError(subprocess.CalledProcessError):
