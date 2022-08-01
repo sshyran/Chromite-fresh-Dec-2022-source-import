@@ -24,7 +24,6 @@ import sys
 import tempfile
 import time
 from typing import List, Optional, Union
-import warnings
 
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import constants
@@ -227,22 +226,12 @@ class CompletedProcess(subprocess.CompletedProcess):
 class CommandResult(CompletedProcess):
   """An object to store various attributes of a child process.
 
-  This is akin to subprocess.CompletedProcess.
+  This is the same as subprocess.CompletedProcess except we allow None defaults
+  for |args| and |returncode|.
   """
 
-  def __init__(self, args=None, returncode=None, stdout=None, stderr=None,
-               **kwargs):
-    # TODO(b/187789262): Handle deprecated arguments for now.
-    # Drop this by Jan 2023.
-    if 'cmd' in kwargs:
-      # Break unittests, but allow production for now.
-      assert 'PYTEST_CURRENT_TEST' not in os.environ
-      warnings.warn('cmd= is deprecated -- use args=', DeprecationWarning)
-      assert args is None, 'Only specify |args|, not |cmd|'
-      args = kwargs.pop('cmd')
-    assert not kwargs, f'Unknown args {kwargs}'
-
-    super().__init__(args, returncode, stdout=stdout, stderr=stderr)
+  def __init__(self, args=None, returncode=None, **kwargs):
+    super().__init__(args, returncode, **kwargs)
 
 
 class CalledProcessError(subprocess.CalledProcessError):
