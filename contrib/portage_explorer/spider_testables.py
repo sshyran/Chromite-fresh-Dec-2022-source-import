@@ -9,6 +9,7 @@ from typing import Dict, List, Optional, Tuple
 
 import chromite as cr
 from chromite.contrib.portage_explorer import spiderlib
+from chromite.lib.parser import package_info
 
 
 def create_overlays(tmp_path: Path, name: str) -> Tuple[cr.test.Overlay,
@@ -91,3 +92,36 @@ def create_profiles(
         spider_flags, key=lambda use_flag: use_flag.name)
     populated_profiles[profile_name] = populated_spider_profile
   return (test_profiles, unpopulated_profiles, populated_profiles)
+
+
+def create_ebuilds(tmp_path: Path, test_overlay: cr.test.Overlay,
+                   packages: List[str]):
+  """Create test ebuilds for unittesting spiders.
+
+  Create the unpopulated and populated versions of ebuilds for the overlay to
+  represent the before and after of running the spider against mock data.
+  Unpopulated ebuilds only contain information gathered from ebuild directory.
+  Populated ebuilds contain information after sourcing the ebuild.
+
+  Args:
+    tmp_path: Temporary path to put mock data in
+    test_overlay: cr.test.Overlay instance to create ebuilds in
+    packages: List of string cpvs
+
+  Returns:
+    A tuple containing the cr.test.Packages, the unpopulated ebuilds, and
+    populated ebuilds.
+  """
+  test_packages = []
+  spider_ebuilds = []
+  for cpv in packages:
+    package = package_info.parse(cpv)
+    test_package = cr.test.Package(package.category, package.package,
+                                   package.vr)
+    test_packages.append(test_overlay.add_package(test_package))
+    ebuild_path = (test_overlay.path.relative_to(tmp_path) /
+                   package.relative_path)
+    spider_ebuild = spiderlib.Ebuild(ebuild_path, package)
+    spider_ebuilds.append(spider_ebuild)
+  spider_ebuilds.sort(key=lambda ebuild: ebuild.package.cpf)
+  return (test_packages, spider_ebuilds)

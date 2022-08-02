@@ -15,6 +15,15 @@ import enum
 from pathlib import Path
 from typing import List, Optional
 
+from chromite.lib.parser import package_info
+
+
+@dataclasses.dataclass
+class Ebuild:
+  """An Ebuild."""
+  path: Path
+  package: package_info.PackageInfo
+
 
 class UseState(enum.Enum):
   """Disabled or enabled state for use flags."""
@@ -59,7 +68,7 @@ class Overlay:
   path: Path
   name: str
   profiles: List[Profile] = dataclasses.field(default_factory=list)
-
+  ebuilds: List[Ebuild] = dataclasses.field(default_factory=list)
 
 @dataclasses.dataclass
 class SpiderOutput:
