@@ -163,13 +163,13 @@ class SDKFetcher(object):
     if self.toolchain_path is None:
       self.toolchain_path = 'gs://%s' % constants.SDK_GS_BUCKET
 
-    if use_external_config or not self._HasInternalConfig():
+    if use_external_config or not self._HasInternalConfig(cache_dir):
       self.config_name = f'{board}-{config_lib.CONFIG_TYPE_FULL}'
     else:
       self.config_name = f'{board}-{config_lib.CONFIG_TYPE_RELEASE}'
     self.gs_base = f'gs://chromeos-image-archive/{self.config_name}'
 
-  def _HasInternalConfig(self):
+  def _HasInternalConfig(self, cache_dir):
     """Determines if the SDK we need is provided by an internal builder.
 
     A given board can have a public and/or an internal builder that publishes
@@ -181,6 +181,9 @@ class SDKFetcher(object):
     This fetches the configs files in constants.RELEASE_CONFIG_GS_BUCKET to
     determine if the internal release builders support the given board. If
     they don't, we fall back to trying to use the public builders.
+
+    Args:
+      cache_dir: The toplevel cache dir to use.
 
     Returns:
       True if there's an internal builder available that publishes SDKs for the
@@ -196,7 +199,10 @@ class SDKFetcher(object):
     # If we're on a release branch, we don't want to use ToT's config, so read
     # //chrome/VERSION to determine which branch we're on and use the
     # corresponding config file.
-    chrome_version = chrome_util.ProcessVersionFile(self.chrome_src)['MAJOR']
+    src_dir = self.chrome_src
+    if not src_dir:
+      src_dir = os.path.abspath(os.path.join(cache_dir, '..', '..'))
+    chrome_version = chrome_util.ProcessVersionFile(src_dir)['MAJOR']
     relevant_config = None
     for config in configs:
       if f'-R{chrome_version}-' in config:

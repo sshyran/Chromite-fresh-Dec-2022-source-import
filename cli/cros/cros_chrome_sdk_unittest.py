@@ -763,9 +763,10 @@ class HasInternalConfigTest(cros_test_lib.MockTempDirTestCase):
     osutils.SafeMakedirs(os.path.join(self.src_dir, 'chrome'))
     self.gs_mock = self.StartPatcher(gs_unittest.GSContextMock())
     self.gs_mock.SetDefaultCmdResult()
+    self.cache_dir = os.path.join(self.tempdir, 'cache')
 
     self.sdk = cros_chrome_sdk.SDKFetcher(
-        os.path.join(self.tempdir, 'cache'), SDKFetcherMock.BOARD,
+        self.cache_dir, SDKFetcherMock.BOARD,
         chrome_src=self.src_dir,
         use_external_config=True)
 
@@ -774,7 +775,7 @@ class HasInternalConfigTest(cros_test_lib.MockTempDirTestCase):
     self.gs_mock.AddCmdResult(
         partial_mock.ListRegex(f'ls .*gs://{constants.RELEASE_GS_BUCKET}'),
         side_effect=gs.GSCommandError('some ACL error'))
-    self.assertFalse(self.sdk._HasInternalConfig())
+    self.assertFalse(self.sdk._HasInternalConfig(self.cache_dir))
 
   def testFoundInToTConfig(self):
     """Covers the case when the board is found in the ToT file."""
@@ -801,7 +802,7 @@ class HasInternalConfigTest(cros_test_lib.MockTempDirTestCase):
     self.gs_mock.AddCmdResult(
         partial_mock.ListRegex('cat .*/build_config.ToT.json'),
         stdout=config_contents)
-    self.assertTrue(self.sdk._HasInternalConfig())
+    self.assertTrue(self.sdk._HasInternalConfig(self.cache_dir))
 
     # Check against the top-level 'reference_board_unified_builds' key.
     config_contents = json.dumps({
@@ -815,7 +816,7 @@ class HasInternalConfigTest(cros_test_lib.MockTempDirTestCase):
     self.gs_mock.AddCmdResult(
         partial_mock.ListRegex('cat .*/build_config.ToT.json'),
         stdout=config_contents)
-    self.assertTrue(self.sdk._HasInternalConfig())
+    self.assertTrue(self.sdk._HasInternalConfig(self.cache_dir))
 
   def testFoundInBranchConfig(self):
     """Covers the case when the board is found in a branch file."""
@@ -838,7 +839,7 @@ class HasInternalConfigTest(cros_test_lib.MockTempDirTestCase):
             f'cat .*gs://{constants.RELEASE_GS_BUCKET}/{branch_config_file}'),
         stdout=config_contents)
     # Our board was listed in the branch file, so should return True.
-    self.assertTrue(self.sdk._HasInternalConfig())
+    self.assertTrue(self.sdk._HasInternalConfig(self.cache_dir))
 
   def testNotFoundInConfig(self):
     """Covers the case when the board is not found in a config file."""
@@ -859,7 +860,7 @@ class HasInternalConfigTest(cros_test_lib.MockTempDirTestCase):
         partial_mock.ListRegex('cat .*/build_config.ToT.json'),
         stdout=config_contents)
     # Our board wasn't listed in the ToT file, so should return False.
-    self.assertFalse(self.sdk._HasInternalConfig())
+    self.assertFalse(self.sdk._HasInternalConfig(self.cache_dir))
 
 
 class VersionTest(cros_test_lib.MockTempDirTestCase,
