@@ -130,7 +130,7 @@ class CommandVMTest(object):
                                 check=False)
     if result.returncode:
       logging.error('Failed to write the file to the VM device.')
-      raise CommandError(result.error)
+      raise CommandError(result.stderr)
 
     logging.info('Test to use shell command to read a file on the VM device.')
     read_cmd = cmd + ['--', 'cat %s' % path]
@@ -138,7 +138,7 @@ class CommandVMTest(object):
                                 check=False)
     if result.returncode or result.stdout.rstrip() != content:
       logging.error('Failed to read the file on the VM device.')
-      raise CommandError(result.error)
+      raise CommandError(result.stderr)
 
     logging.info('Test to use shell command to remove a file on the VM device.')
     remove_cmd = cmd + ['--', 'rm %s' % path]
@@ -146,7 +146,7 @@ class CommandVMTest(object):
                                 check=False)
     if result.returncode:
       logging.error('Failed to remove the file on the VM device.')
-      raise CommandError(result.error)
+      raise CommandError(result.stderr)
 
   @test_command_decorator('debug')
   def TestDebug(self):
@@ -159,7 +159,7 @@ class CommandVMTest(object):
                                 check=False, input='\n')
     if result.returncode:
       logging.error('Failed to start and debug a new process on the VM device.')
-      raise CommandError(result.error)
+      raise CommandError(result.stderr)
 
     logging.info('Test to attach a running process on the VM device.')
     with remote_access.ChromiumOSDeviceHandler(
@@ -176,7 +176,7 @@ class CommandVMTest(object):
                                   check=False, input='\n')
       if result.returncode:
         logging.error('Failed to attach a running process on the VM device.')
-        raise CommandError(result.error)
+        raise CommandError(result.stderr)
 
   @test_command_decorator('flash')
   def TestFlash(self):
@@ -192,7 +192,7 @@ class CommandVMTest(object):
     result = cros_build_lib.run(cmd, capture_output=True, check=False)
     if result.returncode:
       logging.error('Failed to flash the VM device.')
-      raise CommandError(result.error)
+      raise CommandError(result.stderr)
 
   @test_command_decorator('deploy')
   def TestDeploy(self):
@@ -210,7 +210,7 @@ class CommandVMTest(object):
 
     if result.returncode:
       logging.error('Failed to uninstall packages on the VM device.')
-      raise CommandError(result.error)
+      raise CommandError(result.stderr)
 
     captured_output = output.GetStdout() + output.GetStderr()
     for event in deploy.BrilloDeployOperation.UNMERGE_EVENTS:
@@ -226,7 +226,7 @@ class CommandVMTest(object):
 
     if result.returncode:
       logging.error('Failed to install packages on the VM device.')
-      raise CommandError(result.error)
+      raise CommandError(result.stderr)
 
     captured_output = output.GetStdout() + output.GetStderr()
     for event in deploy.BrilloDeployOperation.MERGE_EVENTS:

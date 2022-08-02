@@ -499,7 +499,7 @@ class PaygenPayload(object):
       if isinstance(result, cros_build_lib.RunCommandError):
         # Dump error output and re-raise the exception.
         logging.error('Nonzero exit code (%d), dumping command output:\n%s',
-                      result.result.returncode, result.result.output)
+                      result.result.returncode, result.result.stdout)
         raise result
       elif isinstance(result, cros_build_lib.CommandResult):
         self._StoreLog('Output of command: ' + result.cmdstr)

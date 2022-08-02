@@ -802,7 +802,7 @@ class MiniOSUpdater(RawPartitionUpdater):
       self._FlipMiniOSPriority()
 
   def _GetMiniOSPriority(self):
-    return self._device.run(['crossystem', constants.MINIOS_PRIORITY]).output
+    return self._device.run(['crossystem', constants.MINIOS_PRIORITY]).stdout
 
   def _SetMiniOSPriority(self, priority: str):
     self._device.run(

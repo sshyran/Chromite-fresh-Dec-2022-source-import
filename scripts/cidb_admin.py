@@ -46,12 +46,12 @@ def main(argv):
   # Check that we have no uncommitted files, and that our checkout's HEAD is
   # contained in a remote branch. This is to ensure that we don't accidentally
   # run uncommitted migrations.
-  uncommitted_files = git.RunGit(os.getcwd(), ['status', '-s']).output
+  uncommitted_files = git.RunGit(os.getcwd(), ['status', '-s']).stdout
   if uncommitted_files:
     cros_build_lib.Die('You appear to have uncommitted files. Aborting!')
 
   remote_branches = git.RunGit(
-      os.getcwd(), ['branch', '-r', '--contains']).output
+      os.getcwd(), ['branch', '-r', '--contains']).stdout
   if not remote_branches:
     cros_build_lib.Die(
         'You appear to be on a local branch of chromite. Aborting!')

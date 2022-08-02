@@ -509,7 +509,7 @@ def RunBuild(options, base, target, queue):
     result = cros_build_lib.run(cmd, capture_output=True,
                                 stderr=subprocess.STDOUT, **kwargs)
     if result.returncode:
-      print("cmd: '%s', output: '%s'" % (result.cmdstr, result.output))
+      print("cmd: '%s', output: '%s'" % (result.cmdstr, result.stdout))
       sys.exit(result.returncode)
 
   # Do the actual build.
@@ -518,7 +518,7 @@ def RunBuild(options, base, target, queue):
                                 stderr=subprocess.STDOUT, **kwargs)
     if result.returncode:
       # The build failed, so output the results to stderr.
-      print("cmd: '%s', output: '%s'" % (result.cmdstr, result.output),
+      print("cmd: '%s', output: '%s'" % (result.cmdstr, result.stdout),
             file=sys.stderr)
       sys.exit(result.returncode)
 

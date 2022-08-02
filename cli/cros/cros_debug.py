@@ -100,7 +100,7 @@ To debug a process by its pid:
         header, procs = lines[0], lines[1:]
         info = os.linesep.join([p for p in procs if int(p.split()[1]) in pids])
       except ValueError:
-        cros_build_lib.Die('Parsing output failed:\n%s', result.output)
+        cros_build_lib.Die('Parsing output failed:\n%s', result.stdout)
 
       print('\nList running processes of %s on device %s:\n%s\n%s' %
             (self.exe, self.ssh_hostname, header, info))
