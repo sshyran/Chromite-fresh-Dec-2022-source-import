@@ -186,8 +186,10 @@ def Data(data: str) -> str:
       elif node.nodeType == node.TEXT_NODE:
         # These are inter-node whitespace (indentation) and newlines.  We will
         # handle reformatting of indentation below, but we want to preserve any
-        # existing newlines as we don't enforce anything with them atm.
+        # existing newlines as we largely don't enforce anything with them atm.
         output = node.data.strip(' ')
+        # We don't allow multiple blank lines in a row.
+        output = re.sub(r'\n\n\n+', '\n\n', output)
         # Finally, strip non-whitespace characters.  There never should be any.
         buffer.write(re.sub(r'[^\s]+', '', output))
       else:
