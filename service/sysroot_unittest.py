@@ -35,8 +35,9 @@ class SetupBoardRunConfigTest(cros_test_lib.TestCase):
     """Test the update chroot args conversion method."""
     # False/0/None tests.
     instance = sysroot.SetupBoardRunConfig(
-        usepkg=False, jobs=None, update_toolchain=False)
+        usepkg=False, jobs=None, update_toolchain=False, backtrack=1)
     args = instance.GetUpdateChrootArgs()
+    self.assertIn('--backtrack=1', args)
     self.assertIn('--nousepkg', args)
     self.assertIn('--skip_toolchain_update', args)
     self.assertNotIn('--usepkg', args)

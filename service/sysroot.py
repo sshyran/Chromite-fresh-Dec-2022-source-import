@@ -145,7 +145,7 @@ class SetupBoardRunConfig(object):
     Returns:
       The list of arguments
     """
-    args = []
+    args = [f'--backtrack={self.backtrack}']
     if self.usepkg:
       args += ['--usepkg']
     else:
