@@ -79,6 +79,7 @@ def main(argv):
         f'The root directory has broken ownership: {st.st_uid}:{st.st_gid}'
         ' (should be 0:0)\nFix with: sudo chown 0:0 /')
 
+  logging.debug('Running: pytest %s', cros_build_lib.CmdToStr(pytest_args))
   sys.exit(pytest.main(pytest_args))
 
 
