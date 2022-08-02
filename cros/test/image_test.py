@@ -290,6 +290,9 @@ class LinkageTest(image_test_lib.ImageTestCase):
             # Deps mounted from squashfs at runtime.
             'intel-ipu6.so',
 
+            # Deps mounted from squashfs at runtime.
+            'camera.qcom.core.so',
+
             # libasound_module_ctl_ipaudio.so dep outside normal search paths.
             'libasound_module_pcm_ipaudio.so',
         ]:
@@ -464,6 +467,7 @@ class SymbolsTest(image_test_lib.ImageTestCase):
         # runtime.
         'libcros_camera.so',
         'camera_hal/intel-ipu6.so',
+        'camera.qcom.core.so',
         'camera_hal/usb.so',
     ])
 
