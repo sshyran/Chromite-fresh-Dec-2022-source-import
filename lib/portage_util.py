@@ -331,10 +331,9 @@ def GetOverlayName(overlay):
       return None
 
 
-def _GetSysrootTool(
-    tool: str,
-    board: Optional[str] = None,
-    sysroot: Optional[Union[str, os.PathLike]] = None) -> str:
+def _GetSysrootTool(tool: str,
+                    board: Optional[str] = None,
+                    sysroot: Optional[Union[str, os.PathLike]] = None) -> str:
   """Return the |tool| to use for a sysroot/board/host."""
   # If there is no board or sysroot, return the host tool.
   if sysroot is None and board is None:
@@ -1281,7 +1280,9 @@ class PortageDBError(Error):
 class PortageDB(object):
   """Wrapper class to access the portage database located in var/db/pkg."""
 
-  def __init__(self, root: os.PathLike = '/', vdb: Optional[os.PathLike] = None,
+  def __init__(self,
+               root: os.PathLike = '/',
+               vdb: Optional[os.PathLike] = None,
                package_install_path: Optional[os.PathLike] = None):
     """Initialize the internal structure for the database in the given root.
 
@@ -1883,16 +1884,15 @@ def IsPackageInstalled(package, sysroot='/'):
   return False
 
 
-def _Equery(
-    module: str,
-    *args: str,
-    board: Optional[str] = None,
-    sysroot: Optional[str] = None,
-    buildroot: str = constants.SOURCE_ROOT,
-    quiet: bool = True,
-    print_cmd: bool = True,
-    extra_env: Optional[Dict[str, str]] = None,
-    check: bool = True) -> cros_build_lib.CommandResult:
+def _Equery(module: str,
+            *args: str,
+            board: Optional[str] = None,
+            sysroot: Optional[str] = None,
+            buildroot: str = constants.SOURCE_ROOT,
+            quiet: bool = True,
+            print_cmd: bool = True,
+            extra_env: Optional[Dict[str, str]] = None,
+            check: bool = True) -> cros_build_lib.CommandResult:
   """Executes equery commands.
 
   Args:
@@ -2008,8 +2008,14 @@ def _EqueryWhich(packages_list: List[str],
   if include_masked:
     args += ['--include-masked']
   args += packages_list
-  return _Equery('which', *args, sysroot=sysroot, quiet=False,
-                 print_cmd=False, extra_env=extra_env, check=check)
+  return _Equery(
+      'which',
+      *args,
+      sysroot=sysroot,
+      quiet=False,
+      print_cmd=False,
+      extra_env=extra_env,
+      check=check)
 
 
 def FindEbuildsForPackages(packages_list,
@@ -2118,8 +2124,8 @@ def _EqueryDepgraph(pkg_str: str,
   Returns:
     result (cros_build_lib.CommandResult)
   """
-  return _Equery('depgraph', f'--depth={depth}', pkg_str, sysroot=sysroot,
-                 print_cmd=False)
+  return _Equery(
+      'depgraph', f'--depth={depth}', pkg_str, sysroot=sysroot, print_cmd=False)
 
 
 def GetFlattenedDepsForPackage(pkg_str, sysroot='/', depth=0):
@@ -2281,12 +2287,11 @@ def GetBoardUseFlags(board):
   return PortageqEnvvar('USE', board=board).split()
 
 
-def _EmergeBoard(
-    package: str,
-    board: Optional[str] = None,
-    sysroot: Optional[Union[str, os.PathLike]] = None,
-    buildroot: str = constants.SOURCE_ROOT,
-    set_empty_root: bool = False) -> cros_build_lib.CommandResult:
+def _EmergeBoard(package: str,
+                 board: Optional[str] = None,
+                 sysroot: Optional[Union[str, os.PathLike]] = None,
+                 buildroot: str = constants.SOURCE_ROOT,
+                 set_empty_root: bool = False) -> cros_build_lib.CommandResult:
   """Call emerge board to get dependences of package.
 
   Args:
@@ -2314,12 +2319,11 @@ def _EmergeBoard(
       encoding='utf-8')
 
 
-def GetPackageDependencies(
-    package: str,
-    board: Optional[str] = None,
-    sysroot: Optional[Union[str, os.PathLike]] = None,
-    buildroot: str = constants.SOURCE_ROOT,
-    set_empty_root: bool = False) -> List[str]:
+def GetPackageDependencies(package: str,
+                           board: Optional[str] = None,
+                           sysroot: Optional[Union[str, os.PathLike]] = None,
+                           buildroot: str = constants.SOURCE_ROOT,
+                           set_empty_root: bool = False) -> List[str]:
   """Returns the depgraph list of packages for a board and package."""
   output = _EmergeBoard(package, board, sysroot, buildroot,
                         set_empty_root).stdout.splitlines()
