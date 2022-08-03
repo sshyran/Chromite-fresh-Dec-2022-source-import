@@ -236,7 +236,6 @@
     hatch-arc-r-release
     hatch-arc-r-userdebug-release
     hatch-arc-t-release
-    hatch-borealis-release
     hatch-kernelnext-release
     hatch-release
     herobrine-release
@@ -270,7 +269,6 @@
     octopus-kernelnext-release
     octopus-release
     palkia-release
-    puff-borealis-release
     puff-moblab-release
     puff-release
     pyro-release
@@ -315,7 +313,6 @@
     volteer-manatee-release
     volteer-release
     zork-arc-r-release
-    zork-borealis-release
     zork-connectivitynext-release
     zork-floss-release
     zork-kernelnext-release
@@ -928,11 +925,6 @@
   hatch-arc-t-llvm-toolchain-tryjob
   hatch-arc-t-payloads-tryjob
   hatch-arc-t-release-tryjob
-  hatch-borealis-full-tryjob
-  hatch-borealis-llvm-next-toolchain-tryjob
-  hatch-borealis-llvm-toolchain-tryjob
-  hatch-borealis-payloads-tryjob
-  hatch-borealis-release-tryjob
   hatch-factory-hatch-12692.B-factorybranch-tryjob
   hatch-full-tryjob
   hatch-kernelnext-full-tryjob
@@ -1166,7 +1158,6 @@
     hatch-arc-r-release-tryjob
     hatch-arc-r-userdebug-release-tryjob
     hatch-arc-t-release-tryjob
-    hatch-borealis-release-tryjob
     hatch-kernelnext-release-tryjob
     hatch-release-tryjob
     herobrine-release-tryjob
@@ -1200,7 +1191,6 @@
     octopus-kernelnext-release-tryjob
     octopus-release-tryjob
     palkia-release-tryjob
-    puff-borealis-release-tryjob
     puff-moblab-release-tryjob
     puff-release-tryjob
     pyro-release-tryjob
@@ -1245,7 +1235,6 @@
     volteer-manatee-release-tryjob
     volteer-release-tryjob
     zork-arc-r-release-tryjob
-    zork-borealis-release-tryjob
     zork-connectivitynext-release-tryjob
     zork-floss-release-tryjob
     zork-kernelnext-release-tryjob
@@ -1335,11 +1324,6 @@
   poppy-llvm-toolchain-tryjob
   poppy-payloads-tryjob
   poppy-release-tryjob
-  puff-borealis-full-tryjob
-  puff-borealis-llvm-next-toolchain-tryjob
-  puff-borealis-llvm-toolchain-tryjob
-  puff-borealis-payloads-tryjob
-  puff-borealis-release-tryjob
   puff-factory-puff-13329.B-factorybranch-tryjob
   puff-factory-puff-13813.B-factorybranch-tryjob
   puff-full-tryjob
@@ -1634,11 +1618,6 @@
   zork-arc-r-llvm-toolchain-tryjob
   zork-arc-r-payloads-tryjob
   zork-arc-r-release-tryjob
-  zork-borealis-full-tryjob
-  zork-borealis-llvm-next-toolchain-tryjob
-  zork-borealis-llvm-toolchain-tryjob
-  zork-borealis-payloads-tryjob
-  zork-borealis-release-tryjob
   zork-connectivitynext-full-tryjob
   zork-connectivitynext-llvm-next-toolchain-tryjob
   zork-connectivitynext-llvm-toolchain-tryjob
