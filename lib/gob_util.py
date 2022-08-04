@@ -826,7 +826,8 @@ def SetReview(host, change, revision=None, msg=None, labels=None, notify=None,
   """Set labels and/or add a message to a code review."""
   if revision is None:
     revision = 'current'
-  if not msg and not labels:
+  # Ignore 'notify' on purpose - it's not empty by default in the caller.
+  if not any((msg, labels, reviewers, cc, ready, wip)):
     return
   path = '%s/revisions/%s/review' % (_GetChangePath(change), revision)
   body = {'reviewers': []}
