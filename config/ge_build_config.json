@@ -10838,6 +10838,14 @@
         },
         {
           "board_name": "trogdor-arc-r",
+          "name": "pazquel360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7189,
+          "is_active": true
+        },
+        {
+          "board_name": "trogdor-arc-r",
           "name": "pompom",
           "test_suites": [
             "sanity",
@@ -11160,6 +11168,14 @@
         {
           "board_name": "trogdor64",
           "name": "pazquel",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 462,
+          "is_active": true
+        },
+        {
+          "board_name": "trogdor64",
+          "name": "pazquel360",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 462,
