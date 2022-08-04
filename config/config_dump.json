@@ -26605,6 +26605,7 @@
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"trogdor\",\n  \"name\": \"lazor\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"trogdor\",\n  \"name\": \"limozeen\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"trogdor\",\n  \"name\": \"pazquel\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"trogdor\",\n  \"name\": \"pazquel360\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"trogdor\",\n  \"name\": \"pompom\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"trogdor\",\n  \"name\": \"trogdor\",\n  \"test_suites\": []\n}"
     ],
@@ -26633,6 +26634,7 @@
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"trogdor\",\n  \"name\": \"lazor\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"trogdor\",\n  \"name\": \"limozeen\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"trogdor\",\n  \"name\": \"pazquel\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"trogdor\",\n  \"name\": \"pazquel360\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"trogdor\",\n  \"name\": \"pompom\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"trogdor\",\n  \"name\": \"trogdor\",\n  \"test_suites\": []\n}"
     ],
