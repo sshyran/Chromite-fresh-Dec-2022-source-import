@@ -431,9 +431,6 @@
     "chown -R tpm_manager:tpm_manager \"${LOCAL_DATA_DIRECTORY}\"",
     "mkdir -m 0755 \"${LOCAL_DATA_DIRECTORY}\""
   ],
-  "trace_marker-test.conf": [
-    "chmod a+w /sys/kernel/debug/tracing/trace_marker"
-  ],
   "traced.conf": [
     "rm -rf \"${PERFETTO_SOCK_DIR}\"/*"
   ],
