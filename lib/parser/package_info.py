@@ -287,10 +287,19 @@ class PackageInfo(object):
 
   @property
   def pvr(self):
+    """This is PF in Gentoo variable definitions.
+
+    From Gentoo docs: PF - Full package name. e.g. 'vim-6.3-r1' or 'vim-6.3'.
+    """
     return format(self, '{pv}-r{r}') or self.pv
 
   @property
   def vr(self):
+    """This is PVR in Gentoo variable definitions.
+
+    From Gentoo docs: PVR - Package version and revision (if any). e.g. '6.3'
+    or '6.3-r1'.
+    """
     return format(self, '{v}-r{r}') or self.version
 
   @property
