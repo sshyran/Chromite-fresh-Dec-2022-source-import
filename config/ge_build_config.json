@@ -10906,6 +10906,14 @@
         },
         {
           "board_name": "trogdor-connectivitynext",
+          "name": "pazquel360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7203,
+          "is_active": true
+        },
+        {
+          "board_name": "trogdor-connectivitynext",
           "name": "pompom",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -10980,6 +10988,14 @@
             "bvt-perbuild",
             "bvt-tast-informational"
           ],
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7159,
+          "is_active": true
+        },
+        {
+          "board_name": "trogdor-kernelnext",
+          "name": "pazquel360",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7159,
