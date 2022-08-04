@@ -75,7 +75,7 @@ def get_package_details_for_partition(
   for installed_package, pkg_fileset in pkgs:
     size = portage_util.CalculatePackageSize(pkg_fileset, installation_path)
     pkg_identifier = parse_package_name(installed_package.package_info)
-    details[pkg_identifier] = size
+    details[pkg_identifier] = size.apparent_size
   return details
 
 

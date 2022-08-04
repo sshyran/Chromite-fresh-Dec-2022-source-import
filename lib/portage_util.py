@@ -15,7 +15,16 @@ import os
 from pathlib import Path
 import re
 import shutil
-from typing import Dict, Iterable, Iterator, List, Optional, Tuple, Union
+from typing import (
+    Dict,
+    Iterable,
+    Iterator,
+    List,
+    NamedTuple,
+    Optional,
+    Tuple,
+    Union,
+)
 
 from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
@@ -1043,7 +1052,10 @@ class EBuild(object):
     else:
       return '"%s"' % unformatted_list[0]
 
-  def RevWorkOnEBuild(self, srcroot, manifest, reject_self_repo=True,
+  def RevWorkOnEBuild(self,
+                      srcroot,
+                      manifest,
+                      reject_self_repo=True,
                       new_version=None):
     """Revs a workon ebuild given the git commit hash.
 
@@ -1090,9 +1102,9 @@ class EBuild(object):
     old_stable_ebuild_path = '%s-%s.ebuild' % (self._ebuild_path_no_version,
                                                old_version)
 
-    revision = (1 if new_version is not None
-                and new_version != stable_version_no_rev
-                else self.current_revision + 1)
+    revision = (1 if new_version is not None and
+                new_version != stable_version_no_rev else
+                self.current_revision + 1)
     version = f'{new_version or stable_version_no_rev}-r{revision}'
     new_stable_ebuild_path = '%s-%s.ebuild' % (self._ebuild_path_no_version,
                                                version)
@@ -2368,9 +2380,8 @@ def GetRepositoryFromEbuildInfo(info):
   ]
 
 
-def _EbuildInfo(
-    ebuild_path: str,
-    sysroot: str) -> cros_build_lib.CompletedProcess:
+def _EbuildInfo(ebuild_path: str,
+                sysroot: str) -> cros_build_lib.CompletedProcess:
   """Get ebuild info for <ebuild_path>.
 
   Args:
@@ -2733,6 +2744,12 @@ def GenerateInstalledPackages(db, root, packages):
     yield installed_package
 
 
+class PackageSizes(NamedTuple):
+  """Size of an installed package on disk."""
+  apparent_size: int
+  disk_utilization_size: int
+
+
 def GeneratePackageSizes(db, root, installed_packages):
   """Collect package sizes and generate package size pairs.
 
@@ -2751,22 +2768,25 @@ def GeneratePackageSizes(db, root, installed_packages):
     if not installed_package:
       raise PackageNotFoundError('Unable to locate installed_package %s in %s' %
                                  (package_cpv, root))
-    total_package_filesize = CalculatePackageSize(
-        installed_package.ListContents(), db.package_install_path)
+    package_filesize = CalculatePackageSize(installed_package.ListContents(),
+                                            db.package_install_path)
     logging.debug('%s installed_package size is %d', package_cpv,
-                  total_package_filesize)
-    yield package_cpv, total_package_filesize
+                  package_filesize.apparent_size)
+    yield package_cpv, package_filesize.apparent_size
 
 
-def CalculatePackageSize(files_in_package: Iterable[Tuple[str, str]],
-                         package_install_path: os.PathLike) -> int:
-  """Given a fileset for a Portage package, calculate the apparent package size.
+def CalculatePackageSize(
+    files_in_package: Iterable[Tuple[str, str]],
+    package_install_path: os.PathLike,
+) -> PackageSizes:
+  """Given a fileset for a Portage package, calculate the package size.
 
-  This function provides the apparent size of the given package on disk. It is
-  provided in bytes (not blocks). It does not account for overall disk usage;
-  by implication, the size does not include allocated blocks when files are very
-  small, or when the apparent size is much larger than allocated blocks on disk
-  (as is the case with sparse files).
+  This function provides the size of the given package on disk in both apparent
+  size and disk utilization. It is provided in bytes (not blocks).
+
+  By implication, these two figures may be different when files are very small,
+  or when the apparent size is much larger than allocated blocks on disk (as is
+  the case with sparse files).
 
   This function also only calculates the size of package files which are actual
   OBJ-type files listed in the CONTENTS file for the package in the package db.
@@ -2779,21 +2799,39 @@ def CalculatePackageSize(files_in_package: Iterable[Tuple[str, str]],
     package_install_path: The path prefix for the installation location.
 
   Returns:
-    The total apparent size of the installed package, in bytes.
+    A PackageSizes object containing the calculated apparent size and disk
+      utilization.
   """
-  total_package_filesize = 0
+  total_apparent_size = 0
+  total_disk_utilization = 0
   for content_type, path in files_in_package:
     if content_type == InstalledPackage.OBJ:
       filename = os.path.join(package_install_path, path)
       try:
-        filesize = os.path.getsize(filename)
+        file_details = os.lstat(filename)
+        apparent_size = file_details.st_size
+        disk_utilization = file_details.st_blocks * 512
+      except FileNotFoundError as e:
+        logging.warning(
+            'unable to compute the size of %s because the file '
+            "doesn't exist (skipping): %s", filename, e)
+        continue
+      except PermissionError as e:
+        logging.warning(
+            'cannot compute size of %s due to inadequate '
+            'permissions (skipping): %s', filename, e)
+        continue
       except OSError as e:
         logging.warning('unable to compute the size of %s (skipping): %s',
                         filename, e)
         continue
-      logging.debug('size of %s = %d bytes', filename, filesize)
-      total_package_filesize += filesize
-  return total_package_filesize
+      logging.debug('apparent size of %s = %d bytes, du = %d bytes', filename,
+                    apparent_size, disk_utilization)
+      total_apparent_size += apparent_size
+      total_disk_utilization += disk_utilization
+  return PackageSizes(
+      apparent_size=total_apparent_size,
+      disk_utilization_size=total_disk_utilization)
 
 
 def UpdateEbuildManifest(

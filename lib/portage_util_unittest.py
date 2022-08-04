@@ -1382,6 +1382,51 @@ class PortageDBTest(cros_test_lib.TempDirTestCase):
     self.fake_packages.sort()
     self.assertEqual(self.fake_packages, packages)
 
+  def testCalculatePackageSizes_ApparentSize(self):
+    """Test if calculating disk usage of installed packages works."""
+    fake_data = 'FAKE DATA'
+    expected_size = 0
+    for fake_file in self.fake_files:
+      if fake_file[0] == 'obj':
+        fake_filename = os.path.join(self.fake_chroot,
+                                     os.path.relpath(fake_file[1], '/'))
+        osutils.WriteFile(fake_filename, fake_data, makedirs=True)
+        expected_size += len(fake_data)
+
+    portage_db = portage_util.PortageDB(self.fake_chroot)
+    installed_packages = portage_db.InstalledPackages()
+
+    # Only one package in fake portage db has files associated with it.
+    total_size = 0
+    for p in installed_packages:
+      sizes = portage_util.CalculatePackageSize(p.ListContents(),
+                                                self.fake_chroot)
+      total_size += sizes.apparent_size
+    self.assertEqual(total_size, expected_size)
+
+  def testCalculatePackageSizes_DiskUsage(self):
+    """Test if calculating disk usage of installed packages works."""
+    fake_data = 'FAKE DATA'
+    expected_size = 0
+    for fake_file in self.fake_files:
+      if fake_file[0] == 'obj':
+        fake_filename = os.path.join(self.fake_chroot,
+                                     os.path.relpath(fake_file[1], '/'))
+        osutils.WriteFile(fake_filename, fake_data, makedirs=True)
+        # Filesystems allocate 4096 bytes on disk for new files.
+        expected_size += 8 * 512
+
+    portage_db = portage_util.PortageDB(self.fake_chroot)
+    installed_packages = portage_db.InstalledPackages()
+
+    # Only one package in fake portage db has files associated with it.
+    total_size = 0
+    for p in installed_packages:
+      sizes = portage_util.CalculatePackageSize(
+          p.ListContents(), self.fake_chroot)
+      total_size += sizes.disk_utilization_size
+    self.assertEqual(total_size, expected_size)
+
   def testGeneratePackageSizes(self):
     """Test if calculating installed package sizes works."""
     fake_data = 'FAKE DATA'
