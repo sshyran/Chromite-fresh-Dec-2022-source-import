@@ -119,30 +119,43 @@ def create_ebuilds(tmp_path: Path, test_overlay: cr.test.Overlay,
   for cpv in packages:
     metadata = packages[cpv]
     package = package_info.parse(cpv)
-    test_package = cr.test.Package(
-        package.category, package.package, package.vr, eapi=metadata.eapi,
-        slot=metadata.slot, depend=metadata.depend, rdepend=metadata.rdepend,
-        inherit=metadata.inherit, DESCRIPTION=metadata.description,
-        HOMEPAGE=metadata.homepage, LICENSE=metadata.license_,
-        SRC_URI=metadata.src_uri, RESTRICT=metadata.restrict,
-        BDEPEND=metadata.bdepend, PDEPEND=metadata.pdepend, IUSE=metadata.iuse)
-    test_packages.append(test_overlay.add_package(test_package))
+    test_package = cr.test.Package(package.category, package.package,
+                                   package.vr)
+    test_packages.append(test_package)
+    test_overlay.add_package(test_package)
+    md5_path = test_overlay.path / 'metadata' / 'md5-cache' / package.category
+    md5_path.mkdir(parents=True, exist_ok=True)
+    pdepend_text = f'PDEPEND={metadata.pdepend}\n' if metadata.pdepend else ''
+    (md5_path / package.pvr).write_text(f'EAPI={metadata.eapi}\n'
+                                        f'DESCRIPTION={metadata.description}\n'
+                                        f'HOMEPAGE={metadata.homepage}\n'
+                                        f'LICENSE={metadata.license_}\n'
+                                        f'SLOT={metadata.slot}\n'
+                                        f'SRC_URI={metadata.src_uri}\n'
+                                        f'RESTRICT={metadata.restrict}\n'
+                                        f'DEPEND={metadata.depend}\n'
+                                        f'RDEPEND={metadata.rdepend}\n'
+                                        f'BDEPEND={metadata.bdepend}\n'
+                                        f'{pdepend_text}'
+                                        f'IUSE={metadata.iuse}\n'
+                                        f'_eclasses_={metadata.inherit}')
     ebuild_path = (test_overlay.path.relative_to(tmp_path) /
                    package.relative_path)
     spider_ebuild = spiderlib.Ebuild(ebuild_path, package)
     unpopulated_ebuilds.append(spider_ebuild)
-    eclasses_inherited = sorted(metadata.inherit.split())
+    eclasses_inherited = metadata.inherit.split()
+    hold_eclasses = sorted(eclasses_inherited[::2])
     spider_ebuild_metadata = spiderlib.Ebuild(
         ebuild_path, package, metadata.eapi, metadata.description,
         metadata.homepage, metadata.license_, metadata.slot, metadata.src_uri,
         metadata.restrict, metadata.depend, metadata.rdepend, metadata.bdepend,
-        metadata.pdepend, [], eclasses_inherited)
+        metadata.pdepend, [], hold_eclasses)
     for flag in metadata.iuse.split():
       spider_ebuild_metadata.add_use_flag(flag)
     spider_ebuild_metadata.use_flags.sort(key=lambda flag: flag.name)
     populated_ebuilds.append(spider_ebuild_metadata)
   unpopulated_ebuilds.sort(key=lambda ebuild: ebuild.package.cpf)
-  return (test_packages, unpopulated_ebuilds, populated_ebuilds)
+  return (test_package, unpopulated_ebuilds, populated_ebuilds)
 
 
 def create_eclasses(tmp_path: Path, test_overlay: cr.test.Overlay,

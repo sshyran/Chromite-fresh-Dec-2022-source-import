@@ -38,6 +38,21 @@ def _RunSpiders(_input_proto, output_proto, _config_proto):
   mock_ebuild.package_info.package_name = 'name'
   mock_ebuild.version = '1.1'
   mock_ebuild.revision = 4
+  mock_ebuild.eapi = 7
+  mock_ebuild.description = 'Description of ebuild.'
+  mock_ebuild.homepage = 'http://homepage.com'
+  mock_ebuild.license = 'Google'
+  mock_ebuild.slot = '0/0'
+  mock_ebuild.src_uri = 'name-1.1.tar.gz'
+  mock_ebuild.restrict = 'mirror'
+  mock_ebuild.depend = 'diff_category/diff_name'
+  mock_ebuild.rdepend = 'diff_category/diff_name'
+  mock_ebuild.bdepend = 'diff_category/diff_name'
+  mock_ebuild.pdepend = 'diff_category/diff_name'
+  mock_ebuild_use = mock_ebuild.use_flags.add()
+  mock_ebuild_use.name = '+use_flag'
+  mock_ebuild_use.default_enabled = True
+  mock_ebuild.eclass_inherits.extend(['boo', 'far'])
 
 
 @faux.success(_RunSpiders)
@@ -73,6 +88,22 @@ def RunSpiders(_input_proto, output_proto, _config_proto):
       proto_ebuild.package_info.package_name = ebuild.package.package
       proto_ebuild.version = ebuild.package.version
       proto_ebuild.revision = ebuild.package.revision
+      proto_ebuild.eapi = ebuild.eapi
+      proto_ebuild.description = ebuild.description
+      proto_ebuild.homepage = ebuild.homepage
+      proto_ebuild.license = ebuild.license_
+      proto_ebuild.slot = ebuild.slot
+      proto_ebuild.src_uri = ebuild.src_uri
+      proto_ebuild.restrict = ebuild.restrict
+      proto_ebuild.depend = ebuild.depend
+      proto_ebuild.rdepend = ebuild.rdepend
+      proto_ebuild.bdepend = ebuild.bdepend
+      proto_ebuild.pdepend = ebuild.pdepend
+      for flag in ebuild.use_flags:
+        proto_use = proto_ebuild.use_flags.add()
+        proto_use.name = flag.name
+        proto_use.default_enabled = flag.default_enabled.value
+      proto_ebuild.eclass_inherits.extend(ebuild.eclass_inherits)
     for eclass in overlay.eclasses:
       proto_eclass = proto_overlay.eclasses.add()
       proto_eclass.path = str(eclass.path)

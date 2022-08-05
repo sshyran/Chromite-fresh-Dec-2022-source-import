@@ -5,6 +5,7 @@
 """Call all the spiders in the correct order for them to fill out the output."""
 
 from chromite.contrib.portage_explorer import get_boards_spider
+from chromite.contrib.portage_explorer import get_ebuild_metadata_spider
 from chromite.contrib.portage_explorer import get_ebuilds_spider
 from chromite.contrib.portage_explorer import get_eclasses_spider
 from chromite.contrib.portage_explorer import get_overlays_spider
@@ -28,4 +29,5 @@ def execute():
   get_profile_use_spider.execute(output)
   get_eclasses_spider.execute(output)
   get_ebuilds_spider.execute(output)
+  get_ebuild_metadata_spider.execute(output)
   return output
