@@ -14,11 +14,15 @@ writing serialized data from a message instance out to a file.
 
 import logging
 import os
+from typing import Optional, TYPE_CHECKING
 
 from chromite.third_party.google.protobuf import json_format
 
 from chromite.lib import osutils
 
+
+if TYPE_CHECKING:
+  from chromite.third_party import google
 
 FORMAT_BINARY = 1
 FORMAT_JSON = 2
@@ -82,23 +86,23 @@ def get_message_handler(path, msg_format):
 class Serializer(object):
   """Base (and null) serializer class."""
 
-  def deserialize(self, data, message):
+  def deserialize(self, data: str, message: 'google.protobuf.Message'):
     """Deserialize the data into the given message.
 
     Args:
-      data (str): The message data to deserialize.
-      message (google.protobuf.Message): The message to load the data into.
+      data: The message data to deserialize.
+      message: The message to load the data into.
     """
 
   # pylint: disable=unused-argument
-  def serialize(self, message):
+  def serialize(self, message: 'google.protobuf.Message') -> str:
     """Serialize the message data.
 
     Args:
-      message (google.protobuf.Message): The message to be serialized.
+      message: The message to be serialized.
 
     Returns:
-      str: The message's serialized data.
+      The message's serialized data.
     """
     return ''
 
@@ -169,19 +173,19 @@ class MessageHandler(object):
     message_handler.write_into(message, path=other_path)
   """
 
-  def __init__(self, path, serializer, binary, input_arg, output_arg,
-               config_arg):
+  def __init__(self, path: str, serializer: Serializer, binary: bool,
+               input_arg: str, output_arg: str, config_arg: str):
     """MessageHandler init.
 
     Args:
-      path (str): The path to the main file associated with this handler.
-      serializer (Serializer): The serializer to be used for the messages.
-      binary (bool): Whether the serialized content is binary.
-      input_arg (str): The --input-x argument used for this type. Used for
+      path: The path to the main file associated with this handler.
+      serializer: The serializer to be used for the messages.
+      binary: Whether the serialized content is binary.
+      input_arg: The --input-x argument used for this type. Used for
         reexecution inside the chroot.
-      output_arg (str): The --output-x argument used for this type. Used for
+      output_arg: The --output-x argument used for this type. Used for
         reexecution inside the chroot.
-      config_arg (str): The --config-x argument used for this type. Used for
+      config_arg: The --config-x argument used for this type. Used for
         reexecution inside the chroot.
     """
     self.path = path
@@ -192,12 +196,13 @@ class MessageHandler(object):
     self.output_arg = output_arg
     self.config_arg = config_arg
 
-  def read_into(self, message, path=None):
+  def read_into(self, message: 'google.protobuf.Message',
+                path: Optional[str] = None):
     """Read a file containing serialized data into a message.
 
     Args:
-      message (google.protobuf.Message): The message to populate.
-      path (str|None): A path to read. Uses the instance's path when not given.
+      message: The message to populate.
+      path: A path to read. Uses the instance's path when not given.
 
     Raises:
       InvalidInputFileError: When a path has not been given, does not exist,
@@ -219,12 +224,13 @@ class MessageHandler(object):
     else:
       logging.warning('No content found in %s to deserialize.', target_path)
 
-  def write_from(self, message, path=None):
+  def write_from(self, message: 'google.protobuf.Message',
+                 path: Optional[str] = None):
     """Write serialized data from the message to a file.
 
     Args:
-      message (google.protobuf.Message): The message to serialize and persist.
-      path (str|None): An optional override of the instance's path.
+      message: The message to serialize and persist.
+      path: An optional override of the instance's path.
 
     Raises:
       InvalidOutputFileError: When no path given, or it cannot be written to.
