@@ -181,11 +181,11 @@ def main(argv):
     base = Gitiles
   elif attrs.get('remote_alias') == 'cros-internal':
     # Private repos not on public CS, so force internal private.
-    base = InternalCS
+    base = PrivateCS
   elif opts.public_link:
     base = PublicCS
   else:
-    base = PrivateCS
+    base = InternalCS
 
   final_link = base.format(attrs, opts, checkout_path, relative_path)
 
