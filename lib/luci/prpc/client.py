@@ -92,13 +92,13 @@ class ProtocolError(Error):
   """Server returned a malformed pRPC response."""
 
 
-def rpc(req):
+def rpc(req: Request) -> dict:
   """Sends an asynchronous pRPC request.
 
   This API is low level. Most users should use Client class instead.
 
   Args:
-    req (Request): a pRPC request.
+    req: a pRPC request.
 
   Returns the response message if the RPC status code is OK.
   Otherwise raises an Error.
