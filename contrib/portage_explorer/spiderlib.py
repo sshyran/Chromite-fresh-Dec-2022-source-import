@@ -25,17 +25,64 @@ class Eclass:
   name: str
 
 
+class UseState(enum.Enum):
+  """Disabled or enabled state for use flags."""
+  DISABLED = False
+  ENABLED = True
+
+
+@dataclasses.dataclass
+class EbuildUse:
+  """USE flags used for Ebuilds."""
+  name: str
+  default_enabled: UseState
+
+
+@dataclasses.dataclass
+class TestEbuild:
+  """Contain only data that is found by sourcing the ebuild for testing."""
+  eapi: int = 0
+  description: str = ''
+  homepage: str = ''
+  license_: str = ''
+  slot: str = ''
+  src_uri: str = ''
+  restrict: str = ''
+  depend: str = ''
+  rdepend: str = ''
+  bdepend: str = ''
+  pdepend: str = ''
+  iuse: str = ''
+  inherit: str = ''
+
+
 @dataclasses.dataclass
 class Ebuild:
   """An Ebuild."""
   path: Path
   package: package_info.PackageInfo
+  eapi: int = 0
+  description: str = ''
+  homepage: str = ''
+  license_: str = ''
+  slot: str = ''
+  src_uri: str = ''
+  restrict: str = ''
+  depend: str = ''
+  rdepend: str = ''
+  bdepend: str = ''
+  pdepend: str = ''
+  use_flags: List[EbuildUse] = dataclasses.field(default_factory=list)
+  eclass_inherits: List[str] = dataclasses.field(default_factory=list)
 
 
-class UseState(enum.Enum):
-  """Disabled or enabled state for use flags."""
-  DISABLED = False
-  ENABLED = True
+  def add_use_flag(self, flag):
+    """Parse the use flag for its UseState and add to use_flags."""
+    default_enabled = UseState(flag.startswith('+'))
+    # Check Gentoo docs, '-' is "pretty much useless"
+    # https://devmanual.gentoo.org/general-concepts/use-flags/index.html#iuse-defaults
+    flag = flag.strip('+-')
+    self.use_flags.append(EbuildUse(flag, default_enabled))
 
 
 @dataclasses.dataclass
@@ -77,6 +124,7 @@ class Overlay:
   profiles: List[Profile] = dataclasses.field(default_factory=list)
   ebuilds: List[Ebuild] = dataclasses.field(default_factory=list)
   eclasses: List[Eclass] = dataclasses.field(default_factory=list)
+
 
 @dataclasses.dataclass
 class SpiderOutput:

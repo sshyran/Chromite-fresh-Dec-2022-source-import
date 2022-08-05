@@ -16,16 +16,17 @@ def test_execute(monkeypatch, tmp_path):
   the right src path, category, PN, version, and revision.
   """
   test_oak, overlay_oak = spider_testables.create_overlays(tmp_path, 'oak')
-  _test_ebuilds, spider_ebuilds = spider_testables.create_ebuilds(
-      tmp_path,
-      test_oak,
-      [
-          'category/name-1',
-          'category/name-1-r4',
-          'category/eman-1.2.3-r3',
-          'yrogetac/foo-5.4_alpha0',
-      ],
-  )
+  (_test_ebuilds, spider_ebuilds,
+   _spider_ebuilds_metadata) = spider_testables.create_ebuilds(
+       tmp_path,
+       test_oak,
+       {
+           'category/name-1': spiderlib.TestEbuild(),
+           'category/name-1-r4': spiderlib.TestEbuild(),
+           'category/eman-1.2.3-r3': spiderlib.TestEbuild(),
+           'yrogetac/foo-5.4_alpha0': spiderlib.TestEbuild(),
+       },
+   )
   test_output = spiderlib.SpiderOutput([], [overlay_oak])
   monkeypatch.setattr('chromite.lib.constants.SOURCE_ROOT', str(tmp_path))
   get_ebuilds_spider.execute(test_output)

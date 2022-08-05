@@ -95,7 +95,7 @@ def create_profiles(
 
 
 def create_ebuilds(tmp_path: Path, test_overlay: cr.test.Overlay,
-                   packages: List[str]):
+                   packages: Dict[str, spiderlib.TestEbuild]):
   """Create test ebuilds for unittesting spiders.
 
   Create the unpopulated and populated versions of ebuilds for the overlay to
@@ -106,25 +106,43 @@ def create_ebuilds(tmp_path: Path, test_overlay: cr.test.Overlay,
   Args:
     tmp_path: Temporary path to put mock data in
     test_overlay: cr.test.Overlay instance to create ebuilds in
-    packages: List of string cpvs
+    packages: Dict of cpv to the metadata associated with the ebuild in that
+    cpv.
 
   Returns:
     A tuple containing the cr.test.Packages, the unpopulated ebuilds, and
     populated ebuilds.
   """
   test_packages = []
-  spider_ebuilds = []
+  unpopulated_ebuilds = []
+  populated_ebuilds = []
   for cpv in packages:
+    metadata = packages[cpv]
     package = package_info.parse(cpv)
-    test_package = cr.test.Package(package.category, package.package,
-                                   package.vr)
+    test_package = cr.test.Package(
+        package.category, package.package, package.vr, eapi=metadata.eapi,
+        slot=metadata.slot, depend=metadata.depend, rdepend=metadata.rdepend,
+        inherit=metadata.inherit, DESCRIPTION=metadata.description,
+        HOMEPAGE=metadata.homepage, LICENSE=metadata.license_,
+        SRC_URI=metadata.src_uri, RESTRICT=metadata.restrict,
+        BDEPEND=metadata.bdepend, PDEPEND=metadata.pdepend, IUSE=metadata.iuse)
     test_packages.append(test_overlay.add_package(test_package))
     ebuild_path = (test_overlay.path.relative_to(tmp_path) /
                    package.relative_path)
     spider_ebuild = spiderlib.Ebuild(ebuild_path, package)
-    spider_ebuilds.append(spider_ebuild)
-  spider_ebuilds.sort(key=lambda ebuild: ebuild.package.cpf)
-  return (test_packages, spider_ebuilds)
+    unpopulated_ebuilds.append(spider_ebuild)
+    eclasses_inherited = sorted(metadata.inherit.split())
+    spider_ebuild_metadata = spiderlib.Ebuild(
+        ebuild_path, package, metadata.eapi, metadata.description,
+        metadata.homepage, metadata.license_, metadata.slot, metadata.src_uri,
+        metadata.restrict, metadata.depend, metadata.rdepend, metadata.bdepend,
+        metadata.pdepend, [], eclasses_inherited)
+    for flag in metadata.iuse.split():
+      spider_ebuild_metadata.add_use_flag(flag)
+    spider_ebuild_metadata.use_flags.sort(key=lambda flag: flag.name)
+    populated_ebuilds.append(spider_ebuild_metadata)
+  unpopulated_ebuilds.sort(key=lambda ebuild: ebuild.package.cpf)
+  return (test_packages, unpopulated_ebuilds, populated_ebuilds)
 
 
 def create_eclasses(tmp_path: Path, test_overlay: cr.test.Overlay,
