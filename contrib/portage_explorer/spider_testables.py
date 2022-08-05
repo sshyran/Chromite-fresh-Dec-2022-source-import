@@ -125,3 +125,30 @@ def create_ebuilds(tmp_path: Path, test_overlay: cr.test.Overlay,
     spider_ebuilds.append(spider_ebuild)
   spider_ebuilds.sort(key=lambda ebuild: ebuild.package.cpf)
   return (test_packages, spider_ebuilds)
+
+
+def create_eclasses(tmp_path: Path, test_overlay: cr.test.Overlay,
+                    eclasses: List[str]):
+  """Create test eclasses in tmp dir for unittesting spiders.
+
+  Args:
+    tmp_path: Temporary path to put mock data in.
+    test_overlay: The test overlay to create these eclasses for.
+    eclasses: List of eclass names.
+
+  Returns:
+    A tuple of a list of unpopulated spiderlib.Eclass instances (just src_path
+    and name filled in) and a list of populated spiderlib.Eclass instances for
+    inheritance.
+  """
+  eclass_folder = test_overlay.path / 'eclass'
+  eclass_folder.mkdir(parents=True, exist_ok=True)
+  unpopulated_eclasses = []
+  populated_eclasses = []
+  for eclass in eclasses:
+    eclass_path = eclass_folder / f'{eclass}.eclass'
+    eclass_path.write_text('')
+    unpopulated_eclasses.append(spiderlib.Eclass(
+        eclass_path.relative_to(tmp_path), eclass))
+  unpopulated_eclasses.sort(key=lambda eclass: eclass.name)
+  return (unpopulated_eclasses, populated_eclasses)

@@ -19,6 +19,13 @@ from chromite.lib.parser import package_info
 
 
 @dataclasses.dataclass
+class Eclass:
+  """Eclass."""
+  path: Path
+  name: str
+
+
+@dataclasses.dataclass
 class Ebuild:
   """An Ebuild."""
   path: Path
@@ -69,6 +76,7 @@ class Overlay:
   name: str
   profiles: List[Profile] = dataclasses.field(default_factory=list)
   ebuilds: List[Ebuild] = dataclasses.field(default_factory=list)
+  eclasses: List[Eclass] = dataclasses.field(default_factory=list)
 
 @dataclasses.dataclass
 class SpiderOutput:
