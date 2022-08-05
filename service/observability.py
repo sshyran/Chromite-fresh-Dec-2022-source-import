@@ -62,7 +62,7 @@ def get_package_details_for_partition(
     installation_path: os.PathLike,
     pkgs: Iterable[Tuple[portage_util.InstalledPackage, Iterable[Tuple[str,
                                                                        str]]]]
-) -> Dict[PackageIdentifier, int]:
+) -> Dict[PackageIdentifier, portage_util.PackageSizes]:
   """Retrieve package size and format name details for a given set of packages.
 
   Args:
@@ -73,9 +73,9 @@ def get_package_details_for_partition(
   """
   details = {}
   for installed_package, pkg_fileset in pkgs:
-    size = portage_util.CalculatePackageSize(pkg_fileset, installation_path)
+    sizes = portage_util.CalculatePackageSize(pkg_fileset, installation_path)
     pkg_identifier = parse_package_name(installed_package.package_info)
-    details[pkg_identifier] = size.apparent_size
+    details[pkg_identifier] = sizes
   return details
 
 

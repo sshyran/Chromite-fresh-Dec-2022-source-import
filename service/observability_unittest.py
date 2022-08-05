@@ -85,8 +85,10 @@ _FAKE_FILES = [
     ('sym', 'lib64/libe2p.so.2', '->', 'libe2p.so.2.3', '1390850489'),
     ('foo'),
 ]
-_FAKE_EXPECTED_PACKAGE_SIZE = sum(
+_FAKE_EXPECTED_APPARENT_PACKAGE_SIZE = sum(
     [_FAKE_DATA_SIZE for f in _FAKE_FILES if f[0] == 'obj'])
+_FAKE_EXPECTED_PACKAGE_DISK_USAGE = sum(
+    [8 * 512 for f in _FAKE_FILES if f[0] == 'obj'])
 
 
 def make_portage_db(tmp_path: os.PathLike,
@@ -142,7 +144,6 @@ def make_portage_db(tmp_path: os.PathLike,
     if fake_file_data[0] == 'obj':
       fake_filename = tmp_path / fake_install_subdir / fake_file_data[1]
       osutils.WriteFile(fake_filename, _FAKE_DATA, makedirs=True)
-      print('wrote obj file at %s' % fake_filename)
 
   db = portage_util.PortageDB(
       root=tmp_path,
@@ -181,7 +182,10 @@ def test_get_package_details_for_partition__rootfs(tmp_path):
   assert len(result) == 4
   for expected in expected_packages:
     assert expected in result
-    assert result[expected] == 2 * _FAKE_DATA_SIZE
+    # verify apparent size
+    assert result[expected][0] == _FAKE_EXPECTED_APPARENT_PACKAGE_SIZE
+    # verify disk utilization size
+    assert result[expected][1] == _FAKE_EXPECTED_PACKAGE_DISK_USAGE
 
 
 def test_get_package_details_for_partition__stateful(tmp_path):
@@ -204,7 +208,9 @@ def test_get_package_details_for_partition__stateful(tmp_path):
   assert len(result) == 4
   for expected in expected_packages:
     assert expected in result
-    assert result[expected] == _FAKE_EXPECTED_PACKAGE_SIZE
+    assert result[expected][0] == _FAKE_EXPECTED_APPARENT_PACKAGE_SIZE
+    # verify disk utilization size
+    assert result[expected][1] == _FAKE_EXPECTED_PACKAGE_DISK_USAGE
 
 
 def test_get_package_details_for_partition__bad_install_path(tmp_path):
@@ -231,4 +237,4 @@ def test_get_package_details_for_partition__bad_install_path(tmp_path):
     # Since a bad path was provided, we expect all packages to report back as
     # have 0 bytes on the provided partition.
     # TODO(zland): make this mechanism a little less brittle?
-    assert result[expected] == 0
+    assert result[expected] == (0, 0)
