@@ -16,6 +16,7 @@ import operator
 import os
 import tempfile
 import time
+from typing import List
 import urllib.error
 import urllib.request
 
@@ -122,11 +123,11 @@ class PackageIndex(object):
         d[k] = v
     return d
 
-  def _FormatPkgIndex(self, entry):
+  def _FormatPkgIndex(self, entry: dict) -> List[str]:
     """Formats lines for _WritePkgIndex.
 
     Args:
-      entry (dict): The key/value pairs to write.
+      entry: The key/value pairs to write.
     """
     lines = ['%s: %s' % (k, v) for k, v in sorted(entry.items()) if v]
     if lines:
@@ -188,11 +189,11 @@ class PackageIndex(object):
     self._ReadHeader(pkgfile)
     self._ReadBody(pkgfile)
 
-  def ReadFilePath(self, pkgfile_path):
+  def ReadFilePath(self, pkgfile_path: str):
     """Read the packages file path.
 
     Args:
-      pkgfile_path (str): The path to the file.
+      pkgfile_path: The path to the file.
     """
     with open(pkgfile_path) as f:
       self.Read(f)
@@ -291,6 +292,9 @@ class PackageIndex(object):
     Returns:
       A temporary file containing the packages from pkgindex.
     """
+    # pylint: disable=R1732
+    # This method returns an open file, so we cannot use a 'with' here (without
+    # changing the behavior and breaking the unittest).
     f = tempfile.NamedTemporaryFile(prefix='chromite.binpkg.pkgidx.', mode='w+')
     self.Write(f)
     f.flush()
@@ -357,14 +361,15 @@ class PackageIndexInfo(object):
         location=self.location)
 
   @classmethod
-  def from_protobuf(cls, message):
+  def from_protobuf(
+      cls, message: common_pb2.PackageIndexInfo) -> 'PackageIndexInfo':
     """Return a PackageIndexInfo object for the given PackageIndexInfo protobuf.
 
     Args:
-      message (chromiumos.PackageIndexInfo): The protobuf to parse
+      message: The protobuf to parse
 
     Returns:
-      (PackageIndexInfo) the parsed instance.
+      The parsed instance.
     """
     return cls(
         snapshot_sha=message.snapshot_sha,
@@ -390,7 +395,8 @@ def _RetryUrlOpen(url, tries=3):
   """
   for i in range(tries):
     try:
-      return urllib.request.urlopen(url)
+      with urllib.request.urlopen(url) as opened_url:
+        return opened_url
     except urllib.error.HTTPError as e:
       if i + 1 >= tries or e.code < 500:
         e.msg += ('\nwhile processing %s' % url)
