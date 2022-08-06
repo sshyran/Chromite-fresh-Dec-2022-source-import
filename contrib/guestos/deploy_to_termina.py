@@ -127,7 +127,7 @@ def deploy_into_remote_dlc(device: commandline.Device, transfers: List[FileSet],
             f'{remote_dir}/{transfer.destination_image}',
             mode='rsync',
             files_from=files_file,
-            inplace=True)
+            inplace=True, sudo=True)
 
     logging.notice('Repacking DLC')
     # Unmount the inner images, shrink them back to minimum size (so we don't
