@@ -241,14 +241,13 @@ class CalledProcessError(subprocess.CalledProcessError):
       raise TypeError('exception must be an exception instance; got %r'
                       % (exception,))
 
-    super().__init__(returncode, cmd, stdout)
-    # The parent class will set |output|, so delete it.
+    super().__init__(returncode, cmd, stdout, stderr=stderr)
+
+    # The parent class will set |output|, so delete it.  If Python ever drops
+    # this output/stdout compat logic, we can drop this to match.
     del self.output
-    # TODO(vapier): When we're Python 3-only, delete this assignment as the
-    # parent handles it for us.
     self.stdout = stdout
-    # TODO(vapier): When we're Python 3-only, move stderr to the init above.
-    self.stderr = stderr
+
     self.msg = msg
     self.exception = exception
 
