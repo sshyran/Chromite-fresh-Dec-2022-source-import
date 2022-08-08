@@ -345,7 +345,7 @@ class RunCommandError(CalledProcessError):
         stderr=result.stderr, msg=msg, exception=exception)
 
 
-class TerminateRunCommandError(RunCommandError):
+class _TerminateRunCommandError(RunCommandError):
   """We were signaled to shutdown while running a command.
 
   Client code shouldn't generally know, nor care about this class.  It's
@@ -469,7 +469,7 @@ def _KillChildProcess(proc, int_timeout, kill_timeout, cmd, original_handler,
   if not signals.RelaySignal(original_handler, signum, frame):
     # Mock up our own, matching exit code for signaling.
     cmd_result = CommandResult(args=cmd, returncode=signum << 8)
-    raise TerminateRunCommandError('Received signal %i' % signum, cmd_result)
+    raise _TerminateRunCommandError(f'Received signal {signum}', cmd_result)
 
 
 class _Popen(subprocess.Popen):
@@ -851,7 +851,7 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
           popen_stderr.close()
         elif log_stderr_to_file:
           popen_stderr.close()
-    except TerminateRunCommandError as e:
+    except _TerminateRunCommandError as e:
       # If we were killed by a signal (like SIGTERM in case of a timeout), don't
       # swallow the output completely as it can be a huge help for figuring out
       # why the command failed.
