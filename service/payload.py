@@ -120,10 +120,12 @@ class PayloadConfig(object):
     # single shot bots in the context of an overlayfs and will get cleaned up
     # anyway.
     with chroot_util.TempDirInChroot(delete=False) as temp_dir:
+      signer = paygen_payload_lib.PaygenSigner(
+          work_dir=temp_dir, payload_build=self.payload.build)
       self.paygen = paygen_payload_lib.PaygenPayload(
           self.payload,
           temp_dir,
-          sign=True,
+          signer=signer,
           verify=self.verify,
           upload=self.upload,
           cache_dir=self.cache_dir)
