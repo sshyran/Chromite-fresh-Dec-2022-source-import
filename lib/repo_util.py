@@ -150,10 +150,10 @@ class Repository(object):
       cwd: The path to run the command in. Defaults to Repository root.
         Must be within the root.
       capture_output: Whether to capture the output, making it available in the
-        CommandResult object, or print it to stdout/err. Defaults to False.
+        CompletedProcess object, or print it to stdout/err. Defaults to False.
 
     Returns:
-      A CommandResult object.
+      A CompletedProcess object.
 
     Raises:
       NotInRepoError: if cwd is not within the Repository root.

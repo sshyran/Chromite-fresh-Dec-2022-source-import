@@ -241,7 +241,7 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
 
   def testRunGeneratorCmd(self):
     """Test the specialized command to run programs in chroot."""
-    mock_result = cros_build_lib.CommandResult(stdout=b'foo output')
+    mock_result = cros_build_lib.CompletedProcess(stdout=b'foo output')
     run_mock = self.PatchObject(cros_build_lib, 'run', return_value=mock_result)
 
     expected_cmd = ['cmd', 'bar', 'jo nes']

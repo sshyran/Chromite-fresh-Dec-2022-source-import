@@ -2149,11 +2149,11 @@ def ExtractDependencies(buildroot,
     useflags: A list of useflags for this build.
     cpe_format: Set output format to CPE-only JSON; otherwise,
       output traditional deps.
-    raw_cmd_result: If set True, returns the CommandResult object.
+    raw_cmd_result: If set True, returns the CompletedProcess object.
       Otherwise, returns the dependencies as a dictionary.
 
   Returns:
-    Returns the CommandResult object if |raw_cmd_result| is set; returns
+    Returns the CompletedProcess object if |raw_cmd_result| is set; returns
     the dependencies in a dictionary otherwise.
   """
   cmd = ['cros_extract_deps']
@@ -2256,7 +2256,7 @@ def GenerateCPEExport(buildroot, board, useflags=None):
     useflags: A list of useflags for this build.
 
   Returns:
-    A CommandResult object with the results of running the CPE
+    A CompletedProcess object with the results of running the CPE
     export command.
   """
   return ExtractDependencies(
@@ -3716,7 +3716,7 @@ class ChromeSDK(object):
       run_args: If set (dict), pass to run as kwargs.
 
     Returns:
-      A CommandResult object.
+      A CompletedProcess object.
     """
     if run_args is None:
       run_args = {}
@@ -3741,7 +3741,7 @@ class ChromeSDK(object):
       run_args: If set (dict), pass to run as kwargs.
 
     Returns:
-      A CommandResult object.
+      A CompletedProcess object.
     """
     return self.Run(self.GetNinjaCommand(debug=debug), run_args=run_args)
 
@@ -3770,7 +3770,7 @@ class ChromeSDK(object):
       debug: True if this is a debug build.
 
     Returns:
-      A CommandResult object.
+      A CompletedProcess object.
     """
     return self.Run([
         'cros_run_test',

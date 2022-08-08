@@ -38,8 +38,8 @@ class RemoteNebraskaWrapperTest(cros_test_lib.MockTempDirTestCase):
     """
     return self.PatchObject(
         nebraska_wrapper.RemoteNebraskaWrapper, '_RemoteCommand',
-        return_value=cros_build_lib.CommandResult(returncode=return_code,
-                                                  stdout=stdout),
+        return_value=cros_build_lib.CompletedProcess(
+            returncode=return_code, stdout=stdout),
         side_effect=side_effect)
 
   def testIsReady(self):

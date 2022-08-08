@@ -165,7 +165,7 @@ class DownloaderTest(cros_test_lib.TestCase):
     """Test anonymous download of full payload."""
     err_msg = ('ServiceException: 401 Anonymous caller does not have '
                'storage.objects.get access to ' + self.archive_dir + '.')
-    gs_error = gs.GSCommandError(err_msg, cros_build_lib.CommandResult(
+    gs_error = gs.GSCommandError(err_msg, cros_build_lib.CompletedProcess(
         stderr=err_msg))
 
     downloader_instance, factory = self._DownloadFullPayload()

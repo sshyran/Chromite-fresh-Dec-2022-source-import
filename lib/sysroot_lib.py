@@ -147,7 +147,7 @@ class PackageInstallError(Error, cros_build_lib.RunCommandError):
 
   def __init__(self,
                msg: str,
-               result: 'cros_build_lib.CommandResult',
+               result: 'cros_build_lib.CompletedProcess',
                exception: BaseException = None,
                packages: Optional[Iterable[package_info.PackageInfo]] = None):
     """Init method.
@@ -194,7 +194,7 @@ class ToolchainInstallError(PackageInstallError):
 
   def __init__(self,
                msg: str,
-               result: 'cros_build_lib.CommandResult',
+               result: 'cros_build_lib.CompletedProcess',
                exception: BaseException = None,
                tc_info: Optional[Iterable[package_info.PackageInfo]] = None):
     """Init method.

@@ -376,8 +376,8 @@ class RemoteAccess(object):
       **kwargs: See cros_build_lib.run documentation.
 
     Returns:
-      A CommandResult object.  The returncode is the returncode of the command,
-      or 255 if ssh encountered an error (could not connect, connection
+      A CompletedProcess object.  The returncode is the returncode of the
+      command, or 255 if ssh encountered an error (could not connect, connection
       interrupted, etc.)
 
     Raises:
@@ -644,7 +644,7 @@ class RemoteAccess(object):
       **kwargs: See cros_build_lib.run documentation.
 
     Returns:
-      A CommandResult object containing the information and return code of
+      A CompletedProcess object containing the information and return code of
       the scp command.
     """
     remote_sudo = kwargs.pop('remote_sudo', False)

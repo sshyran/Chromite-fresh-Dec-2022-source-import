@@ -313,7 +313,7 @@ class CrOSTest(object):
     """Run catapult tests matching a pattern using run_tests.
 
     Returns:
-      cros_build_lib.CommandResult object.
+      cros_build_lib.CompletedProcess object.
     """
 
     browser = 'system-guest' if self.guest else 'system'
@@ -327,7 +327,7 @@ class CrOSTest(object):
     """Run an autotest using test_that.
 
     Returns:
-      cros_build_lib.CommandResult object.
+      cros_build_lib.CompletedProcess object.
     """
     cmd = ['test_that']
     if self._device.board:
@@ -356,7 +356,7 @@ class CrOSTest(object):
     """Run Tast tests.
 
     Returns:
-      cros_build_lib.CommandResult object.
+      cros_build_lib.CompletedProcess object.
     """
     # Try using the Tast binaries that the SimpleChrome SDK downloads
     # automatically.
@@ -503,7 +503,7 @@ class CrOSTest(object):
     """Tells the VM to save its image on shutdown if the test failed.
 
     Args:
-      result: A cros_build_lib.CommandResult object from a test run.
+      result: A cros_build_lib.CompletedProcess object from a test run.
     """
     if not self._device.should_start_vm or not self.save_snapshot_on_failure:
       return
@@ -533,7 +533,7 @@ class CrOSTest(object):
     self.cwd, run the command in self.args, and cleanup.
 
     Returns:
-      cros_build_lib.CommandResult object.
+      cros_build_lib.CompletedProcess object.
     """
     DEST_BASE = '/usr/local/cros_test'
     files = FileList(self.files, self.files_from)

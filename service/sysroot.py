@@ -1120,7 +1120,7 @@ class SymbolFileTuple(NamedTuple):
 
 def GenerateBreakpadSymbols(chroot: 'chroot_lib.Chroot',
                             build_target: 'build_target_lib.BuildTarget',
-                            debug: bool) -> cros_build_lib.CommandResult:
+                            debug: bool) -> cros_build_lib.CompletedProcess:
   """Generate breakpad (go/breakpad) symbols for debugging.
 
   This function generates .sym files to /build/<board>/usr/lib/debug/breakpad

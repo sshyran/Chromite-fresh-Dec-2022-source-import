@@ -645,13 +645,13 @@ class BuildPackagesTest(cros_test_lib.RunCommandTestCase,
     self.PatchObject(portage_util, 'ParseDieHookStatusFile', return_value=cpvs)
     config = sysroot.BuildPackagesRunConfig()
 
-    result = cros_build_lib.CommandResult(self.base_command, returncode=1)
+    result = cros_build_lib.CompletedProcess(self.base_command, returncode=1)
     error = cros_build_lib.RunCommandError('Error', result)
     self.PatchObject(
         cros_build_lib,
         'run',
-        side_effect=(cros_build_lib.CommandResult(stdout=''),
-                     cros_build_lib.CommandResult(stdout=''), error))
+        side_effect=(cros_build_lib.CompletedProcess(stdout=''),
+                     cros_build_lib.CompletedProcess(stdout=''), error))
 
     with self.assertRaises(sysroot_lib.PackageInstallError) as e:
       sysroot.BuildPackages(self.target, self.sysroot, config)
@@ -977,7 +977,7 @@ class BundleDebugSymbolsTest(cros_test_lib.MockTempDirTestCase):
     generate_breakpad_symbols_patch = self.PatchObject(
         sysroot,
         'GenerateBreakpadSymbols',
-        return_value=cros_build_lib.CommandResult(returncode=0, stdout=''))
+        return_value=cros_build_lib.CompletedProcess(returncode=0, stdout=''))
     gather_symbol_files_patch = self.PatchObject(
         sysroot,
         'GatherSymbolFiles',
@@ -1007,7 +1007,7 @@ class BundleDebugSymbolsTest(cros_test_lib.MockTempDirTestCase):
     create_tarball_patch = self.PatchObject(
         cros_build_lib,
         'CreateTarball',
-        return_value=cros_build_lib.CommandResult(returncode=0, stdout=''))
+        return_value=cros_build_lib.CompletedProcess(returncode=0, stdout=''))
 
     tar_file = sysroot.BundleDebugSymbols(self.chroot, self.sysroot, None,
                                           self.output_dir)

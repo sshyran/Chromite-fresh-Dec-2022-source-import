@@ -53,7 +53,7 @@ class ShellTest(cros_test_lib.MockTempDirTestCase):
     self.mock_device.hostname = self.DEVICE_IP
     self.mock_device.connection_type = None
     self.mock_base_run_command = self.mock_device.BaseRunCommand
-    self.mock_base_run_command.return_value = cros_build_lib.CommandResult()
+    self.mock_base_run_command.return_value = cros_build_lib.CompletedProcess()
 
   def testSshInteractive(self):
     """Tests flow for an interactive session.
@@ -110,7 +110,7 @@ class ShellTest(cros_test_lib.MockTempDirTestCase):
     error_message = 'Test error message'
     # BaseRunCommand() gives a key mismatch error the first time only.
     self.mock_base_run_command.side_effect = [_KeyMismatchError(error_message),
-                                              cros_build_lib.CommandResult()]
+                                              cros_build_lib.CompletedProcess()]
     # User chooses to continue.
     self.mock_prompt.return_value = True
 

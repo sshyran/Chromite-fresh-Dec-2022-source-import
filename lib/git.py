@@ -727,7 +727,7 @@ def RunGit(git_repo, cmd, **kwargs):
     kwargs: Any run or GenericRetry options/overrides to use.
 
   Returns:
-    A CommandResult object.
+    A CompletedProcess object.
   """
   kwargs.setdefault('print_cmd', False)
   kwargs.setdefault('cwd', git_repo)

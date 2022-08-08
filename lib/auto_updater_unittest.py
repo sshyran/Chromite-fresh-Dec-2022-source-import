@@ -92,10 +92,10 @@ class RemoteAccessMock(remote_access_unittest.RemoteShMock):
   ATTRS = ('RemoteSh', 'Rsync', 'Scp')
 
   def Rsync(self, *_args, **_kwargs):
-    return cros_build_lib.CommandResult(returncode=0)
+    return cros_build_lib.CompletedProcess(returncode=0)
 
   def Scp(self, *_args, **_kwargs):
-    return cros_build_lib.CommandResult(returncode=0)
+    return cros_build_lib.CompletedProcess(returncode=0)
 
 
 class ChromiumOSUpdaterBaseTest(cros_test_lib.MockTempDirTestCase):

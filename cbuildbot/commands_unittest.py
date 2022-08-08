@@ -509,9 +509,9 @@ The suite job has another 2:39:39.789250 till timeout.
     self.wait_cmd = base_cmd + ['-m', '26960110']
     self.json_dump_cmd = base_cmd + ['--json_dump', '-m', '26960110']
     create_results = iter([
-        cros_build_lib.CommandResult(returncode=create_return_code,
-                                     stdout=self.JOB_ID_OUTPUT,
-                                     stderr=''),
+        cros_build_lib.CompletedProcess(returncode=create_return_code,
+                                        stdout=self.JOB_ID_OUTPUT,
+                                        stderr=''),
     ])
     self.rc.AddCmdResult(
         self.create_cmd,
@@ -519,14 +519,14 @@ The suite job has another 2:39:39.789250 till timeout.
     )
     wait_results_list = []
     if wait_retry:
-      r = cros_build_lib.CommandResult(
+      r = cros_build_lib.CompletedProcess(
           returncode=self.internal_failure_exit_code,
           stdout=self.WAIT_RETRY_OUTPUT,
           stderr='')
       wait_results_list.append(r)
 
     wait_results_list.append(
-        cros_build_lib.CommandResult(
+        cros_build_lib.CompletedProcess(
             returncode=wait_return_code, stdout=self.WAIT_OUTPUT,
             stderr='')
     )
@@ -540,9 +540,9 @@ The suite job has another 2:39:39.789250 till timeout.
     # Json dump will only run when wait_cmd fails
     if wait_return_code != 0:
       dump_json_results = iter([
-          cros_build_lib.CommandResult(returncode=dump_json_return_code,
-                                       stdout=self.JSON_OUTPUT,
-                                       stderr=''),
+          cros_build_lib.CompletedProcess(returncode=dump_json_return_code,
+                                          stdout=self.JSON_OUTPUT,
+                                          stderr=''),
       ])
       self.rc.AddCmdResult(
           self.json_dump_cmd,

@@ -148,7 +148,7 @@ inherit cros-workon superpower
     # git rev-parse HEAD
     self.PatchObject(
         git, 'RunGit',
-        return_value=cros_build_lib.CommandResult(stdout=fake_hash + '\n'))
+        return_value=cros_build_lib.CompletedProcess(stdout=fake_hash + '\n'))
     test_hash = fake_ebuild.GetCommitId(self.tempdir)
     self.assertEqual(test_hash, fake_hash)
 
@@ -840,7 +840,7 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
                      return_value=portage_util.SourceInfo(
                          projects=None, srcdirs=[], subdirs=[], subtrees=[]))
     self.PatchObject(cros_build_lib, 'run',
-                     return_value=cros_build_lib.CommandResult(
+                     return_value=cros_build_lib.CompletedProcess(
                          returncode=0, stdout='1122', stderr='STDERR'))
     self.assertEqual('1122', self.m_ebuild.GetVersion(None, None, '1234'))
     # Sanity check.
@@ -855,7 +855,7 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
     run = self.PatchObject(cros_build_lib, 'run')
 
     # Reject no output.
-    run.return_value = cros_build_lib.CommandResult(
+    run.return_value = cros_build_lib.CompletedProcess(
         returncode=0, stdout='', stderr='STDERR')
     self.assertRaises(portage_util.Error,
                       self.m_ebuild.GetVersion, None, None, '1234')
@@ -864,7 +864,7 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
     exists.reset_mock()
 
     # Reject simple output.
-    run.return_value = cros_build_lib.CommandResult(
+    run.return_value = cros_build_lib.CompletedProcess(
         returncode=0, stdout='\n', stderr='STDERR')
     self.assertRaises(portage_util.Error,
                       self.m_ebuild.GetVersion, None, None, '1234')
@@ -873,7 +873,7 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
     exists.reset_mock()
 
     # Reject error.
-    run.return_value = cros_build_lib.CommandResult(
+    run.return_value = cros_build_lib.CompletedProcess(
         returncode=1, stdout='FAIL\n', stderr='STDERR')
     self.assertRaises(portage_util.Error,
                       self.m_ebuild.GetVersion, None, None, '1234')
@@ -887,7 +887,7 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
                      return_value=portage_util.SourceInfo(
                          projects=None, srcdirs=[], subdirs=[], subtrees=[]))
     self.PatchObject(cros_build_lib, 'run',
-                     return_value=cros_build_lib.CommandResult(
+                     return_value=cros_build_lib.CompletedProcess(
                          returncode=0, stdout='999999', stderr='STDERR'))
     self.assertRaises(ValueError, self.m_ebuild.GetVersion, None, None, '1234')
     # Sanity check.
@@ -900,7 +900,7 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
                      return_value=portage_util.SourceInfo(
                          projects=None, srcdirs=[], subdirs=[], subtrees=[]))
     self.PatchObject(cros_build_lib, 'run',
-                     return_value=cros_build_lib.CommandResult(
+                     return_value=cros_build_lib.CompletedProcess(
                          returncode=0, stdout='abcd', stderr='STDERR'))
     self.assertRaises(ValueError, self.m_ebuild.GetVersion, None, None, '1234')
     # Sanity check.
@@ -917,7 +917,7 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
     self.PatchObject(
         cros_build_lib,
         'run',
-        return_value=cros_build_lib.CommandResult(
+        return_value=cros_build_lib.CompletedProcess(
             returncode=0, stdout='4.4.21_baseline', stderr='STDERR'))
     with self.assertRaises(portage_util.EbuildVersionError):
       self.m_ebuild.GetVersion(None, None, '1234')
@@ -1508,7 +1508,7 @@ class PortageqBestVisibleTest(cros_test_lib.MockTestCase):
   def testValidPackage(self):
     """Test valid outputs."""
     expected = package_info.PackageInfo('cat', 'pkg', '1.0')
-    result = cros_build_lib.CommandResult(stdout=expected.cpvr, returncode=0)
+    result = cros_build_lib.CompletedProcess(stdout=expected.cpvr, returncode=0)
     self.PatchObject(portage_util, '_Portageq', return_value=result)
 
     result = portage_util.PortageqBestVisible('cat/pkg')
@@ -1520,7 +1520,8 @@ class PortageqEnvvarTest(cros_test_lib.MockTestCase):
 
   def testValidEnvvar(self):
     """Test valid variables."""
-    result = cros_build_lib.CommandResult(stdout='TEST=value\n', returncode=0)
+    result = cros_build_lib.CompletedProcess(
+        stdout='TEST=value\n', returncode=0)
     self.PatchObject(portage_util, '_Portageq', return_value=result)
 
     envvar1 = portage_util.PortageqEnvvar('TEST')
@@ -1532,8 +1533,8 @@ class PortageqEnvvarTest(cros_test_lib.MockTestCase):
   def testUndefinedEnvvars(self):
     """Test undefined variable handling."""
     # The variable exists in the command output even when not actually defined.
-    result = cros_build_lib.CommandResult(stdout='DOES_NOT_EXIST=\n',
-                                          returncode=1)
+    result = cros_build_lib.CompletedProcess(
+        stdout='DOES_NOT_EXIST=\n', returncode=1)
     success_error = cros_build_lib.RunCommandError('', result)
     self.PatchObject(portage_util, '_Portageq', side_effect=success_error)
 
@@ -1550,7 +1551,7 @@ class PortageqEnvvarTest(cros_test_lib.MockTestCase):
     with self.assertRaises(portage_util.PortageqError):
       portage_util.PortageqEnvvars(['DOES_NOT_EXIST'])
 
-    run_error = cros_build_lib.CommandResult(stdout='\n', returncode=2)
+    run_error = cros_build_lib.CompletedProcess(stdout='\n', returncode=2)
     failure_error = cros_build_lib.RunCommandError('', run_error)
     self.PatchObject(portage_util, '_Portageq', side_effect=failure_error)
 
@@ -1584,9 +1585,9 @@ class PortageqHasVersionTest(cros_test_lib.MockTestCase):
 
   def testPortageqHasVersion(self):
     """Test HasVersion."""
-    result_true = cros_build_lib.CommandResult(returncode=0)
-    result_false = cros_build_lib.CommandResult(returncode=1)
-    result_error = cros_build_lib.CommandResult(returncode=2)
+    result_true = cros_build_lib.CompletedProcess(returncode=0)
+    result_false = cros_build_lib.CompletedProcess(returncode=1)
+    result_error = cros_build_lib.CompletedProcess(returncode=2)
 
     # Test has version.
     self.PatchObject(portage_util, '_Portageq', return_value=result_true)
@@ -1612,8 +1613,8 @@ class PortageqMatchTest(cros_test_lib.MockTestCase):
     a hard requirement, just the current expected behavior.
     """
     output_str = 'cat-1/pkg-one-1.0\ncat-2/pkg-two-2.1.3-r45\n'
-    result = cros_build_lib.CommandResult(returncode=0,
-                                          stdout=output_str)
+    result = cros_build_lib.CompletedProcess(
+        returncode=0, stdout=output_str)
     self.PatchObject(portage_util, '_Portageq', return_value=result)
 
     with self.assertRaises(ValueError):
@@ -1622,7 +1623,7 @@ class PortageqMatchTest(cros_test_lib.MockTestCase):
   def testValidPackage(self):
     """Test valid package produces the corresponding PackageInfo."""
     cpvr = 'cat/pkg-1.0-r1'
-    result = cros_build_lib.CommandResult(returncode=0, stdout=cpvr)
+    result = cros_build_lib.CompletedProcess(returncode=0, stdout=cpvr)
     self.PatchObject(portage_util, '_Portageq', return_value=result)
 
     pkg = portage_util.PortageqMatch('cat/pkg')

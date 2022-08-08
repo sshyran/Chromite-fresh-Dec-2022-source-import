@@ -300,7 +300,7 @@ def RetryCommand(functor, max_retry, *args, **kwargs):
     kwargs: Optional args passed to run; see run for specifics.
 
   Returns:
-    A CommandResult object.
+    A CompletedProcess object.
 
   Raises:
     RunCommandError: Raised on error.
@@ -351,7 +351,7 @@ def RunCommandWithRetries(max_retry, *args, **kwargs):
     **kwargs: See RetryCommand and run.
 
   Returns:
-    A CommandResult object.
+    A CompletedProcess object.
 
   Raises:
     RunCommandError: Raised on error.
@@ -373,7 +373,7 @@ def RunCurl(curl_args, *args, **kwargs):
       overwritten.
 
   Returns:
-    A CommandResult object.
+    A CompletedProcess object.
 
   Raises:
     DownloadError: Whenever curl fails for any reason.

@@ -401,6 +401,6 @@ class GitBranchTest(cros_test_lib.MockTestCase):
 
   def testExists(self):
     """Test if branch exists that is created."""
-    result = cros_build_lib.CommandResult(stdout=self._branch_name + '\n')
+    result = cros_build_lib.CompletedProcess(stdout=self._branch_name + '\n')
     self.PatchObject(git, 'RunGit', return_value=result)
     self.assertTrue(self._branch.Exists())

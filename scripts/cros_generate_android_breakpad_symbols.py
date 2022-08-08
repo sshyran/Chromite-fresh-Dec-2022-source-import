@@ -45,7 +45,7 @@ def FindExpansionOffset(unpack_result):
   Will return 0 if no adjustment is needed.
 
   Args:
-    unpack_result: CommandResult from the relocation_packer command.
+    unpack_result: CompletedProcess from the relocation_packer command.
 
   Returns:
     Integer offset to adjust symbols by. May be 0.

@@ -892,7 +892,7 @@ class GSDoCommandTest(cros_test_lib.TestCase):
     if sleep is None:
       sleep = ctx.DEFAULT_SLEEP_TIME
 
-    result = cros_build_lib.CommandResult(stderr='')
+    result = cros_build_lib.CompletedProcess(stderr='')
     with mock.patch.object(retry_stats, 'RetryWithStats', autospec=True,
                            return_value=result):
       ctx.Copy('/blah', 'gs://foon', version=version, recursive=recursive)
@@ -955,7 +955,7 @@ class GSRetryFilterTest(cros_test_lib.TestCase):
     self.ctx.DEFAULT_GSUTIL_TRACKER_DIR = self.GSUTIL_TRACKER_DIR
 
   def _getException(self, cmd, error, returncode=RETURN_CODE):
-    result = cros_build_lib.CommandResult(
+    result = cros_build_lib.CompletedProcess(
         args=cmd,
         stderr=error,
         returncode=returncode)

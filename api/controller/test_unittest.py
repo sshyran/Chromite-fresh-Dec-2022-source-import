@@ -391,7 +391,7 @@ class BuildTestServiceContainers(cros_test_lib.RunCommandTempDirTestCase,
     patch = self.PatchObject(
         cros_build_lib,
         'run',
-        return_value=cros_build_lib.CommandResult(returncode=1))
+        return_value=cros_build_lib.CompletedProcess(returncode=1))
 
     response = test_pb2.BuildTestServiceContainersResponse()
     test_controller.BuildTestServiceContainers(self.request, response,
@@ -454,7 +454,7 @@ class ChromiteUnitTestTest(cros_test_lib.MockTestCase,
     patch = self.PatchObject(
         cros_build_lib,
         'run',
-        return_value=cros_build_lib.CommandResult(returncode=0))
+        return_value=cros_build_lib.CompletedProcess(returncode=0))
 
     test_controller.ChromiteUnitTest(request, self._GetOutput(),
                                      self.api_config)
@@ -494,7 +494,7 @@ class CrosSigningTestTest(cros_test_lib.RunCommandTestCase,
     patch = self.PatchObject(
         cros_build_lib,
         'run',
-        return_value=cros_build_lib.CommandResult(returncode=0))
+        return_value=cros_build_lib.CompletedProcess(returncode=0))
 
     test_controller.CrosSigningTest(request, self._GetOutput(), self.api_config)
     patch.assert_called_once()
@@ -704,7 +704,7 @@ class VmTestTest(cros_test_lib.RunCommandTestCase, api_config.ApiConfigMixin):
     patch = self.PatchObject(
         cros_build_lib,
         'run',
-        return_value=cros_build_lib.CommandResult(returncode=0))
+        return_value=cros_build_lib.CompletedProcess(returncode=0))
 
     test_controller.VmTest(request, response, self.api_config)
     patch.assert_called()

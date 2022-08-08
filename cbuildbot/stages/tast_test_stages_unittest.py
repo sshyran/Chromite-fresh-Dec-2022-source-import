@@ -152,7 +152,8 @@ class TastVMTestStageTest(generic_stages_unittest.AbstractStageTestCase,
 
     if self._test_results_data is not None:
       self._WriteResultsFile(self._test_results_data)
-    return cros_build_lib.CommandResult(returncode=self._run_command_exit_code)
+    return cros_build_lib.CompletedProcess(
+        returncode=self._run_command_exit_code)
 
   def _GetResultsFilePath(self):
     """Returns the path to the results file."""
@@ -199,7 +200,7 @@ class TastVMTestStageTest(generic_stages_unittest.AbstractStageTestCase,
       for test in json.load(f):
         if (test[tast_test_stages.RESULTS_ERRORS_KEY] or
             test[tast_test_stages.RESULTS_END_KEY] ==
-                tast_test_stages.ZERO_TIME):
+            tast_test_stages.ZERO_TIME):
           num_failed_tests += 1
           informational = (tast_test_stages.RESULTS_INFORMATIONAL_ATTR in
                            test.get(tast_test_stages.RESULTS_ATTR_KEY, []))

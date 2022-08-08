@@ -499,7 +499,7 @@ class PaygenPayload(object):
         logging.error('Nonzero exit code (%d), dumping command output:\n%s',
                       result.result.returncode, result.result.stdout)
         raise result
-      elif isinstance(result, cros_build_lib.CommandResult):
+      elif isinstance(result, cros_build_lib.CompletedProcess):
         self._StoreLog('Output of command: ' + result.cmdstr)
         self._StoreLog(result.stdout.decode('utf-8', 'replace'))
       else:

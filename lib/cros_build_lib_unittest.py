@@ -418,14 +418,14 @@ class TestRunCommand(cros_test_lib.MockTestCase):
                        msg='kwargs[%s] mismatch' % key)
 
   def _AssertCrEqual(self, expected, actual):
-    """Helper method to compare two CommandResult objects.
+    """Helper method to compare two CompletedProcess objects.
 
     This is needed since assertEqual does not know how to compare two
-    CommandResult objects.
+    CompletedProcess objects.
 
     Args:
-      expected: a CommandResult object, expected result.
-      actual: a CommandResult object, actual result.
+      expected: a CompletedProcess object, expected result.
+      actual: a CompletedProcess object, actual result.
     """
     self.assertEqual(expected.args, actual.args)
     self.assertEqual(expected.stderr, actual.stderr)
@@ -456,7 +456,7 @@ class TestRunCommand(cros_test_lib.MockTestCase):
     if rc_kv.get('stderr') or rc_kv.get('capture_output'):
       stderr = self.stderr
 
-    expected_result = cros_build_lib.CommandResult(
+    expected_result = cros_build_lib.CompletedProcess(
         args=real_cmd, stdout=stdout, stderr=stderr,
         returncode=self.proc_mock.returncode)
 
@@ -647,9 +647,9 @@ class TestRunCommand(cros_test_lib.MockTestCase):
   def testExceptionEquality(self):
     """Verify equality methods for RunCommandError"""
 
-    c1 = cros_build_lib.CommandResult(['ls', 'arg'], returncode=1)
-    c2 = cros_build_lib.CommandResult(['ls', 'arg1'], returncode=1)
-    c3 = cros_build_lib.CommandResult(['ls', 'arg'], returncode=2)
+    c1 = cros_build_lib.CompletedProcess(['ls', 'arg'], returncode=1)
+    c2 = cros_build_lib.CompletedProcess(['ls', 'arg1'], returncode=1)
+    c3 = cros_build_lib.CompletedProcess(['ls', 'arg'], returncode=2)
     e1 = cros_build_lib.RunCommandError('Message 1', c1)
     e2 = cros_build_lib.RunCommandError('Message 1', c1)
     e_diff_msg = cros_build_lib.RunCommandError('Message 2', c1)
@@ -1275,12 +1275,12 @@ class FailedCreateTarballTests(cros_test_lib.MockTestCase):
   def setUp(self):
     """Mock run mock."""
     # Each test can change this value as needed.  Each element is the return
-    # code in the CommandResult for subsequent calls to run().
+    # code in the CompletedProcess for subsequent calls to run().
     self.tarResults = []
 
     def Result(*_args, **_kwargs):
-      """Creates CommandResult objects for each tarResults value in turn."""
-      return cros_build_lib.CommandResult(returncode=self.tarResults.pop(0))
+      """Creates CompletedProcess objects for each tarResults value in turn."""
+      return cros_build_lib.CompletedProcess(returncode=self.tarResults.pop(0))
 
     self.mockRun = self.PatchObject(cros_build_lib, 'run',
                                     autospec=True,

@@ -924,7 +924,7 @@ wheel: <
         0 states "only update if no version exists".
 
     Returns:
-      A RunCommandResult object.
+      A CompletedProcess object.
     """
     kwargs = kwargs.copy()
     kwargs.setdefault('stderr', True)

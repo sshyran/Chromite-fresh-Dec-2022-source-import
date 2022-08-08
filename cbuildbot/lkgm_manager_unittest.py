@@ -241,7 +241,7 @@ class LKGMManagerTest(cros_test_lib.MockTempDirTestCase):
     fake_project_handler.checkouts_by_path = {project['path']: project}
     self.PatchObject(git, 'Manifest', return_value=fake_project_handler)
 
-    fake_result = cros_build_lib.CommandResult(stdout=fake_git_log)
+    fake_result = cros_build_lib.CompletedProcess(stdout=fake_git_log)
     self.PatchObject(git, 'RunGit', return_value=fake_result)
 
     return exists_mock, link_mock

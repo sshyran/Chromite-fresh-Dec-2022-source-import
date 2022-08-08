@@ -834,7 +834,7 @@ class CleanUpStageTest(generic_stages_unittest.StageTestCase):
         cros_build_lib,
         'sudo_run',
         side_effect=cros_build_lib.RunCommandError(
-            'error', cros_build_lib.CommandResult('error', returncode=5)))
+            'error', cros_build_lib.CompletedProcess('error', returncode=5)))
     self._Prepare(extra_config={
         'chroot_use_image': True,
         'chroot_replace': False

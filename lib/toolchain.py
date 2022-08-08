@@ -40,7 +40,7 @@ class UnknownToolchainError(Error):
 class ToolchainInstallError(Error, cros_build_lib.RunCommandError):
   """An error when installing a toolchain."""
 
-  def __init__(self, msg: str, result: cros_build_lib.CommandResult,
+  def __init__(self, msg: str, result: cros_build_lib.CompletedProcess,
                exception: Optional[Exception] = None,
                tc_info: Optional[List['package_info.PackageInfo']] = None):
     """ToolchainInstallError init.

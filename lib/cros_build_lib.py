@@ -230,9 +230,6 @@ class CommandResult(CompletedProcess):
   for |args| and |returncode|.
   """
 
-  def __init__(self, args=None, returncode=None, **kwargs):
-    super().__init__(args, returncode, **kwargs)
-
 
 class CalledProcessError(subprocess.CalledProcessError):
   """Error caught in run() function.
@@ -326,16 +323,16 @@ class RunCommandError(CalledProcessError):
   Attributes:
     args: Tuple of the attributes below.
     msg: Short explanation of the error.
-    result: The CommandResult that triggered this error, if available.
+    result: The CompletedProcess that triggered this error, if available.
     exception: The underlying Exception if available.
   """
 
   def __init__(self, msg, result=None, exception=None):
     # This makes mocking tests easier.
     if result is None:
-      result = CommandResult()
-    elif not isinstance(result, CommandResult):
-      raise TypeError('result must be a CommandResult instance; got %r'
+      result = CompletedProcess()
+    elif not isinstance(result, CompletedProcess):
+      raise TypeError('result must be a CompletedProcess instance; got %r'
                       % (result,))
 
     self.args = (msg, result, exception)
@@ -354,7 +351,7 @@ class _TerminateRunCommandError(RunCommandError):
 
 
 def sudo_run(cmd, user='root', preserve_env: bool = False, **kwargs
-            ) -> CommandResult:
+            ) -> CompletedProcess:
   """Run a command via sudo.
 
   Client code must use this rather than coming up with their own run
@@ -391,7 +388,7 @@ def sudo_run(cmd, user='root', preserve_env: bool = False, **kwargs
       raise RunCommandError(
           'We were invoked in a strict sudo non - interactive context, but no '
           'sudo keep alive daemon is running.  This is a bug in the code.',
-          CommandResult(args=cmd, returncode=126))
+          CompletedProcess(args=cmd, returncode=126))
     sudo_cmd += ['-n']
 
   if user != 'root':
@@ -468,7 +465,7 @@ def _KillChildProcess(proc, int_timeout, kill_timeout, cmd, original_handler,
 
   if not signals.RelaySignal(original_handler, signum, frame):
     # Mock up our own, matching exit code for signaling.
-    cmd_result = CommandResult(args=cmd, returncode=signum << 8)
+    cmd_result = CompletedProcess(args=cmd, returncode=signum << 8)
     raise _TerminateRunCommandError(f'Received signal {signum}', cmd_result)
 
 
@@ -554,7 +551,7 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
         check=True, int_timeout=1, kill_timeout=1,
         log_output=False, capture_output=False,
         quiet=False, encoding=None, errors=None, dryrun=False,
-        **kwargs) -> CommandResult:
+        **kwargs) -> CompletedProcess:
   """Runs a command.
 
   Args:
@@ -595,7 +592,7 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
     chroot_args: An array of arguments for the chroot environment wrapper.
     debug_level: The debug level of run's output.
     check: Whether to raise an exception when command returns a non-zero exit
-      code, or return the CommandResult object containing the exit code.
+      code, or return the CompletedProcess object containing the exit code.
       Note: will still raise an exception if the cmd file does not exist.
     int_timeout: If we're interrupted, how long (in seconds) should we give the
       invoked process to clean up before we send a SIGTERM.
@@ -611,7 +608,7 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
     dryrun: Only log the command,and return a stub result.
 
   Returns:
-    A CommandResult object.
+    A CompletedProcess object.
 
   Raises:
     RunCommandError: Raised on error.
@@ -657,7 +654,7 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
   popen_stdout = None
   popen_stderr = None
   stdin = None
-  cmd_result = CommandResult()
+  cmd_result = CompletedProcess()
 
   # Force the timeout to float; in the process, if it's not convertible,
   # a self-explanatory exception will be thrown.
@@ -889,7 +886,7 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
     estr = str(e)
     if e.errno == errno.EACCES:
       estr += '; does the program need `chmod a+x`?'
-    raise RunCommandError(estr, CommandResult(args=cmd), exception=e)
+    raise RunCommandError(estr, CompletedProcess(args=cmd), exception=e)
   finally:
     if proc is not None:
       # Ensure the process is dead.

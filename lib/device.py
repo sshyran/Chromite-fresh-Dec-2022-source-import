@@ -83,7 +83,7 @@ class Device(object):
       kwargs: additional args (see documentation for RemoteDevice.run).
 
     Returns:
-      cros_build_lib.CommandResult object.
+      cros_build_lib.CompletedProcess object.
     """
     kwargs.setdefault('check', False)
     if stream_output:

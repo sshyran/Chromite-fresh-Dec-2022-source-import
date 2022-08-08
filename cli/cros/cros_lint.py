@@ -133,7 +133,7 @@ def _ToolRunCommand(cmd, debug, **kwargs):
 
 def _ConfLintFile(path, output_format, debug, relaxed: bool):
   """Determine the applicable .conf syntax and call the appropriate handler."""
-  ret = cros_build_lib.CommandResult(f'cros lint "{path}"', returncode=0)
+  ret = cros_build_lib.CompletedProcess(f'cros lint "{path}"', returncode=0)
   if not os.path.isfile(path):
     return ret
 
@@ -210,14 +210,13 @@ def _GolintFile(path, _, debug, _relaxed: bool):
     return _ToolRunCommand(cmd, debug)
   except cros_build_lib.RunCommandError:
     logging.notice('Install golint for additional go linting.')
-    return cros_build_lib.CommandResult('gofmt "%s"' % path,
-                                        returncode=0)
+    return cros_build_lib.CompletedProcess(f'gofmt "{path}"', returncode=0)
 
 
 def _JsonLintFile(path, _output_format, _debug, _relaxed: bool):
   """Returns result of running json lint checks on |path|."""
-  result = cros_build_lib.CommandResult('python -mjson.tool "%s"' % path,
-                                        returncode=0)
+  result = cros_build_lib.CompletedProcess(
+      f'python -mjson.tool "{path}"', returncode=0)
 
   data = osutils.ReadFile(path)
 
@@ -244,8 +243,8 @@ def _JsonLintFile(path, _output_format, _debug, _relaxed: bool):
 
 def _MarkdownLintFile(path, _output_format, _debug, _relaxed: bool):
   """Returns result of running lint checks on |path|."""
-  result = cros_build_lib.CommandResult('mdlint(internal) "%s"' % path,
-                                        returncode=0)
+  result = cros_build_lib.CompletedProcess(
+      f'mdlint(internal) "{path}"', returncode=0)
 
   data = osutils.ReadFile(path)
 
@@ -268,7 +267,7 @@ def _ShellLintFile(path, output_format, debug, _relaxed: bool,
     gentoo_format: Whether to treat this file as an ebuild style script.
 
   Returns:
-    A CommandResult object.
+    A CompletedProcess object.
   """
   # TODO: Try using `checkbashisms`.
   syntax_check = _ToolRunCommand(['bash', '-n', path], debug)
@@ -341,7 +340,7 @@ def _SeccompPolicyLintFile(path, _output_format, debug, _relaxed: bool):
 def _UpstartLintFile(path, _output_format, _debug, relaxed: bool):
   """Run lints on upstart configs."""
   # Skip .conf files that aren't in an init parent directory.
-  ret = cros_build_lib.CommandResult(f'cros lint "{path}"', returncode=0)
+  ret = cros_build_lib.CompletedProcess(f'cros lint "{path}"', returncode=0)
   if not upstart.CheckInitConf(Path(path), relaxed):
     ret.returncode = 1
   return ret
@@ -356,7 +355,7 @@ def _DirMdLintFile(path, _output_format, debug, _relaxed: bool):
 
 def _OwnersLintFile(path, _output_format, _debug, _relaxed: bool):
   """Run lints on OWNERS files."""
-  ret = cros_build_lib.CommandResult(f'cros lint "{path}"', returncode=0)
+  ret = cros_build_lib.CompletedProcess(f'cros lint "{path}"', returncode=0)
   if not owners.lint_path(Path(path)):
     ret.returncode = 1
   return ret
@@ -364,8 +363,8 @@ def _OwnersLintFile(path, _output_format, _debug, _relaxed: bool):
 
 def _WhitespaceLintFile(path, _output_format, _debug, _relaxed: bool):
   """Returns result of running basic whitespace checks on |path|."""
-  result = cros_build_lib.CommandResult(f'whitespace(internal) "{path}"',
-                                        returncode=0)
+  result = cros_build_lib.CompletedProcess(
+      f'whitespace(internal) "{path}"', returncode=0)
 
   data = osutils.ReadFile(path)
 

@@ -303,7 +303,7 @@ class BundleCodeCoverageLlvmJsonTest(cros_test_lib.MockTempDirTestCase):
     self.PatchObject(
         code_coverage_util, 'GetLLVMCoverageWithFilesExcluded', return_value={})
 
-    create_tarball_result = cros_build_lib.CommandResult(returncode=1)
+    create_tarball_result = cros_build_lib.CompletedProcess(returncode=1)
     CreateTarball_mock = self.PatchObject(
         cros_build_lib, 'CreateTarball', return_value=create_tarball_result)
 
@@ -337,7 +337,7 @@ class BundleCodeCoverageLlvmJsonTest(cros_test_lib.MockTempDirTestCase):
     self.PatchObject(
         test, 'GatherCodeCoverageLlvmJsonFile', return_value=gather_result)
 
-    create_tarball_result = cros_build_lib.CommandResult(returncode=1)
+    create_tarball_result = cros_build_lib.CompletedProcess(returncode=1)
     self.PatchObject(
         cros_build_lib, 'CreateTarball', return_value=create_tarball_result)
 
@@ -358,7 +358,7 @@ class BundleCodeCoverageLlvmJsonTest(cros_test_lib.MockTempDirTestCase):
     self.PatchObject(
         code_coverage_util, 'GetLLVMCoverageWithFilesExcluded', return_value={})
 
-    create_tarball_result = cros_build_lib.CommandResult(returncode=0)
+    create_tarball_result = cros_build_lib.CompletedProcess(returncode=0)
     self.PatchObject(
         cros_build_lib, 'CreateTarball', return_value=create_tarball_result)
 

@@ -254,7 +254,7 @@ def RsyncQuickmerge(source_path, sysroot_autotest_path,
                not just older files.
 
   Returns:
-    The cros_build_lib.CommandResult object resulting from the rsync command.
+    The cros_build_lib.CompletedProcess object resulting from the rsync command.
   """
   command = ['rsync', '-a']
 

@@ -368,7 +368,7 @@ class SysrootLibToolchainUpdateTest(cros_test_lib.RunCommandTempDirTestCase):
     """Test error handling from the libc install."""
     failed = ['cat/pkg', 'cat/pkg2']
     failed_pkgs = [package_info.parse(pkg) for pkg in failed]
-    result = cros_build_lib.CommandResult(returncode=1)
+    result = cros_build_lib.CompletedProcess(returncode=1)
     error = toolchain.ToolchainInstallError('Error', result=result,
                                             tc_info=failed_pkgs)
     self.PatchObject(toolchain, 'InstallToolchain', side_effect=error)
@@ -390,7 +390,7 @@ class SysrootLibToolchainUpdateTest(cros_test_lib.RunCommandTempDirTestCase):
     command = self.sysroot._UpdateToolchainCommand('board', True)
 
     err = cros_build_lib.RunCommandError(
-        'Error', cros_build_lib.CommandResult(returncode=1))
+        'Error', cros_build_lib.CompletedProcess(returncode=1))
     self.rc.AddCmdResult(command, side_effect=err)
 
     with self.assertRaises(sysroot_lib.ToolchainInstallError):

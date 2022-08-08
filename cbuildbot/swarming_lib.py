@@ -192,7 +192,7 @@ def RunSwarmingCommandWithRetries(max_retry, *args, **kwargs):
   return retry_util.RetryCommand(RunSwarmingCommand, max_retry, *args, **kwargs)
 
 
-class SwarmingCommandResult(cros_build_lib.CommandResult):
+class SwarmingCommandResult(cros_build_lib.CompletedProcess):
   """An object to store result of a command that is run via swarming."""
 
   def __init__(self, task_summary_json, *args, **kwargs):
@@ -222,12 +222,12 @@ class SwarmingCommandResult(cros_build_lib.CommandResult):
 
   @staticmethod
   def CreateSwarmingCommandResult(task_summary_json_path, command_result):
-    """Create a SwarmingCommandResult object from a CommandResult object.
+    """Create a SwarmingCommandResult object from a CompletedProcess object.
 
     Args:
       task_summary_json_path: The path to a json file that contains
                               output of a swarming task.
-      command_result: A CommandResult object.
+      command_result: A CompletedProcess object.
 
     Returns:
       A SwarmingCommandResult object.

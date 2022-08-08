@@ -317,7 +317,7 @@ class ToolchainInstallerTest(cros_test_lib.MockTempDirTestCase):
     """Test the installer error handling."""
     # Test error thrown during toolchain installation.
     # We want a ToolchainInstallError with the glibc info set.
-    error_result = cros_build_lib.CommandResult(returncode=1)
+    error_result = cros_build_lib.CompletedProcess(returncode=1)
     self.PatchObject(cros_build_lib, 'sudo_run',
                      side_effect=cros_build_lib.RunCommandError('Error',
                                                                 error_result))

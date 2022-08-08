@@ -1630,7 +1630,7 @@ def GetOverlayEBuilds(overlay,
 def _Egencache(repo_name: str,
                overlay: str,
                chroot_args: List[str] = None,
-               log_output: bool = True) -> cros_build_lib.CommandResult:
+               log_output: bool = True) -> cros_build_lib.CompletedProcess:
   """Execute egencache for repo_name inside the chroot.
 
   Args:
@@ -1640,7 +1640,7 @@ def _Egencache(repo_name: str,
     log_output: Log output of cros_build_run commands.
 
   Returns:
-    A cros_build_lib.CommandResult object.
+    A cros_build_lib.CompletedProcess object.
   """
   return cros_build_lib.run([
       'egencache', '--update', '--repo', repo_name, '--jobs',
@@ -1892,7 +1892,7 @@ def _Equery(module: str,
             quiet: bool = True,
             print_cmd: bool = True,
             extra_env: Optional[Dict[str, str]] = None,
-            check: bool = True) -> cros_build_lib.CommandResult:
+            check: bool = True) -> cros_build_lib.CompletedProcess:
   """Executes equery commands.
 
   Args:
@@ -1908,7 +1908,7 @@ def _Equery(module: str,
     check: Whether to throw an exception if the command fails.
 
   Returns:
-    A cros_build_lib.CommandResult object.
+    A cros_build_lib.CompletedProcess object.
   """
   # There is no situation where we want color or pipe detection.
   cmd = [_GetSysrootTool('equery', board, sysroot), '--no-color', '--no-pipe']
@@ -1931,7 +1931,7 @@ def _Equery(module: str,
 def _EqueryList(
     pkg_str: str,
     board: Optional[str] = None,
-    buildroot: str = constants.SOURCE_ROOT) -> cros_build_lib.CommandResult:
+    buildroot: str = constants.SOURCE_ROOT) -> cros_build_lib.CompletedProcess:
   """Executes equery list command.
 
   Args:
@@ -1940,7 +1940,7 @@ def _EqueryList(
     buildroot: Source root to find overlays.
 
   Returns:
-    A cros_build_lib.CommandResult object.
+    A cros_build_lib.CompletedProcess object.
   """
   return _Equery('list', pkg_str, board=board, buildroot=buildroot, check=False)
 
@@ -1985,7 +1985,7 @@ def _EqueryWhich(packages_list: List[str],
                  sysroot: str,
                  include_masked: bool = False,
                  extra_env: Optional[Dict[str, str]] = None,
-                 check: bool = False) -> cros_build_lib.CommandResult:
+                 check: bool = False) -> cros_build_lib.CompletedProcess:
   """Executes an equery command, returns the result of the cmd.
 
   Args:
@@ -2002,7 +2002,7 @@ def _EqueryWhich(packages_list: List[str],
       empty dictionary.
 
   Returns:
-    result (cros_build_lib.CommandResult)
+    result (cros_build_lib.CompletedProcess)
   """
   args = []
   if include_masked:
@@ -2112,7 +2112,7 @@ def FindEbuildsForOverlays(
 
 def _EqueryDepgraph(pkg_str: str,
                     sysroot: str,
-                    depth: int = 0) -> cros_build_lib.CommandResult:
+                    depth: int = 0) -> cros_build_lib.CompletedProcess:
   """Executes equery depgraph to find dependencies.
 
   Args:
@@ -2122,7 +2122,7 @@ def _EqueryDepgraph(pkg_str: str,
       unlimited.
 
   Returns:
-    result (cros_build_lib.CommandResult)
+    result (cros_build_lib.CompletedProcess)
   """
   return _Equery(
       'depgraph', f'--depth={depth}', pkg_str, sysroot=sysroot, print_cmd=False)
@@ -2206,7 +2206,7 @@ def GetReverseDependencies(
 def _Qlist(
     args: List[str],
     board: Optional[str] = None,
-    buildroot: str = constants.SOURCE_ROOT) -> cros_build_lib.CommandResult:
+    buildroot: str = constants.SOURCE_ROOT) -> cros_build_lib.CompletedProcess:
   """Run qlist with the given args.
 
   Args:
@@ -2287,11 +2287,13 @@ def GetBoardUseFlags(board):
   return PortageqEnvvar('USE', board=board).split()
 
 
-def _EmergeBoard(package: str,
-                 board: Optional[str] = None,
-                 sysroot: Optional[Union[str, os.PathLike]] = None,
-                 buildroot: str = constants.SOURCE_ROOT,
-                 set_empty_root: bool = False) -> cros_build_lib.CommandResult:
+def _EmergeBoard(
+    package: str,
+    board: Optional[str] = None,
+    sysroot: Optional[Union[str, os.PathLike]] = None,
+    buildroot: str = constants.SOURCE_ROOT,
+    set_empty_root: bool = False,
+) -> cros_build_lib.CompletedProcess:
   """Call emerge board to get dependences of package.
 
   Args:
@@ -2303,7 +2305,7 @@ def _EmergeBoard(package: str,
       workaround for an issue for portage versions before 2.3.75.
 
   Returns:
-    result (cros_build_lib.CommandResult)
+    result (cros_build_lib.CompletedProcess)
   """
   emerge = _GetSysrootTool('emerge', board=board, sysroot=sysroot)
   cmd = [emerge, '-p', '--cols', '--quiet', '-e']
@@ -2366,7 +2368,9 @@ def GetRepositoryFromEbuildInfo(info):
   ]
 
 
-def _EbuildInfo(ebuild_path: str, sysroot: str) -> cros_build_lib.CommandResult:
+def _EbuildInfo(
+    ebuild_path: str,
+    sysroot: str) -> cros_build_lib.CompletedProcess:
   """Get ebuild info for <ebuild_path>.
 
   Args:
@@ -2374,7 +2378,7 @@ def _EbuildInfo(ebuild_path: str, sysroot: str) -> cros_build_lib.CommandResult:
     sysroot: The root directory being inspected.
 
   Returns:
-    result (cros_build_lib.CommandResult)
+    result (cros_build_lib.CompletedProcess)
   """
   cmd = (_GetSysrootTool('ebuild', sysroot=sysroot), ebuild_path, 'info')
   return cros_build_lib.run(
@@ -2402,7 +2406,7 @@ def CleanOutdatedBinaryPackages(
     sysroot: Union[str, os.PathLike],
     deep: bool = True,
     exclusion_file: Optional[Union[str, os.PathLike]] = None
-) -> cros_build_lib.CommandResult:
+) -> cros_build_lib.CompletedProcess:
   """Cleans outdated binary packages from |sysroot|.
 
   Args:
@@ -2413,7 +2417,7 @@ def CleanOutdatedBinaryPackages(
     exclusion_file: Path to the exclusion file.
 
   Returns:
-    result (cros_build_lib.CommandResult)
+    result (cros_build_lib.CompletedProcess)
 
   Raises:
     cros_build_lib.RunCommandError
@@ -2546,7 +2550,7 @@ def _Portageq(command, board=None, sysroot=None, **kwargs):
     kwargs: Additional run arguments.
 
   Returns:
-    cros_build_lib.CommandResult
+    cros_build_lib.CompletedProcess
 
   Raises:
     cros_build_lib.RunCommandError
@@ -2794,7 +2798,8 @@ def CalculatePackageSize(files_in_package: Iterable[Tuple[str, str]],
 
 def UpdateEbuildManifest(
     ebuild_path: Union[str, os.PathLike],
-    chroot: Optional[chroot_lib.Chroot] = None) -> cros_build_lib.CommandResult:
+    chroot: Optional[chroot_lib.Chroot] = None,
+) -> cros_build_lib.CompletedProcess:
   """Updates the ebuild manifest for the provided ebuild path.
 
   Args:

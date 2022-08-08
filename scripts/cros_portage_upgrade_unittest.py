@@ -1103,25 +1103,25 @@ class PortageStableTest(CpuTestBase):
   def testCheckStableRepoOnBranchNoBranch(self):
     """Should fail due to 'git branch' saying 'no branch'"""
     output = '* (no branch)\n  somebranch\n  otherbranch\n'
-    run_result = cros_build_lib.CommandResult(returncode=0, stdout=output)
+    run_result = cros_build_lib.CompletedProcess(returncode=0, stdout=output)
     self._TestCheckStableRepoOnBranch(run_result, True)
 
   def testCheckStableRepoOnBranchOK1(self):
     """Should pass as 'git branch' indicates a branch"""
     output = '* somebranch\n  otherbranch\n'
-    run_result = cros_build_lib.CommandResult(returncode=0, stdout=output)
+    run_result = cros_build_lib.CompletedProcess(returncode=0, stdout=output)
     self._TestCheckStableRepoOnBranch(run_result, False)
 
   def testCheckStableRepoOnBranchOK2(self):
     """Should pass as 'git branch' indicates a branch"""
     output = '  somebranch\n* otherbranch\n'
-    run_result = cros_build_lib.CommandResult(returncode=0, stdout=output)
+    run_result = cros_build_lib.CompletedProcess(returncode=0, stdout=output)
     self._TestCheckStableRepoOnBranch(run_result, False)
 
   def testCheckStableRepoOnBranchFail(self):
     """Should fail as 'git branch' failed"""
     output = 'does not matter'
-    run_result = cros_build_lib.CommandResult(returncode=1, stdout=output)
+    run_result = cros_build_lib.CompletedProcess(returncode=1, stdout=output)
     self._TestCheckStableRepoOnBranch(run_result, True)
 
   #
@@ -1144,7 +1144,7 @@ class PortageStableTest(CpuTestBase):
 
   def testSaveStatusOnStableRepoFailed(self):
     """Test case where 'git status -s' fails, should raise RuntimeError"""
-    run_result = cros_build_lib.CommandResult(returncode=1)
+    run_result = cros_build_lib.CompletedProcess(returncode=1)
 
     self.assertRaises(RuntimeError,
                       self._TestSaveStatusOnStableRepo,
@@ -1154,8 +1154,8 @@ class PortageStableTest(CpuTestBase):
     """Test where 'git status -s' returns all status kinds"""
     status_lines = ['%2s %s' % (v, k) for (k, v) in self.STATUS_MIX.items()]
     status_output = '\n'.join(status_lines)
-    run_result = cros_build_lib.CommandResult(returncode=0,
-                                              stdout=status_output)
+    run_result = cros_build_lib.CompletedProcess(returncode=0,
+                                                 stdout=status_output)
     status = self._TestSaveStatusOnStableRepo(run_result)
     self.assertEqual(status, self.STATUS_MIX)
 
@@ -1165,14 +1165,14 @@ class PortageStableTest(CpuTestBase):
     new = 'path/foo-2'
     status_lines = [' R %s --> %s' % (old, new)]
     status_output = '\n'.join(status_lines)
-    run_result = cros_build_lib.CommandResult(returncode=0,
-                                              stdout=status_output)
+    run_result = cros_build_lib.CompletedProcess(returncode=0,
+                                                 stdout=status_output)
     status = self._TestSaveStatusOnStableRepo(run_result)
     self.assertEqual(status, {old: 'D', new: 'A'})
 
   def testSaveStatusOnStableRepoEmpty(self):
     """Test empty response from 'git status -s'"""
-    run_result = cros_build_lib.CommandResult(returncode=0, stdout='')
+    run_result = cros_build_lib.CompletedProcess(returncode=0, stdout='')
     status = self._TestSaveStatusOnStableRepo(run_result)
     self.assertEqual(status, {})
 
@@ -2135,7 +2135,8 @@ class VerifyPackageTest(CpuTestBase):
                                               unstable_ok=False)
     mocked_upgrader._GenPortageEnvvars.return_value = envvars
     mocked_upgrader._GetBoardCmd.return_value = 'equery'
-    run_result = cros_build_lib.CommandResult(returncode=0, stdout=ebuild_path)
+    run_result = cros_build_lib.CompletedProcess(
+        returncode=0, stdout=ebuild_path)
     run_mock.return_value = run_result
     split_ebuild = cpu.Upgrader._SplitEBuildPath(mocked_upgrader, ebuild_path)
     mocked_upgrader._SplitEBuildPath.return_value = split_ebuild
@@ -2186,7 +2187,7 @@ class VerifyPackageTest(CpuTestBase):
     # Replay script.
     mocked_upgrader._GenPortageEnvvars.return_value = 'envvars'
     mocked_upgrader._GetBoardCmd.return_value = 'equery'
-    run_result = cros_build_lib.CommandResult(returncode=0, stdout=output)
+    run_result = cros_build_lib.CompletedProcess(returncode=0, stdout=output)
     run_mock.return_value = run_result
 
     # Verify.
@@ -2263,7 +2264,7 @@ class CommitTest(CpuTestBase):
     # Replay script.
     def RunGit(cwd, _cmd, **_kwargs):
       self.assertEqual(mocked_upgrader._stable_repo, cwd)
-      return cros_build_lib.CommandResult(returncode=0, stdout=git_show)
+      return cros_build_lib.CompletedProcess(returncode=0, stdout=git_show)
     mocked_upgrader._RunGit.side_effect = RunGit
 
     def CreateCommit(mock_upgrade_lines, mock_remaining_lines):

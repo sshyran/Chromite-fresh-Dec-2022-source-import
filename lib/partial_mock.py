@@ -600,7 +600,7 @@ class PartialCmdMock(PartialMock):
       side_effect: See MockedCallResults.AddResultForParams
       mock_attr: Which attributes's mock is being referenced.
     """
-    result = cros_build_lib.CommandResult(
+    result = cros_build_lib.CompletedProcess(
         returncode=returncode, stdout=stdout, stderr=stderr)
     self._results[mock_attr].SetDefaultResult(result, side_effect)
 
@@ -619,7 +619,7 @@ class PartialCmdMock(PartialMock):
       side_effect: See MockedCallResults.AddResultForParams
       mock_attr: Which attributes's mock is being referenced.
     """
-    result = cros_build_lib.CommandResult(
+    result = cros_build_lib.CompletedProcess(
         returncode=returncode, stdout=stdout, stderr=stderr)
     self._results[mock_attr].AddResultForParams(
         (cmd,), result, kwargs=kwargs, side_effect=side_effect, strict=strict)

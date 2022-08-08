@@ -113,7 +113,7 @@ class RemoteShMock(partial_mock.PartialCmdMock):
     """Simulates a RemoteSh invocation.
 
     Returns:
-      A CommandResult object with an additional member |rc_mock| to
+      A CompletedProcess object with an additional member |rc_mock| to
       enable examination of the underlying run() function call.
     """
     result = self._results['RemoteSh'].LookupResult(

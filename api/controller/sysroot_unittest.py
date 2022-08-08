@@ -411,7 +411,7 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase,
           datetime.datetime(2021, 6, 9, 16, 20, 0))
 
     err = sysroot_lib.ToolchainInstallError(
-        'Error', cros_build_lib.CommandResult(), tc_info=err_cpvs)
+        'Error', cros_build_lib.CompletedProcess(), tc_info=err_cpvs)
     self.PatchObject(sysroot_service, 'InstallToolchain', side_effect=err)
 
     rc = sysroot_controller.InstallToolchain(in_proto, out_proto,
@@ -810,7 +810,7 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
           datetime.datetime(2021, 6, 9, 16, 20, 0))
     # Force error to be raised with the packages.
     error = sysroot_lib.PackageInstallError(
-        'Error', cros_build_lib.CommandResult(), packages=err_cpvs)
+        'Error', cros_build_lib.CompletedProcess(), packages=err_cpvs)
     self.PatchObject(sysroot_service, 'BuildPackages', side_effect=error)
 
     rc = sysroot_controller.InstallPackages(in_proto, out_proto,
@@ -835,7 +835,7 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
 
     # Force error to be raised with no packages.
     error = sysroot_lib.PackageInstallError(
-        'Error', cros_build_lib.CommandResult(), packages=[])
+        'Error', cros_build_lib.CompletedProcess(), packages=[])
     self.PatchObject(sysroot_service, 'BuildPackages', side_effect=error)
 
     rc = sysroot_controller.InstallPackages(in_proto, out_proto,

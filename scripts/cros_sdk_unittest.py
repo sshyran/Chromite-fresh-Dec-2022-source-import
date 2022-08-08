@@ -67,13 +67,13 @@ class CrosSdkUtilsTest(cros_test_lib.MockTempDirTestCase):
     m = self.PatchObject(retry_util, 'RunCurl')
     with self.assertRaises(ValueError):
       cros_sdk.FetchRemoteTarballs(self.tempdir, [])
-    m.return_value = cros_build_lib.CommandResult(stdout=b'Foo: bar\n')
+    m.return_value = cros_build_lib.CompletedProcess(stdout=b'Foo: bar\n')
     with self.assertRaises(ValueError):
       cros_sdk.FetchRemoteTarballs(self.tempdir, ['gs://x.tar'])
 
   def testFetchRemoteTarballsSuccess(self):
     """Test FetchRemoteTarballs with a successful download."""
-    curl = cros_build_lib.CommandResult(stdout=(
+    curl = cros_build_lib.CompletedProcess(stdout=(
         b'HTTP/1.0 200\n'
         b'Foo: bar\n'
         b'Content-Length: 100\n'
