@@ -1,7 +1,6 @@
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Common python commands used by various internal build scripts."""
 
 from collections import namedtuple
@@ -16,6 +15,7 @@ from chromite.utils import key_value_store
 AcquireResult = namedtuple('AcquireResult', ['result', 'reason'])
 
 MINOR_VERSION = 'PAYLOAD_MINOR_VERSION'
+
 
 def ListdirFullpath(directory):
   """Return all files in a directory with full pathnames.
@@ -120,6 +120,7 @@ def ReadLsbRelease(sysroot):
 
   return lsb_release
 
+
 def ReadMinorVersion(sysroot: str):
   """Reads the /etc/update_engine.conf file out of the given sysroot.
 
@@ -135,6 +136,7 @@ def ReadMinorVersion(sysroot: str):
   if MINOR_VERSION in versions:
     return versions.get(MINOR_VERSION)
   return None
+
 
 class MemoryConsumptionSemaphore(object):
   """A semaphore that tries to acquire only if there is enough memory available.
@@ -152,7 +154,8 @@ class MemoryConsumptionSemaphore(object):
   """
   SYSTEM_POLLING_INTERVAL_SECONDS = 0.5
 
-  def __init__(self, system_available_buffer_bytes: Optional[int] = None,
+  def __init__(self,
+               system_available_buffer_bytes: Optional[int] = None,
                single_proc_max_bytes: Optional[int] = None,
                quiescence_time_seconds: Optional[float] = None,
                unchecked_acquires: int = 0,
@@ -163,8 +166,8 @@ class MemoryConsumptionSemaphore(object):
     Args:
       system_available_buffer_bytes: The number of bytes to reserve on the
         system as a buffer against moving into swap (or OOM).
-      single_proc_max_bytes: The number of bytes we expect a process to
-        consume on the system.
+      single_proc_max_bytes: The number of bytes we expect a process to consume
+        on the system.
       quiescence_time_seconds: The number of seconds to wait at a minimum
         between acquires. The purpose is to ensure the subprocess begins to
         consume a stable amount of memory.
@@ -280,9 +283,9 @@ class MemoryConsumptionSemaphore(object):
       time.sleep(MemoryConsumptionSemaphore.SYSTEM_POLLING_INTERVAL_SECONDS)
 
     # There was no moment before timeout where we could have ran the task.
-    return AcquireResult(False,
-                         'Timed out (due to quiescence, '
-                         'total max, or avail memory)')
+    return AcquireResult(
+        False, 'Timed out (due to quiescence, '
+        'total max, or avail memory)')
 
   def release(self):
     """Releases a single acquire."""

@@ -1,7 +1,6 @@
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Test Utils library."""
 
 import multiprocessing
@@ -56,22 +55,25 @@ class TestUtils(cros_test_lib.TempDirTestCase):
     osutils.Touch(file_a)
     osutils.Touch(file_b)
 
-    self.assertEqual(sorted(utils.ListdirFullpath(self.tempdir)),
-                     [file_a, file_b])
+    self.assertEqual(
+        sorted(utils.ListdirFullpath(self.tempdir)), [file_a, file_b])
 
   def testReadLsbRelease(self):
     """Tests that we correctly read the lsb release file."""
     path = os.path.join(self.tempdir, 'etc', 'lsb-release')
     osutils.WriteFile(path, 'key=value\nfoo=bar\n', makedirs=True)
 
-    self.assertEqual(utils.ReadLsbRelease(self.tempdir),
-                     {'key': 'value', 'foo': 'bar'})
+    self.assertEqual(
+        utils.ReadLsbRelease(self.tempdir), {
+            'key': 'value',
+            'foo': 'bar'
+        })
 
   def testReadMinorVersion(self):
     """Tests that we correctly read the update_engine.conf file."""
     path = os.path.join(self.tempdir, 'etc', 'update_engine.conf')
-    osutils.WriteFile(path,'PAYLOAD_VERSION=2\nPAYLOAD_MINOR_VERSION=6\n',
-                      makedirs=True)
+    osutils.WriteFile(
+        path, 'PAYLOAD_VERSION=2\nPAYLOAD_MINOR_VERSION=6\n', makedirs=True)
 
     self.assertEqual(utils.ReadMinorVersion(self.tempdir), '6')
 
@@ -79,13 +81,13 @@ class TestUtils(cros_test_lib.TempDirTestCase):
     """Tests that we block on not having enough memory."""
     # You should never get 2**64 bytes.
     _semaphore = utils.MemoryConsumptionSemaphore(
-        system_available_buffer_bytes=2 ** 64,
-        single_proc_max_bytes=2 ** 64,
+        system_available_buffer_bytes=2**64,
+        single_proc_max_bytes=2**64,
         quiescence_time_seconds=0.0)
 
     # You can't get that much.
-    self.assertEqual(_semaphore.acquire(
-        ACQUIRE_SHOULD_BLOCK_TIMEOUT).result, False)
+    self.assertEqual(
+        _semaphore.acquire(ACQUIRE_SHOULD_BLOCK_TIMEOUT).result, False)
 
   def testNoMemoryConsumptionSemaphore(self):
     """Tests that you can acquire a very little amount of memory."""
@@ -222,8 +224,9 @@ class TestUtils(cros_test_lib.TempDirTestCase):
       with exit_lock:
         good_thread_exits[0] = good_thread_exits[0] + 1
 
-    threads = [threading.Thread(target=hammer_semaphore)
-               for _ in range(test_threads)]
+    threads = [
+        threading.Thread(target=hammer_semaphore) for _ in range(test_threads)
+    ]
     for x in threads:
       x.daemon = True
       x.start()
@@ -289,8 +292,10 @@ class TestUtils(cros_test_lib.TempDirTestCase):
       with good_process_exits.get_lock():
         good_process_exits.value = good_process_exits.value + 1
 
-    processes = [multiprocessing.Process(target=hammer_semaphore)
-                 for _ in range(n_processes)]
+    processes = [
+        multiprocessing.Process(target=hammer_semaphore)
+        for _ in range(n_processes)
+    ]
 
     for p in processes:
       p.daemon = True

@@ -1,7 +1,6 @@
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Test signer_payloads_client library."""
 
 import base64
@@ -24,7 +23,6 @@ from chromite.lib.paygen import signer_payloads_client
 
 pytestmark = cros_test_lib.pytestmark_inside_only
 
-
 # pylint: disable=protected-access
 
 
@@ -37,10 +35,7 @@ class SignerPayloadsClientGoogleStorageTest(gs_unittest.AbstractGSContextTest,
 
   def setUp(self):
     """Setup for tests, and store off some standard expected values."""
-    self.hash_names = [
-        '1.payload.hash',
-        '2.payload.hash',
-        '3.payload.hash']
+    self.hash_names = ['1.payload.hash', '2.payload.hash', '3.payload.hash']
 
     self.build_uri = ('gs://foo-bucket/foo-channel/foo-board/foo-version/'
                       'payloads/signing/foo-unique')
@@ -58,10 +53,11 @@ class SignerPayloadsClientGoogleStorageTest(gs_unittest.AbstractGSContextTest,
     """Test helper method to create a client with standard arguments."""
 
     client = signer_payloads_client.SignerPayloadsClientGoogleStorage(
-        build=gspaths.Build(channel='foo-channel',
-                            board='foo-board',
-                            version='foo-version',
-                            bucket='foo-bucket'),
+        build=gspaths.Build(
+            channel='foo-channel',
+            board='foo-board',
+            version='foo-version',
+            bucket='foo-bucket'),
         work_dir=self.tempdir,
         unique='foo-unique',
         ctx=self.ctx)
@@ -74,13 +70,10 @@ class SignerPayloadsClientGoogleStorageTest(gs_unittest.AbstractGSContextTest,
 
     expected_build_uri = self.build_uri
 
-    self.assertEqual(
-        client.signing_base_dir,
-        expected_build_uri)
+    self.assertEqual(client.signing_base_dir, expected_build_uri)
 
-    self.assertEqual(
-        client.archive_uri,
-        expected_build_uri + '/payload.hash.tar.bz2')
+    self.assertEqual(client.archive_uri,
+                     expected_build_uri + '/payload.hash.tar.bz2')
 
   def testWorkDir(self):
     """Test that the work_dir is generated/passed correctly."""
@@ -124,8 +117,7 @@ class SignerPayloadsClientGoogleStorageTest(gs_unittest.AbstractGSContextTest,
 
     # Fake lock failed then acquired.
     lock = self.PatchObject(gslock, 'Lock', autospec=True)
-    lock.Acquire.side_effect = [gslock.LockNotAcquired(),
-                                mock.MagicMock()]
+    lock.Acquire.side_effect = [gslock.LockNotAcquired(), mock.MagicMock()]
 
     # Do the work.
     client._CleanSignerFilesByKeyset(hashes, keyset)
@@ -159,7 +151,6 @@ class SignerPayloadsClientGoogleStorageTest(gs_unittest.AbstractGSContextTest,
         'gs://foo-bucket/tobesigned/45,foo-channel,foo-board,foo-version,'
         'payloads,signing,foo-unique,'
         'foo-keys-1.payload.signer.instructions',
-
         'gs://foo-bucket/tobesigned/45,foo-channel,foo-board,foo-version,'
         'payloads,signing,foo-unique,'
         'foo-keys-2.payload.signer.instructions',
@@ -188,8 +179,9 @@ class SignerPayloadsClientGoogleStorageTest(gs_unittest.AbstractGSContextTest,
     client._CleanSignerFiles(hashes, keysets)
 
     # Check created with lock_uri1, lock_uri2.
-    self.assertEqual(lock.call_args_list,
-                     [mock.call(lock_uri1), mock.call(lock_uri2)])
+    self.assertEqual(
+        lock.call_args_list,
+        [mock.call(lock_uri1), mock.call(lock_uri2)])
 
     # Verify expected removals.
     for uri in expected_removals:
@@ -205,8 +197,7 @@ class SignerPayloadsClientGoogleStorageTest(gs_unittest.AbstractGSContextTest,
     signature_uri = client._CreateInstructionsURI('keyset_foo')
 
     expected_signature_uri = (
-        self.build_uri +
-        '/keyset_foo.payload.signer.instructions')
+        self.build_uri + '/keyset_foo.payload.signer.instructions')
 
     self.assertEqual(signature_uri, expected_signature_uri)
 
@@ -226,8 +217,7 @@ class SignerPayloadsClientGoogleStorageTest(gs_unittest.AbstractGSContextTest,
 
     client = self.createStandardClient()
 
-    signature_uris = client._CreateSignatureURIs(self.hash_names,
-                                                 'keyset_foo')
+    signature_uris = client._CreateSignatureURIs(self.hash_names, 'keyset_foo')
 
     expected_signature_uris = [
         self.build_uri + '/1.payload.hash.keyset_foo.signed.bin',
@@ -255,8 +245,7 @@ class SignerPayloadsClientGoogleStorageTest(gs_unittest.AbstractGSContextTest,
         tmp_dir = tempfile.mkdtemp()
 
         cmd = ['tar', '-xjf', archive_file.name]
-        cros_build_lib.run(
-            cmd, stdout=True, stderr=True, cwd=tmp_dir)
+        cros_build_lib.run(cmd, stdout=True, stderr=True, cwd=tmp_dir)
 
         # Check that the expected (and only the expected) contents are present
         extracted_file_names = os.listdir(tmp_dir)
@@ -302,9 +291,7 @@ archive = payload.hash.tar.bz2
 # correct versionrev "R24-1.2.3"
 version = foo-version
 versionrev = foo-version
-""" % ' '.join(['1.payload.hash',
-                '2.payload.hash',
-                '3.payload.hash'])
+""" % ' '.join(['1.payload.hash', '2.payload.hash', '3.payload.hash'])
 
     self.assertEqual(instructions, expected_instructions)
 
@@ -334,8 +321,7 @@ versionrev = foo-version
     self.assertTrue(client._WaitForSignatures(uris, timeout=0.02))
 
     # Make sure it really looked for every URL listed.
-    self.assertEqual(exists.call_args_list,
-                     [mock.call(u) for u in uris])
+    self.assertEqual(exists.call_args_list, [mock.call(u) for u in uris])
 
   def testWaitForSignaturesNever(self):
     """Test that we can correctly timeout waiting for a list of URIs."""
@@ -356,22 +342,26 @@ class SignerPayloadsClientIntegrationTest(cros_test_lib.MockTempDirTestCase):
     # This is in the real production chromeos-releases, but the listed
     # build has never, and will never exist.
     self.client = signer_payloads_client.SignerPayloadsClientGoogleStorage(
-        gspaths.Build(channel='test-channel',
-                      board='crostools-client',
-                      version='Rxx-Ryy',
-                      bucket='chromeos-releases'),
+        gspaths.Build(
+            channel='test-channel',
+            board='crostools-client',
+            version='Rxx-Ryy',
+            bucket='chromeos-releases'),
         work_dir=self.tempdir)
 
   def testDownloadSignatures(self):
     """Test that we can correctly download a list of URIs."""
+
     def fake_copy(uri, sig):
       """Just write the uri address to the content of the file."""
       osutils.WriteFile(sig, uri, mode='wb')
 
     self.PatchObject(self.client._ctx, 'Copy', side_effect=fake_copy)
 
-    uris = [b'gs://chromeos-releases-test/sigining-test/foo',
-            b'gs://chromeos-releases-test/sigining-test/bar']
+    uris = [
+        b'gs://chromeos-releases-test/sigining-test/foo',
+        b'gs://chromeos-releases-test/sigining-test/bar'
+    ]
     downloads = self.client._DownloadSignatures(uris)
     self.assertEqual(downloads, uris)
 
@@ -387,10 +377,11 @@ class SignerPayloadsClientIntegrationTest(cros_test_lib.MockTempDirTestCase):
     ctx.Remove(clean_uri, ignore_missing=True)
 
     try:
-      hashes = [b'0' * 32,
-                b'1' * 32,
-                (b'29834370e415b3124a926c903906f18b'
-                 b'3d52e955147f9e6accd67e9512185a63')]
+      hashes = [
+          b'0' * 32, b'1' * 32,
+          (b'29834370e415b3124a926c903906f18b'
+           b'3d52e955147f9e6accd67e9512185a63')
+      ]
 
       keysets = ['update_signer']
 
@@ -403,7 +394,6 @@ class SignerPayloadsClientIntegrationTest(cros_test_lib.MockTempDirTestCase):
            'f52b85c3f9774edc376902458344d1c1cd72bc932f033c076c76fee2400716fe'
            '652306871ba923021ce245e0c778ad9e0e50e87a169b2aea338c4dc8b5c0c716'
            'aabfb6133482e8438b084a09503db27ca546e910f8938f7805a8a76a3b0d0241',),
-
           ('2d909ca5b33a7fb6f2323ca0bf9de2e4f2266c73da4b6948a517dffa96783e08'
            'ca36411d380f6e8a20011f599d8d73576b2a141a57c0873d089726e24f62c7e0'
            '346ba5fbde68414b0f874b627fb1557a6e9658c8fac96c54f458161ea770982b'
@@ -412,7 +402,6 @@ class SignerPayloadsClientIntegrationTest(cros_test_lib.MockTempDirTestCase):
            '968c973f698db1ce59f6871303dcdbe839400c5df4d2e6e505d68890010a4459'
            '6ca9fee77f4db6ea3448d98018437c319fc8c5f4603ef94b04e3a4eafa206b73'
            '91a2640d43128310285bc0f1c7e5060d37c433d663b1c6f01110b9a43f2a74f4',),
-
           ('23791c99ab937f1ae5d4988afc9ceca39c290ac90e3da9f243f9a0b1c86c3c32'
            'ab7241d43dfc233da412bab989cf02f15a01fe9ea4b2dc7dc9182117547836d6'
            '9310af3aa005ee3a6deb9602bc676dcc103bf3f7831d64ab844b4785c5c8b4b1'
@@ -422,8 +411,8 @@ class SignerPayloadsClientIntegrationTest(cros_test_lib.MockTempDirTestCase):
            'c83702179f69f5c6eca4630807fbc4ab6241017e0942b15feada0b240e9729bf'
            '33bf456bd419da63302477e147963550a45c6cf60925ff48ad7b309fa158dcb2',))
 
-      expected_sigs = [[base64.b16decode(x[0], True)]
-                       for x in expected_sigs_hex]
+      expected_sigs = [[base64.b16decode(x[0], True)] for x in expected_sigs_hex
+                      ]
 
       all_signatures = self.client.GetHashSignatures(hashes, keysets)
 
@@ -446,8 +435,7 @@ class SignerPayloadsClientIntegrationTest(cros_test_lib.MockTempDirTestCase):
     ctx.Remove(clean_uri, ignore_missing=True)
 
     try:
-      hashes = [b'0' * 32,
-                b'0' * 32]
+      hashes = [b'0' * 32, b'0' * 32]
 
       keysets = ['update_signer']
 
@@ -460,7 +448,6 @@ class SignerPayloadsClientIntegrationTest(cros_test_lib.MockTempDirTestCase):
            'f52b85c3f9774edc376902458344d1c1cd72bc932f033c076c76fee2400716fe'
            '652306871ba923021ce245e0c778ad9e0e50e87a169b2aea338c4dc8b5c0c716'
            'aabfb6133482e8438b084a09503db27ca546e910f8938f7805a8a76a3b0d0241',),
-
           ('ba4c7a86b786c609bf6e4c5fb9c47525608678caa532bea8acc457aa6dd32b43'
            '5f094b331182f2e167682916990c40ff7b6b0128de3fa45ad0fd98041ec36d6f'
            '63b867bcf219804200616590a41a727c2685b48340efb4b480f1ef448fc7bc3f'
@@ -470,8 +457,8 @@ class SignerPayloadsClientIntegrationTest(cros_test_lib.MockTempDirTestCase):
            '652306871ba923021ce245e0c778ad9e0e50e87a169b2aea338c4dc8b5c0c716'
            'aabfb6133482e8438b084a09503db27ca546e910f8938f7805a8a76a3b0d0241',))
 
-      expected_sigs = [[base64.b16decode(x[0], True)]
-                       for x in expected_sigs_hex]
+      expected_sigs = [[base64.b16decode(x[0], True)] for x in expected_sigs_hex
+                      ]
 
       all_signatures = self.client.GetHashSignatures(hashes, keysets)
 
@@ -485,6 +472,7 @@ class SignerPayloadsClientIntegrationTest(cros_test_lib.MockTempDirTestCase):
 
 class UnofficialPayloadSignerTest(cros_test_lib.TestCase):
   """Test suit for testing unofficial local payload signer."""
+
   def setUp(self):
     # UnofficialSignerPayloadsClient need a temporary directory inside chroot so
     # cros_test_lib.TempDirTestCase will not work if we run this unittest

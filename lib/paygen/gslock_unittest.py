@@ -1,7 +1,6 @@
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Test gslock library."""
 
 import multiprocessing
@@ -71,10 +70,8 @@ def _InProcessDataUpdate(lock_uri_data_uri):
   This helper has to be pickleable, so can't be a member of the test class.
 
   Args:
-    lock_uri_data_uri: Tuple containing (lock_uri, data_uri). Passed as
-                       a tuple, since multiprocessing.Pool.map only allows
-                       a single argument in.
-
+    lock_uri_data_uri: Tuple containing (lock_uri, data_uri). Passed as a tuple,
+      since multiprocessing.Pool.map only allows a single argument in.
     lock_uri: URI of the lock to acquire.
     data_uri: URI of the data file to create/increment.
 
@@ -227,8 +224,7 @@ class GSLockTest(cros_test_lib.MockTestCase):
     with gs.TemporaryURL('gslock') as lock_uri, multiprocessing.Pool(
         processes=count) as pool:
       data_uri = lock_uri + '.data'
-      results = pool.map(_InProcessDataUpdate,
-                         [(lock_uri, data_uri)] * count)
+      results = pool.map(_InProcessDataUpdate, [(lock_uri, data_uri)] * count)
 
       self.assertEqual(self.ctx.Cat(data_uri), str(count))
 

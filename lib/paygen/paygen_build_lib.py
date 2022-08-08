@@ -1,7 +1,6 @@
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """PayGen - Automatic Payload Generation.
 
 This library processes a single build at a time, and decides which payloads
@@ -56,8 +55,11 @@ PAYLOAD_TYPE_FSI = 'FSI'
 PAYLOAD_TYPE_OMAHA = 'OMAHA'
 PAYLOAD_TYPE_MILESTONE = 'MILESTONE'
 PAYLOAD_TYPE_STEPPING_STONE = 'STEPPING_STONE'
-PAYLOAD_TYPES = [PAYLOAD_TYPE_N2N, PAYLOAD_TYPE_FSI, PAYLOAD_TYPE_OMAHA,
-                 PAYLOAD_TYPE_MILESTONE, PAYLOAD_TYPE_STEPPING_STONE]
+PAYLOAD_TYPES = [
+    PAYLOAD_TYPE_N2N, PAYLOAD_TYPE_FSI, PAYLOAD_TYPE_OMAHA,
+    PAYLOAD_TYPE_MILESTONE, PAYLOAD_TYPE_STEPPING_STONE
+]
+
 
 class Error(Exception):
   """Exception base class for this module."""
@@ -188,9 +190,10 @@ def _FilterForBasic(artifacts):
 
 def _FilterForUnsignedImageArchives(artifacts):
   """Return only instances of UnsignedImageArchive from a list of artifacts."""
-  return [x for x in artifacts
-          if gspaths.IsUnsignedImageArchive(x) or
-          gspaths.IsUnsignedMiniOSImageArchive(x)]
+  return [
+      x for x in artifacts if gspaths.IsUnsignedImageArchive(x) or
+      gspaths.IsUnsignedMiniOSImageArchive(x)
+  ]
 
 
 def _FilterForImageType(artifacts, image_type):
@@ -201,14 +204,16 @@ def _FilterForImageType(artifacts, image_type):
 def _FilterForValidImageType(artifacts):
   """Return only images with image types that paygen supports."""
   v = gspaths.ChromeosReleases.UNSIGNED_IMAGE_TYPES
-  return functools.reduce(
-      operator.add, [_FilterForImageType(artifacts, x) for x in v])
+  return functools.reduce(operator.add,
+                          [_FilterForImageType(artifacts, x) for x in v])
 
 
 def _FilterForTest(artifacts):
   """Return only test images archives."""
-  return [i for i in _FilterForUnsignedImageArchives(artifacts)
-          if i.image_type == 'test']
+  return [
+      i for i in _FilterForUnsignedImageArchives(artifacts)
+      if i.image_type == 'test'
+  ]
 
 
 def DefaultPayloadUri(payload, random_str=None):
@@ -241,25 +246,29 @@ def DefaultPayloadUri(payload, random_str=None):
   elif gspaths.IsMiniOSImage(payload.tgt_image):
     # Signed MiniOS payload.
     return gspaths.ChromeosReleases.MiniOSPayloadUri(
-        payload.build, random_str=random_str, key=payload.tgt_image.key,
+        payload.build,
+        random_str=random_str,
+        key=payload.tgt_image.key,
         image_channel=payload.tgt_image.image_channel,
-        image_version=payload.tgt_image.image_version, src_version=src_version)
+        image_version=payload.tgt_image.image_version,
+        src_version=src_version)
   elif gspaths.IsImage(payload.tgt_image):
     # Signed payload.
     return gspaths.ChromeosReleases.PayloadUri(
-        payload.build, random_str=random_str, key=payload.tgt_image.key,
+        payload.build,
+        random_str=random_str,
+        key=payload.tgt_image.key,
         image_channel=payload.tgt_image.image_channel,
-        image_version=payload.tgt_image.image_version, src_version=src_version)
+        image_version=payload.tgt_image.image_version,
+        src_version=src_version)
   elif gspaths.IsUnsignedMiniOSImageArchive(payload.tgt_image):
     # Unsigned test MiniOS payload.
-    return gspaths.ChromeosReleases.MiniOSPayloadUri(payload.build,
-                                                     random_str=random_str,
-                                                     src_version=src_version)
+    return gspaths.ChromeosReleases.MiniOSPayloadUri(
+        payload.build, random_str=random_str, src_version=src_version)
   elif gspaths.IsUnsignedImageArchive(payload.tgt_image):
     # Unsigned test payload.
-    return gspaths.ChromeosReleases.PayloadUri(payload.build,
-                                               random_str=random_str,
-                                               src_version=src_version)
+    return gspaths.ChromeosReleases.PayloadUri(
+        payload.build, random_str=random_str, src_version=src_version)
   else:
     raise Error('Unknown image type %s' % type(payload.tgt_image))
 
@@ -288,8 +297,10 @@ def _FilterNonPayloadUris(payload_uris):
   Returns:
     A filtered list of URIs.
   """
-  return [uri for uri in payload_uris
-          if not (uri.endswith('.log') or uri.endswith('.metadata-signature'))]
+  return [
+      uri for uri in payload_uris
+      if not (uri.endswith('.log') or uri.endswith('.metadata-signature'))
+  ]
 
 
 # If the downloaded JSON is bad, a ValueError exception will be rasied.
@@ -319,23 +330,24 @@ class PayloadTest(utils.RestrictedAttrDict):
 
   Attributes:
     payload: A gspaths.Payload object describing the payload to be tested.
-
-    src_channel: The channel of the image to test updating from. Required
-                 if the payload is a full payload, required to be None if
-                 it's a delta.
-    src_version: The version of the image to test updating from. Required
-                 if the payload is a full payload, required to be None if
-                 it's a delta.
+    src_channel: The channel of the image to test updating from. Required if the
+      payload is a full payload, required to be None if it's a delta.
+    src_version: The version of the image to test updating from. Required if the
+      payload is a full payload, required to be None if it's a delta.
     payload_type: The type of update we are doing with this payload. Possible
-                  types are in PAYLOAD_TYPES.
+      types are in PAYLOAD_TYPES.
     applicable_models: A list of models that a paygen test should run against.
   """
   _slots = ('payload', 'src_channel', 'src_version', 'payload_type',
             'applicable_models')
   _name = 'Payload Test'
 
-  def __init__(self, payload, src_channel=None, src_version=None,
-               payload_type=PAYLOAD_TYPE_N2N, applicable_models=None):
+  def __init__(self,
+               payload,
+               src_channel=None,
+               src_version=None,
+               payload_type=PAYLOAD_TYPE_N2N,
+               applicable_models=None):
     assert bool(src_channel) == bool(src_version), (
         'src_channel(%s), src_version(%s) must both be set, or not set' %
         (src_channel, src_version))
@@ -350,9 +362,12 @@ class PayloadTest(utils.RestrictedAttrDict):
 
     assert payload_type is not None and payload_type in PAYLOAD_TYPES
 
-    super().__init__(payload=payload, src_channel=src_channel,
-                     src_version=src_version, payload_type=payload_type,
-                     applicable_models=applicable_models)
+    super().__init__(
+        payload=payload,
+        src_channel=src_channel,
+        src_version=src_version,
+        payload_type=payload_type,
+        applicable_models=applicable_models)
 
 
 class PaygenBuild(object):
@@ -373,8 +388,12 @@ class PaygenBuild(object):
   # Cache of full test payloads for a given version.
   _version_to_full_test_payloads = {}
 
-
-  def __init__(self, build, payload_build, work_dir, site_config, dry_run=False,
+  def __init__(self,
+               build,
+               payload_build,
+               work_dir,
+               site_config,
+               dry_run=False,
                skip_delta_payloads=False):
     """Initializer."""
     self._build = build
@@ -399,8 +418,8 @@ class PaygenBuild(object):
 
     Args:
       board: Board name in builder format (not release) or None for '*'
-      channel: Channel name in 'stable' or 'stable-channel' format.
-               Or None for '*'.
+      channel: Channel name in 'stable' or 'stable-channel' format. Or None for
+        '*'.
 
     Returns:
       List of GE delta values matching specification. Sample delta value:
@@ -466,7 +485,8 @@ class PaygenBuild(object):
     # Map chromeos-releases board name to its chromeos-image-archive equivalent.
     archive_board_candidates = set([
         archive_board for archive_board in self._site_config.GetBoards()
-        if archive_board.replace('_', '-') == board])
+        if archive_board.replace('_', '-') == board
+    ])
     if not archive_board_candidates:
       raise ArchiveError('could not find build board name for %s' % board)
     elif len(archive_board_candidates) > 1:
@@ -487,10 +507,8 @@ class PaygenBuild(object):
     uri_parts = urllib.parse.urlsplit(archive_build_file_uri_list[0])
     archive_build_path = os.path.dirname(uri_parts.path)
     archive_build = archive_build_path.strip('/')
-    archive_build_uri = urllib.parse.urlunsplit((uri_parts.scheme,
-                                                 uri_parts.netloc,
-                                                 archive_build_path,
-                                                 '', ''))
+    archive_build_uri = urllib.parse.urlunsplit(
+        (uri_parts.scheme, uri_parts.netloc, archive_build_path, '', ''))
 
     return archive_board, archive_build, archive_build_uri
 
@@ -561,8 +579,8 @@ class PaygenBuild(object):
     if any(not x.minios for x in images):
       raise BuildCorrupt(f'{build} has unexpected MiniOS images: {images}.')
 
-  @retry_util.WithRetry(max_retry=3, exception=ImageMissing,
-                        sleep=BUILD_DISCOVER_RETRY_SLEEP)
+  @retry_util.WithRetry(
+      max_retry=3, exception=ImageMissing, sleep=BUILD_DISCOVER_RETRY_SLEEP)
   def _DiscoverSignedImages(self, build, os_type):
     """Return a list of images associated with a given build.
 
@@ -586,8 +604,10 @@ class PaygenBuild(object):
         build, key='*', image_type='*', image_channel='*', image_version='*')
 
     image_uris = self._ctx.LS(search_uri)
-    images = [gspaths.ChromeosReleases.ParseImageUri(uri, os_type=os_type)
-              for uri in image_uris]
+    images = [
+        gspaths.ChromeosReleases.ParseImageUri(uri, os_type=os_type)
+        for uri in image_uris
+    ]
 
     # Unparsable URIs will result in Nones; filter them out.
     images = [i for i in images if i]
@@ -599,8 +619,8 @@ class PaygenBuild(object):
 
     return images
 
-  @retry_util.WithRetry(max_retry=3, exception=ImageMissing,
-                        sleep=BUILD_DISCOVER_RETRY_SLEEP)
+  @retry_util.WithRetry(
+      max_retry=3, exception=ImageMissing, sleep=BUILD_DISCOVER_RETRY_SLEEP)
   def _DiscoverMiniOSSignedImages(self, build):
     """Return a list of images associated with a given build.
 
@@ -623,8 +643,9 @@ class PaygenBuild(object):
         build, key='*', image_type='*', image_channel='*', image_version='*')
 
     image_uris = self._ctx.LS(search_uri)
-    images = [gspaths.ChromeosReleases.ParseMiniOSImageUri(x)
-              for x in image_uris]
+    images = [
+        gspaths.ChromeosReleases.ParseMiniOSImageUri(x) for x in image_uris
+    ]
 
     # Unparsable URIs will result in Nones; filter them out.
     images = [x for x in images if x]
@@ -636,8 +657,8 @@ class PaygenBuild(object):
 
     return images
 
-  @retry_util.WithRetry(max_retry=3, exception=ImageMissing,
-                        sleep=BUILD_DISCOVER_RETRY_SLEEP)
+  @retry_util.WithRetry(
+      max_retry=3, exception=ImageMissing, sleep=BUILD_DISCOVER_RETRY_SLEEP)
   def _DiscoverTestImage(self, build, os_type):
     """Return a list of unsigned image archives associated with a given build.
 
@@ -652,13 +673,14 @@ class PaygenBuild(object):
       BuildCorrupt: Raised if unexpected images are found.
       ImageMissing: Raised if expected images are missing.
     """
-    search_uri = gspaths.ChromeosReleases.UnsignedImageUri(build, milestone='*',
-                                                           image_type='test')
+    search_uri = gspaths.ChromeosReleases.UnsignedImageUri(
+        build, milestone='*', image_type='test')
 
     image_uris = self._ctx.LS(search_uri)
-    images = [gspaths.ChromeosReleases.ParseUnsignedImageUri(uri,
-                                                             os_type=os_type)
-              for uri in image_uris]
+    images = [
+        gspaths.ChromeosReleases.ParseUnsignedImageUri(uri, os_type=os_type)
+        for uri in image_uris
+    ]
 
     # Unparsable URIs will result in Nones; filter them out.
     images = [i for i in images if i]
@@ -672,8 +694,8 @@ class PaygenBuild(object):
 
     return images[0]
 
-  @retry_util.WithRetry(max_retry=3, exception=ImageMissing,
-                        sleep=BUILD_DISCOVER_RETRY_SLEEP)
+  @retry_util.WithRetry(
+      max_retry=3, exception=ImageMissing, sleep=BUILD_DISCOVER_RETRY_SLEEP)
   def _DiscoverDLCImages(self, build):
     """Return a list of DLC image archives associated with a given build.
 
@@ -693,8 +715,9 @@ class PaygenBuild(object):
     except gs.GSNoSuchKey:
       logging.info('No DLC modules exist: %s', search_uri)
 
-    images = [gspaths.ChromeosReleases.ParseDLCImageUri(uri)
-              for uri in image_uris]
+    images = [
+        gspaths.ChromeosReleases.ParseDLCImageUri(uri) for uri in image_uris
+    ]
 
     # Unparsable URIs will result in Nones; filter them out.
     images = [i for i in images if i is not None]
@@ -732,8 +755,9 @@ class PaygenBuild(object):
         assert len(filtered_target) == 1, 'Unexpected: %s.' % filtered_target
 
         # A delta from each previous image to current image.
-        results.append(gspaths.Payload(tgt_image=filtered_target[0],
-                                       src_image=filtered_source[0]))
+        results.append(
+            gspaths.Payload(
+                tgt_image=filtered_target[0], src_image=filtered_source[0]))
 
     return results
 
@@ -758,9 +782,11 @@ class PaygenBuild(object):
         assert len(filtered_target) == 1, f'Unexpected: {filtered_target}.'
 
         # A delta from each previous image to current image.
-        results.append(gspaths.Payload(tgt_image=filtered_target[0],
-                                       src_image=filtered_source[0],
-                                       minios=True))
+        results.append(
+            gspaths.Payload(
+                tgt_image=filtered_target[0],
+                src_image=filtered_source[0],
+                minios=True))
 
     return results
 
@@ -782,8 +808,8 @@ class PaygenBuild(object):
       for image in images:
         if (source_image.dlc_id == image.dlc_id and
             source_image.dlc_package == image.dlc_package):
-          results.append(gspaths.Payload(tgt_image=image,
-                                         src_image=source_image))
+          results.append(
+              gspaths.Payload(tgt_image=image, src_image=source_image))
 
     return results
 
@@ -813,14 +839,14 @@ class PaygenBuild(object):
     try:
       # When discovering the images for our current build, they might not be
       # discoverable right away (GS eventual consistency). So, we retry.
-      images = self._DiscoverSignedImages(self._build,
-                                          os_type=gspaths.OSType.CROS)
-      minios_images = self._DiscoverSignedImages(self._build,
-                                                 os_type=gspaths.OSType.MINIOS)
-      test_image = self._DiscoverTestImage(self._build,
-                                           os_type=gspaths.OSType.CROS)
-      test_minios_image = self._DiscoverTestImage(self._build,
-                                                  os_type=gspaths.OSType.MINIOS)
+      images = self._DiscoverSignedImages(
+          self._build, os_type=gspaths.OSType.CROS)
+      minios_images = self._DiscoverSignedImages(
+          self._build, os_type=gspaths.OSType.MINIOS)
+      test_image = self._DiscoverTestImage(
+          self._build, os_type=gspaths.OSType.CROS)
+      test_minios_image = self._DiscoverTestImage(
+          self._build, os_type=gspaths.OSType.MINIOS)
       dlc_module_images = self._DiscoverDLCImages(self._build)
 
     except ImageMissing as e:
@@ -829,8 +855,9 @@ class PaygenBuild(object):
       logging.info(e)
       raise BuildNotReady()
 
-    _LogList('Images found', images + [test_image] + dlc_module_images +
-             minios_images + [test_minios_image])
+    _LogList(
+        'Images found', images + [test_image] + dlc_module_images +
+        minios_images + [test_minios_image])
 
     # Add full payloads for PreMP and MP (as needed).
     for i in images:
@@ -847,8 +874,9 @@ class PaygenBuild(object):
     # Add full test payload, and N2N test for it.
     full_test_payload = gspaths.Payload(tgt_image=test_image)
     payloads.append(full_test_payload)
-    payload_tests.append(PayloadTest(
-        full_test_payload, self._build.channel, self._build.version))
+    payload_tests.append(
+        PayloadTest(full_test_payload, self._build.channel,
+                    self._build.version))
 
     # Add MiniOS test payload.
     payloads.append(gspaths.Payload(tgt_image=test_minios_image, minios=True))
@@ -860,15 +888,19 @@ class PaygenBuild(object):
       payload_tests.append(PayloadTest(n2n_payload))
 
       # Add MiniOS n2n test delta.
-      payloads.append(gspaths.Payload(tgt_image=test_minios_image,
-                                      src_image=test_minios_image, minios=True))
+      payloads.append(
+          gspaths.Payload(
+              tgt_image=test_minios_image,
+              src_image=test_minios_image,
+              minios=True))
 
     # Add in the payloads GE wants us to generate.
     for source in self.GetPaygenJson(self._build.board, self._build.channel):
-      source_build = gspaths.Build(version=source['chrome_os_version'],
-                                   board=self._build.board,
-                                   channel=self._build.channel,
-                                   bucket=self._build.bucket)
+      source_build = gspaths.Build(
+          version=source['chrome_os_version'],
+          board=self._build.board,
+          channel=self._build.channel,
+          bucket=self._build.bucket)
 
       # Extract the source values we care about.
       logging.info('Considering: %s %s', source['delta_type'], source_build)
@@ -881,34 +913,36 @@ class PaygenBuild(object):
         logging.warning('Skipping. Newer than current build.')
         continue
 
-      source_images = self._DiscoverSignedImages(source_build,
-                                                 os_type=gspaths.OSType.CROS)
+      source_images = self._DiscoverSignedImages(
+          source_build, os_type=gspaths.OSType.CROS)
       source_minios_images = self._DiscoverSignedImages(
           source_build, os_type=gspaths.OSType.MINIOS)
-      source_test_image = self._DiscoverTestImage(source_build,
-                                                  os_type=gspaths.OSType.CROS)
+      source_test_image = self._DiscoverTestImage(
+          source_build, os_type=gspaths.OSType.CROS)
       source_test_minios_image = self._DiscoverTestImage(
           source_build, os_type=gspaths.OSType.MINIOS)
       source_dlc_module_images = self._DiscoverDLCImages(source_build)
 
-      _LogList('Images found (source)', (source_images + [source_test_image] +
-                                         source_dlc_module_images +
-                                         source_minios_images +
-                                         [source_test_minios_image]))
+      _LogList('Images found (source)',
+               (source_images + [source_test_image] + source_dlc_module_images +
+                source_minios_images + [source_test_minios_image]))
 
       applicable_models = source.get('applicable_models', None)
       if not self._skip_delta_payloads and source['generate_delta']:
         # Generate the signed deltas.
-        payloads.extend(self._DiscoverRequiredDeltasBuildToBuild(
-            source_images, images+[test_image]))
+        payloads.extend(
+            self._DiscoverRequiredDeltasBuildToBuild(source_images,
+                                                     images + [test_image]))
 
         # Generate MiniOS deltas.
-        payloads.extend(self._DiscoverRequiredMiniOSDeltasBuildToBuild(
-            source_minios_images, minios_images))
+        payloads.extend(
+            self._DiscoverRequiredMiniOSDeltasBuildToBuild(
+                source_minios_images, minios_images))
 
         # Generate DLC deltas.
-        payloads.extend(self._DiscoverRequiredDLCDeltasBuildToBuild(
-            source_dlc_module_images, dlc_module_images))
+        payloads.extend(
+            self._DiscoverRequiredDLCDeltasBuildToBuild(
+                source_dlc_module_images, dlc_module_images))
 
         # Generate the test delta.
         test_payload = gspaths.Payload(
@@ -917,21 +951,27 @@ class PaygenBuild(object):
 
         # Generate the test MiniOS delta.
         payloads.append(
-            gspaths.Payload(tgt_image=test_minios_image,
-                            src_image=source_test_minios_image,
-                            minios=True))
+            gspaths.Payload(
+                tgt_image=test_minios_image,
+                src_image=source_test_minios_image,
+                minios=True))
 
         if source['delta_payload_tests']:
-          payload_tests.append(PayloadTest(test_payload,
-                                           payload_type=source['delta_type'],
-                                           applicable_models=applicable_models))
+          payload_tests.append(
+              PayloadTest(
+                  test_payload,
+                  payload_type=source['delta_type'],
+                  applicable_models=applicable_models))
 
       if source['full_payload_tests']:
         # Test the full payload against this source version.
-        payload_tests.append(PayloadTest(
-            full_test_payload, source_build.channel, source_build.version,
-            payload_type=source['delta_type'],
-            applicable_models=applicable_models))
+        payload_tests.append(
+            PayloadTest(
+                full_test_payload,
+                source_build.channel,
+                source_build.version,
+                payload_type=source['delta_type'],
+                applicable_models=applicable_models))
 
     for p in payloads:
       p.build = self._payload_build
@@ -966,9 +1006,7 @@ class PaygenBuild(object):
     Raises:
       Any arbitrary exception raised by CreateAndUploadPayload.
     """
-    payloads_args = [(payload,
-                      self._ShouldSign(payload.tgt_image),
-                      True)
+    payloads_args = [(payload, self._ShouldSign(payload.tgt_image), True)
                      for payload in payloads]
 
     # Most of the operations in paygen for one single payload is single threaded
@@ -1004,8 +1042,11 @@ class PaygenBuild(object):
       # Serve from cache, if possible.
       return self._version_to_full_test_payloads[(channel, version)]
 
-    build = gspaths.Build(channel=channel, board=self._build.board,
-                          version=version, bucket=self._build.bucket)
+    build = gspaths.Build(
+        channel=channel,
+        board=self._build.board,
+        version=version,
+        bucket=self._build.bucket)
 
     payload_search_uri = gspaths.ChromeosReleases.PayloadUri(build, '*')
     payload_candidate = self._ctx.LS(payload_search_uri)
@@ -1013,8 +1054,10 @@ class PaygenBuild(object):
     # We create related files for each payload that have the payload name
     # plus these extensions. Skip these files.
     NOT_PAYLOAD = ('.json', '.log')
-    full_test_payloads = [u for u in payload_candidate
-                          if not any(u.endswith(n) for n in NOT_PAYLOAD)]
+    full_test_payloads = [
+        u for u in payload_candidate
+        if not any(u.endswith(n) for n in NOT_PAYLOAD)
+    ]
     # Store in cache.
     self._version_to_full_test_payloads[(channel, version)] = full_test_payloads
     return full_test_payloads
@@ -1037,39 +1080,43 @@ class PaygenBuild(object):
     # Discover the full test payload that corresponds to the source version.
     src_payload_uri_list = self._FindFullTestPayloads(src_channel, src_version)
     if not src_payload_uri_list:
-      logging.error('Cannot find full test payload for source version (%s), '
-                    'control file not generated', src_version)
+      logging.error(
+          'Cannot find full test payload for source version (%s), '
+          'control file not generated', src_version)
       raise PayloadTestError('cannot find source payload for testing %s' %
                              payload)
 
     if len(src_payload_uri_list) != 1:
-      logging.error('Found multiple (%d) full test payloads for source version '
-                    '(%s), control file not generated:\n%s',
-                    len(src_payload_uri_list), src_version,
-                    '\n'.join(src_payload_uri_list))
+      logging.error(
+          'Found multiple (%d) full test payloads for source version '
+          '(%s), control file not generated:\n%s', len(src_payload_uri_list),
+          src_version, '\n'.join(src_payload_uri_list))
       raise PayloadTestError('multiple source payloads found for testing %s' %
                              payload)
 
     src_payload_uri = src_payload_uri_list[0]
     logging.info('Source full test payload found at %s', src_payload_uri)
 
-    build = gspaths.Build(channel=src_channel, board=self._build.board,
-                          version=src_version, bucket=self._build.bucket)
+    build = gspaths.Build(
+        channel=src_channel,
+        board=self._build.board,
+        version=src_version,
+        bucket=self._build.bucket)
     release_archive_uri = gspaths.ChromeosReleases.BuildUri(build)
 
     # TODO(dgarrett): Remove if block after finishing crbug.com/523122
     stateful_uri = os.path.join(release_archive_uri, 'stateful.tgz')
     if not self._ctx.Exists(stateful_uri):
       logging.error('%s does not exist.', stateful_uri)
-      logging.error('Full test payload for source version (%s) exists, but '
-                    'stateful.tgz does not. Control file not generated',
-                    src_version)
+      logging.error(
+          'Full test payload for source version (%s) exists, but '
+          'stateful.tgz does not. Control file not generated', src_version)
       raise PayloadTestError('cannot find source stateful.tgz for testing %s' %
                              payload)
 
     return test_params.TestConfig(
         self._archive_board,
-        suite_name,               # Name of the test (use the suite name).
+        suite_name,  # Name of the test (use the suite name).
         bool(payload.src_image),  # Whether this is a delta.
         src_version,
         payload.tgt_image.build.version,
@@ -1079,7 +1126,6 @@ class PaygenBuild(object):
         source_archive_uri=release_archive_uri,
         payload_type=payload_test.payload_type,
         applicable_models=payload_test.applicable_models)
-
 
   def _EmitControlFile(self, payload_test_config, control_dump_dir):
     """Emit an Autotest control file for a given payload test config.
@@ -1129,7 +1175,8 @@ class PaygenBuild(object):
     logging.info('Packing %s in %s into %s', self.CONTROL_FILE_SUBDIR,
                  control_dir, tarball_path)
     cmd_result = cros_build_lib.CreateTarball(
-        tarball_path, control_dir,
+        tarball_path,
+        control_dir,
         compression=cros_build_lib.COMP_BZIP2,
         inputs=[self.CONTROL_FILE_SUBDIR])
     if cmd_result.returncode != 0:
@@ -1150,8 +1197,8 @@ class PaygenBuild(object):
     # the archive build name, which takes the form
     # boardname-release/R12-3456.78.9 (in this case it is 12).
     try:
-      build_mstone = int(self._archive_build.partition('/')[2]
-                         .partition('-')[0][1:])
+      build_mstone = int(
+          self._archive_build.partition('/')[2].partition('-')[0][1:])
       if build_mstone < RUN_SUITE_MIN_MSTONE:
         logging.warning('Build milestone < %s, test suite scheduling skipped',
                         RUN_SUITE_MIN_MSTONE)
@@ -1170,7 +1217,8 @@ class PaygenBuild(object):
     # runs.
     self._ctx.Remove(
         gspaths.ChromeosReleases.BuildPayloadsSigningUri(self._build),
-        recursive=True, ignore_missing=True)
+        recursive=True,
+        ignore_missing=True)
 
   def _FindExistingPayloads(self, payload):
     """Look to see if any matching payloads already exist.
@@ -1294,8 +1342,8 @@ def ScheduleAutotestTests(suite_name, board, model, build,
     board: A string representing the name of the archive board.
     model: The model that will be tested against.
     build: A string representing the name of the archive build.
-    payload_test_configs: A list of test_params.TestConfig objets to be
-                          scheduled with.
+    payload_test_configs: A list of test_params.TestConfig objects to be
+      scheduled with.
   """
   test_plan = _TestPlan(
       payload_test_configs=payload_test_configs,
@@ -1304,9 +1352,7 @@ def ScheduleAutotestTests(suite_name, board, model, build,
 
   # 4x timeout for b/209034161.
   timeout_mins = 4 * config_lib.HWTestConfig.SHARED_HW_TEST_TIMEOUT // 60
-  tags = ['build:%s' % build,
-          'suite:%s' % suite_name,
-          'user:PaygenTestStage']
+  tags = ['build:%s' % build, 'suite:%s' % suite_name, 'user:PaygenTestStage']
 
   keyvals = {'build': build, 'suite': suite_name}
 
@@ -1360,18 +1406,14 @@ def _TestPlan(payload_test_configs, suite_name=None, build=None):
                 allow_retries=True,
                 # Matching autoupdate_EndToEndTest control file.
                 max_retries=1,
-                execution_environment=(
-                    test_metadata_pb2.AutotestTest.EXECUTION_ENVIRONMENT_SERVER)
-            ),
+                execution_environment=(test_metadata_pb2.AutotestTest
+                                       .EXECUTION_ENVIRONMENT_SERVER)),
             test_args=test_args,
             display_name=tko_label,
-        )
-    )
+        ))
 
   test_plan = request_pb2.Request.TestPlan(
       enumeration=request_pb2.Request.Enumeration(
-          autotest_invocations=autotest_invocations
-      )
-  )
+          autotest_invocations=autotest_invocations))
 
   return json_format.MessageToJson(test_plan)

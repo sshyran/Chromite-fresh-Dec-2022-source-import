@@ -1,7 +1,6 @@
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """This library manages the interfaces to the signer for update payloads."""
 
 import logging
@@ -40,9 +39,8 @@ class SignerPayloadsClientGoogleStorage(object):
     Args:
       build: An instance of gspaths.Build that defines the build.
       work_dir: A directory inside the chroot to be used for temporarily
-                manipulating files. The directory should be cleaned by the
-                caller. If it is not passed, a temporary directory will be
-                created.
+        manipulating files. The directory should be cleaned by the caller. If it
+        is not passed, a temporary directory will be created.
       unique: Force known 'unique' id. Mostly for unittests.
       ctx: GS Context to use for GS operations.
     """
@@ -69,8 +67,8 @@ class SignerPayloadsClientGoogleStorage(object):
     """Helper method that cleans up GS files associated with a single keyset.
 
     Args:
-      hashes: A list of hash values to be signed by the signer in string
-              format. They are all expected to be 32 bytes in length.
+      hashes: A list of hash values to be signed by the signer in string format.
+        They are all expected to be 32 bytes in length.
       keyset: keyset to have the hashes signed with.
       timeout: Timeout for acquiring the lock on the files to clean.
 
@@ -109,8 +107,8 @@ class SignerPayloadsClientGoogleStorage(object):
     Safe to call repeatedly.
 
     Args:
-      hashes: A list of hash values to be signed by the signer in string
-              format. They are all expected to be 32 bytes in length.
+      hashes: A list of hash values to be signed by the signer in string format.
+        They are all expected to be 32 bytes in length.
       keysets: list of keysets to have the hashes signed with.
 
     Raises:
@@ -191,8 +189,7 @@ class SignerPayloadsClientGoogleStorage(object):
         osutils.WriteFile(os.path.join(tmp_dir, hash_name), h, mode='wb')
 
       cmd = ['tar', '-cjf', archive_file] + hash_names
-      cros_build_lib.run(
-          cmd, stdout=True, stderr=True, cwd=tmp_dir)
+      cros_build_lib.run(cmd, stdout=True, stderr=True, cwd=tmp_dir)
     finally:
       # Cleanup.
       shutil.rmtree(tmp_dir)
@@ -202,8 +199,8 @@ class SignerPayloadsClientGoogleStorage(object):
 
     Args:
       hash_names: The names of the hash files in the archive to sign.
-      keyset: Which keyset to sign the hashes with. Valid keysets are
-              defined on the signer. 'update_signer' is currently valid.
+      keyset: Which keyset to sign the hashes with. Valid keysets are defined on
+        the signer. 'update_signer' is currently valid.
 
     Returns:
       A string that contains the contents of the instructions to send.
@@ -254,12 +251,11 @@ versionrev = %(version)s
     m = re.match(exp, instructions_uri)
     relative_uri = m.group('postbucket')
 
-    return 'gs://%s/tobesigned/%d,%s' % (
-        self._build.bucket,
-        SIGNER_PRIORITY,
-        relative_uri.replace('/', ','))
+    return 'gs://%s/tobesigned/%d,%s' % (self._build.bucket, SIGNER_PRIORITY,
+                                         relative_uri.replace('/', ','))
 
-  def _WaitForSignatures(self, signature_uris,
+  def _WaitForSignatures(self,
+                         signature_uris,
                          timeout=constants.PAYLOAD_SIGNING_TIMEOUT):
     """Wait until all uris exist, or timeout.
 
@@ -296,8 +292,8 @@ versionrev = %(version)s
 
     results = []
     for uri in signature_uris:
-      with tempfile.NamedTemporaryFile(dir=self._work_dir,
-                                       delete=False) as sig_file:
+      with tempfile.NamedTemporaryFile(
+          dir=self._work_dir, delete=False) as sig_file:
         sig_file_name = sig_file.name
       try:
         self._ctx.Copy(uri, sig_file_name)
@@ -313,11 +309,11 @@ versionrev = %(version)s
     """Take an arbitrary list of hash files, and get them signed.
 
     Args:
-      hashes: A list of hash values to be signed by the signer as bytes.
-              They are all expected to be 32 bytes in length.
-      keysets: list of keysets to have the hashes signed with. The default
-               is almost certainly what you want. These names must match
-               valid keysets on the signer.
+      hashes: A list of hash values to be signed by the signer as bytes. They
+        are all expected to be 32 bytes in length.
+      keysets: list of keysets to have the hashes signed with. The default is
+        almost certainly what you want. These names must match valid keysets on
+        the signer.
 
     Returns:
       A list of lists of signatures as bytes in the order of the |hashes|.
@@ -356,8 +352,7 @@ versionrev = %(version)s
         instructions_uri = self._CreateInstructionsURI(keyset)
 
         self._ctx.CreateWithContents(
-            instructions_uri,
-            self._CreateInstructions(hash_names, keyset))
+            instructions_uri, self._CreateInstructions(hash_names, keyset))
 
         # Create signer request file with debug friendly contents.
         self._ctx.CreateWithContents(
@@ -377,9 +372,10 @@ versionrev = %(version)s
         return None
 
       # Download the results.
-      return [self._DownloadSignatures(hash_signature_uri)
-              for hash_signature_uri
-              in hash_signature_uris]
+      return [
+          self._DownloadSignatures(hash_signature_uri)
+          for hash_signature_uri in hash_signature_uris
+      ]
 
     finally:
       # Clean up the signature related files from this run.
@@ -404,8 +400,8 @@ class UnofficialSignerPayloadsClient(SignerPayloadsClientGoogleStorage):
     Args:
       private_key: A 2048 bits private key in PEM format for signing.
       work_dir: A directory inside the chroot to be used for temporarily
-                manipulating files. The directory should be cleaned by the
-                caller. If None is passed, the directory will be created.
+        manipulating files. The directory should be cleaned by the caller. If
+        None is passed, the directory will be created.
     """
     assert private_key, 'No private key in PEM format is passed for signing.'
 
@@ -421,8 +417,10 @@ class UnofficialSignerPayloadsClient(SignerPayloadsClientGoogleStorage):
     Args:
       public_key: The path to write the public key to.
     """
-    cmd = ['openssl', 'rsa', '-in', self._private_key, '-pubout', '-out',
-           public_key]
+    cmd = [
+        'openssl', 'rsa', '-in', self._private_key, '-pubout', '-out',
+        public_key
+    ]
     cros_build_lib.run(cmd, stdout=True, stderr=subprocess.STDOUT)
 
   def GetHashSignatures(self, hashes, keysets=('update_signer',)):
@@ -445,15 +443,17 @@ class UnofficialSignerPayloadsClient(SignerPayloadsClientGoogleStorage):
                                     'signature-%s.bin' % hash_hex)
       osutils.WriteFile(hash_file, h, mode='wb')
 
-      sign_script = path_util.ToChrootPath(os.path.join(
-          constants.SOURCE_ROOT,
-          'src/platform/vboot_reference/scripts/image_signing/',
-          'sign_official_build.sh'))
+      sign_script = path_util.ToChrootPath(
+          os.path.join(constants.SOURCE_ROOT,
+                       'src/platform/vboot_reference/scripts/image_signing/',
+                       'sign_official_build.sh'))
 
-      cros_build_lib.run([sign_script, 'update_payload',
-                          path_util.ToChrootPath(hash_file),
-                          path_util.ToChrootPath(self._work_dir),
-                          path_util.ToChrootPath(signature_file)],
+      cros_build_lib.run([
+          sign_script, 'update_payload',
+          path_util.ToChrootPath(hash_file),
+          path_util.ToChrootPath(self._work_dir),
+          path_util.ToChrootPath(signature_file)
+      ],
                          enter_chroot=True)
 
       signatures.append([osutils.ReadFile(signature_file, mode='rb')])

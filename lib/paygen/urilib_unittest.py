@@ -1,7 +1,6 @@
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Test the urilib module."""
 
 import os
@@ -20,31 +19,22 @@ class TestUrilib(cros_test_lib.MockTempDirTestCase):
   """Test urilib module."""
 
   def testExtractProtocol(self):
-    tests = {'gs': ['gs://',
-                    'gs://foo',
-                    'gs://foo/bar'],
-             'abc': ['abc://',
-                     'abc://foo',
-                     'abc://foo/bar'],
-             None: ['foo/bar',
-                    '/foo/bar',
-                    '://garbage/path']}
+    tests = {
+        'gs': ['gs://', 'gs://foo', 'gs://foo/bar'],
+        'abc': ['abc://', 'abc://foo', 'abc://foo/bar'],
+        None: ['foo/bar', '/foo/bar', '://garbage/path']
+    }
 
     for protocol in tests:
       for uri in tests[protocol]:
         self.assertEqual(protocol, urilib.ExtractProtocol(uri))
 
   def testGetUriType(self):
-    tests = {'gs': ['gs://',
-                    'gs://foo',
-                    'gs://foo/bar'],
-             'abc': ['abc://',
-                     'abc://foo',
-                     'abc://foo/bar'],
-             'file': ['foo/bar',
-                      '/foo/bar',
-                      '://garbage/path',
-                      '/cnsfoo/bar']}
+    tests = {
+        'gs': ['gs://', 'gs://foo', 'gs://foo/bar'],
+        'abc': ['abc://', 'abc://foo', 'abc://foo/bar'],
+        'file': ['foo/bar', '/foo/bar', '://garbage/path', '/cnsfoo/bar']
+    }
 
     for uri_type in tests:
       for uri in tests[uri_type]:
@@ -73,8 +63,8 @@ index %s..%s 100644
  // modification, are permitted provided that the following conditions are
 """ % (git_index1, git_index2)
 
-    self.assertRaises(urilib.MissingURLError, urilib.URLRetrieve,
-                      bad_path_url, local_path)
+    self.assertRaises(urilib.MissingURLError, urilib.URLRetrieve, bad_path_url,
+                      local_path)
     self.assertRaises(urilib.MissingURLError, urilib.URLRetrieve,
                       bad_domain_url, local_path)
 
@@ -116,25 +106,27 @@ index %s..%s 100644
     urlretrieve_mock.reset_mock()
 
     # Run 8, local and HTTP
-    self.assertRaises(urilib.NotSupportedBetweenTypes, urilib.Copy,
-                      local_path, http_path)
+    self.assertRaises(urilib.NotSupportedBetweenTypes, urilib.Copy, local_path,
+                      http_path)
 
   def testGetPathExcludingProtocol(self):
     """Tests GetPathExcludingProtocol."""
     self.assertEqual(urilib.GetPathExcludingProtocol('foo-file'), 'foo-file')
-    self.assertEqual(urilib.GetPathExcludingProtocol('foo/directory/foo-file'),
-                     'foo/directory/foo-file')
+    self.assertEqual(
+        urilib.GetPathExcludingProtocol('foo/directory/foo-file'),
+        'foo/directory/foo-file')
     self.assertEqual(urilib.GetPathExcludingProtocol('/foo-file'), '/foo-file')
-    self.assertEqual(urilib.GetPathExcludingProtocol('/foo/directory/foo-file'),
-                     '/foo/directory/foo-file')
-    self.assertEqual(urilib.GetPathExcludingProtocol('file:///foo-file'),
-                     '/foo-file')
-    self.assertEqual(urilib.GetPathExcludingProtocol('gs://foo-file'),
-                     'foo-file')
-    self.assertEqual(urilib.GetPathExcludingProtocol('http://foo-file'),
-                     'foo-file')
-    self.assertEqual(urilib.GetPathExcludingProtocol('https://foo-file'),
-                     'foo-file')
+    self.assertEqual(
+        urilib.GetPathExcludingProtocol('/foo/directory/foo-file'),
+        '/foo/directory/foo-file')
+    self.assertEqual(
+        urilib.GetPathExcludingProtocol('file:///foo-file'), '/foo-file')
+    self.assertEqual(
+        urilib.GetPathExcludingProtocol('gs://foo-file'), 'foo-file')
+    self.assertEqual(
+        urilib.GetPathExcludingProtocol('http://foo-file'), 'foo-file')
+    self.assertEqual(
+        urilib.GetPathExcludingProtocol('https://foo-file'), 'foo-file')
     self.assertEqual(
         urilib.GetPathExcludingProtocol('https://foo-directory/foo-file'),
         'foo-directory/foo-file')

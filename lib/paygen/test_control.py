@@ -1,7 +1,6 @@
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Control file generation for the autoupdate_EndToEnd server-side test.
 
 This library is used by paygen_build_lib to generate the paygen_au_* control
@@ -59,8 +58,7 @@ def dump_autotest_control_file(test, env, control_code, directory):
   parametrized_control_code = generate_full_control_file(
       test, env, control_code)
 
-  control_file = os.path.join(directory,
-                              test.get_control_file_name())
+  control_file = os.path.join(directory, test.get_control_file_name())
   with open(control_file, 'w') as fh:
     fh.write(parametrized_control_code)
 
@@ -74,6 +72,6 @@ def get_test_name():
 
 def get_control_file_name():
   """Returns the path of the end-to-end base control file."""
-  return os.path.join(
-      constants.SOURCE_ROOT, 'src', 'third_party', 'autotest', 'files',
-      'server', 'site_tests', get_test_name(), 'control')
+  return os.path.join(constants.SOURCE_ROOT, 'src', 'third_party',
+                      'autotest', 'files', 'server', 'site_tests',
+                      get_test_name(), 'control')

@@ -1,7 +1,6 @@
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Downloads files upon request in a thread/process safe way.
 
 DEPRECATED: Should be merged into chromite.lib.cache.
@@ -71,11 +70,10 @@ class DownloadCache(object):
     Args:
       cache_dir: The directory in which to create the cache.
       max_age: Purge files not used for this number of seconds. None for no
-               max_age.
-      cache_size: Purge the least recently used files until the cache is
-                  below this size in bytes. None for no size limit.
-
-      If no condition is provided, we purge all files unused for one full day.
+        max_age.
+      cache_size: Purge the least recently used files until the cache is below
+        this size in bytes. None for no size limit.  If no condition is
+        provided, we purge all files unused for one full day.
     """
     # One directory for cached files, one for lock files.
     self._cache_dir = os.path.realpath(cache_dir)
@@ -147,8 +145,8 @@ class DownloadCache(object):
       Locking.FileLock (acquired)
     """
     lock_file = os.path.join(self._cache_dir, self._CACHE_LOCK)
-    lock = locking.FileLock(lock_file, locktype=locking.FLOCK,
-                            blocking=blocking)
+    lock = locking.FileLock(
+        lock_file, locktype=locking.FLOCK, blocking=blocking)
     return lock.lock(shared)
 
   def _CacheFileLock(self, cache_file, blocking=False, shared=False):
@@ -172,8 +170,8 @@ class DownloadCache(object):
       Locking.FileLock (acquired)
     """
     lock_file = os.path.join(self._lock_dir, os.path.basename(cache_file))
-    lock = locking.FileLock(lock_file, locktype=locking.FLOCK,
-                            blocking=blocking)
+    lock = locking.FileLock(
+        lock_file, locktype=locking.FLOCK, blocking=blocking)
     return lock.lock(shared)
 
   def Purge(self, max_age=None, cache_size=None):
@@ -182,10 +180,10 @@ class DownloadCache(object):
     Is a no-op if cache lock is not acquirable.
 
     Args:
-      max_age: Overrides the __init__ max_age for this one
-                       purge. Mostly intended for unittests.
-      cache_size: Overrides the __init__ cache_size for this one
-                       purge. Mostly intended for unittests.
+      max_age: Overrides the __init__ max_age for this one purge. Mostly
+        intended for unittests.
+      cache_size: Overrides the __init__ cache_size for this one purge. Mostly
+        intended for unittests.
     """
     max_age = self._max_age if max_age is None else max_age
     cache_size = self._cache_size if cache_size is None else cache_size
@@ -292,7 +290,7 @@ class DownloadCache(object):
     Args:
       uri: The uri of the file to access.
       fetch_func: A function to produce the file if it isn't already in the
-                  cache.
+        cache.
 
     Returns:
       File object opened with 'rb' mode.

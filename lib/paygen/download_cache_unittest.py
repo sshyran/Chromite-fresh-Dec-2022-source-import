@@ -1,7 +1,6 @@
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Test download_cache library.
 
 DEPRECATED: Should be migrated to chromite.lib.cache_unittest.
@@ -20,6 +19,7 @@ from chromite.lib.paygen import download_cache
 
 # We access a lot of protected members during testing.
 # pylint: disable=protected-access
+
 
 # The inProcess methods have to be standalone to be pickleable.
 def _inProcessFetchIntoCache(uri_tempdir):
@@ -172,8 +172,8 @@ class DownloadCacheTest(cros_test_lib.TempDirTestCase):
                                  'lock/3ba505fc7774455169af6f50b7964dff')
 
     # Make sure a cache content file is named as expected.
-    self.assertEqual(cache._UriToCacheFile('gs://bucket/of/awesome'),
-                     expected_cache)
+    self.assertEqual(
+        cache._UriToCacheFile('gs://bucket/of/awesome'), expected_cache)
 
     # Make sure the lock file for a cache content file is named as expected.
     with cache._CacheFileLock(expected_cache) as file_lock:
@@ -294,8 +294,7 @@ class DownloadCacheTest(cros_test_lib.TempDirTestCase):
     cache.GetFileObject(self.uri_b).close()
 
     # Change the timestamp so uri_a hasn't been used for a very long time.
-    os.utime(os.path.join(self.cache_dir, 'cache', self.hash_a),
-             (2, 2))
+    os.utime(os.path.join(self.cache_dir, 'cache', self.hash_a), (2, 2))
 
     # Purge files that haven't been used recently.
     cache.Purge(max_age=1000)

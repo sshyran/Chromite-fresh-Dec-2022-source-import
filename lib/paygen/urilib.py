@@ -1,7 +1,6 @@
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Utilities for standard operations on URIs of different kinds."""
 
 import re
@@ -15,16 +14,12 @@ from chromite.lib.paygen import filelib
 # This module allows files from different storage types to be handled
 # in a common way, for supported operations.
 
-
 PROTOCOL_GS = 'gs'
 PROTOCOL_HTTP = 'http'
 PROTOCOL_HTTPS = 'https'
 PROTOCOL_FILE = 'file'
 
-PROTOCOLS = (PROTOCOL_GS,
-             PROTOCOL_HTTP,
-             PROTOCOL_HTTPS,
-             PROTOCOL_FILE)
+PROTOCOLS = (PROTOCOL_GS, PROTOCOL_HTTP, PROTOCOL_HTTPS, PROTOCOL_FILE)
 
 PROTOCOL_SEP = '://'
 
@@ -111,6 +106,7 @@ def GetUriType(uri):
 
 class URLopener(urllib.request.FancyURLopener):
   """URLopener that will actually complain when download fails."""
+
   # The urllib.urlretrieve function, which seems like a good fit for this,
   # does not give access to error code.
 
@@ -177,6 +173,7 @@ def Copy(src_uri, dest_uri):
 
   raise NotSupportedBetweenTypes(uri_type1, uri_type2)
 
+
 def GetPathExcludingProtocol(uri):
   """Returns the path of the given URI excluding the protocol and its separator.
 
@@ -184,7 +181,7 @@ def GetPathExcludingProtocol(uri):
     uri: The uri to extract the base name, e.g.:
          gs://foo/directory/file.bin -> /foo/directory/file.bin
          file:///foo/directory/file.bin -> /foo/directory/file.bin
-         /foo/directory/file.bin -> /foo/directory/file.bin
+           /foo/directory/file.bin -> /foo/directory/file.bin
   """
   protocol = ExtractProtocol(uri)
   if protocol is None:

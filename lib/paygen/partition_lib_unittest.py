@@ -1,7 +1,6 @@
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Test the partition_lib module."""
 
 import os
@@ -65,8 +64,8 @@ class PartitionLibMockTest(cros_test_lib.RunCommandTempDirTestCase):
         image_lib.PartitionInfo(1, 0, 4, 4, 'fs', 'PART-A', ''),
         image_lib.PartitionInfo(2, 4, 8, 4, 'fs', 'PART-B', ''),
     )
-    self.PatchObject(image_lib, 'GetImageDiskPartitionInfo',
-                     return_value=fake_partitions)
+    self.PatchObject(
+        image_lib, 'GetImageDiskPartitionInfo', return_value=fake_partitions)
 
     partition_lib.ExtractPartition(image, 'PART-A', part_a)
     self.assertEqual(osutils.ReadFile(part_a), part_a_bin)
@@ -92,18 +91,18 @@ class PartitionLibMockTest(cros_test_lib.RunCommandTempDirTestCase):
     is_ext2 = self.PatchObject(image_lib, 'IsExt2Image')
 
     is_gpt.return_value = True
-    self.assertEqual(partition_lib.LookupImageType(image),
-                     partition_lib.CROS_IMAGE)
+    self.assertEqual(
+        partition_lib.LookupImageType(image), partition_lib.CROS_IMAGE)
 
     is_gpt.return_value = False
     is_squashfs.return_value = True
-    self.assertEqual(partition_lib.LookupImageType(image),
-                     partition_lib.DLC_IMAGE)
+    self.assertEqual(
+        partition_lib.LookupImageType(image), partition_lib.DLC_IMAGE)
 
     is_squashfs.return_value = False
     is_ext2.return_value = True
-    self.assertEqual(partition_lib.LookupImageType(image),
-                     partition_lib.DLC_IMAGE)
+    self.assertEqual(
+        partition_lib.LookupImageType(image), partition_lib.DLC_IMAGE)
 
     is_ext2.return_value = False
     self.assertIsNone(partition_lib.LookupImageType(image))
@@ -113,8 +112,8 @@ class PartitionLibMockTest(cros_test_lib.RunCommandTempDirTestCase):
     image = '/foo/image'
 
     self.PatchObject(cgpt.Disk, 'FromImage', return_value=cgpt.Disk(''))
-    self.PatchObject(cgpt.Disk, 'GetPartitionByTypeGuid',
-                     side_effect=KeyError())
+    self.PatchObject(
+        cgpt.Disk, 'GetPartitionByTypeGuid', side_effect=KeyError())
     self.assertFalse(partition_lib.HasMiniOSPartitions(image))
 
     self.PatchObject(cgpt.Disk, 'GetPartitionByTypeGuid')

@@ -1,7 +1,6 @@
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Library for handling Chrome OS partition."""
 
 import logging
@@ -45,13 +44,17 @@ def GenerateStatefulPayload(image_path, output):
       if os.path.exists(os.path.join(stateful_dir, 'unencrypted')):
         inputs += ['unencrypted']
       cros_build_lib.CreateTarball(
-          output_gz, '.', sudo=True, compression=cros_build_lib.COMP_GZIP,
+          output_gz,
+          '.',
+          sudo=True,
+          compression=cros_build_lib.COMP_GZIP,
           inputs=inputs,
           extra_args=[
               '--selinux',
               '--directory=%s' % stateful_dir,
               '--transform=s,^dev_image,dev_image_new,',
-              '--transform=s,^var_overlay,var_new,'])
+              '--transform=s,^var_overlay,var_new,'
+          ])
     except:
       logging.error('Failed to create stateful update file')
       raise

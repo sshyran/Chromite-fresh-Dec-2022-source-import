@@ -1,7 +1,6 @@
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Library for handling Chrome OS partition."""
 
 import logging
@@ -34,8 +33,8 @@ def ExtractPartition(filename, partition, out_part):
   offset = int(part_info.start)
   length = int(part_info.size)
 
-  filelib.CopyFileSegment(filename, 'rb', length, out_part, 'wb',
-                          in_seek=offset)
+  filelib.CopyFileSegment(
+      filename, 'rb', length, out_part, 'wb', in_seek=offset)
 
 
 def Ext2FileSystemSize(ext2_file):
@@ -45,9 +44,9 @@ def Ext2FileSystemSize(ext2_file):
     ext2_file: The path to the ext2 file.
   """
   # dumpe2fs is normally installed in /sbin but doesn't require root.
-  dump = cros_build_lib.dbg_run(
-      ['/sbin/dumpe2fs', '-h', ext2_file], capture_output=True,
-      encoding='utf-8').stdout
+  dump = cros_build_lib.dbg_run(['/sbin/dumpe2fs', '-h', ext2_file],
+                                capture_output=True,
+                                encoding='utf-8').stdout
   fs_blocks = 0
   fs_blocksize = 0
   for line in dump.split('\n'):
@@ -73,10 +72,9 @@ def PatchKernel(image, kern_file):
   with tempfile.NamedTemporaryFile(prefix='stateful') as state_out, \
        tempfile.NamedTemporaryFile(prefix='vmlinuz_hd.vblock') as vblock:
     ExtractPartition(image, constants.PART_STATE, state_out)
-    cros_build_lib.run(
-        ['e2cp', '%s:/vmlinuz_hd.vblock' % state_out, vblock])
-    filelib.CopyFileSegment(
-        vblock, 'rb', os.path.getsize(vblock), kern_file, 'r+b')
+    cros_build_lib.run(['e2cp', '%s:/vmlinuz_hd.vblock' % state_out, vblock])
+    filelib.CopyFileSegment(vblock, 'rb', os.path.getsize(vblock), kern_file,
+                            'r+b')
 
 
 def ExtractKernel(image, kern_out):

@@ -1,7 +1,6 @@
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Test the filelib module."""
 
 import base64
@@ -30,8 +29,8 @@ class TestFileLib(cros_test_lib.TempDirTestCase):
     compare against (rather than the two modules be bug-for-bug compatible).
     """
     # The shasum utility returns hashes in base 16 encoding.  We need base 64.
-    hash16 = cros_build_lib.run(
-        [util, file_path], stdout=True).stdout.split(b' ')[0]
+    hash16 = cros_build_lib.run([util, file_path],
+                                stdout=True).stdout.split(b' ')[0]
     hashbytes = base64.b16decode(hash16, True)
     hash64 = base64.b64encode(hashbytes)
     return hash64.rstrip().decode('utf-8')
