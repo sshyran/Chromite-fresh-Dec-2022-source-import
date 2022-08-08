@@ -17,7 +17,6 @@ from chromite.lib import chromeos_version
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import git
-from chromite.lib import install_mask
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import retry_util
@@ -721,13 +720,13 @@ def GetBuildImageEnvvars(
   """
   if not env_var_init:
     env_var_init = {}
-  env_var_init['INSTALL_MASK'] = '\n'.join(install_mask.DEFAULT)
+  env_var_init['INSTALL_MASK'] = '\n'.join(constants.DEFAULT_INSTALL_MASK)
   env_var_init['PRISTINE_IMAGE_NAME'] = constants.BASE_IMAGE_BIN
   env_var_init['BASE_PACKAGE'] = 'virtual/target-os'
 
   if constants.FACTORY_IMAGE_BIN in image_names:
     env_var_init['INSTALL_MASK'] = '\n'.join(
-        install_mask.FACTORY_SHIM)
+        constants.FACTORY_SHIM_INSTALL_MASK)
     env_var_init['USE'] = (env_var_init.get('USE', '') + ' ' +
                            _FACTORY_SHIM_USE_FLAGS).strip()
     env_var_init['PRISTINE_IMAGE_NAME'] = constants.FACTORY_IMAGE_BIN
@@ -736,7 +735,7 @@ def GetBuildImageEnvvars(
   # Mask systemd directories if this is not a systemd image.
   if 'systemd' not in portage_util.GetBoardUseFlags(board):
     env_var_init['INSTALL_MASK'] += '\n' + '\n'.join(
-        install_mask.SYSTEMD)
+        constants.SYSTEMD_INSTALL_MASK)
 
   if version_info:
     env_var_init['CHROME_BRANCH'] = version_info.chrome_branch
