@@ -10,12 +10,13 @@ with Clang Tidy and Rust with Cargo Clippy for all packages within platform2.
 
 import json
 import sys
-from typing import List
+from typing import List, Text
 
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import portage_util
+from chromite.lib import terminal
 from chromite.lib import workon_helper
 from chromite.lib.parser import package_info
 from chromite.service import toolchain
@@ -50,6 +51,45 @@ def parse_packages(build_target: build_target_lib.BuildTarget,
   return package_infos
 
 
+def format_lint(lint: toolchain.LinterFinding) -> Text:
+  """Formats a lint for human readable printing.
+
+  Example output:
+  [ClangTidy] In 'path/to/file.c' on line 36:
+      Also in 'path/to/file.c' on line 40:
+      Also in 'path/to/file.c' on lines 50-53:
+    You did something bad, don't do it.
+
+  Args:
+    lint: A linter finding from the toolchain service.
+
+  Returns:
+    A correctly formatted string ready to be displayed to the user.
+  """
+
+  color = terminal.Color(True)
+  lines = []
+  linter_prefix = color.Color(terminal.Color.YELLOW, f'[{lint.linter}]',
+                              background_color=terminal.Color.BLACK)
+  for loc in lint.locations:
+    if not lines:
+      location_prefix = f'\n{linter_prefix} In'
+    else:
+      location_prefix = '   and in'
+    if loc.line_start != loc.line_end:
+      lines.append(
+          f"{location_prefix} '{loc.filepath}' "
+          f'lines {loc.line_start}-{loc.line_end}:')
+    else:
+      lines.append(
+          f"{location_prefix} '{loc.filepath}' line {loc.line_start}:")
+  message_lines = lint.message.split('\n')
+  for line in message_lines:
+    lines.append(f'  {line}')
+  lines.append('')
+  return '\n'.join(lines)
+
+
 def get_arg_parser() -> commandline.ArgumentParser:
   """Creates an argument parser for this script."""
   default_board = cros_build_lib.GetDefaultBoard()
@@ -81,6 +121,10 @@ def get_arg_parser() -> commandline.ArgumentParser:
       '--output',
       default=sys.stdout,
       help='File to use instead of stdout.')
+  parser.add_argument(
+      '--json',
+      action='store_true',
+      help='Output lints in JSON format.')
   parser.add_argument(
       '--no-clippy',
       dest='clippy',
@@ -138,5 +182,13 @@ def main(argv: List[str]) -> None:
       lints = build_linter.emerge_with_linting(
           use_clippy=opts.clippy, use_tidy=opts.tidy, use_golint=opts.golint)
 
+  if opts.json:
+    formatted_output = json.dumps([lint._asdict() for lint in lints])
+  else:
+    formatted_output = '\n'.join(format_lint(lint) for lint in lints)
+
   with file_util.Open(opts.output, 'w') as output_file:
-    json.dump(lints, output_file)
+    output_file.write(formatted_output)
+    if not opts.json:
+      output_file.write(f'\nFound {len(lints)} lints.')
+    output_file.write('\n')

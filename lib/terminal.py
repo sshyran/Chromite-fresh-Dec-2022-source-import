@@ -18,8 +18,10 @@ class Color(object):
   BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
   BOLD = -1
   COLOR_START = '\033[1;%dm'
+  BACKGROUND_START = '\u001b[%dm'
   BOLD_START = '\033[1m'
   RESET = '\033[0m'
+  BACKGROUND_RESET = '\u001b[0m'
 
   def __init__(self, enabled=None):
     """Create a new Color object, optionally disabling color output.
@@ -59,12 +61,14 @@ class Color(object):
       return self.RESET
     return ''
 
-  def Color(self, color, text):
+  def Color(self, color, text, background_color=None):
     """Returns text with conditionally added color escape sequences.
 
     Keyword arguments:
       color: Text color -- one of the color constants defined in this class.
       text: The text to color.
+      background_color: Background highlight color -- one of the color
+        constants defined in this class.
 
     Returns:
       If self._enabled is False, returns the original text. If it's True,
@@ -76,7 +80,11 @@ class Color(object):
       start = self.BOLD_START
     else:
       start = self.COLOR_START % (color + 30)
-    return start + text + self.RESET
+    end = self.RESET
+    if background_color:
+      start += self.BACKGROUND_START % (color + 30)
+      end += self.RESET
+    return start + text + end
 
   @staticmethod
   def UserEnabled():
