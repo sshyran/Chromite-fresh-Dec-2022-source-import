@@ -46,14 +46,11 @@ from chromite.lib.parser import package_info
 
 
 BUILD_PACKAGES_PREBUILTS = '10774.0.0'
-BUILD_PACKAGES_WITH_DEBUG_SYMBOLS = '6302.0.0'
-CROS_RUN_UNITTESTS = '6773.0.0'
 BUILD_IMAGE_BUILDER_PATH = '8183.0.0'
 BUILD_IMAGE_ECLEAN_FLAG = '8318.0.0'
 ANDROID_BREAKPAD = '9667.0.0'
 PORTAGE_2_3_75_UPDATE = '12693.0.0'
 SETUP_BOARD_PORT_COMPLETE = '11802.0.0'
-USE_TOOLCHAINS_BOARDS = '6480.0.0'
 
 
 class InvalidWorkspace(failures_lib.StepFailure):
@@ -447,15 +444,12 @@ class WorkspaceUpdateSDKStage(WorkspaceStageBase):
     """Do the work of updating the chroot."""
     usepkg_toolchain = (
         self._run.config.usepkg_toolchain and not self._latest_toolchain)
-    toolchain_boards = None
-    if self.AfterLimit(USE_TOOLCHAINS_BOARDS):
-      toolchain_boards = self._run.config.boards
 
     commands.UpdateChroot(
         self._build_root,
         usepkg=usepkg_toolchain,
         extra_env=self._portage_extra_env,
-        toolchain_boards=toolchain_boards,
+        toolchain_boards=self._run.config.boards,
         chroot_args=['--cache-dir', self._run.options.cache_dir])
 
 
@@ -491,13 +485,11 @@ class WorkspaceBuildPackagesStage(generic_stages.BoardSpecificBuilderStage,
     packages = self.GetListOfPackagesToBuild()
 
     cmd = ['./build_packages', '--board=%s' % self._current_board,
-           '--accept_licenses=@CHROMEOS', '--skip_chroot_upgrade']
+           '--accept_licenses=@CHROMEOS', '--skip_chroot_upgrade',
+           '--withdebugsymbols']
 
     if not self._run.options.tests:
       cmd.append('--nowithautotest')
-
-    if self.AfterLimit(BUILD_PACKAGES_WITH_DEBUG_SYMBOLS):
-      cmd.append('--withdebugsymbols')
 
     if not usepkg:
       cmd.extend(commands.LOCAL_BUILD_FLAGS)
@@ -528,16 +520,6 @@ class WorkspaceUnitTestStage(generic_stages.BoardSpecificBuilderStage,
   # If the processes hang, parallel_emerge will print a status report after 60
   # minutes, so we picked 90 minutes because it gives us a little buffer time.
   UNIT_TEST_TIMEOUT = 90 * 60
-
-  def WaitUntilReady(self):
-    """Decide if we should run the unittest stage."""
-    # See crbug.com/937328.
-    if not self.AfterLimit(CROS_RUN_UNITTESTS):
-      cbuildbot_alerts.PrintBuildbotStepWarnings()
-      logging.warning('cros_run_unit_tests does not exist on this branch.')
-      return False
-
-    return True
 
   def PerformStage(self):
     extra_env = {}

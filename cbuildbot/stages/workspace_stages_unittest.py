@@ -466,7 +466,7 @@ class WorkspaceUpdateSDKStageTest(WorkspaceStageBase):
 
     self.assertEqual(self.rc.call_count, 1)
     self.rc.assertCommandCalled(
-        ['./update_chroot',],
+        ['./update_chroot', '--toolchain_boards', 'board'],
         enter_chroot=True,
         chroot_args=['--cache-dir', '/cache'],
         extra_env={
@@ -487,7 +487,7 @@ class WorkspaceUpdateSDKStageTest(WorkspaceStageBase):
 
     self.assertEqual(self.rc.call_count, 1)
     self.rc.assertCommandCalled(
-        ['./update_chroot',],
+        ['./update_chroot', '--toolchain_boards', 'board'],
         enter_chroot=True,
         chroot_args=['--cache-dir', '/cache'],
         extra_env={
@@ -647,6 +647,7 @@ class WorkspaceBuildPackagesStageTest(WorkspaceStageBase):
             '--board=board',
             '--accept_licenses=@CHROMEOS',
             '--skip_chroot_upgrade',
+            '--withdebugsymbols',
             '--nousepkg',
             'virtual/target-os',
             'virtual/target-os-dev',
@@ -671,18 +672,6 @@ class WorkspaceUnitTestStageTest(WorkspaceStageBase):
   def ConstructStage(self):
     return workspace_stages.WorkspaceUnitTestStage(
         self._run, self.buildstore, build_root=self.workspace, board='board')
-
-  def testFactoryOld(self):
-    self.SetWorkspaceVersion(self.OLD_VERSION)
-
-    self._Prepare(
-        'test-factorybranch',
-        site_config=workspace_builders_unittest.CreateMockSiteConfig(),
-        extra_cmd_args=['--cache-dir', '/cache'])
-
-    self.RunStage()
-
-    self.assertEqual(self.rc.call_args_list, [])
 
   def testFactoryNew(self):
     self.SetWorkspaceVersion(self.MODERN_VERSION)
