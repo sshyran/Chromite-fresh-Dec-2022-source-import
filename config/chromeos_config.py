@@ -1048,19 +1048,6 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
   MONTHLY = 'with 720h interval'  # 30 day interval
   TRIGGERED = 'triggered'  # Only when triggered
   branch_builders = [
-      (MONTHLY, 'factory-rambi-5517.B',
-       ['enguarde', 'expresso', 'kip', 'swanky', 'winky']),
-      (MONTHLY, 'factory-rambi-6420.B', [
-          'enguarde', 'candy', 'banjo', 'ninja', 'sumo', 'orco', 'heli',
-          'gnawty'
-      ]),
-      (MONTHLY, 'factory-auron-6459.B',
-       ['auron_paine', 'auron_yuna', 'lulu', 'gandof', 'buddy']),
-      (MONTHLY, 'factory-auron-6772.B', ['guado', 'tidus', 'rikku', 'buddy']),
-      (MONTHLY, 'factory-strago-7458.B', [
-          'cyan', 'celes', 'ultima', 'reks', 'terra', 'edgar', 'wizpig',
-          'setzer', 'banon', 'kefka', 'relm', 'kip'
-      ]),
       (MONTHLY, 'factory-glados-7657.B', ['glados', 'chell']),
       (MONTHLY, 'factory-glados-7828.B',
        ['glados', 'chell', 'lars', 'sentry', 'cave', 'asuka', 'caroline']),
@@ -1148,12 +1135,6 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
 
   # These branches require a differnt list of packages to build.
   old_package_branches = {
-      'factory-rambi-5517.B',
-      'factory-rambi-6420.B',
-      'factory-auron-6459.B',
-      'factory-auron-6772.B',
-      'factory-samus-6658.B',
-      'factory-strago-7458.B',
       'factory-glados-7657.B',
       'factory-glados-7828.B',
   }

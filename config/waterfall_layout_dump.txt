@@ -5,17 +5,6 @@
     asurada-factory-asurada-13929.B-factorybranch
   factory-atlas-11907.B-buildspec
     atlas-factory-atlas-11907.B-factorybranch
-  factory-auron-6459.B-buildspec
-    auron_paine-factory-auron-6459.B-factorybranch
-    auron_yuna-factory-auron-6459.B-factorybranch
-    buddy-factory-auron-6459.B-factorybranch
-    gandof-factory-auron-6459.B-factorybranch
-    lulu-factory-auron-6459.B-factorybranch
-  factory-auron-6772.B-buildspec
-    buddy-factory-auron-6772.B-factorybranch
-    guado-factory-auron-6772.B-factorybranch
-    rikku-factory-auron-6772.B-factorybranch
-    tidus-factory-auron-6772.B-factorybranch
   factory-brya-14517.B-buildspec
     brask-factory-brya-14517.B-factorybranch
     brya-factory-brya-14517.B-factorybranch
@@ -88,21 +77,6 @@
     puff-moblab-factory-puff-13329.B-factorybranch
   factory-puff-13813.B-buildspec
     puff-factory-puff-13813.B-factorybranch
-  factory-rambi-5517.B-buildspec
-    enguarde-factory-rambi-5517.B-factorybranch
-    expresso-factory-rambi-5517.B-factorybranch
-    kip-factory-rambi-5517.B-factorybranch
-    swanky-factory-rambi-5517.B-factorybranch
-    winky-factory-rambi-5517.B-factorybranch
-  factory-rambi-6420.B-buildspec
-    banjo-factory-rambi-6420.B-factorybranch
-    candy-factory-rambi-6420.B-factorybranch
-    enguarde-factory-rambi-6420.B-factorybranch
-    gnawty-factory-rambi-6420.B-factorybranch
-    heli-factory-rambi-6420.B-factorybranch
-    ninja-factory-rambi-6420.B-factorybranch
-    orco-factory-rambi-6420.B-factorybranch
-    sumo-factory-rambi-6420.B-factorybranch
   factory-rammus-11289.B-buildspec
     rammus-factory-rammus-11289.B-factorybranch
   factory-reef-8811.B-buildspec
@@ -116,19 +90,6 @@
     scarlet-factory-scarlet-10211.B-factorybranch
   factory-soraka-10323.39.B-buildspec
     soraka-factory-soraka-10323.39.B-factorybranch
-  factory-strago-7458.B-buildspec
-    banon-factory-strago-7458.B-factorybranch
-    celes-factory-strago-7458.B-factorybranch
-    cyan-factory-strago-7458.B-factorybranch
-    edgar-factory-strago-7458.B-factorybranch
-    kefka-factory-strago-7458.B-factorybranch
-    kip-factory-strago-7458.B-factorybranch
-    reks-factory-strago-7458.B-factorybranch
-    relm-factory-strago-7458.B-factorybranch
-    setzer-factory-strago-7458.B-factorybranch
-    terra-factory-strago-7458.B-factorybranch
-    ultima-factory-strago-7458.B-factorybranch
-    wizpig-factory-strago-7458.B-factorybranch
   factory-strongbad-13963.B-buildspec
     strongbad-factory-strongbad-13963.B-factorybranch
     trogdor-factory-strongbad-13963.B-factorybranch
@@ -404,15 +365,11 @@
   atlas-payloads-tryjob
   atlas-release-basic-tryjob
   atlas-release-tryjob
-  auron_paine-factory-auron-6459.B-factorybranch-tryjob
-  auron_yuna-factory-auron-6459.B-factorybranch-tryjob
   aurora-full-tryjob
   aurora-llvm-next-toolchain-tryjob
   aurora-llvm-toolchain-tryjob
   aurora-payloads-tryjob
   aurora-release-tryjob
-  banjo-factory-rambi-6420.B-factorybranch-tryjob
-  banon-factory-strago-7458.B-factorybranch-tryjob
   beaglebone-full-tryjob
   beaglebone-llvm-next-toolchain-tryjob
   beaglebone-llvm-toolchain-tryjob
@@ -500,9 +457,6 @@
   bubs-llvm-toolchain-tryjob
   bubs-payloads-tryjob
   bubs-release-tryjob
-  buddy-factory-auron-6459.B-factorybranch-tryjob
-  buddy-factory-auron-6772.B-factorybranch-tryjob
-  candy-factory-rambi-6420.B-factorybranch-tryjob
   caroline-factory-glados-7828.B-factorybranch-tryjob
   caroline-full-tryjob
   caroline-llvm-next-toolchain-tryjob
@@ -520,7 +474,6 @@
   cave-llvm-toolchain-tryjob
   cave-payloads-tryjob
   cave-release-tryjob
-  celes-factory-strago-7458.B-factorybranch-tryjob
   chell-chrome-no-afdo-uprev-pre-flight-branch-tryjob
   chell-factory-glados-7657.B-factorybranch-tryjob
   chell-factory-glados-7828.B-factorybranch-tryjob
@@ -570,7 +523,6 @@
   corsola64-llvm-toolchain-tryjob
   corsola64-payloads-tryjob
   corsola64-release-tryjob
-  cyan-factory-strago-7458.B-factorybranch-tryjob
   dedede-factory-dedede-13683.B-factorybranch-tryjob
   dedede-full-tryjob
   dedede-llvm-next-toolchain-tryjob
@@ -594,7 +546,6 @@
   drallion-master-factorybranch-tryjob
   drallion-payloads-tryjob
   drallion-release-tryjob
-  edgar-factory-strago-7458.B-factorybranch-tryjob
   elm-connectivitynext-full-tryjob
   elm-connectivitynext-llvm-next-toolchain-tryjob
   elm-connectivitynext-llvm-toolchain-tryjob
@@ -617,8 +568,6 @@
   endeavour-llvm-toolchain-tryjob
   endeavour-payloads-tryjob
   endeavour-release-tryjob
-  enguarde-factory-rambi-5517.B-factorybranch-tryjob
-  enguarde-factory-rambi-6420.B-factorybranch-tryjob
   eve-arc-r-full-tryjob
   eve-arc-r-llvm-next-toolchain-tryjob
   eve-arc-r-llvm-toolchain-tryjob
@@ -649,24 +598,12 @@
   excelsior-llvm-toolchain-tryjob
   excelsior-payloads-tryjob
   excelsior-release-tryjob
-  expresso-factory-rambi-5517.B-factorybranch-tryjob
   factory-ambassador-14265.B-buildspec-tryjob
     ambassador-factory-ambassador-14265.B-factorybranch-tryjob
   factory-asurada-13929.B-buildspec-tryjob
     asurada-factory-asurada-13929.B-factorybranch-tryjob
   factory-atlas-11907.B-buildspec-tryjob
     atlas-factory-atlas-11907.B-factorybranch-tryjob
-  factory-auron-6459.B-buildspec-tryjob
-    auron_paine-factory-auron-6459.B-factorybranch-tryjob
-    auron_yuna-factory-auron-6459.B-factorybranch-tryjob
-    buddy-factory-auron-6459.B-factorybranch-tryjob
-    gandof-factory-auron-6459.B-factorybranch-tryjob
-    lulu-factory-auron-6459.B-factorybranch-tryjob
-  factory-auron-6772.B-buildspec-tryjob
-    buddy-factory-auron-6772.B-factorybranch-tryjob
-    guado-factory-auron-6772.B-factorybranch-tryjob
-    rikku-factory-auron-6772.B-factorybranch-tryjob
-    tidus-factory-auron-6772.B-factorybranch-tryjob
   factory-brya-14517.B-buildspec-tryjob
     brask-factory-brya-14517.B-factorybranch-tryjob
     brya-factory-brya-14517.B-factorybranch-tryjob
@@ -739,21 +676,6 @@
     puff-moblab-factory-puff-13329.B-factorybranch-tryjob
   factory-puff-13813.B-buildspec-tryjob
     puff-factory-puff-13813.B-factorybranch-tryjob
-  factory-rambi-5517.B-buildspec-tryjob
-    enguarde-factory-rambi-5517.B-factorybranch-tryjob
-    expresso-factory-rambi-5517.B-factorybranch-tryjob
-    kip-factory-rambi-5517.B-factorybranch-tryjob
-    swanky-factory-rambi-5517.B-factorybranch-tryjob
-    winky-factory-rambi-5517.B-factorybranch-tryjob
-  factory-rambi-6420.B-buildspec-tryjob
-    banjo-factory-rambi-6420.B-factorybranch-tryjob
-    candy-factory-rambi-6420.B-factorybranch-tryjob
-    enguarde-factory-rambi-6420.B-factorybranch-tryjob
-    gnawty-factory-rambi-6420.B-factorybranch-tryjob
-    heli-factory-rambi-6420.B-factorybranch-tryjob
-    ninja-factory-rambi-6420.B-factorybranch-tryjob
-    orco-factory-rambi-6420.B-factorybranch-tryjob
-    sumo-factory-rambi-6420.B-factorybranch-tryjob
   factory-rammus-11289.B-buildspec-tryjob
     rammus-factory-rammus-11289.B-factorybranch-tryjob
   factory-reef-8811.B-buildspec-tryjob
@@ -767,19 +689,6 @@
     scarlet-factory-scarlet-10211.B-factorybranch-tryjob
   factory-soraka-10323.39.B-buildspec-tryjob
     soraka-factory-soraka-10323.39.B-factorybranch-tryjob
-  factory-strago-7458.B-buildspec-tryjob
-    banon-factory-strago-7458.B-factorybranch-tryjob
-    celes-factory-strago-7458.B-factorybranch-tryjob
-    cyan-factory-strago-7458.B-factorybranch-tryjob
-    edgar-factory-strago-7458.B-factorybranch-tryjob
-    kefka-factory-strago-7458.B-factorybranch-tryjob
-    kip-factory-strago-7458.B-factorybranch-tryjob
-    reks-factory-strago-7458.B-factorybranch-tryjob
-    relm-factory-strago-7458.B-factorybranch-tryjob
-    setzer-factory-strago-7458.B-factorybranch-tryjob
-    terra-factory-strago-7458.B-factorybranch-tryjob
-    ultima-factory-strago-7458.B-factorybranch-tryjob
-    wizpig-factory-strago-7458.B-factorybranch-tryjob
   factory-strongbad-13963.B-buildspec-tryjob
     strongbad-factory-strongbad-13963.B-factorybranch-tryjob
     trogdor-factory-strongbad-13963.B-factorybranch-tryjob
@@ -831,7 +740,6 @@
   gale-payloads-tryjob
   gale-release-tryjob
   gale-test-ap-tryjob
-  gandof-factory-auron-6459.B-factorybranch-tryjob
   ghost-full-tryjob
   ghost-llvm-next-toolchain-tryjob
   ghost-llvm-toolchain-tryjob
@@ -844,7 +752,6 @@
   glados-llvm-toolchain-tryjob
   glados-payloads-tryjob
   glados-release-tryjob
-  gnawty-factory-rambi-6420.B-factorybranch-tryjob
   goroh-full-tryjob
   goroh-llvm-next-toolchain-tryjob
   goroh-llvm-toolchain-tryjob
@@ -869,7 +776,6 @@
   grunt-payloads-tryjob
   grunt-release-basic-tryjob
   grunt-release-tryjob
-  guado-factory-auron-6772.B-factorybranch-tryjob
   guado-macrophage-full-tryjob
   guado-macrophage-llvm-next-toolchain-tryjob
   guado-macrophage-llvm-toolchain-tryjob
@@ -929,7 +835,6 @@
   hatch-llvm-toolchain-tryjob
   hatch-payloads-tryjob
   hatch-release-tryjob
-  heli-factory-rambi-6420.B-factorybranch-tryjob
   herobrine-full-tryjob
   herobrine-llvm-next-toolchain-tryjob
   herobrine-llvm-toolchain-tryjob
@@ -984,7 +889,6 @@
   keeby-llvm-toolchain-tryjob
   keeby-payloads-tryjob
   keeby-release-tryjob
-  kefka-factory-strago-7458.B-factorybranch-tryjob
   kevin-android-pi-pre-flight-branch-tryjob
   kevin-factory-gru-8652.B-factorybranch-tryjob
   kevin-full-tryjob
@@ -1008,8 +912,6 @@
   kevin64-llvm-toolchain-tryjob
   kevin64-payloads-tryjob
   kevin64-release-tryjob
-  kip-factory-rambi-5517.B-factorybranch-tryjob
-  kip-factory-strago-7458.B-factorybranch-tryjob
   kukui-arc-r-full-tryjob
   kukui-arc-r-llvm-next-toolchain-tryjob
   kukui-arc-r-llvm-toolchain-tryjob
@@ -1044,7 +946,6 @@
   littlejoe-rapid
   littlejoe-release-tryjob
   luci-scheduler-updater-tryjob
-  lulu-factory-auron-6459.B-factorybranch-tryjob
   majolica-full-tryjob
   majolica-llvm-next-toolchain-tryjob
   majolica-llvm-toolchain-tryjob
@@ -1250,7 +1151,6 @@
   nautilus-llvm-toolchain-tryjob
   nautilus-payloads-tryjob
   nautilus-release-tryjob
-  ninja-factory-rambi-6420.B-factorybranch-tryjob
   nissa-full-tryjob
   nissa-llvm-next-toolchain-tryjob
   nissa-llvm-toolchain-tryjob
@@ -1304,7 +1204,6 @@
   octopus-master-factorybranch-tryjob
   octopus-payloads-tryjob
   octopus-release-tryjob
-  orco-factory-rambi-6420.B-factorybranch-tryjob
   palkia-full-tryjob
   palkia-llvm-next-toolchain-tryjob
   palkia-llvm-toolchain-tryjob
@@ -1362,8 +1261,6 @@
   reef-llvm-toolchain-tryjob
   reef-payloads-tryjob
   reef-release-tryjob
-  reks-factory-strago-7458.B-factorybranch-tryjob
-  relm-factory-strago-7458.B-factorybranch-tryjob
   reven-full-tryjob
   reven-llvm-next-toolchain-tryjob
   reven-llvm-toolchain-tryjob
@@ -1379,7 +1276,6 @@
   rex-llvm-toolchain-tryjob
   rex-payloads-tryjob
   rex-release-tryjob
-  rikku-factory-auron-6772.B-factorybranch-tryjob
   sand-factory-reef-8811.B-factorybranch-tryjob
   sand-full-tryjob
   sand-llvm-next-toolchain-tryjob
@@ -1420,7 +1316,6 @@
   sentry-llvm-toolchain-tryjob
   sentry-payloads-tryjob
   sentry-release-tryjob
-  setzer-factory-strago-7458.B-factorybranch-tryjob
   shadowkeep-full-tryjob
   shadowkeep-llvm-next-toolchain-tryjob
   shadowkeep-llvm-toolchain-tryjob
@@ -1490,8 +1385,6 @@
   strongbad-userdebug-payloads-tryjob
   strongbad-userdebug-release-tryjob
   success-build
-  sumo-factory-rambi-6420.B-factorybranch-tryjob
-  swanky-factory-rambi-5517.B-factorybranch-tryjob
   sync-test-cbuildbot-tryjob
   tael-full-tryjob
   tael-llvm-next-toolchain-tryjob
@@ -1501,9 +1394,7 @@
   tatl-llvm-next-toolchain-tryjob
   tatl-llvm-toolchain-tryjob
   tatl-release-tryjob
-  terra-factory-strago-7458.B-factorybranch-tryjob
   test-ap-group-tryjob
-  tidus-factory-auron-6772.B-factorybranch-tryjob
   trogdor-arc-r-full-tryjob
   trogdor-arc-r-llvm-next-toolchain-tryjob
   trogdor-arc-r-llvm-toolchain-tryjob
@@ -1541,7 +1432,6 @@
   trogdor64-llvm-toolchain-tryjob
   trogdor64-payloads-tryjob
   trogdor64-release-tryjob
-  ultima-factory-strago-7458.B-factorybranch-tryjob
   veyron_mighty-full-tryjob
   veyron_mighty-llvm-next-toolchain-tryjob
   veyron_mighty-llvm-toolchain-tryjob
@@ -1589,8 +1479,6 @@
   whirlwind-payloads-tryjob
   whirlwind-release-tryjob
   whirlwind-test-ap-tryjob
-  winky-factory-rambi-5517.B-factorybranch-tryjob
-  wizpig-factory-strago-7458.B-factorybranch-tryjob
   wristpin-full-tryjob
   wristpin-llvm-next-toolchain-tryjob
   wristpin-llvm-toolchain-tryjob
