@@ -103,11 +103,17 @@ def GenerateBreakpadSymbol(elf_file, debug_file=None, breakpad_dir=None,
         cmd_base + cmd_args, stderr=True, stdout=temp.name,
         check=False, debug_level=logging.DEBUG)
 
-  def _CrashCheck(ret, msg):
-    if ret < 0:
+  def _CrashCheck(result, file_or_files, msg):
+    if result.returncode:
       cbuildbot_alerts.PrintBuildbotStepWarnings()
-      logging.warning('dump_syms crashed with %s; %s',
-                      signals.StrSignal(-ret), msg)
+      if result.returncode < 0:
+        logging.warning('dump_syms %s crashed with %s; %s',
+                        file_or_files, signals.StrSignal(-result.returncode),
+                        msg)
+      else:
+        logging.warning('dump_syms %s returned %d; %s',
+                        file_or_files, result.returncode, msg)
+      logging.warning('output:\n%s', result.stderr.decode('utf-8'))
 
   osutils.SafeMakedirs(breakpad_dir)
   with cros_build_lib.UnbufferedNamedTemporaryFile(
@@ -116,8 +122,10 @@ def GenerateBreakpadSymbol(elf_file, debug_file=None, breakpad_dir=None,
       # Try to dump the symbols using the debug file like normal.
       if debug_file_only:
         cmd_args = [debug_file]
+        file_or_files = debug_file
       else:
         cmd_args = [elf_file, os.path.dirname(debug_file)]
+        file_or_files = [elf_file, debug_file]
 
       result = _DumpIt(cmd_args)
 
@@ -125,10 +133,10 @@ def GenerateBreakpadSymbol(elf_file, debug_file=None, breakpad_dir=None,
         # Sometimes dump_syms can crash because there's too much info.
         # Try dumping and stripping the extended stuff out.  At least
         # this way we'll get the extended symbols.  https://crbug.com/266064
-        _CrashCheck(result.returncode, 'retrying w/out CFI')
+        _CrashCheck(result, file_or_files, 'retrying w/out CFI')
         cmd_args = ['-c', '-r'] + cmd_args
         result = _DumpIt(cmd_args)
-        _CrashCheck(result.returncode, 'retrying w/out debug')
+        _CrashCheck(result, file_or_files, 'retrying w/out debug')
 
       basic_dump = result.returncode
     else:
@@ -142,13 +150,12 @@ def GenerateBreakpadSymbol(elf_file, debug_file=None, breakpad_dir=None,
         # A lot of files (like kernel files) contain no debug information,
         # do not consider such occurrences as errors.
         cbuildbot_alerts.PrintBuildbotStepWarnings()
-        _CrashCheck(result.returncode, 'giving up entirely')
         if b'file contains no debugging information' in result.stderr:
-          logging.warning('no symbols found for %s', elf_file)
+          logging.warning('dump_syms failed; giving up entirely.')
+          logging.warning('No symbols found for %s', elf_file)
         else:
           num_errors.value += 1
-          logging.error('dumping symbols for %s failed:\n%s', elf_file,
-                        result.stderr.decode('utf-8'))
+          _CrashCheck(result, elf_file, 'giving up entirely')
         os.unlink(temp.name)
         return num_errors.value
 
