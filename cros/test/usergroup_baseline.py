@@ -232,7 +232,6 @@ GROUP_BASELINE = dict((e.group, e) for e in (
     GroupEntry(group='android-root', gid=655360, users={'android-root'}),
     GroupEntry(group='nvpd', gid=20190, users={'nvpd'}),
     GroupEntry(group='missived_senders', gid=20191, users={'cros_healthd',
-                                                           'secagentd',
                                                            'secanomaly'}),
 ))
 
