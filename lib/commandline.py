@@ -17,6 +17,7 @@ import optparse  # pylint: disable=deprecated-module
 import os
 import signal
 import sys
+from typing import List
 import urllib.parse
 
 from chromite.lib import constants
@@ -1014,6 +1015,30 @@ def RunInsideChroot(command=None, chroot_args=None):
     chroot_args += ['--log-level', command.options.log_level]
 
   raise ChrootRequiredError(argv, chroot_args)
+
+
+def RunAsRootUser(argv: List[str]):
+  """Run the given command as the root user.
+
+  Args:
+    argv: Command line arguments to run as the root user.
+
+  Raises:
+    ValueError: If a command is not provided.
+  """
+  if not argv:
+    raise ValueError('Command not provided to run as the root user.')
+
+  if osutils.IsRootUser():
+    return
+
+  cmd = [
+      'sudo',
+      f'HOME={os.environ["HOME"]}',
+      f'PATH={os.environ["PATH"]}',
+      '--',
+  ] + argv
+  os.execvp(cmd[0], cmd)
 
 
 def ReExec():

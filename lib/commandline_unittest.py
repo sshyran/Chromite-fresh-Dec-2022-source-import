@@ -18,6 +18,7 @@ from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
+from chromite.lib import osutils
 from chromite.lib import path_util
 
 
@@ -775,6 +776,40 @@ class TestRunInsideChroot(cros_test_lib.MockTestCase):
     self.mock_inside_chroot.return_value = False
     sys.argv.append('arg3')
     self._VerifyRunInsideChroot(['/inside/cmd', 'arg1', 'arg2', 'newarg3'])
+
+
+class TestRunAsRootUsesr(cros_test_lib.MockTestCase):
+  """Test commandline.RunAsRootUser()."""
+
+  def setUp(self):
+    self.is_root_user_mock = self.PatchObject(
+        osutils, 'IsRootUser', return_value=True)
+    self.execvp_mock = self.PatchObject(os, 'execvp')
+
+  def testInvalidInput(self):
+    """Test an error is raised when no command is given."""
+    with self.assertRaises(ValueError):
+      commandline.RunAsRootUser([])
+
+  def testRootUser(self):
+    """Test that the function returns when is root user."""
+    commandline.RunAsRootUser(['test_cmd'])
+
+    self.execvp_mock.assert_not_called()
+
+  def testCommandCreation(self):
+    """Test that the command is created with the appropriate envvars."""
+    self.is_root_user_mock.return_value = False
+
+    commandline.RunAsRootUser(['test_cmd'])
+
+    self.execvp_mock.assert_called_once_with('sudo', [
+        'sudo',
+        f'HOME={os.environ["HOME"]}',
+        f'PATH={os.environ["PATH"]}',
+        '--',
+        'test_cmd',
+    ])
 
 
 class DeprecatedActionTest(cros_test_lib.MockTestCase):

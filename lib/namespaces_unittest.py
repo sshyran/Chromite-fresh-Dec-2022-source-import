@@ -8,6 +8,7 @@ import errno
 import os
 import unittest
 
+from chromite.lib import commandline
 from chromite.lib import cros_test_lib
 from chromite.lib import namespaces
 
@@ -43,3 +44,27 @@ class UnshareTests(cros_test_lib.TestCase):
         # Running as non-root will fail, so ignore it.  We ran most
         # of the code in the process which is all we really wanted.
         raise
+
+class ReExecuteWithNamespaceTests(cros_test_lib.MockTestCase):
+  """Tests for ReExecuteWithNamespace()."""
+
+  def testReExecuteWithNamespace(self):
+    """Test that SimpleUnshare is called and the non-root user is restored."""
+    self.PatchObject(commandline, 'RunAsRootUser')
+    self.PatchDict(os.environ, {
+        'SUDO_GID': '123',
+        'SUDO_UID': '456',
+        'SUDO_USER': 'testuser',
+    })
+    simple_unshare_mock = self.PatchObject(namespaces, 'SimpleUnshare')
+    os_initgroups_mock = self.PatchObject(os, 'initgroups')
+    os_setresgid_mock = self.PatchObject(os, 'setresgid')
+    os_setresuid_mock = self.PatchObject(os, 'setresuid')
+
+    namespaces.ReExecuteWithNamespace([])
+
+    simple_unshare_mock.assert_called_once_with(net=True, pid=True)
+    os_initgroups_mock.assert_called_once_with('testuser', 123)
+    os_setresgid_mock.assert_called_once_with(123, 123, 123)
+    os_setresuid_mock.assert_called_once_with(456, 456, 456)
+    self.assertEqual('testuser', os.environ['USER'])

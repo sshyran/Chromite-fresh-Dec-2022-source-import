@@ -17,7 +17,9 @@ import signal
 # the cros_build_lib.run helper.
 import subprocess
 import sys
+from typing import List
 
+from chromite.lib import commandline
 from chromite.lib import locking
 from chromite.lib import osutils
 from chromite.lib import process_util
@@ -318,3 +320,26 @@ def SimpleUnshare(mount=True, uts=True, ipc=True, net=False, pid=False):
 
   if pid:
     CreatePidNs()
+
+
+def ReExecuteWithNamespace(argv: List[str], network: bool = False):
+  """Re-execute as root so we can unshare resources.
+
+  Args:
+    argv: Command line arguments to run as root user.
+    network: If False, disable access to the network.
+  """
+  # Re-run the command as a root user in order to create the namespaces.
+  # Ideally, we can rework this logic to swap to the root user in a way that
+  # doesn't involve re-executing the command.
+  commandline.RunAsRootUser(argv)
+
+  SimpleUnshare(net=not network, pid=True)
+  # We got our namespaces, so switch back to the non-root user.
+  gid = int(os.environ.pop('SUDO_GID'))
+  uid = int(os.environ.pop('SUDO_UID'))
+  user = os.environ.pop('SUDO_USER')
+  os.initgroups(user, gid)
+  os.setresgid(gid, gid, gid)
+  os.setresuid(uid, uid, uid)
+  os.environ['USER'] = user

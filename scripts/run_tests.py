@@ -32,7 +32,6 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import gs
 from chromite.lib import namespaces
-from chromite.lib import osutils
 
 
 def main(argv):
@@ -66,7 +65,8 @@ def main(argv):
     # Namespacing is enabled by default because tests may break each other or
     # interfere with parts of the running system if not isolated in a namespace.
     # Disabling namespaces is not recommended for general use.
-    re_execute_with_namespace([sys.argv[0]] + argv, network=opts.network)
+    namespaces.ReExecuteWithNamespace(
+        [sys.argv[0]] + argv, network=opts.network)
 
   # Check the environment.  https://crbug.com/1015450
   st = os.stat('/')
@@ -91,28 +91,6 @@ def precache():
   # Ensure protoc is installed for api/compile_build_api_proto_unittest.
   compile_build_api_proto.InstallProtoc(
       compile_build_api_proto.ProtocVersion.CHROMITE)
-
-
-def re_execute_with_namespace(argv, network=False):
-  """Re-execute as root so we can unshare resources."""
-  if osutils.IsNonRootUser():
-    cmd = [
-        'sudo',
-        'HOME=%s' % os.environ['HOME'],
-        'PATH=%s' % os.environ['PATH'],
-        '--',
-    ] + argv
-    os.execvp(cmd[0], cmd)
-  else:
-    namespaces.SimpleUnshare(net=not network, pid=True)
-    # We got our namespaces, so switch back to the user to run the tests.
-    gid = int(os.environ.pop('SUDO_GID'))
-    uid = int(os.environ.pop('SUDO_UID'))
-    user = os.environ.pop('SUDO_USER')
-    os.initgroups(user, gid)
-    os.setresgid(gid, gid, gid)
-    os.setresuid(uid, uid, uid)
-    os.environ['USER'] = user
 
 
 def re_execute_inside_chroot(argv):
