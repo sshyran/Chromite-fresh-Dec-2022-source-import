@@ -222,15 +222,6 @@ class CompletedProcess(subprocess.CompletedProcess):
           stderr=self.stderr, msg='check_returncode failed')
 
 
-# TODO(crbug.com/1006587): Migrate users to CompletedProcess and drop this.
-class CommandResult(CompletedProcess):
-  """An object to store various attributes of a child process.
-
-  This is the same as subprocess.CompletedProcess except we allow None defaults
-  for |args| and |returncode|.
-  """
-
-
 class CalledProcessError(subprocess.CalledProcessError):
   """Error caught in run() function.
 
