@@ -140,7 +140,7 @@ def GetParser():
   return parser
 
 
-def _ParseArguments(argv):
+def ParseArguments(argv):
   """Parse and validate arguments."""
   parser = GetParser()
   opts = parser.parse_args(argv)
@@ -151,8 +151,22 @@ def _ParseArguments(argv):
   return opts
 
 
+def GenerateLink(attrs, opts, checkout_path, relative_path):
+  """Generate link to CS based on on parsed arguments and checkout."""
+  if opts.gitiles:
+    base = Gitiles
+  elif attrs.get('remote_alias') == 'cros-internal':
+    # Private repos not on public CS, so force internal private.
+    base = PrivateCS
+  elif opts.public_link:
+    base = PublicCS
+  else:
+    base = InternalCS
+
+  return base.format(attrs, opts, checkout_path, relative_path)
+
 def main(argv):
-  opts = _ParseArguments(argv)
+  opts = ParseArguments(argv)
 
   checkout = git.ManifestCheckout.Cached(opts.path)
 
@@ -177,17 +191,7 @@ def main(argv):
         attrs['local_path'], ['rev-parse', 'HEAD']
     ).stdout.strip()
 
-  if opts.gitiles:
-    base = Gitiles
-  elif attrs.get('remote_alias') == 'cros-internal':
-    # Private repos not on public CS, so force internal private.
-    base = PrivateCS
-  elif opts.public_link:
-    base = PublicCS
-  else:
-    base = InternalCS
-
-  final_link = base.format(attrs, opts, checkout_path, relative_path)
+  final_link = GenerateLink(attrs, opts, checkout_path, relative_path)
 
   is_mac_os = sys.platform.startswith('darwin')
 
