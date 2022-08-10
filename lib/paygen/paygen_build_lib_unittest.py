@@ -12,7 +12,6 @@ from chromite.lib import config_lib_unittest
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
-from chromite.lib import parallel
 from chromite.lib.paygen import gslock
 from chromite.lib.paygen import gspaths
 from chromite.lib.paygen import paygen_build_lib
@@ -1583,17 +1582,16 @@ class TestPayloadGeneration(BasePaygenBuildLibTestWithBuilds):
 
   def testGeneratePayloads(self):
     """Test paygen_build_lib._GeneratePayloads"""
-    poolMock = self.PatchObject(parallel, 'RunTasksInProcessPool')
-
     paygen = self._GetPaygenBuildInstance()
-    paygen._GeneratePayloads(
-        (self.mp_full_payload, self.mp_delta_payload, self.test_delta_payload))
+    payloads = (self.mp_full_payload, self.mp_delta_payload,
+                self.test_delta_payload)
 
-    self.assertEqual(poolMock.call_args_list, [
-        mock.call(paygen_payload_lib.CreateAndUploadPayload,
-                  [(self.mp_full_payload, True, True),
-                   (self.mp_delta_payload, True, True),
-                   (self.test_delta_payload, False, True)])
+    generatePayloadsMock = self.PatchObject(paygen_payload_lib,
+                                            'GeneratePayloads')
+    paygen._GeneratePayloads(payloads)
+
+    self.assertEqual(generatePayloadsMock.call_args_list, [
+        mock.call([mock.ANY, mock.ANY, mock.ANY]),
     ])
 
   def testCleanupBuild(self):

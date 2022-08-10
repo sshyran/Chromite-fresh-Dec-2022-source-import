@@ -4,8 +4,9 @@
 """Hold the functions that do the real work generating payloads."""
 
 import base64
+from collections import defaultdict
 from collections import deque
-import datetime
+import itertools
 import json
 import logging
 import os
@@ -14,6 +15,7 @@ import subprocess
 import tempfile
 import threading
 import time
+from typing import List
 
 from chromite.lib import cgpt
 from chromite.lib import chroot_util
@@ -22,6 +24,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import dlc_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
+from chromite.lib import parallel
 from chromite.lib import path_util
 from chromite.lib.paygen import download_cache
 from chromite.lib.paygen import filelib
@@ -32,9 +35,12 @@ from chromite.lib.paygen import urilib
 from chromite.lib.paygen import utils
 from chromite.scripts import cros_set_lsb_release
 from chromite.utils import pformat
+from chromite.utils import timer
 
 
 DESCRIPTION_FILE_VERSION = 2
+# The size to split the batched paygen payloads into.
+PAYGEN_SPLIT_SIZE = 300
 
 # See class docs for functionality information. Configured to reserve 6GB and
 # consider each individual task as consuming 6GB. Therefore we won't start a
@@ -60,6 +66,10 @@ class PayloadVerificationError(Error):
   """Raised when the generated payload fails to verify."""
 
 
+class SigningError(Error):
+  """Raised when there was a failure to sign paygen payload hashes."""
+
+
 class PayloadGenerationSkippedException(BaseException):
   """Base class for reasons that payload generation might be skipped.
 
@@ -72,10 +82,16 @@ class NoMiniOSPartitionException(PayloadGenerationSkippedException):
   """Raised when generating a miniOS payload for an img with no miniOS part."""
 
 
+def GenerateSignerResultsError(msg):
+  """Helper for reporting errors with signer results."""
+  logging.error(msg)
+  raise UnexpectedSignerResultsError(msg)
+
+
 class PaygenSigner(object):
   """Class to manager the payload signer."""
 
-  def __init__(self, work_dir, private_key=None, payload_build=None):
+  def __init__(self, work_dir=None, private_key=None, payload_build=None):
     """Initializer.
 
     Args:
@@ -91,6 +107,13 @@ class PaygenSigner(object):
 
     self._signer = None
     self._Initialize()
+
+  def __hash__(self):
+    """Hash of the class to make hashable.
+
+    Each instance of the class is its own unique hash.
+    """
+    return hash(repr(self))
 
   def _Initialize(self):
     """Initializes based on which bucket the payload is supposed to go."""
@@ -206,6 +229,34 @@ class PaygenPayload(object):
     cache_dir = cache_dir or self._FindCacheDir()
     self._cache = download_cache.DownloadCache(
         cache_dir, cache_size=PaygenPayload.CACHE_SIZE)
+
+    # Set to True if paygen payload generation is skipped.
+    self.skipped = False
+
+  def _AcquireLock(self):
+    """Acquires the memory semaphore."""
+    while True:
+      acq_result = _mem_semaphore.acquire(timeout=self._SEMAPHORE_TIMEOUT)
+      if acq_result.result:
+        logging.info('Acquired lock (reason: %s)', acq_result.reason)
+        break
+      else:
+        logging.info(
+            'Still waiting to run this particular payload (reason: %s)'
+            ', trying again ...', acq_result.reason)
+
+  def _ReleaseLock(self):
+    """Releases the memory semaphore."""
+    _mem_semaphore.release()
+
+  def _DeleteImageFiles(self):
+    """Deletes/Unlinks the image files."""
+    try:
+      if self.payload.src_image:
+        os.unlink(self.src_image_file)
+      os.unlink(self.tgt_image_file)
+    except Error as e:
+      logging.warning('Failed to delete image files, %s', e)
 
   def _MetadataUri(self, uri):
     """Given a payload uri, find the uri for the metadata signature."""
@@ -444,7 +495,12 @@ class PaygenPayload(object):
         # image.
         self._appid, _ = self._GetPlatformImageParams(self.tgt_image_file)
 
-      # Reset the target image file path so no one uses it later.
+      # For CrOS image types, delete the source and target image files as the
+      # partitions get extracted.
+      self._DeleteImageFiles()
+
+      # Reset the image file paths so no one uses it later.
+      self.src_image_file = None
       self.tgt_image_file = None
 
     else:
@@ -654,7 +710,7 @@ class PaygenPayload(object):
     # This can take a very long time with no output, so wrap the call.
     self._RunGeneratorCmd(cmd, squawk_wrap=True)
 
-  def _GenerateHashes(self):
+  def GenerateHashes(self):
     """Generate a payload hash and a metadata hash.
 
     Works from an unsigned update payload.
@@ -677,57 +733,6 @@ class PaygenPayload(object):
 
     return (osutils.ReadFile(self.payload_hash_file, mode='rb'),
             osutils.ReadFile(self.metadata_hash_file, mode='rb'))
-
-  def _GenerateSignerResultsError(self, format_str, *args):
-    """Helper for reporting errors with signer results."""
-    msg = format_str % args
-    logging.error(msg)
-    raise UnexpectedSignerResultsError(msg)
-
-  def _SignHashes(self, hashes):
-    """Get the signer to sign the hashes with the update payload key via GS.
-
-    May sign each hash with more than one key, based on how many keysets are
-    required.
-
-    Args:
-      hashes: List of hashes (as bytes) to be signed.
-
-    Returns:
-      List of lists which contain each signed hash (as bytes).
-      [[hash_1_sig_1, hash_1_sig_2], [hash_2_sig_1, hash_2_sig_2]]
-    """
-    keysets = self.PAYLOAD_SIGNATURE_KEYSETS
-    logging.info('Signing payload hashes with %s.', ', '.join(keysets))
-
-    # Results look like:
-    #  [[hash_1_sig_1, hash_1_sig_2], [hash_2_sig_1, hash_2_sig_2]]
-    hashes_sigs = self.signer.GetHashSignatures(hashes, keysets=keysets)
-    logging.info('Signatures for hashes=%s and keysets=%s is %s', hashes,
-                 keysets, hashes_sigs)
-
-    if hashes_sigs is None:
-      self._GenerateSignerResultsError('Signing of hashes failed')
-    if len(hashes_sigs) != len(hashes):
-      self._GenerateSignerResultsError(
-          'Count of hashes signed (%d) != Count of hashes (%d).',
-          len(hashes_sigs), len(hashes))
-
-    # Make sure that the results we get back the expected number of signatures.
-    for hash_sigs in hashes_sigs:
-      # Make sure each hash has the right number of signatures.
-      if len(hash_sigs) != len(self.PAYLOAD_SIGNATURE_SIZES_BYTES):
-        self._GenerateSignerResultsError(
-            'Signature count (%d) != Expected signature count (%d)',
-            len(hash_sigs), len(self.PAYLOAD_SIGNATURE_SIZES_BYTES))
-
-      # Make sure each hash signature is the expected size.
-      for sig, sig_size in zip(hash_sigs, self.PAYLOAD_SIGNATURE_SIZES_BYTES):
-        if len(sig) != sig_size:
-          self._GenerateSignerResultsError(
-              'Signature size (%d) != expected size(%d)', len(sig), sig_size)
-
-    return hashes_sigs
 
   def _WriteSignaturesToFile(self, signatures):
     """Write each signature into a temp file in the chroot.
@@ -783,9 +788,9 @@ class PaygenPayload(object):
       signatures: A list of metadata signatures in binary string format.
     """
     if len(signatures) != 1:
-      self._GenerateSignerResultsError(
-          'Received %d metadata signatures, only a single signature supported.',
-          len(signatures))
+      GenerateSignerResultsError(
+          f'Received {len(signatures)} metadata signatures, '
+          f'only a single signature supported.')
 
     logging.info('Saving metadata signatures in %s.',
                  self.metadata_signature_file)
@@ -865,7 +870,7 @@ class PaygenPayload(object):
 
     return props_map
 
-  def _StorePayloadJson(self, metadata_signatures):
+  def StorePayloadJson(self, metadata_signatures):
     """Generate the payload description json file.
 
     Args:
@@ -884,9 +889,9 @@ class PaygenPayload(object):
     # payload.
     if metadata_signatures:
       if len(metadata_signatures) != 1:
-        self._GenerateSignerResultsError(
-            'Received %d metadata signatures, only one supported.',
-            len(metadata_signatures))
+        GenerateSignerResultsError(
+            f'Received {len(metadata_signatures)} metadata signatures, '
+            f'only one supported.')
       metadata_signature = base64.b64encode(
           metadata_signatures[0]).decode('utf-8')
       if metadata_signature != props_map['metadata_signature']:
@@ -915,26 +920,16 @@ class PaygenPayload(object):
       logging.error('flattened: %r', flat)
       logging.error('expanded: %r', list(flat))
 
-  def _SignPayload(self):
-    """Wrap all the steps for signing an existing payload.
+  def SignPayload(self, payload_signatures, metadata_signatures):
+    """Sign payload with signatures for payload and metadata.
 
-    Returns:
-      List of payload signatures, List of metadata signatures.
+    Args:
+      payload_signatures: List of signatures as bytes for the payload.
+      metadata_signatures: List of signatures as bytes for the metadata.
     """
-    # Create hashes to sign or even if signing not needed.  TODO(ahassani): In
-    # practice we don't need to generate hashes if we are not signing, so when
-    # devserver stopped depending on cros_generate_update_payload. this can be
-    # reverted.
-    payload_hash, metadata_hash = self._GenerateHashes()
-
     if not self.signer:
-      return (None, None)
-
-    # Sign them.
-    # pylint: disable=unpacking-non-sequence
-    payload_signatures, metadata_signatures = self._SignHashes(
-        [payload_hash, metadata_hash])
-    # pylint: enable=unpacking-non-sequence
+      logging.info('Skipped signing payload.')
+      return
 
     # Insert payload and metadata signature(s).
     self._InsertSignaturesIntoPayload(payload_signatures, metadata_signatures)
@@ -942,9 +937,7 @@ class PaygenPayload(object):
     # Store metadata signature(s).
     self._StoreMetadataSignatures(metadata_signatures)
 
-    return (payload_signatures, metadata_signatures)
-
-  def _Create(self):
+  def Create(self):
     """Create a given payload, if it doesn't already exist.
 
     Raises:
@@ -969,19 +962,8 @@ class PaygenPayload(object):
     # period of time, the builder kills the process for not outputting any
     # logs. So here we try to acquire the lock with a timeout of ten minutes in
     # a loop and log some output so not to be killed by the builder.
-    while True:
-      acq_result = _mem_semaphore.acquire(timeout=self._SEMAPHORE_TIMEOUT)
-      if acq_result.result:
-        logging.info('Acquired lock (reason: %s)', acq_result.reason)
-        break
-      else:
-        logging.info(
-            'Still waiting to run this particular payload (reason: %s)'
-            ', trying again ...', acq_result.reason)
+    self._AcquireLock()
     try:
-      # Time the actual paygen operation started.
-      start_time = datetime.datetime.now()
-
       # Fetch and prepare the tgt image.
       self._PrepareImage(self.payload.tgt_image, self.tgt_image_file)
 
@@ -1000,25 +982,22 @@ class PaygenPayload(object):
       self._GenerateUnsignedPayload()
     except PayloadGenerationSkippedException:
       logging.info('Skipping payload generation.')
+      self.skipped = True
+      self._DeleteImageFiles()
       raise
     finally:
-      _mem_semaphore.release()
-      # Time the actual paygen operation ended.
-      end_time = datetime.datetime.now()
-      logging.info('* Finished payload generation in %s', end_time - start_time)
+      self._ReleaseLock()
 
-    # Sign the payload, if needed.
-    _, metadata_signatures = self._SignPayload()
-
-    # Store hash and signatures json.
-    self._StorePayloadJson(metadata_signatures)
-
-  def _VerifyPayload(self):
+  def VerifyPayload(self):
     """Checks the integrity of the generated payload.
 
     Raises:
       PayloadVerificationError when the payload fails to verify.
     """
+    if not self._verify:
+      logging.info('Skipping payload verification.')
+      return
+
     if self.signer:
       payload_file_name = self.signed_payload_file
       metadata_sig_file_name = self.metadata_signature_file
@@ -1057,8 +1036,11 @@ class PaygenPayload(object):
 
     self._RunGeneratorCmd(cmd)
 
-  def _UploadResults(self):
+  def UploadResults(self):
     """Copy the payload generation results to the specified destination."""
+    if not self._upload:
+      logging.info('Not uploading payload to %s.', self.payload.uri)
+      return
 
     logging.info('Uploading payload to %s.', self.payload.uri)
 
@@ -1072,58 +1054,129 @@ class PaygenPayload(object):
     urilib.Copy(self.log_file, self._LogsUri(self.payload.uri))
     urilib.Copy(self.description_file, self._JsonUri(self.payload.uri))
 
-  def Run(self):
-    """Create, verify and upload the results.
 
-    Returns:
-      A string uri to payload, if uploaded, otherwise None.
+@timer.timed('Elapsed time (CreatePayload)')
+def CreatePayload(paygen_payload: PaygenPayload) -> PaygenPayload:
+  """Helper to create paygen payload.
 
-    Raises:
-      PayloadGenerationSkippedException: If paygen was skipped for any reason.
-    """
-    ret_uri = None
-    logging.info('* Starting payload generation')
-    start_time = datetime.datetime.now()
-
-    try:
-      self._Create()
-      if self._verify:
-        self._VerifyPayload()
-      if self._upload:
-        self._UploadResults()
-        ret_uri = self.payload.uri
-    except PayloadGenerationSkippedException as ex:
-      if self._verify:
-        print('Not verifying payload, because paygen was skipped.')
-      if self._upload:
-        print('Not uploading payload, because paygen was skipped.')
-      raise ex
-
-    end_time = datetime.datetime.now()
-    logging.info('* Total elapsed payload generation in %s',
-                 end_time - start_time)
-    return ret_uri
-
-
-def CreateAndUploadPayload(payload, sign=True, verify=True):
-  """Helper to create a PaygenPayloadLib instance and use it.
-
-  Mainly can be used as a single function to help with parallelism.
+  Mainly used as a single function for parallelism.
 
   Args:
-    payload: An instance of gspaths.Payload describing the payload to generate.
-    sign: Boolean saying if the payload should be signed (normally, you do).
-    verify: whether the payload should be verified (default: True)
+    paygen_payload: An instance of PaygenPayload.
   """
-  # We need to create a temp directory inside the chroot so be able to access
-  # from both inside and outside the chroot.
-  with chroot_util.TempDirInChroot() as work_dir:
-    signer = PaygenSigner(work_dir=work_dir,
-                          payload_build=payload.build if sign else None)
-    try:
-      PaygenPayload(payload, work_dir, signer=signer, verify=verify).Run()
-    except PayloadGenerationSkippedException:
-      pass
+  try:
+    paygen_payload.Create()
+  except PayloadGenerationSkippedException:
+    pass
+  return paygen_payload
+
+
+@timer.timed('Elapsed time (SignHashes)')
+def SignHashes(signer: PaygenSigner, hashes: List[bytes]) -> List[List[bytes]]:
+  """Get the signer to sign the hashes with the update payload key via GS.
+
+  May sign each hash with more than one key, based on how many keysets are
+  required.
+
+  Args:
+    signer: The signer to use.
+    hashes: List of hashes (as bytes) to be signed.
+
+  Returns:
+    List of lists which contain each signed hash (as bytes).
+    [[hash_1_sig_1, hash_1_sig_2], [hash_2_sig_1, hash_2_sig_2]]
+  """
+  keysets = PaygenPayload.PAYLOAD_SIGNATURE_KEYSETS
+  logging.info('Signing payload hashes (%s) with keyset (%s).', hashes,
+               ', '.join(keysets))
+
+  if signer is None:
+    logging.info('Skipped signing hashes.')
+    return (None,) * len(hashes)
+
+  # Results look like:
+  #  [[hash_1_sig_1, hash_1_sig_2], [hash_2_sig_1, hash_2_sig_2]]
+  hashes_sigs = signer.GetHashSignatures(hashes, keysets=keysets)
+  logging.info('Signatures for hashes=%s and keysets=%s is %s', hashes, keysets,
+               hashes_sigs)
+
+  if hashes_sigs is None:
+    GenerateSignerResultsError('Signing of hashes failed')
+  if len(hashes_sigs) != len(hashes):
+    GenerateSignerResultsError(
+        f'Count of hashes signed ({len(hashes_sigs)}) != '
+        f'Count of hashes ({len(hashes)}).')
+
+  # Make sure that the results we get back the expected number of signatures.
+  for hash_sigs in hashes_sigs:
+    # Make sure each hash has the right number of signatures.
+    if len(hash_sigs) != len(PaygenPayload.PAYLOAD_SIGNATURE_SIZES_BYTES):
+      GenerateSignerResultsError(
+          f'Signature count ({len(hash_sigs)}) != '
+          'Expected signature count '
+          f'({len(PaygenPayload.PAYLOAD_SIGNATURE_SIZES_BYTES)})')
+
+    # Make sure each hash signature is the expected size.
+    for sig, sig_size in zip(hash_sigs,
+                             PaygenPayload.PAYLOAD_SIGNATURE_SIZES_BYTES):
+      if len(sig) != sig_size:
+        GenerateSignerResultsError(
+            f'Signature size ({len(sig)}) != expected size({sig_size})')
+
+  return hashes_sigs
+
+
+@timer.timed('Elapsed time (SignPayload)')
+def SignPayload(paygen_payload: PaygenPayload, signatures: List[bytes]) -> None:
+  """Helper to sign paygen payload.
+
+  Mainly used as a single function for parallelism.
+
+  Args:
+    paygen_payload: An instance of PaygenPayload.
+    signatures: List of signatures as bytes for the payload and metadata.
+  """
+  paygen_payload.SignPayload(*signatures)
+
+
+@timer.timed('Elapsed time (StorePayloadJson)')
+def StorePayloadJson(paygen_payload: PaygenPayload,
+                     signatures: List[bytes]) -> None:
+  """Helper to store paygen payload json.
+
+  Mainly used as a single function for parallelism.
+
+  Args:
+    paygen_payload: An instance of PaygenPayload.
+    signatures: List of signatures as bytes for the payload and metadata.
+  """
+  paygen_payload.StorePayloadJson(signatures[1])
+
+
+@timer.timed('Elapsed time (VerifyPayload)')
+def VerifyPayload(paygen_payload: PaygenPayload) -> None:
+  """Helper to verify paygen payload.
+
+  Mainly used as a single function for parallelism.
+
+  Args:
+    paygen_payload: An instance of PaygenPayload.
+  """
+  paygen_payload.VerifyPayload()
+  return paygen_payload
+
+
+@timer.timed('Elapsed time (UploadResults)')
+def UploadResults(paygen_payload: PaygenPayload) -> None:
+  """Helper to upload paygen payload results.
+
+  Mainly used as a single function for parallelism.
+
+  Args:
+    paygen_payload: An instance of PaygenPayload.
+  """
+  paygen_payload.UploadResults()
+  return paygen_payload
 
 
 def GenerateUpdatePayload(tgt_image,
@@ -1163,13 +1216,10 @@ def GenerateUpdatePayload(tgt_image,
     # Sign if a private key is passed in.
     if private_key is not None:
       signer = PaygenSigner(work_dir=work_dir, private_key=private_key)
-    paygen = PaygenPayload(
-        payload,
-        work_dir,
-        signer=signer,
-        verify=check)
+    paygen_payload = PaygenPayload(
+        payload, work_dir, signer=signer, verify=check)
     try:
-      paygen.Run()
+      GeneratePayloads([paygen_payload])
     except PayloadGenerationSkippedException:
       logging.info('No payload generated.')
       return False
@@ -1192,3 +1242,138 @@ def GenerateUpdatePayloadPropertiesFile(payload, output=None):
     paygen = PaygenPayload(None, work_dir)
     properties_map = paygen.GetPayloadPropertiesMap(payload)
     pformat.json(properties_map, fp=output, compact=True)
+
+
+def GeneratePayload(signer: PaygenSigner,
+                    batched_paygen_payloads: List[PaygenPayload]) -> None:
+  """Helper to generate and sign paygen payloads in parallel.
+
+  Args:
+    signer: The signer to use.
+    batched_paygen_payloads: The batched paygen payloads to generate and sign.
+  """
+  # Split the batched pagen payloads.
+  for paygen_payloads in (
+      batched_paygen_payloads[i:i + PAYGEN_SPLIT_SIZE]
+      for i in range(0, len(batched_paygen_payloads), PAYGEN_SPLIT_SIZE)):
+    # Need to do this as builders can run out of storage.
+    with chroot_util.TempDirInChroot() as root_paygen_payload_work_dir:
+      for paygen_payload in paygen_payloads:
+        paygen_payload.work_dir = tempfile.mkdtemp(
+            prefix='payload', dir=root_paygen_payload_work_dir)
+
+      paygen_payloads = parallel.RunTasksInProcessPool(
+          CreatePayload, [(x,) for x in paygen_payloads])
+
+      # Skip the paygen payloads which aren't generated.
+      paygen_payloads = [x for x in paygen_payloads if not x.skipped]
+
+      # New builders such as Rubik will send individual payload requests to
+      # generate, so paygen lib should handle cases of a single paygen
+      # payload which can lead to a skip that creates an empty filtered list.
+      if not paygen_payloads:
+        logging.info('No paygen payloads to generate.')
+        continue
+
+      # Batch the paygen payload hashes here.
+      paygen_payload_hashes = [x.GenerateHashes() for x in paygen_payloads]
+      # Hashes: [
+      #   [hash_1, hash_2],
+      #   [hash_3, hash_4],
+      #   ...
+      # ]
+
+      chained_paygen_payload_hashes = list(
+          itertools.chain(*paygen_payload_hashes))
+      # Hash chain: [
+      #   hash_1,
+      #   hash_2,
+      #   hash_3,
+      #   hash_4,
+      #   ...
+      # ]
+
+      # Sign the hashes in a batch.
+      # TODO(kimjae): Can't parallelize here yet as it's a single signer used
+      # for creating multiple paygen payloads.
+      chained_paygen_payload_signatures = SignHashes(
+          signer, chained_paygen_payload_hashes)
+      # Signature chain: [
+      #   [hash_1_sig_1, hash_1_sig_2, ...],
+      #   [hash_2_sig_1, hash_2_sig_2, ...],
+      #   [hash_3_sig_1, hash_3_sig_2, ...],
+      #   [hash_4_sig_1, hash_4_sig_2, ...],
+      #   ...
+      # ]
+
+      # TODO(kimjae): Use itertools.pairwise when 3.10+.
+      # Pair up the signatures.
+      paygen_payload_signatures = list(
+          zip(chained_paygen_payload_signatures[::2],
+              chained_paygen_payload_signatures[1::2]))
+      # Signatures: [
+      #   (
+      #     [hash_1_sig_1, hash_1_sig_2, ...],
+      #     [hash_2_sig_1, hash_2_sig_2, ...],
+      #   ),
+      #   (
+      #     [hash_3_sig_1, hash_3_sig_2, ...],
+      #     [hash_4_sig_1, hash_4_sig_2, ...],
+      #   ),
+      #   ...
+      # ]
+
+      if len(paygen_payloads) != len(paygen_payload_signatures):
+        raise SigningError(
+            f'Paygen payload count and signature count mismatch, '
+            f'paygen_payloads={paygen_payloads} '
+            f'paygen_payload_signatures={paygen_payload_signatures}')
+
+      paygen_payloads_with_signatures = list(
+          zip(paygen_payloads, paygen_payload_signatures))
+      # PaygenPayloads with Signatures: [
+      #   (
+      #     paygen_payload_1,
+      #     (
+      #       [hash_1_sig_1, hash_1_sig_2, ...],
+      #       [hash_2_sig_1, hash_2_sig_2, ...],
+      #     )
+      #   ),
+      #   ...
+      # ]
+
+      parallel.RunTasksInProcessPool(SignPayload,
+                                     paygen_payloads_with_signatures)
+      parallel.RunTasksInProcessPool(StorePayloadJson,
+                                     paygen_payloads_with_signatures)
+
+      paygen_payloads = parallel.RunTasksInProcessPool(
+          VerifyPayload, [(x,) for x in paygen_payloads])
+      _ = parallel.RunTasksInProcessPool(UploadResults,
+                                         [(x,) for x in paygen_payloads])
+
+
+def GeneratePayloads(in_paygen_payloads: List[PaygenPayload]) -> None:
+  """Helper to generate and sign paygen payloads.
+
+  Args:
+    in_paygen_payloads: List of the paygen payloads to generate.
+  """
+  # Most of the operations in paygen for one single payload is single threaded
+  # and mostly IO bound (downloading images, extracting partitions, waiting
+  # for signers, signing payload, etc). The only part that requires special
+  # attention is generating an unsigned payload which internally has a
+  # massively parallel implementation. So, here we allow multiple processes to
+  # run simultaneously and we restrict the number of processes that do the
+  # unsigned payload generation by looking at the available memory and seeing
+  # if additional runs would exceed allowed memory use thresholds (look at
+  # the MemoryConsumptionSemaphore in utils.py).
+
+  # Create the signer to paygen payloads mapping.
+  signer_to_paygen_payloads = defaultdict(list)
+  for paygen_payload in in_paygen_payloads:
+    signer_to_paygen_payloads[paygen_payload.signer].append(paygen_payload)
+
+  # Kick off per signer in parallel.
+  parallel.RunTasksInProcessPool(
+      GeneratePayload, [(x, y) for x, y in signer_to_paygen_payloads.items()])
