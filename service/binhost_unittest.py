@@ -42,8 +42,8 @@ class GetPrebuiltAclArgsTest(cros_test_lib.MockTempDirTestCase):
 
   def testParse(self):
     """Test parsing a valid file."""
-    self.PatchObject(portage_util, 'FindOverlayFile',
-                     return_value=self.acl_file)
+    self.PatchObject(
+        portage_util, 'FindOverlayFile', return_value=self.acl_file)
 
     expected_acls = [['-g', 'group1:READ'], ['-u', 'user:FULL_CONTROL'],
                      ['-g', 'group2:READ']]
@@ -66,12 +66,14 @@ class SetBinhostTest(cros_test_lib.MockTempDirTestCase):
   def setUp(self):
     self.PatchObject(constants, 'SOURCE_ROOT', new=self.tempdir)
 
-    self.public_conf_dir = os.path.join(
-        self.tempdir, constants.PUBLIC_BINHOST_CONF_DIR, 'target')
+    self.public_conf_dir = os.path.join(self.tempdir,
+                                        constants.PUBLIC_BINHOST_CONF_DIR,
+                                        'target')
     osutils.SafeMakedirs(self.public_conf_dir)
 
-    self.private_conf_dir = os.path.join(
-        self.tempdir, constants.PRIVATE_BINHOST_CONF_DIR, 'target')
+    self.private_conf_dir = os.path.join(self.tempdir,
+                                         constants.PRIVATE_BINHOST_CONF_DIR,
+                                         'target')
     osutils.SafeMakedirs(self.private_conf_dir)
 
   def tearDown(self):
@@ -169,8 +171,8 @@ CPV: package/prebuilt_a
 CPV: package/prebuilt_b
     """
     osutils.WriteFile(os.path.join(self.root, 'Packages'), packages_content)
-    osutils.WriteFile(os.path.join(self.root, 'package/prebuilt_a.tbz2'), 'a',
-                      makedirs=True)
+    osutils.WriteFile(
+        os.path.join(self.root, 'package/prebuilt_a.tbz2'), 'a', makedirs=True)
     osutils.WriteFile(os.path.join(self.root, 'package/prebuilt_b.tbz2'), 'b')
 
     actual = binhost.GetPrebuiltsFiles(self.root)
@@ -187,10 +189,12 @@ CPV: package/prebuilt
 DEBUG_SYMBOLS: yes
     """
     osutils.WriteFile(os.path.join(self.root, 'Packages'), packages_content)
-    osutils.WriteFile(os.path.join(self.root, 'package/prebuilt.tbz2'), 'foo',
-                      makedirs=True)
-    osutils.WriteFile(os.path.join(self.root, 'package/prebuilt.debug.tbz2'),
-                      'debug', makedirs=True)
+    osutils.WriteFile(
+        os.path.join(self.root, 'package/prebuilt.tbz2'), 'foo', makedirs=True)
+    osutils.WriteFile(
+        os.path.join(self.root, 'package/prebuilt.debug.tbz2'),
+        'debug',
+        makedirs=True)
 
     actual = binhost.GetPrebuiltsFiles(self.root)
     expected = ['package/prebuilt.tbz2', 'package/prebuilt.debug.tbz2']
@@ -238,9 +242,10 @@ CPV: package/prebuilt
     actual = binpkg.GrabLocalPackageIndex(self.root)
     self.assertEqual(actual.header['URI'], 'gs://chromeos-prebuilt')
     self.assertEqual(int(actual.header['TTL']), 60 * 60 * 24 * 365)
-    self.assertEqual(
-        actual.packages,
-        [{'CPV': 'package/prebuilt', 'PATH': 'target/package/prebuilt.tbz2'}])
+    self.assertEqual(actual.packages, [{
+        'CPV': 'package/prebuilt',
+        'PATH': 'target/package/prebuilt.tbz2'
+    }])
 
 
 class RegenBuildCacheTest(cros_test_lib.MockTempDirTestCase):
@@ -264,11 +269,9 @@ class ReadDevInstallPackageFileTest(cros_test_lib.MockTempDirTestCase):
   """Unittests for ReadDevInstallPackageFile."""
 
   def setUp(self):
-    self.root = os.path.join(
-        self.tempdir,
-        'chroot/build/target/build/dev-install/')
-    self.packages_file = os.path.join(
-        self.root, 'package.installable')
+    self.root = os.path.join(self.tempdir,
+                             'chroot/build/target/build/dev-install/')
+    self.packages_file = os.path.join(self.root, 'package.installable')
     osutils.SafeMakedirs(self.root)
     package_file_content = """\
 x11-apps/intel-gpu-tools-1.22
@@ -278,14 +281,13 @@ virtual/acl-0-r1
 """
     osutils.WriteFile(self.packages_file, package_file_content)
 
-
   def testReadDevInstallPackageFile(self):
     """Test that parsing valid file works."""
     packages = binhost.ReadDevInstallPackageFile(self.packages_file)
-    expected_packages = ['x11-apps/intel-gpu-tools-1.22',
-                         'x11-libs/gdk-pixbuf-2.36.12-r1',
-                         'x11-misc/read-edid-1.4.2',
-                         'virtual/acl-0-r1']
+    expected_packages = [
+        'x11-apps/intel-gpu-tools-1.22', 'x11-libs/gdk-pixbuf-2.36.12-r1',
+        'x11-misc/read-edid-1.4.2', 'virtual/acl-0-r1'
+    ]
     self.assertEqual(packages, expected_packages)
 
 
@@ -319,11 +321,9 @@ virtual/python-enum34-1
     osutils.SafeMakedirs(self.upload_dir)
     self.upload_packages_file = os.path.join(self.upload_dir, 'Packages')
 
-
   def testCreateFilteredPackageIndex(self):
     """CreateDevInstallPackageFile writes updated file to disk."""
-    binhost.CreateFilteredPackageIndex(self.root,
-                                       self.devinstall_package_list,
+    binhost.CreateFilteredPackageIndex(self.root, self.devinstall_package_list,
                                        self.upload_packages_file,
                                        'gs://chromeos-prebuilt', 'target/')
 
@@ -331,7 +331,7 @@ virtual/python-enum34-1
     actual = binpkg.GrabLocalPackageIndex(self.upload_dir)
     self.assertEqual(actual.header['URI'], 'gs://chromeos-prebuilt')
     self.assertEqual(int(actual.header['TTL']), 60 * 60 * 24 * 365)
-    self.assertEqual(
-        actual.packages,
-        [{'CPV': 'virtual/python-enum34-1',
-          'PATH': 'target/virtual/python-enum34-1.tbz2'}])
+    self.assertEqual(actual.packages, [{
+        'CPV': 'virtual/python-enum34-1',
+        'PATH': 'target/virtual/python-enum34-1.tbz2'
+    }])

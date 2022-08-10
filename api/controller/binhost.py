@@ -135,8 +135,8 @@ def PrepareBinhostUploads(
   # Read all packages and update the index. The index must be uploaded to the
   # binhost for Portage to use it, so include it in upload_targets.
   uploads_dir = binhost.GetPrebuiltsRoot(chroot, sysroot, build_target)
-  index_path = binhost.UpdatePackageIndex(uploads_dir, upload_uri, upload_path,
-                                          sudo=True)
+  index_path = binhost.UpdatePackageIndex(
+      uploads_dir, upload_uri, upload_path, sudo=True)
   upload_targets = binhost.GetPrebuiltsFiles(uploads_dir)
   assert index_path.startswith(uploads_dir), (
       'expected index_path to start with uploads_dir')
@@ -238,8 +238,8 @@ def SetBinhost(input_proto: binhost_pb2.SetBinhostRequest,
   uri = input_proto.uri
   private = input_proto.private
 
-  output_proto.output_file = binhost.SetBinhost(target, key, uri,
-                                                private=private)
+  output_proto.output_file = binhost.SetBinhost(
+      target, key, uri, private=private)
 
 
 def _RegenBuildCacheResponse(_input_proto, output_proto, _config):
