@@ -5,6 +5,7 @@
 """Unittests for the binhost.py service."""
 
 import os
+import time
 from unittest import mock
 
 from chromite.lib import binpkg
@@ -156,8 +157,8 @@ class GetPrebuiltsFilesTest(cros_test_lib.MockTempDirTestCase):
   """Unittests for GetPrebuiltsFiles."""
 
   def setUp(self):
-    self.PatchObject(constants, 'SOURCE_ROOT', new=self.tempdir)
-    self.root = os.path.join(self.tempdir, 'chroot/build/target/packages')
+    self.PatchObject(constants, 'SOURCE_ROOT', new=str(self.tempdir))
+    self.root = self.tempdir / 'chroot/build/target/packages'
     osutils.SafeMakedirs(self.root)
 
   def testGetPrebuiltsFiles(self):
@@ -178,6 +179,45 @@ CPV: package/prebuilt_b
     actual = binhost.GetPrebuiltsFiles(self.root)
     expected = ['package/prebuilt_a.tbz2', 'package/prebuilt_b.tbz2']
     self.assertEqual(actual, expected)
+
+  def testPrebuiltsDeduplication(self):
+    """GetPrebuiltsFiles returns all archives for all packages."""
+    now = int(time.time())
+    # As of time of writing it checks for no older than 2 weeks. We just need
+    # to be newer than that, but older than the new time, so just knock off a
+    # few seconds.
+    old_time = now - 5
+
+    packages_content = f"""\
+ARCH: amd64
+URI: gs://foo_prebuilts
+
+CPV: category/package_a
+SHA1: 02b0a68a347e39c6d7be3c987022c134e4ba75e5
+MTIME: {now}
+
+CPV: category/package_b
+"""
+
+    old_packages_content = f"""\
+ARCH: amd64
+URI: gs://foo_prebuilts
+
+CPV: category/package_a
+SHA1: 02b0a68a347e39c6d7be3c987022c134e4ba75e5
+MTIME: {old_time}
+"""
+
+    old_binhost = self.tempdir / 'old_packages'
+    old_package_index = old_binhost / 'Packages'
+    osutils.WriteFile(old_package_index, old_packages_content, makedirs=True)
+    osutils.WriteFile(self.root / 'Packages', packages_content)
+    osutils.WriteFile(self.root / 'category/package_a.tbz2', 'a', makedirs=True)
+    osutils.WriteFile(self.root / 'category/package_b.tbz2', 'b')
+
+    actual = binhost.GetPrebuiltsFiles(self.root, [old_package_index])
+    expected = ['category/package_b.tbz2']
+    self.assertEqual(expected, actual)
 
   def testGetPrebuiltsFilesWithDebugSymbols(self):
     """GetPrebuiltsFiles returns debug symbols archive if specified in index."""
