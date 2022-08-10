@@ -10,11 +10,13 @@ This library is reponsible for locking builds during processing, and checking
 and setting flags to show that a build has been processed.
 """
 
+from collections import defaultdict
 import functools
 import json
 import logging
 import operator
 import os
+import tempfile
 import urllib.parse
 
 from chromite.third_party.google.protobuf import json_format
@@ -22,12 +24,12 @@ from chromite.third_party.google.protobuf import json_format
 from chromite.api.gen.chromite.api import test_metadata_pb2
 from chromite.api.gen.test_platform import request_pb2
 from chromite.cbuildbot import commands
+from chromite.lib import chroot_util
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import failures_lib
 from chromite.lib import gs
-from chromite.lib import parallel
 from chromite.lib import retry_util
 from chromite.lib.paygen import gslock
 from chromite.lib.paygen import gspaths
@@ -995,31 +997,47 @@ class PaygenBuild(object):
     return (gspaths.IsImage(image) or gspaths.IsDLCImage(image) or
             gspaths.IsMiniOSImage(image))
 
-  def _GeneratePayloads(self, payloads):
+  def _GeneratePayloads(self, in_payloads):
     """Generate the payloads called for by a list of payload definitions.
 
     It will keep going, even if there is a failure.
 
     Args:
-      payloads: gspath.Payload objects defining all of the payloads to generate.
+      in_payloads: gspath.Payload objects defining all of the payloads to
+        generate.
 
     Raises:
-      Any arbitrary exception raised by CreateAndUploadPayload.
+      Any arbitrary exception.
     """
-    payloads_args = [(payload, self._ShouldSign(payload.tgt_image), True)
-                     for payload in payloads]
+    with chroot_util.TempDirInChroot() as root_work_dir:
+      # Create the build to payloads mapping.
+      build_to_payloads = defaultdict(list)
+      for payload in in_payloads:
+        build_to_payloads[payload.build].append(payload)
 
-    # Most of the operations in paygen for one single payload is single threaded
-    # and mostly IO bound (downloading images, extracting partitions, waiting
-    # for signers, signing payload, etc). The only part that requires special
-    # attention is generating an unsigned payload which internally has a
-    # massively parallel implementation. So, here we allow multiple processes to
-    # run simultaneously and we restrict the number of processes that do the
-    # unsigned payload generation by looking at the available memory and seeing
-    # if additional runs would exceed allowed memory use thresholds (look at
-    # the MemoryConsumptionSemaphore in utils.py).
-    parallel.RunTasksInProcessPool(paygen_payload_lib.CreateAndUploadPayload,
-                                   payloads_args)
+      paygen_payloads = []
+
+      # Create signer per build.
+      for build, payloads in build_to_payloads.items():
+        signer = paygen_payload_lib.PaygenSigner(
+            work_dir=tempfile.mkdtemp(prefix='signer', dir=root_work_dir),
+            payload_build=build)
+        for payload in payloads:
+          payload_work_dir = tempfile.mkdtemp(
+              prefix='payload', dir=root_work_dir)
+          paygen_payloads.append(
+              paygen_payload_lib.PaygenPayload(
+                  payload,
+                  # Note: This work dir will be overridden in GeneratePayloads.
+                  payload_work_dir,
+                  # Don't set the signer for paygen payloads that don't need to
+                  # get signed.
+                  signer=signer
+                  if self._ShouldSign(payload.tgt_image) else None,
+                  verify=True))
+
+      # Use helper to generate the paygen payloads.
+      paygen_payload_lib.GeneratePayloads(paygen_payloads)
 
   def _FindFullTestPayloads(self, channel, version):
     """Returns a list of full test payloads for a given version.

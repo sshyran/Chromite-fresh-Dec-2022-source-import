@@ -65,8 +65,7 @@ class PayloadApiTests(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
   def testCallSucceeds(self):
     """Check that a call is made successfully."""
     # Deep patch the paygen lib, this is a full run through service as well.
-    patch_obj = self.PatchObject(paygen_payload_lib, 'PaygenPayload')
-    patch_obj.return_value.Run.return_value = 'gs://something'
+    self.PatchObject(paygen_payload_lib, 'GeneratePayloads')
     res = payload.GeneratePayload(self.req, self.result, self.api_config)
     self.assertEqual(res, controller.RETURN_CODE_SUCCESS)
 
@@ -90,8 +89,7 @@ class PayloadApiTests(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
 
   def testMiniOSSuccess(self):
     """Test a miniOS paygen request."""
-    patch = self.PatchObject(paygen_payload_lib, 'PaygenPayload')
-    patch.return_value.Run.return_value = 'gs://minios/something'
+    self.PatchObject(paygen_payload_lib, 'GeneratePayloads')
     res = payload.GeneratePayload(self.minios_req, self.result, self.api_config)
     self.assertEqual(res, controller.RETURN_CODE_SUCCESS)
 

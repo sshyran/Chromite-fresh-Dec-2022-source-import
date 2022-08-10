@@ -1583,18 +1583,36 @@ class TestPayloadGeneration(BasePaygenBuildLibTestWithBuilds):
 
   def testGeneratePayloads(self):
     """Test paygen_build_lib._GeneratePayloads"""
-    poolMock = self.PatchObject(parallel, 'RunTasksInProcessPool')
-
     paygen = self._GetPaygenBuildInstance()
-    paygen._GeneratePayloads(
-        (self.mp_full_payload, self.mp_delta_payload, self.test_delta_payload))
+    payloads = (self.mp_full_payload, self.mp_delta_payload,
+                self.test_delta_payload)
 
-    self.assertEqual(poolMock.call_args_list, [
-        mock.call(paygen_payload_lib.CreateAndUploadPayload,
-                  [(self.mp_full_payload, True, True),
-                   (self.mp_delta_payload, True, True),
-                   (self.test_delta_payload, False, True)])
+    generatePayloadsMock = self.PatchObject(paygen_payload_lib,
+                                            'GeneratePayloads')
+    paygen._GeneratePayloads(payloads)
+
+    self.assertEqual(generatePayloadsMock.call_args_list, [
+        mock.call([mock.ANY, mock.ANY, mock.ANY]),
     ])
+
+  def testGeneratePayloadsSigningMismatch(self):
+    """Test paygen_build_lib._GeneratePayloads with signing mismatch."""
+    with self.assertRaises(paygen_payload_lib.SigningError):
+      paygen = self._GetPaygenBuildInstance()
+      payloads = (self.mp_full_payload, self.mp_delta_payload,
+                  self.test_delta_payload)
+
+      self.PatchObject(parallel, 'RunTasksInProcessPool')
+      self.PatchObject(
+          paygen_payload_lib.PaygenPayload,
+          'GenerateHashes',
+          return_value=(b'123', b'234'))
+      self.PatchObject(
+          paygen_payload_lib,
+          'SignHashes',
+          return_value=([b'123signed', b'234signed'] * (len(payloads) - 1)))
+
+      paygen._GeneratePayloads(payloads)
 
   def testCleanupBuild(self):
     """Test PaygenBuild._CleanupBuild."""
