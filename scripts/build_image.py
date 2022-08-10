@@ -31,11 +31,13 @@ adjust-part='STATE:=1G' --  make the stateful partition 1 GB
 import argparse
 import os
 from pathlib import Path
+import sys
 from typing import List, Optional, Tuple
 
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
+from chromite.lib import namespaces
 from chromite.service import image
 from chromite.utils import timer
 
@@ -332,6 +334,10 @@ def parse_args(
 @timer.timed('Elapsed time (build_image)')
 def main(argv: Optional[List[str]] = None) -> Optional[int]:
   commandline.RunInsideChroot()
+
+  # Make sure we run with network disabled to prevent leakage.
+  namespaces.ReExecuteWithNamespace(sys.argv)
+
   parser, opts = parse_args(argv)
 
   # If the opts.board is not set, then it means user hasn't specified a default

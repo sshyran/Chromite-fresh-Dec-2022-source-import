@@ -6,6 +6,7 @@
 
 import logging
 import os
+import sys
 
 from chromite.api import api_config as api_config_lib
 from chromite.api import controller
@@ -14,6 +15,7 @@ from chromite.api import router as router_lib
 from chromite.api.gen.chromite.api import build_api_config_pb2
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
+from chromite.lib import namespaces
 from chromite.utils import matching
 
 
@@ -145,6 +147,10 @@ def _get_io_handlers(opts):
 def main(argv):
   router = router_lib.GetRouter()
   opts = _ParseArgs(argv, router)
+
+  # For build_image, make sure we run with network disabled to prevent leakage.
+  if opts.service_method == 'chromite.api.ImageService/Create':
+    namespaces.ReExecuteWithNamespace(sys.argv)
 
   if opts.config.log_path:
     logging.warning('Ignoring log_path config option')
