@@ -689,7 +689,7 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
         toolchain_url_2)
     nacl_toolchain_dir = os.path.join(
         self.tempdir,
-        'chrome-sdk/tarballs/nacl_arm32_toolchain/')
+        'chrome-sdk/tarballs/arm32_toolchain_for_nacl_helper/')
 
     # Prepare the cache using 'toolchain_url_1'.
     self.sdk_mock.tarball_cache_key_map = {

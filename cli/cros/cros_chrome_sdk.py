@@ -100,7 +100,7 @@ class SDKFetcher(object):
   SYMLINK_CACHE = 'symlinks'
 
   TARGET_TOOLCHAIN_KEY = 'target_toolchain'
-  NACL_ARM32_TOOLCHAIN_KEY = 'nacl_arm32_toolchain'
+  NACL_ARM32_TOOLCHAIN_KEY = 'arm32_toolchain_for_nacl_helper'
   QEMU_BIN_PATH = 'app-emulation/qemu'
   SEABIOS_BIN_PATH = 'sys-firmware/seabios'
   TAST_CMD_PATH = 'chromeos-base/tast-cmd'
