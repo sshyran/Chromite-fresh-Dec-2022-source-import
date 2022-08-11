@@ -100,6 +100,7 @@ class SDKFetcher(object):
   SYMLINK_CACHE = 'symlinks'
 
   TARGET_TOOLCHAIN_KEY = 'target_toolchain'
+  NACL_ARM32_TOOLCHAIN_KEY = 'nacl_arm32_toolchain'
   QEMU_BIN_PATH = 'app-emulation/qemu'
   SEABIOS_BIN_PATH = 'sys-firmware/seabios'
   TAST_CMD_PATH = 'chromeos-base/tast-cmd'
@@ -819,6 +820,14 @@ class SDKFetcher(object):
           toolchain_url = metadata['toolchain-url']
         elif build_report and 'toolchainUrl' in build_report:
           toolchain_url = build_report['toolchainUrl']
+
+    # Fetch Arm32 toolchain for NaCl in Arm64 builds.
+    aarch64_cros_tuple = 'aarch64-cros-linux-gnu'
+    arm32_cros_tuple = 'armv7a-cros-linux-gnueabihf'
+
+    if target_tc == aarch64_cros_tuple:
+      fetch_urls[self.NACL_ARM32_TOOLCHAIN_KEY] = os.path.join(
+          self.toolchain_path, toolchain_url % {'target': arm32_cros_tuple})
 
     # Fetch toolchains from separate location.
     if self.TARGET_TOOLCHAIN_KEY in components:

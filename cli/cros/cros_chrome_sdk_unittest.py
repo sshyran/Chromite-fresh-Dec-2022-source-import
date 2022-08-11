@@ -687,6 +687,9 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
         self.tempdir,
         'chrome-sdk/tarballs/target_toolchain/',
         toolchain_url_2)
+    nacl_toolchain_dir = os.path.join(
+        self.tempdir,
+        'chrome-sdk/tarballs/nacl_arm32_toolchain/')
 
     # Prepare the cache using 'toolchain_url_1'.
     self.sdk_mock.tarball_cache_key_map = {
@@ -707,6 +710,10 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
       self.assertExists(toolchain_dir_2)
       self.assertExists(toolchain_dir_1)
 
+    # Test that arm32 toolchain is fetched for NaCl for arm64.
+    with sdk.Prepare(components, toolchain_url=toolchain_url_2,
+                     target_tc='aarch64-cros-linux-gnu'):
+      self.assertExists(nacl_toolchain_dir)
 
 class GomaTest(cros_test_lib.MockTempDirTestCase,
                cros_test_lib.LoggingTestCase):
