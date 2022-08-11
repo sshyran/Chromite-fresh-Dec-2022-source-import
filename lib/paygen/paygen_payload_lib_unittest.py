@@ -31,7 +31,7 @@ pytestmark = cros_test_lib.pytestmark_inside_only
 # pylint: disable=protected-access
 
 
-class PaygenPayloadLibTest(cros_test_lib.RunCommandTempDirTestCase):
+class PaygenLibTest(cros_test_lib.RunCommandTempDirTestCase):
   """PaygenPayloadLib tests base class."""
 
   def setUp(self):
@@ -139,7 +139,56 @@ class PaygenPayloadLibTest(cros_test_lib.RunCommandTempDirTestCase):
     shutil.rmtree(cls.cache_dir)
 
 
-class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
+class PaygenSignerTest(PaygenLibTest):
+  """PaygenSigner testing."""
+
+  def testSetupOfficialSigner(self):
+    """Tests that official signer is being setup properly."""
+    signer = paygen_payload_lib.PaygenSigner(
+        work_dir='/foo',
+        private_key='foo-private-key',
+        payload_build=self.full_payload.build)
+
+    self.assertIsInstance(
+        signer._signer,
+        signer_payloads_client.SignerPayloadsClientGoogleStorage)
+    self.assertIsNone(signer._private_key)
+    self.assertIsNone(signer.public_key)
+
+  def testSetupUnofficialSigner(self):
+    """Tests that unofficial signer is being setup properly.
+
+    And private key is set to the default correctly.
+    """
+    pubkey_extract_mock = self.PatchObject(
+        signer_payloads_client.UnofficialSignerPayloadsClient,
+        'ExtractPublicKey')
+
+    build = self.new_build
+    build.bucket = 'foo-bucket'
+    signer = paygen_payload_lib.PaygenSigner(
+        work_dir='/foo', private_key=None, payload_build=None)
+
+    self.assertIsInstance(signer._signer,
+                          signer_payloads_client.UnofficialSignerPayloadsClient)
+    self.assertEqual(
+        signer._private_key,
+        os.path.join(constants.CHROMITE_DIR, 'ssh_keys', 'testing_rsa'))
+    pubkey_extract_mock.assert_called_once_with('/foo/public_key.pem')
+
+  def testSetupUnofficialSignerPassedPrivateKey(self):
+    """Tests that setting signers use correct passed private key."""
+    build = self.new_build
+    build.bucket = 'foo-bucket'
+    signer = paygen_payload_lib.PaygenSigner(
+        work_dir='/foo', private_key='some-foo-private-key', payload_build=None)
+
+    self.assertIsInstance(signer._signer,
+                          signer_payloads_client.UnofficialSignerPayloadsClient)
+    self.assertEqual(signer._private_key, 'some-foo-private-key')
+
+
+class PaygenPayloadLibBasicTest(PaygenLibTest):
   """PaygenPayloadLib basic (and quick) testing."""
 
   def _GetStdGenerator(self,
@@ -156,8 +205,13 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
 
     payload.minios = payload.minios or minios
 
+    signer_mock = None
+    if sign:
+      signer_mock = self.PatchObject(paygen_payload_lib, 'PaygenSigner')
+      signer_mock.public_key = None
+
     gen = paygen_payload_lib.PaygenPayload(
-        payload=payload, work_dir=work_dir, sign=sign, verify=False)
+        payload=payload, work_dir=work_dir, signer=signer_mock, verify=False)
 
     gen.partition_names = ('foo-root', 'foo-kernel')
     gen.tgt_partitions = ('/work/tgt_root.bin', '/work/tgt_kernel.bin')
@@ -193,51 +247,6 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
 
     self.assertEqual(gen._JsonUri('/foo/bar'), '/foo/bar.json')
     self.assertEqual(gen._JsonUri('gs://foo/bar'), 'gs://foo/bar.json')
-
-  def testSetupOfficialSigner(self):
-    """Tests that official signer is being setup properly."""
-    gen = self._GetStdGenerator(work_dir='/foo', sign=True)
-    gen._private_key = 'foo-private-key'
-
-    gen._SetupSigner(self.new_build)
-    self.assertIsInstance(
-        gen.signer, signer_payloads_client.SignerPayloadsClientGoogleStorage)
-    self.assertIsNone(gen._private_key)
-    self.assertIsNone(gen._public_key)
-
-  def testSetupUnofficialSigner(self):
-    """Tests that unofficial signer is being setup properly.
-
-    And private key is set to the default correctly.
-    """
-    gen = self._GetStdGenerator(work_dir='/foo', sign=True)
-
-    pubkey_extract_mock = self.PatchObject(
-        signer_payloads_client.UnofficialSignerPayloadsClient,
-        'ExtractPublicKey')
-
-    build = self.new_build
-    build.bucket = 'foo-bucket'
-    gen._SetupSigner(build)
-    self.assertIsInstance(gen.signer,
-                          signer_payloads_client.UnofficialSignerPayloadsClient)
-    self.assertEqual(
-        gen._private_key,
-        os.path.join(constants.CHROMITE_DIR, 'ssh_keys', 'testing_rsa'))
-    pubkey_extract_mock.assert_called_once_with('/foo/public_key.pem')
-
-  def testSetupUnofficialSignerPassedPrivateKey(self):
-    """Tests that setting signers use correct passed private key."""
-    gen = self._GetStdGenerator(work_dir='/foo', sign=True)
-    gen._private_key = 'some-foo-private-key'
-
-    build = self.new_build
-    build.bucket = 'foo-bucket'
-
-    gen._SetupSigner(build)
-    self.assertIsInstance(gen.signer,
-                          signer_payloads_client.UnofficialSignerPayloadsClient)
-    self.assertEqual(gen._private_key, 'some-foo-private-key')
 
   def testRunGeneratorCmd(self):
     """Test the specialized command to run programs in chroot."""
@@ -627,7 +636,7 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
 
     # Stub out the required functions.
     hash_mock = self.PatchObject(
-        signer_payloads_client.SignerPayloadsClientGoogleStorage,
+        paygen_payload_lib.PaygenSigner,
         'GetHashSignatures',
         return_value=signatures)
 
@@ -745,14 +754,14 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
     # Stub out the required functions.
     run_mock = self.PatchObject(gen, '_RunGeneratorCmd')
     gen.metadata_size = 10
-    gen._private_key = 'foo-private-key'
+    public_key = os.path.join('/work/public_key.pem')
+    gen.signer.public_key = public_key
 
     # Run the test.
     gen._VerifyPayload()
 
     # Check the expected function calls.
     cmd = [mock.ANY] * 17
-    public_key = os.path.join('/work/public_key.pem')
     cmd.extend(['--key', public_key])
     run_mock.assert_called_once_with(cmd)
 
@@ -990,8 +999,8 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
             'metadata_signature': 'foo-sig',
             'metadata_size': 10
         }))
-    gen._public_key = os.path.join(self.tempdir, 'public_key.pem')
-    osutils.WriteFile(gen._public_key, 'foo-pubkey')
+    gen.signer.public_key = os.path.join(self.tempdir, 'public_key.pem')
+    osutils.WriteFile(gen.signer.public_key, 'foo-pubkey')
 
     payload_path = '/foo'
     props_map = gen.GetPayloadPropertiesMap(payload_path)
@@ -1009,7 +1018,7 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
         })
 
 
-class PaygenPayloadLibEndToEndTest(PaygenPayloadLibTest):
+class PaygenPayloadLibEndToEndTest(PaygenLibTest):
   """PaygenPayloadLib end-to-end testing."""
 
   def _EndToEndIntegrationTest(self, tgt_image, src_image, sign):
