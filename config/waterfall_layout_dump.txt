@@ -182,6 +182,7 @@
     fizz-labstation-release
     fizz-moblab-release
     fizz-release
+    geralt-release
     ghost-release
     goroh-release
     grunt-arc-r-release
@@ -740,6 +741,11 @@
   gale-payloads-tryjob
   gale-release-tryjob
   gale-test-ap-tryjob
+  geralt-full-tryjob
+  geralt-llvm-next-toolchain-tryjob
+  geralt-llvm-toolchain-tryjob
+  geralt-payloads-tryjob
+  geralt-release-tryjob
   ghost-full-tryjob
   ghost-llvm-next-toolchain-tryjob
   ghost-llvm-toolchain-tryjob
@@ -1037,6 +1043,7 @@
     fizz-labstation-release-tryjob
     fizz-moblab-release-tryjob
     fizz-release-tryjob
+    geralt-release-tryjob
     ghost-release-tryjob
     goroh-release-tryjob
     grunt-arc-r-release-tryjob

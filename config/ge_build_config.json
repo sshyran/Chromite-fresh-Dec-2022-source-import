@@ -145,6 +145,19 @@
       ]
     },
     {
+      "name": "geralt",
+      "configs": [
+        {
+          "builder": "RELEASE",
+          "experimental": true,
+          "leader_board": true,
+          "board_group": "",
+          "arch": "ARM_INTERNAL"
+        }
+      ],
+      "rubik_target_milestone": 103
+    },
+    {
       "name": "goroh",
       "configs": [
         {
