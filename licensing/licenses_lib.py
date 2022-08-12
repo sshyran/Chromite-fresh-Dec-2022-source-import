@@ -340,30 +340,25 @@ class PackageInfo(object):
     Args:
       sysroot: The board this package was built for.
       fullnamerev: package name of the form 'x11-base/X.Org-1.9.3-r23'
+
+    Raises:
+      ValueError if |fullnamerev| is not a valid package string.
     """
 
     self.sysroot = sysroot
 
-    #
-    # Populate these fields from fullnamerev:
-    #   category, name, version, revision
-    #
-    try:
-      cpv = package_info.SplitCPV(fullnamerev)
-    except ValueError:
-      # A bad package can either raise a TypeError exception or return None.
+    package = package_info.parse(fullnamerev)
+    self.category = package.category
+    self.name = package.package
+    self.version = package.version
+    self.revision = package.revision
+    self.fullname = package.cpv
+    self.fullnamerev = package.cpvr
+
+    if fullnamerev != self.fullnamerev:
+      # Parsed package doesn't match original, invalid package passed.
       raise ValueError(
           "portage couldn't find %s, missing version number?" % fullnamerev)
-
-    #
-    # These define the package uniquely.
-    #
-
-    self.category, self.name, self.version, self.revision = (
-        cpv.category, cpv.package, cpv.version_no_rev, cpv.rev)
-
-    if self.revision is not None:
-      self.revision = str(self.revision).lstrip('r')
 
     #
     # These fields hold license information used to generate the credits page.
@@ -392,19 +387,6 @@ class PackageInfo(object):
     self.tainted = None
 
     self.ebuild_path = None
-
-  @property
-  def fullnamerev(self):
-    """e.g. libnl/libnl-3.2.24-r12"""
-    s = '%s-%s' % (self.fullname, self.version)
-    if self.revision:
-      s += '-r%s' % self.revision
-    return s
-
-  @property
-  def fullname(self):
-    """e.g. libnl/libnl-3.2.24"""
-    return '%s/%s' % (self.category, self.name)
 
   @property
   def license_dump_path(self):

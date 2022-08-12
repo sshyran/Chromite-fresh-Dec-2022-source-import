@@ -1046,7 +1046,9 @@ class EBuild(object):
 
     # Sanity check: We should be able to parse a CPV string with the produced
     # version number.
-    if not package_info.SplitCPV('foo/bar-%s' % output):
+    verify_pkg_str = f'foo/bar-{output}'
+    verify_pkg = package_info.parse(verify_pkg_str)
+    if verify_pkg.cpvr != verify_pkg_str:
       raise EbuildVersionError(
           'PV returned does not match the version spec: %s' % output)
 

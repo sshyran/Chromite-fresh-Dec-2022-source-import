@@ -918,7 +918,7 @@ class BuildImageStage(BuildPackagesStage):
       return None
     for package in packages:
       if package.startswith('sys-kernel/chromeos-kernel-'):
-        kernel_version = package_info.SplitCPV(package).version
+        kernel_version = package_info.parse(package).vr
         logging.info('Found active kernel version: %s', kernel_version)
         return kernel_version
     return None
