@@ -98,6 +98,8 @@ class SDKFetcher(object):
   MISC_CACHE = 'misc'
   SYMLINK_CACHE = 'symlinks'
 
+  ARM32_TUPLE = 'armv7a-cros-linux-gnueabihf'
+  ARM64_TUPLE = 'aarch64-cros-linux-gnu'
   TARGET_TOOLCHAIN_KEY = 'target_toolchain'
   NACL_ARM32_TOOLCHAIN_KEY = 'arm32_toolchain_for_nacl_helper'
   QEMU_BIN_PATH = 'app-emulation/qemu'
@@ -792,12 +794,9 @@ class SDKFetcher(object):
           toolchain_url = build_report['toolchainUrl']
 
     # Fetch Arm32 toolchain for NaCl in Arm64 builds.
-    aarch64_cros_tuple = 'aarch64-cros-linux-gnu'
-    arm32_cros_tuple = 'armv7a-cros-linux-gnueabihf'
-
-    if target_tc == aarch64_cros_tuple:
+    if target_tc == self.ARM64_TUPLE:
       fetch_urls[self.NACL_ARM32_TOOLCHAIN_KEY] = os.path.join(
-          self.toolchain_path, toolchain_url % {'target': arm32_cros_tuple})
+          self.toolchain_path, toolchain_url % {'target': self.ARM32_TUPLE})
 
     # Fetch toolchains from separate location.
     if self.TARGET_TOOLCHAIN_KEY in components:
@@ -1408,6 +1407,24 @@ class ChromeSDKCommand(command.CliCommand):
     target_tc_path = sdk_ctx.key_map[self.sdk.TARGET_TOOLCHAIN_KEY].path
     for env_path in self.EBUILD_ENV_PATHS:
       env[env_path] = self._AbsolutizeBinaryPath(env[env_path], target_tc_path)
+
+    # Add Arm32 toolchain GN flags for building nacl_helper on Arm64.
+    if self.sdk.NACL_ARM32_TOOLCHAIN_KEY in sdk_ctx.key_map:
+      nacl_helper_tc_path = (
+          sdk_ctx.key_map[self.sdk.NACL_ARM32_TOOLCHAIN_KEY].path)
+      gn_args['cros_nacl_helper_arm32_ar'] = self._AbsolutizeBinaryPath(
+          'llvm-ar', nacl_helper_tc_path)
+      gn_args['cros_nacl_helper_arm32_cc'] = self._AbsolutizeBinaryPath(
+          self.sdk.ARM32_TUPLE + '-clang', nacl_helper_tc_path)
+      gn_args['cros_nacl_helper_arm32_cxx'] = self._AbsolutizeBinaryPath(
+          self.sdk.ARM32_TUPLE + '-clang++', nacl_helper_tc_path)
+      gn_args['cros_nacl_helper_arm32_ld'] = self._AbsolutizeBinaryPath(
+          self.sdk.ARM32_TUPLE + '-clang++', nacl_helper_tc_path)
+      gn_args['cros_nacl_helper_arm32_readelf'] = self._AbsolutizeBinaryPath(
+          'llvm-readelf', nacl_helper_tc_path)
+      gn_args['cros_nacl_helper_arm32_sysroot'] = os.path.join(
+          nacl_helper_tc_path, 'usr', self.sdk.ARM32_TUPLE)
+
     gn_args['cros_target_cc'] = env['CC']
     gn_args['cros_target_cxx'] = env['CXX']
     gn_args['cros_target_ld'] = env['LD']

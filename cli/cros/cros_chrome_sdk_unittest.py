@@ -703,7 +703,7 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
 
     # Test that arm32 toolchain is fetched for NaCl for arm64.
     with sdk.Prepare(components, toolchain_url=toolchain_url_2,
-                     target_tc='aarch64-cros-linux-gnu'):
+                     target_tc=sdk.ARM64_TUPLE):
       self.assertExists(nacl_toolchain_dir)
 
 class GomaTest(cros_test_lib.MockTempDirTestCase,
