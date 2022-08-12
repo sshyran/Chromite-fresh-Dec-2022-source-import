@@ -27,6 +27,8 @@ _EXT_TOOL_MAP = {
     frozenset({'.gn', '.gni'}): (formatters.gn.Data,),
     frozenset({'.json'}): (formatters.json.Data,),
     # TODO(build): Add a formatter for this.
+    frozenset({'.ebuild', '.eclass'}): (formatters.whitespace.Data,),
+    # TODO(build): Add a formatter for this.
     frozenset({'.md'}): (formatters.whitespace.Data,),
     # TODO(build): Add a formatter for this (minijail seccomp policies).
     frozenset({'.policy'}): (formatters.whitespace.Data,),
