@@ -147,6 +147,7 @@
     betty-release
     bob-release
     brask-release
+    brya-arc-t-release
     brya-hibernate-release
     brya-kernelnext-release
     brya-lvm-stateful-release
@@ -422,6 +423,11 @@
   brask-llvm-toolchain-tryjob
   brask-payloads-tryjob
   brask-release-tryjob
+  brya-arc-t-full-tryjob
+  brya-arc-t-llvm-next-toolchain-tryjob
+  brya-arc-t-llvm-toolchain-tryjob
+  brya-arc-t-payloads-tryjob
+  brya-arc-t-release-tryjob
   brya-factory-brya-14517.B-factorybranch-tryjob
   brya-full-tryjob
   brya-hibernate-full-tryjob
@@ -1008,6 +1014,7 @@
     betty-release-tryjob
     bob-release-tryjob
     brask-release-tryjob
+    brya-arc-t-release-tryjob
     brya-hibernate-release-tryjob
     brya-kernelnext-release-tryjob
     brya-lvm-stateful-release-tryjob
