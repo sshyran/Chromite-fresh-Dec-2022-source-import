@@ -6,6 +6,7 @@
 
 import logging
 import time
+from typing import List
 
 from chromite.lib import cros_build_lib
 from chromite.lib.firmware import servo_lib
@@ -66,43 +67,46 @@ class DutControl():
     # Return value from the "key:value" output.
     return result.stdout.partition(':')[2].strip()
 
-  def run(self, cmd_fragment, verbose=False, dryrun=False):
+  def run(self, cmd_fragment: List[str], verbose: bool = False,
+          dryrun: bool = False):
     """Run a dut_control command.
 
     Args:
-      cmd_fragment (list[str]): The dut_control command to run.
-      verbose (bool): Whether to print the command before it's run.
-      dryrun (bool): Whether to actually execute the command or just print it.
+      cmd_fragment: The dut_control command to run.
+      verbose: Whether to print the command before it's run.
+      dryrun: Whether to actually execute the command or just print it.
     """
     cros_build_lib.run(
         self._base_cmd + cmd_fragment, print_cmd=verbose, dryrun=dryrun)
 
-  def run_all(self, cmd_fragments, verbose=False, dryrun=False):
+  def run_all(self, cmd_fragments: List[List[str]], verbose: bool = False,
+              dryrun: bool = False):
     """Run multiple dut_control commands in the order given.
 
     Args:
-      cmd_fragments (list[list[str]]): The dut_control commands to run.
-      verbose (bool): Whether to print the commands as they are run.
-      dryrun (bool): Whether to actually execute the command or just print it.
+      cmd_fragments: The dut_control commands to run.
+      verbose: Whether to print the commands as they are run.
+      dryrun: Whether to actually execute the command or just print it.
     """
     for cmd in cmd_fragments:
       self.run(cmd, verbose=verbose, dryrun=dryrun)
 
-  def servo_run(self, dut_cmd_on, dut_cmd_off, flash_cmd, verbose, dryrun):
+  def servo_run(self, dut_cmd_on: List[List[str]], dut_cmd_off: List[List[str]],
+                flash_cmd: List[str], verbose: bool, dryrun: bool):
     """Runs subprocesses for setting dut controls and executing flash_cmd.
 
     Args:
-      dut_cmd_on ([[str]]): 2d array of dut-control commands
+      dut_cmd_on: 2d array of dut-control commands
         in the form [['dut-control', 'cmd1', 'cmd2'...],
         ['dut-control', 'cmd3'...]]
         that get executed before the dut_cmd.
-      dut_cmd_off ([[str]]): 2d array of dut-control commands
+      dut_cmd_off: 2d array of dut-control commands
         in the same form that get executed after the dut_cmd.
-      flash_cmd ([str]): array containing all arguments for
+      flash_cmd: array containing all arguments for
         the actual command. Run as root user on host.
-      verbose (bool): if True then print out the various
+      verbose: if True then print out the various
         commands before running them.
-      dryrun (bool): if True then print the commands without executing.
+      dryrun: if True then print the commands without executing.
 
     Returns:
       bool: True if commands were run successfully, otherwise False.
