@@ -7,6 +7,7 @@
 import json
 import os
 
+import chromite as cr
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -1892,6 +1893,22 @@ class GetReverseDependenciesTest(cros_test_lib.RunCommandTestCase):
       portage_util.GetReverseDependencies([])
 
       self.assertEqual('Must provide at least one package.', e)
+
+
+class RegenCacheTest(cros_test_lib.MockTempDirTestCase):
+  """Tests for RegenCache."""
+
+  def testRegenCacheGenerateConfig(self):
+    overlay1 = cr.test.Overlay(f'{self.tempdir}/src/overlays/foo', 'foo')
+    overlay2 = cr.test.Overlay(f'{self.tempdir}/src/overlays/bar', 'bar')
+    overlay3 = cr.test.Overlay(f'{self.tempdir}/src/overlays/baz', 'baz')
+    overlays = [overlay1.path, overlay2.path, overlay3.path]
+    self.PatchObject(portage_util, 'FindOverlays', return_value=overlays)
+    mock_output = portage_util._generate_repositories_configuration()
+    correct_output = (f'[foo]\nlocation = {self.tempdir}/src/overlays/foo\n'
+                      f'[bar]\nlocation = {self.tempdir}/src/overlays/bar\n'
+                      f'[baz]\nlocation = {self.tempdir}/src/overlays/baz\n')
+    self.assertEqual(mock_output, correct_output)
 
 
 class RegenDependencyCacheTest(cros_test_lib.RunCommandTestCase,

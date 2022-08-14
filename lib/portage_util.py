@@ -1660,6 +1660,7 @@ def GetOverlayEBuilds(overlay,
 
 def _Egencache(repo_name: str,
                overlay: str,
+               repos_config: str,
                chroot_args: List[str] = None,
                log_output: bool = True) -> cros_build_lib.CompletedProcess:
   """Execute egencache for repo_name inside the chroot.
@@ -1667,6 +1668,8 @@ def _Egencache(repo_name: str,
   Args:
     repo_name: Name of the repo for the overlay.
     overlay: The tree to regenerate the cache for.
+    repos_config: The new repositories configuration to give to egencache to
+      recognize all overlays. Comes from _generate_repositories_configuration.
     chroot_args: chroot enter args.
     log_output: Log output of cros_build_run commands.
 
@@ -1674,13 +1677,31 @@ def _Egencache(repo_name: str,
     A cros_build_lib.CompletedProcess object.
   """
   return cros_build_lib.run([
-      'egencache', '--update', '--repo', repo_name, '--jobs',
-      str(multiprocessing.cpu_count())
+      'egencache', '--repositories-configuration', repos_config, '--update',
+      '--repo', repo_name, '--jobs', str(multiprocessing.cpu_count())
   ],
                             cwd=overlay,
                             enter_chroot=True,
                             chroot_args=chroot_args,
                             log_output=log_output)
+
+
+def _generate_repositories_configuration() -> str:
+  """Make a repositories configuration with all overlays for egencache.
+
+  Generate the repositories configuration containing every overlay in the same
+  format as repos.conf so egencache can produce an md5-cache for every overlay
+  The repositories configuration can be accepted as a string in egencache.
+
+  Returns:
+    The string of the new repositories configuration.
+  """
+  repos_config = ''
+  overlays = FindOverlays(constants.BOTH_OVERLAYS)
+  for overlay_path in overlays:
+    overlay_name = GetOverlayName(overlay_path)
+    repos_config += f'[{overlay_name}]\nlocation = {overlay_path}\n'
+  return repos_config
 
 
 def RegenCache(overlay: str,
@@ -1713,8 +1734,10 @@ def RegenCache(overlay: str,
   if chroot:
     chroot_args = chroot.get_enter_args()
 
+  repos_config = _generate_repositories_configuration()
+
   # Regen for the whole repo.
-  _Egencache(repo_name, overlay, chroot_args)
+  _Egencache(repo_name, overlay, repos_config, chroot_args)
   # If there was nothing new generated, then let's just bail.
   result = git.RunGit(overlay, ['status', '-s', 'metadata/'])
   if not result.stdout:
