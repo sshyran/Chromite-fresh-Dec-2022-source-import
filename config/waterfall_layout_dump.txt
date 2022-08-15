@@ -135,7 +135,6 @@
     asuka-release
     asurada-connectivitynext-release
     asurada-release
-    atlas-connectivitynext-release
     atlas-kernelnext-release
     atlas-release
     aurora-release
@@ -169,7 +168,6 @@
     dedede-release
     draco-release
     drallion-release
-    elm-connectivitynext-release
     elm-kernelnext-release
     elm-release
     endeavour-release
@@ -263,7 +261,6 @@
     tael-release
     tatl-release
     trogdor-arc-r-release
-    trogdor-connectivitynext-release
     trogdor-kernelnext-release
     trogdor-release
     trogdor-userdebug-release
@@ -348,11 +345,6 @@
   asurada-llvm-toolchain-tryjob
   asurada-payloads-tryjob
   asurada-release-tryjob
-  atlas-connectivitynext-full-tryjob
-  atlas-connectivitynext-llvm-next-toolchain-tryjob
-  atlas-connectivitynext-llvm-toolchain-tryjob
-  atlas-connectivitynext-payloads-tryjob
-  atlas-connectivitynext-release-tryjob
   atlas-factory-atlas-11907.B-factorybranch-tryjob
   atlas-full-tryjob
   atlas-kernelnext-full-tryjob
@@ -552,11 +544,6 @@
   drallion-master-factorybranch-tryjob
   drallion-payloads-tryjob
   drallion-release-tryjob
-  elm-connectivitynext-full-tryjob
-  elm-connectivitynext-llvm-next-toolchain-tryjob
-  elm-connectivitynext-llvm-toolchain-tryjob
-  elm-connectivitynext-payloads-tryjob
-  elm-connectivitynext-release-tryjob
   elm-factory-oak-8182.B-factorybranch-tryjob
   elm-full-tryjob
   elm-kernelnext-full-tryjob
@@ -1001,7 +988,6 @@
     asuka-release-tryjob
     asurada-connectivitynext-release-tryjob
     asurada-release-tryjob
-    atlas-connectivitynext-release-tryjob
     atlas-kernelnext-release-tryjob
     atlas-release-tryjob
     aurora-release-tryjob
@@ -1035,7 +1021,6 @@
     dedede-release-tryjob
     draco-release-tryjob
     drallion-release-tryjob
-    elm-connectivitynext-release-tryjob
     elm-kernelnext-release-tryjob
     elm-release-tryjob
     endeavour-release-tryjob
@@ -1129,7 +1114,6 @@
     tael-release-tryjob
     tatl-release-tryjob
     trogdor-arc-r-release-tryjob
-    trogdor-connectivitynext-release-tryjob
     trogdor-kernelnext-release-tryjob
     trogdor-release-tryjob
     trogdor-userdebug-release-tryjob
@@ -1407,11 +1391,6 @@
   trogdor-arc-r-llvm-toolchain-tryjob
   trogdor-arc-r-payloads-tryjob
   trogdor-arc-r-release-tryjob
-  trogdor-connectivitynext-full-tryjob
-  trogdor-connectivitynext-llvm-next-toolchain-tryjob
-  trogdor-connectivitynext-llvm-toolchain-tryjob
-  trogdor-connectivitynext-payloads-tryjob
-  trogdor-connectivitynext-release-tryjob
   trogdor-factory-strongbad-13963.B-factorybranch-tryjob
   trogdor-factory-trogdor-13443.B-factorybranch-tryjob
   trogdor-full-tryjob
