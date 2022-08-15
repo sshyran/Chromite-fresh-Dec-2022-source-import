@@ -22,7 +22,6 @@ from chromite.third_party.gn_helpers import gn_helpers
 
 from chromite.cli import command
 from chromite.lib import cache
-from chromite.lib import chrome_util
 from chromite.lib import chromite_config
 from chromite.lib import cipd
 from chromite.lib import config_lib
@@ -164,13 +163,13 @@ class SDKFetcher(object):
     if self.toolchain_path is None:
       self.toolchain_path = 'gs://%s' % constants.SDK_GS_BUCKET
 
-    if use_external_config or not self._HasInternalConfig(cache_dir):
+    if use_external_config or not self._HasInternalConfig():
       self.config_name = f'{board}-{config_lib.CONFIG_TYPE_FULL}'
     else:
       self.config_name = f'{board}-{config_lib.CONFIG_TYPE_RELEASE}'
     self.gs_base = f'gs://chromeos-image-archive/{self.config_name}'
 
-  def _HasInternalConfig(self, cache_dir):
+  def _HasInternalConfig(self):
     """Determines if the SDK we need is provided by an internal builder.
 
     A given board can have a public and/or an internal builder that publishes
@@ -179,51 +178,22 @@ class SDKFetcher(object):
     explicitly passed "--use-external-config", we need to figure out if we want
     to use a public or internal builder.
 
-    This fetches the configs files in constants.RELEASE_CONFIG_GS_BUCKET to
-    determine if the internal release builders support the given board. If
-    they don't, we fall back to trying to use the public builders.
+    The configs inside gs://chromeos-build-release-console are the proper
+    source of truth for what boards have public or internal builders. However,
+    the ACLs on that bucket make it difficult for some folk to inspect it. So
+    we instead simply assume that everything but the "*-generic" boards have
+    internal configs.
 
-    Args:
-      cache_dir: The toplevel cache dir to use.
+    TODO(b/241964080): Inspect gs://chromeos-build-release-console here instead
+    if/when ACLs on that bucket are opened up.
 
     Returns:
       True if there's an internal builder available that publishes SDKs for the
       board.
     """
-    try:
-      configs = self.gs_ctx.LS(f'gs://{constants.RELEASE_GS_BUCKET}', retries=0)
-    except gs.GSCommandError:
-      # If we can't list the config files, assume that means we don't have the
-      # needed credentials and that we want a public config.
+    if 'generic' in self.board:
       return False
-
-    # If we're on a release branch, we don't want to use ToT's config, so read
-    # //chrome/VERSION to determine which branch we're on and use the
-    # corresponding config file.
-    src_dir = self.chrome_src
-    if not src_dir:
-      src_dir = os.path.abspath(os.path.join(cache_dir, '..', '..'))
-    chrome_version = chrome_util.ProcessVersionFile(src_dir)['MAJOR']
-    relevant_config = None
-    for config in configs:
-      if f'-R{chrome_version}-' in config:
-        relevant_config = config
-        break
-    if not relevant_config:
-      # If no config was found for our branch, assume that means we want ToT.
-      relevant_config = (
-          f'gs://{constants.RELEASE_GS_BUCKET}/build_config.ToT.json')
-
-    config = json.loads(self.gs_ctx.Cat(relevant_config))
-    for board in config.get('boards', []):
-      if board.get('name') != self.board:
-        continue
-      if any(c.get('builder') == 'RELEASE' for c in board.get('configs', [])):
-        return True
-    for board in config.get('reference_board_unified_builds', []):
-      if board.get('name') == self.board and board.get('builder') == 'RELEASE':
-        return True
-    return False
+    return True
 
   def _InstallZstdFromCipd(self):
     """Install zstd from cipd if the system doesn't have it."""
