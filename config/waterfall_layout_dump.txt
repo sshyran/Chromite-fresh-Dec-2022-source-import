@@ -249,7 +249,6 @@
     scarlet-release
     senor-release
     sentry-release
-    shadowkeep-release
     shotzo-release
     skyrim-chausie-release
     skyrim-kernelnext-release
@@ -1116,7 +1115,6 @@
     scarlet-release-tryjob
     senor-release-tryjob
     sentry-release-tryjob
-    shadowkeep-release-tryjob
     shotzo-release-tryjob
     skyrim-chausie-release-tryjob
     skyrim-kernelnext-release-tryjob
@@ -1330,11 +1328,6 @@
   sentry-llvm-toolchain-tryjob
   sentry-payloads-tryjob
   sentry-release-tryjob
-  shadowkeep-full-tryjob
-  shadowkeep-llvm-next-toolchain-tryjob
-  shadowkeep-llvm-toolchain-tryjob
-  shadowkeep-payloads-tryjob
-  shadowkeep-release-tryjob
   shotzo-full-tryjob
   shotzo-llvm-next-toolchain-tryjob
   shotzo-llvm-toolchain-tryjob

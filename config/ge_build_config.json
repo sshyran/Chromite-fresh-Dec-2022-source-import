@@ -359,19 +359,6 @@
       ]
     },
     {
-      "name": "shadowkeep",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": true,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ],
-      "rubik_target_milestone": 103
-    },
-    {
       "name": "tael",
       "configs": [
         {
