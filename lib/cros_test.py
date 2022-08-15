@@ -51,7 +51,7 @@ class CrOSTest(object):
     self.lacros_launcher_script = opts.lacros_launcher_script
     if opts.deploy_lacros and opts.deploy:
       self.additional_lacros_build_dir = os.path.join(opts.build_dir,
-          _ADDITIONAL_LACROS_SUBDIR)
+                                                      _ADDITIONAL_LACROS_SUBDIR)
     self.nostrip = opts.nostrip
     self.build_dir = opts.build_dir
     self.mount = opts.mount
@@ -730,10 +730,10 @@ def ParseCommandLine(argv):
 
   if opts.deploy_lacros and opts.deploy:
     additional_lacros_build_dir = os.path.join(opts.build_dir,
-        _ADDITIONAL_LACROS_SUBDIR)
+                                               _ADDITIONAL_LACROS_SUBDIR)
     if not os.path.exists(additional_lacros_build_dir):
       parser.error('Script will deploy both Ash and Lacros but can not find '
-        'Lacros at %s' % additional_lacros_build_dir)
+                   f'Lacros at {additional_lacros_build_dir}')
 
   if bool(opts.deploy_lacros) != bool(opts.lacros_launcher_script):
     parser.error(
