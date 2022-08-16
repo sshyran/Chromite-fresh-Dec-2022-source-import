@@ -18,6 +18,7 @@ from chromite.lib import image_lib
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
+from chromite.lib.parser import package_info
 from chromite.service import image
 
 
@@ -515,3 +516,58 @@ class TestCreateFactoryImageZip(cros_test_lib.MockTempDirTestCase):
     cmd = ['unzip', '-p', output_file, 'BUILD_VERSION']
     version_file = cros_build_lib.run(cmd, cwd=self.output_dir, stdout=True)
     self.assertEqual(version_file.stdout.decode('UTF-8').strip(), version)
+
+
+class TestCreateStrippedPackagesTar(cros_test_lib.MockTempDirTestCase):
+  """Unittests for create_stripped_packages_tar."""
+
+  def setUp(self):
+    # Create a chroot_path.
+    self.chroot_path = os.path.join(self.tempdir, 'chroot_dir')
+    self.chroot = chroot_lib.Chroot(path=self.chroot_path)
+    self.sysroot_path = os.path.join(self.chroot_path, 'build', 'target')
+    self.sysroot = sysroot_lib.Sysroot(path=self.sysroot_path)
+
+    # Create build target.
+    self.build_target = build_target_lib.BuildTarget(
+        'target',
+        build_root=self.sysroot_path)
+
+    # Create output dir.
+    self.output_dir = os.path.join(self.tempdir, 'output_dir')
+    osutils.SafeMakedirs(self.output_dir)
+
+  def test(self):
+    """Test generation of stripped package tarball using globs."""
+    self.PatchObject(
+        portage_util, 'FindPackageNameMatches',
+        side_effect=[
+            [package_info.SplitCPV('chromeos-base/chrome-1-r0')],
+            [package_info.SplitCPV('sys-kernel/kernel-1-r0'),
+             package_info.SplitCPV('sys-kernel/kernel-2-r0')]])
+    # Drop "stripped packages".
+    pkg_dir = os.path.join(self.build_target.root, 'stripped-packages')
+    osutils.Touch(os.path.join(pkg_dir, 'chromeos-base', 'chrome-1-r0.tbz2'),
+                  makedirs=True)
+    sys_kernel = os.path.join(pkg_dir, 'sys-kernel')
+    osutils.Touch(os.path.join(sys_kernel, 'kernel-1-r0.tbz2'), makedirs=True)
+    osutils.Touch(os.path.join(sys_kernel, 'kernel-1-r01.tbz2'), makedirs=True)
+    osutils.Touch(os.path.join(sys_kernel, 'kernel-2-r0.tbz1'), makedirs=True)
+    osutils.Touch(os.path.join(sys_kernel, 'kernel-2-r0.tbz2'), makedirs=True)
+    stripped_files_list = [
+        os.path.join('stripped-packages', 'chromeos-base', 'chrome-1-r0.tbz2'),
+        os.path.join('stripped-packages', 'sys-kernel', 'kernel-1-r0.tbz2'),
+        os.path.join('stripped-packages', 'sys-kernel', 'kernel-2-r0.tbz2'),
+    ]
+
+    tar_mock = self.PatchObject(cros_build_lib, 'CreateTarball')
+    self.PatchObject(cros_build_lib, 'run')
+    image.create_stripped_packages_tar(self.chroot,
+                                       self.build_target,
+                                       self.output_dir)
+    tar_mock.assert_called_once_with(
+        tarball_path=os.path.join(self.output_dir, 'stripped-packages.tar'),
+        cwd=self.build_target.root,
+        compressor=cros_build_lib.COMP_NONE,
+        chroot=self.chroot,
+        inputs=stripped_files_list)

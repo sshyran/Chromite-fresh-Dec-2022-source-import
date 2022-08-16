@@ -182,10 +182,16 @@ def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Image,
       factory_shim_location,
       packages_service.determine_full_version(),
   )
+  stripped_packags_func = functools.partial(
+    image.create_stripped_packages_tar,
+    chroot,
+    build_target,
+  )
   artifact_types = {
       in_proto.ArtifactType.DLC_IMAGE: dlc_func,
       in_proto.ArtifactType.LICENSE_CREDITS: license_func,
       in_proto.ArtifactType.FACTORY_IMAGE: factory_image_func,
+      in_proto.ArtifactType.STRIPPED_PACKAGES: stripped_packags_func,
   }
 
   for output_artifact in in_proto.output_artifacts:

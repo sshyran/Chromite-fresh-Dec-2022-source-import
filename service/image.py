@@ -5,6 +5,7 @@
 """The Image API is the entry point for image functionality."""
 
 import errno
+import glob
 import logging
 import os
 from pathlib import Path
@@ -19,6 +20,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
+from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
 
@@ -681,3 +683,57 @@ def create_factory_image_zip(chroot: chroot_lib.Chroot,
                          capture_output=True)
 
   return zipfile if os.path.exists(zipfile) else None
+
+
+def create_stripped_packages_tar(chroot: chroot_lib.Chroot,
+                                 build_target: build_target_lib.BuildTarget,
+                                 output_dir: str) -> Union[str, None]:
+  """Build stripped_packages.tar in archive_dir.
+
+  Args:
+    chroot: The chroot class used for these artifacts.
+    build_target: The build target.
+    output_dir: Directory to store stripped_packages.tar.
+
+  Returns:
+    The path to the zipfile if it could be created, else None.
+  """
+  package_globs = [
+      "chromeos-base/chromeos-chrome",
+      "sys-kernel/*kernel*",
+  ]
+  board = build_target.name
+  stripped_pkg_dir = os.path.join(build_target.root, 'stripped-packages')
+  tarball_paths = []
+  strip_package_path = path_util.ToChrootPath(
+      os.path.join(constants.CHROMITE_SCRIPTS_DIR, 'strip_package'))
+  for pattern in package_globs:
+    packages = portage_util.FindPackageNameMatches(pattern, board)
+    for cpv in packages:
+      cmd = [strip_package_path, '--board', board, cpv.cpf]
+      cros_build_lib.run(cmd, enter_chroot=True,
+                         chroot_args=chroot.get_enter_args())
+      # Find the stripped package.
+      files = glob.glob(os.path.join(stripped_pkg_dir, cpv.cpf) + '.*')
+      if not files:
+        bin_path = os.path.join(stripped_pkg_dir, cpv.cpf)
+        raise AssertionError(f'Silent failure to strip binary {cpv.cpf}? '
+                             f'Failed to find stripped files at {bin_path}.')
+      if len(files) > 1:
+        logging.warning('Expected one stripped package for %s, found %d',
+                        cpv.cpf, len(files))
+
+      tarball = sorted(files)[-1]
+      tarball_paths.append(os.path.relpath(tarball, build_target.root))
+
+  if not tarball_paths:
+    # tar barfs on an empty list of files, so skip tarring completely.
+    return None
+
+  tarball_output = os.path.join(output_dir, 'stripped-packages.tar')
+  cros_build_lib.CreateTarball(tarball_path=tarball_output,
+                               cwd=build_target.root,
+                               compressor=cros_build_lib.COMP_NONE,
+                               chroot=chroot,
+                               inputs=tarball_paths)
+  return tarball_output
