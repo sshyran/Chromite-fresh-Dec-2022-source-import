@@ -3163,6 +3163,22 @@
           "release_builder_test_pool": "bvt",
           "board_id": 7231,
           "is_active": true
+        },
+        {
+          "board_name": "corsola64",
+          "name": "tentacool",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7231,
+          "is_active": true
+        },
+        {
+          "board_name": "corsola64",
+          "name": "tentacruel",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7231,
+          "is_active": true
         }
       ],
       "rubik_target_milestone": 103
@@ -5812,7 +5828,7 @@
             "bvt-perbuild",
             "bvt-tast-informational"
           ],
-          "cq_test_enabled": false,
+          "cq_test_enabled": true,
           "release_builder_test_pool": "bvt",
           "board_id": 7166,
           "is_active": true
