@@ -40,7 +40,9 @@ _EXT_TOOL_MAP = {
     # TODO(build): Add a formatter for this (SELinux policies).
     frozenset({".te"}): (formatters.whitespace.Data,),
     frozenset({".xml"}): (formatters.xml.Data,),
-    frozenset({".cfg", ".conf", ".rules", ".txt"}): (
+    # TODO(build): Switch .toml to rustfmt when available.
+    # https://github.com/rust-lang/rustfmt/issues/4091
+    frozenset({".cfg", ".conf", ".ini", ".rules", ".toml", ".txt"}): (
         formatters.whitespace.Data,
     ),
 }
@@ -48,6 +50,7 @@ _EXT_TOOL_MAP = {
 
 # Map known filenames to a tool function.
 _FILENAME_PATTERNS_TOOL_MAP = {
+    frozenset({".gn"}): (formatters.gn.Data,),
     # These are plain text files.
     frozenset(
         {
