@@ -126,31 +126,30 @@ def GetPrebuiltsRoot(chroot: 'chroot_lib.Chroot',
   return root
 
 
-def GetPrebuiltsFiles(prebuilts_root: str,
-                      package_index_paths: List[str] = None) -> List[str]:
+def GetPrebuiltsFiles(prebuilts_root: str) -> List[str]:
   """Find paths to prebuilts at the given root directory.
 
   Assumes the root contains a Portage package index named Packages.
 
+  The package index paths are used to de-duplicate prebuilts uploaded. The
+  immediate consequence of this is reduced storage usage. The non-obvious
+  consequence is the shared packages generally end up with public permissions,
+  while the board-specific packages end up with private permissions. This is
+  what is meant to happen, but a further consequence of that is that when
+  something happens that causes the toolchains to be uploaded as a private
+  board's package, the board will not be able to build properly because
+  it won't be able to fetch the toolchain packages, because they're expected
+  to be public.
+
   Args:
     prebuilts_root: Absolute path to root directory containing a package index.
-    package_index_paths: A list of paths to previous package index files used
-      to de-duplicate prebuilts.
 
   Returns:
     List of paths to all prebuilt archives, relative to the root.
   """
-  indexes = []
-  for package_index_path in package_index_paths or []:
-    index = binpkg.PackageIndex()
-    index.ReadFilePath(package_index_path)
-    indexes.append(index)
-
   package_index = binpkg.GrabLocalPackageIndex(prebuilts_root)
-  packages = package_index.ResolveDuplicateUploads(indexes)
-
   prebuilt_paths = []
-  for package in packages:
+  for package in package_index.packages:
     prebuilt_paths.append(package['CPV'] + '.tbz2')
 
     include_debug_symbols = package.get('DEBUG_SYMBOLS')
