@@ -20,7 +20,7 @@
           "arch": "X86_INTERNAL"
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "betty",
@@ -137,7 +137,7 @@
           "arch": "X86_INTERNAL"
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "caroline-ndktranslation",
@@ -163,7 +163,7 @@
           "arch": "X86_INTERNAL"
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "geralt",
@@ -254,7 +254,7 @@
           "arch": "X86_INTERNAL"
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "lars-kernelnext",
@@ -802,7 +802,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "brask",
@@ -2253,7 +2253,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "cherry",
@@ -4124,7 +4124,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "elm",
@@ -4229,7 +4229,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "eve-arc-r",
@@ -5132,7 +5132,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 106
     },
     {
       "name": "guybrush-kernelnext",
@@ -6679,7 +6679,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "kalista-cfm",
@@ -6836,7 +6836,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 106
     },
     {
       "name": "kevin",
@@ -6865,7 +6865,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "kevin-kernelnext",
@@ -7664,7 +7664,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "nocturne-kernelnext",
@@ -9703,7 +9703,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "rammus",
@@ -9904,7 +9904,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "sarien",
@@ -10086,7 +10086,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 106
     },
     {
       "name": "scarlet-kernelnext",
@@ -10179,7 +10179,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 106
     },
     {
       "name": "shotzo",
@@ -10442,7 +10442,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "soraka-libcamera",
@@ -10565,7 +10565,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "strongbad-kernelnext",
