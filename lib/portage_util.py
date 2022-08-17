@@ -6,6 +6,7 @@
 
 import collections
 import errno
+import functools
 import glob
 import itertools
 import json
@@ -114,17 +115,19 @@ def GetOverlayRoot(path):
   return path
 
 
-def _ListOverlays(board=None, buildroot=constants.SOURCE_ROOT):
-  """Return the list of overlays to use for a given buildbot.
+@functools.lru_cache(maxsize=None)
+def _GetKnownOverlays(buildroot):
+  """Return the list of overlays for a buildroot irrespective of board.
 
-  Always returns all overlays in parent -> child order, and does not
-  perform any filtering.
+  Find all the overlays for a buildroot and cache the result since finding the
+  overlays is the same no matter the board given for _ListOverlays.
 
   Args:
-    board: Board to look at.
     buildroot: Source root to find overlays.
+
+  Returns:
+    List of overlays.
   """
-  # Load all the known overlays so we can extract the details below.
   paths = (
       'projects',
       'src/overlays',
@@ -154,6 +157,22 @@ def _ListOverlays(board=None, buildroot=constants.SOURCE_ROOT):
           'masters': masters,
           'path': GetOverlayRoot(overlay),
       }
+  return overlays
+
+
+@functools.lru_cache(maxsize=None)
+def _ListOverlays(board=None, buildroot=constants.SOURCE_ROOT):
+  """Return the list of overlays to use for a given buildbot.
+
+  Always returns all overlays in parent -> child order, and does not
+  perform any filtering.
+
+  Args:
+    board: Board to look at.
+    buildroot: Source root to find overlays.
+  """
+  # Load all the known overlays so we can extract the details below.
+  overlays = _GetKnownOverlays(buildroot)
 
   # Easy enough -- dump them all.
   if board is None:
