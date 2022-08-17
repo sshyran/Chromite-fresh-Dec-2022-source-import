@@ -725,67 +725,88 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(MockImageDiscoveryHelper,
     # Define the expected payloads, including URLs.
     mp_full = gspaths.Payload(
         tgt_image=mp_image,
-        uri='gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/chromeos_9999.0.0_auron-yuna_canary-channel_full_mp.bin-<random>.signed'
-    )
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9999.0.0_auron-yuna_canary-channel_full_mp'
+             '.bin-<random>.signed'))
     premp_full = gspaths.Payload(
         tgt_image=premp_image,
-        uri='gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/chromeos_9999.0.0_auron-yuna_canary-channel_full_premp.bin-<random>.signed'
-    )
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9999.0.0_auron-yuna_canary-channel_full_premp'
+             '.bin-<random>.signed'))
     mp_full_minios = gspaths.Payload(
         tgt_image=mp_image_minios,
-        uri='gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/minios/minios_9999.0.0_auron-yuna_canary-channel_full_mp.bin-<random>.signed',
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9999.0.0_auron-yuna_canary-channel_full_mp'
+             '.bin-<random>.signed'),
         minios=True)
     premp_full_minios = gspaths.Payload(
         tgt_image=premp_image_minios,
-        uri='gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/minios/minios_9999.0.0_auron-yuna_canary-channel_full_premp.bin-<random>.signed',
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9999.0.0_auron-yuna_canary-channel_full_premp'
+             '.bin-<random>.signed'),
         minios=True)
     test_full = gspaths.Payload(
         tgt_image=test_image,
-        uri='gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/chromeos_9999.0.0_auron-yuna_canary-channel_full_test.bin-<random>'
-    )
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9999.0.0_auron-yuna_canary-channel_full_test'
+             '.bin-<random>'))
     test_full_minios = gspaths.Payload(
         tgt_image=test_image_minios,
-        uri='gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/minios/minios_9999.0.0_auron-yuna_canary-channel_full_test.bin-<random>',
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9999.0.0_auron-yuna_canary-channel_full_test'
+             '.bin-<random>'),
         minios=True)
     n2n_delta = gspaths.Payload(
         tgt_image=test_image,
         src_image=test_image,
-        uri='gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/chromeos_9999.0.0-9999.0.0_auron-yuna_canary-channel_delta_test.bin-<random>'
-    )
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9999.0.0-9999.0.0_auron-yuna_canary-channel_delta_test'
+             '.bin-<random>'))
     n2n_delta_minios = gspaths.Payload(
         tgt_image=test_image_minios,
         src_image=test_image_minios,
-        uri='gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/minios/minios_9999.0.0-9999.0.0_auron-yuna_canary-channel_delta_test.bin-<random>',
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9999.0.0-9999.0.0_auron-yuna_canary-channel_delta_test'
+             '.bin-<random>'),
         minios=True)
     mp_delta = gspaths.Payload(
         tgt_image=mp_image,
         src_image=prev_mp_image,
-        uri='gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/chromeos_9756.0.0-9999.0.0_auron-yuna_canary-channel_delta_mp.bin-<random>.signed'
-    )
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9756.0.0-9999.0.0_auron-yuna_canary-channel_delta_mp'
+             '.bin-<random>.signed'))
     premp_delta = gspaths.Payload(
         tgt_image=premp_image,
         src_image=prev_premp_image,
-        uri='gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/chromeos_9756.0.0-9999.0.0_auron-yuna_canary-channel_delta_premp.bin-<random>.signed'
-    )
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9756.0.0-9999.0.0_auron-yuna_canary-channel_delta_premp'
+             '.bin-<random>.signed'))
     mp_delta_minios = gspaths.Payload(
         tgt_image=mp_image_minios,
         src_image=prev_mp_image_minios,
-        uri='gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/minios/minios_9756.0.0-9999.0.0_auron-yuna_canary-channel_delta_mp.bin-<random>.signed',
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9756.0.0-9999.0.0_auron-yuna_canary-channel_delta_mp'
+             '.bin-<random>.signed'),
         minios=True)
     premp_delta_minios = gspaths.Payload(
         tgt_image=premp_image_minios,
         src_image=prev_premp_image_minios,
-        uri='gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/minios/minios_9756.0.0-9999.0.0_auron-yuna_canary-channel_delta_premp.bin-<random>.signed',
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9756.0.0-9999.0.0_auron-yuna_canary-channel_delta_premp'
+             '.bin-<random>.signed'),
         minios=True)
     test_delta = gspaths.Payload(
         tgt_image=test_image,
         src_image=prev_test_image,
-        uri='gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/chromeos_9756.0.0-9999.0.0_auron-yuna_canary-channel_delta_test.bin-<random>'
-    )
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9756.0.0-9999.0.0_auron-yuna_canary-channel_delta_test'
+             '.bin-<random>'))
     test_delta_minios = gspaths.Payload(
         tgt_image=test_image_minios,
         src_image=prev_test_image_minios,
-        uri='gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/minios/minios_9756.0.0-9999.0.0_auron-yuna_canary-channel_delta_test.bin-<random>',
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9756.0.0-9999.0.0_auron-yuna_canary-channel_delta_test'
+             '.bin-<random>'),
         minios=True)
     dlc_full = gspaths.Payload(
         tgt_image=dlc_image,
@@ -828,6 +849,9 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(MockImageDiscoveryHelper,
 
   def testCanaryPrempMismatch(self):
     """Handle the canary payloads and testss."""
+
+    self.PatchObject(cros_build_lib, 'GetRandomString', return_value='<random>')
+
     target_build = gspaths.Build(
         bucket='crt',
         channel='canary-channel',
@@ -855,25 +879,53 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(MockImageDiscoveryHelper,
     payloads, tests = paygen._DiscoverRequiredPayloads()
 
     # Define the expected payloads. Test delta from prev, but no signed ones.
-    mp_full = gspaths.Payload(tgt_image=mp_image, uri=mock.ANY)
+    mp_full = gspaths.Payload(
+        tgt_image=mp_image,
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9999.0.0_auron-yuna_canary-channel_full_mp'
+             '.bin-<random>.signed'))
     mp_full_minios = gspaths.Payload(
-        tgt_image=mp_image_minios, uri=mock.ANY, minios=True)
-    test_full = gspaths.Payload(tgt_image=test_image, uri=mock.ANY)
+        tgt_image=mp_image_minios,
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9999.0.0_auron-yuna_canary-channel_full_mp'
+             '.bin-<random>.signed'),
+        minios=True)
+    test_full = gspaths.Payload(
+        tgt_image=test_image,
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9999.0.0_auron-yuna_canary-channel_full_test'
+             '.bin-<random>'))
     test_full_minios = gspaths.Payload(
-        tgt_image=test_image_minios, uri=mock.ANY, minios=True)
+        tgt_image=test_image_minios,
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9999.0.0_auron-yuna_canary-channel_full_test'
+             '.bin-<random>'),
+        minios=True)
     n2n_delta = gspaths.Payload(
-        tgt_image=test_image, src_image=test_image, uri=mock.ANY)
+        tgt_image=test_image,
+        src_image=test_image,
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9999.0.0-9999.0.0_auron-yuna_canary-channel_delta_test'
+             '.bin-<random>'))
     n2n_delta_minios = gspaths.Payload(
         tgt_image=test_image_minios,
         src_image=test_image_minios,
-        uri=mock.ANY,
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9999.0.0-9999.0.0_auron-yuna_canary-channel_delta_test'
+             '.bin-<random>'),
         minios=True)
     test_delta = gspaths.Payload(
-        tgt_image=test_image, src_image=prev_test_image, uri=mock.ANY)
+        tgt_image=test_image,
+        src_image=prev_test_image,
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9756.0.0-9999.0.0_auron-yuna_canary-channel_delta_test'
+             '.bin-<random>'))
     test_delta_minios = gspaths.Payload(
         tgt_image=test_image_minios,
         src_image=prev_test_image_minios,
-        uri=mock.ANY,
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9756.0.0-9999.0.0_auron-yuna_canary-channel_delta_test'
+             '.bin-<random>'),
         minios=True)
 
     # Verify the results.
@@ -897,6 +949,9 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(MockImageDiscoveryHelper,
 
   def testCanarySkipDeltas(self):
     """Handle the canary payloads and testss."""
+
+    self.PatchObject(cros_build_lib, 'GetRandomString', return_value='<random>')
+
     target_build = gspaths.Build(
         bucket='crt',
         channel='canary-channel',
@@ -924,12 +979,28 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(MockImageDiscoveryHelper,
     payloads, tests = paygen._DiscoverRequiredPayloads()
 
     # Define the expected payloads. Test delta from prev, but no signed ones.
-    mp_full = gspaths.Payload(tgt_image=mp_image, uri=mock.ANY)
+    mp_full = gspaths.Payload(
+        tgt_image=mp_image,
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9999.0.0_auron-yuna_canary-channel_full_mp.bin-'
+             '<random>.signed'))
     mp_full_minios = gspaths.Payload(
-        tgt_image=mp_image_minios, uri=mock.ANY, minios=True)
-    test_full = gspaths.Payload(tgt_image=test_image, uri=mock.ANY)
+        tgt_image=mp_image_minios,
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9999.0.0_auron-yuna_canary-channel_full_mp.bin-'
+             '<random>.signed'),
+        minios=True)
+    test_full = gspaths.Payload(
+        tgt_image=test_image,
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9999.0.0_auron-yuna_canary-channel_full_test.bin-'
+             '<random>'))
     test_full_minios = gspaths.Payload(
-        tgt_image=test_image_minios, uri=mock.ANY, minios=True)
+        tgt_image=test_image_minios,
+        uri=('gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9999.0.0_auron-yuna_canary-channel_full_test.bin-'
+             '<random>'),
+        minios=True)
 
     # Verify the results.
     self.assertCountEqual(payloads, [
@@ -945,6 +1016,9 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(MockImageDiscoveryHelper,
 
   def testStable(self):
     """Handle the canary payloads and testss."""
+
+    self.PatchObject(cros_build_lib, 'GetRandomString', return_value='<random>')
+
     target_build = gspaths.Build(
         bucket='crt',
         channel='stable-channel',
@@ -1042,133 +1116,251 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(MockImageDiscoveryHelper,
     payloads, tests = paygen._DiscoverRequiredPayloads()
 
     # Define the expected payloads. Test delta from prev, but no signed ones.
-    mp_full = gspaths.Payload(tgt_image=mp_image, uri=mock.ANY)
+    mp_full = gspaths.Payload(
+        tgt_image=mp_image,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9999.0.0_auron-yuna_stable-channel_full_mp'
+             '.bin-<random>.signed'))
     mp_full_minios = gspaths.Payload(
-        tgt_image=mp_image_minios, uri=mock.ANY, minios=True)
-    test_full = gspaths.Payload(tgt_image=test_image, uri=mock.ANY)
+        tgt_image=mp_image_minios,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9999.0.0_auron-yuna_stable-channel_full_mp'
+             '.bin-<random>.signed'),
+        minios=True)
+    test_full = gspaths.Payload(
+        tgt_image=test_image,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9999.0.0_auron-yuna_stable-channel_full_test'
+             '.bin-<random>'))
     test_full_minios = gspaths.Payload(
-        tgt_image=test_image_minios, uri=mock.ANY, minios=True)
+        tgt_image=test_image_minios,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9999.0.0_auron-yuna_stable-channel_full_test'
+             '.bin-<random>'),
+        minios=True)
     n2n_delta = gspaths.Payload(
-        tgt_image=test_image, src_image=test_image, uri=mock.ANY)
+        tgt_image=test_image,
+        src_image=test_image,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9999.0.0-9999.0.0_auron-yuna_stable-channel_delta_test'
+             '.bin-<random>'))
     n2n_delta_minios = gspaths.Payload(
         tgt_image=test_image_minios,
         src_image=test_image_minios,
-        uri=mock.ANY,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9999.0.0-9999.0.0_auron-yuna_stable-channel_delta_test'
+             '.bin-<random>'),
         minios=True)
 
     mp_delta_8530 = gspaths.Payload(
-        tgt_image=mp_image, src_image=image_8530, uri=mock.ANY)
+        tgt_image=mp_image,
+        src_image=image_8530,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_8530.96.0-9999.0.0_auron-yuna_stable-channel_delta_mp'
+             '.bin-<random>.signed'))
     mp_delta_8530_minios = gspaths.Payload(
         tgt_image=mp_image_minios,
         src_image=image_8530_minios,
-        uri=mock.ANY,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_8530.96.0-9999.0.0_auron-yuna_stable-channel_delta_mp'
+             '.bin-<random>.signed'),
         minios=True)
 
     # Test deltas.
     test_delta_8530 = gspaths.Payload(
-        tgt_image=test_image, src_image=test_image_8530, uri=mock.ANY)
+        tgt_image=test_image,
+        src_image=test_image_8530,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_8530.96.0-9999.0.0_auron-yuna_stable-channel_delta_test'
+             '.bin-<random>'))
     test_delta_8530_minios = gspaths.Payload(
         tgt_image=test_image_minios,
         src_image=test_image_8530_minios,
-        uri=mock.ANY,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_8530.96.0-9999.0.0_auron-yuna_stable-channel_delta_test'
+             '.bin-<random>'),
         minios=True)
     mp_delta_8743 = gspaths.Payload(
-        tgt_image=mp_image, src_image=image_8743, uri=mock.ANY)
+        tgt_image=mp_image,
+        src_image=image_8743,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_8743.85.0-9999.0.0_auron-yuna_stable-channel_delta_mp'
+             '.bin-<random>.signed'))
     mp_delta_8743_minios = gspaths.Payload(
         tgt_image=mp_image_minios,
         src_image=image_8743_minios,
-        uri=mock.ANY,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_8743.85.0-9999.0.0_auron-yuna_stable-channel_delta_mp'
+             '.bin-<random>.signed'),
         minios=True)
     test_delta_8743 = gspaths.Payload(
-        tgt_image=test_image, src_image=test_image_8743, uri=mock.ANY)
+        tgt_image=test_image,
+        src_image=test_image_8743,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_8743.85.0-9999.0.0_auron-yuna_stable-channel_delta_test'
+             '.bin-<random>'))
     test_delta_8743_minios = gspaths.Payload(
         tgt_image=test_image_minios,
         src_image=test_image_8743_minios,
-        uri=mock.ANY,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_8743.85.0-9999.0.0_auron-yuna_stable-channel_delta_test'
+             '.bin-<random>'),
         minios=True)
     mp_delta_8872 = gspaths.Payload(
-        tgt_image=mp_image, src_image=image_8872, uri=mock.ANY)
+        tgt_image=mp_image,
+        src_image=image_8872,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_8872.76.0-9999.0.0_auron-yuna_stable-channel_delta_mp'
+             '.bin-<random>.signed'))
     mp_delta_8872_minios = gspaths.Payload(
         tgt_image=mp_image_minios,
         src_image=image_8872_minios,
-        uri=mock.ANY,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_8872.76.0-9999.0.0_auron-yuna_stable-channel_delta_mp'
+             '.bin-<random>.signed'),
         minios=True)
     test_delta_8872 = gspaths.Payload(
-        tgt_image=test_image, src_image=test_image_8872, uri=mock.ANY)
+        tgt_image=test_image,
+        src_image=test_image_8872,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_8872.76.0-9999.0.0_auron-yuna_stable-channel_delta_test'
+             '.bin-<random>'))
     test_delta_8872_minios = gspaths.Payload(
         tgt_image=test_image_minios,
         src_image=test_image_8872_minios,
-        uri=mock.ANY,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_8872.76.0-9999.0.0_auron-yuna_stable-channel_delta_test'
+             '.bin-<random>'),
         minios=True)
     mp_delta_9000 = gspaths.Payload(
-        tgt_image=mp_image, src_image=image_9000, uri=mock.ANY)
+        tgt_image=mp_image,
+        src_image=image_9000,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9000.91.0-9999.0.0_auron-yuna_stable-channel_delta_mp'
+             '.bin-<random>.signed'))
     mp_delta_9000_minios = gspaths.Payload(
         tgt_image=mp_image_minios,
         src_image=image_9000_minios,
-        uri=mock.ANY,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9000.91.0-9999.0.0_auron-yuna_stable-channel_delta_mp'
+             '.bin-<random>.signed'),
         minios=True)
     test_delta_9000 = gspaths.Payload(
-        tgt_image=test_image, src_image=test_image_9000, uri=mock.ANY)
+        tgt_image=test_image,
+        src_image=test_image_9000,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9000.91.0-9999.0.0_auron-yuna_stable-channel_delta_test'
+             '.bin-<random>'))
     test_delta_9000_minios = gspaths.Payload(
         tgt_image=test_image_minios,
         src_image=test_image_9000_minios,
-        uri=mock.ANY,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9000.91.0-9999.0.0_auron-yuna_stable-channel_delta_test'
+             '.bin-<random>'),
         minios=True)
     mp_delta_9202 = gspaths.Payload(
-        tgt_image=mp_image, src_image=image_9202, uri=mock.ANY)
+        tgt_image=mp_image,
+        src_image=image_9202,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9202.64.0-9999.0.0_auron-yuna_stable-channel_delta_mp'
+             '.bin-<random>.signed'))
     mp_delta_9202_minios = gspaths.Payload(
         tgt_image=mp_image_minios,
         src_image=image_9202_minios,
-        uri=mock.ANY,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9202.64.0-9999.0.0_auron-yuna_stable-channel_delta_mp'
+             '.bin-<random>.signed'),
         minios=True)
     test_delta_9202 = gspaths.Payload(
-        tgt_image=test_image, src_image=test_image_9202, uri=mock.ANY)
+        tgt_image=test_image,
+        src_image=test_image_9202,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9202.64.0-9999.0.0_auron-yuna_stable-channel_delta_test'
+             '.bin-<random>'))
     test_delta_9202_minios = gspaths.Payload(
         tgt_image=test_image_minios,
         src_image=test_image_9202_minios,
-        uri=mock.ANY,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9202.64.0-9999.0.0_auron-yuna_stable-channel_delta_test'
+             '.bin-<random>'),
         minios=True)
     mp_delta_9334 = gspaths.Payload(
-        tgt_image=mp_image, src_image=image_9334, uri=mock.ANY)
+        tgt_image=mp_image,
+        src_image=image_9334,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9334.72.0-9999.0.0_auron-yuna_stable-channel_delta_mp'
+             '.bin-<random>.signed'))
     mp_delta_9334_minios = gspaths.Payload(
         tgt_image=mp_image_minios,
         src_image=image_9334_minios,
-        uri=mock.ANY,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9334.72.0-9999.0.0_auron-yuna_stable-channel_delta_mp'
+             '.bin-<random>.signed'),
         minios=True)
     test_delta_9334 = gspaths.Payload(
-        tgt_image=test_image, src_image=test_image_9334, uri=mock.ANY)
+        tgt_image=test_image,
+        src_image=test_image_9334,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9334.72.0-9999.0.0_auron-yuna_stable-channel_delta_test'
+             '.bin-<random>'))
     test_delta_9334_minios = gspaths.Payload(
         tgt_image=test_image_minios,
         src_image=test_image_9334_minios,
-        uri=mock.ANY,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9334.72.0-9999.0.0_auron-yuna_stable-channel_delta_test'
+             '.bin-<random>'),
         minios=True)
     mp_delta_9460 = gspaths.Payload(
-        tgt_image=mp_image, src_image=image_9460, uri=mock.ANY)
+        tgt_image=mp_image,
+        src_image=image_9460,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9460.60.0-9999.0.0_auron-yuna_stable-channel_delta_mp'
+             '.bin-<random>.signed'))
     mp_delta_9460_minios = gspaths.Payload(
         tgt_image=mp_image_minios,
         src_image=image_9460_minios,
-        uri=mock.ANY,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9460.60.0-9999.0.0_auron-yuna_stable-channel_delta_mp'
+             '.bin-<random>.signed'),
         minios=True)
     test_delta_9460 = gspaths.Payload(
-        tgt_image=test_image, src_image=test_image_9460, uri=mock.ANY)
+        tgt_image=test_image,
+        src_image=test_image_9460,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9460.60.0-9999.0.0_auron-yuna_stable-channel_delta_test'
+             '.bin-<random>'))
     test_delta_9460_minios = gspaths.Payload(
         tgt_image=test_image_minios,
         src_image=test_image_9460_minios,
-        uri=mock.ANY,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9460.60.0-9999.0.0_auron-yuna_stable-channel_delta_test'
+             '.bin-<random>'),
         minios=True)
     mp_delta_9460_67 = gspaths.Payload(
-        tgt_image=mp_image, src_image=image_9460_67, uri=mock.ANY)
+        tgt_image=mp_image,
+        src_image=image_9460_67,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9460.67.0-9999.0.0_auron-yuna_stable-channel_delta_mp'
+             '.bin-<random>.signed'))
     mp_delta_9460_67_minios = gspaths.Payload(
         tgt_image=mp_image_minios,
         src_image=image_9460_67_minios,
-        uri=mock.ANY,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9460.67.0-9999.0.0_auron-yuna_stable-channel_delta_mp'
+             '.bin-<random>.signed'),
         minios=True)
     test_delta_9460_67 = gspaths.Payload(
-        tgt_image=test_image, src_image=test_image_9460_67, uri=mock.ANY)
+        tgt_image=test_image,
+        src_image=test_image_9460_67,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/'
+             'chromeos_9460.67.0-9999.0.0_auron-yuna_stable-channel_delta_test'
+             '.bin-<random>'))
     test_delta_9460_67_minios = gspaths.Payload(
         tgt_image=test_image_minios,
         src_image=test_image_9460_67_minios,
-        uri=mock.ANY,
+        uri=('gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/minios/'
+             'minios_9460.67.0-9999.0.0_auron-yuna_stable-channel_delta_test'
+             '.bin-<random>'),
         minios=True)
 
     # Verify the results.
@@ -1329,39 +1521,58 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(MockImageDiscoveryHelper,
     paygen = self._GetPaygenBuildInstance(target_build)
     _, tests = paygen._DiscoverRequiredPayloads()
 
-    expected_fsi_payload_test = {
-        'applicable_models': [u'basking', u'electro'],
-        'src_channel': 'stable-channel',
-        'src_version': u'11021.56.0',
-        'payload_type': u'FSI',
-        'payload': {
-            'src_image': None,
-            'uri': ('gs://crt/stable-channel/reef/11021.57.0/payloads/'
-                    'chromeos_11021.57.0_reef_stable-channel_full_test.bin-'
-                    '<random>'),
-            'exists': False,
-            'tgt_image': {
-                'image_type': None,
-                'uri': None,
-                'build': {
-                    'version': '11021.57.0',
-                    'bucket': 'crt',
-                    'board': 'reef',
-                    'channel': 'stable-channel',
-                    'uri': None
-                },
-                'milestone': None
-            },
-            'build': {
-                'version': '11021.57.0',
-                'bucket': 'crt',
-                'board': 'reef',
-                'channel': 'stable-channel',
-                'uri': None
-            },
-            'minios': None
-        }
-    }
+    expected_fsi_payload_test = paygen_build_lib.PayloadTest(
+        **{
+            'applicable_models': [u'basking', u'electro'],
+            'src_channel':
+                'stable-channel',
+            'src_version':
+                u'11021.56.0',
+            'payload_type':
+                u'FSI',
+            'payload':
+                gspaths.Payload(
+                    **{
+                        'src_image':
+                            None,
+                        'uri': (
+                            'gs://crt/stable-channel/reef/11021.57.0/payloads/'
+                            'chromeos_11021.57.0_reef_stable-channel_full_test'
+                            '.bin-<random>'),
+                        'exists':
+                            False,
+                        'tgt_image':
+                            gspaths.UnsignedImageArchive(
+                                **{
+                                    'image_type':
+                                        None,
+                                    'uri':
+                                        None,
+                                    'build':
+                                        gspaths.Build(
+                                            **{
+                                                'version': '11021.57.0',
+                                                'bucket': 'crt',
+                                                'board': 'reef',
+                                                'channel': 'stable-channel',
+                                                'uri': None
+                                            }),
+                                    'milestone':
+                                        None
+                                }),
+                        'build':
+                            gspaths.Build(
+                                **{
+                                    'version': '11021.57.0',
+                                    'bucket': 'crt',
+                                    'board': 'reef',
+                                    'channel': 'stable-channel',
+                                    'uri': None
+                                }),
+                        'minios':
+                            None
+                    }),
+        })
 
     # Check that the last test with applicable_models has the correct data
     self.assertDictEqual(tests[-1], expected_fsi_payload_test)

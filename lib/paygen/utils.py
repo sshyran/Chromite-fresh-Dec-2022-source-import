@@ -48,6 +48,31 @@ class RestrictedAttrDict(dict):
     for key in self.keys():
       assert key in self._slots, 'Unexpected key %s in %s' % (key, self._slots)
 
+  def __hash__(self):
+    """Hash of the class to make hashable."""
+
+    def _hash(obj):
+      """Helper to create a deep hash recursively."""
+      t = type(obj)
+      pre = None
+      if isinstance(obj, dict):
+        pre = (t, *((k, _hash(v)) for k, v in sorted(obj.items())))
+      elif isinstance(obj, (list, set, tuple)):
+        pre = (t, *(_hash(v) for v in obj))
+      else:
+        pre = (t, obj)
+      return hash(pre)
+
+    return _hash(self)
+
+  def __eq__(self, other):
+    """Equality of the class with respect to hashing logic."""
+    return type(self) is type(other) and super().__eq__(other)
+
+  def __ne__(self, other):
+    """Inequality of the class."""
+    return not self.__eq__(other)
+
   def __setattr__(self, name, val):
     """Setting an attribute, actually sets a dictionary value."""
     if name not in self._slots:

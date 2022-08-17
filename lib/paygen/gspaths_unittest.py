@@ -16,13 +16,14 @@ class GsPathsDataTest(cros_test_lib.TestCase):
         'board': 'board-name',
         'version': '1.2.3',
     }
-    default_expected = {
-        'bucket': None,
-        'channel': 'foo-channel',
-        'board': 'board-name',
-        'version': '1.2.3',
-        'uri': None,
-    }
+    default_expected = gspaths.Build(
+        **{
+            'bucket': None,
+            'channel': 'foo-channel',
+            'board': 'board-name',
+            'version': '1.2.3',
+            'uri': None,
+        })
     expected_str = ("Build definition (board='board-name',"
                     " version='1.2.3', channel='foo-channel')")
 
@@ -561,64 +562,72 @@ class GsPathsChromeosReleasesTest(cros_test_lib.TestCase):
         image_version=image_version)
 
     self.assertDictEqual(
-        gspaths.ChromeosReleases.ParsePayloadUri(full_uri), {
-            'tgt_image': gspaths.Image(build=self.build, key=self.key),
-            'src_image': None,
-            'build': self.build,
-            'uri': full_uri,
-            'exists': False,
-            'minios': None,
-        })
+        gspaths.ChromeosReleases.ParsePayloadUri(full_uri),
+        gspaths.Payload(
+            **{
+                'tgt_image': gspaths.Image(build=self.build, key=self.key),
+                'src_image': None,
+                'build': self.build,
+                'uri': full_uri,
+                'exists': False,
+                'minios': None,
+            }))
 
     self.assertDictEqual(
-        gspaths.ChromeosReleases.ParsePayloadUri(delta_uri), {
-            'src_image': gspaths.Image(build=self.src_build),
-            'tgt_image': gspaths.Image(build=self.build, key=self.key),
-            'build': self.build,
-            'uri': delta_uri,
-            'exists': False,
-            'minios': None,
-        })
+        gspaths.ChromeosReleases.ParsePayloadUri(delta_uri),
+        gspaths.Payload(
+            **{
+                'src_image': gspaths.Image(build=self.src_build),
+                'tgt_image': gspaths.Image(build=self.build, key=self.key),
+                'build': self.build,
+                'uri': delta_uri,
+                'exists': False,
+                'minios': None,
+            }))
 
     self.assertDictEqual(
-        gspaths.ChromeosReleases.ParsePayloadUri(max_full_uri), {
-            'tgt_image':
-                gspaths.Image(
-                    build=self.build,
-                    key=self.key,
-                    image_version=image_version,
-                    image_channel='image-channel'),
-            'src_image':
-                None,
-            'build':
-                self.build,
-            'uri':
-                max_full_uri,
-            'exists':
-                False,
-            'minios':
-                None,
-        })
+        gspaths.ChromeosReleases.ParsePayloadUri(max_full_uri),
+        gspaths.Payload(
+            **{
+                'tgt_image':
+                    gspaths.Image(
+                        build=self.build,
+                        key=self.key,
+                        image_version=image_version,
+                        image_channel='image-channel'),
+                'src_image':
+                    None,
+                'build':
+                    self.build,
+                'uri':
+                    max_full_uri,
+                'exists':
+                    False,
+                'minios':
+                    None,
+            }))
 
     self.assertDictEqual(
-        gspaths.ChromeosReleases.ParsePayloadUri(max_delta_uri), {
-            'src_image':
-                gspaths.Image(build=self.src_build),
-            'tgt_image':
-                gspaths.Image(
-                    build=self.build,
-                    key=self.key,
-                    image_version=image_version,
-                    image_channel='image-channel'),
-            'build':
-                self.build,
-            'uri':
-                max_delta_uri,
-            'exists':
-                False,
-            'minios':
-                None,
-        })
+        gspaths.ChromeosReleases.ParsePayloadUri(max_delta_uri),
+        gspaths.Payload(
+            **{
+                'src_image':
+                    gspaths.Image(build=self.src_build),
+                'tgt_image':
+                    gspaths.Image(
+                        build=self.build,
+                        key=self.key,
+                        image_version=image_version,
+                        image_channel='image-channel'),
+                'build':
+                    self.build,
+                'uri':
+                    max_delta_uri,
+                'exists':
+                    False,
+                'minios':
+                    None,
+            }))
 
   def testBuildValuesFromUri(self):
     """Tests BuildValuesFromUri"""

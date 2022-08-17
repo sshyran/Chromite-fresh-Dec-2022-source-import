@@ -48,6 +48,91 @@ class TestUtils(cros_test_lib.TempDirTestCase):
     """Mock the system's available memory, used to override /proc."""
     return lambda: how_much
 
+  def testRestrictedAttrDictHashing(self):
+    """Tests that RestrictedAttrDict hashing works in various cases."""
+    # Temporary variables for sanity.
+    self.assertEqual(
+        hash(utils.RestrictedAttrDict()), hash(utils.RestrictedAttrDict()))
+    self.assertEqual(utils.RestrictedAttrDict(), utils.RestrictedAttrDict())
+
+    # Local variables with differing addresses.
+    a = utils.RestrictedAttrDict()
+    b = utils.RestrictedAttrDict()
+    self.assertEqual(hash(a), hash(b))
+    self.assertEqual(a, b)
+
+  def testRestrictedAttrDictHashingDerivedClasses(self):
+    """Tests that RestrictedAttrDict hashing works in derviced classes."""
+
+    class A(utils.RestrictedAttrDict):
+      """Derived class A."""
+      _slots = ('foo',)
+
+    a = A()
+
+    class B(utils.RestrictedAttrDict):
+      """Derived class B."""
+      _slots = ('foo',)
+
+    b = B()
+    self.assertNotEqual(hash(a), hash(b))
+    self.assertNotEqual(a, b)
+
+  def testRestrictedAttrDictHashingDerivedClassesUnorderedSlots(self):
+    """Tests that RestrictedAttrDict hashing works
+
+    ... in derived classes with unordered slots.
+    """
+
+    class A(utils.RestrictedAttrDict):
+      """Derived class A."""
+      _slots = ('foo', 'bar')
+
+    a = A()
+
+    class B(utils.RestrictedAttrDict):
+      """Derived class B."""
+      _slots = ('bar', 'foo')
+
+    b = B()
+    self.assertNotEqual(hash(a), hash(b))
+    self.assertNotEqual(a, b)
+
+  def testRestrictedAttrDictHashingDerivedClassesUnorderedInitialization(self):
+    """Tests that RestrictedAttrDict hashing works
+
+    ... in derived class with unordered slots initialization.
+    """
+
+    class A(utils.RestrictedAttrDict):
+      """Derived class A."""
+      _slots = ('foo', 'bar')
+
+    a1 = A(foo=1, bar=2)
+    a2 = A(bar=2, foo=1)
+    self.assertEqual(hash(a1), hash(a2))
+    self.assertEqual(a1, a2)
+
+  def testRestrictedAttrDictHashingDerivedClassesDataStructures(self):
+    """Tests that RestrictedAttrDict hashing works
+
+    ... in derived class with data structures.
+    """
+
+    class A(utils.RestrictedAttrDict):
+      """Derived class A."""
+      _slots = ('foo', 'bar', 'car', 'far')
+
+    a1 = A(foo=dict(), bar=set(), car=list(), far=tuple())
+    a2 = A(car=list(), bar=set(), foo=dict(), far=tuple())
+    self.assertEqual(hash(a1), hash(a2))
+    self.assertEqual(a1, a2)
+
+    a3 = A(foo=dict(), bar=set(), car=list(), far=tuple())
+    a4 = A(car=1, bar=set(), foo=dict(), far=tuple())
+    self.assertNotEqual(hash(a3), hash(a4))
+    self.assertNotEqual(a3, a4)
+
   def testListdirFullpath(self):
     file_a = os.path.join(self.tempdir, 'a')
     file_b = os.path.join(self.tempdir, 'b')
