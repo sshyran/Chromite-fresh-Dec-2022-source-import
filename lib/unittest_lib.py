@@ -77,7 +77,7 @@ int main() {
         cmd, cwd=outdir, stdout=True, stderr=True,
         print_cmd=False)
   except cros_build_lib.RunCommandError as e:
-    raise BuildELFError('%s\n%s' % (e, e.result.stderr))
+    raise BuildELFError(f'{e}\n{e.stderr}')
   finally:
     os.unlink(source_fn)
 

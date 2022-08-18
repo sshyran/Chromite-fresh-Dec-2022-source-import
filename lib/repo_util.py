@@ -238,7 +238,7 @@ class Repository(object):
     try:
       result = self._Run(['list'] + projects, cwd=cwd, capture_output=True)
     except cros_build_lib.RunCommandError as rce:
-      m = PROJECT_NOT_FOUND_RE.search(rce.result.stderr)
+      m = PROJECT_NOT_FOUND_RE.search(rce.stderr)
       if m:
         raise ProjectNotFoundError(m.group('name'))
       raise rce
@@ -298,10 +298,10 @@ class Repository(object):
               debug_level=logging.DEBUG, capture_output=True, encoding='utf-8',
               extra_env={'LC_MESSAGES': 'C'}, cwd=self.root)
         except cros_build_lib.RunCommandError as e:
-          if 'Invalid cross-device link' in e.result.stderr:
+          if 'Invalid cross-device link' in e.stderr:
             logging.warning("Can't hard link across devices; aborting linking.")
             break
-          logging.warning('Copy linking failed: %s', e.result.stderr)
+          logging.warning('Copy linking failed: %s', e.stderr)
 
       # Copy everything that wasn't created by the hard linking above.
       try:
@@ -313,10 +313,10 @@ class Repository(object):
         # Despite the --no-clobber, `cp` still complains when trying to copy a
         # file to its existing hard link. Filter these errors from the output
         # to see if there were any real failures.
-        errors = e.result.stderr.splitlines()
+        errors = e.stderr.splitlines()
         real_errors = [x for x in errors if 'are the same file' not in x]
         if real_errors:
-          e.result.stderr = '\n'.join(real_errors)
+          e.stderr = '\n'.join(real_errors)
           raise e
       return Repository(dest_root)
 

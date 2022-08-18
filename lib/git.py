@@ -184,7 +184,7 @@ def IsReachable(cwd, to_ref, from_ref):
   try:
     RunGit(cwd, ['merge-base', '--is-ancestor', to_ref, from_ref])
   except cros_build_lib.RunCommandError as e:
-    if e.result.returncode == 1:
+    if e.returncode == 1:
       return False
     raise
   return True
@@ -203,7 +203,7 @@ def DoesCommitExistInRepo(cwd, commit):
   try:
     RunGit(cwd, ['rev-list', '-n1', commit, '--'])
   except cros_build_lib.RunCommandError as e:
-    if e.result.returncode == 128:
+    if e.returncode == 128:
       return False
     raise
   return True
@@ -221,7 +221,7 @@ def GetCurrentBranch(cwd):
     ret = RunGit(cwd, ['symbolic-ref', '-q', 'HEAD'])
     return StripRefsHeads(ret.stdout.strip(), False)
   except cros_build_lib.RunCommandError as e:
-    if e.result.returncode != 1:
+    if e.returncode != 1:
       raise
     return None
 
@@ -942,7 +942,7 @@ def GetTrackingBranchViaGitConfig(git_repo, branch, for_checkout=True,
     return RemoteRef(remote, rev)
   except cros_build_lib.RunCommandError as e:
     # 1 is the retcode for no matches.
-    if e.result.returncode != 1:
+    if e.returncode != 1:
       raise
   return None
 

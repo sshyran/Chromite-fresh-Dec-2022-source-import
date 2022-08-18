@@ -297,7 +297,7 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
       self._RemoteCommand(cmd, **cmd_kwargs)
     except cros_build_lib.RunCommandError as e:
       logging.warning('Cannot start nebraska.')
-      logging.warning(e.result.stderr)
+      logging.warning(e.stderr)
       if ERROR_MSG_IN_LOADING_LIB in str(e):
         logging.info('Attempting to correct device library paths...')
         try:
@@ -307,8 +307,8 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
           return
         except cros_build_lib.RunCommandError as e2:
           logging.warning('Library path correction failed:')
-          logging.warning(e2.result.stderr)
-          raise NebraskaStartupError(e.result.stderr)
+          logging.warning(e2.stderr)
+          raise NebraskaStartupError(e.stderr)
 
       raise NebraskaStartupError(str(e))
 

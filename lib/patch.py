@@ -868,7 +868,7 @@ class GitRepoPatch(PatchQuery):
     try:
       log = git.Log(git_repo, format=fmt, max_count=1, rev=rev)
     except cros_build_lib.RunCommandError as e:
-      raise git.GitException(e.result.stderr)
+      raise git.GitException(e.stderr)
     output = log.split('\0')
     if len(output) != 6:
       raise git.GitException('Git did not format log data in expected format.')
@@ -986,7 +986,7 @@ class GitRepoPatch(PatchQuery):
       # If we get a 128, that means git couldn't find the the parent of our
       # sha1- meaning we're the first commit in the repository (there is no
       # parent).
-      if e.result.returncode != 128:
+      if e.returncode != 128:
         raise
       return {}
     lines = lines.stdout.splitlines()
@@ -1060,7 +1060,7 @@ class GitRepoPatch(PatchQuery):
       reset_target = None
       return
     except cros_build_lib.RunCommandError as error:
-      ret = error.result.returncode
+      ret = error.returncode
       if ret not in (1, 2):
         logging.error('Unknown cherry-pick exit code %s; %s', ret, error)
         raise ApplyPatchException(
@@ -1490,7 +1490,7 @@ class GitRepoPatch(PatchQuery):
       # Exit code 0 means yes.
       return True
     except cros_build_lib.RunCommandError as e:
-      if e.result.returncode == 1:
+      if e.returncode == 1:
         # Exit code 1 means no.
         return False
       # Other return codes are exceptions

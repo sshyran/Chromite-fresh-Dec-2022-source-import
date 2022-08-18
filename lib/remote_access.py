@@ -417,12 +417,12 @@ class RemoteAccess(object):
     try:
       return cros_build_lib.run(ssh_cmd, **kwargs)
     except cros_build_lib.RunCommandError as e:
-      if ((e.result.returncode == SSH_ERROR_CODE and ssh_error_ok) or
-          (e.result.returncode and e.result.returncode != SSH_ERROR_CODE
+      if ((e.returncode == SSH_ERROR_CODE and ssh_error_ok) or
+          (e.returncode and e.returncode != SSH_ERROR_CODE
            and not check)):
         return e.result
-      elif e.result.returncode == SSH_ERROR_CODE:
-        raise SSHConnectionError(e.result.stderr)
+      elif e.returncode == SSH_ERROR_CODE:
+        raise SSHConnectionError(e.stderr)
       else:
         raise
     finally:
@@ -1334,7 +1334,7 @@ class ChromiumOSDevice(RemoteDevice):
       try:
         result = self.BaseRunCommand(['echo', '${PATH}'])
       except cros_build_lib.RunCommandError as e:
-        logging.error('Failed to get $PATH on the device: %s', e.result.stderr)
+        logging.error('Failed to get $PATH on the device: %s', e.stderr)
         raise
 
       self._orig_path = result.stdout.strip()

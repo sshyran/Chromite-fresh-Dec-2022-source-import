@@ -565,7 +565,7 @@ def CleanupChrootMount(chroot=None,
     fs_debug = GetFileSystemDebug(chroot, run_ps=True)
     raise Error(
         'Umount failed: %s.\nfuser output=%s\nlsof output=%s\nps output=%s\n' %
-        (e.result.stderr, fs_debug.fuser, fs_debug.lsof, fs_debug.ps))
+        (e.stderr, fs_debug.fuser, fs_debug.lsof, fs_debug.ps))
 
   # Find the loopback device by either matching the VG or the image.
   chroot_dev = None

@@ -386,7 +386,7 @@ print(json.dumps(pkg_info))
       result = device.GetAgent().RemoteSh(['python'], remote_sudo=True,
                                           input=get_vartree_script)
     except cros_build_lib.RunCommandError as e:
-      logging.error('Cannot get target vartree:\n%s', e.result.stderr)
+      logging.error('Cannot get target vartree:\n%s', e.stderr)
       raise
 
     try:
@@ -1051,8 +1051,7 @@ def _DeployDLCImage(device, sysroot, board, dlc_id, dlc_package):
   try:
     device.run(['dlcservice_util', '--uninstall', '--id=%s' % dlc_id])
   except cros_build_lib.RunCommandError as e:
-    logging.info('Failed to uninstall DLC:%s. Continue anyway.',
-                 e.result.stderr)
+    logging.info('Failed to uninstall DLC:%s. Continue anyway.', e.stderr)
   except Exception:
     logging.error('Failed to uninstall DLC.')
     raise

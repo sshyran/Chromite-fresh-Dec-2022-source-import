@@ -219,7 +219,7 @@ class DeployChrome(object):
       result = self.device.run('status ui', capture_output=True,
                                encoding='utf-8')
     except cros_build_lib.RunCommandError as e:
-      if 'Unknown job' in e.result.stderr:
+      if 'Unknown job' in e.stderr:
         return False
       else:
         raise e

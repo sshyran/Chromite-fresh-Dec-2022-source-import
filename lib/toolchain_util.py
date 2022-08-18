@@ -499,7 +499,7 @@ class GenerateChromeOrderfile(object):
     except cros_build_lib.RunCommandError as e:
       raise GenerateChromeOrderfileError(
           f'Unable to run %s to process orderfile {cmd} '
-          f'with error: {e.result.stdout} {e.result.stderr}.')
+          f'with error: {e.stdout} {e.stderr}.')
 
     # Return path inside chroot
     return result

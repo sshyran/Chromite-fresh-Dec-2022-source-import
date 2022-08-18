@@ -2688,19 +2688,19 @@ def PortageqEnvvars(variables, board=None, sysroot=None, allow_undefined=False):
   try:
     result = _Portageq(
         ['envvar', '-v'] + variables, board=board, sysroot=sysroot)
+    output = result.stdout
   except cros_build_lib.RunCommandError as e:
-    if e.result.returncode != 1:
+    if e.returncode != 1:
       # Actual error running command, raise.
       raise e
     elif not allow_undefined:
       # Error for undefined variable.
-      raise PortageqError('One or more variables undefined: %s' %
-                          e.result.stdout)
+      raise PortageqError(f'One or more variables undefined: {e.stdout}')
     else:
       # Undefined variable but letting it slide.
-      result = e.result
+      output = e.stdout
 
-  return key_value_store.LoadData(result.stdout, multiline=True)
+  return key_value_store.LoadData(output, multiline=True)
 
 
 def PortageqHasVersion(category_package, board=None, sysroot=None):

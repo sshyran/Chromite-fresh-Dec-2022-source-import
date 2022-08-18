@@ -34,7 +34,7 @@ class UnmountError(Error):
     self.fs_debug = fs_debug
 
   def __str__(self):
-    return (f'Umount failed: {self.cmd_error.result.stdout}.\n'
+    return (f'Umount failed: {self.cmd_error.stdout}.\n'
             f'fuser output={self.fs_debug.fuser}\n'
             f'lsof output={self.fs_debug.lsof}\n'
             f'ps output={self.fs_debug.ps}\n')

@@ -1595,7 +1595,7 @@ class MountOverlayContext(object):
                              'workdir=%s' % self.tempdir),
                  quiet=True)
       except cros_build_lib.RunCommandError as e_overlay:
-        if e_overlay.result.returncode not in self.OVERLAY_FS_MOUNT_ERRORS:
+        if e_overlay.returncode not in self.OVERLAY_FS_MOUNT_ERRORS:
           raise
         logging.debug('Failed to mount overlay filesystem. Trying legacy API.')
         stashed_e_overlay_str = str(e_overlay)

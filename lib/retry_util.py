@@ -313,16 +313,16 @@ def RetryCommand(functor, max_retry, *args, **kwargs):
     """Return whether we should retry on a given exception."""
     if not ShouldRetryCommandCommon(exc):
       return False
-    if values is None and exc.result.returncode < 0:
+    if values is None and exc.returncode < 0:
       logging.info('Child process received signal %d; not retrying.',
-                   -exc.result.returncode)
+                   -exc.returncode)
       return False
 
     ret = error_check(exc)
     if ret is not None:
       return ret
 
-    if values is None or exc.result.returncode in values:
+    if values is None or exc.returncode in values:
       if log_retries:
         logging.warning('Command failed with retriable error.\n%s', exc)
       return True
@@ -335,9 +335,9 @@ def ShouldRetryCommandCommon(exc):
   """Returns whether any run should retry on a given exception."""
   if not isinstance(exc, cros_build_lib.RunCommandError):
     return False
-  if exc.result.returncode is None:
+  if exc.returncode is None:
     logging.error('Child process failed to launch; not retrying:\n'
-                  'command: %s', exc.result.cmdstr)
+                  'command: %s', exc.cmdstr)
     return False
   return True
 
@@ -399,9 +399,9 @@ def RunCurl(curl_args, *args, **kwargs):
     set.  For the 4xx, we don't want to retry.  We have to look at the output.
     """
     assert isinstance(exc, cros_build_lib.RunCommandError)
-    if exc.result.returncode == 22:
-      logging.debug('curl stderr %s', exc.result.stderr)
-      matched = CURL_STATUS_RE.search(exc.result.stderr)
+    if exc.returncode == 22:
+      logging.debug('curl stderr %s', exc.stderr)
+      matched = CURL_STATUS_RE.search(exc.stderr)
       if not matched:
         # Unexpected stderr.  It may not be error output from --fail.
         return True
@@ -417,9 +417,8 @@ def RunCurl(curl_args, *args, **kwargs):
         sleep=3, backoff_factor=1.6,
         stderr=True, extra_env={'LC_MESSAGES': 'C'}, *args, **kwargs)
   except cros_build_lib.RunCommandError as e:
-    if e.result.returncode in (51, 58, 60):
+    if e.returncode in (51, 58, 60):
       # These are the return codes of failing certs as per 'man curl'.
       raise DownloadError(
           'Download failed with certificate error? Try "sudo c_rehash".')
-    raise DownloadError('Curl failed w/ exit code %i: %s' %
-                        (e.result.returncode, e.result.stderr))
+    raise DownloadError(f'Curl failed w/ exit code {e.returncode}: {e.stderr}')

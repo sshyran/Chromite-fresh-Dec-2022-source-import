@@ -817,8 +817,8 @@ class TestRunCommandOutput(cros_test_lib.TempDirTestCase,
     """Tests that stderr is captured when run raises."""
     with self.assertRaises(cros_build_lib.RunCommandError) as cm:
       cros_build_lib.run(['cat', '/'], stderr=True)
-    self.assertIsNotNone(cm.exception.result.stderr)
-    self.assertNotEqual('', cm.exception.result.stderr)
+    self.assertIsNotNone(cm.exception.stderr)
+    self.assertNotEqual('', cm.exception.stderr)
 
   def _CaptureLogOutput(self, cmd, **kwargs):
     """Capture logging output of run."""

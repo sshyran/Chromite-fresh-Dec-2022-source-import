@@ -357,8 +357,7 @@ class ChromiumOSUpdater(BaseUpdater):
       if 'start/running' in result:
         logging.info('update engine was not running, so we started it.')
     except cros_build_lib.RunCommandError as e:
-      if (e.result.returncode != 1 or
-          'is already running' not in e.result.stderr):
+      if e.returncode != 1 or 'is already running' not in e.stderr:
         raise e
 
   def SetupRootfsUpdate(self):

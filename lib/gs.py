@@ -835,13 +835,13 @@ wheel: <
       return ErrorDetails(type=error_type, retriable=False)
 
     # e is guaranteed by above filter to be a RunCommandError
-    if e.result.returncode < 0:
-      sig_name = signals.StrSignal(-e.result.returncode)
+    if e.returncode < 0:
+      sig_name = signals.StrSignal(-e.returncode)
       logging.info('Child process received signal %d; not retrying.', sig_name)
       return ErrorDetails(type='received_signal', message_pattern=sig_name,
                           retriable=False)
 
-    error = e.result.stderr
+    error = e.stderr
     if error:
       # Since the captured error will use the encoding the user requested,
       # normalize to bytes for testing below.
@@ -874,11 +874,11 @@ wheel: <
       resumable_error = _FirstSubstring(error, self.RESUMABLE_ERROR_MESSAGE)
       if resumable_error:
         # Only remove the tracker files if we try to upload/download a file.
-        if 'cp' in e.result.cmd[:-2]:
+        if 'cp' in e.cmd[:-2]:
           # Assume a command: gsutil [options] cp [options] src_path dest_path
           # dest_path needs to be a fully qualified local path, which is already
           # required for GSContext.Copy().
-          tracker_filenames = self.GetTrackerFilenames(e.result.cmd[-1])
+          tracker_filenames = self.GetTrackerFilenames(e.cmd[-1])
           logging.info('Potential list of tracker files: %s',
                        tracker_filenames)
           for tracker_filename in tracker_filenames:
@@ -1317,9 +1317,8 @@ wheel: <
       # Example lines:
       # No URLs matched gs://bucket/file
       # Some more msg: No URLs matched gs://bucket/file
-      if (e.result.stderr and
-          any(x.startswith('No URLs matched')
-              for x in e.result.stderr.splitlines())):
+      if e.stderr and any(x.startswith('No URLs matched')
+                          for x in e.stderr.splitlines()):
         raise GSNoSuchKey('Stat Error: No URLs matched %s.' % path)
 
       # No idea what this is, so just choke.
