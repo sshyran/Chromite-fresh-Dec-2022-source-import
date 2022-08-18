@@ -295,7 +295,7 @@ def get_parser() -> commandline.ArgumentParser:
   # In local dev env cases, compiler_proxy is expected to keep running.
   # In such a case;
   #   $ python ${GOMA_DIR}/goma_ctl.py ensure_start
-  #   $ ./build_packages (... and options without --run-goma ...)
+  #   $ build_packages (... and options without --run-goma ...)
   # is an expected commandline sequence. If you set --run-goma flag while
   # compiler_proxy is already running, the existing compiler_proxy will be
   # stopped.
