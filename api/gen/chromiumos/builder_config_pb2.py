@@ -22,7 +22,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumos',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1f\x63hromiumos/builder_config.proto\x12\nchromiumos\x1a\x17\x63hromiumos/common.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/wrappers.proto\"\xb9+\n\rBuilderConfig\x12(\n\x02id\x18\x01 \x01(\x0b\x32\x1c.chromiumos.BuilderConfig.Id\x12\x32\n\x07general\x18\x02 \x01(\x0b\x32!.chromiumos.BuilderConfig.General\x12<\n\x0corchestrator\x18\x03 \x01(\x0b\x32&.chromiumos.BuilderConfig.Orchestrator\x12\x36\n\tartifacts\x18\x04 \x01(\x0b\x32#.chromiumos.BuilderConfig.Artifacts\x12\x30\n\x06\x63hrome\x18\x05 \x01(\x0b\x32 .chromiumos.BuilderConfig.Chrome\x12.\n\x05\x62uild\x18\x06 \x01(\x0b\x32\x1f.chromiumos.BuilderConfig.Build\x12\x37\n\nunit_tests\x18\x07 \x01(\x0b\x32#.chromiumos.BuilderConfig.UnitTests\x1a\xc2\x01\n\x02Id\x12\x0c\n\x04name\x18\x01 \x01(\t\x12/\n\x04type\x18\x03 \x01(\x0e\x32!.chromiumos.BuilderConfig.Id.Type\"o\n\x04Type\x12\x14\n\x10TYPE_UNSPECIFIED\x10\x00\x12\x06\n\x02\x43Q\x10\x01\x12\x0e\n\nPOSTSUBMIT\x10\x02\x12\r\n\tTOOLCHAIN\x10\x03\x12\x11\n\rINFORMATIONAL\x10\x04\x12\x0b\n\x07RELEASE\x10\x05\x12\n\n\x06PUBLIC\x10\x06J\x04\x08\x02\x10\x03R\x06\x62ranch\x1a\xd6\x05\n\x07General\x12,\n\x08\x63ritical\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.BoolValue\x12\x42\n\x0b\x65nvironment\x18\x02 \x01(\x0e\x32-.chromiumos.BuilderConfig.General.Environment\x12;\n\x08run_when\x18\x03 \x01(\x0b\x32).chromiumos.BuilderConfig.General.RunWhen\x12\x31\n\rbroken_before\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x19\n\x11sdk_cache_version\x18\x05 \x01(\x05\x12\x10\n\x08unibuild\x18\x06 \x01(\x08\x12<\n\x08manifest\x18\x07 \x01(\x0e\x32*.chromiumos.BuilderConfig.General.Manifest\x12\x31\n\x11\x66irmware_location\x18\x08 \x01(\x0e\x32\x16.chromiumos.FwLocation\x1a\xc2\x01\n\x07RunWhen\x12<\n\x04mode\x18\x01 \x01(\x0e\x32..chromiumos.BuilderConfig.General.RunWhen.Mode\x12\x15\n\rfile_patterns\x18\x02 \x03(\t\"b\n\x04Mode\x12\x14\n\x10MODE_UNSPECIFIED\x10\x00\x12\x0e\n\nALWAYS_RUN\x10\x01\x12\x1a\n\x16ONLY_RUN_ON_FILE_MATCH\x10\x02\x12\x18\n\x14NO_RUN_ON_FILE_MATCH\x10\x03\"G\n\x0b\x45nvironment\x12\x1b\n\x17\x45NVIRONMENT_UNSPECIFIED\x10\x00\x12\x0e\n\nPRODUCTION\x10\x01\x12\x0b\n\x07STAGING\x10\x02\"=\n\x08Manifest\x12\x18\n\x14MANIFEST_UNSPECIFIED\x10\x00\x12\n\n\x06PUBLIC\x10\x01\x12\x0b\n\x07PRIVATE\x10\x02\x1a\xe2\x04\n\x0cOrchestrator\x12\x45\n\x0b\x63hild_specs\x18\x05 \x03(\x0b\x32\x30.chromiumos.BuilderConfig.Orchestrator.ChildSpec\x12\x31\n\x0egitiles_commit\x18\x02 \x01(\x0b\x32\x19.chromiumos.GitilesCommit\x12\x30\n\x0egerrit_changes\x18\x03 \x03(\x0b\x32\x18.chromiumos.GerritChange\x12[\n\x16\x66ollow_on_orchestrator\x18\x04 \x01(\x0b\x32;.chromiumos.BuilderConfig.Orchestrator.FollowOnOrchestrator\x12\x1e\n\x16require_stable_devices\x18\x06 \x01(\x08\x1a\xe2\x01\n\tChildSpec\x12\x0c\n\x04name\x18\x01 \x01(\t\x12Z\n\x10\x63ollect_handling\x18\x02 \x01(\x0e\x32@.chromiumos.BuilderConfig.Orchestrator.ChildSpec.CollectHandling\"k\n\x0f\x43ollectHandling\x12 \n\x1c\x43OLLECT_HANDLING_UNSPECIFIED\x10\x00\x12\x0b\n\x07\x43OLLECT\x10\x01\x12\x0e\n\nNO_COLLECT\x10\x02\x12\x19\n\x15\x43OLLECT_AFTER_HW_TEST\x10\x03\x1a>\n\x14\x46ollowOnOrchestrator\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x18\n\x10\x61wait_completion\x18\x02 \x01(\x08J\x04\x08\x01\x10\x02\x1a\xec\x0f\n\tArtifacts\x12@\n\tprebuilts\x18\x01 \x01(\x0e\x32-.chromiumos.BuilderConfig.Artifacts.Prebuilts\x12I\n\x0e\x61rtifact_types\x18\x02 \x03(\x0e\x32\x31.chromiumos.BuilderConfig.Artifacts.ArtifactTypes\x12\x1b\n\x13prebuilts_gs_bucket\x18\x03 \x01(\t\x12\x1b\n\x13\x61rtifacts_gs_bucket\x18\x04 \x01(\t\x12J\n\x11publish_artifacts\x18\x05 \x03(\x0b\x32/.chromiumos.BuilderConfig.Artifacts.PublishInfo\x12N\n\x0finput_artifacts\x18\x06 \x03(\x0b\x32\x35.chromiumos.BuilderConfig.Artifacts.InputArtifactInfo\x12>\n\x15\x61rtifact_profile_info\x18\x07 \x01(\x0b\x32\x1f.chromiumos.ArtifactProfileInfo\x12\x36\n\x0e\x61rtifacts_info\x18\x08 \x01(\x0b\x32\x1e.chromiumos.ArtifactsByService\x1a\x8c\x01\n\x0bPublishInfo\x12H\n\rpublish_types\x18\x02 \x03(\x0e\x32\x31.chromiumos.BuilderConfig.Artifacts.ArtifactTypes\x12\x1b\n\x13publish_gs_location\x18\x03 \x01(\t\x12\x10\n\x08\x61\x63l_name\x18\x04 \x01(\tJ\x04\x08\x01\x10\x02\x1a\x88\x01\n\x11InputArtifactInfo\x12N\n\x13input_artifact_type\x18\x01 \x01(\x0e\x32\x31.chromiumos.BuilderConfig.Artifacts.ArtifactTypes\x12#\n\x1binput_artifact_gs_locations\x18\x02 \x03(\t\"I\n\tPrebuilts\x12\x19\n\x15PREBUILTS_UNSPECIFIED\x10\x00\x12\n\n\x06PUBLIC\x10\x01\x12\x0b\n\x07PRIVATE\x10\x02\x12\x08\n\x04NONE\x10\x03\"\x9e\t\n\rArtifactTypes\x12\x1e\n\x1a\x41RTIFACT_TYPES_UNSPECIFIED\x10\x00\x12\r\n\tIMAGE_ZIP\x10\x01\x12\x17\n\x13TEST_UPDATE_PAYLOAD\x10\x02\x12\x12\n\x0e\x41UTOTEST_FILES\x10\x03\x12\x0e\n\nTAST_FILES\x10\x04\x12\x17\n\x13PINNED_GUEST_IMAGES\x10\x05\x12\x0c\n\x08\x46IRMWARE\x10\x06\x12\x0f\n\x0b\x45\x42UILD_LOGS\x10\x07\x12\x13\n\x0f\x43HROMEOS_CONFIG\x10\x08\x12\x0e\n\nCPE_REPORT\x10\t\x12\x12\n\x0eIMAGE_ARCHIVES\x10\n\x12$\n UNVERIFIED_CHROME_LLVM_ORDERFILE\x10\x0b\x12\"\n\x1eVERIFIED_CHROME_LLVM_ORDERFILE\x10\x0c\x12\x1e\n\x1a\x43HROME_CLANG_WARNINGS_FILE\x10\r\x12\x1c\n\x18UNVERIFIED_LLVM_PGO_FILE\x10\x0e\x12)\n%UNVERIFIED_CHROME_BENCHMARK_AFDO_FILE\x10\x0f\x12\'\n#VERIFIED_CHROME_BENCHMARK_AFDO_FILE\x10\x10\x12!\n\x1dVERIFIED_KERNEL_CWP_AFDO_FILE\x10\x11\x12#\n\x1fUNVERIFIED_KERNEL_CWP_AFDO_FILE\x10\x12\x12#\n\x1fUNVERIFIED_CHROME_CWP_AFDO_FILE\x10\x13\x12!\n\x1dVERIFIED_CHROME_CWP_AFDO_FILE\x10\x14\x12\x1e\n\x1aVERIFIED_RELEASE_AFDO_FILE\x10\x15\x12)\n%UNVERIFIED_CHROME_BENCHMARK_PERF_FILE\x10\x16\x12\x17\n\x13\x43HROME_DEBUG_BINARY\x10\x17\x12\x1a\n\x16TOOLCHAIN_WARNING_LOGS\x10\x18\x12)\n%CHROME_AFDO_PROFILE_FOR_ANDROID_LINUX\x10\x19\x12\x19\n\x15\x43LANG_CRASH_DIAGNOSES\x10\x1a\x12\x13\n\x0f\x46PMCU_UNITTESTS\x10\x1b\x12\x0f\n\x0bGCE_TARBALL\x10\x1c\x12\x17\n\x13\x43OMPILER_RUSAGE_LOG\x10\x1d\x12\x14\n\x10\x46IRMWARE_TARBALL\x10\x1e\x12\x19\n\x15\x46IRMWARE_TARBALL_INFO\x10\x1f\x12\x11\n\rDEBUG_SYMBOLS\x10 \x12\x11\n\rFIRMWARE_LCOV\x10!\x12\r\n\tDLC_IMAGE\x10\"\x12\x1a\n\x16\x42REAKPAD_DEBUG_SYMBOLS\x10#\x12\x12\n\x0e\x42UILD_MANIFEST\x10$\x12\x0e\n\nUNIT_TESTS\x10%\x12\x13\n\x0fLICENSE_CREDITS\x10&\x12\x1b\n\x17\x43ODE_COVERAGE_LLVM_JSON\x10\'\x12\x19\n\x15SIMPLE_CHROME_SYSROOT\x10(\x12\x15\n\x11\x43HROME_EBUILD_ENV\x10)\x12\n\n\x06HWQUAL\x10*\x12\x11\n\rFACTORY_IMAGE\x10+\x12\x16\n\x12\x43ODE_COVERAGE_HTML\x10,\x1a\x1a\n\x06\x43hrome\x12\x10\n\x08internal\x18\x01 \x01(\x08\x1a\xe1\x08\n\x05\x42uild\x12&\n\tuse_flags\x18\x01 \x03(\x0b\x32\x13.chromiumos.UseFlag\x12G\n\x0fportage_profile\x18\x02 \x01(\x0b\x32..chromiumos.BuilderConfig.Build.PortageProfile\x12\x1c\n\x14\x61pply_gerrit_changes\x18\x06 \x01(\x08\x12J\n\x11prepare_for_build\x18\x11 \x01(\x0b\x32/.chromiumos.BuilderConfig.Build.PrepareForBuild\x12=\n\nsdk_update\x18\x0c \x01(\x0b\x32).chromiumos.BuilderConfig.Build.SdkUpdate\x12K\n\x11install_toolchain\x18\r \x01(\x0b\x32\x30.chromiumos.BuilderConfig.Build.InstallToolchain\x12I\n\x10install_packages\x18\x10 \x01(\x0b\x32/.chromiumos.BuilderConfig.Build.InstallPackages\x12\x41\n\x0c\x62uild_images\x18\x0f \x01(\x0b\x32+.chromiumos.BuilderConfig.Build.BuildImages\x1a!\n\x0ePortageProfile\x12\x0f\n\x07profile\x18\x01 \x01(\t\x1aU\n\x0fPrepareForBuild\x12\x42\n\x0f\x61\x64\x64itional_args\x18\x01 \x01(\x0b\x32).chromiumos.PrepareForBuildAdditionalArgs\x1a#\n\tSdkUpdate\x12\x16\n\x0e\x63ompile_source\x18\x01 \x01(\x08\x1a*\n\x10InstallToolchain\x12\x16\n\x0e\x63ompile_source\x18\x01 \x01(\x08\x1a\xf5\x01\n\x0fInstallPackages\x12\x16\n\x0e\x63ompile_source\x18\x01 \x01(\x08\x12\x33\n\x08run_spec\x18\x02 \x01(\x0e\x32!.chromiumos.BuilderConfig.RunSpec\x12)\n\x08packages\x18\x03 \x03(\x0b\x32\x17.chromiumos.PackageInfo\x12\x14\n\x0c\x64isable_goma\x18\x04 \x01(\x08\x12\x16\n\x0euse_remoteexec\x18\x06 \x01(\x08\x12<\n\x0c\x64\x65pendencies\x18\x05 \x01(\x0e\x32&.chromiumos.BuilderConfig.Dependencies\x1a\x8d\x01\n\x0b\x42uildImages\x12*\n\x0bimage_types\x18\x01 \x03(\x0e\x32\x15.chromiumos.ImageType\x12#\n\x1b\x64isable_rootfs_verification\x18\x02 \x01(\x08\x12\x13\n\x0b\x64isk_layout\x18\x03 \x01(\t\x12\x18\n\x10\x62\x61se_is_recovery\x18\x04 \x01(\x08J\x04\x08\x03\x10\x06J\x04\x08\x07\x10\x0cJ\x04\x08\x0e\x10\x0f\x1a\x9c\x02\n\tUnitTests\x12;\n\x10\x65\x62uilds_run_spec\x18\x05 \x01(\x0e\x32!.chromiumos.BuilderConfig.RunSpec\x12\x15\n\rempty_sysroot\x18\x06 \x01(\x08\x12)\n\x08packages\x18\x07 \x03(\x0b\x32\x17.chromiumos.PackageInfo\x12<\n\x0c\x64\x65pendencies\x18\x08 \x01(\x0e\x32&.chromiumos.BuilderConfig.Dependencies\x12\x32\n\x11package_blocklist\x18\t \x03(\x0b\x32\x17.chromiumos.PackageInfo\x12\x18\n\x10skip_image_tests\x18\n \x01(\x08J\x04\x08\x04\x10\x05\"F\n\x07RunSpec\x12\x18\n\x14RUN_SPEC_UNSPECIFIED\x10\x00\x12\n\n\x06NO_RUN\x10\x01\x12\x07\n\x03RUN\x10\x02\x12\x0c\n\x08RUN_EXIT\x10\x03\"`\n\x0c\x44\x65pendencies\x12\x1c\n\x18\x44\x45PENDENCIES_UNSPECIFIED\x10\x00\x12\x14\n\x10\x41LL_DEPENDENCIES\x10\x01\x12\x1c\n\x18\x43L_AFFECTED_DEPENDENCIES\x10\x02\"D\n\x0e\x42uilderConfigs\x12\x32\n\x0f\x62uilder_configs\x18\x01 \x03(\x0b\x32\x19.chromiumos.BuilderConfigBY\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumosb\x06proto3'
+  serialized_pb=b'\n\x1f\x63hromiumos/builder_config.proto\x12\nchromiumos\x1a\x17\x63hromiumos/common.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/wrappers.proto\"\xf8+\n\rBuilderConfig\x12(\n\x02id\x18\x01 \x01(\x0b\x32\x1c.chromiumos.BuilderConfig.Id\x12\x32\n\x07general\x18\x02 \x01(\x0b\x32!.chromiumos.BuilderConfig.General\x12<\n\x0corchestrator\x18\x03 \x01(\x0b\x32&.chromiumos.BuilderConfig.Orchestrator\x12\x36\n\tartifacts\x18\x04 \x01(\x0b\x32#.chromiumos.BuilderConfig.Artifacts\x12\x30\n\x06\x63hrome\x18\x05 \x01(\x0b\x32 .chromiumos.BuilderConfig.Chrome\x12.\n\x05\x62uild\x18\x06 \x01(\x0b\x32\x1f.chromiumos.BuilderConfig.Build\x12\x37\n\nunit_tests\x18\x07 \x01(\x0b\x32#.chromiumos.BuilderConfig.UnitTests\x1a\xc2\x01\n\x02Id\x12\x0c\n\x04name\x18\x01 \x01(\t\x12/\n\x04type\x18\x03 \x01(\x0e\x32!.chromiumos.BuilderConfig.Id.Type\"o\n\x04Type\x12\x14\n\x10TYPE_UNSPECIFIED\x10\x00\x12\x06\n\x02\x43Q\x10\x01\x12\x0e\n\nPOSTSUBMIT\x10\x02\x12\r\n\tTOOLCHAIN\x10\x03\x12\x11\n\rINFORMATIONAL\x10\x04\x12\x0b\n\x07RELEASE\x10\x05\x12\n\n\x06PUBLIC\x10\x06J\x04\x08\x02\x10\x03R\x06\x62ranch\x1a\xd6\x05\n\x07General\x12,\n\x08\x63ritical\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.BoolValue\x12\x42\n\x0b\x65nvironment\x18\x02 \x01(\x0e\x32-.chromiumos.BuilderConfig.General.Environment\x12;\n\x08run_when\x18\x03 \x01(\x0b\x32).chromiumos.BuilderConfig.General.RunWhen\x12\x31\n\rbroken_before\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x19\n\x11sdk_cache_version\x18\x05 \x01(\x05\x12\x10\n\x08unibuild\x18\x06 \x01(\x08\x12<\n\x08manifest\x18\x07 \x01(\x0e\x32*.chromiumos.BuilderConfig.General.Manifest\x12\x31\n\x11\x66irmware_location\x18\x08 \x01(\x0e\x32\x16.chromiumos.FwLocation\x1a\xc2\x01\n\x07RunWhen\x12<\n\x04mode\x18\x01 \x01(\x0e\x32..chromiumos.BuilderConfig.General.RunWhen.Mode\x12\x15\n\rfile_patterns\x18\x02 \x03(\t\"b\n\x04Mode\x12\x14\n\x10MODE_UNSPECIFIED\x10\x00\x12\x0e\n\nALWAYS_RUN\x10\x01\x12\x1a\n\x16ONLY_RUN_ON_FILE_MATCH\x10\x02\x12\x18\n\x14NO_RUN_ON_FILE_MATCH\x10\x03\"G\n\x0b\x45nvironment\x12\x1b\n\x17\x45NVIRONMENT_UNSPECIFIED\x10\x00\x12\x0e\n\nPRODUCTION\x10\x01\x12\x0b\n\x07STAGING\x10\x02\"=\n\x08Manifest\x12\x18\n\x14MANIFEST_UNSPECIFIED\x10\x00\x12\n\n\x06PUBLIC\x10\x01\x12\x0b\n\x07PRIVATE\x10\x02\x1a\xe2\x04\n\x0cOrchestrator\x12\x45\n\x0b\x63hild_specs\x18\x05 \x03(\x0b\x32\x30.chromiumos.BuilderConfig.Orchestrator.ChildSpec\x12\x31\n\x0egitiles_commit\x18\x02 \x01(\x0b\x32\x19.chromiumos.GitilesCommit\x12\x30\n\x0egerrit_changes\x18\x03 \x03(\x0b\x32\x18.chromiumos.GerritChange\x12[\n\x16\x66ollow_on_orchestrator\x18\x04 \x01(\x0b\x32;.chromiumos.BuilderConfig.Orchestrator.FollowOnOrchestrator\x12\x1e\n\x16require_stable_devices\x18\x06 \x01(\x08\x1a\xe2\x01\n\tChildSpec\x12\x0c\n\x04name\x18\x01 \x01(\t\x12Z\n\x10\x63ollect_handling\x18\x02 \x01(\x0e\x32@.chromiumos.BuilderConfig.Orchestrator.ChildSpec.CollectHandling\"k\n\x0f\x43ollectHandling\x12 \n\x1c\x43OLLECT_HANDLING_UNSPECIFIED\x10\x00\x12\x0b\n\x07\x43OLLECT\x10\x01\x12\x0e\n\nNO_COLLECT\x10\x02\x12\x19\n\x15\x43OLLECT_AFTER_HW_TEST\x10\x03\x1a>\n\x14\x46ollowOnOrchestrator\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x18\n\x10\x61wait_completion\x18\x02 \x01(\x08J\x04\x08\x01\x10\x02\x1a\xab\x10\n\tArtifacts\x12@\n\tprebuilts\x18\x01 \x01(\x0e\x32-.chromiumos.BuilderConfig.Artifacts.Prebuilts\x12I\n\x0e\x61rtifact_types\x18\x02 \x03(\x0e\x32\x31.chromiumos.BuilderConfig.Artifacts.ArtifactTypes\x12\x1b\n\x13prebuilts_gs_bucket\x18\x03 \x01(\t\x12\x1b\n\x13\x61rtifacts_gs_bucket\x18\x04 \x01(\t\x12J\n\x11publish_artifacts\x18\x05 \x03(\x0b\x32/.chromiumos.BuilderConfig.Artifacts.PublishInfo\x12N\n\x0finput_artifacts\x18\x06 \x03(\x0b\x32\x35.chromiumos.BuilderConfig.Artifacts.InputArtifactInfo\x12>\n\x15\x61rtifact_profile_info\x18\x07 \x01(\x0b\x32\x1f.chromiumos.ArtifactProfileInfo\x12\x36\n\x0e\x61rtifacts_info\x18\x08 \x01(\x0b\x32\x1e.chromiumos.ArtifactsByService\x12&\n\x1e\x64\x65vinstall_prebuilts_gs_bucket\x18\t \x01(\t\x1a\x8c\x01\n\x0bPublishInfo\x12H\n\rpublish_types\x18\x02 \x03(\x0e\x32\x31.chromiumos.BuilderConfig.Artifacts.ArtifactTypes\x12\x1b\n\x13publish_gs_location\x18\x03 \x01(\t\x12\x10\n\x08\x61\x63l_name\x18\x04 \x01(\tJ\x04\x08\x01\x10\x02\x1a\x88\x01\n\x11InputArtifactInfo\x12N\n\x13input_artifact_type\x18\x01 \x01(\x0e\x32\x31.chromiumos.BuilderConfig.Artifacts.ArtifactTypes\x12#\n\x1binput_artifact_gs_locations\x18\x02 \x03(\t\"I\n\tPrebuilts\x12\x19\n\x15PREBUILTS_UNSPECIFIED\x10\x00\x12\n\n\x06PUBLIC\x10\x01\x12\x0b\n\x07PRIVATE\x10\x02\x12\x08\n\x04NONE\x10\x03\"\xb5\t\n\rArtifactTypes\x12\x1e\n\x1a\x41RTIFACT_TYPES_UNSPECIFIED\x10\x00\x12\r\n\tIMAGE_ZIP\x10\x01\x12\x17\n\x13TEST_UPDATE_PAYLOAD\x10\x02\x12\x12\n\x0e\x41UTOTEST_FILES\x10\x03\x12\x0e\n\nTAST_FILES\x10\x04\x12\x17\n\x13PINNED_GUEST_IMAGES\x10\x05\x12\x0c\n\x08\x46IRMWARE\x10\x06\x12\x0f\n\x0b\x45\x42UILD_LOGS\x10\x07\x12\x13\n\x0f\x43HROMEOS_CONFIG\x10\x08\x12\x0e\n\nCPE_REPORT\x10\t\x12\x12\n\x0eIMAGE_ARCHIVES\x10\n\x12$\n UNVERIFIED_CHROME_LLVM_ORDERFILE\x10\x0b\x12\"\n\x1eVERIFIED_CHROME_LLVM_ORDERFILE\x10\x0c\x12\x1e\n\x1a\x43HROME_CLANG_WARNINGS_FILE\x10\r\x12\x1c\n\x18UNVERIFIED_LLVM_PGO_FILE\x10\x0e\x12)\n%UNVERIFIED_CHROME_BENCHMARK_AFDO_FILE\x10\x0f\x12\'\n#VERIFIED_CHROME_BENCHMARK_AFDO_FILE\x10\x10\x12!\n\x1dVERIFIED_KERNEL_CWP_AFDO_FILE\x10\x11\x12#\n\x1fUNVERIFIED_KERNEL_CWP_AFDO_FILE\x10\x12\x12#\n\x1fUNVERIFIED_CHROME_CWP_AFDO_FILE\x10\x13\x12!\n\x1dVERIFIED_CHROME_CWP_AFDO_FILE\x10\x14\x12\x1e\n\x1aVERIFIED_RELEASE_AFDO_FILE\x10\x15\x12)\n%UNVERIFIED_CHROME_BENCHMARK_PERF_FILE\x10\x16\x12\x17\n\x13\x43HROME_DEBUG_BINARY\x10\x17\x12\x1a\n\x16TOOLCHAIN_WARNING_LOGS\x10\x18\x12)\n%CHROME_AFDO_PROFILE_FOR_ANDROID_LINUX\x10\x19\x12\x19\n\x15\x43LANG_CRASH_DIAGNOSES\x10\x1a\x12\x13\n\x0f\x46PMCU_UNITTESTS\x10\x1b\x12\x0f\n\x0bGCE_TARBALL\x10\x1c\x12\x17\n\x13\x43OMPILER_RUSAGE_LOG\x10\x1d\x12\x14\n\x10\x46IRMWARE_TARBALL\x10\x1e\x12\x19\n\x15\x46IRMWARE_TARBALL_INFO\x10\x1f\x12\x11\n\rDEBUG_SYMBOLS\x10 \x12\x11\n\rFIRMWARE_LCOV\x10!\x12\r\n\tDLC_IMAGE\x10\"\x12\x1a\n\x16\x42REAKPAD_DEBUG_SYMBOLS\x10#\x12\x12\n\x0e\x42UILD_MANIFEST\x10$\x12\x0e\n\nUNIT_TESTS\x10%\x12\x13\n\x0fLICENSE_CREDITS\x10&\x12\x1b\n\x17\x43ODE_COVERAGE_LLVM_JSON\x10\'\x12\x19\n\x15SIMPLE_CHROME_SYSROOT\x10(\x12\x15\n\x11\x43HROME_EBUILD_ENV\x10)\x12\n\n\x06HWQUAL\x10*\x12\x11\n\rFACTORY_IMAGE\x10+\x12\x16\n\x12\x43ODE_COVERAGE_HTML\x10,\x12\x15\n\x11STRIPPED_PACKAGES\x10-\x1a\x1a\n\x06\x43hrome\x12\x10\n\x08internal\x18\x01 \x01(\x08\x1a\xe1\x08\n\x05\x42uild\x12&\n\tuse_flags\x18\x01 \x03(\x0b\x32\x13.chromiumos.UseFlag\x12G\n\x0fportage_profile\x18\x02 \x01(\x0b\x32..chromiumos.BuilderConfig.Build.PortageProfile\x12\x1c\n\x14\x61pply_gerrit_changes\x18\x06 \x01(\x08\x12J\n\x11prepare_for_build\x18\x11 \x01(\x0b\x32/.chromiumos.BuilderConfig.Build.PrepareForBuild\x12=\n\nsdk_update\x18\x0c \x01(\x0b\x32).chromiumos.BuilderConfig.Build.SdkUpdate\x12K\n\x11install_toolchain\x18\r \x01(\x0b\x32\x30.chromiumos.BuilderConfig.Build.InstallToolchain\x12I\n\x10install_packages\x18\x10 \x01(\x0b\x32/.chromiumos.BuilderConfig.Build.InstallPackages\x12\x41\n\x0c\x62uild_images\x18\x0f \x01(\x0b\x32+.chromiumos.BuilderConfig.Build.BuildImages\x1a!\n\x0ePortageProfile\x12\x0f\n\x07profile\x18\x01 \x01(\t\x1aU\n\x0fPrepareForBuild\x12\x42\n\x0f\x61\x64\x64itional_args\x18\x01 \x01(\x0b\x32).chromiumos.PrepareForBuildAdditionalArgs\x1a#\n\tSdkUpdate\x12\x16\n\x0e\x63ompile_source\x18\x01 \x01(\x08\x1a*\n\x10InstallToolchain\x12\x16\n\x0e\x63ompile_source\x18\x01 \x01(\x08\x1a\xf5\x01\n\x0fInstallPackages\x12\x16\n\x0e\x63ompile_source\x18\x01 \x01(\x08\x12\x33\n\x08run_spec\x18\x02 \x01(\x0e\x32!.chromiumos.BuilderConfig.RunSpec\x12)\n\x08packages\x18\x03 \x03(\x0b\x32\x17.chromiumos.PackageInfo\x12\x14\n\x0c\x64isable_goma\x18\x04 \x01(\x08\x12\x16\n\x0euse_remoteexec\x18\x06 \x01(\x08\x12<\n\x0c\x64\x65pendencies\x18\x05 \x01(\x0e\x32&.chromiumos.BuilderConfig.Dependencies\x1a\x8d\x01\n\x0b\x42uildImages\x12*\n\x0bimage_types\x18\x01 \x03(\x0e\x32\x15.chromiumos.ImageType\x12#\n\x1b\x64isable_rootfs_verification\x18\x02 \x01(\x08\x12\x13\n\x0b\x64isk_layout\x18\x03 \x01(\t\x12\x18\n\x10\x62\x61se_is_recovery\x18\x04 \x01(\x08J\x04\x08\x03\x10\x06J\x04\x08\x07\x10\x0cJ\x04\x08\x0e\x10\x0f\x1a\x9c\x02\n\tUnitTests\x12;\n\x10\x65\x62uilds_run_spec\x18\x05 \x01(\x0e\x32!.chromiumos.BuilderConfig.RunSpec\x12\x15\n\rempty_sysroot\x18\x06 \x01(\x08\x12)\n\x08packages\x18\x07 \x03(\x0b\x32\x17.chromiumos.PackageInfo\x12<\n\x0c\x64\x65pendencies\x18\x08 \x01(\x0e\x32&.chromiumos.BuilderConfig.Dependencies\x12\x32\n\x11package_blocklist\x18\t \x03(\x0b\x32\x17.chromiumos.PackageInfo\x12\x18\n\x10skip_image_tests\x18\n \x01(\x08J\x04\x08\x04\x10\x05\"F\n\x07RunSpec\x12\x18\n\x14RUN_SPEC_UNSPECIFIED\x10\x00\x12\n\n\x06NO_RUN\x10\x01\x12\x07\n\x03RUN\x10\x02\x12\x0c\n\x08RUN_EXIT\x10\x03\"`\n\x0c\x44\x65pendencies\x12\x1c\n\x18\x44\x45PENDENCIES_UNSPECIFIED\x10\x00\x12\x14\n\x10\x41LL_DEPENDENCIES\x10\x01\x12\x1c\n\x18\x43L_AFFECTED_DEPENDENCIES\x10\x02\"D\n\x0e\x42uilderConfigs\x12\x32\n\x0f\x62uilder_configs\x18\x01 \x03(\x0b\x32\x19.chromiumos.BuilderConfigBY\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumosb\x06proto3'
   ,
   dependencies=[chromiumos_dot_common__pb2.DESCRIPTOR,google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,google_dot_protobuf_dot_wrappers__pb2.DESCRIPTOR,])
 
@@ -238,8 +238,8 @@ _BUILDERCONFIG_ARTIFACTS_PREBUILTS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2832,
-  serialized_end=2905,
+  serialized_start=2872,
+  serialized_end=2945,
 )
 _sym_db.RegisterEnumDescriptor(_BUILDERCONFIG_ARTIFACTS_PREBUILTS)
 
@@ -475,11 +475,16 @@ _BUILDERCONFIG_ARTIFACTS_ARTIFACTTYPES = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None,
       create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='STRIPPED_PACKAGES', index=45, number=45,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2908,
-  serialized_end=4090,
+  serialized_start=2948,
+  serialized_end=4153,
 )
 _sym_db.RegisterEnumDescriptor(_BUILDERCONFIG_ARTIFACTS_ARTIFACTTYPES)
 
@@ -513,8 +518,8 @@ _BUILDERCONFIG_RUNSPEC = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=5531,
-  serialized_end=5601,
+  serialized_start=5594,
+  serialized_end=5664,
 )
 _sym_db.RegisterEnumDescriptor(_BUILDERCONFIG_RUNSPEC)
 
@@ -543,8 +548,8 @@ _BUILDERCONFIG_DEPENDENCIES = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=5603,
-  serialized_end=5699,
+  serialized_start=5666,
+  serialized_end=5762,
 )
 _sym_db.RegisterEnumDescriptor(_BUILDERCONFIG_DEPENDENCIES)
 
@@ -886,8 +891,8 @@ _BUILDERCONFIG_ARTIFACTS_PUBLISHINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2551,
-  serialized_end=2691,
+  serialized_start=2591,
+  serialized_end=2731,
 )
 
 _BUILDERCONFIG_ARTIFACTS_INPUTARTIFACTINFO = _descriptor.Descriptor(
@@ -924,8 +929,8 @@ _BUILDERCONFIG_ARTIFACTS_INPUTARTIFACTINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2694,
-  serialized_end=2830,
+  serialized_start=2734,
+  serialized_end=2870,
 )
 
 _BUILDERCONFIG_ARTIFACTS = _descriptor.Descriptor(
@@ -992,6 +997,13 @@ _BUILDERCONFIG_ARTIFACTS = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='devinstall_prebuilts_gs_bucket', full_name='chromiumos.BuilderConfig.Artifacts.devinstall_prebuilts_gs_bucket', index=8,
+      number=9, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -1007,7 +1019,7 @@ _BUILDERCONFIG_ARTIFACTS = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=2062,
-  serialized_end=4090,
+  serialized_end=4153,
 )
 
 _BUILDERCONFIG_CHROME = _descriptor.Descriptor(
@@ -1037,8 +1049,8 @@ _BUILDERCONFIG_CHROME = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4092,
-  serialized_end=4118,
+  serialized_start=4155,
+  serialized_end=4181,
 )
 
 _BUILDERCONFIG_BUILD_PORTAGEPROFILE = _descriptor.Descriptor(
@@ -1068,8 +1080,8 @@ _BUILDERCONFIG_BUILD_PORTAGEPROFILE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4631,
-  serialized_end=4664,
+  serialized_start=4694,
+  serialized_end=4727,
 )
 
 _BUILDERCONFIG_BUILD_PREPAREFORBUILD = _descriptor.Descriptor(
@@ -1099,8 +1111,8 @@ _BUILDERCONFIG_BUILD_PREPAREFORBUILD = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4666,
-  serialized_end=4751,
+  serialized_start=4729,
+  serialized_end=4814,
 )
 
 _BUILDERCONFIG_BUILD_SDKUPDATE = _descriptor.Descriptor(
@@ -1130,8 +1142,8 @@ _BUILDERCONFIG_BUILD_SDKUPDATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4753,
-  serialized_end=4788,
+  serialized_start=4816,
+  serialized_end=4851,
 )
 
 _BUILDERCONFIG_BUILD_INSTALLTOOLCHAIN = _descriptor.Descriptor(
@@ -1161,8 +1173,8 @@ _BUILDERCONFIG_BUILD_INSTALLTOOLCHAIN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4790,
-  serialized_end=4832,
+  serialized_start=4853,
+  serialized_end=4895,
 )
 
 _BUILDERCONFIG_BUILD_INSTALLPACKAGES = _descriptor.Descriptor(
@@ -1227,8 +1239,8 @@ _BUILDERCONFIG_BUILD_INSTALLPACKAGES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4835,
-  serialized_end=5080,
+  serialized_start=4898,
+  serialized_end=5143,
 )
 
 _BUILDERCONFIG_BUILD_BUILDIMAGES = _descriptor.Descriptor(
@@ -1279,8 +1291,8 @@ _BUILDERCONFIG_BUILD_BUILDIMAGES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5083,
-  serialized_end=5224,
+  serialized_start=5146,
+  serialized_end=5287,
 )
 
 _BUILDERCONFIG_BUILD = _descriptor.Descriptor(
@@ -1359,8 +1371,8 @@ _BUILDERCONFIG_BUILD = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4121,
-  serialized_end=5242,
+  serialized_start=4184,
+  serialized_end=5305,
 )
 
 _BUILDERCONFIG_UNITTESTS = _descriptor.Descriptor(
@@ -1425,8 +1437,8 @@ _BUILDERCONFIG_UNITTESTS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5245,
-  serialized_end=5529,
+  serialized_start=5308,
+  serialized_end=5592,
 )
 
 _BUILDERCONFIG = _descriptor.Descriptor(
@@ -1501,7 +1513,7 @@ _BUILDERCONFIG = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=138,
-  serialized_end=5699,
+  serialized_end=5762,
 )
 
 
@@ -1532,8 +1544,8 @@ _BUILDERCONFIGS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5701,
-  serialized_end=5769,
+  serialized_start=5764,
+  serialized_end=5832,
 )
 
 _BUILDERCONFIG_ID.fields_by_name['type'].enum_type = _BUILDERCONFIG_ID_TYPE
