@@ -591,8 +591,10 @@ def Build(buildroot,
       reverse dependency calculation step.
   """
   cmd = [
-      './build_packages',
-      '--board=%s' % board, '--accept_licenses=@CHROMEOS', '--withdebugsymbols'
+      'build_packages',
+      '--board=%s' % board,
+      '--accept_licenses=@CHROMEOS',
+      '--withdebugsymbols',
   ]
 
   if not build_autotest:
@@ -836,8 +838,11 @@ def BuildImage(buildroot,
   builder_path_str = '--builder_path=%s' % (builder_path or '')
 
   cmd = [
-      './build_image',
-      '--board=%s' % board, '--replace', version_str, builder_path_str
+      'build_image',
+      '--board=%s' % board,
+      '--replace',
+      version_str,
+      builder_path_str,
   ]
 
   if not rootfs_verification:
@@ -2756,9 +2761,13 @@ def BuildFactoryInstallImage(buildroot, board, extra_env):
   # output directory from our regular image and the factory test image.
   alias = _FACTORY_SHIM
   cmd = [
-      './build_image',
-      '--board=%s' % board, '--replace', '--noeclean',
-      '--symlink=%s' % alias, '--build_attempt=3', 'factory_install'
+      'build_image',
+      '--board=%s' % board,
+      '--replace',
+      '--noeclean',
+      '--symlink=%s' % alias,
+      '--build_attempt=3',
+      'factory_install',
   ]
   RunBuildScript(
       buildroot,

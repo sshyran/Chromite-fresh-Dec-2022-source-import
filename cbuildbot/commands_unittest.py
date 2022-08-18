@@ -877,7 +877,7 @@ class CBuildBotTest(cros_test_lib.RunCommandTempDirTestCase):
     kwargs.setdefault('skip_chroot_upgrade', default)
 
     commands.Build(buildroot=self._buildroot, board='amd64-generic', **kwargs)
-    self.assertCommandContains(['./build_packages'])
+    self.assertCommandContains(['build_packages'])
 
   def testGetFirmwareVersions(self):
     self.rc.SetDefaultCmdResult(stdout="""
@@ -1102,7 +1102,7 @@ fe5d699f2e9e4a7de031497953313dbd *./models/snappy/setvars.sh
     """Case where Build is called with a custom environment."""
     extra_env = {'A': 'Av', 'B': 'Bv'}
     self.testBuild(extra_env=extra_env)
-    self.assertCommandContains(['./build_packages'], extra_env=extra_env)
+    self.assertCommandContains(['build_packages'], extra_env=extra_env)
 
   def testGenerateBreakpadSymbols(self):
     """Test GenerateBreakpadSymbols Command."""
@@ -1177,7 +1177,7 @@ fe5d699f2e9e4a7de031497953313dbd *./models/snappy/setvars.sh
   def testBuildImage(self):
     """Test Basic BuildImage Command."""
     commands.BuildImage(self._buildroot, self._board, None)
-    self.assertCommandContains(['./build_image'])
+    self.assertCommandContains(['build_image'])
 
   def testCompleteBuildImage(self):
     """Test Complete BuildImage Command."""
@@ -1186,7 +1186,7 @@ fe5d699f2e9e4a7de031497953313dbd *./models/snappy/setvars.sh
         self._buildroot, self._board, images_to_build,
         rootfs_verification=False, extra_env={'LOVE': 'free'},
         disk_layout='2+2', version='1969')
-    self.assertCommandContains(['./build_image'])
+    self.assertCommandContains(['build_image'])
 
   def _TestChromeLKGM(self, chrome_revision):
     """Helper method for testing the GetChromeLKGM method."""

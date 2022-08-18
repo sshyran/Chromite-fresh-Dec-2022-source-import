@@ -339,11 +339,11 @@ class BuildPackagesStageTest(AllConfigsTestCase,
 
     with self.RunStageWithConfig(self._mock_configurator) as rc:
       cfg = self._run.config
-      rc.assertCommandContains(['./build_packages'])
-      rc.assertCommandContains(['./build_packages', '--skip_chroot_upgrade'])
-      rc.assertCommandContains(['./build_packages', '--nousepkg'],
+      rc.assertCommandContains(['build_packages'])
+      rc.assertCommandContains(['build_packages', '--skip_chroot_upgrade'])
+      rc.assertCommandContains(['build_packages', '--nousepkg'],
                                expected=not cfg['usepkg_build_packages'])
-      rc.assertCommandContains(['./build_packages', '--nowithautotest'],
+      rc.assertCommandContains(['build_packages', '--nowithautotest'],
                                expected=not self._run.options.tests)
 
   def testAllConfigs(self):
@@ -592,7 +592,7 @@ class BuildImageStageTest(BuildPackagesStageTest):
     with parallel_unittest.ParallelMock():
       with self.RunStageWithConfig() as rc:
         cfg = self._run.config
-        cmd = ['./build_image', '--version=%s' % (self._release_tag or '')]
+        cmd = ['build_image', '--version=%s' % (self._release_tag or '')]
         rc.assertCommandContains(cmd, expected=cfg['images'])
 
   def RunTestsWithBotId(self, bot_id, options_tests=True):

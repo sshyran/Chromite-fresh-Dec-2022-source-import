@@ -643,7 +643,7 @@ class WorkspaceBuildPackagesStageTest(WorkspaceStageBase):
     self.assertEqual(self.rc.call_count, 1)
     self.rc.assertCommandCalled(
         [
-            './build_packages',
+            'build_packages',
             '--board=board',
             '--accept_licenses=@CHROMEOS',
             '--skip_chroot_upgrade',
@@ -719,7 +719,7 @@ class WorkspaceBuildImageStageTest(WorkspaceStageBase):
     # Ensure no --builderpath
     self.rc.assertCommandCalled(
         [
-            './build_image',
+            'build_image',
             '--board', 'board',
             '--replace',
             '--version', 'R1-1.2.3',
@@ -747,7 +747,7 @@ class WorkspaceBuildImageStageTest(WorkspaceStageBase):
     # Ensure has --builderpath
     self.rc.assertCommandCalled(
         [
-            './build_image',
+            'build_image',
             '--board', 'board',
             '--replace',
             '--version', 'R1-%s' % self.MODERN_VERSION,
