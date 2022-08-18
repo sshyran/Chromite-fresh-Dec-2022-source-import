@@ -325,7 +325,6 @@ class RunCommandError(CalledProcessError):
       raise TypeError('result must be a CompletedProcess instance; got %r'
                       % (result,))
 
-    self.args = (msg, result, exception)
     self.result = result
     super().__init__(
         returncode=result.returncode, cmd=result.args, stdout=result.stdout,
