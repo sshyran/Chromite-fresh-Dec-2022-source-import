@@ -2286,6 +2286,14 @@ def BranchScheduleConfig():
   # Do not remove BOT-TAG:* comments. They are used to help parse config.
   # BOT-TAG:RELEASES_START
   RELEASES = [
+      ('release-R106-15054.B',
+       ['kevin-android-pi-pre-flight-branch',
+        'hatch-android-rvc-pre-flight-branch'],
+       '',
+       [],
+       [],
+       config_lib.LUCI_BUILDER_LEGACY_RELEASE),
+
       ('release-R105-14989.B',
        ['kevin-android-pi-pre-flight-branch',
         'hatch-android-rvc-pre-flight-branch'],
@@ -2295,14 +2303,6 @@ def BranchScheduleConfig():
        config_lib.LUCI_BUILDER_LEGACY_RELEASE),
 
       ('release-R104-14909.B',
-       ['kevin-android-pi-pre-flight-branch',
-        'hatch-android-rvc-pre-flight-branch'],
-       '',
-       [],
-       [],
-       config_lib.LUCI_BUILDER_LEGACY_RELEASE),
-
-      ('release-R103-14816.B',
        ['kevin-android-pi-pre-flight-branch',
         'hatch-android-rvc-pre-flight-branch'],
        '',
