@@ -135,7 +135,7 @@ function build_packages_plain() {
   nuke_cache
   nuke_build
 
-  local cmd="${CROS_SDK} -- ./build_packages --board=${BOARD}"
+  local cmd="${CROS_SDK} -- build_packages --board=${BOARD}"
   run "build_packages plain" "${cmd}"
 }
 
@@ -144,14 +144,14 @@ function build_packages_source() {
   nuke_cache
   nuke_build
 
-  local cmd="${CROS_SDK} -- ./build_packages --board=${BOARD} --nousepkg"
+  local cmd="${CROS_SDK} -- build_packages --board=${BOARD} --no-usepkg"
   run "build_packages source" "${cmd}"
 }
 
 function build_image() {
   echo
 
-  local cmd="${CROS_SDK} -- ./build_image --board=${BOARD}"
+  local cmd="${CROS_SDK} -- build_image --board=${BOARD}"
   run "build_image" "${cmd}"
 }
 
