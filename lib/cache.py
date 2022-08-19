@@ -334,7 +334,8 @@ def Untar(path, cwd, sudo=False):
     elif os.path.basename(extra_comp_args[0]) == 'zstd':
       extra_comp_args.append('-f')
     cmd += ['-I', ' '.join(extra_comp_args)]
-  functor(cmd + ['-xpf', path], cwd=cwd, debug_level=logging.DEBUG, quiet=True)
+  functor(cmd + ['-xpf', path], cwd=cwd, debug_level=logging.DEBUG,
+          capture_output=True)
 
 
 class TarballCache(RemoteCache):

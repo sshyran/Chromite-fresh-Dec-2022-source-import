@@ -396,8 +396,7 @@ class GitBranchTest(cros_test_lib.MockTestCase):
     """Test init with previous branch existing."""
     self.PatchObject(self._branch, 'Exists', return_value=True)
     cros_mark_as_stable.GitBranch.Checkout(self._branch)
-    self.git_mock.assert_called_with('.', ['checkout', '-f', self._branch_name],
-                                     quiet=True)
+    self.git_mock.assert_called_with('.', ['checkout', '-f', self._branch_name])
 
   def testExists(self):
     """Test if branch exists that is created."""

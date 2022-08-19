@@ -928,9 +928,9 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
       # synchronously copy the entire thing before we delete it.
       cwd = os.path.normpath(self.Path('..'))
       try:
-        result = cros_build_lib.sudo_run(['mktemp', '-d', '-p', cwd],
-                                         print_cmd=False, encoding='utf-8',
-                                         stdout=True, cwd=cwd)
+        result = cros_build_lib.sudo_run(
+            ['mktemp', '-d', '-p', cwd], encoding='utf-8', stdout=True,
+            cwd=cwd, debug_level=logging.DEBUG)
       except cros_build_lib.RunCommandError:
         # Fall back to a synchronous delete just in case.
         logging.notice('Error deleting sysroot asynchronously. Deleting '
@@ -938,11 +938,14 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
         return self.Delete(background=False)
 
       tempdir = result.stdout.strip()
-      cros_build_lib.sudo_run(['mv', self.path, tempdir], quiet=True)
+      cros_build_lib.sudo_run(
+          ['mv', self.path, tempdir], capture_output=True,
+          debug_level=logging.DEBUG)
       if not os.fork():
         # Child process, just delete the sysroot root and _exit.
-        result = cros_build_lib.sudo_run(rm + [tempdir], quiet=True,
-                                         check=False)
+        result = cros_build_lib.sudo_run(
+            rm + [tempdir], capture_output=True, check=False,
+            debug_level=logging.DEBUG)
         if result.returncode:
           # Log it so it can be handled manually.
           logging.warning('Unable to delete old sysroot now at %s: %s', tempdir,
@@ -950,7 +953,8 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
         # pylint: disable=protected-access
         os._exit(result.returncode)
     else:
-      cros_build_lib.sudo_run(rm + [self.path], quiet=True)
+      cros_build_lib.sudo_run(
+          rm + [self.path], capture_output=True, debug_level=logging.DEBUG)
 
   def get_sdk_provided_packages(self) -> Iterable[package_info.PackageInfo]:
     """Find all packages provided by the SDK (i.e. package.provided)."""

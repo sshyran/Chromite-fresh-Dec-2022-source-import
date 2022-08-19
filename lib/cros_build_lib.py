@@ -622,6 +622,8 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
   assert not kwargs, 'Unknown arguments to run: %s' % (list(kwargs),)
 
   if quiet:
+    # Break unittests, but allow production for now.
+    assert 'PYTEST_CURRENT_TEST' not in os.environ
     print_cmd = False
     capture_output = True
 

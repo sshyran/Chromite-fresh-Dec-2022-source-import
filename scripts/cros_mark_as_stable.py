@@ -210,7 +210,7 @@ class GitBranch(object):
     if not branch:
       branch = self.branch_name
     if branch == self.tracking_branch or self.Exists(branch):
-      git.RunGit(self.cwd, ['checkout', '-f', branch], quiet=True)
+      git.RunGit(self.cwd, ['checkout', '-f', branch])
     else:
       repo = repo_util.Repository.MustFind(self.cwd)
       repo.StartBranch(branch, projects=['.'], cwd=self.cwd)

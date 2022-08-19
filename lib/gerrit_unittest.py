@@ -104,9 +104,9 @@ class GerritTestCase(cros_test_lib.MockTempDirTestCase):
     gi = self.gerrit_instance = self._create_gerrit_instance(self.tempdir)
 
     # This --global will use our tempdir $HOME we set above, not the real ~/.
-    cros_build_lib.run(
+    cros_build_lib.dbg_run(
         ['git', 'config', '--global', 'http.cookiefile', gi.cookies_path],
-        quiet=True)
+        capture_output=True)
 
     # If you're seeing "does not look like a Netscape format cookies file"
     # errors here, make sure the first line in your gitcookies file is:
@@ -198,11 +198,12 @@ class GerritTestCase(cros_test_lib.MockTempDirTestCase):
                 '-b', self.gerrit_instance.cookies_path]
     hook_cmd.append('https://%s/a/tools/hooks/commit-msg'
                     % self.gerrit_instance.gerrit_host)
-    cros_build_lib.run(hook_cmd, quiet=True)
+    cros_build_lib.dbg_run(hook_cmd, capture_output=True)
     os.chmod(hook_path, stat.S_IRWXU)
     # Set git identity to test account
-    cros_build_lib.run(
-        ['git', 'config', 'user.email', self.TEST_EMAIL], cwd=path, quiet=True)
+    cros_build_lib.dbg_run(
+        ['git', 'config', 'user.email', self.TEST_EMAIL], cwd=path,
+        capture_output=True)
     return path
 
   def cloneProject(self, name, path=None):
@@ -238,10 +239,11 @@ class GerritTestCase(cros_test_lib.MockTempDirTestCase):
       text = 'Another day, another dollar.'
     fpath = os.path.join(clone_path, filename)
     osutils.WriteFile(fpath, '%s\n' % text, mode='a')
-    cros_build_lib.run(['git', 'add', filename], cwd=clone_path, quiet=True)
+    cros_build_lib.dbg_run(['git', 'add', filename], cwd=clone_path,
+                           capture_output=True)
     cmd = ['git', 'commit']
     cmd += ['--amend', '-C', 'HEAD'] if amend else ['-m', msg]
-    cros_build_lib.run(cmd, cwd=clone_path, quiet=True)
+    cros_build_lib.dbg_run(cmd, cwd=clone_path, capture_output=True)
     return cls._GetCommit(clone_path)
 
   def createCommit(self, clone_path, filename=None, msg=None, text=None,
@@ -287,9 +289,9 @@ class GerritTestCase(cros_test_lib.MockTempDirTestCase):
 
   @staticmethod
   def _UploadChange(clone_path, branch='main', remote='origin'):
-    cros_build_lib.run(
+    cros_build_lib.dbg_run(
         ['git', 'push', remote, 'HEAD:refs/for/%s' % branch], cwd=clone_path,
-        quiet=True)
+        capture_output=True)
 
   def uploadChange(self, clone_path, branch='main', remote='origin'):
     """Create a gerrit CL from the HEAD of a git checkout."""
@@ -298,9 +300,9 @@ class GerritTestCase(cros_test_lib.MockTempDirTestCase):
 
   @staticmethod
   def _PushBranch(clone_path, branch='main'):
-    cros_build_lib.run(
+    cros_build_lib.dbg_run(
         ['git', 'push', 'origin', 'HEAD:refs/heads/%s' % branch],
-        cwd=clone_path, quiet=True)
+        cwd=clone_path, capture_output=True)
 
   def pushBranch(self, clone_path, branch='main'):
     """Push a branch directly to gerrit, bypassing code review."""
@@ -365,8 +367,8 @@ class GerritHelperTest(GerritTestCase):
     clone_path = self.cloneProject(project)
     (head_sha1, head_changeid) = self.createCommit(clone_path)
     for idx in range(3):
-      cros_build_lib.run(
-          ['git', 'checkout', head_sha1], cwd=clone_path, quiet=True)
+      cros_build_lib.dbg_run(
+          ['git', 'checkout', head_sha1], cwd=clone_path, capture_output=True)
       self.createCommit(clone_path, filename='test-file-%d.txt' % idx)
       self.uploadChange(clone_path)
     helper = self._GetHelper()
@@ -398,7 +400,7 @@ class GerritHelperTest(GerritTestCase):
            'git add test-file-$i.txt; '
            'git commit -m "Test commit $i."; '
            'done' % num_changes)
-    cros_build_lib.run(cmd, shell=True, cwd=clone_path, quiet=True)
+    cros_build_lib.dbg_run(cmd, shell=True, cwd=clone_path, capture_output=True)
     self.uploadChange(clone_path)
     helper = self._GetHelper()
     changes = helper.Query(project=project)
@@ -524,8 +526,8 @@ class GerritHelperTest(GerritTestCase):
     (sha1, _) = self.createCommit(clone_path)
     (_, changeid) = self.createCommit(clone_path)
     self.uploadChange(clone_path, 'main')
-    cros_build_lib.run(
-        ['git', 'checkout', sha1], cwd=clone_path, quiet=True)
+    cros_build_lib.dbg_run(
+        ['git', 'checkout', sha1], cwd=clone_path, capture_output=True)
     self.createCommit(clone_path)
     self.pushBranch(clone_path, 'testbranch')
     self.createCommit(
@@ -632,8 +634,9 @@ class GerritHelperTest(GerritTestCase):
 
     # Update the change.
     new_msg = 'New %s' % gpatch.commit_message
-    cros_build_lib.run(
-        ['git', 'commit', '--amend', '-m', new_msg], cwd=clone_path, quiet=True)
+    cros_build_lib.dbg_run(
+        ['git', 'commit', '--amend', '-m', new_msg], cwd=clone_path,
+        capture_output=True)
     self.uploadChange(clone_path)
     gpatch2 = self._GetHelper().QuerySingleRecord(
         change=gpatch.change_id, project=gpatch.project, branch='main')

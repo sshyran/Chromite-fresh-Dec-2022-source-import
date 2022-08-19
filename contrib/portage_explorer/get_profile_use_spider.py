@@ -26,8 +26,8 @@ def execute(output: spiderlib.SpiderOutput):
       if make_defaults_path.exists():
         command = (f'source {cros_build_lib.ShellQuote(make_defaults_path)};'
                    f'echo ${{USE}}')
-        source_use = cros_build_lib.run(command, shell=True, quiet=True,
-                                        encoding='utf-8')
+        source_use = cros_build_lib.dbg_run(
+            command, shell=True, capture_output=True, encoding='utf-8')
         flag_output = source_use.stdout.split()
         use_flags = {}
         for flag in flag_output:

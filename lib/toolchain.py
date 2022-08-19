@@ -145,8 +145,8 @@ def GetArchForTarget(target):
   Args:
     target: a toolchain.
   """
-  ret = cros_build_lib.run(['crossdev', '--show-target-cfg', target],
-                           capture_output=True, quiet=True, encoding='utf-8')
+  ret = cros_build_lib.dbg_run(['crossdev', '--show-target-cfg', target],
+                               capture_output=True, encoding='utf-8')
   return key_value_store.LoadData(ret.stdout).get('arch')
 
 

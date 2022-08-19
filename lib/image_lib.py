@@ -101,7 +101,8 @@ class LoopbackPartitions(object):
           cmd, debug_level=logging.DEBUG, capture_output=True, encoding='utf-8')
       self.dev = ret.stdout.strip()
       cmd = ['partx', '-d', self.dev]
-      cros_build_lib.sudo_run(cmd, quiet=True, check=False)
+      cros_build_lib.sudo_run(
+          cmd, debug_level=logging.DEBUG, check=False, capture_output=True)
       cmd = ['partx', '-a', self.dev]
       ret = cros_build_lib.sudo_run(
           cmd, debug_level=logging.DEBUG, check=False)
@@ -284,7 +285,8 @@ class LoopbackPartitions(object):
                                   osutils.RmDir, path, sudo=True, sleep=1)
       self._to_be_rmdir = set()
       cmd = ['partx', '-d', self.dev]
-      cros_build_lib.sudo_run(cmd, quiet=True, check=False)
+      cros_build_lib.sudo_run(
+          cmd, debug_level=logging.DEBUG, capture_output=True, check=False)
       cros_build_lib.sudo_run(['losetup', '--detach', self.dev])
       self.dev = None
       self.parts = {}

@@ -257,7 +257,8 @@ def RemoveKnownHost(host, known_hosts_path=KNOWN_HOSTS_PATH):
     except IOError:
       # If |known_hosts_path| doesn't exist neither does |host| so we're done.
       return
-    cros_build_lib.run(['ssh-keygen', '-R', host, '-f', temp_file], quiet=True)
+    cros_build_lib.dbg_run(['ssh-keygen', '-R', host, '-f', temp_file],
+                           capture_output=True)
     shutil.copy2(temp_file, known_hosts_path)
 
 

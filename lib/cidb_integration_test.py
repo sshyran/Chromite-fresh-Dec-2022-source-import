@@ -80,7 +80,7 @@ class LocalSqlServerTestCase(cros_test_lib.TempDirTestCase):
         '--basedir=/usr',
         '--ldata=%s' % self._mysqld_dir,
     ]
-    cros_build_lib.run(cmd, quiet=True)
+    cros_build_lib.dbg_run(cmd, capture_output=True)
 
     self.mysqld_host = '127.0.0.1'
     self.mysqld_port = remote_access.GetUnusedPort()
@@ -112,8 +112,9 @@ class LocalSqlServerTestCase(cros_test_lib.TempDirTestCase):
       # 1 + 2 + 4 + 8 + 16 + 32 + 64 + 128 = 255 seconds total timeout in case
       # of failure.
       # Smaller timeouts make this check flaky on heavily loaded builders.
-      retry_util.RunCommandWithRetries(cmd=cmd, quiet=True, max_retry=8,
-                                       sleep=1, backoff_factor=2)
+      retry_util.RunCommandWithRetries(
+          cmd=cmd, capture_output=True, print_cmd=False, max_retry=8, sleep=1,
+          backoff_factor=2)
     except Exception as e:
       self.addCleanup(lambda: self._CleanupMysqld(
           'mysqladmin failed to ping mysqld: %s' % e))
@@ -131,7 +132,7 @@ class LocalSqlServerTestCase(cros_test_lib.TempDirTestCase):
           '-u', 'root',
           'shutdown',
       ]
-      cros_build_lib.run(cmd, quiet=True)
+      cros_build_lib.dbg_run(cmd, capture_output=True)
     except cros_build_lib.RunCommandError as e:
       self._CleanupMysqld(
           failure='mysqladmin failed to shutdown mysqld: %s' % e)
@@ -254,7 +255,7 @@ class SchemaDumpTest(CIDBIntegrationTest):
         # '--skip-comments',  # Required to avoid dumping a timestamp.
         'cidb',
     ]
-    result = cros_build_lib.run(cmd, capture_output=True, quiet=True)
+    result = cros_build_lib.dbg_run(cmd, capture_output=True)
 
     # Strip out comment lines, to avoid dumping a problematic timestamp.
     lines = [l for l in result.stdout.splitlines() if not l.startswith('--')]

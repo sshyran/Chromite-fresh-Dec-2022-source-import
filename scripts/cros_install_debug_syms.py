@@ -93,7 +93,8 @@ class DebugSymbolsInstaller(object):
 
     with osutils.TempDir(sudo_rm=True) as tempdir:
       cros_build_lib.sudo_run(
-          ['tar', '-I', compressor, '-xf', archive, '-C', tempdir], quiet=True)
+          ['tar', '-I', compressor, '-xf', archive, '-C', tempdir],
+          debug_level=logging.DEBUG, capture_output=True)
 
       with open(self._vartree.getpath(cpv, filename='CONTENTS'),
                 'a') as content_file:
