@@ -5,6 +5,7 @@
 """Perform various tasks related to updating Portage packages."""
 
 import filecmp
+import glob
 import os
 import re
 import shutil
@@ -1433,6 +1434,37 @@ class Upgrader(object):
 
     return pinfolist
 
+  def _DowngradeEAPI(self):
+    """Downgrade to supported EAPI for requested packages."""
+    oper.Notice(f'Downgrading EAPI version for {self._args}.')
+    pkg_dirs = []
+    envvars = self._GenPortageEnvvars('*', unstable_ok=True,
+                                      portdir=self._upstream,
+                                      portage_configroot=self._emptydir)
+    # Construct the upstream package path for each requested package.
+    for pkg in self._args:
+      equery = ['equery', 'which', pkg]
+      result = cros_build_lib.dbg_run(
+          equery, check=False, extra_env=envvars, stdout=True,
+          stderr=subprocess.STDOUT, encoding='utf-8')
+      if result.returncode == 0:
+        ebuild_path = result.stdout.strip()
+        (_overlay, cat, pn, _pv) = self._SplitEBuildPath(ebuild_path)
+        pkg_dirs.append(os.path.join(self._upstream, cat, pn))
+    try:
+      # Compile a list of ebuild files to be processed.
+      ebuild_files = [f for d in pkg_dirs for f in
+                      glob.glob(os.path.join(d, '*.ebuild'))]
+      # Replace EAPI version 8 with 7 for each ebuild file.
+      for ebuild in ebuild_files:
+        with open(ebuild, 'r+') as f:
+          lines = [x.replace('8', '7') if x.startswith('EAPI=') else x
+                   for x in f.readlines()]
+          f.seek(0)
+          f.writelines(lines)
+    except OSError as e:
+      oper.Error(f'Failed to downgrade ebuild file(s) {e}')
+
   def PrepareToRun(self):
     """Checkout upstream gentoo if necessary, and any other prep steps."""
     if os.path.exists(self._upstream):
@@ -1475,6 +1507,9 @@ class Upgrader(object):
                 'Gentoo/Portage packages. Used by cros_portage_upgrade.\n'
                 'Feel free to delete if you want the space back.\n' %
                 self._upstream)
+
+    # TODO(b/242758296) Remove this when ChromeOS supports EAPI 8.
+    self._DowngradeEAPI()
 
     # An empty directory is needed to trick equery later.
     self._emptydir = tempfile.mkdtemp()
