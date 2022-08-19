@@ -330,8 +330,8 @@ def _SeccompPolicyLintFile(path, _output_format, debug, _relaxed: bool):
   dangerous_syscalls = {'bpf', 'setns', 'execveat', 'ptrace', 'swapoff',
                         'swapon'}
   return _ToolRunCommand(
-      [os.path.join(constants.SOURCE_ROOT, 'src', 'aosp', 'external',
-                    'minijail', 'tools', 'seccomp_policy_lint.py'),
+      [os.path.join(constants.SOURCE_ROOT, 'src', 'platform', 'minijail',
+                    'tools', 'seccomp_policy_lint.py'),
        '--dangerous-syscalls', ','.join(dangerous_syscalls),
        path],
       debug)
