@@ -539,7 +539,7 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
         chroot_args=None, debug_level=logging.INFO,
         check=True, int_timeout=1, kill_timeout=1,
         log_output=False, capture_output=False,
-        quiet=False, encoding=None, errors=None, dryrun=False,
+        encoding=None, errors=None, dryrun=False,
         **kwargs) -> CompletedProcess:
   """Runs a command.
 
@@ -589,7 +589,6 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
       invoked process to shutdown from a SIGTERM before we SIGKILL it.
     log_output: Log the command and its output automatically.
     capture_output: Set |stdout| and |stderr| to True.
-    quiet: Set |print_cmd| to False, and |capture_output| to True.
     encoding: Encoding for stdin/stdout/stderr, otherwise bytes are used.  Most
       users want 'utf-8' here for string data.
     errors: How to handle errors when |encoding| is used.  Defaults to 'strict',
@@ -620,12 +619,6 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
     if kwargs.pop('append_to_file'):
       stdout_file_mode = 'a+b'
   assert not kwargs, 'Unknown arguments to run: %s' % (list(kwargs),)
-
-  if quiet:
-    # Break unittests, but allow production for now.
-    assert 'PYTEST_CURRENT_TEST' not in os.environ
-    print_cmd = False
-    capture_output = True
 
   if capture_output:
     # TODO(vapier): Enable this once we migrate all the legacy arguments above.
