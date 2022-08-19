@@ -12,7 +12,7 @@ from chromite.lib import failure_message_lib
 DEFAULT_BUILD_SCRIPT_FAILURE_EXTRA_INFO = (
     '{\"shortname\": \"security_test_image\"}')
 DEFAULT_PACKAGE_BUILD_FAILURE_EXTRA_INFO = (
-    '{\"shortname\": \"./build_image\", \"failed_packages\":'
+    '{\"shortname\": \"build_image\", \"failed_packages\":'
     '[\"chromeos-base/chromeos-chrome\", \"chromeos-base/chromeos-init\"]}')
 
 
@@ -234,8 +234,7 @@ class PackageBuildFailureMessageTests(cros_test_lib.TestCase):
     """Test GetShortname."""
     failure_message = FailureMessageHelper.GetPackageBuildFailureMessage()
 
-    self.assertEqual(failure_message.GetShortname(),
-                     './build_image')
+    self.assertEqual(failure_message.GetShortname(), 'build_image')
 
   def testGetFailedPackages(self):
     """Test GetFailedPackages."""

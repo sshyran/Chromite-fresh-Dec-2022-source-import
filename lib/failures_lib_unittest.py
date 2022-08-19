@@ -275,8 +275,8 @@ class BuildFailuresForFindit(cros_test_lib.TestCase):
   def testBuildFailuresJson(self):
     error = cros_build_lib.RunCommandError('run cmd error')
     failed_packages = ['sys-apps/mosys', 'chromeos-base/cryptohome']
-    build_failure = failures_lib.PackageBuildFailure(
-        error, './build_packages', failed_packages)
+    build_failure = failures_lib.PackageBuildFailure(error, 'build_packages',
+                                                     failed_packages)
     self.assertSetEqual(set(failed_packages), build_failure.failed_packages)
     failure_json = build_failure.BuildCompileFailureOutputJson()
     values = json.loads(failure_json)
