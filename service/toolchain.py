@@ -181,7 +181,7 @@ class BuildLinter:
     # this is required to make sure lints are always regenerated
     for package in self.package_atoms:
       cache_files_dir = f'{self.sysroot}/var/cache/portage/{package}'
-      osutils.RmDir(cache_files_dir, ignore_missing=True)
+      osutils.RmDir(cache_files_dir, ignore_missing=True, sudo=True)
 
   def _filter_linter_findings(
       self, findings: List[LinterFinding]) -> List[LinterFinding]:
