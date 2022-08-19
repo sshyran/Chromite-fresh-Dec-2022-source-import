@@ -8,6 +8,7 @@ import copy
 import os
 import shutil
 import threading
+import unittest
 from unittest import mock
 
 from chromite.third_party.gn_helpers import gn_helpers
@@ -867,6 +868,8 @@ class VersionTest(cros_test_lib.MockTempDirTestCase,
             self.FULL_VERSION_RECENT,
             self.sdk.GetFullVersion(self.VERSION))
 
+  # TODO(crbug.com/1330762): Re-enable.
+  @unittest.skip('version caching temporarily disabled')
   def testFullVersionCaching(self):
     """Test full version calculation and caching."""
     def RaiseException(*_args, **_kwargs):
