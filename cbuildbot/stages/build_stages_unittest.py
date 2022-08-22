@@ -336,14 +336,19 @@ class BuildPackagesStageTest(AllConfigsTestCase,
     """Test with the config for the specified bot_id."""
     self._Prepare(bot_id)
     self._run.options.tests = options_tests
+    self.build_packages = os.path.join(
+        self.tempdir,
+        'buildroot',
+        constants.CHROMITE_BIN_SUBDIR,
+        'build_packages')
 
     with self.RunStageWithConfig(self._mock_configurator) as rc:
       cfg = self._run.config
-      rc.assertCommandContains(['./build_packages'])
-      rc.assertCommandContains(['./build_packages', '--skip_chroot_upgrade'])
-      rc.assertCommandContains(['./build_packages', '--nousepkg'],
+      rc.assertCommandContains([self.build_packages])
+      rc.assertCommandContains(['--skip-chroot-upgrade'])
+      rc.assertCommandContains(['--no-usepkg'],
                                expected=not cfg['usepkg_build_packages'])
-      rc.assertCommandContains(['./build_packages', '--nowithautotest'],
+      rc.assertCommandContains(['--no-withautotest'],
                                expected=not self._run.options.tests)
 
   def testAllConfigs(self):

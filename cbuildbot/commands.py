@@ -582,6 +582,81 @@ def Build(buildroot,
       not yet up to date, you should specify skip_chroot_upgrade=False.
     extra_env: A dictionary of environmental variables to set during generation.
     chrome_root: The directory where chrome is stored.
+    noretry: Deprecated.
+    chroot_args: The args to the chroot.
+    build_all_with_goma: Deprecated.
+    run_goma: Set `build_package --run-goma` option, which starts and stops
+      goma server in chroot while building packages.
+    disable_revdep_logic: Pass --nowithrevdeps to build_packages, disabling the
+      reverse dependency calculation step.
+  """
+  cmd = [
+      'build_packages',
+      '--board=%s' % board,
+      '--accept-licenses=@CHROMEOS',
+      '--withdebugsymbols',
+  ]
+
+  if not build_autotest:
+    cmd.append('--no-withautotest')
+
+  if skip_chroot_upgrade:
+    cmd.append('--skip-chroot-upgrade')
+
+  if not usepkg:
+    cmd.append('--no-usepkg')
+
+  if disable_revdep_logic:
+    cmd.append('--no-withrevdeps')
+
+  if run_goma:
+    cmd.append('--run-goma')
+
+  if not chroot_args:
+    chroot_args = []
+
+  if chrome_root:
+    chroot_args.append('--chrome_root=%s' % chrome_root)
+
+  cmd.extend(packages)
+  RunBuildScript(
+      buildroot,
+      cmd,
+      chromite_cmd=True,
+      extra_env=extra_env,
+      chroot_args=chroot_args,
+      enter_chroot=True)
+
+
+def LegacyBuild(buildroot,
+                board,
+                build_autotest,
+                usepkg,
+                packages=(),
+                skip_chroot_upgrade=True,
+                extra_env=None,
+                chrome_root=None,
+                noretry=False,
+                chroot_args=None,
+                run_goma=False,
+                build_all_with_goma=False,
+                disable_revdep_logic=False):
+  """Wrapper around legacy build_packages.
+
+  This wrapper supports the old version of build_packages to support old
+  firmware/factory branches. Do not change this function until it's deleted.
+
+  Args:
+    buildroot: The buildroot of the current build.
+    board: The board to set up.
+    build_autotest: Whether to build autotest-related packages.
+    usepkg: Whether to use binary packages.
+    packages: Tuple of specific packages we want to build. If empty,
+      build_packages will calculate a list of packages automatically.
+    skip_chroot_upgrade: Whether to skip the chroot update. If the chroot is
+      not yet up to date, you should specify skip_chroot_upgrade=False.
+    extra_env: A dictionary of environmental variables to set during generation.
+    chrome_root: The directory where chrome is stored.
     noretry: Do not retry package failures.
     chroot_args: The args to the chroot.
     build_all_with_goma: Use goma to build all board packages.
@@ -592,7 +667,9 @@ def Build(buildroot,
   """
   cmd = [
       './build_packages',
-      '--board=%s' % board, '--accept_licenses=@CHROMEOS', '--withdebugsymbols'
+      '--board=%s' % board,
+      '--accept_licenses=@CHROMEOS',
+      '--withdebugsymbols',
   ]
 
   if not build_autotest:
