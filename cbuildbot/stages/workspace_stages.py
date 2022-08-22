@@ -484,13 +484,9 @@ class WorkspaceBuildPackagesStage(generic_stages.BoardSpecificBuilderStage,
 
     packages = self.GetListOfPackagesToBuild()
 
-    cmd = [
-        'build_packages',
-        '--board=%s' % self._current_board,
-        '--accept_licenses=@CHROMEOS',
-        '--skip_chroot_upgrade',
-        '--withdebugsymbols',
-    ]
+    cmd = ['./build_packages', '--board=%s' % self._current_board,
+           '--accept_licenses=@CHROMEOS', '--skip_chroot_upgrade',
+           '--withdebugsymbols']
 
     if not self._run.options.tests:
       cmd.append('--nowithautotest')
@@ -567,7 +563,7 @@ class WorkspaceBuildImageStage(generic_stages.BoardSpecificBuilderStage,
     assert images_to_build
 
     # Build up command line.
-    cmd = ['build_image',
+    cmd = ['./build_image',
            '--board', self._current_board,
            '--replace',
            '--version', version]
