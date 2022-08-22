@@ -1,6 +1,7 @@
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
 """Payload service tests."""
 
 from chromite.api.gen.chromite.api import payload_pb2
@@ -15,20 +16,17 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
   """Unsigned payload generation tests."""
 
   def setUp(self):
-    """Set up a payload test with the GeneratePayloads function mocked."""
-    self.PatchObject(paygen_payload_lib, 'GeneratePayloads', return_value=None)
+    """Set up a payload test with the Run method mocked."""
+    self.PatchObject(paygen_payload_lib.PaygenPayload, 'Run',
+                     return_value=None)
 
     # Common build defs.
-    self.src_build = payload_pb2.Build(
-        version='1.0.0',
-        bucket='test',
-        channel='test-channel',
-        build_target=common_pb2.BuildTarget(name='cave'))
-    self.tgt_build = payload_pb2.Build(
-        version='2.0.0',
-        bucket='test',
-        channel='test-channel',
-        build_target=common_pb2.BuildTarget(name='cave'))
+    self.src_build = payload_pb2.Build(version='1.0.0', bucket='test',
+                                       channel='test-channel', build_target=
+                                       common_pb2.BuildTarget(name='cave'))
+    self.tgt_build = payload_pb2.Build(version='2.0.0', bucket='test',
+                                       channel='test-channel', build_target=
+                                       common_pb2.BuildTarget(name='cave'))
 
   def testUnsigned(self):
     """Test the happy path on unsigned images."""
@@ -122,5 +120,5 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
         upload=True)
 
     payload_config.GeneratePayload()
-    self.assertTrue(
-        gspaths.IsUnsignedMiniOSImageArchive(payload_config.payload.tgt_image))
+    self.assertTrue(gspaths.IsUnsignedMiniOSImageArchive(
+        payload_config.payload.tgt_image))

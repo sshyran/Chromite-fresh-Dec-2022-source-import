@@ -131,11 +131,9 @@ class PayloadConfig(object):
           cache_dir=self.cache_dir)
 
       # We run and expect failures to raise, so if we get passed
-      # paygen_payload_lib.GeneratePayloads then it's safe to assume the bin is
-      # in place as well as the payload's uri.
+      # self.paygen.Run() then it's safe to assume the bin is in place.
       local_path = os.path.join(temp_dir, 'delta.bin')
-      paygen_payload_lib.GeneratePayloads([self.paygen])
-      remote_uri = self.payload.uri if self.upload else None
+      remote_uri = self.paygen.Run()
       return (local_path, remote_uri)
 
 
