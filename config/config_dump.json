@@ -8933,7 +8933,7 @@
     "_template": "buildspec",
     "build_timeout": 43200,
     "display_label": "factory",
-    "schedule": "triggered",
+    "schedule": "with 168h interval",
     "slave_configs": [
       "brya-factory-brya-14909.124.B-factorybranch"
     ],
