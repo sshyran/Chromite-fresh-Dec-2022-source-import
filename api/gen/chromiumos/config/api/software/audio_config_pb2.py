@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z1go.chromium.org/chromiumos/config/go/api/software',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n1chromiumos/config/api/software/audio_config.proto\x12\x1e\x63hromiumos.config.api.software\x1a=chromiumos/config/public_replication/public_replication.proto\"\xb8\x02\n\x0b\x41udioConfig\x12S\n\x12public_replication\x18\t \x01(\x0b\x32\x37.chromiumos.config.public_replication.PublicReplication\x12\x11\n\tcard_name\x18\x01 \x01(\t\x12\x18\n\x10\x63\x61rd_config_file\x18\x02 \x01(\t\x12\x10\n\x08\x64sp_file\x18\x03 \x01(\t\x12\x10\n\x08ucm_file\x18\x04 \x01(\t\x12\x17\n\x0fucm_master_file\x18\x05 \x01(\t\x12\x12\n\nucm_suffix\x18\x06 \x01(\t\x12\x13\n\x0bmodule_file\x18\x07 \x01(\t\x12\x12\n\nboard_file\x18\x08 \x01(\t\x12\x1c\n\x14sound_card_init_file\x18\n \x01(\t\x12\x0f\n\x07\x63\x61rd_id\x18\x0b \x01(\tB3Z1go.chromium.org/chromiumos/config/go/api/softwareb\x06proto3'
+  serialized_pb=b'\n1chromiumos/config/api/software/audio_config.proto\x12\x1e\x63hromiumos.config.api.software\x1a=chromiumos/config/public_replication/public_replication.proto\"\xd2\x02\n\x0b\x41udioConfig\x12S\n\x12public_replication\x18\t \x01(\x0b\x32\x37.chromiumos.config.public_replication.PublicReplication\x12\x11\n\tcard_name\x18\x01 \x01(\t\x12\x18\n\x10\x63\x61rd_config_file\x18\x02 \x01(\t\x12\x10\n\x08\x64sp_file\x18\x03 \x01(\t\x12\x10\n\x08ucm_file\x18\x04 \x01(\t\x12\x17\n\x0fucm_master_file\x18\x05 \x01(\t\x12\x12\n\nucm_suffix\x18\x06 \x01(\t\x12\x13\n\x0bmodule_file\x18\x07 \x01(\t\x12\x12\n\nboard_file\x18\x08 \x01(\t\x12\x1c\n\x14sound_card_init_file\x18\n \x01(\t\x12\x0f\n\x07\x63\x61rd_id\x18\x0b \x01(\t\x12\x18\n\x10\x63ras_custom_name\x18\x0c \x01(\tB3Z1go.chromium.org/chromiumos/config/go/api/softwareb\x06proto3'
   ,
   dependencies=[chromiumos_dot_config_dot_public__replication_dot_public__replication__pb2.DESCRIPTOR,])
 
@@ -112,6 +112,13 @@ _AUDIOCONFIG = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='cras_custom_name', full_name='chromiumos.config.api.software.AudioConfig.cras_custom_name', index=11,
+      number=12, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -125,7 +132,7 @@ _AUDIOCONFIG = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=149,
-  serialized_end=461,
+  serialized_end=487,
 )
 
 _AUDIOCONFIG.fields_by_name['public_replication'].message_type = chromiumos_dot_config_dot_public__replication_dot_public__replication__pb2._PUBLICREPLICATION
