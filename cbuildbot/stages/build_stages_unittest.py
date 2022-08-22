@@ -339,11 +339,11 @@ class BuildPackagesStageTest(AllConfigsTestCase,
 
     with self.RunStageWithConfig(self._mock_configurator) as rc:
       cfg = self._run.config
-      rc.assertCommandContains(['./build_packages'])
-      rc.assertCommandContains(['./build_packages', '--skip_chroot_upgrade'])
-      rc.assertCommandContains(['./build_packages', '--nousepkg'],
+      rc.assertCommandContains(['build_packages'])
+      rc.assertCommandContains(['build_packages', '--skip-chroot-upgrade'])
+      rc.assertCommandContains(['build_packages', '--no-usepkg'],
                                expected=not cfg['usepkg_build_packages'])
-      rc.assertCommandContains(['./build_packages', '--nowithautotest'],
+      rc.assertCommandContains(['build_packages', '--no-withautotest'],
                                expected=not self._run.options.tests)
 
   def testAllConfigs(self):

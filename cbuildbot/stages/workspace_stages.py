@@ -51,6 +51,7 @@ BUILD_IMAGE_ECLEAN_FLAG = '8318.0.0'
 ANDROID_BREAKPAD = '9667.0.0'
 PORTAGE_2_3_75_UPDATE = '12693.0.0'
 SETUP_BOARD_PORT_COMPLETE = '11802.0.0'
+BUILD_PACKAGES_PORT_COMPLETE = '14950.0.0'
 
 
 class InvalidWorkspace(failures_lib.StepFailure):
@@ -478,32 +479,21 @@ class WorkspaceBuildPackagesStage(generic_stages.BoardSpecificBuilderStage,
   category = constants.PRODUCT_OS_STAGE
 
   def PerformStage(self):
-    usepkg = False
-    if self.AfterLimit(BUILD_PACKAGES_PREBUILTS):
-      usepkg = self._run.config.usepkg_build_packages
+    usepkg = False if self.AfterLimit(
+        BUILD_PACKAGES_PREBUILTS) else self._run.config.usepkg_build_packages
 
-    packages = self.GetListOfPackagesToBuild()
-
-    cmd = ['./build_packages', '--board=%s' % self._current_board,
-           '--accept_licenses=@CHROMEOS', '--skip_chroot_upgrade',
-           '--withdebugsymbols']
-
-    if not self._run.options.tests:
-      cmd.append('--nowithautotest')
-
-    if not usepkg:
-      cmd.extend(commands.LOCAL_BUILD_FLAGS)
-
-    if self._run.config.nobuildretry:
-      cmd.append('--nobuildretry')
-
-    cmd.extend(packages)
-
-    commands.RunBuildScript(
-        self._build_root, cmd,
-        enter_chroot=True,
-        chroot_args=ChrootArgs(self._run.options),
-        extra_env=self._portage_extra_env)
+    build_packages_func = commands.Build if self.AfterLimit(
+        BUILD_PACKAGES_PORT_COMPLETE) else commands.LegacyBuild
+    build_packages_func(
+        self._build_root,
+        self._current_board,
+        self._run.options.tests,
+        usepkg,
+        packages=self.GetListOfPackagesToBuild(),
+        skip_chroot_upgrade=True,
+        extra_env=self._portage_extra_env,
+        noretry=self._run.config.nobuildretry,
+        chroot_args=ChrootArgs(self._run.options))
 
 
 class WorkspaceUnitTestStage(generic_stages.BoardSpecificBuilderStage,
