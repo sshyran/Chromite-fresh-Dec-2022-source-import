@@ -7,6 +7,7 @@
 import functools
 
 from chromite.lib import cros_test_lib
+from chromite.lib import parallel_unittest
 from chromite.lib import sysroot_lib
 from chromite.scripts import cros_list_modified_packages
 
@@ -27,5 +28,6 @@ class ListModifiedWorkonPackagesTest(cros_test_lib.MockTestCase):
       # actually do any work automatically. We have to extract the elements
       # from it to get it to exercise the code, and we can do that by turning
       # it into a list.
-      list(cros_list_modified_packages.ListModifiedWorkonPackages(
-          sysroot=sysroot_lib.Sysroot('/')))
+      with parallel_unittest.ParallelMock():
+        list(cros_list_modified_packages.ListModifiedWorkonPackages(
+            sysroot=sysroot_lib.Sysroot('/')))
