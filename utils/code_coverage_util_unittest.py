@@ -160,8 +160,7 @@ class GenerateZeroCoverageLlvmTest(cros_test_lib.TempDirTestCase):
         exclude_line_prefixes=constants.ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES,
         exclude_files=['/build/code_coverage/' + USE_CASE_5_FILE_NAME],
         exclude_files_suffixes=(),
-        src_prefix_path=self.tempdir,
-        extensions_to_remove_exclusion_check=['.h'])
+        src_prefix_path=self.tempdir)
 
     coverage_data = coverageJson['data'][0]['files']
 
@@ -278,7 +277,7 @@ class GenerateZeroCoverageLlvmTest(cros_test_lib.TempDirTestCase):
     self.assertEqual(1, len(filenames))
     self.assertEqual('src_code.cpp', filenames[0])
 
-  def testExtensionsToRemoveExclusionCheck(self):
+  def testHeaderFilesExcluded(self):
     """Verify that header files are properly excluded"""
 
     path_to_src_directory = os.path.join(self.tempdir, 'src')
@@ -306,8 +305,7 @@ class GenerateZeroCoverageLlvmTest(cros_test_lib.TempDirTestCase):
         exclude_line_prefixes=constants.ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES,
         exclude_files=['/build/code_coverage/' + USE_CASE_5_FILE_NAME],
         exclude_files_suffixes=(),
-        src_prefix_path=self.tempdir,
-        extensions_to_remove_exclusion_check=['.h'])
+        src_prefix_path=self.tempdir)
 
     coverage_data = coverageJson['data'][0]['files']
 
@@ -327,5 +325,4 @@ class GenerateZeroCoverageLlvmTest(cros_test_lib.TempDirTestCase):
     self.assertIsNone(usecase_5_cov_data,
                       'Zero cov should not be generated for excluded src file')
     self.assertIsNone(usecase_5_header_cov_data,
-                      str('Zero cov should not be generated for'
-                          'corresponding excluded header file'))
+                      str('Zero cov should not be generated for header file'))

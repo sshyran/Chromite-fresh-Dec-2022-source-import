@@ -786,7 +786,7 @@ CODE_COVERAGE_LLVM_JSON_SYMBOLS_NAME = 'code_coverage'
 CODE_COVERAGE_LLVM_JSON_SYMBOLS_TAR = ('%s.tar.xz'
                                        % CODE_COVERAGE_LLVM_JSON_SYMBOLS_NAME)
 CODE_COVERAGE_LLVM_FILE_NAME = 'coverage.json'
-ZERO_COVERAGE_FILE_EXTENSIONS_TO_PROCESS = ['.cc', '.h', '.c', '.cpp']
+ZERO_COVERAGE_FILE_EXTENSIONS_TO_PROCESS = ['.cc', '.c', '.cpp']
 ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES = (
     '/*',
     '#include',
@@ -806,10 +806,6 @@ ZERO_COVERAGE_EXCLUDE_FILES_SUFFIXES = (
     'test.cpp',
     'tests.cpp'
 )
-
-# For more details see code_coverage_util.py's _ShouldExclude
-# method.
-EXTENSIONS_TO_REMOVE_EXCLUSION_CHECK = ('.h',)
 
 DEBUG_SYMBOLS_NAME = 'debug'
 DEBUG_SYMBOLS_TAR = '%s.tgz' % DEBUG_SYMBOLS_NAME
