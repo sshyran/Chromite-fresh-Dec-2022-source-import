@@ -22436,7 +22436,6 @@
     "boards": [
       "skyrim"
     ],
-    "important": false,
     "models": [
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"skyrim\",\n  \"name\": \"skyrim15w\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"skyrim\",\n  \"name\": \"skyrim15w360\",\n  \"test_suites\": []\n}",

@@ -10380,7 +10380,7 @@
       "reference_board_name": "skyrim",
       "arch": "X86_INTERNAL",
       "builder": "RELEASE",
-      "experimental": true,
+      "experimental": false,
       "models": [
         {
           "board_name": "skyrim",
