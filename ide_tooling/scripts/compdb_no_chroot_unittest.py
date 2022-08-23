@@ -25,6 +25,11 @@ from chromite.lib import cros_test_lib
 
 EXT_TRUNK_PATH = '/usr/local/google/home/oka/os2'
 
+def custom_which(exe: str) -> str:
+  if exe == 'armv7a-cros-linux-gnueabihf-clang++':
+    return os.path.join('usr/bin', exe)
+  raise Exception(f'Unexpected exe {exe}')
+
 class GenerateTest(cros_test_lib.TestCase):
   """Tests generate()"""
 
@@ -39,7 +44,7 @@ class GenerateTest(cros_test_lib.TestCase):
       expected_file = os.path.join(expected_dir, name)
       expected = json.load(open(expected_file))
 
-      got = compdb_no_chroot.generate(given, EXT_TRUNK_PATH)
+      got = compdb_no_chroot.generate(given, EXT_TRUNK_PATH, custom_which)
 
       try:
         self.assertEqual(got, expected)

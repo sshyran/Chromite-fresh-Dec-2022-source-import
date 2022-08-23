@@ -13,17 +13,19 @@ platform.eclass.
 import json
 import os
 import re
+import shutil
 import sys
-from typing import List, Optional
+from typing import Callable, List, Optional
 
 import detect_indent
 
 
 class Converter:
   """Converts compilation database to work outside chroot"""
-  def __init__(self, external_trunk_path: str):
+  def __init__(self, external_trunk_path: str, which: Callable[str, str]):
     self.external_trunk_path = external_trunk_path
     self.external_chroot_path = os.path.join(external_trunk_path, 'chroot')
+    self.which = which
 
   def convert_filepath(self, filepath: str) -> str:
     # If out-of-tree build is enabled, source files under /mnt/host/source are
@@ -78,23 +80,26 @@ class Converter:
       raise Exception(f'Unknown flag that suffixes a filepath: {option}')
     return option
 
+  def convert_exe(self, exe: str) -> str:
+    if exe == 'cc':
+      return exe
+
+    # We should call clang directly instead of using CrOS wrappers.
+    if re.match(r'^(aarch64|arm)', exe):
+      return os.path.join(self.external_chroot_path, self.which(exe))
+
+    for x in ['clang', 'clang++']:
+      if exe.endswith(x):
+        return x
+
+    raise Exception(f'Unexpected executable name: {exe}')
+
   def convert_command_list(self, command: List[str]) -> List[str]:
     exe, *options = command
 
-    # We should call clang directly instead of using CrOS wrappers.
-    converted_exe: str
-    for x in ['clang', 'clang++']:
-      if exe.endswith(x):
-        converted_exe = x
-        break
-    if exe == 'cc':
-      converted_exe = exe
-    if not converted_exe:
-      raise Exception(f'Unexpected executable name: {exe}')
+    converted_exe = self.convert_exe(exe)
 
     converted_options = []
-    if re.match(r'^(aarch64|arm)', exe):
-      converted_options.append('--target=arm')
     for option in options:
       converted_option = self.convert_clang_option(option)
       if converted_option:
@@ -116,10 +121,11 @@ FILE = 'file'
 OUTPUT = 'output'
 ARGUMENTS = 'arguments'
 
-def generate(data, external_trunk_path):
+def generate(data, external_trunk_path,
+             which: Callable[str, str] = shutil.which):
   """Generates non-chroot version of the compilation database"""
 
-  converter = Converter(external_trunk_path)
+  converter = Converter(external_trunk_path, which)
 
   converted = []
   for item in data:
