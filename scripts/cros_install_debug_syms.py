@@ -164,7 +164,7 @@ def GetPackageIndex(binhost, binhost_cache=None):
     with open(binhost_cache.Lookup(key).path, 'rb') as f:
       return pickle.load(f)
 
-  pkgindex = binpkg.GrabRemotePackageIndex(binhost, quiet=True)
+  pkgindex = binpkg.GrabRemotePackageIndex(binhost)
   if pkgindex and binhost_cache:
     # Only cache remote binhosts as local binhosts can change.
     with tempfile.NamedTemporaryFile(delete=False) as temp_file:
