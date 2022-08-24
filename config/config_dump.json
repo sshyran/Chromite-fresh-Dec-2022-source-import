@@ -20100,7 +20100,6 @@
       "recovery",
       "test"
     ],
-    "important": false,
     "vm_tests_override": null
   },
   "reven-release-tryjob": {
