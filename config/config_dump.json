@@ -17278,7 +17278,7 @@
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"nissa\",\n  \"name\": \"nereid\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"nissa\",\n  \"name\": \"nirwen\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"nissa\",\n  \"name\": \"nirwen_ufs\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"nissa\",\n  \"name\": \"nivviks\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"nissa\",\n  \"name\": \"nivviks\",\n  \"test_suites\": [\n    \"sanity\",\n    \"bvt-inline\",\n    \"bvt-tast-cq\",\n    \"bvt-installer\",\n    \"bvt-arc\",\n    \"au\",\n    \"bvt-cq\",\n    \"bvt-perbuild\",\n    \"bvt-tast-informational\"\n  ]\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"nissa\",\n  \"name\": \"pujjo\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"nissa\",\n  \"name\": \"pujjoteen\",\n  \"test_suites\": []\n}"
     ],
@@ -17313,7 +17313,7 @@
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"nissa\",\n  \"name\": \"nereid\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"nissa\",\n  \"name\": \"nirwen\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"nissa\",\n  \"name\": \"nirwen_ufs\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"nissa\",\n  \"name\": \"nivviks\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"nissa\",\n  \"name\": \"nivviks\",\n  \"test_suites\": [\n    \"sanity\",\n    \"bvt-inline\",\n    \"bvt-tast-cq\",\n    \"bvt-installer\",\n    \"bvt-arc\",\n    \"au\",\n    \"bvt-cq\",\n    \"bvt-perbuild\",\n    \"bvt-tast-informational\"\n  ]\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"nissa\",\n  \"name\": \"pujjo\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"nissa\",\n  \"name\": \"pujjoteen\",\n  \"test_suites\": []\n}"
     ],
