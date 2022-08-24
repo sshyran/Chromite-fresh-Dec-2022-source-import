@@ -15,10 +15,12 @@ import os
 import re
 import shutil
 import sys
-from typing import Callable, List, Optional
+from typing import Callable, List
 
 import detect_indent
 
+
+MNT_HOST_SOURCE_RE = r'(?:\.\.(?:/\.\.)*)?/mnt/host/source/(.*)'
 
 class Converter:
   """Converts compilation database to work outside chroot"""
@@ -30,9 +32,9 @@ class Converter:
   def convert_filepath(self, filepath: str) -> str:
     # If out-of-tree build is enabled, source files under /mnt/host/source are
     # used. This directory is inaccessible outside chroot, so we convert it.
-    m = re.fullmatch(r'(\.\.(/\.\.)*)?/mnt/host/source/(.*)', filepath)
+    m = re.fullmatch(MNT_HOST_SOURCE_RE, filepath)
     if m:
-      return os.path.join(self.external_trunk_path, m[3])
+      return os.path.join(self.external_trunk_path, m[1])
 
     # If out-of-tree build is disabled, source files are copied in a temporary
     # directory, and the filepath may point to the copied file. We convert this
@@ -52,33 +54,69 @@ class Converter:
 
     return filepath
 
+  def convert_include_option(self, option: str) -> List[str]:
+    """Converts include option to work outside chroot.
+
+    Examples:
+      platform2 directory is converted, and the original one that is
+      invisible outside chroot is omitted.
+      .../mnt/host/source/src/platform2
+      -> /path/to/chromiumos/src/platform2
+
+      platform2 directory is converted, and the original one that is
+      visible outside chroot is also kept.
+      .../tmp/whatever/platform2
+      -> /path/to/chromiumos/src/platform2  .../tmp/whatever/platform2
+
+      Paths having no corresponding sources outside chroot are not converted.
+      gen/include
+      -> gen/include
+    """
+
+    filepath = option[2:]
+    converted_include = '-I' + self.convert_filepath(filepath)
+
+    # The filepath is not visible outside chroot.
+    if re.fullmatch(MNT_HOST_SOURCE_RE, filepath):
+      return [converted_include]
+
+    chroot_include = '-I' + (
+        os.path.join(self.external_chroot_path, filepath[1:])
+        if filepath.startswith('/') else filepath
+    )
+    # chroot_include always points to the file inside chroot and might be
+    # different from converted_include.
+    if converted_include == chroot_include:
+      return [converted_include]
+    return [converted_include, chroot_include]
+
   def convert_clang_option_value(self, value: str) -> str:
     if '/' in value:
       return self.convert_filepath(value)
     return value
 
-  def convert_clang_option(self, option: str) -> Optional[str]:
+  def convert_clang_option(self, option: str) -> List[str]:
     if not option.startswith('-'):
-      return self.convert_clang_option_value(option)
+      return [self.convert_clang_option_value(option)]
 
     # Convert flag value
     if option.startswith('-I'):
-      return '-I' + self.convert_filepath(option[2:])
+      return self.convert_include_option(option)
 
     # Remove a few compiler options that might not be available in the
     # potentially older clang version outside the chroot.
     if option in ['-fdebug-info-for-profiling', '-mretpoline',
                   '-mretpoline-external-thunk', '-mfentry',
                   '-mno-sched-prolog', '-fconserve-stack']:
-      return None
+      return []
 
     if '=' in option:
       flag, value = option.split('=', 2)
-      return flag + '=' + self.convert_clang_option_value(value)
+      return [flag + '=' + self.convert_clang_option_value(value)]
 
     if '/' in option:
       raise Exception(f'Unknown flag that suffixes a filepath: {option}')
-    return option
+    return [option]
 
   def convert_exe(self, exe: str) -> str:
     if exe == 'cc':
@@ -101,9 +139,7 @@ class Converter:
 
     converted_options = []
     for option in options:
-      converted_option = self.convert_clang_option(option)
-      if converted_option:
-        converted_options.append(converted_option)
+      converted_options += self.convert_clang_option(option)
 
     # Add "-stdlib=libc++" so that the clang outside the chroot can
     # find built-in headers like <string> and <memory>
