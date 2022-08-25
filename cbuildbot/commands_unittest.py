@@ -877,16 +877,6 @@ class CBuildBotTest(cros_test_lib.RunCommandTempDirTestCase):
     kwargs.setdefault('skip_chroot_upgrade', default)
 
     commands.Build(buildroot=self._buildroot, board='amd64-generic', **kwargs)
-    self.assertCommandContains(['build_packages'])
-
-  def testBuildLegacy(self, default=False, **kwargs):
-    """Base case where legacy Build is called with minimal options."""
-    kwargs.setdefault('build_autotest', default)
-    kwargs.setdefault('usepkg', default)
-    kwargs.setdefault('skip_chroot_upgrade', default)
-
-    commands.LegacyBuild(
-        buildroot=self._buildroot, board='amd64-generic', **kwargs)
     self.assertCommandContains(['./build_packages'])
 
   def testGetFirmwareVersions(self):
@@ -1112,7 +1102,7 @@ fe5d699f2e9e4a7de031497953313dbd *./models/snappy/setvars.sh
     """Case where Build is called with a custom environment."""
     extra_env = {'A': 'Av', 'B': 'Bv'}
     self.testBuild(extra_env=extra_env)
-    self.assertCommandContains(['build_packages'], extra_env=extra_env)
+    self.assertCommandContains(['./build_packages'], extra_env=extra_env)
 
   def testGenerateBreakpadSymbols(self):
     """Test GenerateBreakpadSymbols Command."""

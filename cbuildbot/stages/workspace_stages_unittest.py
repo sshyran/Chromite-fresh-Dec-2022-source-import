@@ -33,7 +33,7 @@ class WorkspaceStageBase(
   OLD_VERSION = '1.2.3'
 
   # Version newer than all "limits" in workspace_stages.
-  MODERN_VERSION = '15000.0.0'
+  MODERN_VERSION = '11900.0.0'
 
   def setUp(self):
     self.workspace = os.path.join(self.tempdir, 'workspace')
@@ -633,42 +633,6 @@ class WorkspaceBuildPackagesStageTest(WorkspaceStageBase):
 
   def testFactoryBuildPackages(self):
     """Test building factory for an old workspace version."""
-    self.SetWorkspaceVersion(self.MODERN_VERSION)
-
-    self._Prepare(
-        'test-factorybranch',
-        site_config=workspace_builders_unittest.CreateMockSiteConfig(),
-        extra_cmd_args=['--cache-dir', '/cache', '--chrome_root', '/chrome'])
-
-    self.RunStage()
-
-    self.assertEqual(self.rc.call_count, 1)
-    self.rc.assertCommandCalled(
-        [
-            'build_packages',
-            '--board=board',
-            '--accept-licenses=@CHROMEOS',
-            '--withdebugsymbols',
-            '--skip-chroot-upgrade',
-            '--no-usepkg',
-            'virtual/target-os',
-            'virtual/target-os-dev',
-            'virtual/target-os-test',
-            'virtual/target-os-factory',
-            'virtual/target-os-factory-shim',
-            'chromeos-base/autotest-all',
-        ],
-        extra_env={
-            'USE': u'-cros-debug chrome_internal thinlto',
-            'CHROME_ORIGIN': 'LOCAL_SOURCE',
-        },
-        chroot_args=['--cache-dir', '/cache', '--chrome_root', '/chrome'],
-        enter_chroot=True,
-        cwd=self.workspace,
-    )
-
-  def testFactoryBuildPackagesLegacy(self):
-    """Test building factory for an old workspace version."""
     self._Prepare(
         'test-factorybranch',
         site_config=workspace_builders_unittest.CreateMockSiteConfig(),
@@ -682,8 +646,8 @@ class WorkspaceBuildPackagesStageTest(WorkspaceStageBase):
             './build_packages',
             '--board=board',
             '--accept_licenses=@CHROMEOS',
-            '--withdebugsymbols',
             '--skip_chroot_upgrade',
+            '--withdebugsymbols',
             '--nousepkg',
             'virtual/target-os',
             'virtual/target-os-dev',
@@ -692,12 +656,12 @@ class WorkspaceBuildPackagesStageTest(WorkspaceStageBase):
             'virtual/target-os-factory-shim',
             'chromeos-base/autotest-all',
         ],
+        enter_chroot=True,
+        chroot_args=['--cache-dir', '/cache', '--chrome_root', '/chrome'],
         extra_env={
             'USE': u'-cros-debug chrome_internal thinlto',
             'CHROME_ORIGIN': 'LOCAL_SOURCE',
         },
-        chroot_args=['--cache-dir', '/cache', '--chrome_root', '/chrome'],
-        enter_chroot=True,
         cwd=self.workspace,
     )
 
