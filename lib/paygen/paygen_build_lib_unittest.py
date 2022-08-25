@@ -1899,8 +1899,11 @@ class HWTest(cros_test_lib.MockTestCase):
     test_plan_dict = json.loads(test_plan_string)
     test_args_string = test_plan_dict['enumeration']['autotestInvocations'][
         0].pop('testArgs')
+    ssp_test_args_string = test_plan_dict['enumeration'][
+        'autotestInvocations'][1].pop('testArgs')
     # There's no guarantee on the order.
     test_args_set = set(test_args_string.split(' '))
+    ssp_test_args_set = set(ssp_test_args_string.split(' '))
 
     expected_test_plan = {
         'enumeration': {
@@ -1914,6 +1917,17 @@ class HWTest(cros_test_lib.MockTestCase):
                 'displayName':
                     'sample-build/sample-suite/' + 'autoupdate_EndToEndTest_' +
                     'sample-test_delta_source-release_n2n'
+            }, {
+                'test': {
+                    'name': 'autoupdate_EndToEndTest.ssp',
+                    'allowRetries': True,
+                    'maxRetries': 1,
+                    'executionEnvironment': 'EXECUTION_ENVIRONMENT_SERVER'
+                },
+                'displayName':
+                    'sample-build/sample-suite/' +
+                    'autoupdate_EndToEndTest.ssp_' +
+                    'sample-test_delta_source-release_n2n'
             }]
         }
     }
@@ -1926,3 +1940,4 @@ class HWTest(cros_test_lib.MockTestCase):
 
     self.assertDictEqual(test_plan_dict, expected_test_plan)
     self.assertSetEqual(test_args_set, expected_test_args)
+    self.assertSetEqual(ssp_test_args_set, expected_test_args)

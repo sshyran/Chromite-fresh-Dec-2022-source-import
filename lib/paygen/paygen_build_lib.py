@@ -1389,6 +1389,7 @@ def _TestPlan(payload_test_configs, suite_name=None, build=None):
   """
   autotest_invocations = []
   test_name = test_control.get_test_name()
+  ssp_test_name = test_name + '.ssp'
 
   for payload_test in payload_test_configs:
     # TKO parser requires that label format can be parsed by
@@ -1411,6 +1412,25 @@ def _TestPlan(payload_test_configs, suite_name=None, build=None):
             test_args=test_args,
             display_name=tko_label,
         ))
+
+    # Schedule the SSP variant as well so we can compare results before
+    # completely converting the test to SSP.
+    ssp_shown_test_name = f'{ssp_test_name}_{payload_test.unique_name_suffix()}'
+    ssp_tko_label = f'{build}/{suite_name}/{ssp_shown_test_name}'
+
+    autotest_invocations.append(
+        request_pb2.Request.Enumeration.AutotestInvocation(
+            test=test_metadata_pb2.AutotestTest(
+                name=ssp_test_name,
+                allow_retries=True,
+                # Matching autoupdate_EndToEndTest control file.
+                max_retries=1,
+                execution_environment=(test_metadata_pb2.AutotestTest
+                                       .EXECUTION_ENVIRONMENT_SERVER)),
+            test_args=test_args,
+            display_name=ssp_tko_label,
+        ))
+
 
   test_plan = request_pb2.Request.TestPlan(
       enumeration=request_pb2.Request.Enumeration(
