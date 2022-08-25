@@ -135,7 +135,9 @@ class PayloadConfig(object):
       # in place as well as the payload's uri.
       local_path = os.path.join(temp_dir, 'delta.bin')
       paygen_payload_lib.GeneratePayloads([self.paygen])
-      remote_uri = self.payload.uri if self.upload else None
+      remote_uri = None
+      if not self.paygen.skipped and self.upload:
+        remote_uri = self.payload.uri
       return (local_path, remote_uri)
 
 
