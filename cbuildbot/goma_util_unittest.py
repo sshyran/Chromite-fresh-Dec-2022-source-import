@@ -108,6 +108,7 @@ class TestGomaLogUploader(cros_test_lib.MockTempDirTestCase):
 
     self.PatchObject(cros_build_lib, 'GetHostName', lambda: 'stub-host-name')
     copy_log = []
+    tarball_mock = self.PatchObject(cros_build_lib, 'CreateTarball')
     self.PatchObject(
         gs.GSContext, 'CopyInto',
         lambda _, __, remote_dir, filename=None, **kwargs: copy_log.append(
@@ -145,6 +146,7 @@ class TestGomaLogUploader(cros_test_lib.MockTempDirTestCase):
           'gomacc.host.log.INFO.20170426-120100.000000.tar.gz',
           ['x-goog-meta-builderinfo:' + expect_builderinfo]),
         ])
+    tarball_mock.assert_called_once()
 
   def testNinjaLogUpload(self):
     self._CreateLogFile(
