@@ -22,7 +22,7 @@ import detect_indent
 
 class Converter:
   """Converts compilation database to work outside chroot"""
-  def __init__(self, external_trunk_path: str, which: Callable[str, str]):
+  def __init__(self, external_trunk_path: str, which: Callable[[str], str]):
     self.external_trunk_path = external_trunk_path
     self.external_chroot_path = os.path.join(external_trunk_path, 'chroot')
     self.which = which
@@ -122,7 +122,7 @@ OUTPUT = 'output'
 ARGUMENTS = 'arguments'
 
 def generate(data, external_trunk_path,
-             which: Callable[str, str] = shutil.which):
+             which: Callable[[str], str] = shutil.which):
   """Generates non-chroot version of the compilation database"""
 
   converter = Converter(external_trunk_path, which)
