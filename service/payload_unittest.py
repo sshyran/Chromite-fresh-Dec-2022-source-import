@@ -104,30 +104,6 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
     payload_config.GeneratePayload()
     self.assertTrue(gspaths.IsMiniOSImage(payload_config.payload.tgt_image))
 
-  def testSkippedSignedMiniOSPayload(self):
-    """Test the signed minios images skip remote URI check."""
-
-    # Image defs.
-    src_image = payload_pb2.SignedImage(
-        build=self.src_build, image_type='IMAGE_TYPE_BASE', key='cave-mp-v4')
-    tgt_image = payload_pb2.SignedImage(
-        build=self.tgt_build, image_type='IMAGE_TYPE_BASE', key='cave-mp-v4')
-
-    payload_config = payload.PayloadConfig(
-        tgt_image=tgt_image,
-        src_image=src_image,
-        dest_bucket='test',
-        minios=True,
-        verify=True,
-        upload=True)
-
-    mockPaygenPayload = self.PatchObject(
-        paygen_payload_lib, 'PaygenPayload').return_value
-    mockPaygenPayload.skipped.return_value = True
-
-    _, remoteUri = payload_config.GeneratePayload()
-    self.assertEqual(remoteUri, None)
-
   def testUnsignedMiniOS(self):
     """Test the happy path on unsigned minios images."""
 
@@ -148,27 +124,3 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
     payload_config.GeneratePayload()
     self.assertTrue(
         gspaths.IsUnsignedMiniOSImageArchive(payload_config.payload.tgt_image))
-
-  def testSkippedUnsignedMiniOSPayload(self):
-    """Test the unsigned minios images skip remote URI check."""
-
-    # Image defs.
-    src_image = payload_pb2.UnsignedImage(
-        build=self.src_build, image_type='IMAGE_TYPE_BASE', milestone='R79')
-    tgt_image = payload_pb2.UnsignedImage(
-        build=self.tgt_build, image_type='IMAGE_TYPE_BASE', milestone='R80')
-
-    payload_config = payload.PayloadConfig(
-        tgt_image=tgt_image,
-        src_image=src_image,
-        dest_bucket='test',
-        minios=True,
-        verify=True,
-        upload=True)
-
-    mockPaygenPayload = self.PatchObject(
-        paygen_payload_lib, 'PaygenPayload').return_value
-    mockPaygenPayload.skipped.return_value = True
-
-    _, remoteUri = payload_config.GeneratePayload()
-    self.assertEqual(remoteUri, None)
