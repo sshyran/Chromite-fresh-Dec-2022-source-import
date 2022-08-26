@@ -29,6 +29,8 @@ _VALID_MINIOS_PAIRS = (('src_signed_image', 'tgt_signed_image'),
                        ('full_update', 'tgt_unsigned_image'),
                        ('full_update', 'tgt_signed_image'))
 
+# TODO: Remove to use the standard cache directory if possible, otherwise
+#  document why it cannot be used and preferably move outside of the repo.
 _DEFAULT_PAYGEN_CACHE_DIR = '.paygen_cache'
 
 # We have more fields we might validate however, they're either

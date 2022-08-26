@@ -13,7 +13,8 @@ from chromite.lib import cros_test_lib
 from chromite.lib.paygen import paygen_payload_lib
 
 
-class PayloadApiTests(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
+class PayloadApiTests(cros_test_lib.MockTempDirTestCase,
+                      api_config.ApiConfigMixin):
   """Unittests for PayloadApi."""
 
   def setUp(self):
@@ -54,6 +55,9 @@ class PayloadApiTests(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         success=True,
         local_path='/tmp/aohiwdadoi/delta.bin',
         remote_uri='gs://something')
+
+    self.PatchObject(payload, '_DEFAULT_PAYGEN_CACHE_DIR',
+                     new=str(self.tempdir))
 
   def testValidateOnly(self):
     """Basic check that a validate only call does not execute any logic."""
