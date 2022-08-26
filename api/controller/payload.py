@@ -100,11 +100,11 @@ def GeneratePayload(input_proto: payload_pb2.GenerationRequest,
   local_path, remote_uri = '', ''
   try:
     local_path, remote_uri = payload_config.GeneratePayload()
-  except paygen_payload_lib.PayloadGenerationSkippedException as e:
+  except paygen_payload_lib.PayloadGenerationSkippedException:
     # If paygen was skipped, provide a reason if possible.
-    if isinstance(e, paygen_payload_lib.NoMiniOSPartitionException):
-      reason = payload_pb2.GenerationResponse.NOT_MINIOS_COMPATIBLE
-      output_proto.failure_reason = reason
+    # Only reason to skip right now is missing miniOS partitions.
+    reason = payload_pb2.GenerationResponse.NOT_MINIOS_COMPATIBLE
+    output_proto.failure_reason = reason
 
   _SetGeneratePayloadOutputProto(output_proto, local_path, remote_uri)
   if remote_uri or input_proto.dryrun and local_path:

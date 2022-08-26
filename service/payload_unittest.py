@@ -3,6 +3,8 @@
 # found in the LICENSE file.
 """Payload service tests."""
 
+from unittest import mock
+
 from chromite.api.gen.chromite.api import payload_pb2
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import cros_test_lib
@@ -17,6 +19,13 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
   def setUp(self):
     """Set up a payload test with the GeneratePayloads function mocked."""
     self.PatchObject(paygen_payload_lib, 'GeneratePayloads', return_value=None)
+
+    self.mockPaygenPayload = mock.MagicMock().return_value
+    self.mockPaygenPayload.skipped = False
+    self.PatchObject(
+        paygen_payload_lib,
+        'PaygenPayload',
+        return_value=self.mockPaygenPayload)
 
     # Common build defs.
     self.src_build = payload_pb2.Build(
@@ -105,7 +114,7 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
     self.assertTrue(gspaths.IsMiniOSImage(payload_config.payload.tgt_image))
 
   def testSkippedSignedMiniOSPayload(self):
-    """Test the signed minios images skip remote URI check."""
+    """Test the signed minios images skip payload generation."""
 
     # Image defs.
     src_image = payload_pb2.SignedImage(
@@ -121,9 +130,28 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
         verify=True,
         upload=True)
 
-    mockPaygenPayload = self.PatchObject(
-        paygen_payload_lib, 'PaygenPayload').return_value
-    mockPaygenPayload.skipped.return_value = True
+    self.mockPaygenPayload.skipped = True
+
+    with self.assertRaises(
+        paygen_payload_lib.PayloadGenerationSkippedException):
+      payload_config.GeneratePayload()
+
+  def testNoUploadSignedMiniOSPayload(self):
+    """Test the signed minios images skip upload remote URI check."""
+
+    # Image defs.
+    src_image = payload_pb2.SignedImage(
+        build=self.src_build, image_type='IMAGE_TYPE_BASE', key='cave-mp-v4')
+    tgt_image = payload_pb2.SignedImage(
+        build=self.tgt_build, image_type='IMAGE_TYPE_BASE', key='cave-mp-v4')
+
+    payload_config = payload.PayloadConfig(
+        tgt_image=tgt_image,
+        src_image=src_image,
+        dest_bucket='test',
+        minios=True,
+        verify=True,
+        upload=False)
 
     _, remoteUri = payload_config.GeneratePayload()
     self.assertEqual(remoteUri, None)
@@ -150,7 +178,7 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
         gspaths.IsUnsignedMiniOSImageArchive(payload_config.payload.tgt_image))
 
   def testSkippedUnsignedMiniOSPayload(self):
-    """Test the unsigned minios images skip remote URI check."""
+    """Test the unsigned minios images skip payload generation."""
 
     # Image defs.
     src_image = payload_pb2.UnsignedImage(
@@ -166,9 +194,28 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
         verify=True,
         upload=True)
 
-    mockPaygenPayload = self.PatchObject(
-        paygen_payload_lib, 'PaygenPayload').return_value
-    mockPaygenPayload.skipped.return_value = True
+    self.mockPaygenPayload.skipped = True
+
+    with self.assertRaises(
+        paygen_payload_lib.PayloadGenerationSkippedException):
+      payload_config.GeneratePayload()
+
+  def testNoUploadUnsignedMiniOSPayload(self):
+    """Test the unsigned minios images skip upload remote URI check."""
+
+    # Image defs.
+    src_image = payload_pb2.UnsignedImage(
+        build=self.src_build, image_type='IMAGE_TYPE_BASE', milestone='R79')
+    tgt_image = payload_pb2.UnsignedImage(
+        build=self.tgt_build, image_type='IMAGE_TYPE_BASE', milestone='R80')
+
+    payload_config = payload.PayloadConfig(
+        tgt_image=tgt_image,
+        src_image=src_image,
+        dest_bucket='test',
+        minios=True,
+        verify=True,
+        upload=False)
 
     _, remoteUri = payload_config.GeneratePayload()
     self.assertEqual(remoteUri, None)
