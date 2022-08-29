@@ -311,7 +311,7 @@ class RemoteDeviceTest(cros_test_lib.MockTestCase):
     self.rsh_mock.AddCmdResult(partial_mock.In('rm'))
 
   def testCommands(self):
-    """Tests simple run() and base_run() usage."""
+    """Tests simple run() usage."""
     command = ['echo', 'foo']
     expected_output = 'foo'
     self.rsh_mock.AddCmdResult(command, stdout=expected_output)
@@ -319,8 +319,6 @@ class RemoteDeviceTest(cros_test_lib.MockTestCase):
 
     with remote_access.RemoteDeviceHandler(remote_access.TEST_IP) as device:
       self.assertEqual(expected_output, device.run(['echo', 'foo']).stdout)
-      self.assertEqual(expected_output,
-                       device.base_run(['echo', 'foo']).stdout)
 
   def testCommandsExtraEnv(self):
     """Tests simple RunCommand() usage with extra_env arg."""

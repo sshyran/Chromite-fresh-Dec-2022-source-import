@@ -757,9 +757,7 @@ class RemoteDevice(object):
       hostname: The hostname of the device.
       port: The ssh port of the device.
       username: The ssh login username.
-      base_dir: The base work directory to create on the device, or
-        None. Required in order to use run(), but
-        base_run() will be available in either case.
+      base_dir: The base work directory to create on the device, or None.
       connect_settings: Default SSH connection settings.
       private_key: The identify file to pass to `ssh -i`.
       debug_level: Setting debug level for logging.
@@ -1169,22 +1167,6 @@ class RemoteDevice(object):
     """Reboot the device."""
     return self.GetAgent().RemoteReboot(timeout_sec=timeout_sec)
 
-  def base_run(self, cmd, **kwargs):
-    """Executes a shell command on the device with output captured by default.
-
-    Args:
-      cmd: command to run. See RemoteAccess.RemoteSh documentation.
-      **kwargs: keyword arguments to pass along with cmd. See
-        RemoteAccess.RemoteSh documentation.
-    """
-    kwargs.setdefault('debug_level', self.debug_level)
-    kwargs.setdefault('connect_settings', self.connect_settings)
-    try:
-      return self.GetAgent().RemoteSh(cmd, **kwargs)
-    except SSHConnectionError:
-      logging.error('Error connecting to device %s', self.hostname)
-      raise
-
   def run(self, cmd, **kwargs):
     """Executes a shell command on the device with output captured by default.
 
@@ -1196,6 +1178,9 @@ class RemoteDevice(object):
       **kwargs: keyword arguments to pass along with cmd. See
         RemoteAccess.RemoteSh documentation.
     """
+    kwargs.setdefault('debug_level', self.debug_level)
+    kwargs.setdefault('connect_settings', self.connect_settings)
+
     # Handle setting environment variables on the device by copying
     # and sourcing a temporary environment file.
     extra_env = kwargs.pop('extra_env', None)
@@ -1243,7 +1228,11 @@ class RemoteDevice(object):
       else:
         cmd = new_cmd + cmd
 
-    return self.base_run(cmd, **kwargs)
+    try:
+      return self.GetAgent().RemoteSh(cmd, **kwargs)
+    except SSHConnectionError:
+      logging.error('Error connecting to device %s', self.hostname)
+      raise
 
   def CheckIfRebooted(self, old_boot_id):
     """Checks if the remote device has successfully rebooted
