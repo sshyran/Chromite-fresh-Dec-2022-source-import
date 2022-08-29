@@ -282,7 +282,7 @@ ANDROID_ALL_PACKAGES = frozenset([ANDROID_PI_PACKAGE,
 ANDROID_PI_BUILD_BRANCH = 'git_pi-arc'
 ANDROID_VMRVC_BUILD_BRANCH = 'git_rvc-arc'
 ANDROID_VMSC_BUILD_BRANCH = 'git_sc-arc-dev'
-ANDROID_VMTM_BUILD_BRANCH = 'git_tm-arc-dev'
+ANDROID_VMTM_BUILD_BRANCH = 'git_tm-arc'
 ANDROID_VMUDC_BUILD_BRANCH = 'git_master-arc-dev'
 
 # Supported Android build targets for each branch. Maps from *_TARGET variables
