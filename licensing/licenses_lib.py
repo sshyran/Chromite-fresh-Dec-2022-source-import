@@ -352,7 +352,7 @@ class PackageInfo(object):
     self.name = package.package
     self.version = package.version
     self.revision = package.revision
-    self.fullname = package.cpv
+    self.fullname = package.cp
     self.fullnamerev = package.cpvr
 
     if fullnamerev != self.fullnamerev:
