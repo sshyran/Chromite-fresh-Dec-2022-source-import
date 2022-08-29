@@ -759,7 +759,7 @@ class RemoteDevice(object):
       username: The ssh login username.
       base_dir: The base work directory to create on the device, or
         None. Required in order to use run(), but
-        BaseRunCommand() will be available in either case.
+        base_run() will be available in either case.
       connect_settings: Default SSH connection settings.
       private_key: The identify file to pass to `ssh -i`.
       debug_level: Setting debug level for logging.
@@ -843,7 +843,7 @@ class RemoteDevice(object):
       return None
 
     if self._work_dir is None:
-      self._work_dir = self.BaseRunCommand(
+      self._work_dir = self.base_run(
           ['mkdir', '-p', self._base_dir, '&&',
            'mktemp', '-d', '--tmpdir=%s' % self._base_dir],
           capture_output=True).stdout.strip()
@@ -910,7 +910,7 @@ class RemoteDevice(object):
       # We want to run through all cleanup commands even if there are errors.
       kwargs.setdefault('check', False)
       try:
-        self.BaseRunCommand(cmd, **kwargs)
+        self.base_run(cmd, **kwargs)
       except SSHConnectionError:
         logging.error('Failed to connect to host in Cleanup, so '
                       'SSHConnectionError will not be raised.')
@@ -1078,7 +1078,7 @@ class RemoteDevice(object):
       command to get file size has failed.
     """
     cmd = ['du', '-Lb', '--max-depth=0', path]
-    result = self.BaseRunCommand(cmd, remote_sudo=True, capture_output=True)
+    result = self.base_run(cmd, remote_sudo=True, capture_output=True)
     return int(result.stdout.split()[0])
 
   def CatFile(self, path, max_size=1000000, encoding='utf-8'):
@@ -1169,11 +1169,6 @@ class RemoteDevice(object):
     """Reboot the device."""
     return self.GetAgent().RemoteReboot(timeout_sec=timeout_sec)
 
-  # TODO(vapier): Delete this shim once chromite & users migrate.
-  def BaseRunCommand(self, cmd, **kwargs):
-    """Backwards compat API."""
-    return self.base_run(cmd, **kwargs)
-
   def base_run(self, cmd, **kwargs):
     """Executes a shell command on the device with output captured by default.
 
@@ -1248,7 +1243,7 @@ class RemoteDevice(object):
       else:
         cmd = new_cmd + cmd
 
-    return self.BaseRunCommand(cmd, **kwargs)
+    return self.base_run(cmd, **kwargs)
 
   def CheckIfRebooted(self, old_boot_id):
     """Checks if the remote device has successfully rebooted
@@ -1333,7 +1328,7 @@ class ChromiumOSDevice(RemoteDevice):
     """The $PATH variable on the device."""
     if not self._orig_path:
       try:
-        result = self.BaseRunCommand(['echo', '${PATH}'])
+        result = self.base_run(['echo', '${PATH}'])
       except cros_build_lib.RunCommandError as e:
         logging.error('Failed to get $PATH on the device: %s', e.stderr)
         raise

@@ -52,7 +52,7 @@ class ShellTest(cros_test_lib.MockTempDirTestCase):
         remote_access, 'ChromiumOSDevice', autospec=True).return_value
     self.mock_device.hostname = self.DEVICE_IP
     self.mock_device.connection_type = None
-    self.mock_base_run_command = self.mock_device.BaseRunCommand
+    self.mock_base_run_command = self.mock_device.base_run
     self.mock_base_run_command.return_value = cros_build_lib.CompletedProcess()
 
   def testSshInteractive(self):
@@ -65,7 +65,7 @@ class ShellTest(cros_test_lib.MockTempDirTestCase):
     self.cmd_mock.inst.Run()
 
     self.assertEqual(self.mock_base_run_command.call_count, 1)
-    # Make sure that BaseRunCommand() started an interactive session (no cmd).
+    # Make sure that base_run() started an interactive session (no cmd).
     self.assertEqual(self.mock_base_run_command.call_args[0][0], [])
     self.assertFalse(self.mock_prompt.called)
 
@@ -94,7 +94,7 @@ class ShellTest(cros_test_lib.MockTempDirTestCase):
                      ['ls', '-l', '/etc'])
 
   def testSshReturnValue(self):
-    """Tests that `cros shell` returns the exit code of BaseRunCommand()."""
+    """Tests that `cros shell` returns the exit code of base_run()."""
     self.SetupCommandMock([self.DEVICE_IP])
     self.mock_base_run_command.return_value.returncode = 42
 
@@ -108,7 +108,7 @@ class ShellTest(cros_test_lib.MockTempDirTestCase):
     """
     self.SetupCommandMock([self.DEVICE_IP])
     error_message = 'Test error message'
-    # BaseRunCommand() gives a key mismatch error the first time only.
+    # base_run() gives a key mismatch error the first time only.
     self.mock_base_run_command.side_effect = [_KeyMismatchError(error_message),
                                               cros_build_lib.CompletedProcess()]
     # User chooses to continue.

@@ -156,7 +156,7 @@ Quoting can be tricky; the rules are the same as with ssh:
           base_dir=None,
           private_key=self.ssh_private_key,
           ping=False)
-    return self.device.BaseRunCommand(
+    return self.device.base_run(
         self.command,
         connect_settings=self._ConnectSettings(),
         check=False,

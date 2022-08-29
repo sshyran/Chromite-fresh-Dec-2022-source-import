@@ -94,7 +94,7 @@ To debug a process by its pid:
       return
 
     try:
-      result = device.BaseRunCommand(['ps', 'aux'])
+      result = device.base_run(['ps', 'aux'])
       lines = result.stdout.splitlines()
       try:
         header, procs = lines[0], lines[1:]
