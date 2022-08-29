@@ -404,8 +404,9 @@ def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Test,
   generated = []
 
   artifact_types = {
-      in_proto.ArtifactType.CODE_COVERAGE_LLVM_JSON:
+      in_proto.ArtifactType.CODE_COVERAGE_LLVM_JSON: functools.partial(
           test.BundleCodeCoverageLlvmJson,
+          build_target.name),
       in_proto.ArtifactType.HWQUAL: functools.partial(
           test.BundleHwqualTarball,
           build_target.name, packages_service.determine_full_version()),

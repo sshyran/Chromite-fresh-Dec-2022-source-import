@@ -29,6 +29,9 @@ if TYPE_CHECKING:
   from chromite.lib import sysroot_lib
   from chromite.lib.parser import package_info
 
+CHROMITE_UTILS_PATH = 'chromite/utils/data'
+COVERAGE_BOARD_OWNERSHIP_JSON = 'code_coverage_board_ownership.json'
+
 
 class Error(Exception):
   """The module's base error class."""
@@ -389,13 +392,45 @@ def _VMTestChrome(board: str, sdk_cmd: commands.ChromeSDK) -> None:
   if image_path and os.path.exists(image_path):
     sdk_cmd.VMTest(image_path)
 
+def _GetZeroCoverageDirectories(
+    build_target: 'build_target_lib.BuildTarget') -> List[str]:
+  """Get the list of directories to generate zero coverage for.
 
-def BundleCodeCoverageLlvmJson(chroot: 'chroot_lib.Chroot',
+  Args:
+    build_target: The build target we want to choose directories for.
+
+  Returns:
+    List of directories that we should generate zero coverage for.
+  """
+  # TODO(b/244365763): Get this mapping dynamically instead of the static json.
+  owners_path = os.path.join(
+      constants.SOURCE_ROOT, CHROMITE_UTILS_PATH, COVERAGE_BOARD_OWNERSHIP_JSON)
+  if not os.path.exists(owners_path):
+    raise ValueError('Coverage boards ownership json does not'
+                     f'exists {owners_path}')
+
+  content = osutils.ReadFile(owners_path)
+  owners_json = json.loads(content)
+  if not owners_json:
+    raise ValueError(f'Could not read board ownership json {owners_path}')
+
+  if owners_json[build_target] is None:
+    raise ValueError(f'No ownership data found for {build_target}'
+                     f'at {owners_path}')
+
+  dirs = [
+      os.path.join(constants.SOURCE_ROOT, d)
+      for d in owners_json[build_target]]
+  return dirs
+
+def BundleCodeCoverageLlvmJson(build_target: 'build_target_lib.BuildTarget',
+                               chroot: 'chroot_lib.Chroot',
                                sysroot_class: 'sysroot_lib.Sysroot',
                                output_dir: str) -> Optional[str]:
   """Bundle code coverage llvm json into a tarball for importing into GCE.
 
   Args:
+    build_target: The build target.
     chroot: The chroot class used for these artifacts.
     sysroot_class: The sysroot class used for these artifacts.
     output_dir: The path to write artifacts to.
@@ -423,10 +458,8 @@ def BundleCodeCoverageLlvmJson(chroot: 'chroot_lib.Chroot',
     zero_coverage_json = code_coverage_util.GenerateZeroCoverageLlvm(
         # TODO(b/227649725): Input path_to_src_directories and language specific
         # src_file_extensions and exclude_line_prefixes from GetArtifact API
-        path_to_src_directories=[
-            os.path.join(constants.SOURCE_ROOT, 'src/platform/'),
-            os.path.join(constants.SOURCE_ROOT, 'src/platform2/')
-        ],
+        path_to_src_directories=_GetZeroCoverageDirectories(
+            build_target=build_target),
         src_file_extensions=constants.ZERO_COVERAGE_FILE_EXTENSIONS_TO_PROCESS,
         exclude_line_prefixes=constants.ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES,
         exclude_files=files_with_cov,

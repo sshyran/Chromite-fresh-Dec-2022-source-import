@@ -279,15 +279,16 @@ class BundleCodeCoverageLlvmJsonTest(cros_test_lib.MockTempDirTestCase):
     GatherCodeCoverageLlvmJsonFile_mock = self.PatchObject(
         test, 'GatherCodeCoverageLlvmJsonFile', return_value=None)
 
-    test.BundleCodeCoverageLlvmJson(self.chroot, self.sysroot, self.output_dir)
+    test.BundleCodeCoverageLlvmJson(
+        'brya', self.chroot, self.sysroot, self.output_dir)
     GatherCodeCoverageLlvmJsonFile_mock.assert_called_once()
 
   def testReturnNoneWhenGatherCodeCoverageLlvmJsonFileReturnsNone(self):
     """Test returns None when no coverage files were found."""
     self.PatchObject(test, 'GatherCodeCoverageLlvmJsonFile', return_value=None)
 
-    result = test.BundleCodeCoverageLlvmJson(self.chroot, self.sysroot,
-                                             self.output_dir)
+    result = test.BundleCodeCoverageLlvmJson(
+        'brya', self.chroot, self.sysroot, self.output_dir)
     self.assertIsNone(result)
 
   def testCreateTarballIsCalled1Time(self):
@@ -307,7 +308,8 @@ class BundleCodeCoverageLlvmJsonTest(cros_test_lib.MockTempDirTestCase):
     CreateTarball_mock = self.PatchObject(
         cros_build_lib, 'CreateTarball', return_value=create_tarball_result)
 
-    test.BundleCodeCoverageLlvmJson(self.chroot, self.sysroot, self.output_dir)
+    test.BundleCodeCoverageLlvmJson(
+        'brya', self.chroot, self.sysroot, self.output_dir)
     CreateTarball_mock.assert_called_once()
 
   def testGenerateZeroCoverageLlvmCalled1Time(self):
@@ -327,7 +329,8 @@ class BundleCodeCoverageLlvmJsonTest(cros_test_lib.MockTempDirTestCase):
     GenerateZeroCoverageLlvm_mock = self.PatchObject(
         code_coverage_util, 'GenerateZeroCoverageLlvm')
 
-    test.BundleCodeCoverageLlvmJson(self.chroot, self.sysroot, self.output_dir)
+    test.BundleCodeCoverageLlvmJson(
+        'brya', self.chroot, self.sysroot, self.output_dir)
 
     GenerateZeroCoverageLlvm_mock.assert_called_once()
 
@@ -341,8 +344,8 @@ class BundleCodeCoverageLlvmJsonTest(cros_test_lib.MockTempDirTestCase):
     self.PatchObject(
         cros_build_lib, 'CreateTarball', return_value=create_tarball_result)
 
-    result = test.BundleCodeCoverageLlvmJson(self.chroot, self.sysroot,
-                                             self.output_dir)
+    result = test.BundleCodeCoverageLlvmJson(
+        'brya', self.chroot, self.sysroot, self.output_dir)
     self.assertIsNone(result)
 
   def testShouldReturnPathToTarballOnSuccess(self):
@@ -362,8 +365,8 @@ class BundleCodeCoverageLlvmJsonTest(cros_test_lib.MockTempDirTestCase):
     self.PatchObject(
         cros_build_lib, 'CreateTarball', return_value=create_tarball_result)
 
-    result = test.BundleCodeCoverageLlvmJson(self.chroot, self.sysroot,
-                                             self.output_dir)
+    result = test.BundleCodeCoverageLlvmJson(
+        'brya', self.chroot, self.sysroot, self.output_dir)
 
     self.assertEqual(
         os.path.join(self.output_dir,

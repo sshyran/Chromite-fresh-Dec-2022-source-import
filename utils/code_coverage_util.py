@@ -283,7 +283,7 @@ def GenerateZeroCoverageLlvm(
     src_prefix_path: str) -> Dict:
   """Generate zero coverage for all src files under  |path_to_src_directories|.
 
-     More detials on how to generate zero coverage: go/chromeos-zero-coverage.
+     More details on how to generate zero coverage: go/chromeos-zero-coverage.
 
   Args:
     path_to_src_directories: Dir to look for files to generate zero coverage.
@@ -299,7 +299,7 @@ def GenerateZeroCoverageLlvm(
   coverage_data = []
   filenames = []
   for basedir in path_to_src_directories:
-    for dirpath, _dirnames, filenames in os.walk(basedir):
+    for dirpath, _, filenames in os.walk(basedir):
       for filename in filenames:
         full_file_path = os.path.join(dirpath, filename)
         relative_file_path = full_file_path.replace(basedir, '')
