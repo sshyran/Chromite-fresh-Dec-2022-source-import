@@ -633,7 +633,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "atlas-kernelnext",
@@ -4101,7 +4101,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "draco",
@@ -4220,7 +4220,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "elm-kernelnext",
@@ -4453,7 +4453,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "fizz-cfm",
@@ -5436,7 +5436,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "hatch-arc-r-userdebug",
@@ -6865,7 +6865,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "kukui-arc-r",
@@ -7189,7 +7189,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "nami-kernelnext",
@@ -7394,7 +7394,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "nissa",
@@ -9541,7 +9541,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "puff-moblab",
@@ -9643,7 +9643,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "rammus-arc-r-userdebug",
@@ -9706,7 +9706,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "reef-arc-r",
@@ -9824,7 +9824,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "sarien-kernelnext",
@@ -10054,7 +10054,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 106
     },
     {
       "name": "skyrim",
@@ -10662,7 +10662,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "trogdor-arc-r",
@@ -11356,7 +11356,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "volteer-kernelnext",
@@ -11958,7 +11958,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "zork-arc-r",
