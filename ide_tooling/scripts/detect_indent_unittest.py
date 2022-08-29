@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # Copyright 2022 The ChromiumOS Authors.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -81,6 +80,3 @@ class GenerateTest(cros_test_lib.TestCase):
     for text, expected in cases.items():
       detected = detect_indent.detect_indentation(text)
       self.assertEqual(detected, expected)
-
-if __name__ == '__main__':
-  cros_test_lib.main(module=__name__)
