@@ -52,8 +52,8 @@ class ShellTest(cros_test_lib.MockTempDirTestCase):
         remote_access, 'ChromiumOSDevice', autospec=True).return_value
     self.mock_device.hostname = self.DEVICE_IP
     self.mock_device.connection_type = None
-    self.mock_base_run_command = self.mock_device.base_run
-    self.mock_base_run_command.return_value = cros_build_lib.CompletedProcess()
+    self.mock_run_command = self.mock_device.run
+    self.mock_run_command.return_value = cros_build_lib.CompletedProcess()
 
   def testSshInteractive(self):
     """Tests flow for an interactive session.
@@ -64,9 +64,9 @@ class ShellTest(cros_test_lib.MockTempDirTestCase):
     self.SetupCommandMock([self.DEVICE_IP])
     self.cmd_mock.inst.Run()
 
-    self.assertEqual(self.mock_base_run_command.call_count, 1)
-    # Make sure that base_run() started an interactive session (no cmd).
-    self.assertEqual(self.mock_base_run_command.call_args[0][0], [])
+    self.assertEqual(self.mock_run_command.call_count, 1)
+    # Make sure that run() started an interactive session (no cmd).
+    self.assertEqual(self.mock_run_command.call_args[0][0], [])
     self.assertFalse(self.mock_prompt.called)
 
   def testSshNonInteractiveSingleArg(self):
@@ -78,8 +78,7 @@ class ShellTest(cros_test_lib.MockTempDirTestCase):
     self.SetupCommandMock([self.DEVICE_IP, 'ls -l /etc'])
     self.cmd_mock.inst.Run()
 
-    self.assertEqual(self.mock_base_run_command.call_args[0][0],
-                     ['ls -l /etc'])
+    self.assertEqual(self.mock_run_command.call_args[0][0], ['ls -l /etc'])
 
   def testSshNonInteractiveMultipleArgs(self):
     """Tests a non-interactive command as multiple arguments with "--".
@@ -90,13 +89,13 @@ class ShellTest(cros_test_lib.MockTempDirTestCase):
     self.SetupCommandMock([self.DEVICE_IP, '--', 'ls', '-l', '/etc'])
     self.cmd_mock.inst.Run()
 
-    self.assertEqual(self.mock_base_run_command.call_args[0][0],
+    self.assertEqual(self.mock_run_command.call_args[0][0],
                      ['ls', '-l', '/etc'])
 
   def testSshReturnValue(self):
-    """Tests that `cros shell` returns the exit code of base_run()."""
+    """Tests that `cros shell` returns the exit code of run()."""
     self.SetupCommandMock([self.DEVICE_IP])
-    self.mock_base_run_command.return_value.returncode = 42
+    self.mock_run_command.return_value.returncode = 42
 
     self.assertEqual(self.cmd_mock.inst.Run(), 42)
 
@@ -108,9 +107,9 @@ class ShellTest(cros_test_lib.MockTempDirTestCase):
     """
     self.SetupCommandMock([self.DEVICE_IP])
     error_message = 'Test error message'
-    # base_run() gives a key mismatch error the first time only.
-    self.mock_base_run_command.side_effect = [_KeyMismatchError(error_message),
-                                              cros_build_lib.CompletedProcess()]
+    # run() gives a key mismatch error the first time only.
+    self.mock_run_command.side_effect = [_KeyMismatchError(error_message),
+                                         cros_build_lib.CompletedProcess()]
     # User chooses to continue.
     self.mock_prompt.return_value = True
 
@@ -118,7 +117,7 @@ class ShellTest(cros_test_lib.MockTempDirTestCase):
 
     self.assertIn(error_message, self.caplog.text)
     self.assertTrue(self.mock_prompt.called)
-    self.assertEqual(self.mock_base_run_command.call_count, 2)
+    self.assertEqual(self.mock_run_command.call_count, 2)
     self.assertTrue(self.mock_remove_known_host.called)
 
   def testSshKeyChangeAbort(self):
@@ -128,14 +127,14 @@ class ShellTest(cros_test_lib.MockTempDirTestCase):
     no host keys should be removed.
     """
     self.SetupCommandMock([self.DEVICE_IP])
-    self.mock_base_run_command.side_effect = _KeyMismatchError()
+    self.mock_run_command.side_effect = _KeyMismatchError()
     # User chooses to abort.
     self.mock_prompt.return_value = False
 
     self.cmd_mock.inst.Run()
 
     self.assertTrue(self.mock_prompt.called)
-    self.assertEqual(self.mock_base_run_command.call_count, 1)
+    self.assertEqual(self.mock_run_command.call_count, 1)
     self.assertFalse(self.mock_remove_known_host.called)
 
   def testSshConnectError(self):
@@ -145,10 +144,10 @@ class ShellTest(cros_test_lib.MockTempDirTestCase):
     no host keys should be removed.
     """
     self.SetupCommandMock([self.DEVICE_IP])
-    self.mock_base_run_command.side_effect = remote_access.SSHConnectionError()
+    self.mock_run_command.side_effect = remote_access.SSHConnectionError()
 
     self.assertRaises(remote_access.SSHConnectionError, self.cmd_mock.inst.Run)
 
     self.assertFalse(self.mock_prompt.called)
-    self.assertEqual(self.mock_base_run_command.call_count, 1)
+    self.assertEqual(self.mock_run_command.call_count, 1)
     self.assertFalse(self.mock_remove_known_host.called)
