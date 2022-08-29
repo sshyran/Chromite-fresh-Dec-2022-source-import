@@ -33,7 +33,7 @@
           "arch": "X86_INTERNAL"
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "betty-arc-r",
@@ -293,7 +293,7 @@
           "arch": "X86_INTERNAL"
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "reven",
@@ -371,7 +371,7 @@
           "arch": "ARM_INTERNAL"
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "tatl",
@@ -384,7 +384,7 @@
           "arch": "X86_INTERNAL"
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 107
     },
     {
       "name": "unknown",
