@@ -54,7 +54,7 @@ class DeviceTester(cros_test_lib.RunCommandTestCase):
         boot_mock.assert_called()
 
     @mock.patch(
-        "chromite.lib.device.Device.remote_run",
+        "chromite.lib.device.Device.run",
         return_value=cros_build_lib.CompletedProcess(returncode=1),
     )
     def testWaitForBootReturnCode(self, boot_mock):
@@ -64,7 +64,7 @@ class DeviceTester(cros_test_lib.RunCommandTestCase):
 
     def testRemoteCmd(self):
         """Verify remote command runs correctly with default arguments."""
-        self._device.remote_run(["/usr/local/autotest/bin/vm_sanity"])
+        self._device.run(["/usr/local/autotest/bin/vm_sanity"])
         self.assertCommandContains(["/usr/local/autotest/bin/vm_sanity"])
         self.assertCommandContains(
             capture_output=True, stderr=subprocess.STDOUT, log_output=True
@@ -72,7 +72,7 @@ class DeviceTester(cros_test_lib.RunCommandTestCase):
 
     def testRemoteCmdStream(self):
         """Verify remote command for streaming output."""
-        self._device.remote_run(
+        self._device.run(
             "/usr/local/autotest/bin/vm_sanity", stream_output=True
         )
         self.assertCommandContains(capture_output=False)

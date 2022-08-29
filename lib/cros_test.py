@@ -356,7 +356,7 @@ class CrOSTest(object):
         """
 
         browser = "system-guest" if self.guest else "system"
-        return self._device.remote_run(
+        return self._device.run(
             [
                 "python",
                 "/usr/local/telemetry/src/third_party/catapult/telemetry/bin/run_tests",
@@ -561,7 +561,7 @@ class CrOSTest(object):
         elif self.chrome_test:
             result = self._RunChromeTest()
         else:
-            result = self._device.remote_run(
+            result = self._device.run(
                 ["/usr/local/autotest/bin/vm_sanity.py"], stream_output=True
             )
 
@@ -641,43 +641,41 @@ class CrOSTest(object):
         cwd = self.cwd
         if files and not (cwd and os.path.isabs(cwd)):
             cwd = os.path.join(DEST_BASE, cwd) if cwd else DEST_BASE
-            self._device.remote_run(["mkdir", "-p", cwd])
+            self._device.run(["mkdir", "-p", cwd])
 
         if self.as_chronos:
             # This authorizes the test ssh keys with chronos.
-            self._device.remote_run(
-                ["cp", "-r", "/root/.ssh/", "/home/chronos/user/"]
-            )
+            self._device.run(["cp", "-r", "/root/.ssh/", "/home/chronos/user/"])
             if files:
                 # The trailing ':' after the user also changes the group to the user's
                 # primary group.
-                self._device.remote_run(["chown", "-R", "chronos:", DEST_BASE])
+                self._device.run(["chown", "-R", "chronos:", DEST_BASE])
 
         user = "chronos" if self.as_chronos else None
         if cwd:
             # Run the remote command with cwd.
             cmd = "cd %s && %s" % (cwd, " ".join(self.args))
             # Pass shell=True because of && in the cmd.
-            result = self._device.remote_run(
+            result = self._device.run(
                 cmd, stream_output=True, shell=True, remote_user=user
             )
         else:
-            result = self._device.remote_run(
+            result = self._device.run(
                 self.args, stream_output=True, remote_user=user
             )
 
         # Cleanup.
         if files:
-            self._device.remote_run(["rm", "-rf", DEST_BASE])
+            self._device.run(["rm", "-rf", DEST_BASE])
 
         return result
 
     def _RunChromeTest(self):
         # Stop UI in case the test needs to grab GPU.
-        self._device.remote_run("stop ui")
+        self._device.run("stop ui")
 
         # Send a user activity ping to powerd to light up the display.
-        self._device.remote_run(
+        self._device.run(
             [
                 "dbus-send",
                 "--system",
@@ -701,7 +699,7 @@ class CrOSTest(object):
             test_binary,
             " ".join(test_args),
         )
-        result = self._device.remote_run(command, stream_output=True)
+        result = self._device.run(command, stream_output=True)
         return result
 
 

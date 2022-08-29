@@ -442,7 +442,7 @@ class VM(device.Device):
         if self.cmd:
             if not self.IsRunning():
                 raise VMError("VM not running.")
-            self.remote_run(self.cmd, stream_output=True)
+            self.run(self.cmd, stream_output=True)
         if self.stop:
             self.Stop()
 

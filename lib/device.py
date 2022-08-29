@@ -68,7 +68,7 @@ class Device(object):
             result = retry_util.RetryException(
                 exception=remote_access.SSHConnectionError,
                 max_retry=max_retry,
-                functor=lambda: self.remote_run(cmd=["true"]),
+                functor=lambda: self.run(cmd=["true"]),
                 sleep=sleep,
             )
         except remote_access.SSHConnectionError:
@@ -79,7 +79,7 @@ class Device(object):
         if result.returncode != 0:
             raise DeviceError("WaitForBoot failed: %s." % result.stderr)
 
-    def remote_run(self, cmd, stream_output=False, **kwargs):
+    def run(self, cmd, stream_output=False, **kwargs):
         """Run a remote command.
 
         Args:
