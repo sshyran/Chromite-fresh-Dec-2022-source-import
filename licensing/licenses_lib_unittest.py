@@ -355,8 +355,6 @@ obj /file bd1b4ffa168f50b0d45571dae51eefc7 1611355468""",
     # These are known bad packages.
     licenses_lib._CheckForKnownBadLicenses(
         'chromeos-base/google-sans-fonts-1-r13', {'Google-TOS'})
-    licenses_lib._CheckForKnownBadLicenses(
-        'sys-firmware/dell-dock-0.1', {'no-source-code'})
 
     # These packages should not be allowed.
     with self.assertRaises(licenses_lib.PackageLicenseError):
@@ -365,9 +363,6 @@ obj /file bd1b4ffa168f50b0d45571dae51eefc7 1611355468""",
     with self.assertRaises(licenses_lib.PackageLicenseError):
       licenses_lib._CheckForKnownBadLicenses(
           'sys-apps/portage-123', {'GPL-2', 'Google-TOS'})
-    with self.assertRaises(licenses_lib.PackageLicenseError):
-      licenses_lib._CheckForKnownBadLicenses(
-          'sys-apps/portage-123', {'no-source-code'})
 
   def testHookPackageProcess(self):
     build_infos_path = os.path.join(self.tempdir, 'build_infos')

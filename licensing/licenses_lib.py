@@ -938,18 +938,6 @@ def _CheckForKnownBadLicenses(cpf, licenses):
       raise PackageLicenseError(
           f'{cpf}: Proprietary-Binary is not a valid license.')
 
-  # TODO(crbug.com/1111077): Remove this entirely.
-  # We allow a few packages for now so new packages will stop showing up.
-  if 'no-source-code' in licenses:
-    # Note: DO NOT ADD ANY MORE PACKAGES HERE.
-    LEGACY_PKGS = (
-        'sys-firmware/dell-disk',
-        'sys-firmware/dell-dock',
-    )
-    if not any(cpf.startswith(x) for x in LEGACY_PKGS):
-      raise PackageLicenseError(
-          f'{cpf}: no-source-code is not a valid license')
-
   # TODO(b/187789754): Remove this entirely.
   # We allow a few packages for now so new packages will stop showing up.
   if 'Google-TOS' in licenses:
