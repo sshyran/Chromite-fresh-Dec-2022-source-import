@@ -487,7 +487,7 @@ To install the debug symbols for all available packages, run:
             ]
 
         if device:
-            ssh_cmd = device.GetAgent().GetSSHCommand(self.ssh_settings)
+            ssh_cmd = device.agent.GetSSHCommand(self.ssh_settings)
 
             ssh_cmd.extend(["--", "gdbserver"])
 

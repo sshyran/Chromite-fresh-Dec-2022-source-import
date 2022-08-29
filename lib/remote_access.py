@@ -870,7 +870,7 @@ class RemoteDevice(object):
         # The temporary work directories on the device.
         self._base_dir = base_dir
         self._work_dir = None
-        # Use GetAgent() instead of accessing this directly for deferred connect.
+        # Use agent instead of accessing this directly for deferred connect.
         self._agent = None
         self.cleanup_cmds = []
 
@@ -915,7 +915,8 @@ class RemoteDevice(object):
         )
         return result.returncode == 0
 
-    def GetAgent(self):
+    @property
+    def agent(self):
         """Agent accessor; connects the agent if necessary."""
         if not self._agent:
             self._Connect()
@@ -969,7 +970,7 @@ class RemoteDevice(object):
         This will cache the result and assume that $PATH does not have entries
         added ore removed for the life of the connection.
         """
-        result = self.GetAgent().RemoteSh(
+        result = self.agent.RemoteSh(
             ["PATH=%s:$PATH which" % DEV_BIN_PATHS, binary], check=False
         )
         return result.returncode == 0
@@ -985,7 +986,7 @@ class RemoteDevice(object):
 
         The function checkes the device's first ethernet interface (eth0).
         """
-        result = self.GetAgent().RemoteSh(
+        result = self.agent.RemoteSh(
             ["ethtool", "eth0"], check=False, capture_output=True
         )
         return re.search(r"Speed: \d+000Mb/s", result.stdout)
@@ -1114,9 +1115,9 @@ class RemoteDevice(object):
         if mode == "scp" or not self.HasRsync():
             # scp always follow symlinks
             kwargs.pop("follow_symlinks", None)
-            func = self.GetAgent().Scp
+            func = self.agent.Scp
         else:
-            func = self.GetAgent().Rsync
+            func = self.agent.Rsync
 
         return RunCommandFuncWrapper(func, msg, src, dest, **kwargs)
 
@@ -1135,9 +1136,9 @@ class RemoteDevice(object):
         if mode == "scp" or not self.HasRsync():
             # scp always follow symlinks
             kwargs.pop("follow_symlinks", None)
-            func = self.GetAgent().ScpToLocal
+            func = self.agent.ScpToLocal
         else:
-            func = self.GetAgent().RsyncToLocal
+            func = self.agent.RsyncToLocal
 
         return RunCommandFuncWrapper(func, msg, src, dest, **kwargs)
 
@@ -1174,7 +1175,7 @@ class RemoteDevice(object):
           path: Directory on the device to check.
         """
         tmp_file = os.path.join(path, ".tmp.remote_access.is.writable")
-        result = self.GetAgent().RemoteSh(
+        result = self.agent.RemoteSh(
             ["touch", tmp_file, "&&", "rm", tmp_file],
             check=False,
             remote_sudo=True,
@@ -1200,7 +1201,7 @@ class RemoteDevice(object):
             "-x",
             path,
         ]
-        result = self.GetAgent().RemoteSh(
+        result = self.agent.RemoteSh(
             cmd, remote_sudo=True, check=False, capture_output=True
         )
         return result.returncode == 0
@@ -1287,7 +1288,7 @@ class RemoteDevice(object):
     def PipeOverSSH(self, filepath, cmd, **kwargs):
         """Cat a file and pipe over SSH."""
         producer_cmd = ["cat", filepath]
-        return self.GetAgent().PipeToRemoteSh(producer_cmd, cmd, **kwargs)
+        return self.agent.PipeToRemoteSh(producer_cmd, cmd, **kwargs)
 
     def GetRunningPids(self, exe, full_path=True):
         """Get all the running pids on the device with the executable path.
@@ -1304,9 +1305,7 @@ class RemoteDevice(object):
             cmd = ["pgrep", exe]
             if full_path:
                 cmd.append("-f")
-            result = self.GetAgent().RemoteSh(
-                cmd, check=False, capture_output=True
-            )
+            result = self.agent.RemoteSh(cmd, check=False, capture_output=True)
             try:
                 return [int(pid) for pid in result.stdout.splitlines()]
             except ValueError:
@@ -1318,7 +1317,7 @@ class RemoteDevice(object):
 
     def Reboot(self, timeout_sec=REBOOT_MAX_WAIT):
         """Reboot the device."""
-        return self.GetAgent().RemoteReboot(timeout_sec=timeout_sec)
+        return self.agent.RemoteReboot(timeout_sec=timeout_sec)
 
     def run(self, cmd, **kwargs):
         """Executes a shell command on the device with output captured by default.
@@ -1339,7 +1338,7 @@ class RemoteDevice(object):
         extra_env = kwargs.pop("extra_env", None)
         if extra_env:
             remote_sudo = kwargs.pop("remote_sudo", False)
-            if remote_sudo and self.GetAgent().username == ROOT_ACCOUNT:
+            if remote_sudo and self.agent.username == ROOT_ACCOUNT:
                 remote_sudo = False
 
             new_cmd = []
@@ -1400,7 +1399,7 @@ class RemoteDevice(object):
                 cmd = new_cmd + cmd
 
         try:
-            return self.GetAgent().RemoteSh(cmd, **kwargs)
+            return self.agent.RemoteSh(cmd, **kwargs)
         except SSHConnectionError:
             logging.error("Error connecting to device %s", self.hostname)
             raise
@@ -1416,7 +1415,7 @@ class RemoteDevice(object):
         Returns:
           True if the device has successfully rebooted, false otherwise.
         """
-        return self.GetAgent().CheckIfRebooted(old_boot_id)
+        return self.agent.CheckIfRebooted(old_boot_id)
 
     def AwaitReboot(self, old_boot_id):
         """Await reboot away from old_boot_id.
@@ -1427,7 +1426,7 @@ class RemoteDevice(object):
         Returns:
           True if the device has successfully rebooted.
         """
-        return self.GetAgent().AwaitReboot(old_boot_id)
+        return self.agent.AwaitReboot(old_boot_id)
 
     def GetDecompressor(self, compression):
         """Returns a decompressor command on a remote device.

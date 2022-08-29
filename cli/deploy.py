@@ -419,7 +419,7 @@ print(json.dumps(pkg_info))
         """Initializes a dictionary of packages installed on |device|."""
         get_vartree_script = self._GetVartreeSnippet(root)
         try:
-            result = device.GetAgent().RemoteSh(
+            result = device.agent.RemoteSh(
                 ["python"], remote_sudo=True, input=get_vartree_script
             )
         except cros_build_lib.RunCommandError as e:

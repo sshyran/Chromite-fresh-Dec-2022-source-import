@@ -462,7 +462,7 @@ class CrOSTest(object):
             )
             private_key = (
                 self._device.private_key
-                or self._device.remote.GetAgent().private_key
+                or self._device.remote.agent.private_key
             )
             assert private_key, "ssh private key not found."
             cmd += [

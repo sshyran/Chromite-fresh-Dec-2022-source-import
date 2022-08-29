@@ -78,7 +78,8 @@ class ChromiumOSDeviceHandlerFake(object):
         self.device = ChromiumOSDeviceFake()
 
     # TODO(dpursell): Mock remote access object in cros_test_lib (brbug.com/986).
-    def GetAgent(self):
+    @property
+    def agent(self):
         return self._agent
 
     def __exit__(self, _type, _value, _traceback):
@@ -161,7 +162,7 @@ class TestInstallPackageScanner(cros_test_lib.MockOutputTestCase):
         self.PatchObject(deploy, "_GetDLCInfo", return_value=(None, None))
 
     def SetupVartree(self, vartree_pkgs):
-        self.device.GetAgent().remote_sh_output = json.dumps(vartree_pkgs)
+        self.device.agent.remote_sh_output = json.dumps(vartree_pkgs)
 
     def SetupBintree(self, bintree_pkgs):
         bintree = PortageTreeFake(DbApiFake(bintree_pkgs))
