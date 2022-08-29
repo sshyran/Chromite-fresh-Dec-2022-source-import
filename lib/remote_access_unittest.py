@@ -365,8 +365,7 @@ class RemoteDeviceTest(cros_test_lib.MockTestCase):
 
     with remote_access.RemoteDeviceHandler(
         remote_access.TEST_IP, base_dir=None) as device:
-      self.assertEqual(expected_output,
-                       device.base_run(['echo', 'foo']).stdout)
+      self.assertEqual(expected_output, device.run(['echo', 'foo']).stdout)
 
   def testDelayedRemoteDirs(self):
     """Tests the delayed creation of base_dir/work_dir."""

@@ -843,7 +843,7 @@ class RemoteDevice(object):
       return None
 
     if self._work_dir is None:
-      self._work_dir = self.base_run(
+      self._work_dir = self.run(
           ['mkdir', '-p', self._base_dir, '&&',
            'mktemp', '-d', '--tmpdir=%s' % self._base_dir],
           capture_output=True).stdout.strip()
@@ -910,7 +910,7 @@ class RemoteDevice(object):
       # We want to run through all cleanup commands even if there are errors.
       kwargs.setdefault('check', False)
       try:
-        self.base_run(cmd, **kwargs)
+        self.run(cmd, **kwargs)
       except SSHConnectionError:
         logging.error('Failed to connect to host in Cleanup, so '
                       'SSHConnectionError will not be raised.')
@@ -1078,7 +1078,7 @@ class RemoteDevice(object):
       command to get file size has failed.
     """
     cmd = ['du', '-Lb', '--max-depth=0', path]
-    result = self.base_run(cmd, remote_sudo=True, capture_output=True)
+    result = self.run(cmd, remote_sudo=True, capture_output=True)
     return int(result.stdout.split()[0])
 
   def CatFile(self, path, max_size=1000000, encoding='utf-8'):
@@ -1106,8 +1106,8 @@ class RemoteDevice(object):
         raise CatFileError('File "%s" is larger than %d bytes' %
                            (path, max_size))
 
-    result = self.base_run(['cat', path], remote_sudo=True, check=False,
-                           capture_output=True, encoding=encoding)
+    result = self.run(['cat', path], remote_sudo=True, check=False,
+                      capture_output=True, encoding=encoding)
     if result.returncode:
       raise CatFileError('Failed to read file "%s" on the device' % path)
     return result.stdout
@@ -1328,7 +1328,8 @@ class ChromiumOSDevice(RemoteDevice):
     """The $PATH variable on the device."""
     if not self._orig_path:
       try:
-        result = self.base_run(['echo', '${PATH}'])
+        # We can't use self.run since it calls us.
+        result = super().run(['echo', '${PATH}'])
       except cros_build_lib.RunCommandError as e:
         logging.error('Failed to get $PATH on the device: %s', e.stderr)
         raise
