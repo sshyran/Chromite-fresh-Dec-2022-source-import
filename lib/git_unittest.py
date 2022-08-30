@@ -634,7 +634,7 @@ class ManifestCheckoutTest(cros_test_lib.TempDirTestCase):
     git.CreateBranch(remote_manifests, 'firmware-link-')
     # This must come last as it sets up HEAD for the default branch, and repo
     # uses that to figure out which branch to check out.
-    git.CreateBranch(remote_manifests, 'main')
+    git.CreateBranch(remote_manifests, 'master')
 
     # Create a copy of our existing manifests.git, but rewrite it so it
     # looks like a remote manifests.git.  This is to avoid hitting the
@@ -692,7 +692,7 @@ class ManifestCheckoutTest(cros_test_lib.TempDirTestCase):
     repo_root = self.tempdir
 
     # pylint: disable=unused-argument
-    def reconfig(merge='main', origin='origin'):
+    def reconfig(merge='master', origin='origin'):
       if merge is not None:
         merge = 'refs/heads/%s' % merge
       for key in ('merge', 'origin'):
@@ -705,13 +705,13 @@ class ManifestCheckoutTest(cros_test_lib.TempDirTestCase):
 
     # First, verify our assumptions about a fresh repo init are correct.
     self.assertEqual('default', git.GetCurrentBranch(manifest))
-    self.assertEqual('main', func(repo_root))
+    self.assertEqual('master', func(repo_root))
 
     # Ensure we can handle a missing origin; this can occur jumping between
     # branches, and can be worked around.
     reconfig(origin=None)
     self.assertEqual('default', git.GetCurrentBranch(manifest))
-    self.assertEqual('main', func(repo_root))
+    self.assertEqual('master', func(repo_root))
 
     def assertExcept(message, **kwargs):
       reconfig(**kwargs)
@@ -724,7 +724,7 @@ class ManifestCheckoutTest(cros_test_lib.TempDirTestCase):
 
     # Ensure we detect if we're on the wrong branch, even if it has
     # tracking setup.
-    git.RunGit(manifest, ['checkout', '-t', 'origin/main', '-b', 'test'])
+    git.RunGit(manifest, ['checkout', '-t', 'origin/master', '-b', 'test'])
     assertExcept("It should be checked out to 'default'")
 
     # Ensure we handle detached HEAD w/ an appropriate exception.
