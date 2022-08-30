@@ -245,10 +245,10 @@ def GetBuilderMetadata(input_proto, output_proto, _config):
         key_id = packages.get_key_id(build_target, model)
         model_metadata = output_proto.model_metadata.add()
         model_metadata.model_name = model
-        model_metadata.ec_firmware_version = ec
+        model_metadata.ec_firmware_version = ec or ''
         model_metadata.firmware_key_id = key_id
-        model_metadata.main_readonly_firmware_version = main_ro
-        model_metadata.main_readwrite_firmware_version = main_rw
+        model_metadata.main_readonly_firmware_version = main_ro or ''
+        model_metadata.main_readwrite_firmware_version = main_rw or ''
 
 
 def _HasPrebuiltSuccess(_input_proto, output_proto, _config):

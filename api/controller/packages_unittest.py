@@ -541,17 +541,15 @@ class GetBuilderMetadataTest(cros_test_lib.MockTestCase, ApiConfigMixin):
       packages_controller.GetBuilderMetadata(request, self.response,
                                              self.api_config)
 
-  def testGetBuilderMetadata(self):
-    """Verify basic return values."""
-    android_version = 'android_test_version'
+  def _patch_all(self, android_version, android_branch, android_target,
+                 fw_versions, fingerprints):
+    """Patch everything that hasn't been broken out yet."""
     android_version_mock = self.PatchObject(packages_service,
                                             'determine_android_version',
                                             return_value=android_version)
-    android_branch = 'android_test_branch'
     android_branch_mock = self.PatchObject(packages_service,
                                            'determine_android_branch',
                                            return_value=android_branch)
-    android_target = 'android_test_target'
     android_target_mock = self.PatchObject(packages_service,
                                            'determine_android_target',
                                            return_value=android_target)
@@ -563,20 +561,92 @@ class GetBuilderMetadataTest(cros_test_lib.MockTestCase, ApiConfigMixin):
     self.PatchObject(portage_util, 'GetPackageDependencies',
                      return_value=package_result)
 
+    self.PatchObject(packages_service, 'get_firmware_versions',
+                     return_value=fw_versions)
+    self.PatchObject(packages_service, 'find_fingerprints',
+                     return_value=fingerprints)
+
+    return android_version_mock, android_branch_mock, android_target_mock
+
+  def _patch_get_all_firmware(self, all_fw_versions):
+    """Patch get_all_firmware_versions and related functions."""
+    # Patch packages.get_models, packages.get_all_firmware_versions,
+    # and packages.get_key_id for calls needed by model_metadata.
+    model_list = list(all_fw_versions.keys())
+    self.PatchObject(packages_service, 'get_all_firmware_versions',
+                     return_value=all_fw_versions)
+    self.PatchObject(packages_service, 'get_models',
+                     return_value=model_list)
+    self.PatchObject(packages_service, 'get_key_id',
+                     return_value='key')
+
+  def testNoFirmware(self):
+    """Test no firmware versions handled well."""
+    android_version = 'android_test_version'
+    android_branch = 'android_test_branch'
+    android_target = 'android_test_target'
+    fw_versions = packages_service.FirmwareVersions(
+        None, None, None, None, None)
+    fingerprints = ['fingerprint1', 'fingerprint2']
+    self._patch_all(android_version, android_branch, android_target,
+                    fw_versions, fingerprints)
+
+    all_fw_versions = {
+        'pyro': packages_service.FirmwareVersions(
+            'pyro', None, None, None, None),
+        'reef': packages_service.FirmwareVersions(
+            'reef', None, None, None, None),
+    }
+    self._patch_get_all_firmware(all_fw_versions)
+
+    request = self._GetRequest(board='betty')
+    packages_controller.GetBuilderMetadata(request, self.response,
+                                           self.api_config)
+
+    self.assertFalse(
+        self.response.build_target_metadata[0].main_firmware_version)
+    self.assertFalse(
+        self.response.build_target_metadata[0].ec_firmware_version)
+
+    self.assertEqual(
+        self.response.model_metadata[0].model_name, 'pyro')
+    self.assertFalse(
+        self.response.model_metadata[0].ec_firmware_version)
+    self.assertEqual(
+        self.response.model_metadata[0].firmware_key_id, 'key')
+    self.assertFalse(
+        self.response.model_metadata[0].main_readonly_firmware_version)
+    self.assertFalse(
+        self.response.model_metadata[0].main_readwrite_firmware_version)
+    self.assertEqual(
+        self.response.model_metadata[1].model_name, 'reef')
+    self.assertFalse(
+        self.response.model_metadata[1].ec_firmware_version)
+    self.assertEqual(
+        self.response.model_metadata[1].firmware_key_id, 'key')
+    self.assertFalse(
+        self.response.model_metadata[1].main_readonly_firmware_version)
+    self.assertFalse(
+        self.response.model_metadata[1].main_readwrite_firmware_version)
+
+  def testGetBuilderMetadata(self):
+    """Verify basic return values."""
+    android_version = 'android_test_version'
+    android_branch = 'android_test_branch'
+    android_target = 'android_test_target'
     fw_versions = packages_service.FirmwareVersions(
         None,
         'Google_Caroline.7820.263.0',
         'Google_Caroline.7820.286.0',
         'caroline_v1.9.357-ac5c7b4',
         'caroline_v1.9.370-e8b9bd2')
-    self.PatchObject(packages_service, 'get_firmware_versions',
-                     return_value=fw_versions)
     fingerprints = ['fingerprint1', 'fingerprint2']
-    self.PatchObject(packages_service, 'find_fingerprints',
-                     return_value=fingerprints)
-    # Patch packages.get_models, packages.get_all_firmware_versions,
-    # and packages.get_key_id for calls needed by model_metadata.
-    model_list = ['pyro', 'reef']
+
+    android_version_mock, android_branch_mock, android_target_mock = (
+        self._patch_all(android_version, android_branch, android_target,
+                        fw_versions, fingerprints)
+    )
+
     all_fw_versions = {
         'pyro': packages_service.FirmwareVersions(
             'pyro',
@@ -591,12 +661,7 @@ class GetBuilderMetadataTest(cros_test_lib.MockTestCase, ApiConfigMixin):
             'reef_v1.1.5900-ab1ee51',
             'reef_v1.1.5909-bd1f0c9')
     }
-    self.PatchObject(packages_service, 'get_all_firmware_versions',
-                     return_value=all_fw_versions)
-    self.PatchObject(packages_service, 'get_models',
-                     return_value=model_list)
-    self.PatchObject(packages_service, 'get_key_id',
-                     return_value='key')
+    self._patch_get_all_firmware(all_fw_versions)
 
     request = self._GetRequest(board='betty')
     packages_controller.GetBuilderMetadata(request, self.response,
