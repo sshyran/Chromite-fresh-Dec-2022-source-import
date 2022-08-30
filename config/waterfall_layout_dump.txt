@@ -183,7 +183,6 @@
     fizz-moblab-release
     fizz-release
     geralt-release
-    ghost-release
     goroh-release
     grunt-arc-r-release
     grunt-kernelnext-release
@@ -733,11 +732,6 @@
   geralt-llvm-toolchain-tryjob
   geralt-payloads-tryjob
   geralt-release-tryjob
-  ghost-full-tryjob
-  ghost-llvm-next-toolchain-tryjob
-  ghost-llvm-toolchain-tryjob
-  ghost-payloads-tryjob
-  ghost-release-tryjob
   glados-factory-glados-7657.B-factorybranch-tryjob
   glados-factory-glados-7828.B-factorybranch-tryjob
   glados-full-tryjob
@@ -1019,7 +1013,6 @@
     fizz-moblab-release-tryjob
     fizz-release-tryjob
     geralt-release-tryjob
-    ghost-release-tryjob
     goroh-release-tryjob
     grunt-arc-r-release-tryjob
     grunt-kernelnext-release-tryjob
