@@ -13,6 +13,7 @@ import functools
 import itertools
 import logging
 import os
+import re
 from typing import Callable, Union
 
 from chromite.cli import command
@@ -32,6 +33,7 @@ _EXT_TOOL_MAP = {
     frozenset({'.md'}): (formatters.whitespace.Data,),
     # TODO(build): Add a formatter for this (minijail seccomp policies).
     frozenset({'.policy'}): (formatters.whitespace.Data,),
+    frozenset({'.py'}): (formatters.python.Data,),
     frozenset({'.rs'}): (formatters.rust.Data,),
     # TODO(build): Add a formatter for this (SELinux policies).
     frozenset({'.te'}): (formatters.whitespace.Data,),
@@ -67,11 +69,24 @@ _FILENAME_PATTERNS_TOOL_MAP = {
 }
 
 
+# TODO: Move to a centralized configuration somewhere.
+_EXCLUDED_FILE_REGEX = (
+    # Compiled python protobuf bindings.
+    re.compile(r'.*_pb2\.py'),
+    # Vendored third-party code.
+    re.compile(r'.*third_party/.*\.py'),
+)
+
+
 def _BreakoutFilesByTool(files):
   """Maps a tool method to the list of files to process."""
   map_to_return = {}
 
   for f in files:
+    # Skip if excluded.
+    if any(x.search(f) for x in _EXCLUDED_FILE_REGEX):
+      continue
+
     extension = os.path.splitext(f)[1]
     for extensions, tools in _EXT_TOOL_MAP.items():
       if extension in extensions:
