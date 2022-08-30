@@ -1688,7 +1688,8 @@ def _Egencache(repo_name: str,
                             log_output=log_output)
 
 
-def _generate_repositories_configuration() -> str:
+def _generate_repositories_configuration(
+    chroot: Optional[chroot_lib.Chroot] = None) -> str:
   """Make a repositories configuration with all overlays for egencache.
 
   Generate the repositories configuration containing every overlay in the same
@@ -1702,6 +1703,8 @@ def _generate_repositories_configuration() -> str:
   overlays = FindOverlays(constants.BOTH_OVERLAYS)
   for overlay_path in overlays:
     overlay_name = GetOverlayName(overlay_path)
+    if chroot:
+      overlay_path = chroot.chroot_path(overlay_path)
     repos_config += f'[{overlay_name}]\nlocation = {overlay_path}\n'
   return repos_config
 
@@ -1736,7 +1739,7 @@ def RegenCache(overlay: str,
   if chroot:
     chroot_args = chroot.get_enter_args()
 
-  repos_config = _generate_repositories_configuration()
+  repos_config = _generate_repositories_configuration(chroot)
 
   # Regen for the whole repo.
   _Egencache(repo_name, overlay, repos_config, chroot_args)
