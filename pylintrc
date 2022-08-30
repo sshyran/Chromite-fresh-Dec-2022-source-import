@@ -33,11 +33,6 @@ load-plugins=
     pylint.extensions.redefined_variable_type,
     pylint.extensions.overlapping_exceptions,
 
-# Configure quote preferences.
-string-quote = single-avoid-escape
-triple-quote = double
-docstring-quote = double
-
 
 [MESSAGES CONTROL]
 
@@ -138,6 +133,8 @@ enable=
 # ungrouped-imports: We let isort handle this.
 # wrong-import-order: We let isort handle this.
 disable=
+    bad-continuation,
+    bad-whitespace,
     broad-except,
     chained-comparison,
     consider-iterating-dictionary,
@@ -179,7 +176,11 @@ disable=
     unnecessary-comprehension,
     useless-object-inheritance,
     wrong-import-order,
-
+# Temporary disables to allow old style and new style to both pass linting.
+    bad-indentation,
+    line-too-long,
+    docstring-section-indent,
+    docstring-trailing-quotes,
 
 [REPORTS]
 
@@ -232,7 +233,7 @@ ignore-long-lines=(^(import|from))|(^\s*(# )?<?https?://\S+>?$)
 # String used as indentation unit. This is usually " " (4 spaces) or "\t" (1
 # tab).
 # CHANGE: Use "  " instead.
-indent-string='  '
+indent-string="    "
 
 
 [TYPECHECK]

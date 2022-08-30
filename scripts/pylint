@@ -41,13 +41,6 @@
 #   version: "version:1.4.3"
 # >
 #
-# # Pylint extensions.
-#
-# wheel: <
-#   name: "infra/python/wheels/pylint-quotes-py3"
-#   version: "version:0.2.1"
-# >
-#
 # # Pylint dependencies.
 # # NB: Keep in sync with scripts/run_tests.vpython3.
 #
@@ -62,8 +55,11 @@
 #
 # [VPYTHON:END]
 
+"""Wrapper for stable version of pylint that we control."""
+
 import sys
 
 from pylint import lint
+
 
 lint.Run(sys.argv[1:])
