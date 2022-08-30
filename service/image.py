@@ -699,11 +699,12 @@ def create_stripped_packages_tar(chroot: chroot_lib.Chroot,
     The path to the zipfile if it could be created, else None.
   """
   package_globs = [
-      "chromeos-base/chromeos-chrome",
-      "sys-kernel/*kernel*",
+      'chromeos-base/chromeos-chrome',
+      'sys-kernel/*kernel*',
   ]
   board = build_target.name
-  stripped_pkg_dir = os.path.join(build_target.root, 'stripped-packages')
+  stripped_pkg_dir = chroot.full_path(build_target.root,
+                                      'stripped-packages')
   tarball_paths = []
   strip_package_path = path_util.ToChrootPath(
       os.path.join(constants.CHROMITE_SCRIPTS_DIR, 'strip_package'))
