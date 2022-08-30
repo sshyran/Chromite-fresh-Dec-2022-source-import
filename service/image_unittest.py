@@ -93,6 +93,17 @@ class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase,
         'board', [constants.IMAGE_TYPE_BASE, constants.FACTORY_IMAGE_BIN])
     self.assertEqual(build_result.return_code, errno.EINVAL)
 
+  def testClearShadowLocks(self):
+    """Test that stale shadow-utils locks are cleared."""
+    clear_shadow_locks_mock = self.PatchObject(
+        cros_build_lib, 'ClearShadowLocks')
+    test_board = 'board'
+
+    image.Build(test_board, [constants.IMAGE_TYPE_BASE])
+
+    clear_shadow_locks_mock.assert_called_once_with(
+        build_target_lib.get_default_sysroot_path(test_board))
+
   def testBuildDir(self):
     """Test the case if build directory exists."""
     config = image.BuildConfig(

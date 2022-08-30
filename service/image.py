@@ -252,6 +252,9 @@ def Build(board: str,
       version_file=Path(constants.SOURCE_ROOT) / constants.VERSION_FILE)
   cmd = GetBuildImageCommand(config, image_names, board)
 
+  cros_build_lib.ClearShadowLocks(
+      build_target_lib.get_default_sysroot_path(board))
+
   try:
     build_dir, output_dir, image_dir = image_lib.CreateBuildDir(
         config.build_root,
