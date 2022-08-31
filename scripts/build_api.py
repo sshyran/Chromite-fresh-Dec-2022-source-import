@@ -15,7 +15,6 @@ from chromite.api import router as router_lib
 from chromite.api.gen.chromite.api import build_api_config_pb2
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import namespaces
 from chromite.utils import matching
 
 
@@ -147,10 +146,6 @@ def _get_io_handlers(opts):
 def main(argv):
   router = router_lib.GetRouter()
   opts = _ParseArgs(argv, router)
-
-  # For build_image, make sure we run with network disabled to prevent leakage.
-  if opts.service_method == 'chromite.api.ImageService/Create':
-    namespaces.ReExecuteWithNamespace(sys.argv)
 
   # We currently don't have any APIs that want to access stdin, so rebind.
   sys.stdin = open(os.devnull, 'r')  # pylint: disable=consider-using-with
