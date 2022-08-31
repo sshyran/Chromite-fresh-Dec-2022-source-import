@@ -1188,7 +1188,7 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
 
   def _CreateMasterConfig(name,
                           template=site_config.templates.release,
-                          schedule='  0 0 * * *'):
+                          schedule='  0 12 * * *'):
     return site_config.Add(
         name,
         template,
