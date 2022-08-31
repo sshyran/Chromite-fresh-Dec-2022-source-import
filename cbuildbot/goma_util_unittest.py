@@ -21,6 +21,16 @@ from chromite.lib import osutils
 class TestGomaLogUploader(cros_test_lib.MockTempDirTestCase):
   """Tests for upload_goma_info."""
 
+  def setUp(self):
+
+    # cros_build_lib.CreateTarball() function is unit tested. Safe to patch.
+    # pylint: disable=unused-argument
+    def _createTarball(tarball_path, *args, **kwargs):
+      osutils.Touch(tarball_path, makedirs=True)
+
+    self.tarball_mock = self.PatchObject(
+        cros_build_lib, 'CreateTarball', side_effect=_createTarball)
+
   def _CreateLogFile(self, name, timestamp):
     path = os.path.join(
         self.tempdir,
@@ -80,6 +90,7 @@ class TestGomaLogUploader(cros_test_lib.MockTempDirTestCase):
           'gomacc.host.log.INFO.20170426-120100.000000.tar.gz',
           ['x-goog-meta-builderinfo:' + expect_builderinfo]),
         ])
+    self.tarball_mock.assert_called_once()
 
   def testUploadLuci(self):
     self._CreateLogFile(
@@ -108,7 +119,6 @@ class TestGomaLogUploader(cros_test_lib.MockTempDirTestCase):
 
     self.PatchObject(cros_build_lib, 'GetHostName', lambda: 'stub-host-name')
     copy_log = []
-    tarball_mock = self.PatchObject(cros_build_lib, 'CreateTarball')
     self.PatchObject(
         gs.GSContext, 'CopyInto',
         lambda _, __, remote_dir, filename=None, **kwargs: copy_log.append(
@@ -146,7 +156,7 @@ class TestGomaLogUploader(cros_test_lib.MockTempDirTestCase):
           'gomacc.host.log.INFO.20170426-120100.000000.tar.gz',
           ['x-goog-meta-builderinfo:' + expect_builderinfo]),
         ])
-    tarball_mock.assert_called_once()
+    self.tarball_mock.assert_called_once()
 
   def testNinjaLogUpload(self):
     self._CreateLogFile(
