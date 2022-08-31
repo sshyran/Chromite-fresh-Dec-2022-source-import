@@ -21,6 +21,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
+from chromite.lib.parser import ebuild_license
 from chromite.lib.parser import package_info
 
 
@@ -104,46 +105,6 @@ LICENSE_NAMES_REGEX = [
     # (netifaces, unittest2)
 ]
 
-# These are _temporary_ license mappings for packages that do not have a valid
-# shared/custom license, or LICENSE file we can use.
-# Once this script runs earlier (during the package build process), it will
-# block new source without a LICENSE file if the ebuild contains a license
-# that requires copyright assignment (BSD and friends).
-# At that point, new packages will get fixed to include LICENSE instead of
-# adding workaround mappings like those below.
-# The way you now fix copyright attribution cases create a custom file with the
-# right license directly in COPYRIGHT_ATTRIBUTION_DIR.
-PACKAGE_LICENSES = {
-    # TODO: replace the naive license parsing code in this script with a hook
-    # into portage's license parsing. See https://crbug.com/348779
-    # Chrome (the browser) is complicated, it has a morphing license that is
-    # either BSD-Google, or BSD-Google,Google-TOS depending on how it was
-    # built. We bypass this problem for now by hardcoding the Google-TOS bit as
-    # per ChromeOS with non free bits
-    "chromeos-base/chromeos-chrome": ["BSD-Google", "Google-TOS"],
-    # Currently the code cannot parse embedded || (...) syntax.
-    "app-admin/eselect": ["GPL-2+"],
-    "dev-python/pycairo": ["LGPL-3", "LGPL-2.1"],
-    "dev-lang/yasm": ["BSD-2", "GPL-2", "LGPL-2"],
-    "dev-ruby/rubygems": ["GPL-2", "MIT"],
-    # Currently the code cannot parse the license for mit-krb5
-    # "openafs-krb5-a BSD MIT OPENLDAP BSD-2 HPND BSD-4 ISC RSA CC-BY-SA-3.0 ||
-    #      ( BSD-2 GPL-2+ )"
-    "app-crypt/mit-krb5": [
-        "openafs-krb5-a",
-        "BSD",
-        "MIT",
-        "OPENLDAP",
-        "BSD-2",
-        "HPND",
-        "BSD-4",
-        "ISC",
-        "RSA",
-        "CC-BY-SA-3.0",
-        "GPL-2+",
-    ],
-}
-
 # Any license listed list here found in the ebuild will make the code look for
 # license files inside the package source code in order to get copyright
 # attribution from them.
@@ -210,15 +171,6 @@ PACKAGE_HOMEPAGES = {
     # Example:
     # 'x11-proto/glproto': ['http://www.x.org/'],
 }
-
-# These are tokens found in LICENSE= in an ebuild that aren't licenses we
-# can actually read from disk.
-# You should not use this to ban real licenses.
-LICENCES_IGNORE = [
-    ")",  # Ignore OR tokens from LICENSE="|| ( LGPL-2.1 MPL-1.1 )"
-    "(",
-    "||",
-]
 
 # List of overlays that must use 'metapackage' license for virtual packages.
 # Throw error for those, print a warning for others.
@@ -710,7 +662,28 @@ to assign.  Once you've found it, copy the entire license file to:
                 return
 
         self.homepages = _BuildInfo(build_info_dir, "HOMEPAGE").split()
-        ebuild_license_names = _BuildInfo(build_info_dir, "LICENSE").split()
+        licenses = ebuild_license.parse(_BuildInfo(build_info_dir, "LICENSE"))
+
+        # The ebuild license field can look like:
+        # LICENSE="GPL-3 LGPL-3 Apache-2.0" (this means AND, as in all 3)
+        # for third_party/portage-stable/app-admin/rsyslog/rsyslog-5.8.11.ebuild
+        # LICENSE="|| ( LGPL-2.1 MPL-1.1 )"
+        # for third_party/portage-stable/x11-libs/cairo/cairo-1.8.8.ebuild
+        #
+        # In order to save time needlessly unpacking packages and looking or a
+        # cleartext license (which is really a crapshoot), if we have a license
+        # like BSD that requires looking for copyright attribution, but we can
+        # chose another license like GPL, we do that.
+        def license_picker(choices):
+            for choice in choices:
+                if choice not in COPYRIGHT_ATTRIBUTION_LICENSES:
+                    logging.info(
+                        "Picking license '%s' from %s", choice, choices
+                    )
+                    return choice
+            return choices[0]
+
+        ebuild_license_names = licenses.reduce(or_reduce=license_picker)
 
         # Is this tainted?
         self.tainted = TAINTED in ebuild_license_names
@@ -729,34 +702,11 @@ to assign.  Once you've found it, copy the entire license file to:
         if self.fullname in PACKAGE_HOMEPAGES:
             self.homepages = PACKAGE_HOMEPAGES[self.fullname]
 
-        # Packages with missing licenses or licenses that need mapping (like
-        # BSD/MIT) are hardcoded here:
-        if self.fullname in PACKAGE_LICENSES:
-            ebuild_license_names = PACKAGE_LICENSES[self.fullname]
-            logging.info(
-                "Static license mapping for %s: %s",
-                self.fullnamerev,
-                ",".join(ebuild_license_names),
-            )
-        else:
-            logging.info(
-                "Read licenses for %s: %s",
-                self.fullnamerev,
-                ",".join(ebuild_license_names),
-            )
-
-        # The ebuild license field can look like:
-        # LICENSE="GPL-3 LGPL-3 Apache-2.0" (this means AND, as in all 3)
-        # for third_party/portage-stable/app-admin/rsyslog/rsyslog-5.8.11.ebuild
-        # LICENSE="|| ( LGPL-2.1 MPL-1.1 )"
-        # for third_party/portage-stable/x11-libs/cairo/cairo-1.8.8.ebuild
-
-        # The parser isn't very smart and only has basic support for the
-        # || ( X Y ) OR logic to do the following:
-        # In order to save time needlessly unpacking packages and looking or a
-        # cleartext license (which is really a crapshoot), if we have a license
-        # like BSD that requires looking for copyright attribution, but we can
-        # chose another license like GPL, we do that.
+        logging.info(
+            "Read licenses for %s: %s",
+            self.fullnamerev,
+            ",".join(ebuild_license_names),
+        )
 
         if not self.skip and not ebuild_license_names:
             logging.error(
@@ -768,62 +718,21 @@ to assign.  Once you've found it, copy the entire license file to:
             # the source.
             raise PackageLicenseError()
 
-        # This is not invalid, but the parser can't deal with it, so if it ever
-        # happens, error out to tell the programmer to do something.
-        # dev-python/pycairo-1.10.0-r4: LGPL-3 || ( LGPL-2.1 MPL-1.1 )
-        if "||" in ebuild_license_names[1:]:
-            logging.error(
-                "%s: Can't parse || in the middle of a license: %s",
-                self.fullnamerev,
-                " ".join(ebuild_license_names),
-            )
-            raise PackageLicenseError()
-
-        or_licenses_and_one_is_no_attribution = False
-        # We do a quick early pass first so that the longer pass below can
-        # run accordingly.
-        for license_name in [
-            x for x in ebuild_license_names if x not in LICENCES_IGNORE
-        ]:
-            # Here we have an OR case, and one license that we can use stock, so
-            # we remember that in order to be able to skip license attributions if
-            # any were in the OR.
-            if (
-                ebuild_license_names[0] == "||"
-                and license_name not in COPYRIGHT_ATTRIBUTION_LICENSES
-            ):
-                or_licenses_and_one_is_no_attribution = True
-
         need_copyright_attribution = set()
         scan_source_for_licenses = False
 
-        for license_name in [
-            x for x in ebuild_license_names if x not in LICENCES_IGNORE
-        ]:
-            # Licenses like BSD or MIT can't be used as is because they do not contain
-            # copyright self. They have to be replaced by copyright file given in the
-            # source code, or manually mapped by us in PACKAGE_LICENSES
+        for license_name in ebuild_license_names:
+            # Licenses like BSD or MIT can't be used as is because they do not
+            # contain copyright self. They have to be replaced by copyright file
+            # given in the source code.
             if license_name in COPYRIGHT_ATTRIBUTION_LICENSES:
-                # To limit needless efforts, if a package is BSD or GPL, we ignore BSD
-                # and use GPL to avoid scanning the package, but we can only do this if
-                # or_licenses_and_one_is_no_attribution has been set above.
-                # This ensures that if we have License: || (BSD3 BSD4), we will
-                # look in the source.
-                if or_licenses_and_one_is_no_attribution:
-                    logging.info(
-                        "%s: ignore license %s because ebuild LICENSES had %s",
-                        self.fullnamerev,
-                        license_name,
-                        " ".join(ebuild_license_names),
-                    )
-                else:
-                    logging.info(
-                        "%s: can't use %s, will scan source code for copyright",
-                        self.fullnamerev,
-                        license_name,
-                    )
-                    need_copyright_attribution.add(license_name)
-                    scan_source_for_licenses = True
+                logging.info(
+                    "%s: can't use %s, will scan source code for copyright",
+                    self.fullnamerev,
+                    license_name,
+                )
+                need_copyright_attribution.add(license_name)
+                scan_source_for_licenses = True
             else:
                 self.license_names.add(license_name)
                 # We can't display just 2+ because it only contains text that says to
