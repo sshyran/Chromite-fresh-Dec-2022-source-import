@@ -5,7 +5,9 @@
 """The Binhost API interacts with Portage binhosts and Packages files."""
 
 import functools
+import logging
 import os
+import tempfile
 from typing import List, TYPE_CHECKING
 
 from chromite.lib import binpkg
@@ -227,10 +229,20 @@ def RegenBuildCache(chroot: 'chroot_lib.Chroot',
   """
   overlays = portage_util.FindOverlays(overlay_type)
 
-  task = functools.partial(
-      portage_util.RegenCache, commit_changes=False, chroot=chroot)
-  task_inputs = [[o] for o in overlays if os.path.isdir(o)]
-  results = parallel.RunTasksInProcessPool(task, task_inputs)
+  repos_config = portage_util.generate_repositories_configuration(chroot)
+
+  with tempfile.NamedTemporaryFile(
+      prefix='repos.conf.', dir=chroot.tmp) as repos_conf:
+    repos_conf.write(repos_config.encode('utf-8'))
+    repos_conf.flush()
+    logging.debug('Using custom repos.conf settings at %s:\n%s',
+                  repos_conf.name, repos_config)
+
+    task = functools.partial(
+        portage_util.RegenCache, commit_changes=False, chroot=chroot,
+        repos_conf=repos_conf.name)
+    task_inputs = [[o] for o in overlays if os.path.isdir(o)]
+    results = parallel.RunTasksInProcessPool(task, task_inputs)
 
   # Filter out all of the unchanged-overlay results.
   return [overlay_dir for overlay_dir in results if overlay_dir]

@@ -1904,7 +1904,7 @@ class RegenCacheTest(cros_test_lib.MockTempDirTestCase):
     overlay3 = cr.test.Overlay(f'{self.tempdir}/src/overlays/baz', 'baz')
     overlays = [overlay1.path, overlay2.path, overlay3.path]
     self.PatchObject(portage_util, 'FindOverlays', return_value=overlays)
-    mock_output = portage_util._generate_repositories_configuration()
+    mock_output = portage_util.generate_repositories_configuration()
     correct_output = (f'[foo]\nlocation = {self.tempdir}/src/overlays/foo\n'
                       f'[bar]\nlocation = {self.tempdir}/src/overlays/bar\n'
                       f'[baz]\nlocation = {self.tempdir}/src/overlays/baz\n')

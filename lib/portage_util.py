@@ -11,7 +11,6 @@ import glob
 import itertools
 import json
 import logging
-import multiprocessing
 import os
 from pathlib import Path
 import re
@@ -1661,34 +1660,31 @@ def GetOverlayEBuilds(overlay,
 
 
 def _Egencache(repo_name: str,
-               overlay: str,
-               repos_config: str,
+               repos_conf: Optional[str] = None,
                chroot_args: Optional[List[str]] = None,
                log_output: bool = True) -> cros_build_lib.CompletedProcess:
   """Execute egencache for repo_name inside the chroot.
 
   Args:
     repo_name: Name of the repo for the overlay.
-    overlay: The tree to regenerate the cache for.
-    repos_config: The new repositories configuration to give to egencache to
-      recognize all overlays. Comes from _generate_repositories_configuration.
+    repos_conf: Alternative repos.conf file.
     chroot_args: chroot enter args.
     log_output: Log output of cros_build_run commands.
 
   Returns:
     A cros_build_lib.CompletedProcess object.
   """
-  return cros_build_lib.run([
-      'egencache', '--repositories-configuration', repos_config, '--update',
-      '--repo', repo_name, '--jobs', str(multiprocessing.cpu_count())
-  ],
-                            cwd=overlay,
+  cmd = ['egencache', '--update', '--repo', repo_name, '--jobs',
+         str(os.cpu_count())]
+  if repos_conf:
+    cmd += ['--repos-conf', repos_conf]
+  return cros_build_lib.run(cmd,
                             enter_chroot=True,
                             chroot_args=chroot_args,
                             log_output=log_output)
 
 
-def _generate_repositories_configuration(
+def generate_repositories_configuration(
     chroot: Optional[chroot_lib.Chroot] = None) -> str:
   """Make a repositories configuration with all overlays for egencache.
 
@@ -1711,13 +1707,15 @@ def _generate_repositories_configuration(
 
 def RegenCache(overlay: str,
                commit_changes: bool = True,
-               chroot: Optional[chroot_lib.Chroot] = None) -> Optional[str]:
+               chroot: Optional[chroot_lib.Chroot] = None,
+               repos_conf: Optional[str] = None) -> Optional[str]:
   """Regenerate the cache of the specified overlay.
 
   Args:
     overlay: The tree to regenerate the cache for.
     commit_changes: Whether to commit the changes.
     chroot: A chroot to enter.
+    repos_conf: Alternative repos.conf file.
 
   Returns:
     The overlay when there are outstanding changes, or None when there were no
@@ -1738,11 +1736,10 @@ def RegenCache(overlay: str,
   chroot_args = None
   if chroot:
     chroot_args = chroot.get_enter_args()
-
-  repos_config = _generate_repositories_configuration(chroot)
+    repos_conf = chroot.chroot_path(repos_conf)
 
   # Regen for the whole repo.
-  _Egencache(repo_name, overlay, repos_config, chroot_args)
+  _Egencache(repo_name, repos_conf=repos_conf, chroot_args=chroot_args)
   # If there was nothing new generated, then let's just bail.
   result = git.RunGit(overlay, ['status', '-s', 'metadata/'])
   if not result.stdout:

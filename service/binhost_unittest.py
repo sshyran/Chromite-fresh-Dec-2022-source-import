@@ -5,7 +5,6 @@
 """Unittests for the binhost.py service."""
 
 import os
-from unittest import mock
 
 from chromite.lib import binpkg
 from chromite.lib import build_target_lib
@@ -13,7 +12,7 @@ from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
-from chromite.lib import parallel
+from chromite.lib import parallel_unittest
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 from chromite.service import binhost
@@ -253,16 +252,16 @@ class RegenBuildCacheTest(cros_test_lib.MockTempDirTestCase):
 
   def testCallsRegenPortageCache(self):
     """Test that overlays=None works."""
+    (self.tempdir / 'tmp').mkdir()
     overlays_found = [os.path.join(self.tempdir, 'path/to')]
     for o in overlays_found:
       osutils.SafeMakedirs(o)
-    find_overlays = self.PatchObject(
+    self.PatchObject(
         portage_util, 'FindOverlays', return_value=overlays_found)
-    run_tasks = self.PatchObject(parallel, 'RunTasksInProcessPool')
 
-    binhost.RegenBuildCache(chroot_lib.Chroot, None)
-    find_overlays.assert_called_once_with(None)
-    run_tasks.assert_called_once_with(mock.ANY, [overlays_found])
+    with parallel_unittest.ParallelMock():
+      binhost.RegenBuildCache(
+          chroot_lib.Chroot(self.tempdir), constants.PUBLIC_OVERLAYS)
 
 
 class ReadDevInstallPackageFileTest(cros_test_lib.MockTempDirTestCase):
