@@ -1857,6 +1857,13 @@ def ApplyCustomOverrides(site_config):
           'hw_tests_override': [],
           'hw_tests_disabled_bug': 'b/236920312',
       },
+      'geralt-release': {
+          'sign_types': ['recovery', 'factory'],
+          # Geralt has no DUTs in the lab (b/239660108).
+          'hw_tests': [],
+          'hw_tests_override': [],
+          'hw_tests_disabled_bug': 'b/239660108',
+      },
 
       # --- end from here ---
 
