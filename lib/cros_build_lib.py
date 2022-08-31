@@ -42,7 +42,7 @@ STRICT_SUDO = False
 # See the bash man page as well as the POSIX shell documentation for more info:
 #   http://www.gnu.org/software/bash/manual/bashref.html
 #   http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html
-_SHELL_QUOTABLE_CHARS = frozenset('[|&;()<> \t!{}[]=*?~$"\'\\#^')
+_SHELL_QUOTABLE_CHARS = frozenset('[|&;()<> \t\n!{}[]=*?~$"\'\\#^')
 # The chars that, when used inside of double quotes, need escaping.
 # Order here matters as we need to escape backslashes first.
 _SHELL_ESCAPE_CHARS = r'\"`$'

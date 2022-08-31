@@ -81,6 +81,7 @@ class CmdToStrTest(cros_test_lib.TestCase):
         ('a', u'a'),
         ("'a b c'", u'a b c'),
         ("'a\tb'", 'a\tb'),
+        ("'a\nb'", 'a\nb'),
         ("'/a$file'", '/a$file'),
         ("'/a#file'", '/a#file'),
         ("""'b"c'""", 'b"c'),
