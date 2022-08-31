@@ -152,6 +152,10 @@ def main(argv):
   if opts.service_method == 'chromite.api.ImageService/Create':
     namespaces.ReExecuteWithNamespace(sys.argv)
 
+  # We currently don't have any APIs that want to access stdin, so rebind.
+  sys.stdin = open(os.devnull, 'r')  # pylint: disable=consider-using-with
+  os.dup2(sys.stdin.fileno(), 0)
+
   if opts.config.log_path:
     logging.warning('Ignoring log_path config option')
   if 'BUILD_API_TEE_LOG_FILE' in os.environ:
