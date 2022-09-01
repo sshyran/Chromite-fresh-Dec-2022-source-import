@@ -103,7 +103,7 @@ def _parse_ebuild_cache_entry(cache_file_path):
       r'((?P<overlay_path>[^\s]+)\s+)?'
       # The eclass digest followed by a word boundary -- \b prevents parsing md5
       # digests as paths when the next class begins with a-f.
-      r'(?P<digest>[\da-fA-F]+)\b\s*')
+      r'(?P<digest>[\da-fA-F]+)\b(\s+|$)')
 
   cachefile = osutils.ReadFile(cache_file_path)
   m = eclass_regex.search(cachefile)

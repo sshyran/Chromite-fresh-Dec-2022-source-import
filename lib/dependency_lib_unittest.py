@@ -13,8 +13,11 @@ from chromite.lib import osutils
 def test_parse_ebuild_cache_entry_md5_cache(tmp_path):
   """Verify parsing eclasses from md5 cache style files."""
   expected = [
+      ('autotools', 'd0e5375d47f4c809f406eb892e531513'),
+      ('db-use', '9879c16e695a6adb640e428a40dfd26e'),
       ('eclass1', 'abc123'),
       ('eclass2', '123abc'),
+      ('cros-workon', '112233'),
       ('eclass3', 'def789'),
   ]
   eclass_str = '\t'.join('\t'.join(x) for x in expected)
