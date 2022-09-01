@@ -489,3 +489,79 @@ class FinalizeDlcsTest(cros_test_lib.MockTempDirTestCase):
       self.assertNotExists(
           os.path.join(output, _ID, _PACKAGE + str(package_num),
                        dlc_lib.DLC_IMAGE))
+
+  def testInstallDlcImagesTrustedVerityDigests(self):
+    """Tests InstallDlcImages to verify verity digests are written."""
+    sysroot = self.tempdir / 'sysroot'
+    osutils.WriteFile(
+        os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, _ID, _PACKAGE,
+                     dlc_lib.DLC_TMP_META_DIR, dlc_lib.IMAGELOADER_JSON),
+        '{}',
+        makedirs=True)
+    root_hexdigest = (
+        'af7d331ac908dd6e4f6771a3146310bc7edcfe8d9794abcd34512e1a7b704adc')
+    osutils.WriteFile(
+        os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, _ID, _PACKAGE,
+                     dlc_lib.DLC_TMP_META_DIR, dlc_lib.DLC_VERITY_TABLE),
+        '0 128 verity payload=ROOT_DEV hashtree=HASH_DEV hashstart=128 '
+        f'alg=sha256 root_hexdigest={root_hexdigest} '
+        'salt=471347ffffff2f4a1cff1224ff7b04ffff68ff19ff2dffff63ff47ffffff387c',
+        makedirs=True)
+    output = os.path.join(self.tempdir, 'output')
+    dlc_lib.InstallDlcImages(board=_BOARD, sysroot=sysroot, rootfs=output)
+    self.assertEqual(
+        osutils.ReadFile(
+            os.path.join(output, dlc_lib.DLC_META_DIR,
+                         dlc_lib.DLC_LOADPIN_TRUSTED_VERITY_DIGESTS)),
+        f'{root_hexdigest}\n')
+
+  def testInstallDlcImagesMultiDlcTrustedVerityDigests(self):
+    """Tests InstallDlcImages to verify multiple verity digests are written."""
+    sysroot = self.tempdir / 'sysroot'
+    osutils.WriteFile(
+        os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, _ID + '1', _PACKAGE,
+                     dlc_lib.DLC_TMP_META_DIR, dlc_lib.IMAGELOADER_JSON),
+        '{}',
+        makedirs=True)
+    root_hexdigest1 = (
+        'af7d331ac908dd6e4f6771a3146310bc7edcfe8d9794abcd34512e1a7b704adc')
+    osutils.WriteFile(
+        os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, _ID + '1', _PACKAGE,
+                     dlc_lib.DLC_TMP_META_DIR, dlc_lib.DLC_VERITY_TABLE),
+        '0 128 verity payload=ROOT_DEV hashtree=HASH_DEV hashstart=128 '
+        f'alg=sha256 root_hexdigest={root_hexdigest1} '
+        'salt=471347ffffff2f4a1cff1224ff7b04ffff68ff19ff2dffff63ff47ffffff387c',
+        makedirs=True)
+    osutils.WriteFile(
+        os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, _ID + '1dupe', _PACKAGE,
+                     dlc_lib.DLC_TMP_META_DIR, dlc_lib.IMAGELOADER_JSON),
+        '{}',
+        makedirs=True)
+    osutils.WriteFile(
+        os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, _ID + '1dupe', _PACKAGE,
+                     dlc_lib.DLC_TMP_META_DIR, dlc_lib.DLC_VERITY_TABLE),
+        '0 128 verity payload=ROOT_DEV hashtree=HASH_DEV hashstart=128 '
+        f'alg=sha256 root_hexdigest={root_hexdigest1} '
+        'salt=471347ffffff2f4a1cff1224ff7b04ffff68ff19ff2dffff63ff47ffffff387c',
+        makedirs=True)
+    osutils.WriteFile(
+        os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, _ID + '2', _PACKAGE,
+                     dlc_lib.DLC_TMP_META_DIR, dlc_lib.IMAGELOADER_JSON),
+        '{}',
+        makedirs=True)
+    root_hexdigest2 = (
+        'cdefedb2405a5d87a1e441caf0b3a6fd4d59947597149215ba9ef7d88e269004')
+    osutils.WriteFile(
+        os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, _ID + '2', _PACKAGE,
+                     dlc_lib.DLC_TMP_META_DIR, dlc_lib.DLC_VERITY_TABLE),
+        '0 196184 verity payload=ROOT_DEV hashtree=HASH_DEV hashstart=196184 '
+        f'alg=sha256 root_hexdigest={root_hexdigest2} '
+        'salt=44ff73ff18ff59ff765aff4fffffff45ff2b60ffff2915ff3fffffffff3aff33',
+        makedirs=True)
+    output = self.tempdir / 'output'
+    dlc_lib.InstallDlcImages(board=_BOARD, sysroot=sysroot, rootfs=output)
+    self.assertEqual(
+        osutils.ReadFile(
+            os.path.join(output, dlc_lib.DLC_META_DIR,
+                         dlc_lib.DLC_LOADPIN_TRUSTED_VERITY_DIGESTS)),
+        f'{root_hexdigest1}\n{root_hexdigest2}\n')

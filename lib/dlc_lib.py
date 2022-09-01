@@ -16,6 +16,7 @@ import shutil
 from chromite.lib import build_target_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
+from chromite.lib import verity
 from chromite.licensing import licenses_lib
 from chromite.scripts import cros_set_lsb_release
 from chromite.utils import pformat
@@ -25,9 +26,11 @@ DLC_BUILD_DIR = 'build/rootfs/dlc'
 DLC_FACTORY_INSTALL_DIR = 'unencrypted/dlc-factory-images'
 DLC_GID = 20118
 DLC_IMAGE = 'dlc.img'
+DLC_LOADPIN_TRUSTED_VERITY_DIGESTS = '_trusted_verity_digests'
 DLC_META_DIR = 'opt/google/dlc'
-DLC_UID = 20118
 DLC_TMP_META_DIR = 'meta'
+DLC_UID = 20118
+DLC_VERITY_TABLE = 'table'
 EBUILD_PARAMETERS = 'ebuild_parameters.json'
 IMAGELOADER_JSON = 'imageloader.json'
 LICENSE = 'LICENSE'
@@ -631,7 +634,8 @@ def InstallDlcImages(sysroot, board, dlc_id=None, install_root_dir=None,
     dlc_ids = [dlc_id]
   else:
     # Process all DLCs.
-    dlc_ids = os.listdir(dlc_build_dir)
+    # Sort to ease testing.
+    dlc_ids = sorted(os.listdir(dlc_build_dir))
     if not dlc_ids:
       logging.info('There are no DLC(s) to copy to output, ignoring.')
       return
@@ -718,6 +722,23 @@ def InstallDlcImages(sysroot, board, dlc_id=None, install_root_dir=None,
         cros_build_lib.sudo_run(['cp', '-dR',
                                  meta_dir_src.rstrip('/') + '/.',
                                  meta_rootfs], print_cmd=False, stderr=True)
+        # Append the DLC root dm-verity digest.
+        root_hexdigest = verity.ExtractRootHexdigest(
+            os.path.join(meta_rootfs, DLC_VERITY_TABLE))
+        if not root_hexdigest:
+          raise Exception(f'Could not find root dm-verity digest of {d_id} in '
+                          'dm-verity table')
+        trusted_verity_digests = os.path.join(
+            rootfs, DLC_META_DIR, DLC_LOADPIN_TRUSTED_VERITY_DIGESTS)
+        # Handle duplicates.
+        if (not os.path.exists(trusted_verity_digests) or
+            root_hexdigest not in
+            osutils.ReadFile(trusted_verity_digests).split()):
+          osutils.WriteFile(
+              trusted_verity_digests,
+              root_hexdigest + '\n',
+              mode='a',
+              sudo=True)
 
       else:
         logging.info('rootfs value was not provided. Copying metadata skipped.')
