@@ -238,11 +238,7 @@ class DlcGeneratorTest(cros_test_lib.LoggingTestCase,
         critical_update=False,
         fullnamerev=_FULLNAME_REV)
     return dlc_lib.DlcGenerator(
-        ebuild_params=params,
-        src_dir=src_dir,
-        sysroot=sysroot,
-        install_root_dir=sysroot,
-        board=_BOARD)
+        ebuild_params=params, src_dir=src_dir, sysroot=sysroot, board=_BOARD)
 
   def testSquashOwnerships(self):
     """Test dlc_lib.SquashOwnershipsTest"""

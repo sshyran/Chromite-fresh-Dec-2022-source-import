@@ -212,13 +212,11 @@ class DlcGenerator(object):
   # The DLC root path inside the DLC module.
   _DLC_ROOT_DIR = 'root'
 
-  def __init__(self, ebuild_params, sysroot, install_root_dir, board,
-               src_dir=None):
+  def __init__(self, ebuild_params, sysroot, board, src_dir=None):
     """Object initializer.
 
     Args:
       sysroot: (str) The path to the build root directory.
-      install_root_dir: (str) The path to the root installation directory.
       ebuild_params: (EbuildParams) Ebuild variables.
       board: (str) The target board we are building for.
       src_dir: (str) Optional path to the DLC source root directory. When None,
@@ -229,7 +227,6 @@ class DlcGenerator(object):
     self.temp_root = osutils.TempDir(prefix='dlc', sudo_rm=True)
     self.src_dir = src_dir
     self.sysroot = sysroot
-    self.install_root_dir = install_root_dir
     self.board = board
     self.ebuild_params = ebuild_params
     # If the client is not overriding the src_dir, use the default one.
@@ -258,7 +255,7 @@ class DlcGenerator(object):
   def CopyTempContentsToBuildDir(self):
     """Copy the temp files to the build directory using sudo."""
     src = self.temp_root.tempdir.rstrip('/') + '/.'
-    dst = self.install_root_dir
+    dst = self.sysroot
     logging.info(
         'Copy files from temporary directory (%s) to build directory (%s).',
         src, dst)
@@ -660,11 +657,7 @@ def InstallDlcImages(sysroot, board, dlc_id=None, install_root_dir=None,
                      EbuildParams.GetParamsPath(sysroot, d_id, d_package), d_id)
       else:
         dlc_generator = DlcGenerator(
-            src_dir=src_dir,
-            sysroot=sysroot,
-            install_root_dir=sysroot,
-            board=board,
-            ebuild_params=params)
+            src_dir=src_dir, sysroot=sysroot, board=board, ebuild_params=params)
         dlc_generator.GenerateDLC()
 
       # Copy the dlc images to install_root_dir.
