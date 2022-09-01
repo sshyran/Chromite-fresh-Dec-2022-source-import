@@ -561,13 +561,14 @@ class TestCreateStrippedPackagesTar(cros_test_lib.MockTempDirTestCase):
     ]
 
     tar_mock = self.PatchObject(cros_build_lib, 'CreateTarball')
-    self.PatchObject(cros_build_lib, 'run')
+    rc = self.StartPatcher(cros_test_lib.RunCommandMock())
+    rc.SetDefaultCmdResult()
     image.create_stripped_packages_tar(self.chroot,
                                        self.build_target,
                                        self.output_dir)
     tar_mock.assert_called_once_with(
         tarball_path=os.path.join(self.output_dir, 'stripped-packages.tar'),
         cwd=self.build_target.root,
-        compressor=cros_build_lib.COMP_NONE,
+        compression=cros_build_lib.COMP_NONE,
         chroot=self.chroot,
         inputs=stripped_files_list)

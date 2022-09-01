@@ -734,7 +734,7 @@ def create_stripped_packages_tar(chroot: chroot_lib.Chroot,
   tarball_output = os.path.join(output_dir, 'stripped-packages.tar')
   cros_build_lib.CreateTarball(tarball_path=tarball_output,
                                cwd=build_target.root,
-                               compressor=cros_build_lib.COMP_NONE,
+                               compression=cros_build_lib.COMP_NONE,
                                chroot=chroot,
                                inputs=tarball_paths)
   return tarball_output
