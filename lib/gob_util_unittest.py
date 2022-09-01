@@ -148,6 +148,9 @@ Too bad..."""
     contents = gob_util.GetFileContentsOnHead('some.git.url',
                                               'some/file/path')
     self.assertEqual(contents, expected_contents)
+    contents = gob_util.GetFileContents('some.git.url',
+                                        'some/file/path')
+    self.assertEqual(contents, expected_contents)
 
 
 class GetCookieTests(cros_test_lib.TestCase):

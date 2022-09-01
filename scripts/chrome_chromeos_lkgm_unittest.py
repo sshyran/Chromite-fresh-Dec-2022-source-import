@@ -22,7 +22,7 @@ class ChromeLKGMCommitterTester(cros_test_lib.RunCommandTestCase,
                                                               'main')
     self.old_lkgm = None
 
-  @mock.patch('chromite.lib.gob_util.GetFileContentsOnHead')
+  @mock.patch('chromite.lib.gob_util.GetFileContents')
   def testCommitNewLKGM(self, mock_get_file):
     """Tests that we can commit a new LKGM file."""
     mock_get_file.return_value = '999.0.0'
@@ -38,7 +38,7 @@ class ChromeLKGMCommitterTester(cros_test_lib.RunCommandTestCase,
             bc.assert_called_once_with(123456, labels={'Bot-Commit': 1},
                                        notify='NONE')
 
-  @mock.patch('chromite.lib.gob_util.GetFileContentsOnHead')
+  @mock.patch('chromite.lib.gob_util.GetFileContents')
   def testOlderLKGMFails(self, mock_get_file):
     """Tests that trying to update to an older lkgm version fails."""
     mock_get_file.return_value = '1002.0.0'
@@ -49,7 +49,7 @@ class ChromeLKGMCommitterTester(cros_test_lib.RunCommandTestCase,
                           self.committer.UpdateLKGM)
         ce.assert_not_called()
 
-  @mock.patch('chromite.lib.gob_util.GetFileContentsOnHead')
+  @mock.patch('chromite.lib.gob_util.GetFileContents')
   def testVersionWithChromeBranch(self, mock_get_file):
     """Tests passing a version with a chrome branch strips the branch."""
     branch = 'refs/branch-heads/5000'

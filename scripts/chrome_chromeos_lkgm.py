@@ -176,8 +176,8 @@ class ChromeLKGMCommitter(object):
 
   def UpdateLKGM(self):
     """Updates the LKGM file with the new version."""
-    self._old_lkgm = gob_util.GetFileContentsOnHead(
-        constants.CHROMIUM_GOB_URL, 'chromeos/CHROMEOS_LKGM')
+    self._old_lkgm = gob_util.GetFileContents(
+        constants.CHROMIUM_GOB_URL, 'chromeos/CHROMEOS_LKGM', ref=self._branch)
     self._old_lkgm = self._old_lkgm.strip()
 
     lv = distutils.version.LooseVersion

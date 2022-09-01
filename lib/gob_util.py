@@ -958,8 +958,24 @@ def GetFileContentsOnHead(git_url: str, filepath: str) -> str:
   Returns:
     The contents of the file as a string.
   """
+  return GetFileContents(git_url, filepath, ref='HEAD')
+
+
+def GetFileContents(git_url: str, filepath: str, ref='HEAD') -> str:
+  """Returns the current contents of a file on the default branch.
+
+  Retrieves the contents from Gitiles via its API, not Gerrit's.
+
+  Args:
+    git_url: URL for the repository to get the file contents from.
+    filepath: Path of the file in the repository.
+    ref: The ref to use, e.g. HEAD or refs/heads/main
+
+  Returns:
+    The contents of the file as a string.
+  """
   parsed_url = urllib.parse.urlparse(git_url)
-  path = parsed_url[2].rstrip('/') + f'/+/HEAD/{filepath}?format=TEXT'
+  path = parsed_url[2].rstrip('/') + f'/+/{ref}/{filepath}?format=TEXT'
   contents = FetchUrl(parsed_url[1], path, ignore_404=False)
   contents = base64.b64decode(contents)
   return contents.decode('utf-8')
