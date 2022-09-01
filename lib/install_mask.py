@@ -24,6 +24,7 @@ DEFAULT = {
     '/build/initramfs',
     '/build/libexec/tast',
     '/build/manatee',
+    '/build/opt',
     '/build/rootfs/dlc',
     '/build/share',
     '/etc/init.d',
