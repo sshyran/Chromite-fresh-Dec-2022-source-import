@@ -1017,11 +1017,13 @@ def RunInsideChroot(command=None, chroot_args=None):
   raise ChrootRequiredError(argv, chroot_args)
 
 
-def RunAsRootUser(argv: List[str]):
+def RunAsRootUser(argv: List[str], preserve_env: bool = False):
   """Run the given command as the root user.
 
   Args:
     argv: Command line arguments to run as the root user.
+    preserve_env: If True, preserve existing environment variables when
+        re-executing.
 
   Raises:
     ValueError: If a command is not provided.
@@ -1032,12 +1034,17 @@ def RunAsRootUser(argv: List[str]):
   if osutils.IsRootUser():
     return
 
-  cmd = [
-      'sudo',
+  cmd = ['sudo']
+
+  if preserve_env:
+    cmd.append('--preserve-env')
+
+  cmd.extend([
       f'HOME={os.environ["HOME"]}',
       f'PATH={os.environ["PATH"]}',
-      '--',
-  ] + argv
+      '--'])
+  cmd.extend(argv)
+
   os.execvp(cmd[0], cmd)
 
 

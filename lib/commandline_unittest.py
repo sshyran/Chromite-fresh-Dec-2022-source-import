@@ -778,7 +778,7 @@ class TestRunInsideChroot(cros_test_lib.MockTestCase):
     self._VerifyRunInsideChroot(['/inside/cmd', 'arg1', 'arg2', 'newarg3'])
 
 
-class TestRunAsRootUsesr(cros_test_lib.MockTestCase):
+class TestRunAsRootUser(cros_test_lib.MockTestCase):
   """Test commandline.RunAsRootUser()."""
 
   def setUp(self):
@@ -796,6 +796,21 @@ class TestRunAsRootUsesr(cros_test_lib.MockTestCase):
     commandline.RunAsRootUser(['test_cmd'])
 
     self.execvp_mock.assert_not_called()
+
+  def testPreserveEnv(self):
+    """Test that the environment is preserved."""
+    self.is_root_user_mock.return_value = False
+
+    commandline.RunAsRootUser(['test_cmd'], preserve_env=True)
+
+    self.execvp_mock.assert_called_once_with('sudo', [
+        'sudo',
+        '--preserve-env',
+        f'HOME={os.environ["HOME"]}',
+        f'PATH={os.environ["PATH"]}',
+        '--',
+        'test_cmd',
+    ])
 
   def testCommandCreation(self):
     """Test that the command is created with the appropriate envvars."""

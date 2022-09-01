@@ -322,17 +322,21 @@ def SimpleUnshare(mount=True, uts=True, ipc=True, net=False, pid=False):
     CreatePidNs()
 
 
-def ReExecuteWithNamespace(argv: List[str], network: bool = False):
+def ReExecuteWithNamespace(argv: List[str],
+                           preserve_env: bool = False,
+                           network: bool = False):
   """Re-execute as root so we can unshare resources.
 
   Args:
     argv: Command line arguments to run as root user.
+    preserve_env: If True, preserve existing environment variables when
+        running as root user.
     network: If False, disable access to the network.
   """
   # Re-run the command as a root user in order to create the namespaces.
   # Ideally, we can rework this logic to swap to the root user in a way that
   # doesn't involve re-executing the command.
-  commandline.RunAsRootUser(argv)
+  commandline.RunAsRootUser(argv, preserve_env=preserve_env)
 
   SimpleUnshare(net=not network, pid=True)
   # We got our namespaces, so switch back to the non-root user.

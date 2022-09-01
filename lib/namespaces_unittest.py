@@ -50,19 +50,20 @@ class ReExecuteWithNamespaceTests(cros_test_lib.MockTestCase):
 
   def testReExecuteWithNamespace(self):
     """Test that SimpleUnshare is called and the non-root user is restored."""
-    self.PatchObject(commandline, 'RunAsRootUser')
     self.PatchDict(os.environ, {
         'SUDO_GID': '123',
         'SUDO_UID': '456',
         'SUDO_USER': 'testuser',
     })
+    run_as_root_user_mock = self.PatchObject(commandline, 'RunAsRootUser')
     simple_unshare_mock = self.PatchObject(namespaces, 'SimpleUnshare')
     os_initgroups_mock = self.PatchObject(os, 'initgroups')
     os_setresgid_mock = self.PatchObject(os, 'setresgid')
     os_setresuid_mock = self.PatchObject(os, 'setresuid')
 
-    namespaces.ReExecuteWithNamespace([])
+    namespaces.ReExecuteWithNamespace([], preserve_env=True)
 
+    run_as_root_user_mock.assert_called_once_with([], preserve_env=True)
     simple_unshare_mock.assert_called_once_with(net=True, pid=True)
     os_initgroups_mock.assert_called_once_with('testuser', 123)
     os_setresgid_mock.assert_called_once_with(123, 123, 123)
