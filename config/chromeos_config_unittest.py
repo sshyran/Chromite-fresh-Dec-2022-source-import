@@ -511,14 +511,6 @@ class CBuildBotTest(ChromeosConfigTestBase):
       self.assertIn(config['build_type'], constants.VALID_BUILD_TYPES,
                     'Config %s: has unexpected build_type value.' % build_name)
 
-  def testGCCGitHash(self):
-    """Verifies that gcc_githash is not set without setting latest_toolchain."""
-    for build_name, config in self.site_config.items():
-      if config['gcc_githash']:
-        self.assertTrue(
-            config['latest_toolchain'],
-            'Config %s: has gcc_githash but not latest_toolchain.' % build_name)
-
   def testBuildToRun(self):
     """Verify we don't try to run tests without building them."""
     for build_name, config in self.site_config.items():

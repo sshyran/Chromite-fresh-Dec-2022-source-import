@@ -753,11 +753,6 @@ def DefaultSettings():
       # Use the newest ebuilds for all the toolchain packages.
       latest_toolchain=False,
 
-      # This is only valid when latest_toolchain is True. If you set this to a
-      # commit-ish, the gcc ebuild will use it to build the toolchain
-      # compiler.
-      gcc_githash=None,
-
       # Wipe and replace the board inside the chroot.
       board_replace=False,
 

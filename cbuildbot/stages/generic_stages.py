@@ -174,9 +174,6 @@ class BuilderStage(object):
 
     self._latest_toolchain = (
         self._run.config.latest_toolchain or self._run.options.latest_toolchain)
-    if self._latest_toolchain and self._run.config.gcc_githash:
-      useflags.append('git_gcc')
-      self._portage_extra_env['GCC_GITHASH'] = self._run.config.gcc_githash
 
     if useflags:
       self._portage_extra_env['USE'] = ' '.join(useflags)

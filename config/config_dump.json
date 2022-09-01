@@ -53,7 +53,6 @@
     "factory": true,
     "factory_install_netboot": true,
     "factory_toolkit": true,
-    "gcc_githash": null,
     "gce_image": false,
     "git_sync": false,
     "goma_client_type": null,
