@@ -71,6 +71,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
         'version': f'{_VERSION}_new',
         'preload': True,
         'factory_install': False,
+        'loadpin_verity_digest': False,
         'used_by': dlc_lib.USED_BY_USER,
         'days_to_purge': _DAYS_TO_PURGE,
         'mount_file_required': True,
@@ -98,6 +99,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
                   version=_VERSION,
                   preload=False,
                   factory_install=False,
+                  loadpin_verity_digest=False,
                   used_by=dlc_lib.USED_BY_SYSTEM,
                   days_to_purge=_DAYS_TO_PURGE,
                   mount_file_required=False,
@@ -115,6 +117,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
                           'description': description,
                           'preload': preload,
                           'factory_install': factory_install,
+                          'loadpin_verity_digest': loadpin_verity_digest,
                           'used_by': used_by,
                           'days_to_purge': days_to_purge,
                           'mount_file_required': mount_file_required,
@@ -133,6 +136,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
                      version=_VERSION,
                      preload=False,
                      factory_install=False,
+                     loadpin_verity_digest=False,
                      used_by=dlc_lib.USED_BY_SYSTEM,
                      days_to_purge=_DAYS_TO_PURGE,
                      mount_file_required=False,
@@ -150,6 +154,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
         version=version,
         preload=preload,
         factory_install=factory_install,
+        loadpin_verity_digest=loadpin_verity_digest,
         used_by=used_by,
         days_to_purge=days_to_purge,
         mount_file_required=mount_file_required,
@@ -356,6 +361,7 @@ class DlcGeneratorTest(cros_test_lib.LoggingTestCase,
             'days-to-purge': _DAYS_TO_PURGE,
             'reserved': False,
             'critical-update': False,
+            'loadpin-verity-digest': False,
         })
 
   def testVerifyImageSize(self):
@@ -496,7 +502,7 @@ class FinalizeDlcsTest(cros_test_lib.MockTempDirTestCase):
     osutils.WriteFile(
         os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, _ID, _PACKAGE,
                      dlc_lib.DLC_TMP_META_DIR, dlc_lib.IMAGELOADER_JSON),
-        '{}',
+        '{"loadpin-verity-digest": true}',
         makedirs=True)
     root_hexdigest = (
         'af7d331ac908dd6e4f6771a3146310bc7edcfe8d9794abcd34512e1a7b704adc')
@@ -521,7 +527,7 @@ class FinalizeDlcsTest(cros_test_lib.MockTempDirTestCase):
     osutils.WriteFile(
         os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, _ID + '1', _PACKAGE,
                      dlc_lib.DLC_TMP_META_DIR, dlc_lib.IMAGELOADER_JSON),
-        '{}',
+        '{"loadpin-verity-digest": true}',
         makedirs=True)
     root_hexdigest1 = (
         'af7d331ac908dd6e4f6771a3146310bc7edcfe8d9794abcd34512e1a7b704adc')
@@ -535,7 +541,7 @@ class FinalizeDlcsTest(cros_test_lib.MockTempDirTestCase):
     osutils.WriteFile(
         os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, _ID + '1dupe', _PACKAGE,
                      dlc_lib.DLC_TMP_META_DIR, dlc_lib.IMAGELOADER_JSON),
-        '{}',
+        '{"loadpin-verity-digest": true}',
         makedirs=True)
     osutils.WriteFile(
         os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, _ID + '1dupe', _PACKAGE,
@@ -547,7 +553,7 @@ class FinalizeDlcsTest(cros_test_lib.MockTempDirTestCase):
     osutils.WriteFile(
         os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, _ID + '2', _PACKAGE,
                      dlc_lib.DLC_TMP_META_DIR, dlc_lib.IMAGELOADER_JSON),
-        '{}',
+        '{"loadpin-verity-digest": true}',
         makedirs=True)
     root_hexdigest2 = (
         'cdefedb2405a5d87a1e441caf0b3a6fd4d59947597149215ba9ef7d88e269004')

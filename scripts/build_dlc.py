@@ -91,6 +91,11 @@ def GetParser():
       action='store_true',
       help='Allow factory installing of DLC.')
   one_dlc.add_argument(
+      '--loadpin-verity-digest',
+      default=False,
+      action='store_true',
+      help='Allow DLC to be a trusted dm-verity digest.')
+  one_dlc.add_argument(
       '--used-by', default=dlc_lib.USED_BY_SYSTEM,
       choices=(dlc_lib.USED_BY_USER, dlc_lib.USED_BY_SYSTEM),
       help='Defines how this DLC will be used so dlcservice can take proper '
@@ -188,6 +193,7 @@ def main(argv):
         version=opts.version,
         preload=opts.preload,
         factory_install=opts.factory_install,
+        loadpin_verity_digest=opts.loadpin_verity_digest,
         mount_file_required=opts.mount_file_required,
         reserved=opts.reserved,
         critical_update=opts.critical_update,

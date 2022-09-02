@@ -116,12 +116,15 @@ class EbuildParams(object):
     reserved: (bool) always reserve space for DLC on disk.
     critical_update: (bool) DLC always updates with the OS.
     fullnamerev: (str) The full package & version name.
+    loadpin_verity_digest: (str) DLC digest is part of LoadPin trusted dm-verity
+        digest.
   """
 
   def __init__(self, dlc_id, dlc_package, fs_type, pre_allocated_blocks,
                version, name, description, preload, used_by,
                mount_file_required, fullnamerev, reserved=False,
-               critical_update=False, days_to_purge=0, factory_install=False):
+               critical_update=False, days_to_purge=0, factory_install=False,
+               loadpin_verity_digest=False):
     """Initializes the object.
 
     When adding a new variable in here, always set a default value. The reason
@@ -144,6 +147,7 @@ class EbuildParams(object):
     self.days_to_purge = days_to_purge
     self.reserved = reserved
     self.critical_update = critical_update
+    self.loadpin_verity_digest = loadpin_verity_digest
 
   def StoreDlcParameters(self, install_root_dir, sudo):
     """Store DLC parameters defined in the ebuild.
@@ -496,6 +500,7 @@ class DlcGenerator(object):
         'mount-file-required': self.ebuild_params.mount_file_required,
         'reserved': self.ebuild_params.reserved,
         'critical-update': self.ebuild_params.critical_update,
+        'loadpin-verity-digest': self.ebuild_params.loadpin_verity_digest,
     }
 
   def GenerateVerity(self):
@@ -595,6 +600,19 @@ def IsFactoryInstallAllowed(dlc_id: str, dlc_build_dir: str):
     dlc_build_dir: The root path where DLC build files reside.
   """
   return IsFieldAllowed(dlc_id, dlc_build_dir, 'factory-install')
+
+
+def IsLoadPinVerityDigestAllowed(dlc_id: str, dlc_build_dir: str) -> bool:
+  """Checks that DLC is built with DLC_LOADPIN_VERITY_DIGEST set to true.
+
+  Args:
+    dlc_id: The DLC ID.
+    dlc_build_dir: The root path where DLC build files reside.
+
+  Returns:
+    Boolean based on field being true or false.
+  """
+  return IsFieldAllowed(dlc_id, dlc_build_dir, 'loadpin-verity-digest')
 
 
 def InstallDlcImages(sysroot, board, dlc_id=None, install_root_dir=None,
@@ -722,23 +740,29 @@ def InstallDlcImages(sysroot, board, dlc_id=None, install_root_dir=None,
         cros_build_lib.sudo_run(['cp', '-dR',
                                  meta_dir_src.rstrip('/') + '/.',
                                  meta_rootfs], print_cmd=False, stderr=True)
-        # Append the DLC root dm-verity digest.
-        root_hexdigest = verity.ExtractRootHexdigest(
-            os.path.join(meta_rootfs, DLC_VERITY_TABLE))
-        if not root_hexdigest:
-          raise Exception(f'Could not find root dm-verity digest of {d_id} in '
-                          'dm-verity table')
-        trusted_verity_digests = os.path.join(
-            rootfs, DLC_META_DIR, DLC_LOADPIN_TRUSTED_VERITY_DIGESTS)
-        # Handle duplicates.
-        if (not os.path.exists(trusted_verity_digests) or
-            root_hexdigest not in
-            osutils.ReadFile(trusted_verity_digests).split()):
-          osutils.WriteFile(
-              trusted_verity_digests,
-              root_hexdigest + '\n',
-              mode='a',
-              sudo=True)
+
+        # Only allow if explicitly set when emerge'ing the DLC ebuild.
+        if IsLoadPinVerityDigestAllowed(d_id, dlc_build_dir):
+          # Append the DLC root dm-verity digest.
+          root_hexdigest = verity.ExtractRootHexdigest(
+              os.path.join(meta_rootfs, DLC_VERITY_TABLE))
+          if not root_hexdigest:
+            raise Exception(f'Could not find root dm-verity digest of {d_id} in'
+                            ' dm-verity table')
+          trusted_verity_digests = os.path.join(
+              rootfs, DLC_META_DIR, DLC_LOADPIN_TRUSTED_VERITY_DIGESTS)
+          # Handle duplicates.
+          if (not os.path.exists(trusted_verity_digests) or
+              root_hexdigest not in
+              osutils.ReadFile(trusted_verity_digests).split()):
+            osutils.WriteFile(
+                trusted_verity_digests,
+                root_hexdigest + '\n',
+                mode='a',
+                sudo=True)
+        else:
+          logging.info(
+              'Skipping addition of LoadPin dm-verity digest of %s.', d_id)
 
       else:
         logging.info('rootfs value was not provided. Copying metadata skipped.')
