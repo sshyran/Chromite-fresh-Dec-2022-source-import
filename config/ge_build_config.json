@@ -5669,7 +5669,11 @@
         {
           "board_name": "hatch-kernelnext",
           "name": "dratini",
-          "cq_test_enabled": false,
+          "test_suites": [
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
+          "cq_test_enabled": true,
           "release_builder_test_pool": "bvt",
           "board_id": 440,
           "is_active": true
@@ -5685,6 +5689,12 @@
         {
           "board_name": "hatch-kernelnext",
           "name": "helios",
+          "test_suites": [
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 440,
