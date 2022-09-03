@@ -16,6 +16,7 @@ import functools
 import json
 import logging
 import os
+from pathlib import Path
 import tempfile
 
 from chromite.cli import command
@@ -1043,52 +1044,82 @@ def _UninstallDLCImage(device, pkg_attrs):
 
 
 def _DeployDLCImage(device, sysroot, board, dlc_id, dlc_package):
-  """Deploy (install and mount) a DLC image."""
-  # Build the DLC image if the image is outdated or doesn't exist.
-  dlc_lib.InstallDlcImages(sysroot=sysroot, dlc_id=dlc_id, board=board)
+  """Deploy (install and mount) a DLC image.
 
-  logging.debug('Uninstall DLC %s if it is installed.', dlc_id)
-  try:
-    device.run(['dlcservice_util', '--uninstall', '--id=%s' % dlc_id])
-  except cros_build_lib.RunCommandError as e:
-    logging.info('Failed to uninstall DLC:%s. Continue anyway.', e.stderr)
-  except Exception:
-    logging.error('Failed to uninstall DLC.')
-    raise
+  Args:
+    device: A device object.
+    sysroot: The sysroot path.
+    board: Board to use.
+    dlc_id: The DLC ID.
+    dlc_package: The DLC package name.
+  """
+  # Requires `sudo_rm` because installations of files are running with sudo.
+  with osutils.TempDir(sudo_rm=True) as tempdir:
+    temp_rootfs = Path(tempdir)
+    # Build the DLC image if the image is outdated or doesn't exist.
+    dlc_lib.InstallDlcImages(
+        sysroot=sysroot, rootfs=temp_rootfs, dlc_id=dlc_id, board=board)
 
-  # TODO(andrewlassalle): Copy the DLC image to the preload location instead
-  # of to dlc_a and dlc_b, and let dlcserive install the images to their final
-  # location.
-  logging.notice('Deploy the DLC image for %s', dlc_id)
-  dlc_img_path_src = os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, dlc_id,
-                                  dlc_package, dlc_lib.DLC_IMAGE)
-  dlc_img_path = os.path.join(_DLC_INSTALL_ROOT, dlc_id, dlc_package)
-  dlc_img_path_a = os.path.join(dlc_img_path, 'dlc_a')
-  dlc_img_path_b = os.path.join(dlc_img_path, 'dlc_b')
-  # Create directories for DLC images.
-  device.run(['mkdir', '-p', dlc_img_path_a, dlc_img_path_b])
-  # Copy images to the destination directories.
-  device.CopyToDevice(dlc_img_path_src, os.path.join(dlc_img_path_a,
-                                                     dlc_lib.DLC_IMAGE),
-                      mode='rsync')
-  device.run(['cp', os.path.join(dlc_img_path_a, dlc_lib.DLC_IMAGE),
-              os.path.join(dlc_img_path_b, dlc_lib.DLC_IMAGE)])
+    logging.debug('Uninstall DLC %s if it is installed.', dlc_id)
+    try:
+      device.run(['dlcservice_util', '--uninstall', '--id=%s' % dlc_id])
+    except cros_build_lib.RunCommandError as e:
+      logging.info('Failed to uninstall DLC:%s. Continue anyway.', e.stderr)
+    except Exception:
+      logging.error('Failed to uninstall DLC.')
+      raise
 
-  # Set the proper perms and ownership so dlcservice can access the image.
-  device.run(['chmod', '-R', 'u+rwX,go+rX,go-w', _DLC_INSTALL_ROOT])
-  device.run(['chown', '-R', 'dlcservice:dlcservice', _DLC_INSTALL_ROOT])
+    # TODO(andrewlassalle): Copy the DLC image to the preload location instead
+    # of to dlc_a and dlc_b, and let dlcserive install the images to their final
+    # location.
+    logging.notice('Deploy the DLC image for %s', dlc_id)
+    dlc_img_path_src = os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, dlc_id,
+                                    dlc_package, dlc_lib.DLC_IMAGE)
+    dlc_img_path = os.path.join(_DLC_INSTALL_ROOT, dlc_id, dlc_package)
+    dlc_img_path_a = os.path.join(dlc_img_path, 'dlc_a')
+    dlc_img_path_b = os.path.join(dlc_img_path, 'dlc_b')
+    # Create directories for DLC images.
+    device.run(['mkdir', '-p', dlc_img_path_a, dlc_img_path_b])
+    # Copy images to the destination directories.
+    device.CopyToDevice(dlc_img_path_src, os.path.join(dlc_img_path_a,
+                                                       dlc_lib.DLC_IMAGE),
+                        mode='rsync')
+    device.run(['cp', os.path.join(dlc_img_path_a, dlc_lib.DLC_IMAGE),
+                os.path.join(dlc_img_path_b, dlc_lib.DLC_IMAGE)])
 
-  # Copy metadata to device.
-  dest_mata_dir = os.path.join('/', dlc_lib.DLC_META_DIR, dlc_id,
-                               dlc_package)
-  device.run(['mkdir', '-p', dest_mata_dir])
-  src_meta_dir = os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, dlc_id,
-                              dlc_package, dlc_lib.DLC_TMP_META_DIR)
-  device.CopyToDevice(src_meta_dir + '/',
-                      dest_mata_dir,
-                      mode='rsync',
-                      recursive=True,
-                      remote_sudo=True)
+    # Set the proper perms and ownership so dlcservice can access the image.
+    device.run(['chmod', '-R', 'u+rwX,go+rX,go-w', _DLC_INSTALL_ROOT])
+    device.run(['chown', '-R', 'dlcservice:dlcservice', _DLC_INSTALL_ROOT])
+
+    # Copy metadata to device.
+    dest_meta_dir = Path('/') / dlc_lib.DLC_META_DIR / dlc_id / dlc_package
+    device.run(['mkdir', '-p', str(dest_meta_dir)])
+    src_meta_dir = os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, dlc_id,
+                                dlc_package, dlc_lib.DLC_TMP_META_DIR)
+    device.CopyToDevice(src_meta_dir + '/',
+                        dest_meta_dir,
+                        mode='rsync',
+                        recursive=True,
+                        remote_sudo=True)
+
+    # TODO(kimjae): Make this generic so it recomputes all the DLCs + copies
+    # over a fresh list of dm-verity digests instead of appending and keeping
+    # the stale digests when developers are testing.
+
+    # Copy the LoadPin dm-verity digests to device.
+    loadpin = dlc_lib.DLC_LOADPIN_TRUSTED_VERITY_DIGESTS
+    dst_loadpin = Path('/') / dlc_lib.DLC_META_DIR / loadpin
+    src_loadpin = temp_rootfs / dlc_lib.DLC_META_DIR / loadpin
+    if src_loadpin.exists():
+      digests = set(osutils.ReadFile(src_loadpin).split())
+      try:
+        digests.update(device.CatFile(dst_loadpin).split())
+      except remote_access.CatFileError:
+        pass
+
+      with tempfile.NamedTemporaryFile(dir=temp_rootfs) as f:
+        osutils.WriteFile(f.name, '\n'.join(digests))
+        device.CopyToDevice(f.name, dst_loadpin, mode='rsync', remote_sudo=True)
 
 
 def _GetDLCInfo(device, pkg_path, from_dut):
