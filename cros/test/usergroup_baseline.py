@@ -25,6 +25,9 @@ _VALID_LOGIN_SHELLS = set((
     '/bin/dash',
 ))
 
+# Pulled out for COIL disabling.
+_SCANNER_DAEMON = 'saned'  # nocheck
+
 USER_BASELINE = dict((e.user, e) for e in (
     # These are sorted by uid.
     UserEntry(user='root', encpasswd='x', uid=0, gid=0, home='/root',
@@ -135,7 +138,7 @@ GROUP_BASELINE = dict((e.group, e) for e in (
                                                  'tpm_manager'}),
     GroupEntry(group='authpolicyd', gid=254, users={'authpolicyd',
                                                     'authpolicyd-exec'}),
-    GroupEntry(group='scanner', gid=255, users={'saned'}),
+    GroupEntry(group='scanner', gid=255, users={_SCANNER_DAEMON}),
     GroupEntry(group='uinput', gid=258, users={'bluetooth', 'volume', 'biod'}),
     GroupEntry(group='apmanager', gid=259, users={'apmanager', 'buffet'}),
     GroupEntry(group='peerd', gid=260, users={'buffet', 'chronos', 'peerd'}),
@@ -205,7 +208,7 @@ GROUP_BASELINE = dict((e.group, e) for e in (
 
     # More CrOS system daemon GIDs.
     GroupEntry(group='ippusb', gid=20100, users={'ippusb', 'lp', 'lpadmin',
-                                                 'cups', 'saned'}),
+                                                 'cups', _SCANNER_DAEMON}),
     GroupEntry(group='cfm-peripherals', gid=20103,
                users={'cfm-monitor', 'cfm-firmware-updaters'}),
     GroupEntry(group='shill', gid=20104, users={'shill'}),
@@ -214,7 +217,9 @@ GROUP_BASELINE = dict((e.group, e) for e in (
                                                     'kerberosd-exec'}),
     GroupEntry(group='cups-proxy', gid=20136, users={'crosvm', 'cups-proxy',
                                                      'pluginvm'}),
-    GroupEntry(group='usbprinter', gid=20155, users={'cups', 'saned'}),
+    GroupEntry(group='usbprinter', gid=20155, users={
+        'cups', _SCANNER_DAEMON,
+    }),
     GroupEntry(group='hotline', gid=20157, users={'hotline', 'hotlog'}),
     GroupEntry(group='traced-producer', gid=20162, users={'traced',
                                                           'traced-probes',

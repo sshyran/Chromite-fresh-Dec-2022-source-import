@@ -5,7 +5,6 @@
 # See repohooks/README.md for more details.
 
 master
-\b(in)?sane(\b|\d)
 sanity
 slave
 white.?list
