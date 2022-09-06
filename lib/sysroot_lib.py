@@ -91,6 +91,10 @@ export PKG_CONFIG_SYSROOT_DIR="{sysroot}"
 # Undo that logic.
 unset PKG_CONFIG_PATH
 
+# TODO: Consider using pkgconf cross-personalities instead
+# See https://github.com/pkgconf/pkgconf/issues/264
+export PKG_CONFIG_SYSTEM_INCLUDE_PATH="/usr/include:{sysroot}/usr/include"
+
 # Use full path to bypass automated wrapper checks that block `pkg-config`.
 # https://crbug.com/985180
 exec /usr/bin/pkg-config "$@"
