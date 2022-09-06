@@ -555,10 +555,14 @@ EC (RW) version: reef_v1.1.5909-bd1f0c9
       self._run.options.goma_dir = goma_dir
       stage = self.ConstructStage()
       self._run.options.chromeos_goma_dir = goma_dir
-
-      with self.assertRaisesRegex(ValueError,
-                                  'goma_client_json is not provided'):
-        stage._SetupGomaIfNecessary()
+      chroot_args = stage._SetupGomaIfNecessary()
+      self.assertEqual([
+          '--goma_dir', str(goma_dir),
+      ], chroot_args)
+      portage_env = stage._portage_extra_env
+      self.assertRegex(portage_env.get('GOMA_DIR', ''), '^/home/.*/goma$')
+      self.assertEqual(portage_env.get('GOMA_GCE_SERVICE_ACCOUNT', ''),
+                       'default')
 
 
 class BuildImageStageMock(partial_mock.PartialMock):

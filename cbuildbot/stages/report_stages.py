@@ -165,8 +165,7 @@ def _UploadAndLinkGomaLogIfNecessary(
     stage_name, cbb_config_name, goma_dir, goma_client_json, goma_tmp_dir):
   """Uploads the logs for goma, if needed. Also create a link to the visualizer.
 
-  If |goma_tmp_dir| is given, |goma_dir| and |goma_client_json| must not be
-  None.
+  If |goma_tmp_dir| is given, |goma_dir| must not be None.
 
   Args:
     stage_name: Name of the stage where goma is used.

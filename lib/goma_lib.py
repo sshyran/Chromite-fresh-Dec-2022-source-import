@@ -105,8 +105,8 @@ class Goma(object):
       goma_dir: Path to the Goma client used for simplechrome (outside of
         chroot).
       goma_client_json: Path to the service account json file to use goma. On
-        bots, this must be specified, otherwise raise a ValueError. On local,
-        this is optional, and can be set to None.
+        bots, if this is not specified use service account in GCE metadata.
+        On local, this is optional, and can be set to None.
       goma_tmp_dir: Path to the GOMA_TMP_DIR to be passed to goma programs. If
         given, it is used. If not given, creates a directory under /tmp in the
         chroot, expecting that the directory is removed in the next run's clean
@@ -132,9 +132,8 @@ class Goma(object):
 
     Raises:
       ValueError if 1) |goma_dir| does not point to a directory, 2)
-      on bots, but |goma_client_json| is not given, 3) |goma_client_json|
-      is given, but it does not point to a file, or 4) if |goma_tmp_dir| is
-      given but it does not point to a directory.
+      |goma_client_json| is given, but it does not point to a file, or 3)
+      if |goma_tmp_dir| is given but it does not point to a directory.
     """
     # Sanity checks of given paths.
     goma_dir = Path(goma_dir)
@@ -162,12 +161,6 @@ class Goma(object):
 
     if not goma_dir.is_dir():
       raise ValueError(f'goma_dir does not point a directory: {goma_dir}')
-
-    # If this script runs on bot, service account json file needs to be
-    # provided, otherwise it cannot access to goma service.
-    if cros_build_lib.HostIsCIBuilder() and goma_client_json is None:
-      raise ValueError(
-          'goma is enabled on bot, but goma_client_json is not provided')
 
     # If goma_client_json file is provided, it must be an existing file.
     if goma_client_json and not goma_client_json.is_file():
@@ -268,8 +261,11 @@ class Goma(object):
 
     self._AddCommonExtraEnv(result)
 
+    # TODO(crbug.com/1359171): drop goma_client_json support
     if self.goma_client_json:
       result['GOMA_SERVICE_ACCOUNT_JSON_FILE'] = str(self.goma_client_json)
+    elif cros_build_lib.HostIsCIBuilder():
+      result['GOMA_GCE_SERCVICE_ACCOUNT'] = 'default'
 
     if self.goma_cache:
       result['GOMA_CACHE_DIR'] = str(self.goma_cache)
@@ -295,9 +291,12 @@ class Goma(object):
 
     self._AddCommonExtraEnv(result)
 
+    # TODO(crbug.com/1359171): drop goma_client_json support
     if self.goma_client_json:
       result['GOMA_SERVICE_ACCOUNT_JSON_FILE'] = (
           '/creds/service_accounts/service-account-goma-client.json')
+    elif cros_build_lib.HostIsCIBuilder():
+      result['GOMA_GCE_SERVICE_ACCOUNT'] = 'default'
 
     if self.goma_cache:
       result['GOMA_CACHE_DIR'] = str(goma_dir / self.goma_cache.relative_to(

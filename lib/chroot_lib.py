@@ -118,8 +118,11 @@ class Chroot(object):
     if self.goma:
       args.extend([
           '--goma_dir', self.goma.linux_goma_dir,
-          '--goma_client_json', self.goma.goma_client_json,
       ])
+      if self.goma.goma_client_json:
+        args.extend([
+          '--goma_client_json', self.goma.goma_client_json,
+        ])
     if self.remoteexec:
       args.extend([
           '--reclient-dir', self.remoteexec.reclient_dir,
