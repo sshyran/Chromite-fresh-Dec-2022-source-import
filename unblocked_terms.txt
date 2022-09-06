@@ -7,4 +7,3 @@
 master
 sanity
 slave
-white.?list
