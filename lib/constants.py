@@ -1011,6 +1011,7 @@ LEGACY_RELEASE_ALLOWLIST = [
     'betty-pi-arc-release', # b/240524235
     'betty-release',
     'bob-release',
+    'brya-release',
     'caroline-release',
     'cave-release',
     'chell-release',
