@@ -7,6 +7,7 @@
 import errno
 import os
 import shutil
+import unittest
 from unittest import mock
 
 from chromite.lib import constants
@@ -736,6 +737,7 @@ class ManifestCheckoutTest(cros_test_lib.TempDirTestCase):
     git.RunGit(manifest, ['branch', '-d', 'default'])
     assertExcept("It should be checked out to 'default'")
 
+  @unittest.skip('Skip until staging and prod are on repo v2.29 b/245333797')
   def testGitMatchBranchName(self):
     git_repo = os.path.join(self.tempdir, '.repo', 'manifests')
 
