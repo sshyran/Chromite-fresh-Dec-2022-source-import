@@ -8,7 +8,6 @@ import csv
 import io
 import os
 import shutil
-import sys
 import textwrap
 
 from chromite.lib import cros_test_lib
@@ -442,12 +441,7 @@ class SignerConfigsFromCSVTest(cros_test_lib.TestCase):
     board_dicts = (board_dict or
                    SignerConfigsFromCSVTest.CreateBoardDicts(fields=fields,
                                                              boards=boards))
-    # Python 2 is picky with unicode-vs-str in the CSV module.
-    # TODO(vapier): Drop this once we're Python 3-only.
-    if sys.version_info.major < 3:
-      csv_file = io.BytesIO()
-    else:
-      csv_file = io.StringIO()
+    csv_file = io.StringIO()
     csv_writer = csv.DictWriter(csv_file, fields)
 
     csv_writer.writeheader()

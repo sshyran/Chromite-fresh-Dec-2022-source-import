@@ -7,7 +7,6 @@
 import configparser
 import io
 import os
-import sys
 
 from chromite.lib import cros_test_lib
 from chromite.signing.lib import keys
@@ -56,12 +55,7 @@ class TestSignerConfig(cros_test_lib.TestCase):
       cp.add_section(section)
       for option, value in options.items():
         cp.set(section, option, value=value)
-    # Python 2 is picky with unicode-vs-str in the CSV module.
-    # TODO(vapier): Drop this once we're Python 3-only.
-    if sys.version_info.major < 3:
-      ini_in_file = io.BytesIO()
-    else:
-      ini_in_file = io.StringIO()
+    ini_in_file = io.StringIO()
     cp.write(ini_in_file)
 
     # Read INI to new SignerConfig
