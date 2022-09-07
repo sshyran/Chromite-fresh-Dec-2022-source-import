@@ -166,9 +166,10 @@ class ChromeLKGMCommitter(object):
       logging.info('Would have applied CQ+2 to %s', already_open_lkgm_cl)
     else:
       logging.info('Applying CQ+2 to %s', already_open_lkgm_cl)
-      msg = None
+      msg = 'Applying CQ+2'
       if self._buildbucket_id:
-        msg = 'Applying CQ+2 from build %s' % self._buildbucket_id
+        msg += (' from build: https://ci.chromium.org/b/%s' %
+                self._buildbucket_id)
       self._gerrit_helper.SetReview(
           already_open_lkgm_cl, labels=labels,
           reviewers=[constants.CHROME_GARDENER_REVIEW_EMAIL],
