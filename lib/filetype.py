@@ -25,7 +25,6 @@ import mmap
 import os
 import re
 import stat
-import sys
 
 import magic  # pylint: disable=import-error
 
@@ -160,15 +159,9 @@ class FileTypeDecoder(object):
     # Detect if the file is binary based on the presence of non-ASCII chars. We
     # include some the first 32 chars often used in text files but we exclude
     # the rest.
-    # Python 2 creates bytes as chars when we want ints (like Python 3).
-    # TODO(vapier): Drop this once we require Python 3 everywhere.
-    if sys.version_info.major < 3:
-      to_ints = lambda s: (ord(x) for x in s)
-    else:
-      to_ints = lambda s: s
-    ascii_chars = set(to_ints(b'\a\b\t\n\v\f\r\x1b'))
+    ascii_chars = set(b'\a\b\t\n\v\f\r\x1b')
     ascii_chars.update(range(32, 128))
-    is_binary = any(set(to_ints(chunk)) - ascii_chars
+    is_binary = any(set(chunk) - ascii_chars
                     for chunk in iter(lambda: fmap.read(FILE_BUFFER_SIZE), b''))
 
     # We use the first part of the file in several checks.
