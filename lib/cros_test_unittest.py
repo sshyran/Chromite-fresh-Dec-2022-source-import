@@ -10,6 +10,7 @@ from unittest import mock
 import pytest  # pylint: disable=import-error
 
 from chromite.cbuildbot import commands
+from chromite.cli.cros import cros_chrome_sdk
 from chromite.lib import constants
 from chromite.lib import cros_test
 from chromite.lib import cros_test_lib
@@ -94,7 +95,7 @@ class CrOSTester(CrOSTesterBase):
     self.assertCommandContains([
         os.path.join(constants.CHROMITE_BIN_DIR, 'cros'),
         'flash', 'ssh://localhost:9222',
-        'xbuddy://remote/octopus-full/latest',])
+        'xbuddy://remote/octopus/latest',])
 
     # Specify an xbuddy link.
     self._tester.xbuddy = 'xbuddy://remote/octopus/R82-12901.0.0'
@@ -103,6 +104,35 @@ class CrOSTester(CrOSTesterBase):
         os.path.join(constants.CHROMITE_BIN_DIR, 'cros'),
         'flash', 'ssh://localhost:9222',
         'xbuddy://remote/octopus/R82-12901.0.0'])
+
+  def testFlashChromeCheckout(self):
+    """Tests flash command in a Chrome checkout."""
+    # Create a fake gclient checkout to fool path_util.DetermineCheckout().
+    chrome_root = os.path.join(self.tempdir, 'chrome_root')
+    chrome_src_dir = os.path.join(chrome_root, 'src')
+    osutils.SafeMakedirs(chrome_src_dir)
+    osutils.Touch(os.path.join(chrome_root, '.gclient'))
+    self.PatchObject(os, 'getcwd', return_value=chrome_root)
+    self.PatchObject(cros_chrome_sdk.SDKFetcher, 'GetCachedFullVersion',
+                     return_value='12345.0.0')
+
+    # Flashing a public image should use gs://chromiumos-image-archive/
+    self._tester.flash = True
+    self._tester.public_image = True
+    self._tester._device.board = 'octopus'
+    self._tester.Run()
+    self.assertCommandContains([
+        os.path.join(constants.CHROMITE_BIN_DIR, 'cros'),
+        'flash', 'ssh://localhost:9222',
+        'gs://chromiumos-image-archive/octopus-public/12345.0.0',])
+
+    # Flashing an internal image should use gs://chromeos-image-archive/
+    self._tester.public_image = False
+    self._tester.Run()
+    self.assertCommandContains([
+        os.path.join(constants.CHROMITE_BIN_DIR, 'cros'),
+        'flash', 'ssh://localhost:9222',
+        'gs://chromeos-image-archive/octopus-release/12345.0.0',])
 
   def testFlashSkip(self):
     """Tests flash command is skipped when not needed for ash-chrome."""
@@ -136,7 +166,7 @@ class CrOSTester(CrOSTesterBase):
     self._tester.Run()
     self.assertCommandContains([
         os.path.join(constants.CHROMITE_BIN_DIR, 'cros'), 'flash',
-        'ssh://localhost:9222', 'xbuddy://remote/octopus-full/latest'
+        'ssh://localhost:9222', 'xbuddy://remote/octopus/latest'
     ])
 
   def testDeployAshChrome(self):

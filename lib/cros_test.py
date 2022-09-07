@@ -153,10 +153,11 @@ class CrOSTest(object):
     if not self.flash:
       return
 
+    version = xbuddy.LATEST
     if self.xbuddy:
-      xbuddy_path = self.xbuddy.format(board=self._device.board)
+      flash_path = self.xbuddy.format(board=self._device.board)
     else:
-      version = xbuddy.LATEST
+      flash_path = 'xbuddy://remote/%s/%s' % (self._device.board, xbuddy.LATEST)
       if path_util.DetermineCheckout().type != path_util.CHECKOUT_TYPE_REPO:
         # Try flashing to the full version of the board used in the Simple
         # Chrome SDK if it's present in the cache. Otherwise default to using
@@ -164,29 +165,27 @@ class CrOSTest(object):
         cache = self.cache_dir or path_util.GetCacheDir()
         version = cros_chrome_sdk.SDKFetcher.GetCachedFullVersion(
             cache, self._device.board) or version
-      suffix = ''
-      if self.public_image:
-        suffix = '-full'
-      xbuddy_path = 'xbuddy://remote/%s%s/%s' % (
-          self._device.board, suffix, version)
+        if self.public_image:
+          flash_path = 'gs://chromiumos-image-archive/%s-public/%s' % (
+              self._device.board, version)
+        else:
+          flash_path = 'gs://chromeos-image-archive/%s-release/%s' % (
+              self._device.board, version)
 
     # Only considers skipping flashing if it's NOT for lacros-chrome tests
     # because at this time, automated/CI tests can't assume that ash-chrome is
     # left in a clean state and lacros-chrome depends on ash-chrome.
-    if not self.deploy_lacros:
+    if not self.deploy_lacros and xbuddy.LATEST not in flash_path:
       # Skip the flash if the device is already running the requested version.
       device_version = self._device.remote.version
-      _, _, requested_version, _ = xbuddy.XBuddy.InterpretPath(xbuddy_path)
       # Split on the first "-" when comparing versions since xbuddy requires
       # the RX- prefix, but the device may not advertise it.
-      if xbuddy.LATEST not in requested_version:
-        if (requested_version == device_version or
-            ('-' in requested_version and
-             requested_version.split('-', 1)[1] == device_version)):
-          logging.info(
-              'Skipping the flash. Device running %s when %s was requested',
-              device_version, xbuddy_path)
-          return
+      if (version == device_version or
+          ('-' in version and version.split('-', 1)[1] == device_version)):
+        logging.info(
+            'Skipping the flash. Device running %s when %s was requested',
+            device_version, flash_path)
+        return
 
     device_name = 'ssh://' + self._device.device
     if self._device.ssh_port:
@@ -195,7 +194,7 @@ class CrOSTest(object):
         os.path.join(constants.CHROMITE_BIN_DIR, 'cros'),
         'flash',
         device_name,
-        xbuddy_path,
+        flash_path,
         '--board', self._device.board,
         '--disable-rootfs-verification',
         '--clobber-stateful',
