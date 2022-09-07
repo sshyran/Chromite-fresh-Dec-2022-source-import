@@ -6,6 +6,7 @@
 
 import collections
 import os
+from pathlib import Path
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -354,6 +355,20 @@ class RemoteDeviceTest(cros_test_lib.MockTestCase):
       # We'll assume that the test passed when it tries to copy a file to the
       # remote side (the shell script to run indirectly).
       self.assertEqual(m.call_count, 1)
+
+  def testRunPathlib(self):
+    """Test pathlib usage in commands."""
+    with remote_access.RemoteDeviceHandler(remote_access.TEST_IP) as device:
+      self.rsh_mock.AddCmdResult(['ls', Path('/')], returncode=0)
+      result = device.run(['ls', Path('/')])
+      self.assertEqual(result.cmd[-2:], ['ls', '/'])
+
+  def testRunPathlibEnv(self):
+    """Test pathlib usage in commands w/custom env."""
+    with remote_access.RemoteDeviceHandler(remote_access.TEST_IP) as device:
+      self.rsh_mock.AddCmdResult(['FOO=bar', 'ls', Path('/')], returncode=0)
+      result = device.run(['ls', Path('/')], extra_env={'FOO': 'bar'})
+      self.assertEqual(result.cmd[-2:], ['ls', '/'])
 
   def testNoDeviceBaseDir(self):
     """Tests base_dir=None."""

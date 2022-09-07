@@ -8,6 +8,7 @@ import functools
 import glob
 import logging
 import os
+import pathlib
 import re
 import shutil
 import socket
@@ -1202,11 +1203,16 @@ class RemoteDevice(object):
       if isinstance(cmd, str):
         if not kwargs.get('shell', False):
           raise ValueError("'shell' must be True when 'cmd' is a string.")
-        cmdline = ' '.join(flat_vars) + ' ' + cmd
+        shell_cmd = cmd
       else:
         if kwargs.get('shell', False):
           raise ValueError("'shell' must be False when 'cmd' is a list.")
-        cmdline = ' '.join(flat_vars + cmd)
+        # Support pathlib & strings to match subprocess, but allow other types
+        # through so they still fail.
+        shell_cmd = ' '.join(
+            str(x) if isinstance(x, pathlib.PurePath) else x for x in cmd)
+      cmdline = ' '.join(flat_vars) + shell_cmd
+
       if len(cmdline) > ARG_MAX:
         env_list = ['export %s' % x for x in flat_vars]
         with tempfile.NamedTemporaryFile(dir=self.tempdir.tempdir,
@@ -1224,7 +1230,7 @@ class RemoteDevice(object):
         new_cmd += flat_vars
 
       if isinstance(cmd, str):
-        cmd = ' '.join(new_cmd) + ' ' + cmd
+        cmd = ' '.join(new_cmd) + ' ' + shell_cmd
       else:
         cmd = new_cmd + cmd
 
