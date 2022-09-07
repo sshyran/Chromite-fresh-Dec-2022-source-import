@@ -196,8 +196,6 @@ class _Lock(cros_build_lib.PrimaryPidContextManager):
       self.locking_mechanism(self._fd, fcntl.LOCK_UN)
 
   def __del__(self):
-    # TODO(ferringb): Convert this to snakeoil.weakref.WeakRefFinalizer
-    # if/when that rebasing occurs.
     self.close()
 
   def close(self):

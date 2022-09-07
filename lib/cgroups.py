@@ -529,7 +529,6 @@ class Cgroup(object):
         raise
       return False
 
-  # TODO(ferringb): convert to snakeoil.weakref.WeakRefFinalizer
   def __del__(self):
     if self.autoclean and self._inited and self.CGROUP_ROOT:
       # Suppress any sudo_strict behaviour, since we may be invoked
