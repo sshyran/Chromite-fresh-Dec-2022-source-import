@@ -5,7 +5,6 @@
 """Unit tests for cros_portage_upgrade.py."""
 
 import os
-import sys
 import tempfile
 
 from chromite.lib import cros_test_lib
@@ -246,14 +245,8 @@ class MainTest(cros_test_lib.MockOutputTestCase):
         self.assertNotEqual(e.args[0], 0)
 
     # Verify that output ends in error.
-    stderr = output.GetStderr()
-    # Python changed argparse output style.
-    # TODO(vapier): Drop this once we require Python 3 everywhere.
-    if sys.version_info.major < 3:
-      self.assertIn('error: argument --out is required', stderr)
-    else:
-      self.assertIn('error: the following arguments are required: --out',
-                    stderr)
+    self.assertIn('error: the following arguments are required: --out',
+                  output.GetStderr())
 
   def testMissingPackage(self):
     """Test that running without a package argument exits with an error."""
@@ -265,13 +258,8 @@ class MainTest(cros_test_lib.MockOutputTestCase):
         self.assertNotEqual(e.args[0], 0)
 
     # Verify that output ends in error.
-    stderr = output.GetStderr()
-    # Python changed argparse output style.
-    # TODO(vapier): Drop this once we require Python 3 everywhere.
-    if sys.version_info.major < 3:
-      self.assertIn('error: too few arguments', stderr)
-    else:
-      self.assertIn('error: the following arguments are required', stderr)
+    self.assertIn('error: the following arguments are required',
+                  output.GetStderr())
 
   def testMain(self):
     """Verify that running main method runs expected functons.
