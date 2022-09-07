@@ -39,12 +39,11 @@ def Data(data: str) -> str:
       [
           Path(constants.CHROMITE_SCRIPTS_DIR) / 'black',
           f'--config={config_path}',
-          '--target-version=py36',
-          '--code',
-          result.stdout,
+          '-',
       ],
+      input=result.stdout,
       capture_output=True,
-      encoding='utf-8',
+      encoding="utf-8",
   )
 
   return result.stdout
