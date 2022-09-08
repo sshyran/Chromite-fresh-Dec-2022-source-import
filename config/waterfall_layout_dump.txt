@@ -16,6 +16,7 @@
     coral-factory-coral-10122.B-factorybranch
   factory-dedede-13683.B-buildspec
     dedede-factory-dedede-13683.B-factorybranch
+    shotzo-factory-dedede-13683.B-factorybranch
   factory-drallion-13080.B-buildspec
     drallion-factory-drallion-13080.B-factorybranch
   factory-endeavour-13295.B-buildspec
@@ -591,6 +592,7 @@
     coral-factory-coral-10122.B-factorybranch-tryjob
   factory-dedede-13683.B-buildspec-tryjob
     dedede-factory-dedede-13683.B-factorybranch-tryjob
+    shotzo-factory-dedede-13683.B-factorybranch-tryjob
   factory-drallion-13080.B-buildspec-tryjob
     drallion-factory-drallion-13080.B-factorybranch-tryjob
   factory-endeavour-13295.B-buildspec-tryjob
@@ -1252,6 +1254,7 @@
   sentry-llvm-toolchain-tryjob
   sentry-payloads-tryjob
   sentry-release-tryjob
+  shotzo-factory-dedede-13683.B-factorybranch-tryjob
   shotzo-full-tryjob
   shotzo-llvm-next-toolchain-tryjob
   shotzo-llvm-toolchain-tryjob

@@ -8714,7 +8714,8 @@
     "display_label": "factory",
     "schedule": "with 168h interval",
     "slave_configs": [
-      "dedede-factory-dedede-13683.B-factorybranch"
+      "dedede-factory-dedede-13683.B-factorybranch",
+      "shotzo-factory-dedede-13683.B-factorybranch"
     ],
     "workspace_branch": "factory-dedede-13683.B"
   },
@@ -8726,7 +8727,8 @@
     "display_label": "tryjob",
     "luci_builder": "Try",
     "slave_configs": [
-      "dedede-factory-dedede-13683.B-factorybranch-tryjob"
+      "dedede-factory-dedede-13683.B-factorybranch-tryjob",
+      "shotzo-factory-dedede-13683.B-factorybranch-tryjob"
     ],
     "workspace_branch": "factory-dedede-13683.B"
   },
@@ -20799,6 +20801,26 @@
     "push_image": false,
     "suite_scheduling": false,
     "vm_tests_override": null
+  },
+  "shotzo-factory-dedede-13683.B-factorybranch": {
+    "_template": "factorybranch",
+    "boards": [
+      "shotzo"
+    ],
+    "workspace_branch": "factory-dedede-13683.B"
+  },
+  "shotzo-factory-dedede-13683.B-factorybranch-tryjob": {
+    "_template": "factorybranch",
+    "boards": [
+      "shotzo"
+    ],
+    "debug": true,
+    "display_label": "tryjob",
+    "hw_tests_override": null,
+    "luci_builder": "Try",
+    "push_image": false,
+    "suite_scheduling": false,
+    "workspace_branch": "factory-dedede-13683.B"
   },
   "shotzo-full": {
     "_template": "full",
