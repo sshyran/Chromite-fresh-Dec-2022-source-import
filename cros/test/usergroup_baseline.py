@@ -57,9 +57,7 @@ USER_BASELINE = dict(
         # CrOS system daemon UIDs.
         UserEntry(user="sshd", uid=204, gid=204),
         UserEntry(user="tss", uid=207, gid=207, home="/var/lib/tpm"),
-        UserEntry(
-            user="dhcp", uid=224, gid=224, home={"/var/lib/dhcp", "/dev/null"}
-        ),
+        UserEntry(user="dhcp", uid=224, gid=224),
         UserEntry(
             user="goofy",
             encpasswd="x",
@@ -215,6 +213,7 @@ GROUP_BASELINE = dict(
         ),
         GroupEntry(group="wpa", gid=219, users={"root"}),
         GroupEntry(group="input", gid=222, users={"cras", "power", "chronos"}),
+        GroupEntry(group="dhcp", gid=224, users={"shill"}),
         GroupEntry(group="brltty", gid=240, users={"chronos"}),
         GroupEntry(group="modem", gid=241, users={"shill"}),
         GroupEntry(group="goofy", gid=248, users={"goofy"}),
