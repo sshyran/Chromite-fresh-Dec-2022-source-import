@@ -131,7 +131,6 @@ class SDKFetcher(object):
         use_external_config=None,
         fallback_versions=VERSIONS_TO_CONSIDER,
         is_lacros=False,
-        use_new_public_bucket=False,
     ):
         """Initialize the class.
 
@@ -151,7 +150,6 @@ class SDKFetcher(object):
             are available.
           fallback_versions: The number of versions to consider.
           is_lacros: whether it's Lacros-Chrome build or not.
-          use_new_public_bucket: Uses the new release bucket for public SDKs.
         """
         self.cache_base = os.path.join(cache_dir, COMMAND_NAME)
         if clear_cache:
@@ -187,14 +185,8 @@ class SDKFetcher(object):
             self.toolchain_path = "gs://%s" % constants.SDK_GS_BUCKET
 
         if use_external_config or not self._HasInternalConfig():
-            if use_new_public_bucket:
-                self.config_name = f"{board}-{config_lib.CONFIG_TYPE_PUBLIC}"
-                self.gs_base = (
-                    f"gs://chromiumos-image-archive/{self.config_name}"
-                )
-            else:
-                self.config_name = f"{board}-{config_lib.CONFIG_TYPE_FULL}"
-                self.gs_base = f"gs://chromeos-image-archive/{self.config_name}"
+            self.config_name = f"{board}-{config_lib.CONFIG_TYPE_PUBLIC}"
+            self.gs_base = f"gs://chromiumos-image-archive/{self.config_name}"
         else:
             self.config_name = f"{board}-{config_lib.CONFIG_TYPE_RELEASE}"
             self.gs_base = f"gs://chromeos-image-archive/{self.config_name}"
@@ -1252,7 +1244,8 @@ class ChromeSDKCommand(command.CliCommand):
             "--use-new-public-bucket",
             action="store_true",
             default=False,
-            help="Whether to use the new GS bucket for public images and SDKs.",
+            help="This arg no longer has any effect. Kept here to so clients can "
+            "gracefully switch to the new behavior.",
         )
 
         parser.caching_group.add_argument(
@@ -2020,7 +2013,6 @@ class ChromeSDKCommand(command.CliCommand):
             use_external_config=self.options.use_external_config,
             fallback_versions=self.options.fallback_versions,
             is_lacros=self.options.is_lacros,
-            use_new_public_bucket=self.options.use_new_public_bucket,
         )
 
         prepare_version = self.options.version
