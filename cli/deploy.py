@@ -1093,7 +1093,7 @@ def _DeployDLCImage(device, sysroot, board, dlc_id, dlc_package):
 
     # Copy metadata to device.
     dest_meta_dir = Path('/') / dlc_lib.DLC_META_DIR / dlc_id / dlc_package
-    device.run(['mkdir', '-p', str(dest_meta_dir)])
+    device.run(['mkdir', '-p', dest_meta_dir])
     src_meta_dir = os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, dlc_id,
                                 dlc_package, dlc_lib.DLC_TMP_META_DIR)
     device.CopyToDevice(src_meta_dir + '/',
