@@ -26,6 +26,7 @@ _BLOCK_SIZE = 4096
 _IMAGE_SIZE_NEARING_RATIO = 1.05
 _IMAGE_SIZE_GROWTH_RATIO = 1.2
 _DAYS_TO_PURGE = 3
+_DLC_LOADPIN_FILE_HEADER = '# LOADPIN_TRUSTED_VERITY_ROOT_DIGESTS'
 
 # pylint: disable=protected-access
 
@@ -519,7 +520,7 @@ class FinalizeDlcsTest(cros_test_lib.MockTempDirTestCase):
         osutils.ReadFile(
             os.path.join(output, dlc_lib.DLC_META_DIR,
                          dlc_lib.DLC_LOADPIN_TRUSTED_VERITY_DIGESTS)),
-        f'{root_hexdigest}\n')
+        f'{_DLC_LOADPIN_FILE_HEADER}\n{root_hexdigest}\n')
 
   def testInstallDlcImagesMultiDlcTrustedVerityDigests(self):
     """Tests InstallDlcImages to verify multiple verity digests are written."""
@@ -570,4 +571,5 @@ class FinalizeDlcsTest(cros_test_lib.MockTempDirTestCase):
         osutils.ReadFile(
             os.path.join(output, dlc_lib.DLC_META_DIR,
                          dlc_lib.DLC_LOADPIN_TRUSTED_VERITY_DIGESTS)),
+        f'{_DLC_LOADPIN_FILE_HEADER}\n'
         f'{root_hexdigest1}\n{root_hexdigest2}\n')

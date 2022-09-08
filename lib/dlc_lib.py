@@ -26,6 +26,7 @@ DLC_BUILD_DIR = 'build/rootfs/dlc'
 DLC_FACTORY_INSTALL_DIR = 'unencrypted/dlc-factory-images'
 DLC_GID = 20118
 DLC_IMAGE = 'dlc.img'
+DLC_LOADPIN_FILE_HEADER = '# LOADPIN_TRUSTED_VERITY_ROOT_DIGESTS'
 DLC_LOADPIN_TRUSTED_VERITY_DIGESTS = '_trusted_verity_digests'
 DLC_META_DIR = 'opt/google/dlc'
 DLC_TMP_META_DIR = 'meta'
@@ -751,9 +752,17 @@ def InstallDlcImages(sysroot, board, dlc_id=None, install_root_dir=None,
                             ' dm-verity table')
           trusted_verity_digests = os.path.join(
               rootfs, DLC_META_DIR, DLC_LOADPIN_TRUSTED_VERITY_DIGESTS)
+
+          # Create the initial digests file with correct LoadPin header.
+          if not os.path.exists(trusted_verity_digests):
+            osutils.WriteFile(
+                trusted_verity_digests,
+                DLC_LOADPIN_FILE_HEADER + '\n',
+                mode='w',
+                sudo=True)
+
           # Handle duplicates.
-          if (not os.path.exists(trusted_verity_digests) or
-              root_hexdigest not in
+          if (root_hexdigest not in
               osutils.ReadFile(trusted_verity_digests).split()):
             osutils.WriteFile(
                 trusted_verity_digests,
