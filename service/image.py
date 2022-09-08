@@ -711,6 +711,7 @@ def create_stripped_packages_tar(chroot: chroot_lib.Chroot,
   tarball_paths = []
   strip_package_path = path_util.ToChrootPath(
       os.path.join(constants.CHROMITE_SCRIPTS_DIR, 'strip_package'))
+  tarball_cwd = chroot.full_path(build_target.root)
   for pattern in package_globs:
     packages = portage_util.FindPackageNameMatches(pattern, board)
     for cpv in packages:
@@ -728,7 +729,7 @@ def create_stripped_packages_tar(chroot: chroot_lib.Chroot,
                         cpv.cpf, len(files))
 
       tarball = sorted(files)[-1]
-      tarball_paths.append(os.path.relpath(tarball, build_target.root))
+      tarball_paths.append(os.path.relpath(tarball, tarball_cwd))
 
   if not tarball_paths:
     # tar barfs on an empty list of files, so skip tarring completely.
@@ -736,7 +737,7 @@ def create_stripped_packages_tar(chroot: chroot_lib.Chroot,
 
   tarball_output = os.path.join(output_dir, 'stripped-packages.tar')
   cros_build_lib.CreateTarball(tarball_path=tarball_output,
-                               cwd=chroot.full_path(build_target.root),
+                               cwd=tarball_cwd,
                                compression=cros_build_lib.COMP_NONE,
                                chroot=chroot,
                                inputs=tarball_paths)
