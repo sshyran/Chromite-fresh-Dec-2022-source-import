@@ -530,7 +530,8 @@ EC (RW) version: reef_v1.1.5909-bd1f0c9
           str(goma_client_json),
       ], chroot_args)
       portage_env = stage._portage_extra_env
-      self.assertRegex(portage_env.get('GOMA_DIR', ''), '^/home/.*/goma$')
+      self.assertEqual(
+          portage_env.get('GOMA_DIR', ''), os.path.expanduser('~/goma'))
       self.assertEqual(portage_env.get('USE_GOMA', ''), 'true')
       self.assertEqual(
           '/creds/service_accounts/service-account-goma-client.json',
@@ -565,7 +566,8 @@ EC (RW) version: reef_v1.1.5909-bd1f0c9
           '--goma_dir', str(goma_dir),
       ], chroot_args)
       portage_env = stage._portage_extra_env
-      self.assertRegex(portage_env.get('GOMA_DIR', ''), '^/home/.*/goma$')
+      self.assertEqual(
+          portage_env.get('GOMA_DIR', ''), os.path.expanduser('~/goma'))
       self.assertEqual(portage_env.get('GOMA_GCE_SERVICE_ACCOUNT', ''),
                        'default')
 
