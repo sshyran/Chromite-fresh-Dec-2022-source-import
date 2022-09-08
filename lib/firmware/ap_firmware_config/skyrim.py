@@ -72,6 +72,8 @@ def get_config(servo: servo_lib.Servo) -> servo_lib.ServoConfig:
     dut_control_off.append(['ec_uart_cmd:powerb'])
     programmer = 'raiden_debug_spi:serial=%s' % servo.serial
   elif servo.is_ccd:
+    # see b/245777966 for why this is needed
+    dut_control_off.append(['sleep:0.5'])
     dut_control_off.append(['power_state:reset'])
     programmer = ('raiden_debug_spi:target=AP,custom_rst=True,serial=%s' %
                   servo.serial)
