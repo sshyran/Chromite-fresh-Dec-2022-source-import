@@ -645,7 +645,9 @@ class CrOSTest(object):
 
         if self.as_chronos:
             # This authorizes the test ssh keys with chronos.
-            self._device.run(["cp", "-r", "/root/.ssh/", "/home/chronos/user/"])
+            # With "nosymfollow" mount option present in /home/chronos/user/,
+            # "-L" is required and it will copy symbolic links as real files.
+            self._device.run(["cp", "-L", "-r", "/root/.ssh/", "/home/chronos/user/"])
             if files:
                 # The trailing ':' after the user also changes the group to the user's
                 # primary group.
