@@ -8,6 +8,6 @@ from chromite.lib import cros_test
 
 
 def main(argv):
-  opts = cros_test.ParseCommandLine(argv)
-  opts.Freeze()
-  return cros_test.CrOSTest(opts).Run()
+    opts = cros_test.ParseCommandLine(argv)
+    opts.Freeze()
+    return cros_test.CrOSTest(opts).Run()

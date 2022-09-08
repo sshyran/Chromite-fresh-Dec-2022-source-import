@@ -10,17 +10,17 @@ from typing import Optional
 from chromite.lib import osutils
 
 
-ROOT_HEXDIGEST_RE = re.compile(r'root_hexdigest=([A-Fa-f0-9]{64})\b')
+ROOT_HEXDIGEST_RE = re.compile(r"root_hexdigest=([A-Fa-f0-9]{64})\b")
 
 
 def ExtractRootHexdigest(verity_table: str) -> Optional[str]:
-  """Extract the root hexdigest from dm-verity table.
+    """Extract the root hexdigest from dm-verity table.
 
-  Args:
-    verity_table: Path to the dm-verity table.
+    Args:
+      verity_table: Path to the dm-verity table.
 
-  Returns:
-    The str of root hexdigest, otherwise None.
-  """
-  m = ROOT_HEXDIGEST_RE.search(osutils.ReadFile(verity_table))
-  return m.group(1) if m else None
+    Returns:
+      The str of root hexdigest, otherwise None.
+    """
+    m = ROOT_HEXDIGEST_RE.search(osutils.ReadFile(verity_table))
+    return m.group(1) if m else None

@@ -17,54 +17,54 @@ DELTA = 1.0
 
 @pytest.fixture(autouse=True)
 def time_mock_fixture(monkeypatch):
-  last_t = 0.0
+    last_t = 0.0
 
-  def time_mock():
-    nonlocal last_t
-    last_t += DELTA
-    return last_t
+    def time_mock():
+        nonlocal last_t
+        last_t += DELTA
+        return last_t
 
-  monkeypatch.setattr(time, 'perf_counter', time_mock)
+    monkeypatch.setattr(time, "perf_counter", time_mock)
 
 
 def test_timer_delta(caplog):
-  """Test basic usage of a Timer."""
-  with timer.timer() as t:
-    pass
-  assert re.search(f'{DELTA}[0-9]*s', caplog.text) is not None
-  assert t.delta == DELTA
+    """Test basic usage of a Timer."""
+    with timer.timer() as t:
+        pass
+    assert re.search(f"{DELTA}[0-9]*s", caplog.text) is not None
+    assert t.delta == DELTA
 
 
 def test_timer_average():
-  """Test the timer __add__ and __truediv__ functions."""
-  timers = []
-  range_len = 10
-  for x in range(range_len):
-    with timer.Timer(str(x)) as t:
-      pass
-    timers.append(t)
+    """Test the timer __add__ and __truediv__ functions."""
+    timers = []
+    range_len = 10
+    for x in range(range_len):
+        with timer.Timer(str(x)) as t:
+            pass
+        timers.append(t)
 
-  assert sum(timers, start=timer.Timer()).delta == DELTA * range_len
-  assert (sum(timers, start=timer.Timer()) / len(timers)).delta == DELTA
+    assert sum(timers, start=timer.Timer()).delta == DELTA * range_len
+    assert (sum(timers, start=timer.Timer()) / len(timers)).delta == DELTA
 
 
 def test_timer_decorator():
-  """Test the timed decorator."""
-  name = 'name'
-  output_fn_called = False
+    """Test the timed decorator."""
+    name = "name"
+    output_fn_called = False
 
-  # Output function to check the value.
-  def output_fn(value):
-    nonlocal output_fn_called
-    output_fn_called = True
-    assert re.match(f'{name}: {DELTA}[0-9]*s', value) is not None
+    # Output function to check the value.
+    def output_fn(value):
+        nonlocal output_fn_called
+        output_fn_called = True
+        assert re.match(f"{name}: {DELTA}[0-9]*s", value) is not None
 
-  # The decorated function.
-  @timer.timed(name, output_fn)
-  def timed_fn():
-    pass
+    # The decorated function.
+    @timer.timed(name, output_fn)
+    def timed_fn():
+        pass
 
-  # Run the function to trigger the test.
-  timed_fn()
+    # Run the function to trigger the test.
+    timed_fn()
 
-  assert output_fn_called
+    assert output_fn_called

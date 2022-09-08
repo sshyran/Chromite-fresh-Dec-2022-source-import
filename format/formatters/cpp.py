@@ -11,15 +11,18 @@ from chromite.lib import cros_build_lib
 
 
 def Data(data: str) -> str:
-  """Format C & C++ |data|.
+    """Format C & C++ |data|.
 
-  Args:
-    data: The file content to lint.
+    Args:
+      data: The file content to lint.
 
-  Returns:
-    Formatted data.
-  """
-  result = cros_build_lib.run(
-      ['clang-format', '--style=file'], capture_output=True, input=data,
-      encoding='utf-8')
-  return result.stdout
+    Returns:
+      Formatted data.
+    """
+    result = cros_build_lib.run(
+        ["clang-format", "--style=file"],
+        capture_output=True,
+        input=data,
+        encoding="utf-8",
+    )
+    return result.stdout

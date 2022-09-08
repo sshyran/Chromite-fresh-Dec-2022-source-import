@@ -15,28 +15,32 @@ from chromite.utils import repo_manifest
 
 
 def get_parser():
-  """Creates the argparse parser.
+    """Creates the argparse parser.
 
-  Returns:
-    commandline.ArgumentParser: The argument parser.
-  """
-  parser = commandline.ArgumentParser(description=__doc__)
-  parser.add_argument('--manifest-file', type='path',
-                      help='File path to a manifest to search.')
-  parser.add_argument('--project', required=True,
-                      help='The project to search for.')
-  parser.add_argument('--branch', default='master',
-                      help='The branch to search for.')
-  return parser
-
+    Returns:
+      commandline.ArgumentParser: The argument parser.
+    """
+    parser = commandline.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--manifest-file",
+        type="path",
+        help="File path to a manifest to search.",
+    )
+    parser.add_argument(
+        "--project", required=True, help="The project to search for."
+    )
+    parser.add_argument(
+        "--branch", default="master", help="The branch to search for."
+    )
+    return parser
 
 
 def main(argv):
-  parser = get_parser()
-  options = parser.parse_args(argv)
-  options.Freeze()
-  if options.manifest_file:
-    manifest = repo_manifest.Manifest.FromFile(options.manifest_file)
-  else:
-    manifest = repo_util.Repository.MustFind(__file__).Manifest()
-  print(manifest.GetUniqueProject(options.project, options.branch).Path())
+    parser = get_parser()
+    options = parser.parse_args(argv)
+    options.Freeze()
+    if options.manifest_file:
+        manifest = repo_manifest.Manifest.FromFile(options.manifest_file)
+    else:
+        manifest = repo_util.Repository.MustFind(__file__).Manifest()
+    print(manifest.GetUniqueProject(options.project, options.branch).Path())

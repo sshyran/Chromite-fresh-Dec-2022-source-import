@@ -16,20 +16,22 @@ from chromite.scripts import gen_luci_scheduler
 
 
 class GenLuciSchedulerTest(cros_test_lib.MockTestCase):
-  """Tests for cbuildbot_launch script."""
-  def testSanityAgainstProd(self):
-    """Test we can generate a luci scheduler config with live data."""
-    # If it runs without crashing, we pass.
-    gen_luci_scheduler.genLuciSchedulerConfig(
-        config_lib.GetConfig(), chromeos_config.BranchScheduleConfig())
+    """Tests for cbuildbot_launch script."""
 
-  def testGenSchedulerJob(self):
-    """Test the job creation helper."""
-    build_config = config_lib_unittest.MockBuildConfig().apply(
-        schedule='funky schedule'
-    )
+    def testSanityAgainstProd(self):
+        """Test we can generate a luci scheduler config with live data."""
+        # If it runs without crashing, we pass.
+        gen_luci_scheduler.genLuciSchedulerConfig(
+            config_lib.GetConfig(), chromeos_config.BranchScheduleConfig()
+        )
 
-    expected = """
+    def testGenSchedulerJob(self):
+        """Test the job creation helper."""
+        build_config = config_lib_unittest.MockBuildConfig().apply(
+            schedule="funky schedule"
+        )
+
+        expected = """
 job {
   id: "amd64-generic-release"
   realm: "cbb-jobs"
@@ -50,18 +52,18 @@ job {
 }
 """
 
-    result = gen_luci_scheduler.genSchedulerJob(build_config)
-    self.assertEqual(result, expected)
+        result = gen_luci_scheduler.genSchedulerJob(build_config)
+        self.assertEqual(result, expected)
 
-  def testGenSchedulerTriggerSimple(self):
-    """Test the trigger creation helper."""
-    trigger_name = 'simple'
-    repo = 'url://repo'
-    refs = ['refs/path']
-    path_regexps = ['path/regexps']
-    builds = ['test_build']
+    def testGenSchedulerTriggerSimple(self):
+        """Test the trigger creation helper."""
+        trigger_name = "simple"
+        repo = "url://repo"
+        refs = ["refs/path"]
+        path_regexps = ["path/regexps"]
+        builds = ["test_build"]
 
-    expected = """
+        expected = """
 trigger {
   id: "simple"
   realm: "cbb-jobs"
@@ -76,19 +78,20 @@ trigger {
 }
 """
 
-    result = gen_luci_scheduler.genSchedulerTrigger(
-        trigger_name, repo, refs, path_regexps, builds)
+        result = gen_luci_scheduler.genSchedulerTrigger(
+            trigger_name, repo, refs, path_regexps, builds
+        )
 
-    self.assertEqual(result, expected)
+        self.assertEqual(result, expected)
 
-  def testGenSchedulerTriggerComplex(self):
-    """Test the trigger creation helper."""
-    trigger_name = 'complex'
-    repo = 'url://repo'
-    refs = ['refs/path', 'refs/other_path']
-    builds = ['test_build_a', 'test_build_b']
+    def testGenSchedulerTriggerComplex(self):
+        """Test the trigger creation helper."""
+        trigger_name = "complex"
+        repo = "url://repo"
+        refs = ["refs/path", "refs/other_path"]
+        builds = ["test_build_a", "test_build_b"]
 
-    expected = """
+        expected = """
 trigger {
   id: "complex"
   realm: "cbb-jobs"
@@ -104,20 +107,20 @@ trigger {
 }
 """
 
-    result = gen_luci_scheduler.genSchedulerTrigger(
-        trigger_name, repo, refs, None, builds)
+        result = gen_luci_scheduler.genSchedulerTrigger(
+            trigger_name, repo, refs, None, builds
+        )
 
-    self.assertEqual(result, expected)
+        self.assertEqual(result, expected)
 
+    def testGenSchedulerBranched(self):
+        """Test the job creation helper."""
+        build_config = config_lib_unittest.MockBuildConfig().apply(
+            schedule_branch="mock_branch",
+            schedule="funky schedule",
+        )
 
-  def testGenSchedulerBranched(self):
-    """Test the job creation helper."""
-    build_config = config_lib_unittest.MockBuildConfig().apply(
-        schedule_branch='mock_branch',
-        schedule='funky schedule',
-    )
-
-    expected = """
+        expected = """
 job {
   id: "mock_branch-amd64-generic-release"
   realm: "cbb-jobs"
@@ -138,17 +141,17 @@ job {
 }
 """
 
-    result = gen_luci_scheduler.genSchedulerJob(build_config)
-    self.assertEqual(result, expected)
+        result = gen_luci_scheduler.genSchedulerJob(build_config)
+        self.assertEqual(result, expected)
 
-  def testGenSchedulerWorkspaceBranch(self):
-    """Test the job creation helper."""
-    build_config = config_lib_unittest.MockBuildConfig().apply(
-        workspace_branch='work_branch',
-        schedule='funky schedule',
-    )
+    def testGenSchedulerWorkspaceBranch(self):
+        """Test the job creation helper."""
+        build_config = config_lib_unittest.MockBuildConfig().apply(
+            workspace_branch="work_branch",
+            schedule="funky schedule",
+        )
 
-    expected = """
+        expected = """
 job {
   id: "amd64-generic-release"
   realm: "cbb-jobs"
@@ -171,17 +174,17 @@ job {
 }
 """
 
-    result = gen_luci_scheduler.genSchedulerJob(build_config)
-    self.assertEqual(result, expected)
+        result = gen_luci_scheduler.genSchedulerJob(build_config)
+        self.assertEqual(result, expected)
 
-  def testGenSchedulerGomaClientType(self):
-    """Test the job creation helper."""
-    build_config = config_lib_unittest.MockBuildConfig().apply(
-        goma_client_type='client_type',
-        schedule='funky schedule',
-    )
+    def testGenSchedulerGomaClientType(self):
+        """Test the job creation helper."""
+        build_config = config_lib_unittest.MockBuildConfig().apply(
+            goma_client_type="client_type",
+            schedule="funky schedule",
+        )
 
-    expected = """
+        expected = """
 job {
   id: "amd64-generic-release"
   realm: "cbb-jobs"
@@ -204,82 +207,89 @@ job {
 }
 """
 
-    result = gen_luci_scheduler.genSchedulerJob(build_config)
-    self.assertEqual(result, expected)
+        result = gen_luci_scheduler.genSchedulerJob(build_config)
+        self.assertEqual(result, expected)
 
-  def testGenLuciSchedulerConfig(self):
-    """Test a full LUCI Scheduler config file."""
-    site_config = config_lib.SiteConfig()
+    def testGenLuciSchedulerConfig(self):
+        """Test a full LUCI Scheduler config file."""
+        site_config = config_lib.SiteConfig()
 
-    site_config.Add(
-        'not_scheduled',
-        luci_builder='ReleaseBuilder',
-        display_label='MockLabel',
-    )
+        site_config.Add(
+            "not_scheduled",
+            luci_builder="ReleaseBuilder",
+            display_label="MockLabel",
+        )
 
-    site_config.Add(
-        'build_prod',
-        luci_builder='ReleaseBuilder',
-        display_label='MockLabel',
-        schedule='run once in a while',
-    )
+        site_config.Add(
+            "build_prod",
+            luci_builder="ReleaseBuilder",
+            display_label="MockLabel",
+            schedule="run once in a while",
+        )
 
-    site_config.Add(
-        'build_tester',
-        luci_builder='TestBuilder',
-        display_label='TestLabel',
-        schedule='run daily',
-    )
+        site_config.Add(
+            "build_tester",
+            luci_builder="TestBuilder",
+            display_label="TestLabel",
+            schedule="run daily",
+        )
 
-    site_config.Add(
-        'build_triggered_a',
-        luci_builder='ReleaseBuilder',
-        display_label='MockLabel',
-        schedule='triggered',
-        triggered_gitiles=[[
-            'gitiles_url_a',
-            ['ref_a', 'ref_b'],
-        ], [
-            'gitiles_url_b',
-            ['ref_c'],
-        ]],
-    )
+        site_config.Add(
+            "build_triggered_a",
+            luci_builder="ReleaseBuilder",
+            display_label="MockLabel",
+            schedule="triggered",
+            triggered_gitiles=[
+                [
+                    "gitiles_url_a",
+                    ["ref_a", "ref_b"],
+                ],
+                [
+                    "gitiles_url_b",
+                    ["ref_c"],
+                ],
+            ],
+        )
 
-    site_config.Add(
-        'build_triggered_b',
-        luci_builder='ProdBuilder',
-        display_label='MockLabel',
-        schedule='triggered',
-        triggered_gitiles=[[
-            'gitiles_url_b',
-            ['ref_c'],
-        ]],
-    )
+        site_config.Add(
+            "build_triggered_b",
+            luci_builder="ProdBuilder",
+            display_label="MockLabel",
+            schedule="triggered",
+            triggered_gitiles=[
+                [
+                    "gitiles_url_b",
+                    ["ref_c"],
+                ]
+            ],
+        )
 
-    default_config = config_lib.GetConfig().GetDefault()
+        default_config = config_lib.GetConfig().GetDefault()
 
-    branch_configs = [
-        default_config.derive(
-            name='branch_tester',
-            luci_builder='TestBuilder',
-            display_label='TestLabel',
-            schedule='run daily',
-            schedule_branch='test-branch',
-        ),
-        default_config.derive(
-            name='branch_tester_triggered',
-            luci_builder='TestBuilder',
-            display_label='TestLabel',
-            schedule='run daily',
-            schedule_branch='test-branch',
-            triggered_gitiles=[[
-                'gitiles_url_a',
-                ['ref_a', 'ref_b'],
-            ]],
-        ),
-    ]
+        branch_configs = [
+            default_config.derive(
+                name="branch_tester",
+                luci_builder="TestBuilder",
+                display_label="TestLabel",
+                schedule="run daily",
+                schedule_branch="test-branch",
+            ),
+            default_config.derive(
+                name="branch_tester_triggered",
+                luci_builder="TestBuilder",
+                display_label="TestLabel",
+                schedule="run daily",
+                schedule_branch="test-branch",
+                triggered_gitiles=[
+                    [
+                        "gitiles_url_a",
+                        ["ref_a", "ref_b"],
+                    ]
+                ],
+            ),
+        ]
 
-    expected = """# Defines buckets on luci-scheduler.appspot.com.
+        expected = """# Defines buckets on luci-scheduler.appspot.com.
 #
 # For schema of this file and documentation see ProjectConfig message in
 # https://github.com/luci/luci-go/blob/HEAD/scheduler/appengine/messages/config.proto
@@ -450,7 +460,8 @@ job {
   }
 }
 """
-    result = gen_luci_scheduler.genLuciSchedulerConfig(
-        site_config, branch_configs)
+        result = gen_luci_scheduler.genLuciSchedulerConfig(
+            site_config, branch_configs
+        )
 
-    self.assertEqual(result, expected)
+        self.assertEqual(result, expected)

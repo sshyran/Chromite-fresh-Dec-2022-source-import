@@ -10,16 +10,16 @@ from chromite.lib import vm
 
 
 def main(argv):
-  opts = vm.VM.GetParser().parse_args(argv)
-  opts.Freeze()
+    opts = vm.VM.GetParser().parse_args(argv)
+    opts.Freeze()
 
-  try:
-    vm.VM(opts).Run()
-    return 0
-  except vm.VMError as e:
-    logging.error('%s', e)
-    if opts.debug:
-      raise
+    try:
+        vm.VM(opts).Run()
+        return 0
+    except vm.VMError as e:
+        logging.error("%s", e)
+        if opts.debug:
+            raise
 
-    logging.error('(Re-run with --debug for more details.)')
-    return 1
+        logging.error("(Re-run with --debug for more details.)")
+        return 1

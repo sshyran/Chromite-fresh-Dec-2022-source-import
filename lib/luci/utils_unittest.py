@@ -14,24 +14,24 @@ from chromite.lib.luci import utils
 
 
 class TestTimeParsingFunctions(cros_test_lib.MockTestCase):
-  """Test time parsing functions in luci/utils.py."""
+    """Test time parsing functions in luci/utils.py."""
 
-  def testTimestampToDatetime(self):
-    # Test None input.
-    self.assertIsNone(utils.TimestampToDatetime(None))
-    # Test empty input.
-    time1 = Timestamp()
-    self.assertIsNone(utils.TimestampToDatetime(time1))
-    # Test valid input.
-    time1.GetCurrentTime()
-    formatted_time = utils.TimestampToDatetime(time1)
-    self.assertIsNotNone(formatted_time)
-    self.assertIsInstance(formatted_time, datetime)
+    def testTimestampToDatetime(self):
+        # Test None input.
+        self.assertIsNone(utils.TimestampToDatetime(None))
+        # Test empty input.
+        time1 = Timestamp()
+        self.assertIsNone(utils.TimestampToDatetime(time1))
+        # Test valid input.
+        time1.GetCurrentTime()
+        formatted_time = utils.TimestampToDatetime(time1)
+        self.assertIsNotNone(formatted_time)
+        self.assertIsInstance(formatted_time, datetime)
 
-  def testDateToTimestamp(self):
-    result = utils.DatetimeToTimestamp(date(2019, 4, 15))
-    self.assertEqual(result.seconds, 1555286400)
-    result = utils.DatetimeToTimestamp(date(2019, 4, 15), end_of_day=True)
-    self.assertEqual(result.seconds, 1555372740)
-    with self.assertRaises(AssertionError):
-      utils.DatetimeToTimestamp(None)
+    def testDateToTimestamp(self):
+        result = utils.DatetimeToTimestamp(date(2019, 4, 15))
+        self.assertEqual(result.seconds, 1555286400)
+        result = utils.DatetimeToTimestamp(date(2019, 4, 15), end_of_day=True)
+        self.assertEqual(result.seconds, 1555372740)
+        with self.assertRaises(AssertionError):
+            utils.DatetimeToTimestamp(None)

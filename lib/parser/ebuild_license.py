@@ -44,141 +44,154 @@ from typing import Callable, List, NamedTuple, Optional
 
 
 # https://projects.gentoo.org/pms/7/pms.html#x1-220003.1.6
-VALID_NAME_RE = re.compile(r'^[A-Za-z0-9+_.-]+$')
+VALID_NAME_RE = re.compile(r"^[A-Za-z0-9+_.-]+$")
 
 
 class Error(Exception):
-  """Base error class for the module."""
+    """Base error class for the module."""
 
 
 class LicenseNameError(Error):
-  """A license name is invalid."""
+    """A license name is invalid."""
 
 
 class LicenseSyntaxError(Error):
-  """The license syntax is invalid."""
+    """The license syntax is invalid."""
 
 
 class NestedOrUnsupportedError(Error):
-  """Using ||() directly within ||() doesn't make sense."""
+    """Using ||() directly within ||() doesn't make sense."""
 
 
 def _dedupe_in_order(iterable) -> List:
-  """Dedupe elements while maintaining order."""
-  # This uses Python dict insertion order that is guaranteed in newer versions.
-  return dict((x, None) for x in iterable).keys()
+    """Dedupe elements while maintaining order."""
+    # This uses Python dict insertion order that is guaranteed in newer versions.
+    return dict((x, None) for x in iterable).keys()
 
 
 class LicenseNode(NamedTuple):
-  """A license."""
+    """A license."""
 
-  name: str
+    name: str
 
-  def reduce(
-      self,
-      use_flags: Optional[set] = None,
-      or_reduce: Optional[Callable] = None,
-  ):  # pylint: disable=unused-argument
-    return [self.name]
+    def reduce(
+        self,
+        use_flags: Optional[set] = None,
+        or_reduce: Optional[Callable] = None,
+    ):  # pylint: disable=unused-argument
+        return [self.name]
 
-  def __str__(self):
-    return self.name
+    def __str__(self):
+        return self.name
 
 
 class Node:
-  """A group of license nodes."""
+    """A group of license nodes."""
 
-  def __init__(self):
-    self.children = []
+    def __init__(self):
+        self.children = []
 
-  def reduce(self,
-             use_flags: Optional[set] = None,
-             or_reduce: Optional[Callable] = None):
-    return list(_dedupe_in_order(
-        x for child in self.children for x in child.reduce(
-            use_flags, or_reduce)))
+    def reduce(
+        self,
+        use_flags: Optional[set] = None,
+        or_reduce: Optional[Callable] = None,
+    ):
+        return list(
+            _dedupe_in_order(
+                x
+                for child in self.children
+                for x in child.reduce(use_flags, or_reduce)
+            )
+        )
 
-  def __str__(self):
-    return ' '.join(_dedupe_in_order(str(x) for x in self.children))
+    def __str__(self):
+        return " ".join(_dedupe_in_order(str(x) for x in self.children))
 
 
 class OrNode(Node):
-  """A group of optional/alternative licenses."""
+    """A group of optional/alternative licenses."""
 
-  def reduce(self,
-             use_flags: Optional[set] = None,
-             or_reduce: Optional[Callable] = None):
-    choices = super().reduce(use_flags, or_reduce)
-    if or_reduce:
-      return [or_reduce(choices)]
-    # Just peel off the first one.
-    return choices[:1]
+    def reduce(
+        self,
+        use_flags: Optional[set] = None,
+        or_reduce: Optional[Callable] = None,
+    ):
+        choices = super().reduce(use_flags, or_reduce)
+        if or_reduce:
+            return [or_reduce(choices)]
+        # Just peel off the first one.
+        return choices[:1]
 
-  def __str__(self):
-    return f'|| ( {super().__str__()} )'
+    def __str__(self):
+        return f"|| ( {super().__str__()} )"
 
 
 class UseNode(Node):
-  """A conditional node."""
+    """A conditional node."""
 
-  def __init__(self, flag: str):
-    super().__init__()
-    self.flag = flag
+    def __init__(self, flag: str):
+        super().__init__()
+        self.flag = flag
 
-  def reduce(self,
-             use_flags: Optional[set] = None,
-             or_reduce: Optional[Callable] = None):
-    if use_flags is None:
-      use_flags = []
+    def reduce(
+        self,
+        use_flags: Optional[set] = None,
+        or_reduce: Optional[Callable] = None,
+    ):
+        if use_flags is None:
+            use_flags = []
 
-    if self.flag.startswith('!'):
-      test = self.flag[1:] not in use_flags
-    else:
-      test = self.flag in use_flags
+        if self.flag.startswith("!"):
+            test = self.flag[1:] not in use_flags
+        else:
+            test = self.flag in use_flags
 
-    return super().reduce(use_flags, or_reduce) if test else []
+        return super().reduce(use_flags, or_reduce) if test else []
 
-  def __str__(self):
-    return f'{self.flag}? ( ' + ' '.join(str(x) for x in self.children) + ' )'
+    def __str__(self):
+        return (
+            f"{self.flag}? ( " + " ".join(str(x) for x in self.children) + " )"
+        )
 
 
 def parse(data: str) -> Node:
-  """Parse an ebuild license string into a structure."""
-  root = Node()
-  cur = root
-  stack = [root]
-  for token in data.split():
-    if VALID_NAME_RE.match(token):
-      cur.children.append(LicenseNode(token))
-    elif token == '||':
-      if cur is OrNode:
-        # We could support this, but it doesn't make sense in general.
-        # (A || (B || C)) is simply (A || B || C).
-        raise NestedOrUnsupportedError(
-            f'Redundant nested OR deps are not supported: "{data}"')
-      node = OrNode()
-      cur.children.append(node)
-      stack.append(node)
-      cur = node
-    elif token == '(':
-      if not isinstance(cur, (OrNode, UseNode)):
-        raise LicenseSyntaxError(f'Unexpected "(": "{data}"')
-    elif token == ')':
-      if not isinstance(cur, (OrNode, UseNode)):
-        raise LicenseSyntaxError(f'Unexpected ")": "{data}"')
-      stack.pop()
-      cur = stack[-1]
-    elif token.endswith('?'):
-      # USE flag conditional.
-      node = UseNode(token[:-1])
-      cur.children.append(node)
-      stack.append(node)
-      cur = node
-    else:
-      raise LicenseNameError(f'Invalid license name: "{token}"')
+    """Parse an ebuild license string into a structure."""
+    root = Node()
+    cur = root
+    stack = [root]
+    for token in data.split():
+        if VALID_NAME_RE.match(token):
+            cur.children.append(LicenseNode(token))
+        elif token == "||":
+            if cur is OrNode:
+                # We could support this, but it doesn't make sense in general.
+                # (A || (B || C)) is simply (A || B || C).
+                raise NestedOrUnsupportedError(
+                    f'Redundant nested OR deps are not supported: "{data}"'
+                )
+            node = OrNode()
+            cur.children.append(node)
+            stack.append(node)
+            cur = node
+        elif token == "(":
+            if not isinstance(cur, (OrNode, UseNode)):
+                raise LicenseSyntaxError(f'Unexpected "(": "{data}"')
+        elif token == ")":
+            if not isinstance(cur, (OrNode, UseNode)):
+                raise LicenseSyntaxError(f'Unexpected ")": "{data}"')
+            stack.pop()
+            cur = stack[-1]
+        elif token.endswith("?"):
+            # USE flag conditional.
+            node = UseNode(token[:-1])
+            cur.children.append(node)
+            stack.append(node)
+            cur = node
+        else:
+            raise LicenseNameError(f'Invalid license name: "{token}"')
 
-  # Make sure all '(...)' nodes finished processing.
-  if len(stack) != 1:
-    raise LicenseSyntaxError(f'Incomplete license: "{data}"')
+    # Make sure all '(...)' nodes finished processing.
+    if len(stack) != 1:
+        raise LicenseSyntaxError(f'Incomplete license: "{data}"')
 
-  return root
+    return root

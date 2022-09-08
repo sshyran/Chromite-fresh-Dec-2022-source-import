@@ -15,19 +15,21 @@ pytestmark = cros_test_lib.pytestmark_inside_only
 
 
 class GconvStriptTest(cros_test_lib.MockTempDirTestCase):
-  """Tests for gconv_strip script."""
+    """Tests for gconv_strip script."""
 
-  def testMultipleStringMatch(self):
-    self.assertEqual(
-        gconv_strip.MultipleStringMatch(
-            [b'hell', b'a', b'z', b'k', b'spec'],
-            b'hello_from a very special place'),
-        [True, True, False, False, True])
+    def testMultipleStringMatch(self):
+        self.assertEqual(
+            gconv_strip.MultipleStringMatch(
+                [b"hell", b"a", b"z", b"k", b"spec"],
+                b"hello_from a very special place",
+            ),
+            [True, True, False, False, True],
+        )
 
-  def testModuleRewrite(self):
-    tmp_gconv_module = os.path.join(self.tempdir, 'gconv-modules')
+    def testModuleRewrite(self):
+        tmp_gconv_module = os.path.join(self.tempdir, "gconv-modules")
 
-    data = """
+        data = """
 #      from          to            module         cost
 alias  FOO           charset_foo
 alias  BAR           charset_bar
@@ -39,21 +41,34 @@ alias  EUROPE        charset_B
 module charset_A     charset_B     USED_MODULE
 module charset_foo   charset_A     USED_MODULE
 """
-    osutils.WriteFile(tmp_gconv_module, data)
+        osutils.WriteFile(tmp_gconv_module, data)
 
-    gmods = gconv_strip.GconvModules(tmp_gconv_module)
-    self.assertEqual(gmods.Load(), [
-        'BAR', 'CHAR_A', 'EUROPE', 'FOO', 'charset_A', 'charset_B',
-        'charset_bar', 'charset_foo'])
-    self.PatchObject(gconv_strip.lddtree, 'ParseELF', return_value={})
-    class _StubStat(object):
-      """Fake for lstat."""
-      st_size = 0
-    self.PatchObject(gconv_strip.os, 'lstat', return_value=_StubStat)
-    self.PatchObject(gconv_strip.os, 'unlink')
-    gmods.Rewrite(['charset_A', 'charset_B'], dry_run=False)
+        gmods = gconv_strip.GconvModules(tmp_gconv_module)
+        self.assertEqual(
+            gmods.Load(),
+            [
+                "BAR",
+                "CHAR_A",
+                "EUROPE",
+                "FOO",
+                "charset_A",
+                "charset_B",
+                "charset_bar",
+                "charset_foo",
+            ],
+        )
+        self.PatchObject(gconv_strip.lddtree, "ParseELF", return_value={})
 
-    expected = """
+        class _StubStat(object):
+            """Fake for lstat."""
+
+            st_size = 0
+
+        self.PatchObject(gconv_strip.os, "lstat", return_value=_StubStat)
+        self.PatchObject(gconv_strip.os, "unlink")
+        gmods.Rewrite(["charset_A", "charset_B"], dry_run=False)
+
+        expected = """
 #      from          to            module         cost
 alias  FOO           charset_foo
 
@@ -64,5 +79,5 @@ module charset_A     charset_B     USED_MODULE
 module charset_foo   charset_A     USED_MODULE
 """
 
-    content = osutils.ReadFile(tmp_gconv_module)
-    self.assertEqual(content, expected)
+        content = osutils.ReadFile(tmp_gconv_module)
+        self.assertEqual(content, expected)

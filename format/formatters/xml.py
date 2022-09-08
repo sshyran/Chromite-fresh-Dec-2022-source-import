@@ -14,17 +14,17 @@ from chromite.format.formatters import whitespace
 
 
 def Data(data: str) -> str:
-  """Format XML |data|.
+    """Format XML |data|.
 
-  Args:
-    data: The file content to lint.
+    Args:
+      data: The file content to lint.
 
-  Returns:
-    Formatted data.
-  """
-  root = ElementTree.fromstring(data)
-  if root.tag == 'manifest':
-    data = repo_manifest.Data(data)
-  else:
-    data = whitespace.Data(data)
-  return data
+    Returns:
+      Formatted data.
+    """
+    root = ElementTree.fromstring(data)
+    if root.tag == "manifest":
+        data = repo_manifest.Data(data)
+    else:
+        data = whitespace.Data(data)
+    return data

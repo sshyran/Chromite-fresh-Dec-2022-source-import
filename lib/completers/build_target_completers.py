@@ -14,22 +14,33 @@ from chromite.lib import path_util
 from chromite.lib import portage_util
 
 
-def build_target(prefix, action, parser, parsed_args) -> List[str]:  # pylint: disable=unused-argument
-  """List all possible build targets."""
-  RE_NAME = re.compile(r'^overlay-(.*?)(-private)?$')
-  overlay_paths = portage_util.FindOverlays(constants.BOTH_OVERLAYS)
-  overlays = [os.path.basename(x) for x in overlay_paths]
-  build_targets = set()
-  for overlay in overlays:
-    m = RE_NAME.match(overlay)
-    if m and not m.group(1).startswith('variant-') and m.group(1).startswith(
-        prefix):
-      build_targets.add(m.group(1))
-  return sorted(build_targets)
+def build_target(
+    prefix, action, parser, parsed_args
+) -> List[str]:  # pylint: disable=unused-argument
+    """List all possible build targets."""
+    RE_NAME = re.compile(r"^overlay-(.*?)(-private)?$")
+    overlay_paths = portage_util.FindOverlays(constants.BOTH_OVERLAYS)
+    overlays = [os.path.basename(x) for x in overlay_paths]
+    build_targets = set()
+    for overlay in overlays:
+        m = RE_NAME.match(overlay)
+        if (
+            m
+            and not m.group(1).startswith("variant-")
+            and m.group(1).startswith(prefix)
+        ):
+            build_targets.add(m.group(1))
+    return sorted(build_targets)
 
 
-def built_build_target(prefix, action, parser, parsed_args) -> Iterator[str]:  # pylint: disable=unused-argument
-  """List build targets with a sysroot."""
-  p = f'{prefix}*/etc/portage'
-  yield from (x.parent.parent.name for x in Path(
-      path_util.FromChrootPath(path_util.FromChrootPath('/build'))).glob(p))
+def built_build_target(
+    prefix, action, parser, parsed_args
+) -> Iterator[str]:  # pylint: disable=unused-argument
+    """List build targets with a sysroot."""
+    p = f"{prefix}*/etc/portage"
+    yield from (
+        x.parent.parent.name
+        for x in Path(
+            path_util.FromChrootPath(path_util.FromChrootPath("/build"))
+        ).glob(p)
+    )

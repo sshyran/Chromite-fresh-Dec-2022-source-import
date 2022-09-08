@@ -12,13 +12,16 @@ from chromite.utils import prctl
 
 
 class PrctlTests(cros_test_lib.TestCase):
-  """Tests for prctl()."""
+    """Tests for prctl()."""
 
-  def test_pdeathsig(self):
-    """Check basic functionality with PDEATHSIG option."""
-    # This should be safe to play with as we should exit before the parent.
-    self.assertEqual(0, prctl.prctl(prctl.Option.SET_PDEATHSIG, signal.SIGQUIT))
-    arg2 = ctypes.c_int()
-    self.assertEqual(
-        0, prctl.prctl(prctl.Option.GET_PDEATHSIG, ctypes.byref(arg2)))
-    self.assertEqual(signal.SIGQUIT, arg2.value)
+    def test_pdeathsig(self):
+        """Check basic functionality with PDEATHSIG option."""
+        # This should be safe to play with as we should exit before the parent.
+        self.assertEqual(
+            0, prctl.prctl(prctl.Option.SET_PDEATHSIG, signal.SIGQUIT)
+        )
+        arg2 = ctypes.c_int()
+        self.assertEqual(
+            0, prctl.prctl(prctl.Option.GET_PDEATHSIG, ctypes.byref(arg2))
+        )
+        self.assertEqual(signal.SIGQUIT, arg2.value)

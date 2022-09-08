@@ -9,57 +9,97 @@ from chromite.lint.linters import upstart
 
 
 class CheckForRequiredLinesTest(cros_test_lib.TestCase):
-  """Test the functionality of the required lines check."""
-  def _getTestRequiredLines(self):
-    """Create a test set for use with CheckForRequiredLines."""
-    return {'one', 'two', 'three'}
+    """Test the functionality of the required lines check."""
 
-  def testOneNotPresent(self):
-    """Check the case some are present and some are not."""
-    self.assertEqual(upstart.CheckForRequiredLines("""one
-two""", 'test-string', self._getTestRequiredLines()), False)
+    def _getTestRequiredLines(self):
+        """Create a test set for use with CheckForRequiredLines."""
+        return {"one", "two", "three"}
 
-  def testNonePresent(self):
-    """Check the case none are present."""
-    self.assertEqual(upstart.CheckForRequiredLines("""four
+    def testOneNotPresent(self):
+        """Check the case some are present and some are not."""
+        self.assertEqual(
+            upstart.CheckForRequiredLines(
+                """one
+two""",
+                "test-string",
+                self._getTestRequiredLines(),
+            ),
+            False,
+        )
+
+    def testNonePresent(self):
+        """Check the case none are present."""
+        self.assertEqual(
+            upstart.CheckForRequiredLines(
+                """four
 five
-six""", 'test-string', self._getTestRequiredLines()), False)
+six""",
+                "test-string",
+                self._getTestRequiredLines(),
+            ),
+            False,
+        )
 
-  def testAllPresent(self):
-    """Check the case all are present."""
-    self.assertEqual(upstart.CheckForRequiredLines("""three
+    def testAllPresent(self):
+        """Check the case all are present."""
+        self.assertEqual(
+            upstart.CheckForRequiredLines(
+                """three
 two
-one""", 'test-string', self._getTestRequiredLines()), True)
+one""",
+                "test-string",
+                self._getTestRequiredLines(),
+            ),
+            True,
+        )
 
-  def testPrefix(self):
-    """Check the case one is a prefix match but not a true match."""
-    self.assertEqual(upstart.CheckForRequiredLines("""three
+    def testPrefix(self):
+        """Check the case one is a prefix match but not a true match."""
+        self.assertEqual(
+            upstart.CheckForRequiredLines(
+                """three
 two-with-extra
-one""", 'test-string', self._getTestRequiredLines()), False)
+one""",
+                "test-string",
+                self._getTestRequiredLines(),
+            ),
+            False,
+        )
 
 
 class ExtractCommandsTest(cros_test_lib.TestCase):
-  """Test the functionality of the command extractor."""
-  def testEmpty(self):
-    """Make sure an empty string doesn't break anything."""
-    self.assertEqual(list(upstart.ExtractCommands('')), [])
+    """Test the functionality of the command extractor."""
 
-  def testMultipleSingleLineCommands(self):
-    """Check that single-line commands are handled as expected."""
-    self.assertEqual(list(upstart.ExtractCommands("""
+    def testEmpty(self):
+        """Make sure an empty string doesn't break anything."""
+        self.assertEqual(list(upstart.ExtractCommands("")), [])
+
+    def testMultipleSingleLineCommands(self):
+        """Check that single-line commands are handled as expected."""
+        self.assertEqual(
+            list(
+                upstart.ExtractCommands(
+                    """
 pre-start script
   mkdir -p /run/upstart-test; `chmod 0750 /run/upstart-test`
   echo test && $(chown test:test /run/upstart-test)
 end script
-""")), [
-        ['mkdir', '-p', '/run/upstart-test'],
-        ['`chmod', '0750', '/run/upstart-test`'],
-        ['$(chown', 'test:test', '/run/upstart-test)'],
-    ])
+"""
+                )
+            ),
+            [
+                ["mkdir", "-p", "/run/upstart-test"],
+                ["`chmod", "0750", "/run/upstart-test`"],
+                ["$(chown", "test:test", "/run/upstart-test)"],
+            ],
+        )
 
-  def testMultilineCommands(self):
-    """Check that multi-line commands are handled as expected."""
-    self.assertEqual(list(upstart.ExtractCommands("""
+    def testMultilineCommands(self):
+        """Check that multi-line commands are handled as expected."""
+        self.assertEqual(
+            list(
+                upstart.ExtractCommands(
+                    """
 pre-start script
   mkdir \
     -p \
@@ -71,16 +111,29 @@ pre-start script
     test:test \
     /run/upstart-test) && touch /run/upstart-test/done
 end script
-""")), [
-        ['mkdir', '-p', '/run/upstart-test'],
-        ['`chmod', '0750', '/run/upstart-test`'],
-        ['$(chown', 'test:test', '/run/upstart-test)', '&&', 'touch',
-         '/run/upstart-test/done'],
-    ])
+"""
+                )
+            ),
+            [
+                ["mkdir", "-p", "/run/upstart-test"],
+                ["`chmod", "0750", "/run/upstart-test`"],
+                [
+                    "$(chown",
+                    "test:test",
+                    "/run/upstart-test)",
+                    "&&",
+                    "touch",
+                    "/run/upstart-test/done",
+                ],
+            ],
+        )
 
-  def testDisable(self):
-    """Check that commands with '# croslint: disable' are ignored"""
-    self.assertEqual(list(upstart.ExtractCommands("""
+    def testDisable(self):
+        """Check that commands with '# croslint: disable' are ignored"""
+        self.assertEqual(
+            list(
+                upstart.ExtractCommands(
+                    """
 pre-start script
   mkdir \
     -p \
@@ -92,7 +145,11 @@ pre-start script
     test:test \
     /run/upstart-test
 end script
-""")), [
-        ['mkdir', '-p', '/run/upstart-test'],
-        ['chown', 'test:test', '/run/upstart-test'],
-    ])
+"""
+                )
+            ),
+            [
+                ["mkdir", "-p", "/run/upstart-test"],
+                ["chown", "test:test", "/run/upstart-test"],
+            ],
+        )

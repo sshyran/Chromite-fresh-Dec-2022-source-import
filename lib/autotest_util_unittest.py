@@ -15,91 +15,115 @@ from chromite.utils import matching
 
 
 class BuildTarballTests(cros_test_lib.RunCommandTempDirTestCase):
-  """Tests related to building tarball artifacts."""
-  # pylint: disable=protected-access
+    """Tests related to building tarball artifacts."""
 
-  def setUp(self):
-    self._buildroot = os.path.join(self.tempdir, 'buildroot')
-    os.makedirs(self._buildroot)
-    self._board = 'test-board'
-    self.basedir = os.path.normpath(
-        os.path.join(self._buildroot, 'chroot', 'build', self._board,
-                     constants.AUTOTEST_BUILD_PATH, '..'))
-    self.builder = autotest_util.AutotestTarballBuilder(self.basedir,
-                                                        self.tempdir)
+    # pylint: disable=protected-access
 
-  def testBuildAutotestPackagesTarball(self):
-    """Tests that generating the autotest packages tarball is correct."""
-    tar_mock = self.PatchObject(self.builder, '_BuildTarball')
-    tar_path = os.path.join(self.tempdir, self.builder._PACKAGES_ARCHIVE)
+    def setUp(self):
+        self._buildroot = os.path.join(self.tempdir, "buildroot")
+        os.makedirs(self._buildroot)
+        self._board = "test-board"
+        self.basedir = os.path.normpath(
+            os.path.join(
+                self._buildroot,
+                "chroot",
+                "build",
+                self._board,
+                constants.AUTOTEST_BUILD_PATH,
+                "..",
+            )
+        )
+        self.builder = autotest_util.AutotestTarballBuilder(
+            self.basedir, self.tempdir
+        )
 
-    self.builder.BuildAutotestPackagesTarball()
+    def testBuildAutotestPackagesTarball(self):
+        """Tests that generating the autotest packages tarball is correct."""
+        tar_mock = self.PatchObject(self.builder, "_BuildTarball")
+        tar_path = os.path.join(self.tempdir, self.builder._PACKAGES_ARCHIVE)
 
-    tar_mock.assert_called_once_with(['autotest/packages'], tar_path,
-                                     compressed=False)
+        self.builder.BuildAutotestPackagesTarball()
 
-  def testBuildAutotestTestSuitesTarball(self):
-    """Tests that generating the autotest packages tarball is correct."""
-    tar_mock = self.PatchObject(self.builder, '_BuildTarball')
-    tar_path = os.path.join(self.tempdir, self.builder._TEST_SUITES_ARCHIVE)
+        tar_mock.assert_called_once_with(
+            ["autotest/packages"], tar_path, compressed=False
+        )
 
-    self.builder.BuildAutotestTestSuitesTarball()
+    def testBuildAutotestTestSuitesTarball(self):
+        """Tests that generating the autotest packages tarball is correct."""
+        tar_mock = self.PatchObject(self.builder, "_BuildTarball")
+        tar_path = os.path.join(self.tempdir, self.builder._TEST_SUITES_ARCHIVE)
 
-    tar_mock.assert_called_once_with(['autotest/test_suites'], tar_path)
+        self.builder.BuildAutotestTestSuitesTarball()
 
-  def testBuildAutotestControlFilesTarball(self):
-    """Tests that generating the autotest control files tarball is correct."""
-    control_file_list = ['autotest/client/site_tests/testA/control',
-                         'autotest/server/site_tests/testB/control']
-    tar_path = os.path.join(self.tempdir, self.builder._CONTROL_FILES_ARCHIVE)
+        tar_mock.assert_called_once_with(["autotest/test_suites"], tar_path)
 
-    tar_mock = self.PatchObject(self.builder, '_BuildTarball')
-    self.PatchObject(matching, 'FindFilesMatching',
-                     return_value=control_file_list)
+    def testBuildAutotestControlFilesTarball(self):
+        """Tests that generating the autotest control files tarball is correct."""
+        control_file_list = [
+            "autotest/client/site_tests/testA/control",
+            "autotest/server/site_tests/testB/control",
+        ]
+        tar_path = os.path.join(
+            self.tempdir, self.builder._CONTROL_FILES_ARCHIVE
+        )
 
-    self.builder.BuildAutotestControlFilesTarball()
+        tar_mock = self.PatchObject(self.builder, "_BuildTarball")
+        self.PatchObject(
+            matching, "FindFilesMatching", return_value=control_file_list
+        )
 
-    tar_mock.assert_called_once_with(control_file_list, tar_path,
-                                     compressed=False)
+        self.builder.BuildAutotestControlFilesTarball()
 
-  def testBuildAutotestServerPackageTarball(self):
-    """Tests that generating the autotest server package tarball is correct."""
-    file_list = ['autotest/server/site_tests/testA/control',
-                 'autotest/server/site_tests/testB/control']
-    tar_path = os.path.join(self.tempdir, self.builder._SERVER_PACKAGE_ARCHIVE)
+        tar_mock.assert_called_once_with(
+            control_file_list, tar_path, compressed=False
+        )
 
-    expected_files = list(file_list)
-    ssp_files = list()
+    def testBuildAutotestServerPackageTarball(self):
+        """Tests that generating the autotest server package tarball is correct."""
+        file_list = [
+            "autotest/server/site_tests/testA/control",
+            "autotest/server/site_tests/testB/control",
+        ]
+        tar_path = os.path.join(
+            self.tempdir, self.builder._SERVER_PACKAGE_ARCHIVE
+        )
 
-    # Touch chroot Tast paths so they'll be included in the tar command.
-    for p in self.builder._TAST_SSP_CHROOT_FILES:
-      path = '%s%s' % (self.basedir, p)
-      osutils.Touch(path, makedirs=True)
-      expected_files.append(path)
-      ssp_files.append(path)
+        expected_files = list(file_list)
+        ssp_files = list()
 
-    # Skip touching the source Tast files so we can verify they're not included
-    # in the tar command.
-    for p in self.builder._TAST_SSP_SOURCE_FILES:
-      path = '%s%s' % (self.basedir, p)
-      ssp_files.append(path)
+        # Touch chroot Tast paths so they'll be included in the tar command.
+        for p in self.builder._TAST_SSP_CHROOT_FILES:
+            path = "%s%s" % (self.basedir, p)
+            osutils.Touch(path, makedirs=True)
+            expected_files.append(path)
+            ssp_files.append(path)
 
-    tar_mock = self.PatchObject(self.builder, '_BuildTarball')
-    self.PatchObject(self.builder, '_GetTastSspFiles', return_value=ssp_files)
-    # Pass a copy of the file list so the code under test can't mutate it.
-    self.PatchObject(matching, 'FindFilesMatching',
-                     return_value=list(file_list))
+        # Skip touching the source Tast files so we can verify they're not included
+        # in the tar command.
+        for p in self.builder._TAST_SSP_SOURCE_FILES:
+            path = "%s%s" % (self.basedir, p)
+            ssp_files.append(path)
 
-    self.builder.BuildAutotestServerPackageTarball()
+        tar_mock = self.PatchObject(self.builder, "_BuildTarball")
+        self.PatchObject(
+            self.builder, "_GetTastSspFiles", return_value=ssp_files
+        )
+        # Pass a copy of the file list so the code under test can't mutate it.
+        self.PatchObject(
+            matching, "FindFilesMatching", return_value=list(file_list)
+        )
 
-    tar_mock.assert_called_once_with(expected_files, tar_path,
-                                     extra_args=mock.ANY, check=False)
+        self.builder.BuildAutotestServerPackageTarball()
 
-  def testBuildAutotestTarball(self):
-    """Tests that generating the autotest tarball is correct."""
-    tar_mock = self.PatchObject(self.builder, '_BuildTarball')
-    tar_path = os.path.join(self.tempdir, self.builder._AUTOTEST_ARCHIVE)
+        tar_mock.assert_called_once_with(
+            expected_files, tar_path, extra_args=mock.ANY, check=False
+        )
 
-    self.builder.BuildAutotestTarball()
+    def testBuildAutotestTarball(self):
+        """Tests that generating the autotest tarball is correct."""
+        tar_mock = self.PatchObject(self.builder, "_BuildTarball")
+        tar_path = os.path.join(self.tempdir, self.builder._AUTOTEST_ARCHIVE)
 
-    tar_mock.assert_called_once_with(['autotest/'], tar_path)
+        self.builder.BuildAutotestTarball()
+
+        tar_mock.assert_called_once_with(["autotest/"], tar_path)

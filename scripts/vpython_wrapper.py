@@ -44,8 +44,8 @@ import wrapper3
 
 
 def main():
-  wrapper3.DoMain()
+    wrapper3.DoMain()
 
 
-if __name__ == '__main__':
-  main()
+if __name__ == "__main__":
+    main()

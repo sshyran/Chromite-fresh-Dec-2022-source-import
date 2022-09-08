@@ -11,17 +11,17 @@ import __main__ as main
 
 # Import the relevant funcs into our namespace for callers.
 try:
-  # pylint: disable=unused-import, no-name-in-module
-  from setproctitle import getproctitle
-  from setproctitle import setproctitle
+    # pylint: disable=unused-import, no-name-in-module
+    from setproctitle import getproctitle
+    from setproctitle import setproctitle
 except ImportError:
-  # Module not available -> can't do anything.
-  getproctitle = lambda: None
-  setproctitle = lambda _x: None
+    # Module not available -> can't do anything.
+    getproctitle = lambda: None
+    setproctitle = lambda _x: None
 
 
 # Used with the settitle helper below.
-_SCRIPT_NAME = os.path.basename(getattr(main, '__file__', 'chromite'))
+_SCRIPT_NAME = os.path.basename(getattr(main, "__file__", "chromite"))
 
 
 # Used to distinguish between different runs.
@@ -29,6 +29,6 @@ _TITLE_PID = os.getpid()
 
 
 def settitle(*args):
-  """Set the process title to something useful to make `ps` output easy."""
-  base = ('%s/%s' % (_SCRIPT_NAME, _TITLE_PID),)
-  setproctitle(': '.join(base + args))
+    """Set the process title to something useful to make `ps` output easy."""
+    base = ("%s/%s" % (_SCRIPT_NAME, _TITLE_PID),)
+    setproctitle(": ".join(base + args))

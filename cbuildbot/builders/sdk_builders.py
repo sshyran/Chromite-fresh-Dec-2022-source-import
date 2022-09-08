@@ -16,47 +16,51 @@ from chromite.lib import parallel
 
 
 class ChrootSdkBuilder(simple_builders.SimpleBuilder):
-  """Build the SDK chroot."""
+    """Build the SDK chroot."""
 
-  def RunStages(self):
-    """Runs through build process."""
-    # Unlike normal CrOS builds, the SDK has no concept of pinned CrOS manifest
-    # or specific Chrome version.  Use a datestamp instead.
-    version = datetime.datetime.now().strftime('%Y.%m.%d.%H%M%S')
-    self._RunStage(build_stages.UprevStage, boards=[])
-    self._RunStage(build_stages.InitSDKStage)
+    def RunStages(self):
+        """Runs through build process."""
+        # Unlike normal CrOS builds, the SDK has no concept of pinned CrOS manifest
+        # or specific Chrome version.  Use a datestamp instead.
+        version = datetime.datetime.now().strftime("%Y.%m.%d.%H%M%S")
+        self._RunStage(build_stages.UprevStage, boards=[])
+        self._RunStage(build_stages.InitSDKStage)
 
-    # We don't need the Chrome source until SDKTestStage.  Syncing it should
-    # take less time than BuildSDKBoardStage, so lets run in parallel with it.
-    parallel_stages = [
-        lambda: self._RunStage(chrome_stages.SyncChromeStage),
-        lambda: self._RunStage(build_stages.BuildSDKBoardStage,
-                               constants.CHROOT_BUILDER_BOARD),
-    ]
-    parallel.RunParallelSteps(parallel_stages)
+        # We don't need the Chrome source until SDKTestStage.  Syncing it should
+        # take less time than BuildSDKBoardStage, so lets run in parallel with it.
+        parallel_stages = [
+            lambda: self._RunStage(chrome_stages.SyncChromeStage),
+            lambda: self._RunStage(
+                build_stages.BuildSDKBoardStage, constants.CHROOT_BUILDER_BOARD
+            ),
+        ]
+        parallel.RunParallelSteps(parallel_stages)
 
-    self._RunStage(sdk_stages.SDKBuildToolchainsStage)
+        self._RunStage(sdk_stages.SDKBuildToolchainsStage)
 
-    self._RunStage(sdk_stages.SDKPackageStage, version=version)
-    # Note: This produces badly named toolchain tarballs.  Before
-    # we re-enable it, make sure we fix that first.  For example:
-    # gs://chromiumos-sdk/2015/06/...
-    #   .../cros-sdk-overlay-toolchains-aarch64-cros-linux-gnu-$VER.tar.xz
-    # self._RunStage(sdk_stages.SDKPackageToolchainOverlaysStage,
-    #                version=version)
+        self._RunStage(sdk_stages.SDKPackageStage, version=version)
+        # Note: This produces badly named toolchain tarballs.  Before
+        # we re-enable it, make sure we fix that first.  For example:
+        # gs://chromiumos-sdk/2015/06/...
+        #   .../cros-sdk-overlay-toolchains-aarch64-cros-linux-gnu-$VER.tar.xz
+        # self._RunStage(sdk_stages.SDKPackageToolchainOverlaysStage,
+        #                version=version)
 
-    self._RunStage(sdk_stages.SDKTestStage)
-    # manojgupta: The comment in para below is not valid right now. Need to
-    # test SDK before making artifacts available to users because of
-    # https://crbug.com/798617.
-    # Move it after UploadPrebuilts again once the bug is fixed.
-    #
-    # Upload artifacts before tests. Testing takes several hours, so during
-    # that, goma server will find the new archive and stage it. So that,
-    # goma can be used on bots just after uprev.
-    # TODO(hidehiko): We may want to run upload prebuilts and test in
-    # parallel in future, if it becomes performance bottleneck.
-    self._RunStage(artifact_stages.UploadPrebuiltsStage,
-                   constants.CHROOT_BUILDER_BOARD, version=version)
+        self._RunStage(sdk_stages.SDKTestStage)
+        # manojgupta: The comment in para below is not valid right now. Need to
+        # test SDK before making artifacts available to users because of
+        # https://crbug.com/798617.
+        # Move it after UploadPrebuilts again once the bug is fixed.
+        #
+        # Upload artifacts before tests. Testing takes several hours, so during
+        # that, goma server will find the new archive and stage it. So that,
+        # goma can be used on bots just after uprev.
+        # TODO(hidehiko): We may want to run upload prebuilts and test in
+        # parallel in future, if it becomes performance bottleneck.
+        self._RunStage(
+            artifact_stages.UploadPrebuiltsStage,
+            constants.CHROOT_BUILDER_BOARD,
+            version=version,
+        )
 
-    self._RunStage(sdk_stages.SDKUprevStage, version=version)
+        self._RunStage(sdk_stages.SDKUprevStage, version=version)

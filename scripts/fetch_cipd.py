@@ -22,37 +22,48 @@ from chromite.lib import cros_build_lib
 
 
 def GetParser():
-  """Creates the argparse parser."""
-  parser = commandline.ArgumentParser(description=__doc__)
-  parser.add_argument('uri', type='cipd',
-                      help='CIPD URI of a file to download.')
-  parser.add_argument('output', type='path',
-                      help='Location to store the file.')
-  return parser
+    """Creates the argparse parser."""
+    parser = commandline.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "uri", type="cipd", help="CIPD URI of a file to download."
+    )
+    parser.add_argument(
+        "output", type="path", help="Location to store the file."
+    )
+    return parser
 
 
 def ParseCipdUri(uri):
-  o = urllib.parse.urlparse(uri)
-  if o.scheme != 'cipd':
-    raise ValueError('wrong scheme: ', o.scheme)
-  if ':' not in o.path:
-    raise ValueError('version not specified')
-  pkgpath, version = o.path.rsplit(':', 1)
-  return (o.netloc + pkgpath, version)
+    o = urllib.parse.urlparse(uri)
+    if o.scheme != "cipd":
+        raise ValueError("wrong scheme: ", o.scheme)
+    if ":" not in o.path:
+        raise ValueError("version not specified")
+    pkgpath, version = o.path.rsplit(":", 1)
+    return (o.netloc + pkgpath, version)
 
 
 def main(argv):
-  parser = GetParser()
-  options = parser.parse_args(argv)
-  options.Freeze()
+    parser = GetParser()
+    options = parser.parse_args(argv)
+    options.Freeze()
 
-  (pkgpath, version) = ParseCipdUri(options.uri)
-  try:
-    cros_build_lib.run(
-        [os.path.join(constants.DEPOT_TOOLS_DIR, 'cipd'), 'pkg-fetch',
-         '-out', options.output, '-version', version, '-verbose', pkgpath],
-        check=True)
+    (pkgpath, version) = ParseCipdUri(options.uri)
+    try:
+        cros_build_lib.run(
+            [
+                os.path.join(constants.DEPOT_TOOLS_DIR, "cipd"),
+                "pkg-fetch",
+                "-out",
+                options.output,
+                "-version",
+                version,
+                "-verbose",
+                pkgpath,
+            ],
+            check=True,
+        )
 
-  except cros_build_lib.RunCommandError as ex:
-    # Hide the stack trace using Die.
-    cros_build_lib.Die('%s', ex)
+    except cros_build_lib.RunCommandError as ex:
+        # Hide the stack trace using Die.
+        cros_build_lib.Die("%s", ex)

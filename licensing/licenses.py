@@ -81,91 +81,126 @@ from chromite.lib import osutils
 from chromite.licensing import licenses_lib
 
 
-EXTRA_LICENSES_DIR = os.path.join(licenses_lib.SCRIPT_DIR,
-                                  'extra_package_licenses')
+EXTRA_LICENSES_DIR = os.path.join(
+    licenses_lib.SCRIPT_DIR, "extra_package_licenses"
+)
 
 # These packages exist as workarounds....
 EXTRA_PACKAGES = (
-    ('sys-kernel/Linux-2.6',
-     ['http://www.kernel.org/'], ['GPL-2'], []),
+    ("sys-kernel/Linux-2.6", ["http://www.kernel.org/"], ["GPL-2"], []),
 )
 
 
 def LoadPackageInfo(sysroot, all_packages, generateMissing, packages):
-  """Do the work when we're not called as a hook."""
-  logging.info('Processing sysroot %s', sysroot)
+    """Do the work when we're not called as a hook."""
+    logging.info("Processing sysroot %s", sysroot)
 
-  detect_packages = not packages
-  if detect_packages:
-    # If no packages were specified, we look up the full list.
-    packages = licenses_lib.ListInstalledPackages(sysroot, all_packages)
+    detect_packages = not packages
+    if detect_packages:
+        # If no packages were specified, we look up the full list.
+        packages = licenses_lib.ListInstalledPackages(sysroot, all_packages)
 
-  assert packages, f'{sysroot}: could not find any packages'
+    assert packages, f"{sysroot}: could not find any packages"
 
-  logging.debug('Initial Package list to work through:\n%s',
-                '\n'.join(sorted(packages)))
-  licensing = licenses_lib.Licensing(sysroot, packages, generateMissing)
+    logging.debug(
+        "Initial Package list to work through:\n%s", "\n".join(sorted(packages))
+    )
+    licensing = licenses_lib.Licensing(sysroot, packages, generateMissing)
 
-  licensing.LoadPackageInfo()
-  logging.debug('Package list to skip:\n%s',
-                '\n'.join([p for p in sorted(packages)
-                           if licensing.packages[p].skip]))
-  logging.debug('Package list left to work through:\n%s',
-                '\n'.join([p for p in sorted(packages)
-                           if not licensing.packages[p].skip]))
-  licensing.ProcessPackageLicenses()
-  if detect_packages:
-    # If we detected 'all' packages, we have to add in these extras.
-    for fullnamewithrev, homepages, names, files in EXTRA_PACKAGES:
-      license_texts = [osutils.ReadFile(os.path.join(EXTRA_LICENSES_DIR, f))
-                       for f in files]
-      licensing.AddExtraPkg(fullnamewithrev, homepages, names, license_texts)
+    licensing.LoadPackageInfo()
+    logging.debug(
+        "Package list to skip:\n%s",
+        "\n".join([p for p in sorted(packages) if licensing.packages[p].skip]),
+    )
+    logging.debug(
+        "Package list left to work through:\n%s",
+        "\n".join(
+            [p for p in sorted(packages) if not licensing.packages[p].skip]
+        ),
+    )
+    licensing.ProcessPackageLicenses()
+    if detect_packages:
+        # If we detected 'all' packages, we have to add in these extras.
+        for fullnamewithrev, homepages, names, files in EXTRA_PACKAGES:
+            license_texts = [
+                osutils.ReadFile(os.path.join(EXTRA_LICENSES_DIR, f))
+                for f in files
+            ]
+            licensing.AddExtraPkg(
+                fullnamewithrev, homepages, names, license_texts
+            )
 
-  return licensing
+    return licensing
 
 
 def get_parser() -> commandline.ArgumentParser:
-  """Return a command line parser."""
-  parser = commandline.ArgumentParser(usage=__doc__)
+    """Return a command line parser."""
+    parser = commandline.ArgumentParser(usage=__doc__)
 
-  group = parser.add_mutually_exclusive_group(required=True)
-  group.add_argument('-b', '--board',
-                     help='which board to run for, like x86-alex')
-  group.add_argument('--sysroot', type='path',
-                     help='which sysroot to run on (e.g. /build/eve)')
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        "-b", "--board", help="which board to run for, like x86-alex"
+    )
+    group.add_argument(
+        "--sysroot",
+        type="path",
+        help="which sysroot to run on (e.g. /build/eve)",
+    )
 
-  parser.add_argument('-p', '--package', action='append', default=[],
-                      dest='packages',
-                      help='check the license of the package, e.g.,'
-                      'dev-libs/libatomic_ops-7.2d')
-  parser.add_argument('-a', '--all-packages', action='store_true',
-                      help='Run licensing against all packages in the '
-                      'build tree, instead of just virtual/target-os '
-                      'dependencies.')
-  parser.add_argument('-g', '--generate-licenses', action='store_true',
-                      dest='gen_licenses',
-                      help='Generate license information, if missing.')
-  parser.add_argument('-o', '--output', type='path',
-                      help='which html file to create with output')
-  return parser
+    parser.add_argument(
+        "-p",
+        "--package",
+        action="append",
+        default=[],
+        dest="packages",
+        help="check the license of the package, e.g.,"
+        "dev-libs/libatomic_ops-7.2d",
+    )
+    parser.add_argument(
+        "-a",
+        "--all-packages",
+        action="store_true",
+        help="Run licensing against all packages in the "
+        "build tree, instead of just virtual/target-os "
+        "dependencies.",
+    )
+    parser.add_argument(
+        "-g",
+        "--generate-licenses",
+        action="store_true",
+        dest="gen_licenses",
+        help="Generate license information, if missing.",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        type="path",
+        help="which html file to create with output",
+    )
+    return parser
 
 
 def main(args):
-  parser = get_parser()
-  opts = parser.parse_args(args)
+    parser = get_parser()
+    opts = parser.parse_args(args)
 
-  if not opts.output and not opts.gen_licenses:
-    parser.error('You must specify --output and/or --generate-licenses')
+    if not opts.output and not opts.gen_licenses:
+        parser.error("You must specify --output and/or --generate-licenses")
 
-  sysroot = (opts.sysroot or
-             build_target_lib.get_default_sysroot_path(opts.board))
+    sysroot = opts.sysroot or build_target_lib.get_default_sysroot_path(
+        opts.board
+    )
 
-  if (opts.output and os.path.exists(opts.output) and
-      not os.path.isfile(opts.output)):
-    parser.error(f'--output must point to a file: {opts.output}')
+    if (
+        opts.output
+        and os.path.exists(opts.output)
+        and not os.path.isfile(opts.output)
+    ):
+        parser.error(f"--output must point to a file: {opts.output}")
 
-  licensing = LoadPackageInfo(
-      sysroot, opts.all_packages, opts.gen_licenses, opts.packages)
+    licensing = LoadPackageInfo(
+        sysroot, opts.all_packages, opts.gen_licenses, opts.packages
+    )
 
-  if opts.output:
-    licensing.GenerateHTMLLicenseOutput(opts.output)
+    if opts.output:
+        licensing.GenerateHTMLLicenseOutput(opts.output)

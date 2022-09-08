@@ -24,93 +24,111 @@ from chromite.lib.buildstore import FakeBuildStore
 # pylint: disable=too-many-ancestors
 
 
-class SimpleChromeArtifactsStage(cbuildbot_unittest.SimpleBuilderTestCase,
-                                 generic_stages_unittest.AbstractStageTestCase,
-                                 cros_test_lib.LoggingTestCase):
-  """Verify stage that creates the chrome-sdk and builds chrome with it."""
-  BOT_ID = 'grunt-full'
-  RELEASE_TAG = ''
+class SimpleChromeArtifactsStage(
+    cbuildbot_unittest.SimpleBuilderTestCase,
+    generic_stages_unittest.AbstractStageTestCase,
+    cros_test_lib.LoggingTestCase,
+):
+    """Verify stage that creates the chrome-sdk and builds chrome with it."""
 
-  # pylint: disable=protected-access
+    BOT_ID = "grunt-full"
+    RELEASE_TAG = ""
 
-  def setUp(self):
-    self.CreateMockOverlay('grunt')
+    # pylint: disable=protected-access
 
-    self.StartPatcher(parallel_unittest.ParallelMock())
+    def setUp(self):
+        self.CreateMockOverlay("grunt")
 
-    # Set up a general purpose cidb mock. Tests with more specific
-    # mock requirements can replace this with a separate call to
-    # SetupMockCidb
-    cidb.CIDBConnectionFactory.SetupMockCidb(mock.MagicMock())
+        self.StartPatcher(parallel_unittest.ParallelMock())
 
-    self._Prepare()
+        # Set up a general purpose cidb mock. Tests with more specific
+        # mock requirements can replace this with a separate call to
+        # SetupMockCidb
+        cidb.CIDBConnectionFactory.SetupMockCidb(mock.MagicMock())
 
-  # Our API here is not great when it comes to kwargs passing.
-  def _Prepare(self, bot_id=None, **kwargs):  # pylint: disable=arguments-differ
-    super()._Prepare(bot_id, **kwargs)
+        self._Prepare()
 
-    self._run.options.chrome_root = '/tmp/non-existent'
-    self._run.attrs.metadata.UpdateWithDict({'toolchain-tuple': ['target'],
-                                             'toolchain-url' : 'some-url'})
+    # Our API here is not great when it comes to kwargs passing.
+    def _Prepare(
+        self, bot_id=None, **kwargs
+    ):  # pylint: disable=arguments-differ
+        super()._Prepare(bot_id, **kwargs)
 
-  def ConstructStage(self):
-    self._run.GetArchive().SetupArchivePath()
-    bs = FakeBuildStore()
-    return chrome_stages.SimpleChromeArtifactsStage(self._run,
-                                                    bs,
-                                                    self._current_board)
+        self._run.options.chrome_root = "/tmp/non-existent"
+        self._run.attrs.metadata.UpdateWithDict(
+            {"toolchain-tuple": ["target"], "toolchain-url": "some-url"}
+        )
 
-  def testIt(self):
-    """A simple run-through test."""
-    rc_mock = self.StartPatcher(cros_test_lib.RunCommandMock())
-    rc_mock.SetDefaultCmdResult()
-    self.PatchObject(chrome_stages.SimpleChromeArtifactsStage,
-                     '_ArchiveChromeEbuildEnv',
-                     autospec=True)
-    self.PatchObject(chrome_stages.TestSimpleChromeWorkflowStage,
-                     '_VerifyChromeDeployed',
-                     autospec=True)
-    self.PatchObject(chrome_stages.TestSimpleChromeWorkflowStage,
-                     '_VerifySDKEnvironment',
-                     autospec=True)
-    self.RunStage()
+    def ConstructStage(self):
+        self._run.GetArchive().SetupArchivePath()
+        bs = FakeBuildStore()
+        return chrome_stages.SimpleChromeArtifactsStage(
+            self._run, bs, self._current_board
+        )
 
-  def testChromeEnvironment(self):
-    """Test that the Chrome environment is built."""
-    # Create the chrome environment compressed file.
-    stage = self.ConstructStage()
-    chrome_env_dir = os.path.join(
-        stage._pkg_dir, constants.CHROME_CP + '-25.3643.0_rc1')
-    env_file = os.path.join(chrome_env_dir, 'environment')
-    osutils.Touch(env_file, makedirs=True)
+    def testIt(self):
+        """A simple run-through test."""
+        rc_mock = self.StartPatcher(cros_test_lib.RunCommandMock())
+        rc_mock.SetDefaultCmdResult()
+        self.PatchObject(
+            chrome_stages.SimpleChromeArtifactsStage,
+            "_ArchiveChromeEbuildEnv",
+            autospec=True,
+        )
+        self.PatchObject(
+            chrome_stages.TestSimpleChromeWorkflowStage,
+            "_VerifyChromeDeployed",
+            autospec=True,
+        )
+        self.PatchObject(
+            chrome_stages.TestSimpleChromeWorkflowStage,
+            "_VerifySDKEnvironment",
+            autospec=True,
+        )
+        self.RunStage()
 
-    cros_build_lib.run(['bzip2', env_file])
+    def testChromeEnvironment(self):
+        """Test that the Chrome environment is built."""
+        # Create the chrome environment compressed file.
+        stage = self.ConstructStage()
+        chrome_env_dir = os.path.join(
+            stage._pkg_dir, constants.CHROME_CP + "-25.3643.0_rc1"
+        )
+        env_file = os.path.join(chrome_env_dir, "environment")
+        osutils.Touch(env_file, makedirs=True)
 
-    # Run the code.
-    stage._ArchiveChromeEbuildEnv()
+        cros_build_lib.run(["bzip2", env_file])
 
-    env_tar_base = stage._upload_queue.get()[0]
-    env_tar = os.path.join(stage.archive_path, env_tar_base)
-    self.assertExists(env_tar)
-    cros_test_lib.VerifyTarball(env_tar, ['./', 'environment'])
+        # Run the code.
+        stage._ArchiveChromeEbuildEnv()
+
+        env_tar_base = stage._upload_queue.get()[0]
+        env_tar = os.path.join(stage.archive_path, env_tar_base)
+        self.assertExists(env_tar)
+        cros_test_lib.VerifyTarball(env_tar, ["./", "environment"])
 
 
-class SyncChromeStageTest(generic_stages_unittest.AbstractStageTestCase,
-                          cros_test_lib.RunCommandTestCase):
-  """Tests for SyncChromeStage."""
+class SyncChromeStageTest(
+    generic_stages_unittest.AbstractStageTestCase,
+    cros_test_lib.RunCommandTestCase,
+):
+    """Tests for SyncChromeStage."""
 
-  # pylint: disable=protected-access
-  def setUp(self):
-    self._Prepare()
-    self.PatchObject(cbuildbot_run._BuilderRunBase, 'DetermineChromeVersion',
-                     return_value='35.0.1863.0')
-    self.PatchObject(commands, 'SyncChrome')
+    # pylint: disable=protected-access
+    def setUp(self):
+        self._Prepare()
+        self.PatchObject(
+            cbuildbot_run._BuilderRunBase,
+            "DetermineChromeVersion",
+            return_value="35.0.1863.0",
+        )
+        self.PatchObject(commands, "SyncChrome")
 
-  def ConstructStage(self):
-    bs = FakeBuildStore()
-    return chrome_stages.SyncChromeStage(self._run, bs)
+    def ConstructStage(self):
+        bs = FakeBuildStore()
+        return chrome_stages.SyncChromeStage(self._run, bs)
 
-  def testBasic(self):
-    """Basic syntax sanity test."""
-    stage = self.ConstructStage()
-    stage.PerformStage()
+    def testBasic(self):
+        """Basic syntax sanity test."""
+        stage = self.ConstructStage()
+        stage.PerformStage()

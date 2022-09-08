@@ -10,13 +10,16 @@ from chromite.format.formatters import cpp
 
 
 # None means input is already formatted to avoid having to repeat.
-@pytest.mark.parametrize('data,exp', (
-    ('', None),
-    ('int main() {}', None),
-    ('int main(){return 0;}', 'int main() { return 0; }'),
-))
+@pytest.mark.parametrize(
+    "data,exp",
+    (
+        ("", None),
+        ("int main() {}", None),
+        ("int main(){return 0;}", "int main() { return 0; }"),
+    ),
+)
 def test_check_format(data, exp):
-  """Verify inputs match expected outputs."""
-  if exp is None:
-    exp = data
-  assert exp == cpp.Data(data)
+    """Verify inputs match expected outputs."""
+    if exp is None:
+        exp = data
+    assert exp == cpp.Data(data)

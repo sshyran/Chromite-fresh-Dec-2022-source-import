@@ -12,4 +12,4 @@ import datetime
 #     https://bugs.python.org/issue7980
 #     https://crbug.com/710182
 #
-datetime.datetime.strptime(datetime.datetime.now().strftime('%Y'), '%Y')
+datetime.datetime.strptime(datetime.datetime.now().strftime("%Y"), "%Y")

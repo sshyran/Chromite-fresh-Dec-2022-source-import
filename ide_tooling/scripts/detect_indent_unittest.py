@@ -13,14 +13,15 @@ import detect_indent
 
 sys.path.insert(
     0,
-    os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..', '..'))
+    os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..", ".."),
+)
 # pylint: disable=wrong-import-position
 from chromite.lib import cros_test_lib
 
 
 # pylint: enable=wrong-import-position
 
-TEXT_EMPTY = ''
+TEXT_EMPTY = ""
 
 TEXT_NO_INDENT = """
 Organize the world's information and
@@ -65,18 +66,19 @@ if a:
     foo()
 """
 
-class GenerateTest(cros_test_lib.TestCase):
-  """Tests detect_indentation()"""
 
-  def testAll(self):
-    cases = {
-        TEXT_EMPTY: None,
-        TEXT_NO_INDENT: None,
-        TEXT_LONG_INDENT: 19,
-        TEXT_2_INDENT : 2,
-        TEXT_4_INDENT: 4,
-        TEXT_WITH_EMPTY_LINES: 2
-    }
-    for text, expected in cases.items():
-      detected = detect_indent.detect_indentation(text)
-      self.assertEqual(detected, expected)
+class GenerateTest(cros_test_lib.TestCase):
+    """Tests detect_indentation()"""
+
+    def testAll(self):
+        cases = {
+            TEXT_EMPTY: None,
+            TEXT_NO_INDENT: None,
+            TEXT_LONG_INDENT: 19,
+            TEXT_2_INDENT: 2,
+            TEXT_4_INDENT: 4,
+            TEXT_WITH_EMPTY_LINES: 2,
+        }
+        for text, expected in cases.items():
+            detected = detect_indent.detect_indentation(text)
+            self.assertEqual(detected, expected)

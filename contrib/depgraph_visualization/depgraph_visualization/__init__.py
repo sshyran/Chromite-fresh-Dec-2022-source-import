@@ -6,4 +6,4 @@ import sys
 
 
 # Hardcode Chromite's root path in the SDK to make it importable.
-sys.path.insert(0, '/mnt/host/source/')
+sys.path.insert(0, "/mnt/host/source/")

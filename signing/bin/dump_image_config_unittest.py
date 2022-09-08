@@ -10,11 +10,11 @@ from chromite.signing.image_signing import imagefile
 
 
 class TestMain(cros_test_lib.RunCommandTestCase):
-  """Test main() function."""
+    """Test main() function."""
 
-  def testDumpConfig(self):
-    """Test dump_config."""
-    self.rc.SetDefaultCmdResult()
-    dc = self.PatchObject(imagefile, 'DumpConfig')
-    self.assertIsNone(dump_image_config.main(['/path/to/image.bin']))
-    dc.assert_called_once_with('/path/to/image.bin')
+    def testDumpConfig(self):
+        """Test dump_config."""
+        self.rc.SetDefaultCmdResult()
+        dc = self.PatchObject(imagefile, "DumpConfig")
+        self.assertIsNone(dump_image_config.main(["/path/to/image.bin"]))
+        dc.assert_called_once_with("/path/to/image.bin")

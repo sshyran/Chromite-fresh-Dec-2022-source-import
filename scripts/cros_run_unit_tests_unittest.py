@@ -14,15 +14,18 @@ pytestmark = cros_test_lib.pytestmark_inside_only
 
 
 class CrosRunUnitTestsTest(cros_test_lib.MockTestCase):
-  """Tests for cros_run_unit_tests functions."""
+    """Tests for cros_run_unit_tests functions."""
 
-  def testNonEmptyPackageSet(self):
-    """Asserts that the deps of a known package are non-empty"""
-    self.assertTrue(cros_run_unit_tests.determine_packages(
-        '/', ('virtual/implicit-system',)))
+    def testNonEmptyPackageSet(self):
+        """Asserts that the deps of a known package are non-empty"""
+        self.assertTrue(
+            cros_run_unit_tests.determine_packages(
+                "/", ("virtual/implicit-system",)
+            )
+        )
 
-  def testGetKeepGoing(self):
-    """Tests set keep_going option based on env virables"""
-    self.PatchObject(os, 'environ', new={'USE': 'chrome_internal coverage'})
-    keep_going = cros_run_unit_tests.get_keep_going()
-    self.assertEqual(keep_going, True)
+    def testGetKeepGoing(self):
+        """Tests set keep_going option based on env virables"""
+        self.PatchObject(os, "environ", new={"USE": "chrome_internal coverage"})
+        keep_going = cros_run_unit_tests.get_keep_going()
+        self.assertEqual(keep_going, True)

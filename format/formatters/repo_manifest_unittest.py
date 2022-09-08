@@ -11,27 +11,32 @@ from chromite.format.formatters import repo_manifest
 
 # None means input is already formatted to avoid having to repeat.
 TEST_CASES = (
-    ("""<?xml version="1.0" encoding="UTF-8"?>
+    (
+        """<?xml version="1.0" encoding="UTF-8"?>
 <manifest/>
-""", None),
-
+""",
+        None,
+    ),
     # Project element without children is collapsed.
-    ("""<?xml version="1.0" encoding="UTF-8"?>
+    (
+        """<?xml version="1.0" encoding="UTF-8"?>
 <manifest>
   <project path="path"
            name="name">
   </project>
 </manifest>
-""", """<?xml version="1.0" encoding="UTF-8"?>
+""",
+        """<?xml version="1.0" encoding="UTF-8"?>
 <manifest>
   <project path="path"
            name="name" />
 
 </manifest>
-"""),
-
+""",
+    ),
     # Multiple newlines are collapsed.
-    ("""<?xml version="1.0" encoding="UTF-8"?>
+    (
+        """<?xml version="1.0" encoding="UTF-8"?>
 <manifest>
   <project path="path"
            name="name" />
@@ -40,7 +45,8 @@ TEST_CASES = (
   <project path="path"
            name="name" />
 </manifest>
-""", """<?xml version="1.0" encoding="UTF-8"?>
+""",
+        """<?xml version="1.0" encoding="UTF-8"?>
 <manifest>
   <project path="path"
            name="name" />
@@ -48,13 +54,14 @@ TEST_CASES = (
   <project path="path"
            name="name" />
 </manifest>
-"""),
+""",
+    ),
 )
 
 # Use a separate variable to avoid pytest log spam.
-@pytest.mark.parametrize('data,exp', TEST_CASES)
+@pytest.mark.parametrize("data,exp", TEST_CASES)
 def test_check_format(data, exp):
-  """Verify inputs match expected outputs."""
-  if exp is None:
-    exp = data
-  assert exp == repo_manifest.Data(data)
+    """Verify inputs match expected outputs."""
+    if exp is None:
+        exp = data
+    assert exp == repo_manifest.Data(data)

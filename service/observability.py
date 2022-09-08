@@ -28,101 +28,118 @@ _SUPPORTED_ISCP_PARTITIONS = {
     constants.IMAGE_TYPE_DEV: [constants.PART_ROOT_A, constants.PART_STATE],
 }
 
-_STATEFUL_PARTITION_VDB = 'var_overlay/db/pkg'
-_STATEFUL_PARTITION_INSTALL_PATH = 'dev_image'
+_STATEFUL_PARTITION_VDB = "var_overlay/db/pkg"
+_STATEFUL_PARTITION_INSTALL_PATH = "dev_image"
 
 
 class PackageVersion(NamedTuple):
-  """Container class akin to chromite.observability.PackageVersion proto."""
-  major: int
-  minor: int
-  patch: int
-  extended: int
-  revision: int
-  full_version: str
+    """Container class akin to chromite.observability.PackageVersion proto."""
+
+    major: int
+    minor: int
+    patch: int
+    extended: int
+    revision: int
+    full_version: str
 
 
 class PackageName(NamedTuple):
-  """Container class akin to chromite.observability.PackageName proto."""
-  atom: str
-  category: str
-  package_name: str
+    """Container class akin to chromite.observability.PackageName proto."""
+
+    atom: str
+    category: str
+    package_name: str
 
 
 class PackageIdentifier(NamedTuple):
-  """Container class akin to chromite.observability.PackageIdentifier proto."""
-  package_name: PackageName
-  package_version: PackageVersion
+    """Container class akin to chromite.observability.PackageIdentifier proto."""
+
+    package_name: PackageName
+    package_version: PackageVersion
 
 
 @functools.lru_cache(maxsize=None)
 def _get_version_component_regex() -> Pattern:
-  # Parse version number, expecting up to 4 integer components arranged
-  # like: major[.minor[.patch[.extended]]]
-  extended = r'(?:\.(?P<extended>\d+))?'
-  patch = rf'(?:\.(?P<patch>\d+){extended})?'
-  minor = rf'(?:\.(?P<minor>\d+){patch})?'
-  complete = rf'^(?P<major>\d+){minor}'
-  return re.compile(complete)
+    # Parse version number, expecting up to 4 integer components arranged
+    # like: major[.minor[.patch[.extended]]]
+    extended = r"(?:\.(?P<extended>\d+))?"
+    patch = rf"(?:\.(?P<patch>\d+){extended})?"
+    minor = rf"(?:\.(?P<minor>\d+){patch})?"
+    complete = rf"^(?P<major>\d+){minor}"
+    return re.compile(complete)
 
 
 def get_installed_package_data(
     image_type: str, image_path: os.PathLike
 ) -> Dict[str, Dict[PackageIdentifier, portage_util.PackageSizes]]:
-  """Function for mounting an image and setting up a package database.
+    """Function for mounting an image and setting up a package database.
 
-  Utility method which mounts each supported partition of a given image and
-  produces the dataset of installed packages and their sizes.
+    Utility method which mounts each supported partition of a given image and
+    produces the dataset of installed packages and their sizes.
 
-  Args:
-    image_type: The type of image being queried (base, dev, test).
-    image_path: The path to the image in question.
+    Args:
+      image_type: The type of image being queried (base, dev, test).
+      image_path: The path to the image in question.
 
-  Returns:
-    A mapping of the partition type (stateful, rootfs) to package details.
-  """
-  if image_type not in _SUPPORTED_ISCP_PARTITIONS:
-    logging.warning('Provided image type is not supported.')
-    return dict()
+    Returns:
+      A mapping of the partition type (stateful, rootfs) to package details.
+    """
+    if image_type not in _SUPPORTED_ISCP_PARTITIONS:
+        logging.warning("Provided image type is not supported.")
+        return dict()
 
-  results = {}
-  installed_package_files = []
-  # We mount the stateful partition in all cases because the stateful partition
-  # contains the package db that we need. We do this once and get installed
-  # packages once for all image types, regardless of whether we care about
-  # what's installed on the stateful partition.
-  with osutils.TempDir() as temp_dir:
-    with image_lib.LoopbackPartitions(image_path, destination=temp_dir) as img:
-      # Get a dict of {partition:mountpoint}, including state always.
-      partitions = list(
-          set(_SUPPORTED_ISCP_PARTITIONS[image_type] + [constants.PART_STATE]))
-      mount_points = {
-          partition: path
-          for partition, path in zip(partitions, img.Mount(partitions))
-      }
-      db = portage_util.PortageDB(
-          root=mount_points[constants.PART_STATE],
-          vdb=_STATEFUL_PARTITION_VDB,
-          package_install_path=_STATEFUL_PARTITION_INSTALL_PATH)
-      installed_packages = db.InstalledPackages()
-      installed_package_files = list(
-          zip(installed_packages,
-              [p.ListContents() for p in installed_packages]))
+    results = {}
+    installed_package_files = []
+    # We mount the stateful partition in all cases because the stateful partition
+    # contains the package db that we need. We do this once and get installed
+    # packages once for all image types, regardless of whether we care about
+    # what's installed on the stateful partition.
+    with osutils.TempDir() as temp_dir:
+        with image_lib.LoopbackPartitions(
+            image_path, destination=temp_dir
+        ) as img:
+            # Get a dict of {partition:mountpoint}, including state always.
+            partitions = list(
+                set(
+                    _SUPPORTED_ISCP_PARTITIONS[image_type]
+                    + [constants.PART_STATE]
+                )
+            )
+            mount_points = {
+                partition: path
+                for partition, path in zip(partitions, img.Mount(partitions))
+            }
+            db = portage_util.PortageDB(
+                root=mount_points[constants.PART_STATE],
+                vdb=_STATEFUL_PARTITION_VDB,
+                package_install_path=_STATEFUL_PARTITION_INSTALL_PATH,
+            )
+            installed_packages = db.InstalledPackages()
+            installed_package_files = list(
+                zip(
+                    installed_packages,
+                    [p.ListContents() for p in installed_packages],
+                )
+            )
 
-      # Now that we have the set of installed packages for the image, we mount
-      # each relevant partition that we want to check and calculate the size of
-      # the installed package on the partition (if the package is installed on
-      # that partition).
-      for partition in _SUPPORTED_ISCP_PARTITIONS[image_type]:
-        package_install_path = (
-            _STATEFUL_PARTITION_INSTALL_PATH
-            if partition == constants.PART_STATE else '')
-        package_install_path = os.path.join(mount_points[partition],
-                                            package_install_path)
-        results[partition] = get_package_details_for_partition(
-            package_install_path, installed_package_files)
-      img.Unmount(partitions)
-  return results
+            # Now that we have the set of installed packages for the image, we mount
+            # each relevant partition that we want to check and calculate the size of
+            # the installed package on the partition (if the package is installed on
+            # that partition).
+            for partition in _SUPPORTED_ISCP_PARTITIONS[image_type]:
+                package_install_path = (
+                    _STATEFUL_PARTITION_INSTALL_PATH
+                    if partition == constants.PART_STATE
+                    else ""
+                )
+                package_install_path = os.path.join(
+                    mount_points[partition], package_install_path
+                )
+                results[partition] = get_package_details_for_partition(
+                    package_install_path, installed_package_files
+                )
+            img.Unmount(partitions)
+    return results
 
 
 # TODO(zland): refactor scripts/pkg_size (and this function) to use common
@@ -132,44 +149,49 @@ def get_installed_package_data(
 # chromite/scripts/pkg_size is being used here.
 def get_package_details_for_partition(
     installation_path: os.PathLike,
-    pkgs: Iterable[Tuple[portage_util.InstalledPackage, Iterable[Tuple[str,
-                                                                       str]]]]
+    pkgs: Iterable[
+        Tuple[portage_util.InstalledPackage, Iterable[Tuple[str, str]]]
+    ],
 ) -> Dict[PackageIdentifier, portage_util.PackageSizes]:
-  """Retrieve package size and format name details for a given set of packages.
+    """Retrieve package size and format name details for a given set of packages.
 
-  Args:
-    installation_path: The path to the partition's root that the package's
-      installed files are relative to.
-    pkgs: The packages of interest in the partition (typically, the entire
-      contents of the package db).
-  """
-  details = {}
-  for installed_package, pkg_fileset in pkgs:
-    sizes = portage_util.CalculatePackageSize(pkg_fileset, installation_path)
-    pkg_identifier = parse_package_name(installed_package.package_info)
-    details[pkg_identifier] = sizes
-  return details
+    Args:
+      installation_path: The path to the partition's root that the package's
+        installed files are relative to.
+      pkgs: The packages of interest in the partition (typically, the entire
+        contents of the package db).
+    """
+    details = {}
+    for installed_package, pkg_fileset in pkgs:
+        sizes = portage_util.CalculatePackageSize(
+            pkg_fileset, installation_path
+        )
+        pkg_identifier = parse_package_name(installed_package.package_info)
+        details[pkg_identifier] = sizes
+    return details
 
 
 def parse_package_name(pkg_info: package_info.PackageInfo) -> PackageIdentifier:
-  """Produce detailed NamedTuple for a package from a PackageInfo object."""
-  # Version number parsing, looking for 1-4 numerical components and ignoring
-  # any alphanumeric suffixes (e.g. _alpha1).
-  matcher = _get_version_component_regex()
-  matches = matcher.match(pkg_info.version)
-  major = int(matches.group('major') or 0)
-  minor = int(matches.group('minor') or 0)
-  patch = int(matches.group('patch') or 0)
-  extended = int(matches.group('extended') or 0)
-  version = PackageVersion(
-      major=major,
-      minor=minor,
-      patch=patch,
-      extended=extended,
-      revision=pkg_info.revision,
-      full_version=pkg_info.vr)
-  name = PackageName(
-      atom=pkg_info.atom,
-      category=pkg_info.category,
-      package_name=pkg_info.package)
-  return PackageIdentifier(package_name=name, package_version=version)
+    """Produce detailed NamedTuple for a package from a PackageInfo object."""
+    # Version number parsing, looking for 1-4 numerical components and ignoring
+    # any alphanumeric suffixes (e.g. _alpha1).
+    matcher = _get_version_component_regex()
+    matches = matcher.match(pkg_info.version)
+    major = int(matches.group("major") or 0)
+    minor = int(matches.group("minor") or 0)
+    patch = int(matches.group("patch") or 0)
+    extended = int(matches.group("extended") or 0)
+    version = PackageVersion(
+        major=major,
+        minor=minor,
+        patch=patch,
+        extended=extended,
+        revision=pkg_info.revision,
+        full_version=pkg_info.vr,
+    )
+    name = PackageName(
+        atom=pkg_info.atom,
+        category=pkg_info.category,
+        package_name=pkg_info.package,
+    )
+    return PackageIdentifier(package_name=name, package_version=version)

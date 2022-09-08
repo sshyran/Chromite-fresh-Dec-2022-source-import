@@ -10,15 +10,15 @@ from chromite.utils import pformat
 
 
 def Data(data: str) -> str:
-  """Clean up basic whitespace problems in |data|.
+    """Clean up basic whitespace problems in |data|.
 
-  Args:
-    data: The file content to lint.
+    Args:
+      data: The file content to lint.
 
-  Returns:
-    Formatted data.
-  """
-  # If the file is one line, assume it should be condensed.  If it isn't, assume
-  # it should be human readable.
-  obj = json.loads(data)
-  return pformat.json(obj, fp=None, compact='\n' not in data.strip())
+    Returns:
+      Formatted data.
+    """
+    # If the file is one line, assume it should be condensed.  If it isn't, assume
+    # it should be human readable.
+    obj = json.loads(data)
+    return pformat.json(obj, fp=None, compact="\n" not in data.strip())

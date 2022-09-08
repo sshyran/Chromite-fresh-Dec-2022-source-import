@@ -7,22 +7,22 @@ import logging
 import sys
 
 
-assert sys.version_info >= (3, 6), 'Chromite requires Python 3.6+'
+assert sys.version_info >= (3, 6), "Chromite requires Python 3.6+"
 
 # Set a custom logging class inside this module that provides the NOTICE level.
 NOTICE = 25
 
 
 class ChromiteLogger(logging.getLoggerClass()):
-  """Logger subclass that provides the additional `notice` level."""
+    """Logger subclass that provides the additional `notice` level."""
 
-  def __init__(self, name: str, level: int = logging.NOTSET):
-    super().__init__(name, level=level)
-    logging.addLevelName(NOTICE, 'NOTICE')
+    def __init__(self, name: str, level: int = logging.NOTSET):
+        super().__init__(name, level=level)
+        logging.addLevelName(NOTICE, "NOTICE")
 
-  def notice(self, msg, *args, **kwargs):
-    if self.isEnabledFor(NOTICE):
-      self._log(NOTICE, msg, args, **kwargs)
+    def notice(self, msg, *args, **kwargs):
+        if self.isEnabledFor(NOTICE):
+            self._log(NOTICE, msg, args, **kwargs)
 
 
 logging.setLoggerClass(ChromiteLogger)
@@ -33,4 +33,4 @@ logging.setLoggerClass(ChromiteLogger)
 # functions such as `logging.notice(...)` directly.
 logging.notice = functools.partial(logging.log, NOTICE)
 logging.NOTICE = NOTICE
-logging.addLevelName(logging.NOTICE, 'NOTICE')
+logging.addLevelName(logging.NOTICE, "NOTICE")

@@ -11,16 +11,20 @@ from chromite.lib import parallel
 
 
 class GeneratePayloadsBuilder(simple_builders.SimpleBuilder):
-  """Run the PaygenStage once for each board."""
+    """Run the PaygenStage once for each board."""
 
-  def RunStages(self):
-    """Runs through build process."""
-    def _RunStageWrapper(board):
-      self._RunStage(build_stages.UprevStage)
-      self._RunStage(build_stages.InitSDKStage)
-      self._RunStage(release_stages.PaygenStage, board=board,
-                     channels=self._run.options.channels)
+    def RunStages(self):
+        """Runs through build process."""
 
-    with parallel.BackgroundTaskRunner(_RunStageWrapper) as queue:
-      for board in self._run.config.boards:
-        queue.put([board])
+        def _RunStageWrapper(board):
+            self._RunStage(build_stages.UprevStage)
+            self._RunStage(build_stages.InitSDKStage)
+            self._RunStage(
+                release_stages.PaygenStage,
+                board=board,
+                channels=self._run.options.channels,
+            )
+
+        with parallel.BackgroundTaskRunner(_RunStageWrapper) as queue:
+            for board in self._run.config.boards:
+                queue.put([board])

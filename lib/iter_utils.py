@@ -8,61 +8,63 @@ import itertools
 
 
 def IntersectIntervals(intervals):
-  """Gets the intersection of a set of intervals.
+    """Gets the intersection of a set of intervals.
 
-  Args:
-    intervals: A list of interval groups, where each interval group is itself
-               a list of (start, stop) tuples (ordered by start time and
-               non-overlapping).
+    Args:
+      intervals: A list of interval groups, where each interval group is itself
+                 a list of (start, stop) tuples (ordered by start time and
+                 non-overlapping).
 
-  Returns:
-    An interval group, as a list of (start, stop) tuples, corresponding to the
-    intersection (i.e. overlap) of the given |intervals|.
-  """
-  if not intervals:
-    return []
+    Returns:
+      An interval group, as a list of (start, stop) tuples, corresponding to the
+      intersection (i.e. overlap) of the given |intervals|.
+    """
+    if not intervals:
+        return []
 
-  intersection = []
-  indices = [0] * len(intervals)
-  lengths = [len(i) for i in intervals]
-  while all(i < l for i, l in zip(indices, lengths)):
-    current_intervals = [intervals[i][j] for (i, j) in
-                         zip(itertools.count(), indices)]
-    start = max([s[0] for s in current_intervals])
-    end, end_index = min([(e[1], i) for e, i in
-                          zip(current_intervals, itertools.count())])
-    if start < end:
-      intersection.append((start, end))
-    indices[end_index] += 1
+    intersection = []
+    indices = [0] * len(intervals)
+    lengths = [len(i) for i in intervals]
+    while all(i < l for i, l in zip(indices, lengths)):
+        current_intervals = [
+            intervals[i][j] for (i, j) in zip(itertools.count(), indices)
+        ]
+        start = max([s[0] for s in current_intervals])
+        end, end_index = min(
+            [(e[1], i) for e, i in zip(current_intervals, itertools.count())]
+        )
+        if start < end:
+            intersection.append((start, end))
+        indices[end_index] += 1
 
-  return intersection
+    return intersection
 
 
 def SplitToChunks(input_iter, chunk_size):
-  """Split an iterator into chunks.
+    """Split an iterator into chunks.
 
-  This function walks 1 entire chunk of |input_iter| at a time, but does not
-  walk past that chunk until necessary.
+    This function walks 1 entire chunk of |input_iter| at a time, but does not
+    walk past that chunk until necessary.
 
-  Examples:
-    list(SplitToChunks([1, 2, 3, 4, 5], 3)) -> [[1, 2, 3], [4, 5]
+    Examples:
+      list(SplitToChunks([1, 2, 3, 4, 5], 3)) -> [[1, 2, 3], [4, 5]
 
-  Args:
-    input_iter: iterable or generator to be split into chunks
-    chunk_size: the maximum size of each chunk
+    Args:
+      input_iter: iterable or generator to be split into chunks
+      chunk_size: the maximum size of each chunk
 
-  Returns:
-    An iterable of chunks, where each chunk is of maximum size chunk_size.
-  """
-  count = 0
-  l = []
-  for item in input_iter:
-    l.append(item)
-    count += 1
-    if count == chunk_size:
-      yield l
-      l = []
-      count = 0
+    Returns:
+      An iterable of chunks, where each chunk is of maximum size chunk_size.
+    """
+    count = 0
+    l = []
+    for item in input_iter:
+        l.append(item)
+        count += 1
+        if count == chunk_size:
+            yield l
+            l = []
+            count = 0
 
-  if l:
-    yield l
+    if l:
+        yield l

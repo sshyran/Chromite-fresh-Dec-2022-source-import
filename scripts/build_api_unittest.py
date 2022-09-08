@@ -12,22 +12,24 @@ from chromite.scripts import build_api
 
 
 def testSmoke(tmp_path, monkeypatch):
-  """Basic confidence check"""
+    """Basic confidence check"""
 
-  def stub(*_args, **_kwargs):
-    return True
+    def stub(*_args, **_kwargs):
+        return True
 
-  monkeypatch.setattr(router_lib.Router, 'Route', stub)
+    monkeypatch.setattr(router_lib.Router, "Route", stub)
 
-  input_json = tmp_path / 'input.json'
-  output_json = tmp_path / 'output.json'
+    input_json = tmp_path / "input.json"
+    output_json = tmp_path / "output.json"
 
-  osutils.WriteFile(input_json, '{}')
+    osutils.WriteFile(input_json, "{}")
 
-  build_api.main([
-      '--input-json',
-      str(input_json),
-      '--output-json',
-      str(output_json),
-      'chromite.api.VersionService/Get',
-  ])
+    build_api.main(
+        [
+            "--input-json",
+            str(input_json),
+            "--output-json",
+            str(output_json),
+            "chromite.api.VersionService/Get",
+        ]
+    )

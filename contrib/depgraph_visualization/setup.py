@@ -8,12 +8,13 @@ from setuptools import setup
 
 
 setup(
-    name='depgraph_visualization',
-    version='0.0.1',
-    packages=['depgraph_visualization'],
-    author='The Chromium OS Authors',
+    name="depgraph_visualization",
+    version="0.0.1",
+    packages=["depgraph_visualization"],
+    author="The Chromium OS Authors",
     entry_points={
-        'console_scripts':
-            ['visualize_depgraph = depgraph_visualization.depgraph_viz:main']
-    }
+        "console_scripts": [
+            "visualize_depgraph = depgraph_visualization.depgraph_viz:main"
+        ]
+    },
 )

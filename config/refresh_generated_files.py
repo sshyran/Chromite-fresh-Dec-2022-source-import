@@ -16,29 +16,27 @@ from chromite.lib import osutils
 
 
 def main(argv):
-  # Parse arguments to respect log levels.
-  commandline.ArgumentParser().parse_args(argv)
+    # Parse arguments to respect log levels.
+    commandline.ArgumentParser().parse_args(argv)
 
-  # Regenerate `config_dump.json`.
-  logging.info('Regenerating config_dump.json')
-  site_config = chromeos_config.GetConfig()
-  site_config.SaveConfigToFile(constants.CHROMEOS_CONFIG_FILE)
+    # Regenerate `config_dump.json`.
+    logging.info("Regenerating config_dump.json")
+    site_config = chromeos_config.GetConfig()
+    site_config.SaveConfigToFile(constants.CHROMEOS_CONFIG_FILE)
 
-  # Regenerate `waterfall_layout_dump.txt`.
-  logging.info('Regenerating waterfall_layout_dump.txt')
-  cmd = os.path.join(constants.CHROMITE_BIN_DIR, 'cros_show_waterfall_layout')
-  result = cros_build_lib.run([cmd],
-                              capture_output=True,
-                              encoding='utf-8',
-                              debug_level=logging.DEBUG)
-  waterfall_data = formatters.whitespace.Data(result.stdout)
-  osutils.WriteFile(constants.WATERFALL_CONFIG_FILE, waterfall_data)
+    # Regenerate `waterfall_layout_dump.txt`.
+    logging.info("Regenerating waterfall_layout_dump.txt")
+    cmd = os.path.join(constants.CHROMITE_BIN_DIR, "cros_show_waterfall_layout")
+    result = cros_build_lib.run(
+        [cmd], capture_output=True, encoding="utf-8", debug_level=logging.DEBUG
+    )
+    waterfall_data = formatters.whitespace.Data(result.stdout)
+    osutils.WriteFile(constants.WATERFALL_CONFIG_FILE, waterfall_data)
 
-  # Regenerate `luci-scheduler.cfg`.
-  logging.info('Regenerating luci-scheduler.cfg')
-  cmd = os.path.join(constants.CHROMITE_SCRIPTS_DIR, 'gen_luci_scheduler')
-  luci_result = cros_build_lib.run([cmd],
-                                   capture_output=True,
-                                   encoding='utf-8',
-                                   debug_level=logging.DEBUG)
-  osutils.WriteFile(constants.LUCI_SCHEDULER_CONFIG_FILE, luci_result.stdout)
+    # Regenerate `luci-scheduler.cfg`.
+    logging.info("Regenerating luci-scheduler.cfg")
+    cmd = os.path.join(constants.CHROMITE_SCRIPTS_DIR, "gen_luci_scheduler")
+    luci_result = cros_build_lib.run(
+        [cmd], capture_output=True, encoding="utf-8", debug_level=logging.DEBUG
+    )
+    osutils.WriteFile(constants.LUCI_SCHEDULER_CONFIG_FILE, luci_result.stdout)

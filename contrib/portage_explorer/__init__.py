@@ -8,10 +8,10 @@ from chromite.contrib.portage_explorer import run_portage_explorer
 
 
 def execute():
-  """Call and return run_portage_explorer.
+    """Call and return run_portage_explorer.
 
-  Returns:
-    SpiderOutput from run_portage_explorer containing all the data collected
-    from all the spiders.
-  """
-  return run_portage_explorer.execute()
+    Returns:
+      SpiderOutput from run_portage_explorer containing all the data collected
+      from all the spiders.
+    """
+    return run_portage_explorer.execute()

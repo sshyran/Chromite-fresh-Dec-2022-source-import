@@ -10,6 +10,6 @@ from chromite.lib import constants
 
 
 def main(argv):
-  if argv:
-    sys.exit(f'{sys.argv[0]}: {__doc__}')
-  print(' '.join(constants.CHROOT_ENVIRONMENT_ALLOWLIST))
+    if argv:
+        sys.exit(f"{sys.argv[0]}: {__doc__}")
+    print(" ".join(constants.CHROOT_ENVIRONMENT_ALLOWLIST))

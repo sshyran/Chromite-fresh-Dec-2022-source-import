@@ -12,42 +12,43 @@ from chromite.lib import patch_unittest
 
 
 class FilterTests(patch_unittest.GitRepoPatchTestCase):
-  """Tests for all the various filters."""
+    """Tests for all the various filters."""
 
-  patch_kls = cros_patch.LocalPatch
+    patch_kls = cros_patch.LocalPatch
 
-  def testChromiteFilter(self):
-    """Make sure the chromite filter works"""
-    _, _, patch = self._CommonGitSetup()
-    patch.project = constants.CHROMITE_PROJECT
-    self.assertTrue(trybot_patch_pool.ChromiteFilter(patch))
-    patch.project = 'foooo'
-    self.assertFalse(trybot_patch_pool.ChromiteFilter(patch))
+    def testChromiteFilter(self):
+        """Make sure the chromite filter works"""
+        _, _, patch = self._CommonGitSetup()
+        patch.project = constants.CHROMITE_PROJECT
+        self.assertTrue(trybot_patch_pool.ChromiteFilter(patch))
+        patch.project = "foooo"
+        self.assertFalse(trybot_patch_pool.ChromiteFilter(patch))
 
-  def testManifestFilters(self):
-    """Make sure the manifest filters work"""
-    site_params = config_lib.GetSiteParams()
-    _, _, patch = self._CommonGitSetup()
+    def testManifestFilters(self):
+        """Make sure the manifest filters work"""
+        site_params = config_lib.GetSiteParams()
+        _, _, patch = self._CommonGitSetup()
 
-    patch.project = constants.CHROMITE_PROJECT
-    self.assertFalse(trybot_patch_pool.ExtManifestFilter(patch))
-    self.assertFalse(trybot_patch_pool.IntManifestFilter(patch))
-    self.assertFalse(trybot_patch_pool.ManifestFilter(patch))
+        patch.project = constants.CHROMITE_PROJECT
+        self.assertFalse(trybot_patch_pool.ExtManifestFilter(patch))
+        self.assertFalse(trybot_patch_pool.IntManifestFilter(patch))
+        self.assertFalse(trybot_patch_pool.ManifestFilter(patch))
 
-    patch.project = site_params.MANIFEST_PROJECT
-    self.assertTrue(trybot_patch_pool.ExtManifestFilter(patch))
-    self.assertFalse(trybot_patch_pool.IntManifestFilter(patch))
-    self.assertTrue(trybot_patch_pool.ManifestFilter(patch))
+        patch.project = site_params.MANIFEST_PROJECT
+        self.assertTrue(trybot_patch_pool.ExtManifestFilter(patch))
+        self.assertFalse(trybot_patch_pool.IntManifestFilter(patch))
+        self.assertTrue(trybot_patch_pool.ManifestFilter(patch))
 
-    patch.project = site_params.MANIFEST_INT_PROJECT
-    self.assertFalse(trybot_patch_pool.ExtManifestFilter(patch))
-    self.assertTrue(trybot_patch_pool.IntManifestFilter(patch))
-    self.assertTrue(trybot_patch_pool.ManifestFilter(patch))
+        patch.project = site_params.MANIFEST_INT_PROJECT
+        self.assertFalse(trybot_patch_pool.ExtManifestFilter(patch))
+        self.assertTrue(trybot_patch_pool.IntManifestFilter(patch))
+        self.assertTrue(trybot_patch_pool.ManifestFilter(patch))
 
-  def testBranchFilter(self):
-    """Make sure the branch filter works"""
-    _, _, patch = self._CommonGitSetup()
+    def testBranchFilter(self):
+        """Make sure the branch filter works"""
+        _, _, patch = self._CommonGitSetup()
 
-    self.assertFalse(trybot_patch_pool.BranchFilter('/,/asdf', patch))
-    self.assertTrue(trybot_patch_pool.BranchFilter(
-        patch.tracking_branch, patch))
+        self.assertFalse(trybot_patch_pool.BranchFilter("/,/asdf", patch))
+        self.assertTrue(
+            trybot_patch_pool.BranchFilter(patch.tracking_branch, patch)
+        )

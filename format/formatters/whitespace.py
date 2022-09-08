@@ -6,22 +6,22 @@
 
 
 def Data(data: str) -> str:
-  """Clean up basic whitespace problems in |data|.
+    """Clean up basic whitespace problems in |data|.
 
-  Args:
-    data: The file content to lint.
+    Args:
+      data: The file content to lint.
 
-  Returns:
-    Formatted data.
-  """
-  # Remove all leading/trailing newlines.
-  data = data.strip()
+    Returns:
+      Formatted data.
+    """
+    # Remove all leading/trailing newlines.
+    data = data.strip()
 
-  # Remove trailing whitespace on all lines.
-  data = '\n'.join(x.rstrip() for x in data.splitlines())
+    # Remove trailing whitespace on all lines.
+    data = "\n".join(x.rstrip() for x in data.splitlines())
 
-  # Add a final newline.
-  if data:
-    data += '\n'
+    # Add a final newline.
+    if data:
+        data += "\n"
 
-  return data
+    return data

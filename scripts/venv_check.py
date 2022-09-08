@@ -11,14 +11,14 @@ from chromite.lib import commandline
 
 
 def GetParser():
-  """Creates the argparse parser."""
-  parser = commandline.ArgumentParser(description=__doc__)
-  return parser
+    """Creates the argparse parser."""
+    parser = commandline.ArgumentParser(description=__doc__)
+    return parser
 
 
 def main(argv):
-  parser = GetParser()
-  parser.parse_args(argv)
+    parser = GetParser()
+    parser.parse_args(argv)
 
-  print('The import path is:')
-  pprint.pprint(sys.path)
+    print("The import path is:")
+    pprint.pprint(sys.path)

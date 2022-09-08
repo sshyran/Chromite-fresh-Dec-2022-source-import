@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-IMPORT_PATTERN = 'chromite.api.controller.%s'
+IMPORT_PATTERN = "chromite.api.controller.%s"
 
 # Endpoint ran successfully.
 RETURN_CODE_SUCCESS = 0

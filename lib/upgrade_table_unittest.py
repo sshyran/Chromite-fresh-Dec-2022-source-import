@@ -12,73 +12,87 @@ pytestmark = cros_test_lib.pytestmark_inside_only
 
 
 class UpgradeTableTest(cros_test_lib.TestCase):
-  """Unittests for UpgradeTable."""
-  ARCH = 'some-arch'
-  NAME = 'some-name'
+    """Unittests for UpgradeTable."""
 
-  def _CreateTable(self, upgrade_mode, arch=ARCH, name=NAME):
-    return utable.UpgradeTable(arch, upgrade=upgrade_mode, name=name)
+    ARCH = "some-arch"
+    NAME = "some-name"
 
-  def testGetArch(self):
-    t1 = self._CreateTable(True, arch='arch1')
-    self.assertEqual(t1.GetArch(), 'arch1')
-    t2 = self._CreateTable(False, arch='arch2')
-    self.assertEqual(t2.GetArch(), 'arch2')
+    def _CreateTable(self, upgrade_mode, arch=ARCH, name=NAME):
+        return utable.UpgradeTable(arch, upgrade=upgrade_mode, name=name)
 
-  def _AssertEqualsAfterArchSub(self, arch, table_col_name,
-                                static_table_col_name):
-    self.assertEqual(table_col_name,
-                     static_table_col_name.replace('ARCH', arch))
+    def testGetArch(self):
+        t1 = self._CreateTable(True, arch="arch1")
+        self.assertEqual(t1.GetArch(), "arch1")
+        t2 = self._CreateTable(False, arch="arch2")
+        self.assertEqual(t2.GetArch(), "arch2")
 
-  def testColumnNameArchSubstitute(self):
-    arch = 'foobar'
-    t1 = self._CreateTable(True, arch=arch)
+    def _AssertEqualsAfterArchSub(
+        self, arch, table_col_name, static_table_col_name
+    ):
+        self.assertEqual(
+            table_col_name, static_table_col_name.replace("ARCH", arch)
+        )
 
-    # Some column names are independent of ARCH.
-    self.assertEqual(t1.COL_PACKAGE, utable.UpgradeTable.COL_PACKAGE)
-    self.assertEqual(t1.COL_SLOT, utable.UpgradeTable.COL_SLOT)
-    self.assertEqual(t1.COL_OVERLAY, utable.UpgradeTable.COL_OVERLAY)
-    self.assertEqual(t1.COL_TARGET, utable.UpgradeTable.COL_TARGET)
+    def testColumnNameArchSubstitute(self):
+        arch = "foobar"
+        t1 = self._CreateTable(True, arch=arch)
 
-    # Other column names require ARCH substitution.
-    self._AssertEqualsAfterArchSub(arch, t1.COL_CURRENT_VER,
-                                   utable.UpgradeTable.COL_CURRENT_VER)
-    self._AssertEqualsAfterArchSub(arch, t1.COL_STABLE_UPSTREAM_VER,
-                                   utable.UpgradeTable.COL_STABLE_UPSTREAM_VER)
-    self._AssertEqualsAfterArchSub(arch, t1.COL_LATEST_UPSTREAM_VER,
-                                   utable.UpgradeTable.COL_LATEST_UPSTREAM_VER)
-    self._AssertEqualsAfterArchSub(arch, t1.COL_STATE,
-                                   utable.UpgradeTable.COL_STATE)
-    self._AssertEqualsAfterArchSub(arch, t1.COL_DEPENDS_ON,
-                                   utable.UpgradeTable.COL_DEPENDS_ON)
-    self._AssertEqualsAfterArchSub(arch, t1.COL_USED_BY,
-                                   utable.UpgradeTable.COL_USED_BY)
-    self._AssertEqualsAfterArchSub(arch, t1.COL_UPGRADED,
-                                   utable.UpgradeTable.COL_UPGRADED)
+        # Some column names are independent of ARCH.
+        self.assertEqual(t1.COL_PACKAGE, utable.UpgradeTable.COL_PACKAGE)
+        self.assertEqual(t1.COL_SLOT, utable.UpgradeTable.COL_SLOT)
+        self.assertEqual(t1.COL_OVERLAY, utable.UpgradeTable.COL_OVERLAY)
+        self.assertEqual(t1.COL_TARGET, utable.UpgradeTable.COL_TARGET)
 
-  def testColumnExistence(self):
-    t1 = self._CreateTable(False)
-    t2 = self._CreateTable(True)
+        # Other column names require ARCH substitution.
+        self._AssertEqualsAfterArchSub(
+            arch, t1.COL_CURRENT_VER, utable.UpgradeTable.COL_CURRENT_VER
+        )
+        self._AssertEqualsAfterArchSub(
+            arch,
+            t1.COL_STABLE_UPSTREAM_VER,
+            utable.UpgradeTable.COL_STABLE_UPSTREAM_VER,
+        )
+        self._AssertEqualsAfterArchSub(
+            arch,
+            t1.COL_LATEST_UPSTREAM_VER,
+            utable.UpgradeTable.COL_LATEST_UPSTREAM_VER,
+        )
+        self._AssertEqualsAfterArchSub(
+            arch, t1.COL_STATE, utable.UpgradeTable.COL_STATE
+        )
+        self._AssertEqualsAfterArchSub(
+            arch, t1.COL_DEPENDS_ON, utable.UpgradeTable.COL_DEPENDS_ON
+        )
+        self._AssertEqualsAfterArchSub(
+            arch, t1.COL_USED_BY, utable.UpgradeTable.COL_USED_BY
+        )
+        self._AssertEqualsAfterArchSub(
+            arch, t1.COL_UPGRADED, utable.UpgradeTable.COL_UPGRADED
+        )
 
-    # All these columns should be in both tables, with same name.
-    cols = [
-        t1.COL_PACKAGE,
-        t1.COL_SLOT,
-        t1.COL_OVERLAY,
-        t1.COL_CURRENT_VER,
-        t1.COL_STABLE_UPSTREAM_VER,
-        t1.COL_LATEST_UPSTREAM_VER,
-        t1.COL_STATE,
-        t1.COL_DEPENDS_ON,
-        t1.COL_USED_BY,
-        t1.COL_TARGET,
-    ]
+    def testColumnExistence(self):
+        t1 = self._CreateTable(False)
+        t2 = self._CreateTable(True)
 
-    for col in cols:
-      self.assertTrue(t1.HasColumn(col))
-      self.assertTrue(t2.HasColumn(col))
+        # All these columns should be in both tables, with same name.
+        cols = [
+            t1.COL_PACKAGE,
+            t1.COL_SLOT,
+            t1.COL_OVERLAY,
+            t1.COL_CURRENT_VER,
+            t1.COL_STABLE_UPSTREAM_VER,
+            t1.COL_LATEST_UPSTREAM_VER,
+            t1.COL_STATE,
+            t1.COL_DEPENDS_ON,
+            t1.COL_USED_BY,
+            t1.COL_TARGET,
+        ]
 
-    # The UPGRADED column should only be in the table with upgrade_mode=True.
-    col = t1.COL_UPGRADED
-    self.assertFalse(t1.HasColumn(col))
-    self.assertTrue(t2.HasColumn(col))
+        for col in cols:
+            self.assertTrue(t1.HasColumn(col))
+            self.assertTrue(t2.HasColumn(col))
+
+        # The UPGRADED column should only be in the table with upgrade_mode=True.
+        col = t1.COL_UPGRADED
+        self.assertFalse(t1.HasColumn(col))
+        self.assertTrue(t2.HasColumn(col))

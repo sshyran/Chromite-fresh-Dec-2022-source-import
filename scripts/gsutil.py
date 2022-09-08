@@ -14,10 +14,11 @@ from chromite.lib import gs
 
 
 def main(argv):
-  ctx = gs.GSContext(retries=0)
-  try:
-    return ctx.DoCommand(
-        argv, print_cmd=False, stderr=None, check=False).returncode
-  except KeyboardInterrupt:
-    logging.debug('Aborted due to keyboard interrupt.')
-    return 128 + signal.SIGINT
+    ctx = gs.GSContext(retries=0)
+    try:
+        return ctx.DoCommand(
+            argv, print_cmd=False, stderr=None, check=False
+        ).returncode
+    except KeyboardInterrupt:
+        logging.debug("Aborted due to keyboard interrupt.")
+        return 128 + signal.SIGINT

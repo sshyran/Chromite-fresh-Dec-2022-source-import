@@ -17,36 +17,40 @@ from chromite.lib import cros_sdk_lib
 
 
 def GetParser():
-  """Build the ArgumentParser."""
-  parser = commandline.ArgumentParser(description=__doc__)
-  parser.add_argument('-i', '--init-latest',
-                      action='store_true', default=False,
-                      help='Create the version file with the latest version '
-                           "if it doesn't exist.")
+    """Build the ArgumentParser."""
+    parser = commandline.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "-i",
+        "--init-latest",
+        action="store_true",
+        default=False,
+        help="Create the version file with the latest version "
+        "if it doesn't exist.",
+    )
 
-  return parser
+    return parser
 
 
 def _ParseArgs(argv):
-  """Parse arguments."""
-  parser = GetParser()
+    """Parse arguments."""
+    parser = GetParser()
 
-  opts = parser.parse_args(argv)
-  opts.Freeze()
+    opts = parser.parse_args(argv)
+    opts.Freeze()
 
-  return opts
+    return opts
 
 
 def main(argv):
-  """Main function."""
-  cros_build_lib.AssertInsideChroot()
+    """Main function."""
+    cros_build_lib.AssertInsideChroot()
 
-  opts = _ParseArgs(argv)
+    opts = _ParseArgs(argv)
 
-  if opts.init_latest:
-    cros_sdk_lib.InitLatestVersion()
-  else:
-    try:
-      cros_sdk_lib.RunChrootVersionHooks()
-    except cros_sdk_lib.Error as e:
-      cros_build_lib.Die(e)
+    if opts.init_latest:
+        cros_sdk_lib.InitLatestVersion()
+    else:
+        try:
+            cros_sdk_lib.RunChrootVersionHooks()
+        except cros_sdk_lib.Error as e:
+            cros_build_lib.Die(e)

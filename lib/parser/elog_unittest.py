@@ -85,42 +85,46 @@ S: '/build/grunt/tmp/portage/app-vim/gentoo-syntax-20181023/work/gentoo-syntax-2
 
 
 class ElogTest(cros_test_lib.TestCase):
-  """Unit tests for summary.log parser"""
+    """Unit tests for summary.log parser"""
 
-  def testSingleSectionHeaderRegex(self):
-    match = elog.SECTION_HEADER.search(SAMPLE_LOG)
-    self.assertEqual('sys-libs/libcxx-8.0_pre349610-r1', match.group('package'))
+    def testSingleSectionHeaderRegex(self):
+        match = elog.SECTION_HEADER.search(SAMPLE_LOG)
+        self.assertEqual(
+            "sys-libs/libcxx-8.0_pre349610-r1", match.group("package")
+        )
 
-  def testMultipleSectionHeaderRegex(self):
-    match = elog.SECTION_HEADER.search(SAMPLE_LOG)
-    match2 = elog.SECTION_HEADER.search(SAMPLE_LOG[match.end():])
-    self.assertEqual('app-vim/gentoo-syntax-20181023', match2.group('package'))
+    def testMultipleSectionHeaderRegex(self):
+        match = elog.SECTION_HEADER.search(SAMPLE_LOG)
+        match2 = elog.SECTION_HEADER.search(SAMPLE_LOG[match.end() :])
+        self.assertEqual(
+            "app-vim/gentoo-syntax-20181023", match2.group("package")
+        )
 
-  def testLogEntryRegex(self):
-    match = elog.LOG_ENTRY.search(SAMPLE_LOG)
-    self.assertEqual('LOG', match.group('level'))
-    self.assertEqual('postinst', match.group('phase'))
+    def testLogEntryRegex(self):
+        match = elog.LOG_ENTRY.search(SAMPLE_LOG)
+        self.assertEqual("LOG", match.group("level"))
+        self.assertEqual("postinst", match.group("phase"))
 
-  def testMultipleLogEntryRegex(self):
-    match = elog.LOG_ENTRY.search(SAMPLE_LOG)
-    match2 = elog.LOG_ENTRY.search(SAMPLE_LOG[match.end():])
-    self.assertEqual('WARN', match2.group('level'))
-    self.assertEqual('prepare', match2.group('phase'))
+    def testMultipleLogEntryRegex(self):
+        match = elog.LOG_ENTRY.search(SAMPLE_LOG)
+        match2 = elog.LOG_ENTRY.search(SAMPLE_LOG[match.end() :])
+        self.assertEqual("WARN", match2.group("level"))
+        self.assertEqual("prepare", match2.group("phase"))
 
-  def testNoPackageFailuresInSampleLog(self):
-    pkglog = elog.SummaryLog.parse_from_string(SAMPLE_LOG)
-    self.assertFalse(pkglog.has_failed_packages())
+    def testNoPackageFailuresInSampleLog(self):
+        pkglog = elog.SummaryLog.parse_from_string(SAMPLE_LOG)
+        self.assertFalse(pkglog.has_failed_packages())
 
-  def testPackageFailureExistsInFailingLog(self):
-    pkglog = elog.SummaryLog.parse_from_string(SAMPLE_FAILING_LOG)
-    self.assertTrue(pkglog.has_failed_packages())
+    def testPackageFailureExistsInFailingLog(self):
+        pkglog = elog.SummaryLog.parse_from_string(SAMPLE_FAILING_LOG)
+        self.assertTrue(pkglog.has_failed_packages())
 
-  def testWhichPackageFailsInFailingLog(self):
-    pkglog = elog.SummaryLog.parse_from_string(SAMPLE_FAILING_LOG)
-    self.assertEqual(['app-vim/gentoo-syntax'], pkglog.failed_packages())
+    def testWhichPackageFailsInFailingLog(self):
+        pkglog = elog.SummaryLog.parse_from_string(SAMPLE_FAILING_LOG)
+        self.assertEqual(["app-vim/gentoo-syntax"], pkglog.failed_packages())
 
-  def testPackageWarningsDetectedInSampleLogs(self):
-    pkglog1 = elog.SummaryLog.parse_from_string(SAMPLE_LOG)
-    self.assertTrue(pkglog1.has_warned_packages())
-    pkglog2 = elog.SummaryLog.parse_from_string(SAMPLE_FAILING_LOG)
-    self.assertTrue(pkglog2.has_warned_packages())
+    def testPackageWarningsDetectedInSampleLogs(self):
+        pkglog1 = elog.SummaryLog.parse_from_string(SAMPLE_LOG)
+        self.assertTrue(pkglog1.has_warned_packages())
+        pkglog2 = elog.SummaryLog.parse_from_string(SAMPLE_FAILING_LOG)
+        self.assertTrue(pkglog2.has_warned_packages())

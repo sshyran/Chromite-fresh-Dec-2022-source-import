@@ -9,5 +9,5 @@ from __future__ import absolute_import
 from chromite.scripts.sysmon import mainlib
 
 
-if __name__ == '__main__':
-  mainlib.main()
+if __name__ == "__main__":
+    mainlib.main()
