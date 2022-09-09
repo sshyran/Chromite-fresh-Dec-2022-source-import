@@ -692,8 +692,6 @@ def _ParseCgpt(lines):
     #                              Type: ChromeOS kernel
     #                              UUID: 7007C2F3-08E5-AB40-A4BC-FF5B01F5460D
     #                              Attr: priority=15 tries=15 successful=1
-    # pylint: disable=invalid-triple-quote
-    # https://github.com/edaniszewski/pylint-quotes/issues/20
     start_pattern = re.compile(r'''\s+(\d+)\s+(\d+)\s+(\d+)\s+Label: "(.+)"''')
     ret = []
     line_no = 0

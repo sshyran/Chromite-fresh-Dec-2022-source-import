@@ -94,8 +94,6 @@ class CmdToStrTest(cros_test_lib.TestCase):
             ("""'b"c'""", 'b"c'),
             ("'a@()b'", "a@()b"),
             ("j%k", "j%k"),
-            # pylint: disable=invalid-triple-quote
-            # https://github.com/edaniszewski/pylint-quotes/issues/20
             (r'''"s'a\$va\\rs"''', r"s'a$va\rs"),
             (r'''"\\'\\\""''', r'''\'\"'''),
             (r'''"'\\\$"''', r"""'\$"""),
@@ -111,11 +109,7 @@ class CmdToStrTest(cros_test_lib.TestCase):
 
         # Expected input output specific to ShellUnquote. This string cannot be
         # produced by ShellQuote but is still a valid bash escaped string.
-        tests_unquote = (
-            # pylint: disable=invalid-triple-quote
-            # https://github.com/edaniszewski/pylint-quotes/issues/20
-            (r"""\$""", r'''"\\$"'''),
-        )
+        tests_unquote = ((r"""\$""", r'''"\\$"'''),)
 
         def aux(s):
             return cros_build_lib.ShellUnquote(cros_build_lib.ShellQuote(s))
@@ -142,8 +136,6 @@ class CmdToStrTest(cros_test_lib.TestCase):
         tests = (
             (r"a b", ["a", "b"]),
             (r"'a b' c", ["a b", "c"]),
-            # pylint: disable=invalid-triple-quote
-            # https://github.com/edaniszewski/pylint-quotes/issues/20
             (r'''a "b'c"''', ["a", "b'c"]),
             (r'''a "/'\$b" 'a b c' "xy'z"''', ["a", "/'$b", "a b c", "xy'z"]),
             ("", []),
