@@ -1234,27 +1234,175 @@ class DetermineKernelVersionTest(cros_test_lib.RunCommandTempDirTestCase):
 
     def test_determine_kernel_version(self):
         """Tests that a valid kernel version is returned."""
-        package_result = [
-            "sys-kernel/linux-headers-4.14-r24",
-            "sys-devel/flex-2.6.4-r1",
+        kernel_candidates = [
+            "sys-kernel/chromeos-kernel-experimental-4.18_rc2-r23",
             "sys-kernel/chromeos-kernel-4_4-4.4.223-r2209",
+            "sys-kernel/chromeos-kernel-5_15-5.15.65-r869",
+            "sys-kernel/upstream-kernel-next-9999",
+            "sys-kernel/socfpga-kernel-4.20-r34",
         ]
         self.PatchObject(
-            portage_util, "GetPackageDependencies", return_value=package_result
+            portage_util,
+            "GetFlattenedDepsForPackage",
+            return_value=kernel_candidates,
+        )
+
+        installed_pkgs = [
+            "sys-kernel/linux-firmware-0.0.1-r594",
+            "sys-kernel/chromeos-kernel-4_4-4.4.223-r2209",
+            "virtual/linux-sources-1-r30",
+        ]
+        self.PatchObject(
+            portage_util,
+            "GetPackageDependencies",
+            return_value=installed_pkgs,
         )
 
         result = packages.determine_kernel_version(self.build_target)
         self.assertEqual(result, "4.4.223-r2209")
 
-    def test_determine_kernel_version_exception(self):
-        """Tests that portage_util exceptions result in returning None."""
+    def test_determine_kernel_version_ignores_exact_duplicates(self):
+        """Tests that multiple results for candidates is ignored."""
+        # Depgraph is evaluated for version as well as revision, so graph will
+        # return all results twice.
+        kernel_candidates = [
+            "sys-kernel/chromeos-kernel-experimental-4.18_rc2-r23",
+            "sys-kernel/chromeos-kernel-4_4-4.4.223-r2209",
+            "sys-kernel/chromeos-kernel-5_15-5.15.65-r869",
+            "sys-kernel/upstream-kernel-next-9999",
+            "sys-kernel/socfpga-kernel-4.20-r34",
+            "sys-kernel/chromeos-kernel-experimental-4.18_rc2-r23",
+            "sys-kernel/chromeos-kernel-4_4-4.4.223-r2209",
+            "sys-kernel/chromeos-kernel-5_15-5.15.65-r869",
+            "sys-kernel/upstream-kernel-next-9999",
+            "sys-kernel/socfpga-kernel-4.20-r34",
+        ]
+        self.PatchObject(
+            portage_util,
+            "GetFlattenedDepsForPackage",
+            return_value=kernel_candidates,
+        )
+
+        installed_pkgs = [
+            "sys-kernel/linux-firmware-0.0.1-r594",
+            "sys-kernel/chromeos-kernel-4_4-4.4.223-r2209",
+            "virtual/linux-sources-1-r30",
+        ]
         self.PatchObject(
             portage_util,
             "GetPackageDependencies",
+            return_value=installed_pkgs,
+        )
+
+        result = packages.determine_kernel_version(self.build_target)
+        self.assertEqual(result, "4.4.223-r2209")
+
+    def test_determine_kernel_version_ignores_virtual_package(self):
+        """Tests that top-level package is ignored as potential kernel pkg."""
+        # Depgraph results include the named package at level 0 as well as its
+        # first-order dependencies, so verify that the virtual package is not
+        # included as a kernel package.
+        kernel_candidates = [
+            "virtual/linux-sources-1",
+            "sys-kernel/chromeos-kernel-experimental-4.18_rc2-r23",
+            "sys-kernel/chromeos-kernel-4_4-4.4.223-r2209",
+            "sys-kernel/chromeos-kernel-5_15-5.15.65-r869",
+            "sys-kernel/upstream-kernel-next-9999",
+            "sys-kernel/socfpga-kernel-4.20-r34",
+            "virtual/linux-sources-1-r30",
+            "sys-kernel/chromeos-kernel-experimental-4.18_rc2-r23",
+            "sys-kernel/chromeos-kernel-4_4-4.4.223-r2209",
+            "sys-kernel/chromeos-kernel-5_15-5.15.65-r869",
+            "sys-kernel/upstream-kernel-next-9999",
+            "sys-kernel/socfpga-kernel-4.20-r34",
+        ]
+        self.PatchObject(
+            portage_util,
+            "GetFlattenedDepsForPackage",
+            return_value=kernel_candidates,
+        )
+
+        installed_pkgs = [
+            "sys-kernel/linux-firmware-0.0.1-r594",
+            "sys-kernel/chromeos-kernel-4_4-4.4.223-r2209",
+            "virtual/linux-sources-1-r30",
+        ]
+        self.PatchObject(
+            portage_util,
+            "GetPackageDependencies",
+            return_value=installed_pkgs,
+        )
+
+        result = packages.determine_kernel_version(self.build_target)
+        self.assertEqual(result, "4.4.223-r2209")
+
+    def test_determine_kernel_version_too_many(self):
+        """Tests that an exception is thrown with too many matching packages."""
+        package_result = [
+            "sys-kernel/chromeos-kernel-experimental-4.18_rc2-r23",
+            "sys-kernel/chromeos-kernel-4_4-4.4.223-r2209",
+            "sys-kernel/chromeos-kernel-5_15-5.15.65-r869",
+            "sys-kernel/upstream-kernel-next-9999",
+            "sys-kernel/socfpga-kernel-4.20-r34",
+        ]
+        self.PatchObject(
+            portage_util,
+            "GetFlattenedDepsForPackage",
+            return_value=package_result,
+        )
+
+        installed_pkgs = [
+            "sys-kernel/linux-firmware-0.0.1-r594",
+            "sys-kernel/chromeos-kernel-4_4-4.4.223-r2209",
+            "sys-kernel/chromeos-kernel-5_15-5.15.65-r869",
+            "virtual/linux-sources-1-r30",
+        ]
+        self.PatchObject(
+            portage_util,
+            "GetPackageDependencies",
+            return_value=installed_pkgs,
+        )
+
+        with self.assertRaises(packages.KernelVersionError):
+            packages.determine_kernel_version(self.build_target)
+
+    def test_determine_kernel_version_no_kernel_match(self):
+        """Tests that an exception is thrown with 0-sized intersection."""
+        package_result = [
+            "sys-kernel/chromeos-kernel-experimental-4.18_rc2-r23",
+            "sys-kernel/chromeos-kernel-4_4-4.4.223-r2209",
+            "sys-kernel/chromeos-kernel-5_15-5.15.65-r869",
+            "sys-kernel/upstream-kernel-next-9999",
+        ]
+        self.PatchObject(
+            portage_util,
+            "GetFlattenedDepsForPackage",
+            return_value=package_result,
+        )
+
+        installed_pkgs = [
+            "sys-kernel/linux-firmware-0.0.1-r594",
+            "sys-kernel/socfpga-kernel-4.20-r34",
+            "virtual/linux-sources-1-r30",
+        ]
+        self.PatchObject(
+            portage_util,
+            "GetPackageDependencies",
+            return_value=installed_pkgs,
+        )
+
+        with self.assertRaises(packages.KernelVersionError):
+            packages.determine_kernel_version(self.build_target)
+
+    def test_determine_kernel_version_exception(self):
+        """Tests that portage_util exceptions result in returning empty str."""
+        self.PatchObject(
+            portage_util,
+            "GetFlattenedDepsForPackage",
             side_effect=cros_build_lib.RunCommandError("error"),
         )
         result = packages.determine_kernel_version(self.build_target)
-        self.assertEqual(result, None)
+        self.assertEqual(result, "")
 
 
 class ChromeVersionsTest(cros_test_lib.MockTestCase):

@@ -67,6 +67,10 @@ class NoAndroidTargetError(Error):
     """An error occurred while trying to determine the android target."""
 
 
+class KernelVersionError(Error):
+    """An error occurred while trying to determine the kernel version."""
+
+
 class AndroidIsPinnedUprevError(UprevError):
     """Raised when we try to uprev while Android is pinned."""
 
@@ -1588,28 +1592,53 @@ def determine_firmware_versions(build_target: "build_target_lib.BuildTarget"):
 
 def determine_kernel_version(
     build_target: "build_target_lib.BuildTarget",
-) -> Optional[str]:
+) -> str:
     """Returns a string containing the kernel version for this build target.
 
     Args:
       build_target: The build target.
 
     Returns:
-      The kernel versions, or None.
+      The kernel versions, or empty string.
     """
+    target_virtual_pkg = "virtual/linux-sources"
     try:
-        packages = portage_util.GetPackageDependencies(
-            "virtual/linux-sources", board=build_target.name
+        candidate_packages = portage_util.GetFlattenedDepsForPackage(
+            target_virtual_pkg,
+            sysroot=build_target.root,
+            board=build_target.name,
+            depth=1,
+        )
+        installed_packages = portage_util.GetPackageDependencies(
+            target_virtual_pkg, board=build_target.name
         )
     except cros_build_lib.RunCommandError as e:
         logging.warning("Unable to get package list for metadata: %s", e)
-        return None
-    for package in packages:
-        if package.startswith("sys-kernel/chromeos-kernel-"):
-            kernel_version = package_info.SplitCPV(package).version
-            logging.info("Found active kernel version: %s", kernel_version)
-            return kernel_version
-    return None
+        return ""
+    if not candidate_packages:
+        raise KernelVersionError("No package found in FlattenedDepsForPackage")
+    if not installed_packages:
+        raise KernelVersionError("No package found in GetPackageDependencies")
+    packages = [
+        p
+        for p in installed_packages
+        if p in candidate_packages and target_virtual_pkg not in p
+    ]
+    if len(packages) == 0:
+        raise KernelVersionError(
+            "No matches for installed packages were found in candidate "
+            "packages. Did GetFlattenedDepsForPackage search all possible "
+            "package versions?\tInstalled: %s\tCandidates: %s"
+            % (" ".join(installed_packages), " ".join(candidate_packages))
+        )
+    if len(packages) > 1:
+        raise KernelVersionError(
+            "Too many packages found in intersection of installed packages and "
+            "possible kernel versions (%s)" % "".join(packages)
+        )
+    kernel_version = package_info.SplitCPV(packages[0]).version
+    logging.info("Found active kernel version: %s", kernel_version)
+    return kernel_version
 
 
 def get_models(

@@ -665,13 +665,26 @@ class GetBuilderMetadataTest(cros_test_lib.MockTestCase, ApiConfigMixin):
             "GetBoardUseFlags",
             return_value=["arc", "arcvm", "big_little", "cheets"],
         )
-        package_result = [
+
+        kernel_candidates = [
+            "sys-kernel/chromeos-kernel-4_4-4.4.223-r2209",
+            "sys-kernel/chromeos-kernel-experimental-4.18_rc2-r23",
+            "sys-kernel/sys-kernel/socfpga-kernel-4.20-r34",
+        ]
+        self.PatchObject(
+            portage_util,
+            "GetFlattenedDepsForPackage",
+            return_value=kernel_candidates,
+        )
+        installed_packages = [
             "sys-kernel/linux-headers-4.14-r24",
             "sys-devel/flex-2.6.4-r1",
             "sys-kernel/chromeos-kernel-4_4-4.4.223-r2209",
         ]
         self.PatchObject(
-            portage_util, "GetPackageDependencies", return_value=package_result
+            portage_util,
+            "GetPackageDependencies",
+            return_value=installed_packages,
         )
 
         self.PatchObject(
