@@ -1,4 +1,4 @@
-# Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
+# Copyright 2013 The ChromiumOS Authors
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -910,6 +910,7 @@ class ManifestCheckoutTest(cros_test_lib.TempDirTestCase):
         git.RunGit(manifest, ["branch", "-d", "default"])
         assertExcept("It should be checked out to 'default'")
 
+    # TODO(b/245813531): Renable when repo v2.29 is stable.
     @unittest.skip("Skip until staging and prod are on repo v2.29 b/245333797")
     def testGitMatchBranchName(self):
         git_repo = os.path.join(self.tempdir, ".repo", "manifests")
