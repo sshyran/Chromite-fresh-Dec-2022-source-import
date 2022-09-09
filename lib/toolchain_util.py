@@ -454,7 +454,7 @@ class GenerateChromeOrderfile(object):
         "src/out_${BOARD}/Release/chrome"
     )
     INPUT_ORDERFILE_PATH = (
-        "/build/${BOARD}/opt/google/chrome/" "chrome.orderfile.txt"
+        "/build/${BOARD}/opt/google/chrome/chrome.orderfile.txt"
     )
 
     def __init__(

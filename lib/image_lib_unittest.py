@@ -402,7 +402,7 @@ class LsbUtilsTest(cros_test_lib.MockTempDirTestCase):
         )
         image_lib.WriteLsbRelease(self.tempdir, fields)
         expected_content = (
-            "x=1\ny=2\nfoo=bar\nnewkey1=value1\nnewkey2=value2\n" "a=3\nb=4\n"
+            "x=1\ny=2\nfoo=bar\nnewkey1=value1\nnewkey2=value2\na=3\nb=4\n"
         )
         self.assertFileContents(lsb_release_file, expected_content)
         rc_mock.assert_called_once_with(

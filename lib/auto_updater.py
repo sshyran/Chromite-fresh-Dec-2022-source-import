@@ -902,7 +902,7 @@ class ChromiumOSUpdater(BaseUpdater):
             if services_status != "system-services start/running\n":
                 event = "Chrome failed to reach login screen"
             else:
-                event = "update-engine failed to call " "chromeos-setgoodkernel"
+                event = "update-engine failed to call chromeos-setgoodkernel"
             raise RootfsUpdateError(
                 "After update and reboot, %s "
                 "within %d seconds" % (event, self.KERNEL_UPDATE_TIMEOUT)

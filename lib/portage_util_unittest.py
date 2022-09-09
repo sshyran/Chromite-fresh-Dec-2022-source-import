@@ -619,7 +619,7 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
         "EAPI=5\n",
         "CROS_WORKON_COMMIT=old_id\n",
         "CROS_WORKON_PROJECT=test_package\n",
-        "CROS_WORKON_SUBDIRS_TO_REV=( foo )\n" 'KEYWORDS="~x86 ~arm ~amd64"\n',
+        'CROS_WORKON_SUBDIRS_TO_REV=( foo )\nKEYWORDS="~x86 ~arm ~amd64"\n',
         "src_unpack(){}\n",
     ]
     _revved_ebuild = (

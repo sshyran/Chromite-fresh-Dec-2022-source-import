@@ -23,10 +23,10 @@ class RepoSyncManifestTest(cros_test_lib.RunCommandTempDirTestCase):
     EXT_MANIFEST_URL = "https://chromium.googlesource.com/chromiumos/manifest"
 
     MV_INT_URL = (
-        "https://chrome-internal.googlesource.com/chromeos/" "manifest-versions"
+        "https://chrome-internal.googlesource.com/chromeos/manifest-versions"
     )
     MV_EXT_URL = (
-        "https://chromium.googlesource.com/chromiumos/" "manifest-versions"
+        "https://chromium.googlesource.com/chromiumos/manifest-versions"
     )
 
     def setUp(self):

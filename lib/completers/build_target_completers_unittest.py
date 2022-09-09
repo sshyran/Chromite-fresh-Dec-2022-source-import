@@ -22,7 +22,8 @@ def test_build_target(monkeypatch):
             "/overlays/overlay-overlay2",
             "/overlays/overlay-variant-overlay3",
             "/overlays/overlay-overlay2-private",
-            "/overlays/overlay-test" "/overlays/project-testproject",
+            "/overlays/overlay-test",
+            "/overlays/project-testproject",
         ]
 
     monkeypatch.setattr(portage_util, "FindOverlays", mock_find_overlays)

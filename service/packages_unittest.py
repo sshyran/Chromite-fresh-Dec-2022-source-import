@@ -300,7 +300,7 @@ class PatchEbuildVarsTest(cros_test_lib.MockTestCase):
     def test_patch_ebuild_vars_partial_match(self):
         """patch_ebuild_vars ignores ^{prefix}var=value$."""
         ebuild_contents = (
-            "This and the line below do not change.\n" 'NEW_AFDO="{var_value}"'
+            'This and the line below do not change.\nNEW_AFDO="{var_value}"'
         )
         # Ebuild contains old_var_value.
         self.mock_input.return_value = io.StringIO(

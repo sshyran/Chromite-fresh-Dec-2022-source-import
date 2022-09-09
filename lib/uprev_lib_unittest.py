@@ -450,7 +450,7 @@ def test_no_chrome_uprev_same_version(overlay_stack, caplog):
     assert result.outcome is uprev_lib.Outcome.SAME_VERSION_EXISTS
 
     ebuild_redundant_warning = (
-        "Previous ebuild with same version found and " "ebuild is redundant."
+        "Previous ebuild with same version found and ebuild is redundant."
     )
     assert ebuild_redundant_warning in caplog.text
 

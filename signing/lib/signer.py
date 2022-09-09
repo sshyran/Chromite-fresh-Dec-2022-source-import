@@ -46,7 +46,7 @@ class SignerInstructionConfig(object):
     """
 
     DEFAULT_TEMPLATE = (
-        "chromeos_@VERSION@_@BOARD@_@TYPE@_@CHANNEL@-channel_" "@KEYSET@.bin"
+        "chromeos_@VERSION@_@BOARD@_@TYPE@_@CHANNEL@-channel_@KEYSET@.bin"
     )
 
     def __init__(
