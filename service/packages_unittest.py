@@ -1970,6 +1970,125 @@ class UprevDrivefsTest(cros_test_lib.MockTestCase):
         self.assertTrue(output.uprevved)
 
 
+class UprevKernelAfdo(cros_test_lib.RunCommandTempDirTestCase):
+    """Tests for uprev_kernel_afdo."""
+
+    def setUp(self):
+        # patch_ebuild_vars is tested separately.
+        self.mock_patch = self.PatchObject(packages, "patch_ebuild_vars")
+        self.metadata_dir = os.path.join(
+            constants.SOURCE_ROOT,
+            "src",
+            "third_party",
+            "toolchain-utils",
+            "afdo_metadata",
+        )
+
+    def test_uprev_kernel_afdo_version(self):
+        """Test kernel afdo version uprev."""
+        json_files = {
+            "kernel_afdo.json": (
+                "{\n"
+                '  "chromeos-kernel-5_4": {\n'
+                '    "name": "R106-12345.0-0123456789"\n'
+                "  }\n"
+                "}"
+            ),
+            "kernel_arm_afdo.json": (
+                "{\n"
+                '  "chromeos-kernel-5_15": {\n'
+                '    "name": "R107-67890.0-0123456789"\n'
+                "  }\n"
+                "}"
+            ),
+        }
+        for f, contents in json_files.items():
+            self.WriteTempFile(os.path.join(self.metadata_dir, f), contents)
+
+        returned_output = packages.uprev_kernel_afdo()
+
+        package_root = (
+            "/mnt/host/source/src/third_party/chromiumos-overlay/sys-kernel"
+        )
+        expect_result = [
+            uprev_lib.UprevVersionedPackageModifications(
+                new_version="R106-12345.0-0123456789",
+                files=[
+                    os.path.join(
+                        package_root,
+                        "chromeos-kernel-5_4",
+                        "chromeos-kernel-5_4-9999.ebuild",
+                    ),
+                    os.path.join(
+                        package_root, "chromeos-kernel-5_4", "Manifest"
+                    ),
+                ],
+            ),
+            uprev_lib.UprevVersionedPackageModifications(
+                new_version="R107-67890.0-0123456789",
+                files=[
+                    os.path.join(
+                        package_root,
+                        "chromeos-kernel-5_15",
+                        "chromeos-kernel-5_15-9999.ebuild",
+                    ),
+                    os.path.join(
+                        package_root, "chromeos-kernel-5_15", "Manifest"
+                    ),
+                ],
+            ),
+        ]
+        self.assertTrue(returned_output.uprevved)
+        self.assertEqual(returned_output.modified, expect_result)
+
+    def test_uprev_kernel_afdo_empty_json(self):
+        """Test kernel afdo version unchanged."""
+        json_files = {
+            "kernel_afdo.json": "{}",
+            "kernel_arm_afdo.json": "{}",
+        }
+        for f, contents in json_files.items():
+            self.WriteTempFile(os.path.join(self.metadata_dir, f), contents)
+
+        returned_output = packages.uprev_kernel_afdo()
+        self.assertFalse(returned_output.uprevved)
+
+    def test_uprev_kernel_afdo_empty_file(self):
+        """Test malformed json raises."""
+        json_files = {
+            "kernel_afdo.json": "",
+            "kernel_arm_afdo.json": "",
+        }
+        for f, contents in json_files.items():
+            self.WriteTempFile(os.path.join(self.metadata_dir, f), contents)
+
+        with self.assertRaisesRegex(
+            json.decoder.JSONDecodeError, "Expecting value"
+        ):
+            packages.uprev_kernel_afdo()
+
+    def test_uprev_kernel_afdo_manifest_raises(self):
+        """Test manifest update raises."""
+        json_files = {
+            "kernel_afdo.json": (
+                "{\n"
+                '  "chromeos-kernel-5_4": {\n'
+                '    "name": "R106-12345.0-0123456789"\n'
+                "  }\n"
+                "}"
+            ),
+        }
+        for f, contents in json_files.items():
+            self.WriteTempFile(os.path.join(self.metadata_dir, f), contents)
+        # run() raises exception.
+        self.rc.SetDefaultCmdResult(
+            side_effect=cros_build_lib.RunCommandError("error")
+        )
+
+        with self.assertRaises(uprev_lib.EbuildManifestError):
+            packages.uprev_kernel_afdo()
+
+
 # TODO(chenghaoyang): Shouldn't use uprev_workon_ebuild_to_version.
 class UprevPerfettoTest(cros_test_lib.MockTestCase):
     """Tests for uprev_perfetto."""

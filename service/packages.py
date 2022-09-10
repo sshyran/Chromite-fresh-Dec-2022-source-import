@@ -509,6 +509,13 @@ def uprev_perfetto(_build_targets, refs, chroot):
     return result
 
 
+class AfdoMetadata(NamedTuple):
+    """Data class holding AFDO metadata."""
+
+    var_name: str
+    path: str
+
+
 @uprevs_versioned_package("afdo/kernel-profiles")
 def uprev_kernel_afdo(*_args, **_kwargs):
     """Updates kernel ebuilds with versions from kernel_afdo.json.
@@ -517,48 +524,62 @@ def uprev_kernel_afdo(*_args, **_kwargs):
 
     Raises:
       EbuildManifestError: When ebuild manifest does not complete successfuly.
+      JSONDecodeError: When json is malformed.
     """
-    path = os.path.join(
+    metadata_dir = os.path.join(
         constants.SOURCE_ROOT,
         "src",
         "third_party",
         "toolchain-utils",
         "afdo_metadata",
-        "kernel_afdo.json",
+    )
+    metadata_files = (
+        AfdoMetadata(
+            var_name="AFDO_PROFILE_VERSION",
+            path=os.path.join(metadata_dir, "kernel_afdo.json"),
+        ),
+        AfdoMetadata(
+            var_name="ARM_AFDO_PROFILE_VERSION",
+            path=os.path.join(metadata_dir, "kernel_arm_afdo.json"),
+        ),
     )
 
-    with open(path, "r") as f:
-        versions = json.load(f)
-
     result = uprev_lib.UprevVersionedPackageResult()
-    for kernel_pkg, version_info in versions.items():
-        path = os.path.join(
-            constants.CHROMIUMOS_OVERLAY_DIR, "sys-kernel", kernel_pkg
-        )
-        ebuild_path = os.path.join(
-            constants.SOURCE_ROOT, path, "%s-9999.ebuild" % kernel_pkg
-        )
-        chroot_ebuild_path = os.path.join(
-            constants.CHROOT_SOURCE_ROOT, path, "%s-9999.ebuild" % kernel_pkg
-        )
-        afdo_profile_version = version_info["name"]
-        patch_ebuild_vars(
-            ebuild_path, dict(AFDO_PROFILE_VERSION=afdo_profile_version)
-        )
+    for metadata in metadata_files:
+        with open(metadata.path, "r") as f:
+            versions = json.load(f)
 
-        try:
-            cmd = ["ebuild", chroot_ebuild_path, "manifest", "--force"]
-            cros_build_lib.run(cmd, enter_chroot=True)
-        except cros_build_lib.RunCommandError as e:
-            raise uprev_lib.EbuildManifestError(
-                "Error encountered when regenerating the manifest for ebuild: %s\n%s"
-                % (chroot_ebuild_path, e),
-                e,
+        for kernel_pkg, version_info in versions.items():
+            path = os.path.join(
+                constants.CHROMIUMOS_OVERLAY_DIR, "sys-kernel", kernel_pkg
+            )
+            ebuild_path = os.path.join(
+                constants.SOURCE_ROOT, path, f"{kernel_pkg}-9999.ebuild"
+            )
+            chroot_ebuild_path = os.path.join(
+                constants.CHROOT_SOURCE_ROOT, path, f"{kernel_pkg}-9999.ebuild"
+            )
+            afdo_profile_version = version_info["name"]
+            patch_ebuild_vars(
+                ebuild_path, {metadata.var_name: afdo_profile_version}
             )
 
-        manifest_path = os.path.join(constants.SOURCE_ROOT, path, "Manifest")
+            try:
+                cmd = ["ebuild", chroot_ebuild_path, "manifest", "--force"]
+                cros_build_lib.run(cmd, enter_chroot=True)
+            except cros_build_lib.RunCommandError as e:
+                raise uprev_lib.EbuildManifestError(
+                    "Error encountered when regenerating the manifest for "
+                    f"ebuild: {chroot_ebuild_path}\n{e}",
+                    e,
+                )
 
-        result.add_result(afdo_profile_version, [ebuild_path, manifest_path])
+            manifest_path = os.path.join(
+                constants.SOURCE_ROOT, path, "Manifest"
+            )
+            result.add_result(
+                afdo_profile_version, [ebuild_path, manifest_path]
+            )
 
     return result
 
