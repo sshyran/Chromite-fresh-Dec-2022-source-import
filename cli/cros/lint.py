@@ -25,7 +25,6 @@ import sys
 import tokenize
 
 import astroid
-from chromite.third_party.pylint import format_checkers
 
 # pylint: enable=unused-import
 import pylint.checkers
@@ -1004,13 +1003,3 @@ def register(linter):
             continue
         cls = getattr(this_module, member)
         linter.register_checker(cls(linter))
-
-    cfg = _PylintrcConfig(
-        linter.config_file,
-        "format",
-        (
-            ("indent-string", {"default": "    ", "type": "string"}),
-            ("indent-after-paren", {"default": 4, "type": "int"}),
-        ),
-    )
-    format_checkers.register(linter, cfg)

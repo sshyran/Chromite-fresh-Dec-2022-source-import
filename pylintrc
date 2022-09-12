@@ -133,8 +133,6 @@ enable=
 # ungrouped-imports: We let isort handle this.
 # wrong-import-order: We let isort handle this.
 disable=
-    bad-continuation,
-    bad-whitespace,
     broad-except,
     chained-comparison,
     consider-iterating-dictionary,
