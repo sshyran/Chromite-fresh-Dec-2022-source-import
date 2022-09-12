@@ -165,6 +165,7 @@ class BuildResult(object):
         self.images = {}
         self.return_code = None
         self._failed_packages = []
+        self.output_dir = None
 
     @property
     def failed_packages(self) -> List[package_info.PackageInfo]:
@@ -282,6 +283,7 @@ def Build(
     except FileExistsError:
         build_result.return_code = errno.EEXIST
         return build_result
+    build_result.output_dir = output_dir
 
     extra_env_local = image_lib.GetBuildImageEnvvars(
         image_names, board, version_info, build_dir, output_dir, extra_env

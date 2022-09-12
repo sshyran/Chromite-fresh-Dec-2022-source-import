@@ -8,9 +8,11 @@ The image related API endpoints should generally be found here.
 """
 
 import functools
+import json
 import logging
 import os
 from pathlib import Path
+import time
 from typing import List, NamedTuple, Set, TYPE_CHECKING, Union
 
 from chromite.api import controller
@@ -18,13 +20,11 @@ from chromite.api import faux
 from chromite.api import validate
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromiumos import common_pb2
-from chromite.api.metrics import deserialize_metrics_log
 from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
-from chromite.lib import metrics_lib
 from chromite.lib import sysroot_lib
 from chromite.scripts import pushimage
 from chromite.service import image
@@ -232,7 +232,6 @@ def _CreateResponse(_input_proto, output_proto, _config):
 @faux.empty_completed_unsuccessfully_error
 @validate.require("build_target.name")
 @validate.validation_complete
-@metrics_lib.collect_metrics
 def Create(
     input_proto: "image_pb2.CreateImageRequest",
     output_proto: "image_pb2.CreateImageResult",
@@ -332,7 +331,10 @@ def Create(
                 cros_build_lib.Die("_RECOVERY_ID is the only mod_image_type.")
 
         # Read metric events log and pipe them into output_proto.events.
-        deserialize_metrics_log(output_proto.events, prefix=board)
+        if core_result.build_run and core_result.output_dir:
+            _parse_img_metrics_to_response(
+                output_proto, board, core_result.output_dir
+            )
         return controller.RETURN_CODE_SUCCESS
 
     else:
@@ -346,6 +348,39 @@ def Create(
             controller_util.serialize_package_info(package, current)
 
         return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
+
+
+def _parse_img_metrics_to_response(
+    output: "image_pb2.CreateImageResult", board: str, build_path: Path
+):
+    """Manually translate the package sizes file to the metrics events.
+
+    This is a temporary hack to manually translate the package sizes file to
+    the metrics output because the metrics library does not reliably transmit
+    the data. This can be removed once we switch over to the new metrics
+    pipeline.
+    """
+    filename = build_path / f"{constants.BASE_IMAGE_BIN}-package-sizes.json"
+    if not filename.exists():
+        logging.error("Package sizes file does not exist.")
+        return
+
+    size_data = json.loads(filename.read_text(encoding="utf-8"))
+
+    ts = int(round(time.time() * 1000))
+
+    # Total size event.
+    event = output.events.add()
+    event.gauge = size_data["total_size"]
+    event.timestamp_milliseconds = ts
+    event.name = f"{board}.total_size.base.rootfs"
+
+    # Package sizes.
+    for pkg, size in size_data["package_sizes"].items():
+        event = output.events.add()
+        event.gauge = size
+        event.timestamp_milliseconds = ts
+        event.name = f"{board}.package_size.base.rootfs.{pkg}"
 
 
 def _ParseImagesToCreate(to_build: List[int]) -> ImageTypes:
