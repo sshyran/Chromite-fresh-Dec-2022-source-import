@@ -669,6 +669,7 @@ def run(
     if capture_output:
         if stdout is not None or stderr is not None:
             # TODO(vapier): Switch from warning to error.
+            assert "PYTEST_CURRENT_TEST" not in os.environ
             warnings.warn(
                 "run: capture_output may not be used with stdout/stderr"
             )
