@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z@go.chromium.org/chromiumos/infra/proto/go/chromite/observability',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\"chromite/observability/sizes.proto\x12\x16\x63hromite.observability\x1a\x17\x63hromiumos/common.proto\x1a#chromite/observability/shared.proto\"\xdc\x01\n\x1aImageSizeObservabilityData\x12\x41\n\x10\x62uilder_metadata\x18\x01 \x01(\x0b\x32\'.chromite.observability.BuilderMetadata\x12\x44\n\x12\x62uild_version_data\x18\x02 \x01(\x0b\x32(.chromite.observability.BuildVersionData\x12\x35\n\nimage_data\x18\x03 \x03(\x0b\x32!.chromite.observability.ImageData\"\x80\x01\n\tImageData\x12)\n\nimage_type\x18\x01 \x01(\x0e\x32\x15.chromiumos.ImageType\x12H\n\x14image_partition_data\x18\x02 \x03(\x0b\x32*.chromite.observability.ImagePartitionData\"\x7f\n\x12ImagePartitionData\x12\x16\n\x0epartition_name\x18\x01 \x01(\t\x12\x16\n\x0epartition_size\x18\x02 \x01(\x04\x12\x39\n\x08packages\x18\x03 \x03(\x0b\x32\'.chromite.observability.PackageSizeData\"^\n\x0fPackageSizeData\x12=\n\nidentifier\x18\x01 \x01(\x0b\x32).chromite.observability.PackageIdentifier\x12\x0c\n\x04size\x18\x02 \x01(\x04\"\x8f\x01\n\x11PackageIdentifier\x12\x39\n\x0cpackage_name\x18\x01 \x01(\x0b\x32#.chromite.observability.PackageName\x12?\n\x0fpackage_version\x18\x02 \x01(\x0b\x32&.chromite.observability.PackageVersion\"C\n\x0bPackageName\x12\x0c\n\x04\x61tom\x18\x01 \x01(\t\x12\x10\n\x08\x63\x61tegory\x18\x02 \x01(\t\x12\x14\n\x0cpackage_name\x18\x03 \x01(\t\"w\n\x0ePackageVersion\x12\r\n\x05major\x18\x01 \x01(\r\x12\r\n\x05minor\x18\x02 \x01(\r\x12\r\n\x05patch\x18\x03 \x01(\r\x12\x10\n\x08\x65xtended\x18\x04 \x01(\r\x12\x10\n\x08revision\x18\x05 \x01(\r\x12\x14\n\x0c\x66ull_version\x18\x06 \x01(\tBBZ@go.chromium.org/chromiumos/infra/proto/go/chromite/observabilityb\x06proto3'
+  serialized_pb=b'\n\"chromite/observability/sizes.proto\x12\x16\x63hromite.observability\x1a\x17\x63hromiumos/common.proto\x1a#chromite/observability/shared.proto\"\xdc\x01\n\x1aImageSizeObservabilityData\x12\x41\n\x10\x62uilder_metadata\x18\x01 \x01(\x0b\x32\'.chromite.observability.BuilderMetadata\x12\x44\n\x12\x62uild_version_data\x18\x02 \x01(\x0b\x32(.chromite.observability.BuildVersionData\x12\x35\n\nimage_data\x18\x03 \x03(\x0b\x32!.chromite.observability.ImageData\"\x80\x01\n\tImageData\x12)\n\nimage_type\x18\x01 \x01(\x0e\x32\x15.chromiumos.ImageType\x12H\n\x14image_partition_data\x18\x02 \x03(\x0b\x32*.chromite.observability.ImagePartitionData\"\xc7\x01\n\x12ImagePartitionData\x12\x16\n\x0epartition_name\x18\x01 \x01(\t\x12\x39\n\x08packages\x18\x03 \x03(\x0b\x32\'.chromite.observability.PackageSizeData\x12\x1f\n\x17partition_apparent_size\x18\x04 \x01(\x04\x12\'\n\x1fpartition_disk_utilization_size\x18\x05 \x01(\x04J\x04\x08\x02\x10\x03R\x0epartition_size\"\x92\x01\n\x0fPackageSizeData\x12=\n\nidentifier\x18\x01 \x01(\x0b\x32).chromite.observability.PackageIdentifier\x12\x15\n\rapparent_size\x18\x03 \x01(\x04\x12\x1d\n\x15\x64isk_utilization_size\x18\x04 \x01(\x04J\x04\x08\x02\x10\x03R\x04size\"\x8f\x01\n\x11PackageIdentifier\x12\x39\n\x0cpackage_name\x18\x01 \x01(\x0b\x32#.chromite.observability.PackageName\x12?\n\x0fpackage_version\x18\x02 \x01(\x0b\x32&.chromite.observability.PackageVersion\"C\n\x0bPackageName\x12\x0c\n\x04\x61tom\x18\x01 \x01(\t\x12\x10\n\x08\x63\x61tegory\x18\x02 \x01(\t\x12\x14\n\x0cpackage_name\x18\x03 \x01(\t\"w\n\x0ePackageVersion\x12\r\n\x05major\x18\x01 \x01(\r\x12\r\n\x05minor\x18\x02 \x01(\r\x12\r\n\x05patch\x18\x03 \x01(\r\x12\x10\n\x08\x65xtended\x18\x04 \x01(\r\x12\x10\n\x08revision\x18\x05 \x01(\r\x12\x14\n\x0c\x66ull_version\x18\x06 \x01(\tBBZ@go.chromium.org/chromiumos/infra/proto/go/chromite/observabilityb\x06proto3'
   ,
   dependencies=[chromiumos_dot_common__pb2.DESCRIPTOR,chromite_dot_observability_dot_shared__pb2.DESCRIPTOR,])
 
@@ -129,16 +129,23 @@ _IMAGEPARTITIONDATA = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='partition_size', full_name='chromite.observability.ImagePartitionData.partition_size', index=1,
-      number=2, type=4, cpp_type=4, label=1,
+      name='packages', full_name='chromite.observability.ImagePartitionData.packages', index=1,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='partition_apparent_size', full_name='chromite.observability.ImagePartitionData.partition_apparent_size', index=2,
+      number=4, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='packages', full_name='chromite.observability.ImagePartitionData.packages', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      name='partition_disk_utilization_size', full_name='chromite.observability.ImagePartitionData.partition_disk_utilization_size', index=3,
+      number=5, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -154,8 +161,8 @@ _IMAGEPARTITIONDATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=478,
-  serialized_end=605,
+  serialized_start=479,
+  serialized_end=678,
 )
 
 
@@ -175,8 +182,15 @@ _PACKAGESIZEDATA = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='size', full_name='chromite.observability.PackageSizeData.size', index=1,
-      number=2, type=4, cpp_type=4, label=1,
+      name='apparent_size', full_name='chromite.observability.PackageSizeData.apparent_size', index=1,
+      number=3, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='disk_utilization_size', full_name='chromite.observability.PackageSizeData.disk_utilization_size', index=2,
+      number=4, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -193,8 +207,8 @@ _PACKAGESIZEDATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=607,
-  serialized_end=701,
+  serialized_start=681,
+  serialized_end=827,
 )
 
 
@@ -232,8 +246,8 @@ _PACKAGEIDENTIFIER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=704,
-  serialized_end=847,
+  serialized_start=830,
+  serialized_end=973,
 )
 
 
@@ -278,8 +292,8 @@ _PACKAGENAME = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=849,
-  serialized_end=916,
+  serialized_start=975,
+  serialized_end=1042,
 )
 
 
@@ -345,8 +359,8 @@ _PACKAGEVERSION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=918,
-  serialized_end=1037,
+  serialized_start=1044,
+  serialized_end=1163,
 )
 
 _IMAGESIZEOBSERVABILITYDATA.fields_by_name['builder_metadata'].message_type = chromite_dot_observability_dot_shared__pb2._BUILDERMETADATA

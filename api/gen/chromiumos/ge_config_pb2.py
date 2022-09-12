@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumos',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1a\x63hromiumos/ge_config.proto\x12\nchromiumos\"\xb3\x01\n\x05Model\x12\x12\n\nboard_name\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0btest_suites\x18\x03 \x03(\t\x12\x17\n\x0f\x63q_test_enabled\x18\x04 \x01(\x08\x12!\n\x19release_builder_test_pool\x18\x05 \x01(\t\x12\x10\n\x08\x62oard_id\x18\x06 \x01(\x03\x12\x11\n\tis_active\x18\x07 \x01(\x08\x12\x12\n\nhwid_match\x18\x08 \x01(\t\"\xd9\x01\n ReferenceBoardUnifiedBuildConfig\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x1c\n\x14reference_board_name\x18\x02 \x01(\t\x12&\n\x04\x61rch\x18\x03 \x01(\x0e\x32\x18.chromiumos.Architecture\x12(\n\x07\x62uilder\x18\x04 \x01(\x0e\x32\x17.chromiumos.BuilderType\x12\x14\n\x0c\x65xperimental\x18\x05 \x01(\x08\x12!\n\x06models\x18\x06 \x03(\x0b\x32\x11.chromiumos.Model\"\x9b\x01\n\x06\x43onfig\x12(\n\x07\x62uilder\x18\x01 \x01(\x0e\x32\x17.chromiumos.BuilderType\x12\x14\n\x0c\x65xperimental\x18\x02 \x01(\x08\x12\x14\n\x0cleader_board\x18\x03 \x01(\x08\x12\x13\n\x0b\x62oard_group\x18\x04 \x01(\t\x12&\n\x04\x61rch\x18\x05 \x01(\x0e\x32\x18.chromiumos.Architecture\"?\n\nBuildBoard\x12\x0c\n\x04name\x18\x01 \x01(\t\x12#\n\x07\x63onfigs\x18\x02 \x03(\x0b\x32\x12.chromiumos.Config\"\xba\x01\n\x08GEConfig\x12\x18\n\x10metadata_version\x18\x01 \x01(\t\x12&\n\x06\x62oards\x18\x02 \x03(\x0b\x32\x16.chromiumos.BuildBoard\x12\x16\n\x0erelease_branch\x18\x03 \x01(\x08\x12T\n\x1ereference_board_unified_builds\x18\x04 \x03(\x0b\x32,.chromiumos.ReferenceBoardUnifiedBuildConfig*4\n\x0b\x42uilderType\x12\x18\n\x14UNKNOWN_BUILDER_TYPE\x10\x00\x12\x0b\n\x07RELEASE\x10\x01*?\n\x0c\x41rchitecture\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x10\n\x0cX86_INTERNAL\x10\x01\x12\x10\n\x0c\x41RM_INTERNAL\x10\x02\x42Y\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumosb\x06proto3'
+  serialized_pb=b'\n\x1a\x63hromiumos/ge_config.proto\x12\nchromiumos\"\xb3\x01\n\x05Model\x12\x12\n\nboard_name\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0btest_suites\x18\x03 \x03(\t\x12\x17\n\x0f\x63q_test_enabled\x18\x04 \x01(\x08\x12!\n\x19release_builder_test_pool\x18\x05 \x01(\t\x12\x10\n\x08\x62oard_id\x18\x06 \x01(\x03\x12\x11\n\tis_active\x18\x07 \x01(\x08\x12\x12\n\nhwid_match\x18\x08 \x01(\t\"\xf9\x01\n ReferenceBoardUnifiedBuildConfig\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x1c\n\x14reference_board_name\x18\x02 \x01(\t\x12&\n\x04\x61rch\x18\x03 \x01(\x0e\x32\x18.chromiumos.Architecture\x12(\n\x07\x62uilder\x18\x04 \x01(\x0e\x32\x17.chromiumos.BuilderType\x12\x14\n\x0c\x65xperimental\x18\x05 \x01(\x08\x12!\n\x06models\x18\x06 \x03(\x0b\x32\x11.chromiumos.Model\x12\x1e\n\x16rubik_target_milestone\x18\x07 \x01(\x05\"\x9b\x01\n\x06\x43onfig\x12(\n\x07\x62uilder\x18\x01 \x01(\x0e\x32\x17.chromiumos.BuilderType\x12\x14\n\x0c\x65xperimental\x18\x02 \x01(\x08\x12\x14\n\x0cleader_board\x18\x03 \x01(\x08\x12\x13\n\x0b\x62oard_group\x18\x04 \x01(\t\x12&\n\x04\x61rch\x18\x05 \x01(\x0e\x32\x18.chromiumos.Architecture\"_\n\nBuildBoard\x12\x0c\n\x04name\x18\x01 \x01(\t\x12#\n\x07\x63onfigs\x18\x02 \x03(\x0b\x32\x12.chromiumos.Config\x12\x1e\n\x16rubik_target_milestone\x18\x03 \x01(\x05\"\xba\x01\n\x08GEConfig\x12\x18\n\x10metadata_version\x18\x01 \x01(\t\x12&\n\x06\x62oards\x18\x02 \x03(\x0b\x32\x16.chromiumos.BuildBoard\x12\x16\n\x0erelease_branch\x18\x03 \x01(\x08\x12T\n\x1ereference_board_unified_builds\x18\x04 \x03(\x0b\x32,.chromiumos.ReferenceBoardUnifiedBuildConfig*4\n\x0b\x42uilderType\x12\x18\n\x14UNKNOWN_BUILDER_TYPE\x10\x00\x12\x0b\n\x07RELEASE\x10\x01*?\n\x0c\x41rchitecture\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x10\n\x0cX86_INTERNAL\x10\x01\x12\x10\n\x0c\x41RM_INTERNAL\x10\x02\x42Y\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumosb\x06proto3'
 )
 
 _BUILDERTYPE = _descriptor.EnumDescriptor(
@@ -43,8 +43,8 @@ _BUILDERTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=856,
-  serialized_end=908,
+  serialized_start=920,
+  serialized_end=972,
 )
 _sym_db.RegisterEnumDescriptor(_BUILDERTYPE)
 
@@ -74,8 +74,8 @@ _ARCHITECTURE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=910,
-  serialized_end=973,
+  serialized_start=974,
+  serialized_end=1037,
 )
 _sym_db.RegisterEnumDescriptor(_ARCHITECTURE)
 
@@ -219,6 +219,13 @@ _REFERENCEBOARDUNIFIEDBUILDCONFIG = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='rubik_target_milestone', full_name='chromiumos.ReferenceBoardUnifiedBuildConfig.rubik_target_milestone', index=6,
+      number=7, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -232,7 +239,7 @@ _REFERENCEBOARDUNIFIEDBUILDCONFIG = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=225,
-  serialized_end=442,
+  serialized_end=474,
 )
 
 
@@ -291,8 +298,8 @@ _CONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=445,
-  serialized_end=600,
+  serialized_start=477,
+  serialized_end=632,
 )
 
 
@@ -318,6 +325,13 @@ _BUILDBOARD = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='rubik_target_milestone', full_name='chromiumos.BuildBoard.rubik_target_milestone', index=2,
+      number=3, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -330,8 +344,8 @@ _BUILDBOARD = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=602,
-  serialized_end=665,
+  serialized_start=634,
+  serialized_end=729,
 )
 
 
@@ -383,8 +397,8 @@ _GECONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=668,
-  serialized_end=854,
+  serialized_start=732,
+  serialized_end=918,
 )
 
 _REFERENCEBOARDUNIFIEDBUILDCONFIG.fields_by_name['arch'].enum_type = _ARCHITECTURE

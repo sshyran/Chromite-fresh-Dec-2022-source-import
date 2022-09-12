@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumos',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1d\x63hromiumos/chromiumdash.proto\x12\nchromiumos\x1a\x1fgoogle/protobuf/timestamp.proto\"\x87\x07\n\tMilestone\x12\x32\n\x0e\x66inal_beta_cut\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12.\n\nfinal_beta\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x32\n\x0e\x66\x65\x61ture_freeze\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x31\n\rearliest_beta\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x38\n\x14stable_refresh_first\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12/\n\x0blatest_beta\x18\x06 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x31\n\x06owners\x18\x07 \x03(\x0b\x32!.chromiumos.Milestone.OwnersEntry\x12.\n\nstable_cut\x18\x08 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x39\n\x15stable_refresh_second\x18\t \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0e\n\x06mstone\x18\n \x01(\x05\x12\x34\n\x10late_stable_date\x18\x0b \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12/\n\x0bstable_date\x18\x0c \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12/\n\x05ldaps\x18\r \x03(\x0b\x32 .chromiumos.Milestone.LdapsEntry\x12\x35\n\x11\x65\x61rliest_beta_ios\x18\x0e \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x30\n\x0c\x62ranch_point\x18\x0f \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x38\n\x14stable_refresh_third\x18\x10 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x1a-\n\x0bOwnersEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a,\n\nLdapsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"H\n\x1e\x46\x65tchMilestoneScheduleResponse\x12&\n\x07mstones\x18\x01 \x03(\x0b\x32\x15.chromiumos.MilestoneBY\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumosb\x06proto3'
+  serialized_pb=b'\n\x1d\x63hromiumos/chromiumdash.proto\x12\nchromiumos\x1a\x1fgoogle/protobuf/timestamp.proto\"\x9e\x08\n\tMilestone\x12\x32\n\x0e\x66inal_beta_cut\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12.\n\nfinal_beta\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x32\n\x0e\x66\x65\x61ture_freeze\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x31\n\rearliest_beta\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x38\n\x14stable_refresh_first\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12/\n\x0blatest_beta\x18\x06 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x31\n\x06owners\x18\x07 \x03(\x0b\x32!.chromiumos.Milestone.OwnersEntry\x12.\n\nstable_cut\x18\x08 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x39\n\x15stable_refresh_second\x18\t \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0e\n\x06mstone\x18\n \x01(\x05\x12\x34\n\x10late_stable_date\x18\x0b \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12/\n\x0bstable_date\x18\x0c \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12/\n\x05ldaps\x18\r \x03(\x0b\x32 .chromiumos.Milestone.LdapsEntry\x12\x35\n\x11\x65\x61rliest_beta_ios\x18\x0e \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x30\n\x0c\x62ranch_point\x18\x0f \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x38\n\x14stable_refresh_third\x18\x10 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12,\n\x08ltc_date\x18\x11 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12,\n\x08ltr_date\x18\x12 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x39\n\x15ltr_last_refresh_date\x18\x13 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x1a-\n\x0bOwnersEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a,\n\nLdapsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"H\n\x1e\x46\x65tchMilestoneScheduleResponse\x12&\n\x07mstones\x18\x01 \x03(\x0b\x32\x15.chromiumos.MilestoneBY\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumosb\x06proto3'
   ,
   dependencies=[google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,])
 
@@ -61,8 +61,8 @@ _MILESTONE_OWNERSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=891,
-  serialized_end=936,
+  serialized_start=1042,
+  serialized_end=1087,
 )
 
 _MILESTONE_LDAPSENTRY = _descriptor.Descriptor(
@@ -99,8 +99,8 @@ _MILESTONE_LDAPSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=938,
-  serialized_end=982,
+  serialized_start=1089,
+  serialized_end=1133,
 )
 
 _MILESTONE = _descriptor.Descriptor(
@@ -223,6 +223,27 @@ _MILESTONE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='ltc_date', full_name='chromiumos.Milestone.ltc_date', index=16,
+      number=17, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='ltr_date', full_name='chromiumos.Milestone.ltr_date', index=17,
+      number=18, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='ltr_last_refresh_date', full_name='chromiumos.Milestone.ltr_last_refresh_date', index=18,
+      number=19, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -236,7 +257,7 @@ _MILESTONE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=79,
-  serialized_end=982,
+  serialized_end=1133,
 )
 
 
@@ -267,8 +288,8 @@ _FETCHMILESTONESCHEDULERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=984,
-  serialized_end=1056,
+  serialized_start=1135,
+  serialized_end=1207,
 )
 
 _MILESTONE_OWNERSENTRY.containing_type = _MILESTONE
@@ -288,6 +309,9 @@ _MILESTONE.fields_by_name['ldaps'].message_type = _MILESTONE_LDAPSENTRY
 _MILESTONE.fields_by_name['earliest_beta_ios'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
 _MILESTONE.fields_by_name['branch_point'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
 _MILESTONE.fields_by_name['stable_refresh_third'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
+_MILESTONE.fields_by_name['ltc_date'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
+_MILESTONE.fields_by_name['ltr_date'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
+_MILESTONE.fields_by_name['ltr_last_refresh_date'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
 _FETCHMILESTONESCHEDULERESPONSE.fields_by_name['mstones'].message_type = _MILESTONE
 DESCRIPTOR.message_types_by_name['Milestone'] = _MILESTONE
 DESCRIPTOR.message_types_by_name['FetchMilestoneScheduleResponse'] = _FETCHMILESTONESCHEDULERESPONSE
