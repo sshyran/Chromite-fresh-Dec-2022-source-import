@@ -1033,7 +1033,8 @@ TOPOLOGY_DICT = {
 }
 
 # Percentage of child builders that need to complete to update LKGM
-LKGM_THRESHOLD = 50
+# TODO(b/232822787): Delete when cbuildbot has been removed.
+LKGM_THRESHOLD = 101
 
 # Dev key related names.
 VBOOT_DEVKEYS_DIR = os.path.join("/usr/share/vboot/devkeys")
