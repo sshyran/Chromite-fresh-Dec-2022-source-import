@@ -26,6 +26,8 @@ def Data(data: str) -> str:
     result = cros_build_lib.run(
         [
             Path(constants.CHROMITE_SCRIPTS_DIR) / "isort",
+            "--settings-file",
+            Path(constants.CHROMITE_DIR) / ".isort.cfg",
             "-",
             "-d",
         ],
