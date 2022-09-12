@@ -1,4 +1,4 @@
-# Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
+# Copyright 2012 The ChromiumOS Authors
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 """Test the urilib module."""
@@ -58,8 +58,8 @@ index %s..%s 100644
 --- a/LICENSE
 +++ b/LICENSE
 @@ -1,4 +1,4 @@
--// Copyright (c) 2012 The Chromium Authors. All rights reserved.
-+// Copyright (c) 2013 The Chromium Authors. All rights reserved.
+-// Copyright 2012 The Chromium Authors
++// Copyright 2013 The Chromium Authors
  //
  // Redistribution and use in source and binary forms, with or without
  // modification, are permitted provided that the following conditions are
