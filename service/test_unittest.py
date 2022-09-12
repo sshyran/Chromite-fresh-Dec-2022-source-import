@@ -132,6 +132,19 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
         self.assertEqual(expected_rc, result.return_code)
         self.assertCountEqual(pkgs, result.failed_pkgs)
 
+    def testRustCodeCoverage(self):
+        """Test adding use flags for rust code coverage when requested."""
+        self.PatchObject(os, "environ", new={})
+        result = test.BuildTargetUnitTest(
+            self.build_target, rust_code_coverage=True
+        )
+
+        self.assertCommandContains(
+            ["cros_run_unit_tests", "--board", self.board],
+            extra_env=PartialDict("USE", "rust-coverage"),
+        )
+        self.assertTrue(result.success)
+
     def testCodeCoverage(self):
         """Test adding use flags for coverage when requested."""
         self.PatchObject(os, "environ", new={})
@@ -146,22 +159,28 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
     def testCodeCoverageExistingFlags(self):
         """Test adding use flags for coverage when existing flags."""
         self.PatchObject(os, "environ", new={"USE": "foo bar"})
-        result = test.BuildTargetUnitTest(self.build_target, code_coverage=True)
+        result = test.BuildTargetUnitTest(
+            self.build_target, code_coverage=True, rust_code_coverage=True
+        )
 
         self.assertCommandContains(
             ["cros_run_unit_tests", "--board", self.board],
-            extra_env=PartialDict("USE", "foo bar coverage"),
+            extra_env=PartialDict("USE", "foo bar coverage rust-coverage"),
         )
         self.assertTrue(result.success)
 
     def testCodeCoverageExistingCoverageFlag(self):
         """Test adding use flags for coverage when already has coverage flag."""
-        self.PatchObject(os, "environ", new={"USE": "coverage bar"})
-        result = test.BuildTargetUnitTest(self.build_target, code_coverage=True)
+        self.PatchObject(
+            os, "environ", new={"USE": "coverage bar rust-coverage"}
+        )
+        result = test.BuildTargetUnitTest(
+            self.build_target, code_coverage=True, rust_code_coverage=True
+        )
 
         self.assertCommandContains(
             ["cros_run_unit_tests", "--board", self.board],
-            extra_env=PartialDict("USE", "coverage bar"),
+            extra_env=PartialDict("USE", "coverage bar rust-coverage"),
         )
         self.assertTrue(result.success)
 

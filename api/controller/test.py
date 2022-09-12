@@ -116,6 +116,7 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
     build_target = controller_util.ParseBuildTarget(input_proto.build_target)
 
     code_coverage = input_proto.flags.code_coverage
+    rust_code_coverage = input_proto.flags.rust_code_coverage
 
     sysroot = sysroot_lib.Sysroot(build_target.root)
 
@@ -125,6 +126,7 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
         blocklist=blocklist,
         was_built=was_built,
         code_coverage=code_coverage,
+        rust_code_coverage=rust_code_coverage,
         testable_packages_optional=testable_packages_optional,
         filter_only_cros_workon=filter_only_cros_workon,
     )

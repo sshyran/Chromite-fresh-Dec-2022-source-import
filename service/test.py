@@ -70,6 +70,7 @@ def BuildTargetUnitTest(
     blocklist: Optional[List[str]] = None,
     was_built: bool = True,
     code_coverage: bool = False,
+    rust_code_coverage: bool = False,
     testable_packages_optional: bool = False,
     filter_only_cros_workon: bool = False,
 ) -> BuildTargetUnitTestResult:
@@ -81,6 +82,7 @@ def BuildTargetUnitTest(
       blocklist: Tests to skip.
       was_built: Whether packages were built.
       code_coverage: Whether to produce code coverage data.
+      rust_code_coverage: Whether to produce code coverage data for rust packages.
       testable_packages_optional: Whether to allow no testable packages to be
         found.
       filter_only_cros_workon: Whether to filter out non-cros_workon packages from
@@ -115,12 +117,14 @@ def BuildTargetUnitTest(
         cmd.append("--assume-empty-sysroot")
 
     extra_env = {}
-    if code_coverage:
-        use_flags = os.environ.get("USE", "").split()
-        if "coverage" not in use_flags:
-            use_flags.append("coverage")
-        extra_env["USE"] = " ".join(use_flags)
+    use_flags = os.environ.get("USE", "").split()
+    if code_coverage and "coverage" not in use_flags:
+        use_flags.append("coverage")
 
+    if rust_code_coverage and "rust-coverage" not in use_flags:
+        use_flags.append("rust-coverage")
+
+    extra_env["USE"] = " ".join(use_flags)
     # Set up the failed package status file.
     with osutils.TempDir() as tempdir:
         extra_env[constants.CROS_METRICS_DIR_ENVVAR] = tempdir
