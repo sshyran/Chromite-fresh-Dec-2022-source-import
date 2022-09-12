@@ -34,6 +34,7 @@ _EXT_TOOL_MAP = {
     frozenset({".md"}): (formatters.whitespace.Data,),
     # TODO(build): Add a formatter for this (minijail seccomp policies).
     frozenset({".policy"}): (formatters.whitespace.Data,),
+    frozenset({".proto"}): (formatters.proto.Data,),
     frozenset({".py"}): (formatters.python.Data,),
     frozenset({".rs"}): (formatters.rust.Data,),
     # TODO(build): Add a formatter for this (SELinux policies).
