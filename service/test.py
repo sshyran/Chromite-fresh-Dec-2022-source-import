@@ -510,8 +510,9 @@ def BundleCodeCoverageLlvmJson(
 
         # Gather all LLVM compiler generated coverage data into single coverage.json
         coverage_dir = os.path.join(base_path, "build/coverage_data")
-        coverage_dir = path_util.FromChrootPath(coverage_dir)
-
+        coverage_dir = path_util.FromChrootPath(
+            coverage_dir, chroot_path=chroot.path
+        )
         llvm_generated_cov_json = GatherCodeCoverageLlvmJsonFile(coverage_dir)
 
         llvm_generated_cov_json = (
@@ -523,7 +524,9 @@ def BundleCodeCoverageLlvmJson(
         search_directory = os.path.join(
             base_path, "var/lib/chromeos/package-artifacts"
         )
-        search_directory = path_util.FromChrootPath(search_directory)
+        search_directory = path_util.FromChrootPath(
+            search_directory, chroot_path=chroot.path
+        )
         path_mapping = code_coverage_util.GatherPathMapping(search_directory)
 
         cleaned_cov_json = code_coverage_util.CleanLlvmFileNames(
