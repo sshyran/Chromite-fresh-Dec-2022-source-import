@@ -46,6 +46,7 @@ _FACTORY_ID = common_pb2.IMAGE_TYPE_FACTORY
 _FIRMWARE_ID = common_pb2.IMAGE_TYPE_FIRMWARE
 _BASE_GUEST_VM_ID = common_pb2.IMAGE_TYPE_BASE_GUEST_VM
 _TEST_GUEST_VM_ID = common_pb2.IMAGE_TYPE_TEST_GUEST_VM
+_NETBOOT_ID = common_pb2.IMAGE_TYPE_NETBOOT
 
 # Dict to allow easily translating names to enum ids and vice versa.
 _IMAGE_MAPPING = {
@@ -61,6 +62,8 @@ _IMAGE_MAPPING = {
     constants.IMAGE_TYPE_FACTORY_SHIM: _FACTORY_ID,
     _FIRMWARE_ID: constants.IMAGE_TYPE_FIRMWARE,
     constants.IMAGE_TYPE_FIRMWARE: _FIRMWARE_ID,
+    _NETBOOT_ID: constants.IMAGE_TYPE_NETBOOT,
+    constants.IMAGE_TYPE_NETBOOT: _NETBOOT_ID,
 }
 
 # Dict to describe the prerequisite built images for each VM image type.
@@ -74,6 +77,7 @@ _VM_IMAGE_MAPPING = {
 # Dict to describe the prerequisite built images for each mod image type.
 _MOD_IMAGE_MAPPING = {
     _RECOVERY_ID: _IMAGE_MAPPING[_BASE_ID],
+    _NETBOOT_ID: _IMAGE_MAPPING[_RECOVERY_ID],
 }
 
 # Supported image types for PushImage.
@@ -327,8 +331,15 @@ def Create(
                     )
                 else:
                     cros_build_lib.Die("Failed to create recovery image.")
+            elif mod_type == _NETBOOT_ID:
+                factory_shim_dir = os.path.basename(
+                    factory_result.images[constants.IMAGE_TYPE_FACTORY_SHIM]
+                )
+                image.create_netboot_kernel(board, factory_shim_dir)
             else:
-                cros_build_lib.Die("_RECOVERY_ID is the only mod_image_type.")
+                cros_build_lib.Die(
+                    "_RECOVERY_ID and _NETBOOT_ID are the only mod_image_type."
+                )
 
         # Read metric events log and pipe them into output_proto.events.
         if core_result.build_run and core_result.output_dir:

@@ -198,6 +198,31 @@ class CreateTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
         )
         self.assertFalse(self.response.failed_packages)
 
+    def testFactory(self):
+        """Test it's properly building factory."""
+        request = self._GetRequest(
+            board="board",
+            types=[
+                common_pb2.IMAGE_TYPE_FACTORY,
+                common_pb2.IMAGE_TYPE_NETBOOT,
+            ],
+        )
+        factory_path = self.tempdir / "factory-shim"
+        factory_path.touch()
+        result = image_service.BuildResult([constants.IMAGE_TYPE_FACTORY_SHIM])
+        result.add_image(constants.IMAGE_TYPE_FACTORY_SHIM, factory_path)
+        result.return_code = 0
+        build_patch = self.PatchObject(
+            image_service, "Build", return_value=result
+        )
+        netboot_patch = self.PatchObject(image_service, "create_netboot_kernel")
+
+        image_controller.Create(request, self.response, self.api_config)
+        build_patch.assert_any_call(
+            "board", [constants.IMAGE_TYPE_FACTORY_SHIM], config=mock.ANY
+        )
+        netboot_patch.assert_any_call("board", factory_path.name)
+
 
 class RecoveryImageTest(
     cros_test_lib.RunCommandTempDirTestCase, api_config.ApiConfigMixin

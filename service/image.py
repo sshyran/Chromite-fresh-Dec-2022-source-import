@@ -813,3 +813,17 @@ def create_stripped_packages_tar(
         inputs=tarball_paths,
     )
     return tarball_output
+
+
+def create_netboot_kernel(
+    board: str,
+    output_dir: str,
+):
+    """Build netboot kernel artifacts in output_dir.
+
+    Args:
+      board: The board being built.
+      output_dir: Directory to place the artifact
+    """
+    cmd = ["./make_netboot.sh", f"--board={board}", f"--image_dir={output_dir}"]
+    cros_build_lib.run(cmd, enter_chroot=True)

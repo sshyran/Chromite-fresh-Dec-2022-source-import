@@ -714,3 +714,24 @@ class TestCreateStrippedPackagesTar(cros_test_lib.MockTempDirTestCase):
             chroot=self.chroot,
             inputs=stripped_files_list,
         )
+
+
+class TestCreateNetbootKernel(cros_test_lib.MockTempDirTestCase):
+    """Unittests for create_netboot_kernel."""
+
+    def test(self):
+        """Test netboot kernel creation."""
+        board = "atlas"
+        image_dir = "/path/to/factory_install/"
+
+        rc = self.StartPatcher(cros_test_lib.RunCommandMock())
+        rc.SetDefaultCmdResult()
+
+        image.create_netboot_kernel(board, image_dir)
+        rc.assertCommandContains(
+            [
+                "./make_netboot.sh",
+                f"--board={board}",
+                f"--image_dir={image_dir}",
+            ]
+        )
