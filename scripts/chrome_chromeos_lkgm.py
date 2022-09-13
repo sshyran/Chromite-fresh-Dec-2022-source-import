@@ -12,7 +12,6 @@ it to the CQ.
 
 import distutils.version  # pylint: disable=import-error,no-name-in-module
 import logging
-import urllib.parse
 
 from chromite.lib import chromeos_version
 from chromite.lib import commandline
@@ -81,11 +80,7 @@ class ChromeLKGMCommitter(object):
 
     def Run(self):
         self.CloseOldLKGMRolls()
-        already_open_lkgm_cl = self.FindAlreadyOpenLKGMRoll()
-        if already_open_lkgm_cl:
-            self.SubmitToCQ(already_open_lkgm_cl)
-        else:
-            self.UpdateLKGM()
+        self.UpdateLKGM()
 
     @property
     def lkgm_file(self):
@@ -127,65 +122,6 @@ class ChromeLKGMCommitter(object):
                     open_issue, msg="Superceded by LKGM %s" % self._lkgm
                 )
 
-    # TODO(b/232822787): Remove once we no longer do LKGMs on legacy.
-    def FindAlreadyOpenLKGMRoll(self):
-        """Queries Gerrit for a CL that already rolls the LKGM to our version.
-
-        For a given LKGM, both the master-full and master-release builders provide
-        SDKs needed by Chrome-infra. These two builders aren't synchronized, so
-        one can finish hours before the other. To avoid updating the LKGM in Chrome
-        before they're both finished, we take a two-stage approach:
-        1. Whichever builder finishes first uploads the LKGM CL.
-        2. Whichever builder finishes last submits that CL to the CQ.
-
-        This method queries Gerrit to find the CL for step #2.
-
-        Returns:
-          Returns a patch.GerritPatch for the CL if it exists, None otherwise.
-        """
-        query_params = {
-            "project": constants.CHROMIUM_SRC_PROJECT,
-            "branch": self._branch,
-            "file": constants.PATH_TO_CHROME_LKGM,
-            "status": "open",
-            # Use 'owner' rather than 'uploader' or 'author' since those last two
-            # can be overwritten when the gardener resolves a merge-conflict and
-            # uploads a new patchset.
-            "owner": self._user_email,
-            # The value of the LKGM is included in the first line of the commit
-            # message. So including that in our query should only return CLs that
-            # roll to our LKGM.
-            "message": urllib.parse.quote('"' + self._commit_msg_header + '"'),
-        }
-        issues = self._gerrit_helper.Query(**query_params)
-        if len(issues) > 1:
-            # This shouldn't happen?
-            raise LKGMNotValid(
-                "More than one roll CL open for LKGM %s" % self._lkgm
-            )
-        return issues[0] if issues else None
-
-    def SubmitToCQ(self, already_open_lkgm_cl):
-        """Sends the already_open_lkgm_cl to the CQ."""
-        labels = {"Commit-Queue": 2}
-        if self._dryrun:
-            logging.info("Would have applied CQ+2 to %s", already_open_lkgm_cl)
-        else:
-            logging.info("Applying CQ+2 to %s", already_open_lkgm_cl)
-            msg = "Applying CQ+2"
-            if self._buildbucket_id:
-                msg += (
-                    " from build: https://ci.chromium.org/b/%s"
-                    % self._buildbucket_id
-                )
-            self._gerrit_helper.SetReview(
-                already_open_lkgm_cl,
-                labels=labels,
-                reviewers=[constants.CHROME_GARDENER_REVIEW_EMAIL],
-                msg=msg,
-                ready=True,
-            )
-
     def UpdateLKGM(self):
         """Updates the LKGM file with the new version."""
         self._old_lkgm = gob_util.GetFileContents(
@@ -212,10 +148,19 @@ class ChromeLKGMCommitter(object):
             change.gerrit_number, "chromeos/CHROMEOS_LKGM", self._lkgm
         )
 
-        # Apply Bot-Commit here to minimise the gap between uploading the
-        # CL and approving it.
-        labels = {"Bot-Commit": 1}
-        logging.info("Applying Bot-Commit+1")
+        labels = {
+            "Bot-Commit": 1,
+        }
+        if self._dryrun:
+            logging.info(
+                "Would have applied CQ+2 to crrev.com/c/%s",
+                change.gerrit_number,
+            )
+        else:
+            labels["Commit-Queue"] = 2
+        logging.info(
+            "Applying %s to crrev.com/c/%s", labels, change.gerrit_number
+        )
         self._gerrit_helper.SetReview(
             change.gerrit_number, labels=labels, notify="NONE"
         )

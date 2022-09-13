@@ -5,7 +5,6 @@
 """Unit tests for the chrome_chromeos_lkgm program."""
 
 from unittest import mock
-import urllib.parse
 
 from chromite.lib import cros_test_lib
 from chromite.scripts import chrome_chromeos_lkgm
@@ -46,7 +45,9 @@ class ChromeLKGMCommitterTester(
                             123456, "chromeos/CHROMEOS_LKGM", "1001.0.0"
                         )
                         bc.assert_called_once_with(
-                            123456, labels={"Bot-Commit": 1}, notify="NONE"
+                            123456,
+                            labels={"Bot-Commit": 1, "Commit-Queue": 2},
+                            notify="NONE",
                         )
 
     @mock.patch("chromite.lib.gob_util.GetFileContents")
@@ -96,7 +97,9 @@ class ChromeLKGMCommitterTester(
                             123456, "chromeos/CHROMEOS_LKGM", "1003.0.0"
                         )
                         bc.assert_called_once_with(
-                            123456, labels={"Bot-Commit": 1}, notify="NONE"
+                            123456,
+                            labels={"Bot-Commit": 1, "Commit-Queue": 2},
+                            notify="NONE",
                         )
 
     def testCommitMsg(self):
@@ -116,42 +119,4 @@ class ChromeLKGMCommitterTester(
         )
         self.assertIn(
             "CQ_INCLUDE_TRYBOTS=luci.chrome.try:bot2", commit_msg_lines
-        )
-
-    def testFindAlreadyOpenLKGMRoll(self):
-        already_open_issues = [123456]
-        self.committer._commit_msg_header = "A message with spaces"
-        with mock.patch.object(
-            self.committer._gerrit_helper,
-            "Query",
-            return_value=already_open_issues,
-        ) as mock_query:
-            self.assertEqual(
-                self.committer.FindAlreadyOpenLKGMRoll(), already_open_issues[0]
-            )
-            escaped_quotes = urllib.parse.quote('"')
-            message = mock_query.call_args.kwargs["message"]
-            self.assertEqual(message.count(escaped_quotes), 2)
-            self.assertTrue(message.startswith(escaped_quotes))
-            self.assertTrue(message.endswith(escaped_quotes))
-        already_open_issues = [123456, 654321]
-        with mock.patch.object(
-            self.committer._gerrit_helper,
-            "Query",
-            return_value=already_open_issues,
-        ):
-            self.assertRaises(
-                chrome_chromeos_lkgm.LKGMNotValid,
-                self.committer.FindAlreadyOpenLKGMRoll,
-            )
-
-    def testSubmitToCQ(self):
-        self.committer._buildbucket_id = "some-build-id"
-        already_open_issue = 123456
-        with mock.patch.object(
-            self.committer._gerrit_helper, "SetReview"
-        ) as mock_review:
-            self.committer.SubmitToCQ(already_open_issue)
-        self.assertIn(
-            self.committer._buildbucket_id, mock_review.call_args[1]["msg"]
         )
