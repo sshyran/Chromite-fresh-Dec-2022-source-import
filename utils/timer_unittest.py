@@ -6,6 +6,7 @@
 
 import re
 import time
+from unittest import mock
 
 import pytest
 
@@ -68,3 +69,20 @@ def test_timer_decorator():
     timed_fn()
 
     assert output_fn_called
+
+
+def test_timer_decorator_with_exception_calls_output():
+    """Test the timed decorator with exception handling."""
+    name = "test_name"
+    output_fn = mock.MagicMock()
+
+    # The decorated function.
+    @timer.timer(name, output_fn)
+    def timed_fn():
+        raise Exception('test exception')
+
+    # Run the function to trigger the test.
+    with pytest.raises(Exception):
+        timed_fn()
+
+    output_fn.assert_called_once()
