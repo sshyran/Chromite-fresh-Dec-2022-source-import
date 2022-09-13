@@ -314,11 +314,13 @@ class SwarmingOutputProcessor:
     repeats: int
     complete: bool
     failed_jobs: bool
+    ignore_failed: bool
 
     def __init__(
         self,
         complete: bool,
         failed_jobs: bool,
+        ignore_failed: bool,
         repeats: int,
         baseline: List[TestResult],
         tested: List[TestResult],
@@ -328,9 +330,12 @@ class SwarmingOutputProcessor:
         self.repeats = repeats
         self.complete = complete
         self.failed_jobs = failed_jobs
+        self.ignore_failed = ignore_failed
         self.shared_steps = []
 
-        if not self.complete or self.failed_jobs:
+        if not self.complete:
+            return
+        if self.failed_jobs and not self.ignore_failed:
             return
 
         # Process steps of the builds.
@@ -634,7 +639,9 @@ class Test:
         except cros_build_lib.RunCommandError as e:
             cros_build_lib.Die(e)
 
-    def GetSwarmingResults(self) -> SwarmingOutputProcessor:
+    def GetSwarmingResults(
+        self, ignore_failed: bool
+    ) -> SwarmingOutputProcessor:
         """Collects and swarming results(build.proto.json) for each build."""
         complete = True
         failed_jobs = False
@@ -678,7 +685,12 @@ class Test:
                 )
 
         return SwarmingOutputProcessor(
-            complete, failed_jobs, self.repeats, baseline_builds, tested_builds
+            complete,
+            failed_jobs,
+            ignore_failed,
+            self.repeats,
+            baseline_builds,
+            tested_builds,
         )
 
     def _SwarmingProcessOne(
@@ -803,6 +815,12 @@ def SetupProcessParser(parser) -> None:
       """,
     )
     parser.add_argument(
+        "--ignore-failed",
+        default=False,
+        action="store_true",
+        help="Ignore failed builds when processing results. Default: %(default)s.",
+    )
+    parser.add_argument(
         nargs="?",
         dest="test_name",
         default="",
@@ -916,9 +934,12 @@ def process_subcommand(options: commandline.ArgumentNamespace) -> None:
                 [pformat.json(baseline_job) for baseline_job in t.baseline_jobs]
             ),
         )
-        swarming_results = t.GetSwarmingResults()
-        if swarming_results.failed_jobs:
-            cros_build_lib.Die("Some tests have failed, skipping processing.")
+        swarming_results = t.GetSwarmingResults(options.ignore_failed)
+        if swarming_results.failed_jobs and not options.ignore_failed:
+            cros_build_lib.Die(
+                "Some tests have failed, skipping processing. "
+                "Use --ignore-failed to process the results anyway."
+            )
         if not swarming_results.complete:
             cros_build_lib.Die("Test is not finished, skipping processing.")
 
