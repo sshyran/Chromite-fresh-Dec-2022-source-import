@@ -807,19 +807,45 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
             self.obj._CleanupArtifactDirectory("non/absolute/path")
         self.assertIn("needs to be an absolute path", str(context.exception))
 
-    def callPrepareVerifiedKernelCwpAfdoFile(self, ebuild_list_of_str):
-        cwp_loc = "gs://path/to/cwp/kernel/5.4"
+    def callPrepareVerifiedKernelCwpAfdoFile(
+        self,
+        ebuild_list_of_str,
+        cwp_old_loc=None,
+        cwp_new_loc=None,
+        cwp_old_ver=None,
+        cwp_new_ver=None,
+    ):
+        """Helper function to set up and verify Prepare() call.
+
+        Args:
+            ebuild_list_of_str: list[str] of ebuild contents.
+                Must contain {changing_cwp_loc} which resolves to
+                "cwp_old_loc" before Prepare() and "cwp_new_loc" after.
+                Must contain {changing_cwp_ver} which resolves to
+                "cwp_old_ver" before Prepare() and "cwp_new_ver" after.
+            cwp_old_loc: AFDO_LOCATION value before Prepare().
+            cwp_new_loc: AFDO_LOCATION value after Prepare().
+            cwp_old_ver: AFDO version before Prepare().
+            cwp_new_ver: AFDO version after Prepare().
+        """
+        if not cwp_old_loc:
+            cwp_old_loc = ""
+        if not cwp_new_loc:
+            cwp_new_loc = "gs://path/to/cwp/kernel/5.4"
+        if not cwp_old_ver:
+            cwp_old_ver = "R99-14469.8-1644229953"
+        if not cwp_new_ver:
+            cwp_new_ver = "R100-14496.0-1644834841"
+
         self.SetUpPrepare(
             "VerifiedKernelCwpAfdoFile",
             {
-                "UnverifiedKernelCwpAfdoFile": [cwp_loc],
-                "VerifiedKernelCwpAfdoFile": [cwp_loc],
+                "UnverifiedKernelCwpAfdoFile": [cwp_new_loc],
+                "VerifiedKernelCwpAfdoFile": [cwp_new_loc],
             },
             mock_patch=False,
         )
-        cwp_old_ver = "R99-14469.8-1644229953"
-        cwp_new_ver = "R100-14496.0-1644834841"
-        kernel_cwp = os.path.join(cwp_loc, cwp_new_ver)
+        kernel_cwp = os.path.join(cwp_new_loc, cwp_new_ver)
         ebuild_info = toolchain_util._EbuildInfo(
             path="/path/to/kernel-9999.ebuild", CPV=mock.MagicMock()
         )
@@ -834,7 +860,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
         # The artifact is missing, build is needed.
         self.gsc_exists.return_value = False
         ebuild_old_str = "".join(ebuild_list_of_str).format(
-            kernel_cwp_loc="", kernel_cwp_ver=cwp_old_ver
+            changing_cwp_loc=cwp_old_loc, changing_cwp_ver=cwp_old_ver
         )
         # We are going to check how the mock_object was called.
         mock_open = self.PatchObject(
@@ -846,7 +872,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
         # Check the expected patched lines.
         for ebuild_line in ebuild_list_of_str:
             resolved_line = ebuild_line.format(
-                kernel_cwp_loc=cwp_loc, kernel_cwp_ver=cwp_new_ver
+                changing_cwp_loc=cwp_new_loc, changing_cwp_ver=cwp_new_ver
             )
             self.assertIn(
                 mock.call().write(resolved_line), mock_open.mock_calls
@@ -856,8 +882,8 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
         """Test PrepareVerifiedKernelCwpAfdoFile and patch old ebuild."""
         ebuild_data = (
             "# some comment\n",
-            'AFDO_LOCATION="{kernel_cwp_loc}"\n',
-            'AFDO_PROFILE_VERSION="{kernel_cwp_ver}"',
+            'AFDO_LOCATION="{changing_cwp_loc}"\n',
+            'AFDO_PROFILE_VERSION="{changing_cwp_ver}"',
         )
         self.callPrepareVerifiedKernelCwpAfdoFile(ebuild_data)
 
@@ -865,10 +891,33 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
         """Test PrepareVerifiedKernelCwpAfdoFile and patch new ebuild."""
         ebuild_data = (
             "# some comment\n",
-            'export AFDO_LOCATION="{kernel_cwp_loc}"\n',
-            'export AFDO_PROFILE_VERSION="{kernel_cwp_ver}"',
+            'export AFDO_LOCATION="{changing_cwp_loc}"\n',
+            'export AFDO_PROFILE_VERSION="{changing_cwp_ver}"',
         )
         self.callPrepareVerifiedKernelCwpAfdoFile(ebuild_data)
+
+    def testPrepareVerifiedKernelCwpAfdoFileArm(self):
+        """Test PrepareVerifiedKernelCwpAfdoFile with the Arm profile."""
+        cwp_old_ver = "R99-14469.8-1644229953"
+        cwp_new_ver = "R100-14496.0-1644834841"
+        # changing_cwp_ver is going to be resolved to cwp_old_ver
+        # before Prepare() and cwp_new_ver after.
+        fixed_version = cwp_old_ver
+        ebuild_data = (
+            "# some comment\n",
+            'AFDO_LOCATION="{changing_cwp_loc}"\n',
+            f'AFDO_PROFILE_VERSION="{fixed_version}"\n',
+            'ARM_AFDO_PROFILE_VERSION="{changing_cwp_ver}"',
+        )
+        # Prepend "arm-" to the kernel version which signifies
+        # the arm architecture of the cwp profile.
+        # TODO(b/246457583): Set up arch in self.arch.
+        self.profile_info = {
+            "kernel_version": "arm-5.14",
+        }
+        self.callPrepareVerifiedKernelCwpAfdoFile(
+            ebuild_data, cwp_old_ver=cwp_old_ver, cwp_new_ver=cwp_new_ver
+        )
 
     def setupPrepareVerifiedReleaseAfdoFileMocks(self):
         self.PatchObject(
@@ -1321,6 +1370,7 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         )
 
         ret = self.obj.Bundle()
+
         profile_name = self.kernel_name + (
             toolchain_util.KERNEL_AFDO_COMPRESSION_SUFFIX
         )
@@ -1353,6 +1403,25 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
             'export AFDO_LOCATION=""\n',
             f'export AFDO_PROFILE_VERSION="{self.kernel_name}"',
         )
+        self.callBundleVerifiedKernelCwpAfdoFile(ebuild_data_list)
+
+    def testBundleVerifiedKernelCwpAfdoFileArm(self):
+        """Test BundleVerifiedKernelCwpAfdoFile with the old ebuild."""
+        unchanged_profile = "R100-14496.0-1644834841"
+        ebuild_data_list = (
+            "# some comment\n",
+            'AFDO_LOCATION=""\n',
+            f'AFDO_PROFILE_VERSION="{unchanged_profile}"',
+            f'ARM_AFDO_PROFILE_VERSION="{self.kernel_name}"',
+        )
+        # Prepend "arm-" to the kernel version which signifies
+        # the arm architecture of the cwp profile.
+        # TODO(b/246457583): Set up arch in self.arch.
+        self.profile_info = {
+            "kernel_version": "arm-5.15",
+        }
+        # Expected kernel ebuild version.
+        self.kernel_version = "5_15"
         self.callBundleVerifiedKernelCwpAfdoFile(ebuild_data_list)
 
     def testBundleVerifiedKernelCwpAfdoFileRaises(self):

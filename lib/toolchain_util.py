@@ -53,9 +53,11 @@ BENCHMARK_AFDO_GS_URL = (
 )
 CWP_AFDO_GS_URL = "gs://chromeos-prebuilt/afdo-job/cwp/chrome/"
 KERNEL_PROFILE_URL = "gs://chromeos-prebuilt/afdo-job/cwp/kernel/"
+KERNEL_ARM_PROFILE_URL = os.path.join(KERNEL_PROFILE_URL, "arm")
 AFDO_GS_URL_VETTED = "gs://chromeos-prebuilt/afdo-job/vetted/"
 KERNEL_AFDO_GS_URL_VETTED = os.path.join(AFDO_GS_URL_VETTED, "kernel")
 RELEASE_AFDO_GS_URL_VETTED = os.path.join(AFDO_GS_URL_VETTED, "release")
+KERNEL_ARM_AFDO_GS_URL_VETTED = os.path.join(KERNEL_AFDO_GS_URL_VETTED, "arm")
 
 # Constants
 AFDO_SUFFIX = ".afdo"
@@ -598,7 +600,7 @@ def _RankValidCWPProfiles(name):
         return None
 
 
-def _GetProfileAge(profile, artifact_type):
+def _GetProfileAge(profile: str, artifact_type: str) -> int:
     """Tell the age of profile_version in days.
 
     Args:
@@ -623,18 +625,21 @@ def _GetProfileAge(profile, artifact_type):
     raise ValueError("Only kernel afdo is supported to check profile age.")
 
 
-def _WarnDetectiveAboutKernelProfileExpiration(kver, profile):
+def _WarnDetectiveAboutKernelProfileExpiration(
+    kver: str, profile_path: str
+) -> None:
     """Send emails to toolchain detective to warn the soon expired profiles.
 
     Args:
       kver: Kernel version.
-      profile: Name of the profile.
+      profile_path: Absolute path to the profile.
     """
-    # FIXME(tcwang): Fix the subject and email format before deployment.
     subject_msg = (
         f"[Test Async builder] Kernel AutoFDO profile too old for kernel {kver}"
     )
-    alert_msg = f"AutoFDO profile too old for kernel {kver}. Name={profile}"
+    alert_msg = (
+        f"AutoFDO profile too old for kernel {kver}. Path={profile_path}"
+    )
     alerts.SendEmailLog(
         subject_msg,
         AFDO_ALERT_RECIPIENTS,
@@ -1720,11 +1725,26 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
             raise PrepareForBuildHandlerError(
                 "Could not find kernel version to verify."
             )
+        # Temporary workaround for the kernel AFDO - extract arch
+        # from the kernel version.
+        # kernel_version for arm will look like "arm-5.15".
+        # TODO(b/246457583): Pass arch via an expanded proto field.
+        if kernel_version.startswith("arm-"):
+            self.arch = "arm"
+            kernel_version = kernel_version.split("-")[-1]
+            profile_var_name = "ARM_AFDO_PROFILE_VERSION"
+            profile_url = KERNEL_ARM_PROFILE_URL
+            verified_profile_url = KERNEL_ARM_AFDO_GS_URL_VETTED
+        else:
+            profile_var_name = "AFDO_PROFILE_VERSION"
+            profile_url = KERNEL_PROFILE_URL
+            verified_profile_url = KERNEL_AFDO_GS_URL_VETTED
+
         cwp_locs = [
             x
             for x in self.input_artifacts.get(
                 "UnverifiedKernelCwpAfdoFile",
-                [os.path.join(KERNEL_PROFILE_URL, kernel_version)],
+                [os.path.join(profile_url, kernel_version)],
             )
         ]
         afdo_path = self._FindLatestAFDOArtifact(
@@ -1734,7 +1754,7 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
         published_path = os.path.join(
             self.input_artifacts.get(
                 "VerifiedKernelCwpAfdoFile",
-                [os.path.join(KERNEL_AFDO_GS_URL_VETTED, kernel_version)],
+                [os.path.join(verified_profile_url, kernel_version)],
             )[0],
             os.path.basename(afdo_path),
         )
@@ -1762,7 +1782,7 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
 
         if age > KERNEL_WARN_STALE_DAYS:
             _WarnDetectiveAboutKernelProfileExpiration(
-                kernel_version, afdo_name
+                kernel_version, afdo_path
             )
 
         # If we don't have an SDK, then we cannot update the manifest.
@@ -1771,7 +1791,7 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
                 self._GetEbuildInfo(
                     "chromeos-kernel-%s" % kernel_version, "sys-kernel"
                 ),
-                {"AFDO_PROFILE_VERSION": afdo_name, "AFDO_LOCATION": afdo_dir},
+                {profile_var_name: afdo_name, "AFDO_LOCATION": afdo_dir},
                 uprev=True,
             )
         return ret
@@ -2211,9 +2231,21 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         kernel_version = self.profile_info.get("kernel_version")
         if not kernel_version:
             raise BundleArtifactsHandlerError("kernel_version not provided.")
+
+        # Temporary workaround for the kernel AFDO - extract arch
+        # from the kernel version.
+        # kernel_version for arm will look like "arm-5.15".
+        # TODO(b/246457583): Pass arch via an expanded proto field.
+        if kernel_version.startswith("arm-"):
+            self.arch = "arm"
+            kernel_version = kernel_version.split("-")[-1]
+            profile_var_name = "ARM_AFDO_PROFILE_VERSION"
+        else:
+            profile_var_name = "AFDO_PROFILE_VERSION"
+
         kernel_version = kernel_version.replace(".", "_")
         profile_name = self._GetArtifactVersionInEbuild(
-            f"chromeos-kernel-{kernel_version}", "AFDO_PROFILE_VERSION"
+            f"chromeos-kernel-{kernel_version}", profile_var_name
         )
         if not profile_name:
             raise BundleArtifactsHandlerError(
