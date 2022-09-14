@@ -4,6 +4,8 @@
 
 """The Package Size Reporting CLI entry point."""
 
+import os
+
 from chromite.lib import commandline
 from chromite.lib import metrics_lib
 from chromite.lib import portage_util
@@ -46,7 +48,6 @@ def generate_package_size_report(
 ):
     """Collect package sizes and generate a report."""
     results = {}
-    total_size = 0
     package_sizes = portage_util.GeneratePackageSizes(
         db, root, installed_packages
     )
@@ -59,7 +60,11 @@ def generate_package_size_report(
             metrics_lib.OP_GAUGE,
             arg=size,
         )
-        total_size += size
+
+    rootfs_stat = os.statvfs(root)
+    block_size = rootfs_stat.f_bsize
+    blocks_used = rootfs_stat.f_blocks - rootfs_stat.f_bfree
+    total_size = block_size * blocks_used
 
     metrics_lib.append_metrics_log(
         timestamp,
