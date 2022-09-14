@@ -19,7 +19,6 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
-from chromite.lib import path_util
 from chromite.lib import portage_util
 from chromite.utils import code_coverage_util
 
@@ -510,9 +509,6 @@ def BundleCodeCoverageLlvmJson(
 
         # Gather all LLVM compiler generated coverage data into single coverage.json
         coverage_dir = os.path.join(base_path, "build/coverage_data")
-        coverage_dir = path_util.FromChrootPath(
-            coverage_dir, chroot_path=chroot.path
-        )
         llvm_generated_cov_json = GatherCodeCoverageLlvmJsonFile(coverage_dir)
 
         llvm_generated_cov_json = (
@@ -523,9 +519,6 @@ def BundleCodeCoverageLlvmJson(
         )
         search_directory = os.path.join(
             base_path, "var/lib/chromeos/package-artifacts"
-        )
-        search_directory = path_util.FromChrootPath(
-            search_directory, chroot_path=chroot.path
         )
         path_mapping = code_coverage_util.GatherPathMapping(search_directory)
 
