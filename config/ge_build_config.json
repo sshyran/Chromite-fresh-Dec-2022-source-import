@@ -159,7 +159,7 @@
           "builder": "RELEASE",
           "experimental": true,
           "leader_board": true,
-          "board_group": "",
+          "board_group": "geralt",
           "arch": "ARM_INTERNAL"
         }
       ],
