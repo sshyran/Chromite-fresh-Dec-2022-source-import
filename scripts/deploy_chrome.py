@@ -631,9 +631,10 @@ class DeployChrome(object):
         ), "Only deploying lacros-chrome needs to modify the config file."
         # Update /etc/chrome_dev.conf to include appropriate flags.
         modified = False
-        result = self.device.run(ENABLE_LACROS_VIA_CONF_COMMAND, shell=True)
-        if result.stdout.strip() == MODIFIED_CONF_FILE:
-            modified = True
+        if self.options.enable_lacros_support:
+            result = self.device.run(ENABLE_LACROS_VIA_CONF_COMMAND, shell=True)
+            if result.stdout.strip() == MODIFIED_CONF_FILE:
+                modified = True
         result = self.device.run(
             _SET_LACROS_PATH_VIA_CONF_COMMAND
             % {
@@ -733,7 +734,7 @@ def _CreateParser():
         type="path",
         default=None,
         help="Deploy Chrome in target directory and bind it "
-        "to the directory specified by this flag."
+        "to the directory specified by this flag. "
         "Any existing mount on this directory will be "
         "umounted first.",
     )
@@ -742,7 +743,7 @@ def _CreateParser():
         action="store_true",
         default=False,
         help="Deploy Chrome to default target directory and bind "
-        "it to the default mount directory."
+        "it to the default mount directory. "
         "Any existing mount on this directory will be "
         "umounted first.",
     )
@@ -761,26 +762,6 @@ def _CreateParser():
         "binaries." % _CHROME_TEST_BIN_DIR,
     )
     parser.add_argument(
-        "--lacros",
-        action="store_true",
-        default=False,
-        help="Deploys lacros-chrome rather than ash-chrome.",
-    )
-    parser.add_argument(
-        "--reset-lacros",
-        action="store_true",
-        default=False,
-        help="Reset Lacros by deleting Lacros user data dir if " "exists.",
-    )
-    parser.add_argument(
-        "--skip-modifying-config-file",
-        action="store_false",
-        dest="modify_config_file",
-        help="By default, deploying lacros-chrome modifies the "
-        "/etc/chrome_dev.conf file, which interferes with "
-        "automated testing, and this argument disables it.",
-    )
-    parser.add_argument(
         "--use-external-config",
         action="store_true",
         help="When identifying the configuration for a board, "
@@ -788,6 +769,38 @@ def _CreateParser():
         "internal and external are available. This only "
         "has an effect when stripping Chrome, i.e. when "
         "--nostrip is not passed in.",
+    )
+
+    group = parser.add_argument_group("Lacros Options")
+    group.add_argument(
+        "--lacros",
+        action="store_true",
+        default=False,
+        help="Deploys lacros-chrome rather than ash-chrome.",
+    )
+    group.add_argument(
+        "--reset-lacros",
+        action="store_true",
+        default=False,
+        help="Reset Lacros by deleting Lacros user data dir if it exists.",
+    )
+    group.add_argument(
+        "--skip-enabling-lacros-support",
+        action="store_false",
+        dest="enable_lacros_support",
+        help="By default, deploying lacros-chrome modifies the "
+        "/etc/chrome_dev.conf file to (1) enable the LacrosSupport feature "
+        "and (2) set the Lacros path, which can interfere with automated "
+        "testing. With this flag, part (1) will be skipped. See the "
+        "--skip-modifying-config-file flag for skipping both parts.",
+    )
+    group.add_argument(
+        "--skip-modifying-config-file",
+        action="store_false",
+        dest="modify_config_file",
+        help="When deploying lacros-chrome, do not modify the "
+        "/etc/chrome_dev.conf file. See also the "
+        "--skip-enabling-lacros-support flag.",
     )
 
     group = parser.add_argument_group("Advanced Options")
