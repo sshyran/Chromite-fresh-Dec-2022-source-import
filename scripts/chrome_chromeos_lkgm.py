@@ -4,10 +4,7 @@
 
 """Update the CHROMEOS_LKGM file in a chromium repository.
 
-This script will first query Gerrit for an already-open CL updating the
-CHROMEOS_LKGM file to the given version. If one exists, it will submit that
-CL to the CQ. Else it will upload a new CL and quit _without_ submitting
-it to the CQ.
+This script will upload an LKGM CL and potentially submit it to the CQ.
 """
 
 import distutils.version  # pylint: disable=import-error,no-name-in-module
@@ -171,13 +168,12 @@ class ChromeLKGMCommitter(object):
 
     def ComposeCommitMsg(self):
         """Constructs and returns the commit message for the LKGM update."""
+        dry_run_message = (
+            "This CL was created during a dry run and is not "
+            "intended to be committed.\n"
+        )
         commit_msg_template = (
-            "%(header)s\n"
-            "%(build_link)s"
-            "\nThis CL will remain in WIP until both master-full and "
-            "master-release\nbuilds for this version are finished. This CL "
-            "should not be submitted\nto the CQ until that happens.\n"
-            "\n%(cq_includes)s"
+            "%(header)s\n%(build_link)s\n%(message)s\n%(cq_includes)s"
         )
         cq_includes = ""
         for bot in self._PRESUBMIT_BOTS:
@@ -191,6 +187,7 @@ class ChromeLKGMCommitter(object):
             header=self._commit_msg_header,
             cq_includes=cq_includes,
             build_link=build_link,
+            message=dry_run_message if self._dryrun else "",
         )
 
 
