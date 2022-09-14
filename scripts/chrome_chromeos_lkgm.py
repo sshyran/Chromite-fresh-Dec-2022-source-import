@@ -148,16 +148,17 @@ class ChromeLKGMCommitter(object):
             change.gerrit_number, "chromeos/CHROMEOS_LKGM", self._lkgm
         )
 
-        labels = {
-            "Bot-Commit": 1,
-        }
         if self._dryrun:
             logging.info(
                 "Would have applied CQ+2 to crrev.com/c/%s",
                 change.gerrit_number,
             )
-        else:
-            labels["Commit-Queue"] = 2
+            return
+
+        labels = {
+            "Bot-Commit": 1,
+            "Commit-Queue": 2,
+        }
         logging.info(
             "Applying %s to crrev.com/c/%s", labels, change.gerrit_number
         )
