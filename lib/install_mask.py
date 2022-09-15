@@ -22,6 +22,7 @@ DEFAULT = {
     "*/.keep*",
     "/build/bin",
     "/build/initramfs",
+    "/build/lib",
     "/build/libexec/tast",
     "/build/manatee",
     "/build/opt",
