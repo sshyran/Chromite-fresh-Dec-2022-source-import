@@ -1168,6 +1168,14 @@
         },
         {
           "board_name": "brya-arc-t",
+          "name": "skolas",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7243,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-arc-t",
           "name": "skolas4es",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -1884,6 +1892,14 @@
         {
           "board_name": "brya-lvm-stateful",
           "name": "redrix4es",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7214,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-lvm-stateful",
+          "name": "skolas",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7214,
