@@ -412,6 +412,11 @@ GROUP_BASELINE = dict(
             users={"cros_healthd", "secagentd", "secanomaly"},
         ),
         GroupEntry(group="secagentd", gid=20192, users={"secagentd"}),
+        GroupEntry(
+            group="disk-dlc",
+            gid=20777,
+            users={"root", "dlcservice", "imageloaderd"},
+        ),
     )
 )
 
