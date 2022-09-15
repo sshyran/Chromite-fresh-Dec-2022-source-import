@@ -1590,6 +1590,7 @@ class MockPatchFactory(object):
         """Helper function to create mock GerritPatch objects."""
         if change_id is None:
             change_id = self._patch_counter()
+        subject = f"PatchSet: {change_id}"
         gerrit_number = str(change_id)
         change_id = hex(change_id)[2:].rstrip("L").lower()
         change_id = "I%s" % change_id.rjust(40, "0")
@@ -1616,6 +1617,7 @@ class MockPatchFactory(object):
             "number": gerrit_number,
             "project": project,
             "branch": tracking_branch,
+            "subject": subject,
             "owner": {"email": "elmer.fudd@chromium.org"},
             "remote": remote,
             "status": "MERGED" if is_merged else "NEW",

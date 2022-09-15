@@ -12,6 +12,7 @@ import random
 import re
 import subprocess
 import time
+from typing import Optional
 
 # We import mock so that we can identify mock.MagicMock instances in tests
 # that use mock.
@@ -2075,6 +2076,7 @@ class GerritPatch(GerritFetchOnlyPatch):
         prefix_str = config_lib.GetSiteParams().CHANGE_PREFIX[self.remote]
         self.gerrit_number_str = "%s%s" % (prefix_str, self.gerrit_number)
         self.url = patch_dict["url"]
+        self.subject = patch_dict["subject"]
         # status - Current state of this change.  Can be one of
         # ['NEW', 'SUBMITTED', 'MERGED', 'ABANDONED'].
         self.status = patch_dict["status"]
@@ -2237,6 +2239,24 @@ class GerritPatch(GerritFetchOnlyPatch):
     def IsDraft(self):
         """Return true if the latest patchset is a draft."""
         return self.patch_dict["currentPatchSet"]["draft"]
+
+    def GetFileContents(
+        self, path: str, revision: Optional[str] = None
+    ) -> Optional[str]:
+        """Get the content of a file from the change on Gerrit.
+
+        Args:
+          path: Path of the file in the repo to retrieve.
+          revision: The specific revision in the change. Defaults to the latest
+              revision.
+
+        Returns:
+          Contents of the file.
+        """
+        gerrit_host = config_lib.GetSiteParams().GERRIT_HOSTS[self.remote]
+        return gob_util.GetFileContentsFromGerrit(
+            gerrit_host, self.gerrit_number, path, revision=revision
+        )
 
     def HasApproval(self, field, value):
         """Return whether the current patchset has the specified approval.

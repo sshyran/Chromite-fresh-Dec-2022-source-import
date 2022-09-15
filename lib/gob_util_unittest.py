@@ -164,6 +164,19 @@ Too bad..."""
         contents = gob_util.GetFileContents("some.git.url", "some/file/path")
         self.assertEqual(contents, expected_contents)
 
+    def testGetFileContentsFromGerrit(self):
+        """Test for GetFileContentsFromGerrit()"""
+
+        expected_contents = "some file contents"
+        body = base64.b64encode(expected_contents.encode())
+        self.conn.return_value.__enter__.return_value = FakeHTTPResponse(
+            body=body, status=200
+        )
+        contents = gob_util.GetFileContentsFromGerrit(
+            "some.git.url", "100000", "some/file/path"
+        )
+        self.assertEqual(contents, expected_contents)
+
 
 class GetCookieTests(cros_test_lib.TestCase):
     """Unittests for GetCookies()"""

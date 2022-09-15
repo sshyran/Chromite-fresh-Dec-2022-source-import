@@ -1058,7 +1058,7 @@ def GetFileContentsOnHead(git_url: str, filepath: str) -> str:
 
 
 def GetFileContents(git_url: str, filepath: str, ref="HEAD") -> str:
-    """Returns the current contents of a file on the default branch.
+    """Returns the current contents of a file on the given ref.
 
     Retrieves the contents from Gitiles via its API, not Gerrit's.
 
@@ -1075,6 +1075,37 @@ def GetFileContents(git_url: str, filepath: str, ref="HEAD") -> str:
     contents = FetchUrl(parsed_url[1], path, ignore_404=False)
     contents = base64.b64decode(contents)
     return contents.decode("utf-8")
+
+
+def GetFileContentsFromGerrit(
+    host: str, change: str, filepath: str, revision: Optional[str] = None
+) -> Optional[str]:
+    """Returns the current contents of a file from the Gerrit.
+
+    Args:
+      host: The Gerrit host to interact with.
+      change: A Gerrit change number.
+      filepath: Path of the file in the repo to retrieve.
+      revision: The specific revision in the change. Defaults or None to the
+          latest revision.
+
+    Returns:
+      Contents of the file.
+    """
+    if revision is None:
+        revision = "current"
+    path = "%s/revisions/%s/files/%s/content" % (
+        _GetChangePath(change),
+        revision,
+        urllib.parse.quote(filepath, ""),
+    )
+    contents = FetchUrl(host, path)
+    if contents is None:
+        return None
+
+    contents = base64.b64decode(contents)  # bytes -> bytes
+    contents = contents.decode("utf-8")  # bytes -> string
+    return contents
 
 
 def GetCommitDate(git_url, commit):

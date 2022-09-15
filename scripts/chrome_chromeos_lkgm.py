@@ -7,7 +7,6 @@
 This script will upload an LKGM CL and potentially submit it to the CQ.
 """
 
-import distutils.version  # pylint: disable=import-error,no-name-in-module
 import logging
 
 from chromite.lib import chromeos_version
@@ -69,74 +68,131 @@ class ChromeLKGMCommitter(object):
         # Strip any chrome branch from the lkgm version.
         self._lkgm = chromeos_version.VersionInfo(lkgm).VersionString()
         self._commit_msg_header = self._COMMIT_MSG_HEADER % {"lkgm": self._lkgm}
-        self._old_lkgm = None
+        self._current_lkgm = None
 
         if not self._lkgm:
             raise LKGMNotValid("LKGM not provided.")
         logging.info("lkgm=%s", lkgm)
 
     def Run(self):
-        self.CloseOldLKGMRolls()
+        self.AbandonObsoleteLKGMRolls()
         self.UpdateLKGM()
 
     @property
     def lkgm_file(self):
         return self._committer.FullPath(constants.PATH_TO_CHROME_LKGM)
 
-    def CloseOldLKGMRolls(self):
-        """Closes all open LKGM roll CLs that were last modified >48 hours ago.
+    def AbandonObsoleteLKGMRolls(self):
+        """Abandon all obsolete LKGM roll CLs.
 
-        Any roll that hasn't passed the CQ in 48 hours is likely broken and can be
-        discarded.
+        This method finds the LKGM roll CLs that were trying changing to an
+        older version than the current LKGM version, and abandons them.
         """
         query_params = {
             "project": constants.CHROMIUM_SRC_PROJECT,
             "branch": self._branch,
             "file": constants.PATH_TO_CHROME_LKGM,
-            "age": "2d",
             "status": "open",
             # Use 'owner' rather than 'uploader' or 'author' since those last two
             # can be overwritten when the gardener resolves a merge-conflict and
             # uploads a new patchset.
             "owner": self._user_email,
         }
-        open_issues = self._gerrit_helper.Query(**query_params)
-        if not open_issues:
+        open_changes = self._gerrit_helper.Query(**query_params)
+        if not open_changes:
             logging.info("No old LKGM rolls detected.")
             return
-        for open_issue in open_issues:
-            if self._dryrun:
+
+        logging.info(
+            "Retrieved the current LKGM version: %s",
+            self.GetCurrentLKGM().VersionString(),
+        )
+
+        build_link = ""
+        if self._buildbucket_id:
+            build_link = (
+                "\nUpdated by"
+                f" https://ci.chromium.org/b/{self._buildbucket_id}\n"
+            )
+
+        for change in open_changes:
+            logging.info(
+                "Found a open LKGM roll CL: %s (crrev.com/c/%s).",
+                change.subject,
+                change.gerrit_number,
+            )
+            version_string = change.GetFileContents(
+                constants.PATH_TO_CHROME_LKGM
+            )
+            if version_string is None:
+                logging.info("=> No LKGM change found in this CL.")
+                continue
+
+            version = chromeos_version.VersionInfo(version_string)
+            if version <= self.GetCurrentLKGM():
+                # The target version that the CL is changing to is older than
+                # the current. The roll CL is useless so that it'd be abandoned.
                 logging.info(
-                    "Would have closed old LKGM roll crrev.com/c/%s",
-                    open_issue.gerrit_number,
+                    "=> This CL is an older LKGM roll than current: Abandoning"
                 )
+                if not self._dryrun:
+                    abandon_message = (
+                        "The newer LKGM"
+                        f" ({self.GetCurrentLKGM().VersionString()}) roll than"
+                        f" this CL has been landed.{build_link}"
+                    )
+                    self._gerrit_helper.AbandonChange(
+                        change,
+                        msg=abandon_message,
+                    )
             else:
+                # Do nothing with the roll CLs that tries changing to newer
+                # version.
+                # TODO(yoshiki): rebase the roll CL.
                 logging.info(
-                    "Closing old LKGM roll crrev.com/c/%s",
-                    open_issue.gerrit_number,
+                    "=> This CL is a newer LKGM roll than current: Do nothing."
                 )
-                self._gerrit_helper.AbandonChange(
-                    open_issue, msg="Superceded by LKGM %s" % self._lkgm
-                )
+
+    def GetCurrentLKGM(self):
+        """Returns the current LKGM version on the branch.
+
+        On the first call, this method retrieves the LKGM version from Gltlies
+        server and returns it. On subsequent calls, this method returns the
+        cached LKGM version.
+
+        Raises:
+          LKGMNotValid: if the retrieved LKGM version from the repository is
+          invalid.
+        """
+        if self._current_lkgm is not None:
+            return self._current_lkgm
+
+        current_lkgm = gob_util.GetFileContents(
+            constants.CHROMIUM_GOB_URL,
+            constants.PATH_TO_CHROME_LKGM,
+            ref=self._branch,
+        )
+        if current_lkgm is None:
+            raise LKGMNotValid(
+                "The retrieved LKGM version from the repository is invalid:"
+                f" {self._current_lkgm}."
+            )
+
+        self._current_lkgm = chromeos_version.VersionInfo(current_lkgm.strip())
+        return self._current_lkgm
 
     def UpdateLKGM(self):
         """Updates the LKGM file with the new version."""
-        self._old_lkgm = gob_util.GetFileContents(
-            constants.CHROMIUM_GOB_URL,
-            "chromeos/CHROMEOS_LKGM",
-            ref=self._branch,
-        )
-        self._old_lkgm = self._old_lkgm.strip()
-
-        lv = distutils.version.LooseVersion
-        if self._old_lkgm is not None and lv(self._lkgm) <= lv(self._old_lkgm):
+        if chromeos_version.VersionInfo(self._lkgm) <= self.GetCurrentLKGM():
             raise LKGMNotValid(
-                "LKGM version (%s) is not newer than current version (%s)."
-                % (self._lkgm, self._old_lkgm)
+                f"LKGM version ({self._lkgm}) is not newer than current version"
+                f" ({self.GetCurrentLKGM().VersionString()})."
             )
 
         logging.info(
-            "Updating LKGM version: %s (was %s),", self._lkgm, self._old_lkgm
+            "Updating LKGM version: %s (was %s),",
+            self._lkgm,
+            self.GetCurrentLKGM().VersionString(),
         )
         change = self._gerrit_helper.CreateChange(
             "chromium/src", self._branch, self.ComposeCommitMsg(), False
