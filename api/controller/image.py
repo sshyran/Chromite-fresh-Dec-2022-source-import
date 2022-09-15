@@ -77,7 +77,7 @@ _VM_IMAGE_MAPPING = {
 # Dict to describe the prerequisite built images for each mod image type.
 _MOD_IMAGE_MAPPING = {
     _RECOVERY_ID: _IMAGE_MAPPING[_BASE_ID],
-    _NETBOOT_ID: _IMAGE_MAPPING[_RECOVERY_ID],
+    _NETBOOT_ID: _IMAGE_MAPPING[_FACTORY_ID],
 }
 
 # Supported image types for PushImage.
