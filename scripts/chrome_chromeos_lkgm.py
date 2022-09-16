@@ -150,6 +150,10 @@ class ChromeLKGMCommitter(object):
                 "Would have applied CQ+2 to crrev.com/c/%s",
                 change.gerrit_number,
             )
+            self._gerrit_helper.AbandonChange(
+                change,
+                msg="Dry run",
+            )
             return
 
         labels = {
