@@ -162,7 +162,6 @@
     cherry-release
     cherry64-release
     coral-arc-r-release
-    coral-kernelnext-release
     coral-release
     corsola-release
     corsola64-release
@@ -212,7 +211,6 @@
     kukui-arc-r-release
     kukui-kernelnext-release
     kukui-release
-    lars-kernelnext-release
     lars-release
     majolica-release
     nami-kernelnext-release
@@ -493,11 +491,6 @@
   coral-arc-r-release-tryjob
   coral-factory-coral-10122.B-factorybranch-tryjob
   coral-full-tryjob
-  coral-kernelnext-full-tryjob
-  coral-kernelnext-llvm-next-toolchain-tryjob
-  coral-kernelnext-llvm-toolchain-tryjob
-  coral-kernelnext-payloads-tryjob
-  coral-kernelnext-release-tryjob
   coral-llvm-next-toolchain-tryjob
   coral-llvm-toolchain-tryjob
   coral-master-factorybranch-tryjob
@@ -908,11 +901,6 @@
   kukui-release-tryjob
   lars-factory-glados-7828.B-factorybranch-tryjob
   lars-full-tryjob
-  lars-kernelnext-full-tryjob
-  lars-kernelnext-llvm-next-toolchain-tryjob
-  lars-kernelnext-llvm-toolchain-tryjob
-  lars-kernelnext-payloads-tryjob
-  lars-kernelnext-release-tryjob
   lars-llvm-next-toolchain-tryjob
   lars-llvm-toolchain-tryjob
   lars-payloads-tryjob
@@ -992,7 +980,6 @@
     cherry-release-tryjob
     cherry64-release-tryjob
     coral-arc-r-release-tryjob
-    coral-kernelnext-release-tryjob
     coral-release-tryjob
     corsola-release-tryjob
     corsola64-release-tryjob
@@ -1042,7 +1029,6 @@
     kukui-arc-r-release-tryjob
     kukui-kernelnext-release-tryjob
     kukui-release-tryjob
-    lars-kernelnext-release-tryjob
     lars-release-tryjob
     majolica-release-tryjob
     nami-kernelnext-release-tryjob
