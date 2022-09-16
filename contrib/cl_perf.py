@@ -12,7 +12,7 @@ import os
 from pathlib import Path
 import shutil
 import statistics
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, NamedTuple, Optional, Set
 
 from chromite.lib import cipd
 from chromite.lib import commandline
@@ -308,6 +308,20 @@ class TestResult:
         return step_names
 
 
+class BuildResults(NamedTuple):
+    """Data class for build results."""
+
+    succeeded: List[TestResult]
+    failed: List[TestResult]
+
+    def append(self, test_result: TestResult, succeeded: bool = True) -> None:
+        """Save a test result to the appropriate list."""
+        if succeeded:
+            self.succeeded.append(test_result)
+        else:
+            self.failed.append(test_result)
+
+
 class SwarmingOutputProcessor:
     """Holds output from swarming and compares results."""
 
@@ -324,11 +338,11 @@ class SwarmingOutputProcessor:
         failed_jobs: bool,
         ignore_failed: bool,
         repeats: int,
-        baseline: Dict[str, List[TestResult]],
-        tested: Dict[str, List[TestResult]],
+        baseline: BuildResults,
+        tested: BuildResults,
     ):
-        self.baseline = baseline["succeeded"]
-        self.tested = tested["succeeded"]
+        self.baseline = baseline.succeeded
+        self.tested = tested.succeeded
         self.repeats = repeats
         self.complete = complete
         self.failed_jobs = failed_jobs
@@ -647,8 +661,8 @@ class Test:
         """Collects and swarming results(build.proto.json) for each build."""
         complete = True
         failed_jobs = False
-        tested_builds = {"succeeded": [], "failed": []}
-        baseline_builds = {"succeeded": [], "failed": []}
+        tested_builds = BuildResults(succeeded=[], failed=[])
+        baseline_builds = BuildResults(succeeded=[], failed=[])
 
         for job in self.baseline_jobs:
             host_name = job["swarming"]["host_name"]
@@ -662,12 +676,13 @@ class Test:
                 build_proto_json = json.loads(build_proto_json_str)
                 status = build_proto_json.get("status", "UNKNOWN")
                 logging.notice("%s is finished: %s", swarmingUrl, status)
-                succeeded_or_failed = "succeeded"
+                succeeded = True
                 if status == "FAILURE":
                     failed_jobs = True
-                    succeeded_or_failed = "failed"
-                baseline_builds[succeeded_or_failed].append(
-                    TestResult(swarmingUrl, task_id, build_proto_json)
+                    succeeded = False
+                baseline_builds.append(
+                    TestResult(swarmingUrl, task_id, build_proto_json),
+                    succeeded=succeeded,
                 )
 
         for job in self.tested_jobs:
@@ -682,12 +697,13 @@ class Test:
                 build_proto_json = json.loads(build_proto_json_str)
                 status = build_proto_json.get("status", "UNKNOWN")
                 logging.notice("%s is finished: %s", swarmingUrl, status)
-                succeeded_or_failed = "succeeded"
+                succeeded = True
                 if status == "FAILURE":
                     failed_jobs = True
-                    succeeded_or_failed = "failed"
-                tested_builds[succeeded_or_failed].append(
-                    TestResult(swarmingUrl, task_id, build_proto_json)
+                    succeeded = False
+                tested_builds.append(
+                    TestResult(swarmingUrl, task_id, build_proto_json),
+                    succeeded=succeeded,
                 )
 
         return SwarmingOutputProcessor(
