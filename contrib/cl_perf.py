@@ -270,7 +270,9 @@ class TestResult:
         self.steps = {}
         logging.debug(pformat.json(build_proto_json))
         logging.info("# Processing build %s", swarmingUrl)
-        run_start_time = parse_swarming_datetime(build_proto_json["start_time"])
+        run_start_time = parse_swarming_datetime(
+            build_proto_json["create_time"]
+        )
         run_end_time = parse_swarming_datetime(build_proto_json["end_time"])
         self.total_runtime = (run_end_time - run_start_time).total_seconds()
         for step in build_proto_json["steps"]:
