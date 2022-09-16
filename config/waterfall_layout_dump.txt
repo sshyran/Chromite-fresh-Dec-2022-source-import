@@ -106,22 +106,6 @@
   factory-zork-13700.B-buildspec
     zork-factory-zork-13700.B-factorybranch
 
-== full ==
-  master-full
-    amd64-generic-full
-    amd64-generic-vm-full
-    arm-generic-full
-    arm64-generic-full
-    eve-full
-    hana-full
-    jacuzzi-full
-    kevin-full
-    kevin64-full
-    octopus-full
-    tael-full
-    tatl-full
-    zork-full
-
 == informational ==
   amd64-generic-asan
   amd64-generic-fuzzer

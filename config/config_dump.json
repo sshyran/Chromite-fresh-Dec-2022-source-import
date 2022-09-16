@@ -15711,7 +15711,6 @@
     "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
     "manifest_version": true,
     "master": true,
-    "schedule": "0 */3 * * *",
     "slave_configs": [
       "amd64-generic-full",
       "amd64-generic-vm-full",

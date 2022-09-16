@@ -896,7 +896,7 @@ def FullBuilders(site_config, boards_dict, ge_build_config):
         manifest_version=True,
         overlays=constants.PUBLIC_OVERLAYS,
         slave_configs=[],
-        schedule="0 */3 * * *",
+        schedule=None,
     )
 
     master_config.AddSlaves(
