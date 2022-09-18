@@ -23,7 +23,7 @@ DEFAULT = {
     "/build/bin",
     "/build/initramfs",
     "/build/lib",
-    "/build/libexec/tast",
+    "/build/libexec",
     "/build/manatee",
     "/build/opt",
     "/build/rootfs/dlc",
