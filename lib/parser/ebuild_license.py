@@ -16,6 +16,7 @@ LICENSE="
     licH
     flag4? ( licI licJ )
   )
+  ( licK licL )
 "
 
 Parsed into:
@@ -37,6 +38,9 @@ Node
     UseNode(flag4)
       LicenseNode(licI)
       LicenseNode(licJ)
+  AllOfNode
+    LicenseNode(licK)
+    LicenseNode(licL)
 """
 
 import re
@@ -78,6 +82,7 @@ class LicenseNode(NamedTuple):
         self,
         use_flags: Optional[set] = None,
         or_reduce: Optional[Callable] = None,
+        flatten_allof: Optional[bool] = True,
     ):  # pylint: disable=unused-argument
         return [self.name]
 
@@ -95,17 +100,36 @@ class Node:
         self,
         use_flags: Optional[set] = None,
         or_reduce: Optional[Callable] = None,
+        flatten_allof: Optional[bool] = True,
     ):
         return list(
             _dedupe_in_order(
                 x
                 for child in self.children
-                for x in child.reduce(use_flags, or_reduce)
+                for x in child.reduce(use_flags, or_reduce, flatten_allof)
             )
         )
 
     def __str__(self):
         return " ".join(_dedupe_in_order(str(x) for x in self.children))
+
+
+class AllOfNode(Node):
+    """A group of nodes that should be kept together."""
+
+    def reduce(
+        self,
+        use_flags: Optional[set] = None,
+        or_reduce: Optional[Callable] = None,
+        flatten_allof: Optional[bool] = True,
+    ):
+        ret = super().reduce(use_flags, or_reduce, flatten_allof)
+        if not flatten_allof:
+            ret = (tuple(ret),)
+        return ret
+
+    def __str__(self):
+        return f"( {super().__str__()} )"
 
 
 class OrNode(Node):
@@ -115,12 +139,22 @@ class OrNode(Node):
         self,
         use_flags: Optional[set] = None,
         or_reduce: Optional[Callable] = None,
+        flatten_allof: Optional[bool] = True,
     ):
-        choices = super().reduce(use_flags, or_reduce)
+        choices = super().reduce(use_flags, or_reduce, False)
         if or_reduce:
             return [or_reduce(choices)]
-        # Just peel off the first one.
-        return choices[:1]
+
+        # Just peel off the first group.  If there are any tuples (which come
+        # from AllOfNodes), we need to flatten.
+        def _flatten(eles):
+            for e in eles:
+                if isinstance(e, tuple):
+                    yield from _flatten(e)
+                else:
+                    yield e
+
+        return list(_flatten(choices[:1]))
 
     def __str__(self):
         return f"|| ( {super().__str__()} )"
@@ -137,6 +171,7 @@ class UseNode(Node):
         self,
         use_flags: Optional[set] = None,
         or_reduce: Optional[Callable] = None,
+        flatten_allof: Optional[bool] = True,
     ):
         if use_flags is None:
             use_flags = []
@@ -146,7 +181,9 @@ class UseNode(Node):
         else:
             test = self.flag in use_flags
 
-        return super().reduce(use_flags, or_reduce) if test else []
+        return (
+            super().reduce(use_flags, or_reduce, flatten_allof) if test else []
+        )
 
     def __str__(self):
         return (
@@ -159,7 +196,8 @@ def parse(data: str) -> Node:
     root = Node()
     cur = root
     stack = [root]
-    for token in data.split():
+    tokens = iter(data.split())
+    for token in tokens:
         if VALID_NAME_RE.match(token):
             cur.children.append(LicenseNode(token))
         elif token == "||":
@@ -173,13 +211,19 @@ def parse(data: str) -> Node:
             cur.children.append(node)
             stack.append(node)
             cur = node
+
+            token = next(tokens)
+            if token != "(":
+                raise LicenseSyntaxError(f'Expected "(": "{data}"')
         elif token == "(":
-            if not isinstance(cur, (OrNode, UseNode)):
-                raise LicenseSyntaxError(f'Unexpected "(": "{data}"')
+            node = AllOfNode()
+            cur.children.append(node)
+            stack.append(node)
+            cur = node
         elif token == ")":
-            if not isinstance(cur, (OrNode, UseNode)):
-                raise LicenseSyntaxError(f'Unexpected ")": "{data}"')
             stack.pop()
+            if not stack:
+                raise LicenseSyntaxError(f'Unexpected ")": "{data}"')
             cur = stack[-1]
         elif token.endswith("?"):
             # USE flag conditional.
@@ -187,6 +231,10 @@ def parse(data: str) -> Node:
             cur.children.append(node)
             stack.append(node)
             cur = node
+
+            token = next(tokens)
+            if token != "(":
+                raise LicenseSyntaxError(f'Expected "(": "{data}"')
         else:
             raise LicenseNameError(f'Invalid license name: "{token}"')
 

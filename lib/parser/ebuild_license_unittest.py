@@ -75,6 +75,24 @@ def test_parse_use(test, flags, reduced):
     assert licenses.reduce(use_flags=flags) == reduced
 
 
+TEST_CASES_PARSE_GROUPS = (
+    ("( A B )", None, ["A", "B"]),
+    ("( ( A ( B ) ) )", None, ["A", "B"]),
+    ("|| ( ( A ) B )", None, ["A"]),
+    ("|| ( ( A B ) C )", None, ["A", "B"]),
+    ("|| ( A ( B ) C )", None, ["A"]),
+    ("|| ( ( ( A ) ) )", None, ["A"]),
+)
+
+
+@pytest.mark.parametrize("test,flags,reduced", TEST_CASES_PARSE_GROUPS)
+def test_parse_groups(test, flags, reduced):
+    """Verify group parsing."""
+    licenses = ebuild_license.parse(test)
+    assert str(licenses) == test
+    assert licenses.reduce(use_flags=flags) == reduced
+
+
 def test_parse_or_use():
     """Verify ||(flag?()) parsing."""
     test = "GPL-1 || ( foo? ( || ( BSD BSD-2 ) ) BSD-3 )"
