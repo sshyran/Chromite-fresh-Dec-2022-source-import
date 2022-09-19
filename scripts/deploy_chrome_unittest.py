@@ -202,7 +202,11 @@ class DeployChromeMock(partial_mock.PartialMock):
     """Deploy Chrome Mock Class."""
 
     TARGET = "chromite.scripts.deploy_chrome.DeployChrome"
-    ATTRS = ("_KillAshChromeIfNeeded", "_DisableRootfsVerification")
+    ATTRS = (
+        "_ChromeFileInUse",
+        "_DisableRootfsVerification",
+        "_ShouldUseCompressedAsh",
+    )
 
     def __init__(self):
         partial_mock.PartialMock.__init__(self)
@@ -213,6 +217,10 @@ class DeployChromeMock(partial_mock.PartialMock):
         self.MockMountCmd(1)
         self.rsh_mock.AddCmdResult(
             deploy_chrome.LSOF_COMMAND_CHROME % (deploy_chrome._CHROME_DIR,), 1
+        )
+
+        self.rsh_mock.AddCmdResult(
+            "status ui", stdout="ui start/running, process 123"
         )
 
     def MockMountCmd(self, returnvalue):
@@ -230,9 +238,16 @@ class DeployChromeMock(partial_mock.PartialMock):
         self.rsh_mock.stop()
         self.remote_device_mock.stop()
 
-    def _KillAshChromeIfNeeded(self, _inst):
-        # Fully stub out for now.
-        pass
+    def _ChromeFileInUse(self, _inst):
+        # Fully stub out for now. Can be replaced if further testing is added.
+        return False
+
+    def _ShouldUseCompressedAsh(self, inst):
+        with mock.patch.object(
+            remote_access.RemoteDevice, "IfFileExists"
+        ) as exists_mock:
+            exists_mock.return_value = False
+            self.backup["_ShouldUseCompressedAsh"](inst)
 
 
 class DeployTest(cros_test_lib.MockTempDirTestCase):
@@ -307,6 +322,29 @@ class TestDisableRootfsVerification(DeployTest):
         )
         self.remote_reboot_mock.side_effect = None
         self.assertFalse(self.deploy._root_dir_is_still_readonly.is_set())
+
+
+class TestDeployCompressedAsh(DeployTest):
+    """Testing deployments with --ash-compressed passed."""
+
+    def _GetDeployChrome(self, args):
+        args.append("--compressed-ash")
+        return super(TestDeployCompressedAsh, self)._GetDeployChrome(args)
+
+    def testUnmountSuccess(self):
+        """Test case for a successful 'umount' call."""
+        self.deploy._KillAshChromeIfNeeded()
+
+    def testUnmountFailure(self):
+        """Test case for a failed 'umount' call."""
+        self.deploy_mock.rsh_mock.AddCmdResult(
+            ["umount", deploy_chrome.RAW_ASH_PATH],
+            returncode=32,
+            stderr="umount failure",
+        )
+        self.assertRaises(
+            deploy_chrome.DeployFailure, self.deploy._KillAshChromeIfNeeded
+        )
 
 
 class TestMount(DeployTest):
@@ -476,6 +514,19 @@ class StagingTest(cros_test_lib.MockTempDirTestCase):
             chrome_util._COPY_PATHS_CHROME,
         )
 
+    def testSloppyDeploySuccessLacros(self):
+        """Ensure the squashfs mechanism with --compressed-ash doesn't throw."""
+        options = _ParseCommandLine(
+            self.common_flags + ["--sloppy", "--compressed-ash"]
+        )
+        osutils.Touch(os.path.join(self.build_dir, "chrome"), makedirs=True)
+        deploy_chrome._PrepareStagingDir(
+            options,
+            self.tempdir,
+            self.staging_dir,
+            chrome_util._COPY_PATHS_CHROME,
+        )
+
     @cros_test_lib.pytestmark_network_test
     def testUploadStagingDir(self):
         """Upload staging directory."""
@@ -598,6 +649,9 @@ class TestDeployTestBinaries(cros_test_lib.RunCommandTempDirTestCase):
                 os.path.join(self.tempdir, "build_dir"),
                 "--nostrip",
             ]
+        )
+        self.remote_exists_mock = self.PatchObject(
+            remote_access.RemoteDevice, "IfFileExists", return_value=False
         )
         self.deploy = deploy_chrome.DeployChrome(
             options, self.tempdir, os.path.join(self.tempdir, "staging")

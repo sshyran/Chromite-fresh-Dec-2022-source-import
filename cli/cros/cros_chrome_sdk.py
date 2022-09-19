@@ -110,6 +110,8 @@ class SDKFetcher(object):
     NACL_ARM32_TOOLCHAIN_KEY = "arm32_toolchain_for_nacl_helper"
     QEMU_BIN_PATH = "app-emulation/qemu"
     SEABIOS_BIN_PATH = "sys-firmware/seabios"
+    SQUASHFS_CIPD_PATH = "infra/3pp/tools/squashfs/linux-amd64"
+    SQUASHFS_CIPD_VER = "97pLXFMaDo0YFKrWyL_wfrZHyTNXM9iO6T_uRHkMkrQC"
     TAST_CMD_PATH = "chromeos-base/tast-cmd"
     TAST_REMOTE_TESTS_PATH = "chromeos-base/tast-remote-tests-cros"
     ZSTD_CIPD_PATH = "infra/3pp/static_libs/libzstd/linux-amd64"
@@ -233,6 +235,28 @@ class SDKFetcher(object):
                     self.cipd_cache.staging_dir,
                 )
                 ref.SetDefault(os.path.join(path, "bin"))
+
+        os.environ["PATH"] += f":{ref.path}"
+
+    def _InstallSquashfsFromCipd(self):
+        """Install mksquahsfs from cipd if the system doesn't have it."""
+        if osutils.Which("mksquashfs"):
+            return
+
+        key = (
+            self.SQUASHFS_CIPD_PATH.replace("/", "-"),
+            self.SQUASHFS_CIPD_VER,
+        )
+        with self.cipd_cache.Lookup(key) as ref:
+            if not ref.Exists(lock=True):
+                Log("SDK: Getting squashfs")
+                path = cipd.InstallPackage(
+                    cipd.GetCIPDFromCache(),
+                    self.SQUASHFS_CIPD_PATH,
+                    self.SQUASHFS_CIPD_VER,
+                    self.cipd_cache.staging_dir,
+                )
+                ref.SetDefault(os.path.join(path, "squashfs-tools"))
 
         os.environ["PATH"] += f":{ref.path}"
 
@@ -838,6 +862,7 @@ class SDKFetcher(object):
         key_map = {}
         fetch_urls = {}
 
+        self._InstallSquashfsFromCipd()
         self._InstallZstdFromCipd()
 
         if not target_tc or not toolchain_url:

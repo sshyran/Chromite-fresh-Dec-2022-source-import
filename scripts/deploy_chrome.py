@@ -75,6 +75,14 @@ _FIND_TEST_BIN_CMD = "find %s -maxdepth 1 -executable -type f" % (
 
 DF_COMMAND = "df -k %s"
 
+# This constants are related to an experiment of running compressed ash chrome
+# to save rootfs space. See b/247397013
+COMPRESSED_ASH_SERVICE = "mount-ash-chrome"
+COMPRESSED_ASH_FILE = "chrome.squashfs"
+RAW_ASH_FILE = "chrome"
+COMPRESSED_ASH_PATH = os.path.join(_CHROME_DIR, COMPRESSED_ASH_FILE)
+RAW_ASH_PATH = os.path.join(_CHROME_DIR, RAW_ASH_FILE)
+
 LACROS_DIR = "/usr/local/lacros-chrome"
 _CONF_FILE = "/etc/chrome_dev.conf"
 _KILL_LACROS_CHROME_CMD = "pkill -f %(lacros_dir)s/chrome"
@@ -147,6 +155,9 @@ class DeployChrome(object):
                 private_key=options.private_key,
                 include_dev_paths=False,
             )
+            if self._ShouldUseCompressedAsh():
+                self.options.compressed_ash = True
+
         self._root_dir_is_still_readonly = multiprocessing.Event()
 
         self._deployment_name = "lacros" if options.lacros else "chrome"
@@ -156,6 +167,13 @@ class DeployChrome(object):
 
         # Whether UI was stopped during setup.
         self._stopped_ui = False
+
+    def _ShouldUseCompressedAsh(self):
+        """Detects if the DUT uses compressed-ash setup."""
+        if self.options.lacros:
+            return False
+
+        return self.device.IfFileExists(COMPRESSED_ASH_PATH)
 
     def _GetRemoteMountFree(self, remote_dir):
         result = self.device.run(DF_COMMAND % remote_dir)
@@ -291,6 +309,21 @@ class DeployChrome(object):
                     # Wait for processes to actually terminate
                     time.sleep(POST_KILL_WAIT)
                     logging.info("Rechecking the chrome binary...")
+                if self.options.compressed_ash:
+                    result = self.device.run(
+                        ["umount", RAW_ASH_PATH],
+                        check=False,
+                        capture_output=True,
+                    )
+                    if result.returncode and not (
+                        result.returncode == 32
+                        and "not mounted" in result.stderr
+                    ):
+                        raise DeployFailure(
+                            "Could not unmount compressed ash. "
+                            f"Error Code: {result.returncode}, "
+                            f"Error Message: {result.stderr}"
+                        )
         except timeout_util.TimeoutError:
             msg = (
                 "Could not kill processes after %s seconds.  Please exit any "
@@ -415,6 +448,9 @@ class DeployChrome(object):
             self.device.run(
                 ["chown", "-R", "chronos:chronos", self.options.target_dir]
             )
+
+        if self.options.compressed_ash:
+            self.device.run(["start", COMPRESSED_ASH_SERVICE])
 
         # Send SIGHUP to dbus-daemon to tell it to reload its configs. This won't
         # pick up major changes (bus type, logging, etc.), but all we care about is
@@ -923,9 +959,16 @@ def _CreateParser():
         action="store",
         default="auto",
         choices=("always", "never", "auto"),
-        help="Choose the data compression behavior. Default "
+        help="Choose the data transfer compression behavior. Default "
         'is set to "auto", that disables compression if '
         "the target device has a gigabit ethernet port.",
+    )
+    parser.add_argument(
+        "--compressed-ash",
+        action="store_true",
+        default=False,
+        help="Use compressed-ash deployment scheme. With the flag, ash-chrome "
+        "binary is stored on DUT in squashfs, mounted upon boot.",
     )
     return parser
 
@@ -953,6 +996,8 @@ def _ParseCommandLine(argv):
             parser.error("--lacros does not support --deploy-test-binaries")
         if options.local_pkg_path:
             parser.error("--lacros does not support --local-pkg-path")
+        if options.compressed_ash:
+            parser.error("--lacros does not support --compressed-ash")
     else:
         if not options.board and options.build_dir:
             match = re.search(r"out_([^/]+)/Release$", options.build_dir)
@@ -1193,6 +1238,33 @@ def _PrepareStagingDir(
                 ],
                 cwd=staging_dir,
             )
+
+    if options.compressed_ash:
+        # Setup SDK here so mksquashfs is still found in no-shell + nostrip
+        # configuration.
+        sdk = cros_chrome_sdk.SDKFetcher(
+            options.cache_dir,
+            options.board,
+            use_external_config=options.use_external_config,
+        )
+        with sdk.Prepare(
+            components=[],
+            target_tc=options.target_tc,
+            toolchain_url=options.toolchain_url,
+        ):
+            cros_build_lib.dbg_run(
+                [
+                    "mksquashfs",
+                    RAW_ASH_FILE,
+                    COMPRESSED_ASH_FILE,
+                    "-all-root",
+                    "-no-progress",
+                    "-comp",
+                    "zstd",
+                ],
+                cwd=staging_dir,
+            )
+        os.truncate(os.path.join(staging_dir, RAW_ASH_FILE), 0)
 
     if options.staging_upload:
         _UploadStagingDir(options, tempdir, staging_dir)
