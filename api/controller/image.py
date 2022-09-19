@@ -332,7 +332,7 @@ def Create(
                 else:
                     cros_build_lib.Die("Failed to create recovery image.")
             elif mod_type == _NETBOOT_ID:
-                factory_shim_dir = os.path.basename(
+                factory_shim_dir = os.path.dirname(
                     factory_result.images[constants.IMAGE_TYPE_FACTORY_SHIM]
                 )
                 image.create_netboot_kernel(board, factory_shim_dir)

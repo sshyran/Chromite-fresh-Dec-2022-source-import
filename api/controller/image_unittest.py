@@ -221,7 +221,7 @@ class CreateTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
         build_patch.assert_any_call(
             "board", [constants.IMAGE_TYPE_FACTORY_SHIM], config=mock.ANY
         )
-        netboot_patch.assert_any_call("board", factory_path.name)
+        netboot_patch.assert_any_call("board", os.path.dirname(factory_path))
 
 
 class RecoveryImageTest(
