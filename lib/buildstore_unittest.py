@@ -96,7 +96,7 @@ class TestBuildStore(cros_test_lib.MockTestCase):
             cidb.CIDBConnectionFactory, "IsCIDBSetup", return_value=False
         )
         bs = BuildStore()
-        self.assertEqual(bs.InitializeClients(), True)
+        self.assertEqual(bs.InitializeClients(), False)
 
     def testInitializeClientsWhenCIDBIsNotNeeded(self):
         """Test InitializeClients without CIDB requirement."""
