@@ -683,7 +683,7 @@ to assign.  Once you've found it, copy the entire license file to:
                     return choice
             return choices[0]
 
-        ebuild_license_names = licenses.reduce(or_reduce=license_picker)
+        ebuild_license_names = licenses.reduce(anyof_reduce=license_picker)
 
         # Is this tainted?
         self.tainted = TAINTED in ebuild_license_names

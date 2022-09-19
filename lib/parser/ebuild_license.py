@@ -30,10 +30,10 @@ Node
   UseNode(flag2)
     UseNode(flag3)
       LicenseNode(licE)
-  OrNode
+  AnyOfNode
     LicenseNode(licF)
     LicenseNode(licG)
-  OrNode
+  AnyOfNode
     LicenseNode(licH)
     UseNode(flag4)
       LicenseNode(licI)
@@ -81,7 +81,7 @@ class LicenseNode(NamedTuple):
     def reduce(
         self,
         use_flags: Optional[set] = None,
-        or_reduce: Optional[Callable] = None,
+        anyof_reduce: Optional[Callable] = None,
         flatten_allof: Optional[bool] = True,
     ):  # pylint: disable=unused-argument
         return [self.name]
@@ -99,14 +99,14 @@ class Node:
     def reduce(
         self,
         use_flags: Optional[set] = None,
-        or_reduce: Optional[Callable] = None,
+        anyof_reduce: Optional[Callable] = None,
         flatten_allof: Optional[bool] = True,
     ):
         return list(
             _dedupe_in_order(
                 x
                 for child in self.children
-                for x in child.reduce(use_flags, or_reduce, flatten_allof)
+                for x in child.reduce(use_flags, anyof_reduce, flatten_allof)
             )
         )
 
@@ -120,10 +120,10 @@ class AllOfNode(Node):
     def reduce(
         self,
         use_flags: Optional[set] = None,
-        or_reduce: Optional[Callable] = None,
+        anyof_reduce: Optional[Callable] = None,
         flatten_allof: Optional[bool] = True,
     ):
-        ret = super().reduce(use_flags, or_reduce, flatten_allof)
+        ret = super().reduce(use_flags, anyof_reduce, flatten_allof)
         if not flatten_allof:
             ret = (tuple(ret),)
         return ret
@@ -132,18 +132,18 @@ class AllOfNode(Node):
         return f"( {super().__str__()} )"
 
 
-class OrNode(Node):
+class AnyOfNode(Node):
     """A group of optional/alternative licenses."""
 
     def reduce(
         self,
         use_flags: Optional[set] = None,
-        or_reduce: Optional[Callable] = None,
+        anyof_reduce: Optional[Callable] = None,
         flatten_allof: Optional[bool] = True,
     ):
-        choices = super().reduce(use_flags, or_reduce, False)
-        if or_reduce:
-            return [or_reduce(choices)]
+        choices = super().reduce(use_flags, anyof_reduce, False)
+        if anyof_reduce:
+            return [anyof_reduce(choices)]
 
         # Just peel off the first group.  If there are any tuples (which come
         # from AllOfNodes), we need to flatten.
@@ -170,7 +170,7 @@ class UseNode(Node):
     def reduce(
         self,
         use_flags: Optional[set] = None,
-        or_reduce: Optional[Callable] = None,
+        anyof_reduce: Optional[Callable] = None,
         flatten_allof: Optional[bool] = True,
     ):
         if use_flags is None:
@@ -182,7 +182,9 @@ class UseNode(Node):
             test = self.flag in use_flags
 
         return (
-            super().reduce(use_flags, or_reduce, flatten_allof) if test else []
+            super().reduce(use_flags, anyof_reduce, flatten_allof)
+            if test
+            else []
         )
 
     def __str__(self):
@@ -201,13 +203,13 @@ def parse(data: str) -> Node:
         if VALID_NAME_RE.match(token):
             cur.children.append(LicenseNode(token))
         elif token == "||":
-            if cur is OrNode:
+            if cur is AnyOfNode:
                 # We could support this, but it doesn't make sense in general.
                 # (A || (B || C)) is simply (A || B || C).
                 raise NestedOrUnsupportedError(
                     f'Redundant nested OR deps are not supported: "{data}"'
                 )
-            node = OrNode()
+            node = AnyOfNode()
             cur.children.append(node)
             stack.append(node)
             cur = node
