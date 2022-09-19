@@ -7,6 +7,7 @@
 import pytest
 
 from chromite.lib.parser import ebuild_license
+from chromite.lib.parser import pms_dependency
 
 
 TEST_CASES_PARSE_BASIC = (
@@ -128,7 +129,7 @@ def test_any_of_reduce():
     assert licenses.reduce(anyof_reduce=pick3) == ["GPL-1", "BSD-3"]
 
 
-@pytest.mark.xfail(raises=ebuild_license.LicenseNameError)
+@pytest.mark.xfail(raises=pms_dependency.PmsNameError)
 def test_invalid_license_name():
     """Handle invalid license names."""
     ebuild_license.parse("BSD!!!")
@@ -143,7 +144,7 @@ TEST_CASES_INVALID_SYNTAX = (
 
 
 @pytest.mark.parametrize("test", TEST_CASES_INVALID_SYNTAX)
-@pytest.mark.xfail(raises=ebuild_license.LicenseSyntaxError)
+@pytest.mark.xfail(raises=pms_dependency.PmsSyntaxError)
 def test_invalid_syntax(test):
     """Handle invalid syntax."""
     ebuild_license.parse(test)
