@@ -396,6 +396,7 @@ class TestUploadPrebuilt(cros_test_lib.MockTempDirTestCase):
             "x86-foo",
             [],
             "",
+            report={},
         )
         uploader._UploadPrebuilt(self.tempdir, "suffix")
         self.remote_up_mock.assert_called_once_with(mock.ANY, acl, uploads)
@@ -406,8 +407,18 @@ class TestSyncPrebuilts(cros_test_lib.MockTestCase):
     """Tests for the SyncHostPrebuilts function."""
 
     def setUp(self):
+        clnum = [1]
+
+        def mock_rev(_filename, _data, report, *_args, **_kwargs):
+            report.setdefault("created_cls", []).append(
+                f"https://crrev.com/unittest/{clnum[0]}"
+            )
+            clnum[0] += 1
+
         self.rev_mock = self.PatchObject(
-            prebuilt, "RevGitFile", return_value=None
+            prebuilt,
+            "RevGitFile",
+            side_effect=mock_rev,
         )
         self.update_binhost_mock = self.PatchObject(
             prebuilt, "UpdateBinhostConfFile", return_value=None
@@ -425,6 +436,7 @@ class TestSyncPrebuilts(cros_test_lib.MockTestCase):
         board = "x86-foo"
         target = prebuilt.BuildTarget(board, "aura")
         slave_targets = [prebuilt.BuildTarget("x86-bar", "aura")]
+        report = {}
         if chroot is None:
             package_path = os.path.join(
                 self.build_path, "chroot", prebuilt._HOST_PACKAGES_PATH
@@ -456,14 +468,21 @@ class TestSyncPrebuilts(cros_test_lib.MockTestCase):
             target,
             slave_targets,
             self.version,
+            report,
             chroot=chroot,
         )
         uploader.SyncHostPrebuilts(self.key, True, True)
+        self.assertEqual(
+            report,
+            {
+                "created_cls": ["https://crrev.com/unittest/1"],
+            },
+        )
         self.upload_mock.assert_called_once_with(
             package_path, packages_url_suffix
         )
         self.rev_mock.assert_called_once_with(
-            mock.ANY, {self.key: binhost}, dryrun=False
+            mock.ANY, {self.key: binhost}, report, dryrun=False
         )
         self.update_binhost_mock.assert_called_once_with(
             mock.ANY, self.key, binhost
@@ -497,6 +516,7 @@ class TestSyncPrebuilts(cros_test_lib.MockTestCase):
             prebuilt, "DeterminePrebuiltConfFile", side_effect=("bar", "foo")
         )
         self.PatchObject(prebuilt.PrebuiltUploader, "_UploadSdkTarball")
+        report = {}
         with parallel_unittest.ParallelMock():
             multiprocessing.Process.exitcode = 0
             uploader = prebuilt.PrebuiltUploader(
@@ -512,6 +532,7 @@ class TestSyncPrebuilts(cros_test_lib.MockTestCase):
                 target,
                 slave_targets,
                 self.version,
+                report,
             )
             uploader.SyncBoardPrebuilts(
                 self.key, True, True, True, None, None, None, None, None
@@ -527,8 +548,28 @@ class TestSyncPrebuilts(cros_test_lib.MockTestCase):
         )
         self.rev_mock.assert_has_calls(
             [
-                mock.call("bar", {self.key: bar_binhost}, dryrun=False),
-                mock.call("foo", {self.key: url_value}, dryrun=False),
+                mock.call(
+                    "bar",
+                    {self.key: bar_binhost},
+                    {
+                        "created_cls": [
+                            "https://crrev.com/unittest/1",
+                            "https://crrev.com/unittest/2",
+                        ],
+                    },
+                    dryrun=False,
+                ),
+                mock.call(
+                    "foo",
+                    {self.key: url_value},
+                    {
+                        "created_cls": [
+                            "https://crrev.com/unittest/1",
+                            "https://crrev.com/unittest/2",
+                        ],
+                    },
+                    dryrun=False,
+                ),
             ]
         )
         self.update_binhost_mock.assert_has_calls(
@@ -608,6 +649,7 @@ class TestMain(cros_test_lib.MockTestCase):
             target,
             options.slave_targets,
             mock.ANY,
+            {},
             None,
         )
         board_mock.assert_called_once_with(
@@ -660,6 +702,7 @@ class TestSdk(cros_test_lib.MockTestCase):
             "x86-foo",
             [],
             "chroot-1234",
+            report={},
         )
 
     def testSdkUpload(

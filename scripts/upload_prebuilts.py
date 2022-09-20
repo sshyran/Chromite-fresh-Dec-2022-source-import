@@ -24,6 +24,7 @@ import glob
 import logging
 import multiprocessing
 import os
+from pathlib import Path
 import tempfile
 
 from chromite.cbuildbot import cbuildbot_alerts
@@ -40,6 +41,7 @@ from chromite.lib import parallel
 from chromite.lib import portage_util
 from chromite.lib import toolchain
 from chromite.lib.parser import package_info
+from chromite.utils import pformat
 
 
 # How many times to retry uploads.
@@ -155,12 +157,13 @@ def UpdateLocalFile(filename, value, key="PORTAGE_BINHOST"):
     return made_changes
 
 
-def RevGitFile(filename, data, dryrun=False):
+def RevGitFile(filename, data, report, dryrun=False):
     """Update and push the git file.
 
     Args:
       filename: file to modify that is in a git repo already
       data: A dict of key/values to update in |filename|
+      report: Dict in which to collect information to report to the user.
       dryrun: If True, do not actually commit the change.
     """
     prebuilt_branch = "prebuilt_branch"
@@ -188,6 +191,7 @@ def RevGitFile(filename, data, dryrun=False):
     gpatch = gerrit_helper.CreateGerritPatch(
         cwd, remote_url, ref=tracking_info.ref, notify="NONE"
     )
+    report.setdefault("created_cls", []).append(gpatch.PatchLink())
     gerrit_helper.SetReview(
         gpatch, labels={"Bot-Commit": 1}, dryrun=dryrun, notify="NONE"
     )
@@ -413,6 +417,7 @@ class PrebuiltUploader(object):
         target,
         slave_targets,
         version,
+        report,
         chroot=None,
     ):
         """Constructor for prebuilt uploader object.
@@ -438,6 +443,7 @@ class PrebuiltUploader(object):
           slave_targets: List of BuildTargets managed by slave builders.
           version: A unique string, intended to be included in the upload path,
               which identifies the version number of the uploaded prebuilts.
+          report: Dict in which to collect information to report to the user.
           chroot: Path to the chroot containing the prebuilts.
         """
         self._upload_location = upload_location
@@ -453,6 +459,7 @@ class PrebuiltUploader(object):
         self._target = target
         self._slave_targets = slave_targets
         self._version = version
+        self._report = report
         self._chroot = chroot or os.path.join(
             build_path, constants.DEFAULT_CHROOT_DIR
         )
@@ -665,7 +672,9 @@ class PrebuiltUploader(object):
             git_file = os.path.join(
                 self._build_path, _PREBUILT_MAKE_CONF[_HOST_ARCH]
             )
-            RevGitFile(git_file, {key: binhost}, dryrun=self._dryrun)
+            RevGitFile(
+                git_file, {key: binhost}, self._report, dryrun=self._dryrun
+            )
         if sync_binhost_conf:
             binhost_conf = os.path.join(
                 self._binhost_conf_dir, "host", "%s-%s.conf" % (_HOST_ARCH, key)
@@ -759,7 +768,12 @@ class PrebuiltUploader(object):
 
             if git_sync:
                 git_file = DeterminePrebuiltConfFile(self._build_path, target)
-                RevGitFile(git_file, {key: url_value}, dryrun=self._dryrun)
+                RevGitFile(
+                    git_file,
+                    {key: url_value},
+                    self._report,
+                    dryrun=self._dryrun,
+                )
 
             if sync_binhost_conf:
                 # Update the binhost configuration file in git.
@@ -888,6 +902,12 @@ def ParseOptions(argv):
         "--chroot",
         help="Path where the chroot is located. "
         "(Default: {build_path}/chroot)",
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        help="Write a JSON report to the specified file. "
+        "(Default is not to write the report.)",
     )
     parser.add_argument(
         "--packages",
@@ -1052,6 +1072,11 @@ def ParseOptions(argv):
 
 
 def main(argv):
+    # We accumulate information about actions taken and report it at the end
+    # if asked to do so. Currently, this only records CL creation, which
+    # is the only thing we need for now.
+    report = {}
+
     # Set umask so that files created as root are readable.
     os.umask(0o22)
 
@@ -1108,6 +1133,7 @@ def main(argv):
         target,
         options.slave_targets,
         version,
+        report,
         options.chroot,
     )
 
@@ -1128,3 +1154,7 @@ def main(argv):
             options.toolchain_tarballs,
             options.toolchain_upload_path,
         )
+
+    if options.json:
+        with options.json.open("w") as f:
+            pformat.json(report, fp=f)

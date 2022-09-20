@@ -4,8 +4,10 @@
 
 """Operations to work with the SDK chroot."""
 
+import json
 import logging
 import os
+import tempfile
 from typing import List, Optional, TYPE_CHECKING
 import uuid
 
@@ -466,7 +468,7 @@ def BuildPrebuilts(chroot: "chroot_lib.Chroot"):
 
 def CreateBinhostCLs(
     prepend_version: str, version: str, upload_location: str
-) -> None:
+) -> List[str]:
     """Create CLs that update the binhost to point at uploaded prebuilts.
 
     The CLs are *not* automatically submitted.
@@ -475,31 +477,38 @@ def CreateBinhostCLs(
       prepend_version: String to prepend to version.
       version: The SDK version string.
       upload_location: prefix of the upload path (e.g. 'gs://bucket')
+
+    Returns:
+      List of URIs of the created CLs.
     """
-    cros_build_lib.run(
-        [
-            os.path.join(constants.CHROMITE_BIN_DIR, "upload_prebuilts"),
-            "--skip-upload",
-            "--dry-run",
-            "--sync-host",
-            "--git-sync",
-            "--key",
-            "FULL_BINHOST",
-            "--build-path",
-            constants.SOURCE_ROOT,
-            "--board",
-            "amd64-host",
-            "--set-version",
-            version,
-            "--prepend-version",
-            prepend_version,
-            "--upload",
-            upload_location,
-            "--binhost-conf-dir",
-            constants.PUBLIC_BINHOST_CONF_DIR,
-        ],
-        check=True,
-    )
+    with tempfile.NamedTemporaryFile() as report:
+        cros_build_lib.run(
+            [
+                os.path.join(constants.CHROMITE_BIN_DIR, "upload_prebuilts"),
+                "--skip-upload",
+                "--dry-run",
+                "--sync-host",
+                "--git-sync",
+                "--key",
+                "FULL_BINHOST",
+                "--build-path",
+                constants.SOURCE_ROOT,
+                "--board",
+                "amd64-host",
+                "--set-version",
+                version,
+                "--prepend-version",
+                prepend_version,
+                "--upload",
+                upload_location,
+                "--binhost-conf-dir",
+                constants.PUBLIC_BINHOST_CONF_DIR,
+                "--output",
+                report.name,
+            ],
+            check=True,
+        )
+        return json.load(report.file)["created_cls"]
 
 
 def UploadPrebuiltPackages(

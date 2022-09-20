@@ -10,6 +10,7 @@ from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
+from chromite.lib import partial_mock
 from chromite.service import sdk
 
 
@@ -49,6 +50,30 @@ class CreateArgumentsTest(cros_test_lib.MockTestCase):
             ["--create", "--bootstrap", "--nouse-image"],
             self._GetArgsList(replace=False, bootstrap=True, use_image=False),
         )
+
+
+class CreateBinhostCLsTest(cros_test_lib.RunCommandTestCase):
+    """Tests for CreateBinhostCLs."""
+
+    def testCreateBinhostCLs(self):
+        def fake_run(cmd, *_args, **__kwargs):
+            i = cmd.index("--output")
+            self.assertGreater(len(cmd), i + 1, "no filename after --output")
+            name = cmd[i + 1]
+            with open(name, "w") as f:
+                f.write(
+                    '{ "created_cls": ["the_cl"'
+                    ', "https://crrev.com/another/42"]\n}\n'
+                )
+
+        self.rc.AddCmdResult(
+            partial_mock.ListRegex("upload_prebuilts"),
+            side_effect=fake_run,
+        )
+        cls = sdk.CreateBinhostCLs(
+            "unittest", "2022-02-22", "gs://unittest/createbinhostcls"
+        )
+        self.assertEqual(cls, ["the_cl", "https://crrev.com/another/42"])
 
 
 class UpdateArgumentsTest(cros_test_lib.TestCase):

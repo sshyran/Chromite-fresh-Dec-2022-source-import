@@ -20,6 +20,14 @@ def _ChrootVersionResponse(_input_proto, output_proto, _config):
     output_proto.version.version = 168
 
 
+def _CLUris(_input_proto, output_proto, _config):
+    """Add fake CL URIs to a successful response."""
+    output_proto.cls = [
+        "https://crrev.com/fakecl/1",
+        "https://crrev.com/fakecl/2",
+    ]
+
+
 @faux.success(_ChrootVersionResponse)
 @faux.empty_error
 def Create(
@@ -170,16 +178,22 @@ def BuildPrebuilts(input_proto, _output_proto, _config):
     sdk.BuildPrebuilts(chroot)
 
 
-@faux.all_empty
+@faux.success(_CLUris)
+@faux.empty_error
 @validate.require("prepend_version", "version", "upload_location")
 @validate.validation_complete
-def CreateBinhostCLs(input_proto, _output_proto, _config):
+def CreateBinhostCLs(
+    input_proto: "CreateBinhostCLsRequest",
+    output_proto: "CreateBinhostCLsResponse",
+    _config: "api_config.ApiConfig",
+) -> None:
     """Create CLs to update the binhost to point at uploaded prebuilts."""
-    sdk.CreateBinhostCLs(
+    uris = sdk.CreateBinhostCLs(
         input_proto.prepend_version,
         input_proto.version,
         input_proto.upload_location,
     )
+    output_proto.cls = uris
 
 
 @faux.all_empty
