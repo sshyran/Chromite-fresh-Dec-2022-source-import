@@ -2,7 +2,15 @@
 
 This guide covers how to use `cros ap` tooling.
 If you're interested in changing/fixing config for your board, please refer to
-[ap_firmware_config/README.md](ap_firmware_config/README.md)
+[ap_firmware_config/README.md](ap_firmware_config/README.md).
+
+All `cros ap` commands should be run within the chroot. All examples below
+assume that you have already
+[entered the chroot](http://go/chromeos-building#enter-the-chroot). You can
+enter the chroot by calling:
+```
+  (outside) cros_sdk
+```
 
 ## Building
 To build the AP Firmware for board `foo`:
