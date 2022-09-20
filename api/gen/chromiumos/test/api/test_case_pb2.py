@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z-go.chromium.org/chromiumos/config/go/test/api',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n#chromiumos/test/api/test_case.proto\x12\x13\x63hromiumos.test.api\"\xa2\x01\n\x08TestCase\x12,\n\x02id\x18\x01 \x01(\x0b\x32 .chromiumos.test.api.TestCase.Id\x12\x0c\n\x04name\x18\x02 \x01(\t\x12/\n\x04tags\x18\x03 \x03(\x0b\x32!.chromiumos.test.api.TestCase.Tag\x1a\x13\n\x02Id\x12\r\n\x05value\x18\x01 \x01(\t\x1a\x14\n\x03Tag\x12\r\n\x05value\x18\x01 \x01(\t\"I\n\x0eTestCaseIdList\x12\x37\n\rtest_case_ids\x18\x01 \x03(\x0b\x32 .chromiumos.test.api.TestCase.IdB/Z-go.chromium.org/chromiumos/config/go/test/apib\x06proto3'
+  serialized_pb=b'\n#chromiumos/test/api/test_case.proto\x12\x13\x63hromiumos.test.api\"\xff\x01\n\x08TestCase\x12,\n\x02id\x18\x01 \x01(\x0b\x32 .chromiumos.test.api.TestCase.Id\x12\x0c\n\x04name\x18\x02 \x01(\t\x12/\n\x04tags\x18\x03 \x03(\x0b\x32!.chromiumos.test.api.TestCase.Tag\x12>\n\x0c\x64\x65pendencies\x18\x04 \x03(\x0b\x32(.chromiumos.test.api.TestCase.Dependency\x1a\x13\n\x02Id\x12\r\n\x05value\x18\x01 \x01(\t\x1a\x14\n\x03Tag\x12\r\n\x05value\x18\x01 \x01(\t\x1a\x1b\n\nDependency\x12\r\n\x05value\x18\x01 \x01(\t\"I\n\x0eTestCaseIdList\x12\x37\n\rtest_case_ids\x18\x01 \x03(\x0b\x32 .chromiumos.test.api.TestCase.Id\"A\n\x0cTestCaseList\x12\x31\n\ntest_cases\x18\x01 \x03(\x0b\x32\x1d.chromiumos.test.api.TestCaseB/Z-go.chromium.org/chromiumos/config/go/test/apib\x06proto3'
 )
 
 
@@ -52,8 +52,8 @@ _TESTCASE_ID = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=182,
-  serialized_end=201,
+  serialized_start=246,
+  serialized_end=265,
 )
 
 _TESTCASE_TAG = _descriptor.Descriptor(
@@ -83,8 +83,39 @@ _TESTCASE_TAG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=203,
-  serialized_end=223,
+  serialized_start=267,
+  serialized_end=287,
+)
+
+_TESTCASE_DEPENDENCY = _descriptor.Descriptor(
+  name='Dependency',
+  full_name='chromiumos.test.api.TestCase.Dependency',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='value', full_name='chromiumos.test.api.TestCase.Dependency.value', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=289,
+  serialized_end=316,
 )
 
 _TESTCASE = _descriptor.Descriptor(
@@ -116,10 +147,17 @@ _TESTCASE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='dependencies', full_name='chromiumos.test.api.TestCase.dependencies', index=3,
+      number=4, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
-  nested_types=[_TESTCASE_ID, _TESTCASE_TAG, ],
+  nested_types=[_TESTCASE_ID, _TESTCASE_TAG, _TESTCASE_DEPENDENCY, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -129,7 +167,7 @@ _TESTCASE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=61,
-  serialized_end=223,
+  serialized_end=316,
 )
 
 
@@ -160,17 +198,53 @@ _TESTCASEIDLIST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=225,
-  serialized_end=298,
+  serialized_start=318,
+  serialized_end=391,
+)
+
+
+_TESTCASELIST = _descriptor.Descriptor(
+  name='TestCaseList',
+  full_name='chromiumos.test.api.TestCaseList',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='test_cases', full_name='chromiumos.test.api.TestCaseList.test_cases', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=393,
+  serialized_end=458,
 )
 
 _TESTCASE_ID.containing_type = _TESTCASE
 _TESTCASE_TAG.containing_type = _TESTCASE
+_TESTCASE_DEPENDENCY.containing_type = _TESTCASE
 _TESTCASE.fields_by_name['id'].message_type = _TESTCASE_ID
 _TESTCASE.fields_by_name['tags'].message_type = _TESTCASE_TAG
+_TESTCASE.fields_by_name['dependencies'].message_type = _TESTCASE_DEPENDENCY
 _TESTCASEIDLIST.fields_by_name['test_case_ids'].message_type = _TESTCASE_ID
+_TESTCASELIST.fields_by_name['test_cases'].message_type = _TESTCASE
 DESCRIPTOR.message_types_by_name['TestCase'] = _TESTCASE
 DESCRIPTOR.message_types_by_name['TestCaseIdList'] = _TESTCASEIDLIST
+DESCRIPTOR.message_types_by_name['TestCaseList'] = _TESTCASELIST
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 TestCase = _reflection.GeneratedProtocolMessageType('TestCase', (_message.Message,), {
@@ -188,6 +262,13 @@ TestCase = _reflection.GeneratedProtocolMessageType('TestCase', (_message.Messag
     # @@protoc_insertion_point(class_scope:chromiumos.test.api.TestCase.Tag)
     })
   ,
+
+  'Dependency' : _reflection.GeneratedProtocolMessageType('Dependency', (_message.Message,), {
+    'DESCRIPTOR' : _TESTCASE_DEPENDENCY,
+    '__module__' : 'chromiumos.test.api.test_case_pb2'
+    # @@protoc_insertion_point(class_scope:chromiumos.test.api.TestCase.Dependency)
+    })
+  ,
   'DESCRIPTOR' : _TESTCASE,
   '__module__' : 'chromiumos.test.api.test_case_pb2'
   # @@protoc_insertion_point(class_scope:chromiumos.test.api.TestCase)
@@ -195,6 +276,7 @@ TestCase = _reflection.GeneratedProtocolMessageType('TestCase', (_message.Messag
 _sym_db.RegisterMessage(TestCase)
 _sym_db.RegisterMessage(TestCase.Id)
 _sym_db.RegisterMessage(TestCase.Tag)
+_sym_db.RegisterMessage(TestCase.Dependency)
 
 TestCaseIdList = _reflection.GeneratedProtocolMessageType('TestCaseIdList', (_message.Message,), {
   'DESCRIPTOR' : _TESTCASEIDLIST,
@@ -202,6 +284,13 @@ TestCaseIdList = _reflection.GeneratedProtocolMessageType('TestCaseIdList', (_me
   # @@protoc_insertion_point(class_scope:chromiumos.test.api.TestCaseIdList)
   })
 _sym_db.RegisterMessage(TestCaseIdList)
+
+TestCaseList = _reflection.GeneratedProtocolMessageType('TestCaseList', (_message.Message,), {
+  'DESCRIPTOR' : _TESTCASELIST,
+  '__module__' : 'chromiumos.test.api.test_case_pb2'
+  # @@protoc_insertion_point(class_scope:chromiumos.test.api.TestCaseList)
+  })
+_sym_db.RegisterMessage(TestCaseList)
 
 
 DESCRIPTOR._options = None

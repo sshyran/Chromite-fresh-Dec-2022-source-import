@@ -23,7 +23,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z-go.chromium.org/chromiumos/config/go/test/api',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\'chromiumos/test/api/cros_test_cli.proto\x12\x13\x63hromiumos.test.api\x1a*chromiumos/test/api/test_case_result.proto\x1a$chromiumos/test/api/test_suite.proto\x1a!chromiumos/test/lab/api/dut.proto\x1a)chromiumos/test/lab/api/ip_endpoint.proto\"\xb2\x03\n\x0f\x43rosTestRequest\x12\x33\n\x0btest_suites\x18\x01 \x03(\x0b\x32\x1e.chromiumos.test.api.TestSuite\x12<\n\x07primary\x18\x02 \x01(\x0b\x32+.chromiumos.test.api.CrosTestRequest.Device\x12?\n\ncompanions\x18\x03 \x03(\x0b\x32+.chromiumos.test.api.CrosTestRequest.Device\x12=\n\x10inventory_server\x18\x04 \x01(\x0b\x32#.chromiumos.test.lab.api.IpEndpoint\x1a\xab\x01\n\x06\x44\x65vice\x12)\n\x03\x64ut\x18\x01 \x01(\x0b\x32\x1c.chromiumos.test.lab.api.Dut\x12\x37\n\ndut_server\x18\x02 \x01(\x0b\x32#.chromiumos.test.lab.api.IpEndpoint\x12=\n\x10provision_server\x18\x03 \x01(\x0b\x32#.chromiumos.test.lab.api.IpEndpoint\"R\n\x10\x43rosTestResponse\x12>\n\x11test_case_results\x18\x01 \x03(\x0b\x32#.chromiumos.test.api.TestCaseResultB/Z-go.chromium.org/chromiumos/config/go/test/apib\x06proto3'
+  serialized_pb=b'\n\'chromiumos/test/api/cros_test_cli.proto\x12\x13\x63hromiumos.test.api\x1a*chromiumos/test/api/test_case_result.proto\x1a$chromiumos/test/api/test_suite.proto\x1a!chromiumos/test/lab/api/dut.proto\x1a)chromiumos/test/lab/api/ip_endpoint.proto\"\xec\x03\n\x0f\x43rosTestRequest\x12\x33\n\x0btest_suites\x18\x01 \x03(\x0b\x32\x1e.chromiumos.test.api.TestSuite\x12<\n\x07primary\x18\x02 \x01(\x0b\x32+.chromiumos.test.api.CrosTestRequest.Device\x12?\n\ncompanions\x18\x03 \x03(\x0b\x32+.chromiumos.test.api.CrosTestRequest.Device\x12=\n\x10inventory_server\x18\x04 \x01(\x0b\x32#.chromiumos.test.lab.api.IpEndpoint\x1a\xe5\x01\n\x06\x44\x65vice\x12)\n\x03\x64ut\x18\x01 \x01(\x0b\x32\x1c.chromiumos.test.lab.api.Dut\x12\x37\n\ndut_server\x18\x02 \x01(\x0b\x32#.chromiumos.test.lab.api.IpEndpoint\x12=\n\x10provision_server\x18\x03 \x01(\x0b\x32#.chromiumos.test.lab.api.IpEndpoint\x12\x38\n\x0blibs_server\x18\x04 \x01(\x0b\x32#.chromiumos.test.lab.api.IpEndpoint\"R\n\x10\x43rosTestResponse\x12>\n\x11test_case_results\x18\x01 \x03(\x0b\x32#.chromiumos.test.api.TestCaseResultB/Z-go.chromium.org/chromiumos/config/go/test/apib\x06proto3'
   ,
   dependencies=[chromiumos_dot_test_dot_api_dot_test__case__result__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_test__suite__pb2.DESCRIPTOR,chromiumos_dot_test_dot_lab_dot_api_dot_dut__pb2.DESCRIPTOR,chromiumos_dot_test_dot_lab_dot_api_dot_ip__endpoint__pb2.DESCRIPTOR,])
 
@@ -59,6 +59,13 @@ _CROSTESTREQUEST_DEVICE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='libs_server', full_name='chromiumos.test.api.CrosTestRequest.Device.libs_server', index=3,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -72,7 +79,7 @@ _CROSTESTREQUEST_DEVICE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=488,
-  serialized_end=659,
+  serialized_end=717,
 )
 
 _CROSTESTREQUEST = _descriptor.Descriptor(
@@ -124,7 +131,7 @@ _CROSTESTREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=225,
-  serialized_end=659,
+  serialized_end=717,
 )
 
 
@@ -155,13 +162,14 @@ _CROSTESTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=661,
-  serialized_end=743,
+  serialized_start=719,
+  serialized_end=801,
 )
 
 _CROSTESTREQUEST_DEVICE.fields_by_name['dut'].message_type = chromiumos_dot_test_dot_lab_dot_api_dot_dut__pb2._DUT
 _CROSTESTREQUEST_DEVICE.fields_by_name['dut_server'].message_type = chromiumos_dot_test_dot_lab_dot_api_dot_ip__endpoint__pb2._IPENDPOINT
 _CROSTESTREQUEST_DEVICE.fields_by_name['provision_server'].message_type = chromiumos_dot_test_dot_lab_dot_api_dot_ip__endpoint__pb2._IPENDPOINT
+_CROSTESTREQUEST_DEVICE.fields_by_name['libs_server'].message_type = chromiumos_dot_test_dot_lab_dot_api_dot_ip__endpoint__pb2._IPENDPOINT
 _CROSTESTREQUEST_DEVICE.containing_type = _CROSTESTREQUEST
 _CROSTESTREQUEST.fields_by_name['test_suites'].message_type = chromiumos_dot_test_dot_api_dot_test__suite__pb2._TESTSUITE
 _CROSTESTREQUEST.fields_by_name['primary'].message_type = _CROSTESTREQUEST_DEVICE

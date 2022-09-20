@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z1go.chromium.org/chromiumos/config/go/api/software',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n.chromiumos/config/api/software/ui_config.proto\x12\x1e\x63hromiumos.config.api.software\"\xcf\x01\n\x08UiConfig\x12\x1a\n\x12\x65xtra_web_apps_dir\x18\x01 \x01(\t\x12I\n\x0brequisition\x18\x02 \x01(\x0e\x32\x34.chromiumos.config.api.software.UiConfig.Requisition\"\\\n\x0bRequisition\x12\x1b\n\x17REQUISITION_UNSPECIFIED\x10\x00\x12\x18\n\x14REQUISITION_CHROMEOS\x10\x01\x12\x16\n\x12REQUISITION_MEETHW\x10\x02\x42\x33Z1go.chromium.org/chromiumos/config/go/api/softwareb\x06proto3'
+  serialized_pb=b'\n.chromiumos/config/api/software/ui_config.proto\x12\x1e\x63hromiumos.config.api.software\"\xec\x01\n\x08UiConfig\x12\x1a\n\x12\x65xtra_web_apps_dir\x18\x01 \x01(\t\x12I\n\x0brequisition\x18\x02 \x01(\x0e\x32\x34.chromiumos.config.api.software.UiConfig.Requisition\x12\x1b\n\x13\x63loud_gaming_device\x18\x03 \x01(\x08\"\\\n\x0bRequisition\x12\x1b\n\x17REQUISITION_UNSPECIFIED\x10\x00\x12\x18\n\x14REQUISITION_CHROMEOS\x10\x01\x12\x16\n\x12REQUISITION_MEETHW\x10\x02\x42\x33Z1go.chromium.org/chromiumos/config/go/api/softwareb\x06proto3'
 )
 
 
@@ -49,8 +49,8 @@ _UICONFIG_REQUISITION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=198,
-  serialized_end=290,
+  serialized_start=227,
+  serialized_end=319,
 )
 _sym_db.RegisterEnumDescriptor(_UICONFIG_REQUISITION)
 
@@ -77,6 +77,13 @@ _UICONFIG = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='cloud_gaming_device', full_name='chromiumos.config.api.software.UiConfig.cloud_gaming_device', index=2,
+      number=3, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -91,7 +98,7 @@ _UICONFIG = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=83,
-  serialized_end=290,
+  serialized_end=319,
 )
 
 _UICONFIG.fields_by_name['requisition'].enum_type = _UICONFIG_REQUISITION
