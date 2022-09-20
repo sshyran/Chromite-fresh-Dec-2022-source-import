@@ -1363,6 +1363,7 @@ class ChromeSDKCommand(command.CliCommand):
                         "cros_host_(cc|cxx|ld|extra_(c|cpp|cxx|ld)flags)",
                         "cros_target_(ar|cc|cxx|ld|nm|readelf|extra_(c|cpp|cxx|ld)flags)",
                         "cros_v8_snapshot_(cc|cxx|ld|extra_(c|cpp|cxx|ld)flags)",
+                        "cros_nacl_helper_arm32_(ar|cc|cxx|ld|readelf|sysroot)",
                         "(custom|host|v8_snapshot)_toolchain",
                         "rbe_cros_cc_wrapper",
                         "system_libdir",
