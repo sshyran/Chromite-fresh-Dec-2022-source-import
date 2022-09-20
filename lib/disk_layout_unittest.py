@@ -2,37 +2,22 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Unit tests for disk_layout_tool."""
-
-# pylint: disable=W0212
+"""Test chromite.lib.disk_layout"""
 
 import os
-import shutil
-import tempfile
-import unittest
 
-from chromite.scripts import disk_layout_tool
+from chromite.lib import cros_test_lib
+from chromite.lib import disk_layout
 
 
-class JSONLoadingTest(unittest.TestCase):
+class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
     """Test stacked JSON loading functions."""
 
-    def __init__(self, *args, **kwargs):
-        unittest.TestCase.__init__(self, *args, **kwargs)
-        self.tempdir = None
-        self.maxDiff = 1000
-
     def setUp(self):
-        self.tempdir = tempfile.mkdtemp(prefix="cgpt-test_")
         self.layout_json = os.path.join(self.tempdir, "test_layout.json")
         self.parent_layout_json = os.path.join(
             self.tempdir, "test_layout_parent.json"
         )
-
-    def tearDown(self):
-        if self.tempdir is not None:
-            shutil.rmtree(self.tempdir)
-            self.tempdir = None
 
     def testJSONComments(self):
         """Test that we ignore comments in JSON in lines starting with #."""
@@ -47,8 +32,9 @@ class JSONLoadingTest(unittest.TestCase):
 }
 """
             )
+        # pylint: disable-msg=W0212
         self.assertEqual(
-            disk_layout_tool._LoadStackedPartitionConfig(self.layout_json),
+            disk_layout._LoadStackedPartitionConfig(self.layout_json),
             {"layouts": {"common": []}},
         )
 
@@ -64,14 +50,15 @@ class JSONLoadingTest(unittest.TestCase):
     "layouts": { # This is an inline comment, but is not supported.
         "common": []}}"""
             )
+        # pylint: disable-msg=W0212
         self.assertRaises(
             ValueError,
-            disk_layout_tool._LoadStackedPartitionConfig,
+            disk_layout._LoadStackedPartitionConfig,
             self.layout_json,
         )
 
     def testPartitionOrderPreserved(self):
-        """Test that the order of the partitions is the same as in parent."""
+        """Test the order of the partitions is the same as in the parent."""
         with open(self.parent_layout_json, "w") as f:
             f.write(
                 """{
@@ -93,7 +80,8 @@ class JSONLoadingTest(unittest.TestCase):
   }
 }"""
             )
-        parent_layout = disk_layout_tool._LoadStackedPartitionConfig(
+        # pylint: disable-msg=W0212
+        parent_layout = disk_layout._LoadStackedPartitionConfig(
             self.parent_layout_json
         )
 
@@ -107,7 +95,8 @@ class JSONLoadingTest(unittest.TestCase):
 }"""
                 % self.parent_layout_json
             )
-        layout = disk_layout_tool._LoadStackedPartitionConfig(self.layout_json)
+        # pylint: disable-msg=W0212
+        layout = disk_layout._LoadStackedPartitionConfig(self.layout_json)
         self.assertEqual(parent_layout, layout)
 
         # Test also that even overriding one partition keeps all of them in
@@ -127,7 +116,8 @@ class JSONLoadingTest(unittest.TestCase):
 }"""
                 % self.parent_layout_json
             )
-        layout = disk_layout_tool._LoadStackedPartitionConfig(self.layout_json)
+        # pylint: disable-msg=W0212
+        layout = disk_layout._LoadStackedPartitionConfig(self.layout_json)
         self.assertEqual(parent_layout, layout)
 
     def testGetStartByteOffsetIsAccurate(self):
@@ -160,26 +150,26 @@ class JSONLoadingTest(unittest.TestCase):
                     % (i[0], i[1] * i[0])
                 )
 
-            config = disk_layout_tool.LoadPartitionConfig(self.layout_json)
+            config = disk_layout.LoadPartitionConfig(self.layout_json)
 
             class Options(object):
                 """Fake options"""
 
                 adjust_part = ""
 
-            partitions = disk_layout_tool.GetPartitionTable(
+            partitions = disk_layout.GetPartitionTable(
                 Options(), config, "base"
             )
-            start_offset = disk_layout_tool._GetPartitionStartByteOffset(
+            # pylint: disable-msg=W0212
+            start_offset = disk_layout._GetPartitionStartByteOffset(
                 config, partitions
             )
             self.assertEqual(
-                start_offset, disk_layout_tool.START_SECTOR + i[1] * i[0]
+                start_offset, disk_layout.START_SECTOR + i[1] * i[0]
             )
 
     def testGetTableTotalsSizeIsAccurate(self):
         """Test primary_entry_array_lba results in an accurate block count."""
-
         test_params = (
             # block_size, primary_entry_array_padding_bytes (in blocks),
             # partition size (MiB)
@@ -211,25 +201,24 @@ class JSONLoadingTest(unittest.TestCase):
                     % (i[0], i[1] * i[0], i[2])
                 )
 
-            config = disk_layout_tool.LoadPartitionConfig(self.layout_json)
+            config = disk_layout.LoadPartitionConfig(self.layout_json)
 
             class Options(object):
                 """Fake options"""
 
                 adjust_part = ""
 
-            partitions = disk_layout_tool.GetPartitionTable(
+            partitions = disk_layout.GetPartitionTable(
                 Options(), config, "base"
             )
-            totals = disk_layout_tool.GetTableTotals(config, partitions)
+            totals = disk_layout.GetTableTotals(config, partitions)
 
             # Calculate the expected image block size.
+            # pylint: disable-msg=W0212
             total_size = (
-                disk_layout_tool._GetPartitionStartByteOffset(
-                    config, partitions
-                )
+                disk_layout._GetPartitionStartByteOffset(config, partitions)
                 + sum([x["bytes"] for x in partitions])
-                + disk_layout_tool.SECONDARY_GPT_BYTES
+                + disk_layout.SECONDARY_GPT_BYTES
             )
 
             self.assertEqual(totals["byte_count"], total_size)
@@ -260,8 +249,9 @@ class JSONLoadingTest(unittest.TestCase):
   }
 }"""
             )
+        # pylint: disable-msg=W0212
         self.assertEqual(
-            disk_layout_tool._LoadStackedPartitionConfig(self.layout_json),
+            disk_layout._LoadStackedPartitionConfig(self.layout_json),
             {
                 "layouts": {
                     "common": [],
@@ -291,9 +281,10 @@ class JSONLoadingTest(unittest.TestCase):
   }
 }"""
             )
+        # pylint: disable-msg=W0212
         self.assertRaises(
-            disk_layout_tool.ConflictingPartitionOrder,
-            disk_layout_tool._LoadStackedPartitionConfig,
+            disk_layout.ConflictingPartitionOrderError,
+            disk_layout._LoadStackedPartitionConfig,
             self.layout_json,
         )
 
@@ -317,8 +308,9 @@ class JSONLoadingTest(unittest.TestCase):
   }
 }"""
             )
+        # pylint: disable-msg=W0212
         self.assertEqual(
-            disk_layout_tool._LoadStackedPartitionConfig(self.layout_json),
+            disk_layout._LoadStackedPartitionConfig(self.layout_json),
             {
                 "layouts": {
                     "common": [{"num": 1}, {"num": 2}, {"num": 3}],
@@ -355,11 +347,11 @@ class JSONLoadingTest(unittest.TestCase):
 }"""
             )
         try:
-            disk_layout_tool.LoadPartitionConfig(self.layout_json)
-        except disk_layout_tool.InvalidSize as e:
+            disk_layout.LoadPartitionConfig(self.layout_json)
+        except disk_layout.InvalidSizeError as e:
             self.assertTrue("must be positive" in str(e))
         else:
-            self.fail("InvalidSize not raised.")
+            self.fail("InvalidSizeError not raised.")
 
     def testFileSystemSizeLargerThanPartition(self):
         """Test that file system size must not be greater than partition."""
@@ -384,11 +376,11 @@ class JSONLoadingTest(unittest.TestCase):
 }"""
             )
         try:
-            disk_layout_tool.LoadPartitionConfig(self.layout_json)
-        except disk_layout_tool.InvalidSize as e:
+            disk_layout.LoadPartitionConfig(self.layout_json)
+        except disk_layout.InvalidSizeError as e:
             self.assertTrue("may not be larger than partition" in str(e))
         else:
-            self.fail("InvalidSize not raised.")
+            self.fail("InvalidSizeError not raised.")
 
     def testFileSystemSizeNotMultipleBlocks(self):
         """Test file system size must be multiples of file system blocks."""
@@ -413,11 +405,11 @@ class JSONLoadingTest(unittest.TestCase):
 }"""
             )
         try:
-            disk_layout_tool.LoadPartitionConfig(self.layout_json)
-        except disk_layout_tool.InvalidSize as e:
+            disk_layout.LoadPartitionConfig(self.layout_json)
+        except disk_layout.InvalidSizeError as e:
             self.assertTrue("not an even multiple of fs_align" in str(e))
         else:
-            self.fail("InvalidSize not raised.")
+            self.fail("InvalidSizeError not raised.")
 
     def testFileSystemSizeForUbiWithNoPageSize(self):
         """Test that "page_size" must be present to calculate UBI fs size."""
@@ -443,11 +435,11 @@ class JSONLoadingTest(unittest.TestCase):
 }"""
             )
         try:
-            disk_layout_tool.LoadPartitionConfig(self.layout_json)
-        except disk_layout_tool.InvalidLayout as e:
+            disk_layout.LoadPartitionConfig(self.layout_json)
+        except disk_layout.InvalidLayoutError as e:
             self.assertTrue("page_size" in str(e))
         else:
-            self.fail("InvalidLayout not raised.")
+            self.fail("InvalidLayoutError not raised.")
 
     def testFileSystemSizeForUbiWithNoEraseBlockSize(self):
         """Test "erase_block_size" must be present to calculate UBI fs size."""
@@ -477,11 +469,11 @@ class JSONLoadingTest(unittest.TestCase):
 }"""
             )
         try:
-            disk_layout_tool.LoadPartitionConfig(self.layout_json)
-        except disk_layout_tool.InvalidLayout as e:
+            disk_layout.LoadPartitionConfig(self.layout_json)
+        except disk_layout.InvalidLayoutError as e:
             self.assertTrue("erase_block_size" in str(e))
         else:
-            self.fail("InvalidLayout not raised.")
+            self.fail("InvalidLayoutError not raised.")
 
     def testFileSystemSizeForUbiIsNotMultipleOfUbiEraseBlockSize(self):
         """Test that we raise when fs_size is not multiple of eraseblocks."""
@@ -512,11 +504,11 @@ class JSONLoadingTest(unittest.TestCase):
 }"""
             )
         try:
-            disk_layout_tool.LoadPartitionConfig(self.layout_json)
-        except disk_layout_tool.InvalidSize as e:
+            disk_layout.LoadPartitionConfig(self.layout_json)
+        except disk_layout.InvalidSizeError as e:
             self.assertTrue('to "248 KiB" in the "common" layout' in str(e))
         else:
-            self.fail("InvalidSize not raised")
+            self.fail("InvalidSizeError not raised")
 
     def testFileSystemSizeForUbiIsMultipleOfUbiEraseBlockSize(self):
         """Test everything is okay when fs_size is multiple of eraseblocks."""
@@ -547,7 +539,7 @@ class JSONLoadingTest(unittest.TestCase):
 }"""
             )
         self.assertEqual(
-            disk_layout_tool.LoadPartitionConfig(self.layout_json),
+            disk_layout.LoadPartitionConfig(self.layout_json),
             {
                 "layouts": {
                     "base": [
@@ -581,8 +573,8 @@ class JSONLoadingTest(unittest.TestCase):
         )
 
 
-class UtilityTest(unittest.TestCase):
-    """Test various utility functions in disk_layout_tool.py."""
+class UtilityTest(cros_test_lib.MockTestCase):
+    """Test various utility functions in disk_layout.py."""
 
     def testParseHumanNumber(self):
         """Test that ParseHumanNumber is correct."""
@@ -601,7 +593,7 @@ class UtilityTest(unittest.TestCase):
             ("8TiB", 8 * 2**40),
         ]
         for inp, exp in test_cases:
-            self.assertEqual(disk_layout_tool.ParseHumanNumber(inp), exp)
+            self.assertEqual(disk_layout.ParseHumanNumber(inp), exp)
 
     def testProduceHumanNumber(self):
         """Test that ProduceHumanNumber is correct."""
@@ -618,11 +610,11 @@ class UtilityTest(unittest.TestCase):
             ("8 TiB", 8 * 2**40),
         ]
         for exp, inp in test_cases:
-            self.assertEqual(disk_layout_tool.ProduceHumanNumber(inp), exp)
+            self.assertEqual(disk_layout.ProduceHumanNumber(inp), exp)
 
     def testGetScriptShell(self):
         """Verify GetScriptShell works."""
-        data = disk_layout_tool.GetScriptShell()
+        data = disk_layout.GetScriptShell()
         self.assertIn("#!/bin/sh", data)
 
     def testParseProduce(self):
@@ -641,12 +633,6 @@ class UtilityTest(unittest.TestCase):
         ]
         for n in test_cases:
             self.assertEqual(
-                disk_layout_tool.ParseHumanNumber(
-                    disk_layout_tool.ProduceHumanNumber(n)
-                ),
+                disk_layout.ParseHumanNumber(disk_layout.ProduceHumanNumber(n)),
                 n,
             )
-
-
-if __name__ == "__main__":
-    unittest.main()
