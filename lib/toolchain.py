@@ -324,7 +324,10 @@ class ToolchainInstaller(object):
             # Extract to the temporary directory.
             cmd = ["tar", "-I", compressor, "-xpf", libc_path, "-C", tempdir]
             result = cros_build_lib.sudo_run(
-                cmd, check=False, capture_output=True, stderr=subprocess.STDOUT
+                cmd,
+                check=False,
+                stdout=True,
+                stderr=subprocess.STDOUT,
             )
             if result.returncode:
                 logging.error("failed to extract libc:\n%s", result.stdout)
@@ -343,7 +346,10 @@ class ToolchainInstaller(object):
                 f"{sysroot.path}/",
             ]
             result = cros_build_lib.sudo_run(
-                cmd, check=False, capture_output=True, stderr=subprocess.STDOUT
+                cmd,
+                check=False,
+                stdout=True,
+                stderr=subprocess.STDOUT,
             )
             if result.returncode:
                 logging.error("failed to install libc:\n%s", result.stdout)
@@ -364,7 +370,10 @@ class ToolchainInstaller(object):
                 f"{debug_dir}/",
             ]
             result = cros_build_lib.sudo_run(
-                cmd, check=False, capture_output=True, stderr=subprocess.STDOUT
+                cmd,
+                check=False,
+                stdout=True,
+                stderr=subprocess.STDOUT,
             )
             if result.returncode:
                 logging.error(
