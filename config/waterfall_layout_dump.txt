@@ -178,6 +178,7 @@
     hana-release
     hatch-arc-r-userdebug-release
     hatch-arc-t-release
+    hatch-connectivitynext-release
     hatch-kernelnext-release
     hatch-release
     herobrine-release
@@ -239,6 +240,7 @@
     tael-release
     tatl-release
     trogdor-arc-r-release
+    trogdor-connectivitynext-release
     trogdor-kernelnext-release
     trogdor-release
     trogdor-userdebug-release
@@ -778,6 +780,11 @@
   hatch-arc-t-llvm-toolchain-tryjob
   hatch-arc-t-payloads-tryjob
   hatch-arc-t-release-tryjob
+  hatch-connectivitynext-full-tryjob
+  hatch-connectivitynext-llvm-next-toolchain-tryjob
+  hatch-connectivitynext-llvm-toolchain-tryjob
+  hatch-connectivitynext-payloads-tryjob
+  hatch-connectivitynext-release-tryjob
   hatch-factory-hatch-12692.B-factorybranch-tryjob
   hatch-full-tryjob
   hatch-kernelnext-full-tryjob
@@ -985,6 +992,7 @@
     hana-release-tryjob
     hatch-arc-r-userdebug-release-tryjob
     hatch-arc-t-release-tryjob
+    hatch-connectivitynext-release-tryjob
     hatch-kernelnext-release-tryjob
     hatch-release-tryjob
     herobrine-release-tryjob
@@ -1046,6 +1054,7 @@
     tael-release-tryjob
     tatl-release-tryjob
     trogdor-arc-r-release-tryjob
+    trogdor-connectivitynext-release-tryjob
     trogdor-kernelnext-release-tryjob
     trogdor-release-tryjob
     trogdor-userdebug-release-tryjob
@@ -1318,6 +1327,11 @@
   trogdor-arc-r-llvm-toolchain-tryjob
   trogdor-arc-r-payloads-tryjob
   trogdor-arc-r-release-tryjob
+  trogdor-connectivitynext-full-tryjob
+  trogdor-connectivitynext-llvm-next-toolchain-tryjob
+  trogdor-connectivitynext-llvm-toolchain-tryjob
+  trogdor-connectivitynext-payloads-tryjob
+  trogdor-connectivitynext-release-tryjob
   trogdor-factory-strongbad-13963.B-factorybranch-tryjob
   trogdor-factory-trogdor-13443.B-factorybranch-tryjob
   trogdor-full-tryjob
