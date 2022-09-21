@@ -6,6 +6,7 @@
 
 import json
 import re
+from typing import Optional, Union
 
 from chromite.lib import osutils
 
@@ -60,6 +61,53 @@ def PopValueOfType(a_dict, key, value_type, value_description):
     return ret
 
 
+# Remove # comments.
+STRIP_HASH_COMMENTS = re.compile(r"^\s*#.*", flags=re.M)
+
+
+def loads(
+    data: Union[bytes, str],
+    strip_utf8_bom: Optional[bool] = True,
+    strip_hash_comments: Optional[bool] = True,
+    **kwargs,
+):
+    """Parse JSON data with optional comment support.
+
+    Args:
+        data: JSON data.
+        strip_utf8_bom: Remove leading UTF-8 BOM.
+        strip_hash_comments: Strip # comments.
+        kwargs: Passed to json.loads().
+
+    Returns:
+        The parsed JSON data.
+    """
+    if isinstance(data, bytes):
+        data = data.decode("utf-8")
+
+    # Strip off leading UTF-8 BOM if it exists.
+    if strip_utf8_bom and data.startswith("\ufeff"):
+        data = data[1:]
+
+    # Strip out comments for JSON parsing.
+    if strip_hash_comments:
+        # Replace with blank lines so Python error messages maintain the right
+        # line numbers.
+        data = STRIP_HASH_COMMENTS.sub("", data)
+
+    return json.loads(data, **kwargs)
+
+
+def load(fp, **kwargs):
+    """Parse a JSON file with optional comment support.
+
+    Args:
+        fp: A file handle that can be .read().
+        kwargs: Passed to loads().
+    """
+    return loads(fp.read(), **kwargs)
+
+
 def ParseJsonFileWithComments(path):
     """Parse a JSON file with bash style comments.
 
@@ -71,11 +119,7 @@ def ParseJsonFileWithComments(path):
     Returns:
       Python representation of contents of JSON file.
     """
-    prog = re.compile(r"\s*#.*")
-    lines = osutils.ReadFile(path).splitlines()
-    lines = ["" if prog.match(line) else line for line in lines]
-    parsed_contents = json.loads("\n".join(lines))
-    return parsed_contents
+    return loads(osutils.ReadFile(path))
 
 
 def GetNestedDictValue(a_dict, nested_key):

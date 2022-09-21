@@ -73,12 +73,17 @@ class JsonHelpersTest(cros_test_lib.MockTestCase):
         JSON_WITH_COMMENTS = """
         {
         # I am a comment.
-        "foo": []
+        "foo": [],
+        "# I am not": "a # comment"
         }
         """
         self.PatchObject(osutils, "ReadFile", return_value=JSON_WITH_COMMENTS)
         self.assertEqual(
-            {"foo": []}, json_lib.ParseJsonFileWithComments("fake path")
+            {
+                "foo": [],
+                "# I am not": "a # comment",
+            },
+            json_lib.ParseJsonFileWithComments("fake path"),
         )
         self.PatchObject(osutils, "ReadFile", return_value="")
         self.assertRaises(

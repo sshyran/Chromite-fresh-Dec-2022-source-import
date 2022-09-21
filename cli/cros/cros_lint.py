@@ -7,7 +7,6 @@
 import fnmatch
 import functools
 import itertools
-import json
 import logging
 import os
 from pathlib import Path
@@ -19,6 +18,7 @@ from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import git
+from chromite.lib import json_lib
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lint.linters import owners
@@ -227,16 +227,9 @@ def _JsonLintFile(path, _output_format, _debug, _relaxed: bool):
 
     data = osutils.ReadFile(path)
 
-    # Strip off leading UTF-8 BOM if it exists.
-    if data.startswith("\ufeff"):
-        data = data[1:]
-
-    # Strip out comments for JSON parsing.
-    stripped_data = re.sub(r"^\s*#.*", "", data, flags=re.M)
-
     # See if it validates.
     try:
-        json.loads(stripped_data)
+        json_lib.loads(data)
     except ValueError as e:
         result.returncode = 1
         logging.notice("%s: %s", path, e)
