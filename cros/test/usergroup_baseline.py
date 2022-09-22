@@ -325,6 +325,14 @@ GROUP_BASELINE = dict(
             },
         ),
         GroupEntry(
+            group="cros_fp-access",
+            gid=426,
+            users={
+                "biod",
+                "healthd_fp",
+            },
+        ),
+        GroupEntry(
             group="wayland", gid=601, users={"chronos", "crosvm", "pluginvm"}
         ),
         GroupEntry(group="arc-bridge", gid=602, users={"chronos"}),
