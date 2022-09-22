@@ -449,6 +449,9 @@ def GetArtifacts(
         in_proto.ArtifactType.CODE_COVERAGE_LLVM_JSON: functools.partial(
             test.BundleCodeCoverageLlvmJson, build_target.name
         ),
+        in_proto.ArtifactType.CODE_COVERAGE_RUST_LLVM_JSON: functools.partial(
+            test.BundleCodeCoverageRustLlvmJson, build_target.name
+        ),
         in_proto.ArtifactType.HWQUAL: functools.partial(
             test.BundleHwqualTarball,
             build_target.name,

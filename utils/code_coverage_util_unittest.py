@@ -169,8 +169,12 @@ class GenerateZeroCoverageLlvmTest(cros_test_lib.TempDirTestCase):
 
         coverageJson = code_coverage_util.GenerateZeroCoverageLlvm(
             path_to_src_directories=[path_to_src_directory],
-            src_file_extensions=constants.ZERO_COVERAGE_FILE_EXTENSIONS_TO_PROCESS,
-            exclude_line_prefixes=constants.ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES,
+            src_file_extensions=constants.ZERO_COVERAGE_FILE_EXTENSIONS_TO_PROCESS[
+                "CPP"
+            ],
+            exclude_line_prefixes=constants.ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES[
+                "CPP"
+            ],
             exclude_files=["/build/code_coverage/" + USE_CASE_5_FILE_NAME],
             exclude_files_suffixes=(),
             src_prefix_path=self.tempdir,
@@ -334,8 +338,12 @@ class GenerateZeroCoverageLlvmTest(cros_test_lib.TempDirTestCase):
 
         coverageJson = code_coverage_util.GenerateZeroCoverageLlvm(
             path_to_src_directories=[path_to_src_directory],
-            src_file_extensions=constants.ZERO_COVERAGE_FILE_EXTENSIONS_TO_PROCESS,
-            exclude_line_prefixes=constants.ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES,
+            src_file_extensions=constants.ZERO_COVERAGE_FILE_EXTENSIONS_TO_PROCESS[
+                "CPP"
+            ],
+            exclude_line_prefixes=constants.ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES[
+                "CPP"
+            ],
             exclude_files=["/build/code_coverage/" + USE_CASE_5_FILE_NAME],
             exclude_files_suffixes=(),
             src_prefix_path=self.tempdir,

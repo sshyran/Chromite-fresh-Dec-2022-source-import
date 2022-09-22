@@ -476,6 +476,162 @@ class BundleCodeCoverageLlvmJsonTest(cros_test_lib.MockTempDirTestCase):
         )
 
 
+class BundleCodeCoverageRustLlvmJsonTest(cros_test_lib.MockTempDirTestCase):
+    """BundleCodeCoverageRustLlvmJson Tests."""
+
+    def setUp(self):
+        """Set up the class for tests."""
+        chroot_dir = os.path.join(self.tempdir, "chroot")
+        osutils.SafeMakedirs(chroot_dir)
+        osutils.SafeMakedirs(os.path.join(chroot_dir, "tmp"))
+        self.chroot = chroot_lib.Chroot(chroot_dir)
+
+        sysroot_path = os.path.join(chroot_dir, "build", "board")
+        osutils.SafeMakedirs(sysroot_path)
+        self.sysroot = sysroot_lib.Sysroot(sysroot_path)
+
+        self.output_dir = os.path.join(self.tempdir, "output")
+
+    def testGatherCodeCoverageLlvmJsonFileIsCalled1Time(self):
+        """Verify GatherCodeCoverageLlvmJsonFile is called on each file."""
+        GatherCodeCoverageLlvmJsonFile_mock = self.PatchObject(
+            test, "GatherCodeCoverageLlvmJsonFile", return_value=None
+        )
+
+        test.BundleCodeCoverageRustLlvmJson(
+            "brya", self.chroot, self.sysroot, self.output_dir
+        )
+        GatherCodeCoverageLlvmJsonFile_mock.assert_called_once()
+
+    def testReturnNoneWhenGatherCodeCoverageLlvmJsonFileReturnsNone(self):
+        """Test returns None when no coverage files were found."""
+        self.PatchObject(
+            test, "GatherCodeCoverageLlvmJsonFile", return_value=None
+        )
+
+        result = test.BundleCodeCoverageRustLlvmJson(
+            "brya", self.chroot, self.sysroot, self.output_dir
+        )
+        self.assertIsNone(result)
+
+    def testCreateTarballIsCalled1Time(self):
+        """Test that CreateTarball is called once."""
+        gather_result = GatherCodeCoverageLlvmJsonFileResult({})
+        self.PatchObject(
+            test, "GatherCodeCoverageLlvmJsonFile", return_value=gather_result
+        )
+        self.PatchObject(
+            code_coverage_util, "ExtractFilenames", return_value=[]
+        )
+        self.PatchObject(
+            code_coverage_util, "GenerateZeroCoverageLlvm", return_value={}
+        )
+        self.PatchObject(
+            code_coverage_util, "MergeLLVMCoverageJson", return_value={}
+        )
+        self.PatchObject(
+            code_coverage_util,
+            "GetLLVMCoverageWithFilesExcluded",
+            return_value={},
+        )
+
+        create_tarball_result = cros_build_lib.CompletedProcess(returncode=1)
+        CreateTarball_mock = self.PatchObject(
+            cros_build_lib, "CreateTarball", return_value=create_tarball_result
+        )
+
+        test.BundleCodeCoverageRustLlvmJson(
+            "brya", self.chroot, self.sysroot, self.output_dir
+        )
+        CreateTarball_mock.assert_called_once()
+
+    def testGenerateZeroCoverageLlvmCalled1Time(self):
+        """Test that GenerateZeroCoverageLlvm is called once."""
+        gather_result = GatherCodeCoverageLlvmJsonFileResult({})
+        self.PatchObject(
+            test, "GatherCodeCoverageLlvmJsonFile", return_value=gather_result
+        )
+        self.PatchObject(
+            code_coverage_util, "ExtractFilenames", return_value=[]
+        )
+        self.PatchObject(
+            code_coverage_util,
+            "GetLLVMCoverageWithFilesExcluded",
+            return_value={},
+        )
+
+        self.PatchObject(
+            code_coverage_util, "GenerateZeroCoverageLlvm", return_value={}
+        )
+        self.PatchObject(
+            code_coverage_util, "MergeLLVMCoverageJson", return_value={}
+        )
+
+        GenerateZeroCoverageLlvm_mock = self.PatchObject(
+            code_coverage_util, "GenerateZeroCoverageLlvm"
+        )
+
+        test.BundleCodeCoverageRustLlvmJson(
+            "brya", self.chroot, self.sysroot, self.output_dir
+        )
+
+        GenerateZeroCoverageLlvm_mock.assert_called_once()
+
+    def testShouldReturnNoneWhenCreateTarballFails(self):
+        """Test that None is returned when CreateTarball fails."""
+        gather_result = GatherCodeCoverageLlvmJsonFileResult({})
+        self.PatchObject(
+            test, "GatherCodeCoverageLlvmJsonFile", return_value=gather_result
+        )
+
+        create_tarball_result = cros_build_lib.CompletedProcess(returncode=1)
+        self.PatchObject(
+            cros_build_lib, "CreateTarball", return_value=create_tarball_result
+        )
+
+        result = test.BundleCodeCoverageRustLlvmJson(
+            "brya", self.chroot, self.sysroot, self.output_dir
+        )
+        self.assertIsNone(result)
+
+    def testShouldReturnPathToTarballOnSuccess(self):
+        """Test that the path to the tarball is returned on success."""
+        gather_result = GatherCodeCoverageLlvmJsonFileResult({})
+        self.PatchObject(
+            test, "GatherCodeCoverageLlvmJsonFile", return_value=gather_result
+        )
+        self.PatchObject(
+            code_coverage_util, "ExtractFilenames", return_value=[]
+        )
+        self.PatchObject(
+            code_coverage_util, "GenerateZeroCoverageLlvm", return_value={}
+        )
+        self.PatchObject(
+            code_coverage_util, "MergeLLVMCoverageJson", return_value={}
+        )
+        self.PatchObject(
+            code_coverage_util,
+            "GetLLVMCoverageWithFilesExcluded",
+            return_value={},
+        )
+
+        create_tarball_result = cros_build_lib.CompletedProcess(returncode=0)
+        self.PatchObject(
+            cros_build_lib, "CreateTarball", return_value=create_tarball_result
+        )
+
+        result = test.BundleCodeCoverageRustLlvmJson(
+            "brya", self.chroot, self.sysroot, self.output_dir
+        )
+
+        self.assertEqual(
+            os.path.join(
+                self.output_dir, constants.CODE_COVERAGE_LLVM_JSON_SYMBOLS_TAR
+            ),
+            result,
+        )
+
+
 class GatherCodeCoverageLlvmJsonFileTest(cros_test_lib.MockTempDirTestCase):
     """GatherCodeCoverageLlvmJsonFile Tests."""
 

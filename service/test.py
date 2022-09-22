@@ -490,6 +490,32 @@ def _GetZeroCoverageDirectories(
     return dirs
 
 
+def BundleCodeCoverageRustLlvmJson(
+    build_target: "build_target_lib.BuildTarget",
+    chroot: "chroot_lib.Chroot",
+    sysroot_class: "sysroot_lib.Sysroot",
+    output_dir: str,
+) -> Optional[str]:
+    """Bundle code coverage llvm json into a tarball for importing into GCE.
+
+    Args:
+      build_target: The build target.
+      chroot: The chroot class used for these artifacts.
+      sysroot_class: The sysroot class used for these artifacts.
+      output_dir: The path to write artifacts to.
+
+    Returns:
+      A string path to the output code_coverage.tar.xz artifact, or None.
+    """
+    return _BundleCodeCoverageLlvmJson(
+        build_target=build_target,
+        chroot=chroot,
+        sysroot_class=sysroot_class,
+        output_dir=output_dir,
+        rust_coverage=True,
+    )
+
+
 def BundleCodeCoverageLlvmJson(
     build_target: "build_target_lib.BuildTarget",
     chroot: "chroot_lib.Chroot",
@@ -507,6 +533,37 @@ def BundleCodeCoverageLlvmJson(
     Returns:
       A string path to the output code_coverage.tar.xz artifact, or None.
     """
+    return _BundleCodeCoverageLlvmJson(
+        build_target=build_target,
+        chroot=chroot,
+        sysroot_class=sysroot_class,
+        output_dir=output_dir,
+        rust_coverage=False,
+    )
+
+
+def _BundleCodeCoverageLlvmJson(
+    build_target: "build_target_lib.BuildTarget",
+    chroot: "chroot_lib.Chroot",
+    sysroot_class: "sysroot_lib.Sysroot",
+    output_dir: str,
+    rust_coverage: bool,
+) -> Optional[str]:
+    """Bundle code coverage llvm json into a tarball for importing into GCE.
+
+    Args:
+      build_target: The build target.
+      chroot: The chroot class used for these artifacts.
+      sysroot_class: The sysroot class used for these artifacts.
+      output_dir: The path to write artifacts to.
+      rust_coverage: Whether we are bundling rust coverage artifacts.
+
+    Returns:
+      A string path to the output code_coverage.tar.xz artifact, or None.
+    """
+    lang = "CPP"
+    if rust_coverage:
+        lang = "RUST"
 
     try:
         base_path = chroot.full_path(sysroot_class.path)
@@ -545,8 +602,12 @@ def BundleCodeCoverageLlvmJson(
             path_to_src_directories=_GetZeroCoverageDirectories(
                 build_target=build_target
             ),
-            src_file_extensions=constants.ZERO_COVERAGE_FILE_EXTENSIONS_TO_PROCESS,
-            exclude_line_prefixes=constants.ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES,
+            src_file_extensions=constants.ZERO_COVERAGE_FILE_EXTENSIONS_TO_PROCESS[
+                lang
+            ],
+            exclude_line_prefixes=constants.ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES[
+                lang
+            ],
             exclude_files=files_with_cov,
             exclude_files_suffixes=constants.ZERO_COVERAGE_EXCLUDE_FILES_SUFFIXES,
             src_prefix_path=constants.SOURCE_ROOT,
