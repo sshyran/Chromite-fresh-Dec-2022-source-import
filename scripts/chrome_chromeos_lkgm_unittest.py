@@ -6,6 +6,7 @@
 
 from unittest import mock
 
+from chromite.lib import chromeos_version
 from chromite.lib import cros_test_lib
 from chromite.scripts import chrome_chromeos_lkgm
 
@@ -54,30 +55,27 @@ class ChromeLKGMCommitterTester(
 ):
     """Test cros_chromeos_lkgm.Committer."""
 
-    def setUp(self):
-        """Common set up method for all tests."""
-        self.committer = chrome_chromeos_lkgm.ChromeLKGMCommitter(
-            "1001.0.0", "main"
+    def testCommitNewLKGM(self):
+        """Tests that we can commit a new LKGM file."""
+        committer = chrome_chromeos_lkgm.ChromeLKGMCommitter(
+            "1001.0.0",
+            "main",
+            chromeos_version.VersionInfo("999.0.0"),
+            False,
         )
 
-    @mock.patch("chromite.lib.gob_util.GetFileContents")
-    def testCommitNewLKGM(self, mock_get_file):
-        """Tests that we can commit a new LKGM file."""
-        mock_get_file.return_value = "999.0.0"
-        with mock.patch.object(
-            self.committer._gerrit_helper, "CreateChange"
-        ) as cg:
+        with mock.patch.object(committer._gerrit_helper, "CreateChange") as cg:
             cg.return_value = mock.MagicMock(gerrit_number=123456)
             with mock.patch.object(
-                self.committer._gerrit_helper, "ChangeEdit"
+                committer._gerrit_helper, "ChangeEdit"
             ) as ce:
                 with mock.patch.object(
-                    self.committer._gerrit_helper, "SetReview"
+                    committer._gerrit_helper, "SetReview"
                 ) as bc:
                     with mock.patch.object(
-                        self.committer._gerrit_helper, "SetHashtags"
+                        committer._gerrit_helper, "SetHashtags"
                     ):
-                        self.committer.UpdateLKGM()
+                        committer.UpdateLKGM()
                         ce.assert_called_once_with(
                             123456, "chromeos/CHROMEOS_LKGM", "1001.0.0"
                         )
@@ -91,26 +89,29 @@ class ChromeLKGMCommitterTester(
                             ],
                         )
 
-    @mock.patch("chromite.lib.gob_util.GetFileContents")
-    def testOlderLKGMFails(self, mock_get_file):
+    def testOlderLKGMFails(self):
         """Tests that trying to update to an older lkgm version fails."""
-        mock_get_file.return_value = "1002.0.0"
-        with mock.patch.object(
-            self.committer._gerrit_helper, "CreateChange"
-        ) as cg:
+        committer = chrome_chromeos_lkgm.ChromeLKGMCommitter(
+            "1001.0.0",
+            "main",
+            chromeos_version.VersionInfo("1002.0.0"),
+            False,
+        )
+        with mock.patch.object(committer._gerrit_helper, "CreateChange") as cg:
             cg.return_value = mock.MagicMock(gerrit_number=123456)
             with mock.patch.object(
-                self.committer._gerrit_helper, "ChangeEdit"
+                committer._gerrit_helper, "ChangeEdit"
             ) as ce:
                 self.assertRaises(
-                    chrome_chromeos_lkgm.LKGMNotValid, self.committer.UpdateLKGM
+                    chrome_chromeos_lkgm.LKGMNotValid, committer.UpdateLKGM
                 )
                 ce.assert_not_called()
 
-    @mock.patch("chromite.lib.gob_util.GetFileContents")
-    def testAbandonObsoleteLKGMs(self, mock_get_file):
+    def testAbandonObsoleteLKGMs(self):
         """Tests that trying to abandon the obsolete lkgm CLs."""
-        mock_get_file.return_value = "10002.0.0"
+        cleaner = chrome_chromeos_lkgm.ChromeLKGMCleaner(
+            "main", chromeos_version.VersionInfo("10002.0.0"), "USER_EMAIL"
+        )
 
         older_change = StubGerritChange(
             3876550, "10001.0.0", "10001.0.0", mergeable=False
@@ -119,19 +120,20 @@ class ChromeLKGMCommitterTester(
         open_issues = [older_change, newer_change]
 
         with mock.patch.object(
-            self.committer._gerrit_helper, "Query", return_value=open_issues
+            cleaner._gerrit_helper, "Query", return_value=open_issues
         ) as mock_query:
             with mock.patch.object(
-                self.committer._gerrit_helper, "AbandonChange"
+                cleaner._gerrit_helper, "AbandonChange"
             ) as ac:
-                self.committer.ProcessObsoleteLKGMRolls()
+                cleaner.ProcessObsoleteLKGMRolls()
                 mock_query.assert_called_once()
                 ac.assert_called_once_with((older_change), msg=mock.ANY)
 
-    @mock.patch("chromite.lib.gob_util.GetFileContents")
-    def testRebaseObsoleteLKGMs(self, mock_get_file):
+    def testRebaseObsoleteLKGMs(self):
         """Tests that trying to abandon the obsolete lkgm CLs."""
-        mock_get_file.return_value = "10002.0.0"
+        cleaner = chrome_chromeos_lkgm.ChromeLKGMCleaner(
+            "main", chromeos_version.VersionInfo("10002.0.0"), "USER_EMAIL"
+        )
 
         # LKGM Roll CL from "10001.0.0" to "10003.0.0" should be in the
         # merge-conflict state, since the current LKGM version is "10002.0.0".
@@ -147,23 +149,24 @@ class ChromeLKGMCommitterTester(
         )
 
         with mock.patch.object(
-            self.committer._gerrit_helper, "Query", return_value=[roll]
+            cleaner._gerrit_helper, "Query", return_value=[roll]
         ) as mock_query:
             with mock.patch.object(roll, "Rebase") as rebase:
                 with mock.patch.object(
-                    self.committer._gerrit_helper, "ChangeEdit"
+                    cleaner._gerrit_helper, "ChangeEdit"
                 ) as ce:
-                    self.committer.ProcessObsoleteLKGMRolls()
+                    cleaner.ProcessObsoleteLKGMRolls()
                     mock_query.assert_called_once()
 
                     # Confirm that it does rebasing.
                     rebase.assert_called_once_with(allow_conflicts=True)
                     ce.assert_called_once_with(GERRIT_NUM, mock.ANY, ROLL_TO)
 
-    @mock.patch("chromite.lib.gob_util.GetFileContents")
-    def testDoNothingObsoleteLKGMs(self, mock_get_file):
+    def testDoNothingObsoleteLKGMs(self):
         """Tests that trying to abandon the obsolete lkgm CLs."""
-        mock_get_file.return_value = "10002.0.0"
+        cleaner = chrome_chromeos_lkgm.ChromeLKGMCleaner(
+            "main", chromeos_version.VersionInfo("10002.0.0"), "USER_EMAIL"
+        )
 
         # LKGM Roll CL from "10002.0.0" to "10003.0.0" should NOT be in the
         # merge-conflict state, since the current LKGM version is "10002.0.0".
@@ -180,43 +183,42 @@ class ChromeLKGMCommitterTester(
         )
 
         with mock.patch.object(
-            self.committer._gerrit_helper, "Query", return_value=[roll]
+            cleaner._gerrit_helper, "Query", return_value=[roll]
         ) as mock_query:
             with mock.patch.object(roll, "Rebase") as rebase:
                 with mock.patch.object(
-                    self.committer._gerrit_helper, "ChangeEdit"
+                    cleaner._gerrit_helper, "ChangeEdit"
                 ) as ce:
-                    self.committer.ProcessObsoleteLKGMRolls()
+                    cleaner.ProcessObsoleteLKGMRolls()
                     mock_query.assert_called_once()
 
                     # Confirm that it does nothing.
                     rebase.assert_not_called()
                     ce.assert_not_called()
 
-    @mock.patch("chromite.lib.gob_util.GetFileContents")
-    def testVersionWithChromeBranch(self, mock_get_file):
+    def testVersionWithChromeBranch(self):
         """Tests passing a version with a chrome branch strips the branch."""
         branch = "refs/branch-heads/5000"
-        self.committer = chrome_chromeos_lkgm.ChromeLKGMCommitter(
-            "1003.0.0-rc2", branch
+        committer = chrome_chromeos_lkgm.ChromeLKGMCommitter(
+            "1003.0.0-rc2",
+            branch,
+            chromeos_version.VersionInfo("1002.0.0"),
+            False,
         )
-        mock_get_file.return_value = "1002.0.0"
 
-        with mock.patch.object(
-            self.committer._gerrit_helper, "CreateChange"
-        ) as cg:
+        with mock.patch.object(committer._gerrit_helper, "CreateChange") as cg:
             cg.return_value = mock.MagicMock(gerrit_number=123456)
             with mock.patch.object(
-                self.committer._gerrit_helper, "ChangeEdit"
+                committer._gerrit_helper, "ChangeEdit"
             ) as ce:
                 with mock.patch.object(
-                    self.committer._gerrit_helper, "SetReview"
+                    committer._gerrit_helper, "SetReview"
                 ) as bc:
                     with mock.patch.object(
-                        self.committer._gerrit_helper, "SetHashtags"
+                        committer._gerrit_helper, "SetHashtags"
                     ):
                         # Check the file was actually written out correctly.
-                        self.committer.UpdateLKGM()
+                        committer.UpdateLKGM()
                         cg.assert_called_once_with(
                             "chromium/src", branch, mock.ANY, False
                         )
@@ -235,9 +237,16 @@ class ChromeLKGMCommitterTester(
 
     def testCommitMsg(self):
         """Tests format of the commit message."""
-        self.committer._PRESUBMIT_BOTS = ["bot1", "bot2"]
-        self.committer._buildbucket_id = "some-build-id"
-        commit_msg_lines = self.committer.ComposeCommitMsg().splitlines()
+        committer = chrome_chromeos_lkgm.ChromeLKGMCommitter(
+            "1001.0.0",
+            "main",
+            chromeos_version.VersionInfo("999.0.0"),
+            False,
+            buildbucket_id="some-build-id",
+        )
+
+        committer._PRESUBMIT_BOTS = ["bot1", "bot2"]
+        commit_msg_lines = committer.ComposeCommitMsg().splitlines()
         self.assertIn(
             "Automated Commit: LKGM 1001.0.0 for chromeos.", commit_msg_lines
         )
