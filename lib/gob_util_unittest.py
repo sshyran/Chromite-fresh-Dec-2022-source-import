@@ -177,6 +177,32 @@ Too bad..."""
         )
         self.assertEqual(contents, expected_contents)
 
+    def testGetChangeMergeable(self):
+        """Test for GetChangeMergeable()"""
+
+        mergeable_info = {"mergeable": True}
+        body = json.dumps(mergeable_info).encode()
+        xss_protection_prefix = b")]}'\n"
+        body = xss_protection_prefix + body
+        self.conn.return_value.__enter__.return_value = FakeHTTPResponse(
+            body=body, status=200
+        )
+        result = gob_util.GetChangeMergeable("some.git.url", "100000")
+        self.assertEqual(result, mergeable_info)
+
+    def testRebase(self):
+        """Test for Rebase()"""
+
+        change_info = {}
+        body = json.dumps(change_info).encode()
+        xss_protection_prefix = b")]}'\n"
+        body = xss_protection_prefix + body
+        self.conn.return_value.__enter__.return_value = FakeHTTPResponse(
+            body=body, status=200
+        )
+        result = gob_util.Rebase("some.git.url", "100000")
+        self.assertEqual(result, change_info)
+
 
 class GetCookieTests(cros_test_lib.TestCase):
     """Unittests for GetCookies()"""

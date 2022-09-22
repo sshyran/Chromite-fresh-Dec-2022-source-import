@@ -12,7 +12,7 @@ import random
 import re
 import subprocess
 import time
-from typing import Optional
+from typing import Any, Dict, Optional
 
 # We import mock so that we can identify mock.MagicMock instances in tests
 # that use mock.
@@ -2240,6 +2240,17 @@ class GerritPatch(GerritFetchOnlyPatch):
         """Return true if the latest patchset is a draft."""
         return self.patch_dict["currentPatchSet"]["draft"]
 
+    def IsMergeable(self, revision: Optional[str] = None) -> Optional[bool]:
+        """Return true if the patchset is mergeable."""
+        gerrit_host = config_lib.GetSiteParams().GERRIT_HOSTS[self.remote]
+        result = gob_util.GetChangeMergeable(
+            gerrit_host, self.gerrit_number, revision=revision
+        )
+        if result is None or "mergeable" not in result:
+            # Maybe the request was invalid (eg. revision doesn't exist).
+            return None
+        return result["mergeable"]
+
     def GetFileContents(
         self, path: str, revision: Optional[str] = None
     ) -> Optional[str]:
@@ -2247,7 +2258,7 @@ class GerritPatch(GerritFetchOnlyPatch):
 
         Args:
           path: Path of the file in the repo to retrieve.
-          revision: The specific revision in the change. Defaults to the latest
+          revision: The specific revision of the change. Defaults to the latest
               revision.
 
         Returns:
@@ -2257,6 +2268,66 @@ class GerritPatch(GerritFetchOnlyPatch):
         return gob_util.GetFileContentsFromGerrit(
             gerrit_host, self.gerrit_number, path, revision=revision
         )
+
+    def GetOriginalFileContents(
+        self, path: str, revision: Optional[str] = None
+    ) -> Optional[str]:
+        """Get the contents of a file prior to a specific CL,
+
+        Args:
+            path: Path of the file in the repo to retrieve.
+            revision: The specific revision of the change. Defaults to the
+                latest revision.
+
+        Returns:
+            Contents of the file that is before the change.
+        """
+        # Retrieve the revision of previous.
+        revision_info = self.GetChangeCommit(revision=revision)
+        if revision_info is None:
+            return None
+        content = gob_util.GetFileContents(
+            constants.CHROMIUM_GOB_URL,
+            path,
+            ref=revision_info["parents"][0]["commit"],
+        )
+        return content
+
+    def GetChangeCommit(
+        self, revision: Optional[str] = None
+    ) -> Optional[Dict[str, Any]]:
+        """Get the current review information for a CL.
+
+        The change will be empty of any file modifications. Use ChangeEdit below
+        to add file modifications to the change.
+
+        Args:
+            project: The name of the gerrit project for the change.
+            revision: The specific revision of the change. Defaults to the
+                latest revision.
+
+        Returns:
+            cros_patch.GerritChange for the created change.
+        """
+        gerrit_host = config_lib.GetSiteParams().GERRIT_HOSTS[self.remote]
+        return gob_util.GetChangeCommit(
+            gerrit_host, self.gerrit_number, revision=revision
+        )
+
+    def Rebase(self, allow_conflicts: bool = False) -> Optional[Dict[str, Any]]:
+        """Rebase the CL to the main branch.
+
+        Args:
+            allow_conflicts: True if allowing the merge-conflict after rebasing.
+
+        Returns:
+            Returned value from gob_util.Rebase().
+        """
+        gerrit_host = config_lib.GetSiteParams().GERRIT_HOSTS[self.remote]
+        change_info = gob_util.Rebase(
+            gerrit_host, self.gerrit_number, allow_conflicts=allow_conflicts
+        )
+        return change_info
 
     def HasApproval(self, field, value):
         """Return whether the current patchset has the specified approval.

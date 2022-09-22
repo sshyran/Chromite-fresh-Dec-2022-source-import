@@ -75,15 +75,15 @@ class ChromeLKGMCommitter(object):
         logging.info("lkgm=%s", lkgm)
 
     def Run(self):
-        self.AbandonObsoleteLKGMRolls()
+        self.ProcessObsoleteLKGMRolls()
         self.UpdateLKGM()
 
     @property
     def lkgm_file(self):
         return self._committer.FullPath(constants.PATH_TO_CHROME_LKGM)
 
-    def AbandonObsoleteLKGMRolls(self):
-        """Abandon all obsolete LKGM roll CLs.
+    def ProcessObsoleteLKGMRolls(self):
+        """Clean up all obsolete LKGM roll CLs by abandoning or rebasing.
 
         This method finds the LKGM roll CLs that were trying changing to an
         older version than the current LKGM version, and abandons them.
@@ -121,15 +121,17 @@ class ChromeLKGMCommitter(object):
                 change.subject,
                 change.gerrit_number,
             )
-            version_string = change.GetFileContents(
+
+            # Retrieve the version that this CL tries to roll to.
+            roll_to_string = change.GetFileContents(
                 constants.PATH_TO_CHROME_LKGM
             )
-            if version_string is None:
+            if roll_to_string is None:
                 logging.info("=> No LKGM change found in this CL.")
                 continue
 
-            version = chromeos_version.VersionInfo(version_string)
-            if version <= self.GetCurrentLKGM():
+            roll_to = chromeos_version.VersionInfo(roll_to_string)
+            if roll_to <= self.GetCurrentLKGM():
                 # The target version that the CL is changing to is older than
                 # the current. The roll CL is useless so that it'd be abandoned.
                 logging.info(
@@ -145,13 +147,56 @@ class ChromeLKGMCommitter(object):
                         change,
                         msg=abandon_message,
                     )
-            else:
-                # Do nothing with the roll CLs that tries changing to newer
-                # version.
-                # TODO(yoshiki): rebase the roll CL.
-                logging.info(
-                    "=> This CL is a newer LKGM roll than current: Do nothing."
+                continue
+
+            mergeable = change.IsMergeable()
+            if mergeable is None:
+                logging.info("=> Failed to get the mergeable state of the CL.")
+                continue
+
+            # This CL may be in "merge conflict" state. Resolve.
+            if not mergeable:
+                # Retrieve the version that this CL tries to roll from.
+                roll_from_string = change.GetOriginalFileContents(
+                    constants.PATH_TO_CHROME_LKGM
                 )
+                roll_from = chromeos_version.VersionInfo(
+                    roll_from_string.strip()
+                )
+
+                if roll_from == self.GetCurrentLKGM():
+                    # The CL should not be in the merge-conflict state.
+                    # mergeable=False might come from other reason.
+                    logging.info(
+                        "=> This CL tries to roll from the same LKGM. "
+                        "Doing nothing."
+                    )
+                    continue
+                elif roll_from >= self.GetCurrentLKGM():
+                    # This should not happen.
+                    logging.info(
+                        "=> This CL tries to roll from a newer LKGM. Maybe"
+                        "LKGM in Chromium code has been rolled back. Anyway, "
+                        "rebasing forcibly."
+                    )
+
+                else:
+                    logging.info(
+                        "=> This CL tries to roll from the older LKGM. "
+                        "Rebasing."
+                    )
+
+                # Resolve the conflict by rebasing.
+                if not self._dryrun:
+                    change.Rebase(allow_conflicts=True)
+                    self._gerrit_helper.ChangeEdit(
+                        change.gerrit_number,
+                        "chromeos/CHROMEOS_LKGM",
+                        roll_to_string,
+                    )
+                continue
+
+            logging.info("=> This CL is not in the merge-conflict state.")
 
     def GetCurrentLKGM(self):
         """Returns the current LKGM version on the branch.

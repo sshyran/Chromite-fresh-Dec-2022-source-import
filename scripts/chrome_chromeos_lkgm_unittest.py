@@ -13,10 +13,19 @@ from chromite.scripts import chrome_chromeos_lkgm
 class StubGerritChange:
     """Stab class corresponding to cros_patch.GerritChange."""
 
-    def __init__(self, gerrit_number, file_content, subject):
+    def __init__(
+        self,
+        gerrit_number,
+        file_content,
+        subject,
+        mergeable=True,
+        original_file_content=None,
+    ):
         self._gerrit_number = gerrit_number
         self._subject = subject
         self._file_content = file_content
+        self._mergeable = mergeable
+        self._original_file_content = original_file_content or file_content
 
     @property
     def subject(self):
@@ -28,6 +37,15 @@ class StubGerritChange:
 
     def GetFileContents(self, _path: str):
         return self._file_content
+
+    def GetOriginalFileContents(self, _path: str):
+        return self._original_file_content
+
+    def IsMergeable(self):
+        return self._mergeable
+
+    def Rebase(self, allow_conflicts: bool = False):
+        pass
 
 
 # pylint: disable=protected-access
@@ -94,7 +112,9 @@ class ChromeLKGMCommitterTester(
         """Tests that trying to abandon the obsolete lkgm CLs."""
         mock_get_file.return_value = "10002.0.0"
 
-        older_change = StubGerritChange(3876550, "10001.0.0", "10001.0.0")
+        older_change = StubGerritChange(
+            3876550, "10001.0.0", "10001.0.0", mergeable=False
+        )
         newer_change = StubGerritChange(3876551, "10003.0.0", "10003.0.0")
         open_issues = [older_change, newer_change]
 
@@ -104,9 +124,74 @@ class ChromeLKGMCommitterTester(
             with mock.patch.object(
                 self.committer._gerrit_helper, "AbandonChange"
             ) as ac:
-                self.committer.AbandonObsoleteLKGMRolls()
+                self.committer.ProcessObsoleteLKGMRolls()
                 mock_query.assert_called_once()
                 ac.assert_called_once_with((older_change), msg=mock.ANY)
+
+    @mock.patch("chromite.lib.gob_util.GetFileContents")
+    def testRebaseObsoleteLKGMs(self, mock_get_file):
+        """Tests that trying to abandon the obsolete lkgm CLs."""
+        mock_get_file.return_value = "10002.0.0"
+
+        # LKGM Roll CL from "10001.0.0" to "10003.0.0" should be in the
+        # merge-conflict state, since the current LKGM version is "10002.0.0".
+        ROLL_FROM = "10001.0.0"
+        ROLL_TO = "10003.0.0"
+        GERRIT_NUM = 3876551
+        roll = StubGerritChange(
+            GERRIT_NUM,
+            ROLL_TO,
+            ROLL_TO,
+            mergeable=False,
+            original_file_content=ROLL_FROM,
+        )
+
+        with mock.patch.object(
+            self.committer._gerrit_helper, "Query", return_value=[roll]
+        ) as mock_query:
+            with mock.patch.object(roll, "Rebase") as rebase:
+                with mock.patch.object(
+                    self.committer._gerrit_helper, "ChangeEdit"
+                ) as ce:
+                    self.committer.ProcessObsoleteLKGMRolls()
+                    mock_query.assert_called_once()
+
+                    # Confirm that it does rebasing.
+                    rebase.assert_called_once_with(allow_conflicts=True)
+                    ce.assert_called_once_with(GERRIT_NUM, mock.ANY, ROLL_TO)
+
+    @mock.patch("chromite.lib.gob_util.GetFileContents")
+    def testDoNothingObsoleteLKGMs(self, mock_get_file):
+        """Tests that trying to abandon the obsolete lkgm CLs."""
+        mock_get_file.return_value = "10002.0.0"
+
+        # LKGM Roll CL from "10002.0.0" to "10003.0.0" should NOT be in the
+        # merge-conflict state, since the current LKGM version is "10002.0.0".
+        ROLL_FROM = "10002.0.0"
+        ROLL_TO = "10003.0.0"
+        GERRIT_NUM = 3876551
+        # Even if mergeable=False, the logic should not do nothing.
+        roll = StubGerritChange(
+            GERRIT_NUM,
+            ROLL_TO,
+            ROLL_TO,
+            mergeable=False,
+            original_file_content=ROLL_FROM,
+        )
+
+        with mock.patch.object(
+            self.committer._gerrit_helper, "Query", return_value=[roll]
+        ) as mock_query:
+            with mock.patch.object(roll, "Rebase") as rebase:
+                with mock.patch.object(
+                    self.committer._gerrit_helper, "ChangeEdit"
+                ) as ce:
+                    self.committer.ProcessObsoleteLKGMRolls()
+                    mock_query.assert_called_once()
+
+                    # Confirm that it does nothing.
+                    rebase.assert_not_called()
+                    ce.assert_not_called()
 
     @mock.patch("chromite.lib.gob_util.GetFileContents")
     def testVersionWithChromeBranch(self, mock_get_file):

@@ -552,6 +552,14 @@ def GetChangeDetail(host, change, o_params=None):
     return FetchUrlJson(host, path)
 
 
+def GetChangeMergeable(host, change, revision=None) -> Optional[Dict[str, Any]]:
+    """Query a gerrit server for "mergeable" state."""
+    if revision is None:
+        revision = "current"
+    path = "%s/revisions/%s/mergeable" % (_GetChangePath(change), revision)
+    return FetchUrlJson(host, path)
+
+
 def GetChangeReviewers(host, change):
     """Get information about all reviewers attached to a change.
 
@@ -1106,6 +1114,27 @@ def GetFileContentsFromGerrit(
     contents = base64.b64decode(contents)  # bytes -> bytes
     contents = contents.decode("utf-8")  # bytes -> string
     return contents
+
+
+def Rebase(
+    host: str, change: str, allow_conflicts: bool = False
+) -> Optional[Dict[str, Any]]:
+    """Rebase the CL to the main branch.
+
+    Args:
+        host: The Gerrit host to interact with.
+        change: A Gerrit change number.
+        allow_conflicts: True if allowing the merge-conflict after rebasing.
+
+    Returns:
+        ChangeInfo of the change after the reading.
+    """
+    path = "%s/rebase" % (_GetChangePath(change),)
+    body = {"allow_conflicts": "true" if allow_conflicts else "false"}
+    change_info = FetchUrlJson(host, path, body=body, reqtype="POST")
+    if change_info is None:
+        return None
+    return change_info
 
 
 def GetCommitDate(git_url, commit):
