@@ -523,20 +523,17 @@ class SDKFetcher(object):
           versions for packages built by the SDK builder.
         """
         with self.misc_cache.Lookup(("manifest", self.board, version)) as ref:
-            # When switching to the new public bucket, the manifest cached here can
-            # become inaccurate. So just disable caching for now.
-            # TODO(crbug.com/1330762): Restore this code after the public bucket's
-            # been the default for a couple weeks.
-            # if ref.Exists(lock=True):
-            #   manifest = osutils.ReadFile(ref.path)
-            manifest_path = gs.GetGsURL(
-                bucket=constants.SDK_GS_BUCKET,
-                suburl="cros-sdk-%s.tar.xz.Manifest"
-                % self._GetSDKVersion(version),
-                for_gsutil=True,
-            )
-            manifest = self.gs_ctx.Cat(manifest_path, encoding="utf-8")
-            ref.AssignText(manifest)
+            if ref.Exists(lock=True):
+                manifest = osutils.ReadFile(ref.path)
+            else:
+                manifest_path = gs.GetGsURL(
+                    bucket=constants.SDK_GS_BUCKET,
+                    suburl="cros-sdk-%s.tar.xz.Manifest"
+                    % self._GetSDKVersion(version),
+                    for_gsutil=True,
+                )
+                manifest = self.gs_ctx.Cat(manifest_path, encoding="utf-8")
+                ref.AssignText(manifest)
             return json.loads(manifest)
 
     def _GetBinPackageGSPath(self, version, key):
@@ -763,17 +760,8 @@ class SDKFetcher(object):
         with self.misc_cache.Lookup(
             ("full-version", self.board, version)
         ) as ref:
-            # When switching between the old bucket (gs://chromeos-image-archive/)
-            # and the new public bucket (gs://chromiumos-image-archive/), the version
-            # cached here can become inaccurate. For example, 15050 for amd64-generic
-            # is 'R106-15050.0.0-rc2' in the old bucket, but 'R106-15049.0.0' in the
-            # new one. There's no good way to detect when a user makes the switch, so
-            # just temporarily turn off caching and fetch the version file from GS
-            # each time. It's a small file (~20 bytes) so shouldn't take very long.
-            # TODO(crbug.com/1330762): Restore this code after the public bucket's
-            # been the default for a couple weeks.
-            # if ref.Exists(lock=True):
-            #   return osutils.ReadFile(ref.path).strip()
+            if ref.Exists(lock=True):
+                return osutils.ReadFile(ref.path).strip()
 
             full_version = self._GetFullVersionFromLatest(version)
 
