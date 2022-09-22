@@ -220,7 +220,11 @@ class ChromeLKGMCommitter(object):
             "Applying %s to crrev.com/c/%s", labels, change.gerrit_number
         )
         self._gerrit_helper.SetReview(
-            change.gerrit_number, labels=labels, notify="NONE"
+            change.gerrit_number,
+            labels=labels,
+            notify="NONE",
+            ready=True,
+            reviewers=[constants.CHROME_GARDENER_REVIEW_EMAIL],
         )
         self._gerrit_helper.SetHashtags(
             change.gerrit_number, ["chrome-lkgm"], []

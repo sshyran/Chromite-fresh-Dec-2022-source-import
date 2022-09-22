@@ -67,6 +67,10 @@ class ChromeLKGMCommitterTester(
                             123456,
                             labels={"Bot-Commit": 1, "Commit-Queue": 2},
                             notify="NONE",
+                            ready=True,
+                            reviewers=[
+                                "chrome-os-gardeners-reviews@google.com"
+                            ],
                         )
 
     @mock.patch("chromite.lib.gob_util.GetFileContents")
@@ -138,6 +142,10 @@ class ChromeLKGMCommitterTester(
                             123456,
                             labels={"Bot-Commit": 1, "Commit-Queue": 2},
                             notify="NONE",
+                            ready=True,
+                            reviewers=[
+                                "chrome-os-gardeners-reviews@google.com"
+                            ],
                         )
 
     def testCommitMsg(self):
