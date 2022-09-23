@@ -469,6 +469,13 @@ def RunCurl(curl_args, *args, **kwargs):
         # We'll let the common exit code filter do the right thing.
         return None
 
+    # We want to always capture stderr, so if the caller wants capture_output,
+    # switch to stdout ourselves to avoid mixing these options which is not
+    # allowed by the run APIs.
+    capture_output = kwargs.pop("capture_output", False)
+    if capture_output:
+        kwargs["stdout"] = True
+
     try:
         return RunCommandWithRetries(
             10,
