@@ -953,7 +953,7 @@ def _CheckForKnownBadLicenses(cpf, licenses):
             "chromeos-base/monotype-fonts",
             "chromeos-base/qc7180-modem-firmware",
             "chromeos-base/sc7280-modem-firmware",
-            "chromeos-base/modem-fw-dlc-villager",
+            "chromeos-base/modem-fw-dlc",
             "dev-embedded/meta-embedded-toolkit",
             "media-libs/a630-fw",
             "media-libs/apl-hotword-support",
