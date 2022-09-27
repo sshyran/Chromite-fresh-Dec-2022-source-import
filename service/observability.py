@@ -69,6 +69,28 @@ def _get_version_component_regex() -> Pattern:
     return re.compile(complete)
 
 
+def get_image_size_data(
+    image_details: Dict[os.PathLike, str]
+) -> Dict[str, Dict[str, Dict[PackageIdentifier, portage_util.PackageSizes]]]:
+    """Entry point method to parse input data and retrieve new data.
+
+    Args:
+      image_details: A mapping of the path to the image and the image type (dev,
+        test, etc).
+
+    Returns:
+      A mapping of the image type (base, dev, test) to a partition:package
+      mapping.
+    """
+    package_sizes = {}
+    for image_path, image_type in image_details.items():
+        result = get_installed_package_data(
+            image_type=image_type, image_path=image_path
+        )
+        package_sizes[image_type] = result
+    return package_sizes
+
+
 def get_installed_package_data(
     image_type: str, image_path: os.PathLike
 ) -> Dict[str, Dict[PackageIdentifier, portage_util.PackageSizes]]:
