@@ -293,7 +293,9 @@ GROUP_BASELINE = dict(
                 "rgbkbd",
             },
         ),
-        GroupEntry(group="rgbkbd", gid=20186, users={"rgbkbd", "power"}),
+        GroupEntry(
+            group="rgbkbd", gid=20186, users={"rgbkbd", "power", "fwupd"}
+        ),
         GroupEntry(group="virtaccess", gid=418, users={"crosvm", "wilco_dtc"}),
         GroupEntry(
             group="crash-access", gid=419, users={"crash", "secanomaly"}
