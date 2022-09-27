@@ -1227,15 +1227,6 @@ class ChromeSDKCommand(command.CliCommand):
             "skew, and should be removed once Lacros is swiched to use "
             "Chromium toolchain: crbug.com/1275386.",
         )
-        # TODO(crbug.com/1330762): Remove this arg.
-        parser.add_argument(
-            "--use-new-public-bucket",
-            action="store_true",
-            default=False,
-            help="This arg no longer has any effect. Kept here to so clients can "
-            "gracefully switch to the new behavior.",
-        )
-
         parser.caching_group.add_argument(
             "--clear-sdk-cache",
             action="store_true",
