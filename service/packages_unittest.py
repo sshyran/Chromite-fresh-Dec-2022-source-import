@@ -1976,13 +1976,14 @@ class UprevKernelAfdo(cros_test_lib.RunCommandTempDirTestCase):
     def setUp(self):
         # patch_ebuild_vars is tested separately.
         self.mock_patch = self.PatchObject(packages, "patch_ebuild_vars")
+        self.PatchObject(constants, "SOURCE_ROOT", new=self.tempdir)
         self.metadata_dir = os.path.join(
-            constants.SOURCE_ROOT,
             "src",
             "third_party",
             "toolchain-utils",
             "afdo_metadata",
         )
+        osutils.SafeMakedirs(os.path.join(self.tempdir, self.metadata_dir))
 
     def test_uprev_kernel_afdo_version(self):
         """Test kernel afdo version uprev."""
@@ -2007,8 +2008,10 @@ class UprevKernelAfdo(cros_test_lib.RunCommandTempDirTestCase):
 
         returned_output = packages.uprev_kernel_afdo()
 
-        package_root = (
-            "/mnt/host/source/src/third_party/chromiumos-overlay/sys-kernel"
+        package_root = os.path.join(
+            constants.SOURCE_ROOT,
+            constants.CHROMIUMOS_OVERLAY_DIR,
+            "sys-kernel",
         )
         expect_result = [
             uprev_lib.UprevVersionedPackageModifications(
