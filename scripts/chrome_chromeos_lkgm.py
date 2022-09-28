@@ -285,8 +285,9 @@ class ChromeLKGMCommitter(object):
             "%(header)s\n%(build_link)s\n%(message)s\n%(cq_includes)s"
         )
         cq_includes = ""
-        for bot in self._PRESUBMIT_BOTS:
-            cq_includes += "CQ_INCLUDE_TRYBOTS=luci.chrome.try:%s\n" % bot
+        if self._branch == "main":
+            for bot in self._PRESUBMIT_BOTS:
+                cq_includes += "CQ_INCLUDE_TRYBOTS=luci.chrome.try:%s\n" % bot
         build_link = ""
         if self._buildbucket_id:
             build_link = "\nUploaded by https://ci.chromium.org/b/%s\n" % (
