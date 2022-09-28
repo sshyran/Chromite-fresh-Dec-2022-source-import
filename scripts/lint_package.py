@@ -98,6 +98,38 @@ def format_lint(lint: toolchain.LinterFinding) -> Text:
     return "\n".join(lines)
 
 
+def json_format_lint(lint: toolchain.LinterFinding) -> Text:
+    """Formats a lint in json for machine parsing.
+
+    Args:
+        lint: A linter finding from the toolchain service.
+
+    Returns:
+        A correctly formatted json string ready to be displayed to the user.
+    """
+
+    def _dictify(original):
+        """Turns namedtuple's to dictionaries recursively."""
+        # Handle namedtuples
+        if isinstance(original, tuple) and hasattr(original, "_asdict"):
+            return _dictify(original._asdict())
+        # Handle collection types
+        elif hasattr(original, "__iter__"):
+            # Handle strings
+            if isinstance(original, (str, bytes)):
+                return original
+            # Handle dictionaries
+            elif isinstance(original, dict):
+                return {k: _dictify(v) for k, v in original.items()}
+            # Handle lists, sets, etc.
+            else:
+                return [_dictify(x) for x in original]
+        # Handle everything else
+        return original
+
+    return json.dumps(_dictify(lint))
+
+
 def get_arg_parser() -> commandline.ArgumentParser:
     """Creates an argument parser for this script."""
     default_board = cros_build_lib.GetDefaultBoard()
@@ -208,9 +240,10 @@ def main(argv: List[str]) -> None:
             )
 
     if opts.json:
-        formatted_output = json.dumps([lint._asdict() for lint in lints])
+        formatted_output_inner = ",\n".join(json_format_lint(l) for l in lints)
+        formatted_output = f"[{formatted_output_inner}]"
     else:
-        formatted_output = "\n".join(format_lint(lint) for lint in lints)
+        formatted_output = "\n".join(format_lint(l) for l in lints)
 
     with file_util.Open(opts.output, "w") as output_file:
         output_file.write(formatted_output)

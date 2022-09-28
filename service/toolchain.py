@@ -43,16 +43,28 @@ class CodeLocation(NamedTuple):
     """Holds the code location of a linter finding."""
 
     filepath: str
+    contents: str
     line_start: int
     line_end: int
+    col_start: int
+    col_end: int
+
+
+class SuggestedFix(NamedTuple):
+    """Holds information about a linter finding."""
+
+    replacement: str
+    location: CodeLocation
 
 
 class LinterFinding(NamedTuple):
     """Holds information about a linter finding."""
 
+    name: str
     message: str
     locations: List[CodeLocation]
     linter: str
+    suggested_fixes: List[SuggestedFix]
 
 
 class BuildLinter:
@@ -298,6 +310,10 @@ class BuildLinter:
                         filepath=location.file_path,
                         line_start=location.line_start,
                         line_end=location.line_end,
+                        # FIXME(b/244362509): Extend more details support to Rust
+                        contents="",
+                        col_start=None,
+                        col_end=None,
                     )
                 )
             findings_tuples.append(
@@ -305,6 +321,9 @@ class BuildLinter:
                     message=finding.message,
                     locations=locations,
                     linter="cargo_clippy",
+                    suggested_fixes=[],
+                    # FIXME(b/244362509): Extend more details support to Rust
+                    name="",
                 )
             )
         return findings_tuples
@@ -342,20 +361,56 @@ class BuildLinter:
         self, diagnostics: List["tricium_clang_tidy.TidyDiagnostic"]
     ) -> List[LinterFinding]:
         """Parse diagnostics created by Clang Tidy into LinterFindings objects."""
-        return [
-            LinterFinding(
+        findings = []
+        for diag in diagnostics:
+            filepath = self._clean_file_path(diag.file_path)
+            suggested_fixes = []
+            for replacement in diag.replacements:
+                contents_to_replace = self._get_file_contents(
+                    diag.file_path,
+                    replacement.start_line,
+                    replacement.end_line,
+                    replacement.start_char,
+                    replacement.end_char,
+                )
+                fix_location = CodeLocation(
+                    filepath=filepath,
+                    contents=contents_to_replace,
+                    line_start=replacement.start_line,
+                    line_end=replacement.end_line,
+                    col_start=replacement.start_char,
+                    col_end=replacement.end_char,
+                )
+                suggested_fix = SuggestedFix(
+                    replacement=replacement.new_text, location=fix_location
+                )
+                suggested_fixes.append(suggested_fix)
+            original_contents = self._get_file_contents(
+                diag.file_path,
+                diag.line_number,
+                diag.line_number,
+            )
+            locations = [
+                CodeLocation(
+                    filepath=filepath,
+                    contents=original_contents,
+                    line_start=diag.line_number,
+                    line_end=diag.line_number,
+                    # FIXME(b/244362509): Add column data to claang tidy
+                    # parsing scripts
+                    col_start=None,
+                    col_end=None,
+                )
+            ]
+            finding = LinterFinding(
+                name=diag.diag_name,
                 message=diag.message,
-                locations=[
-                    CodeLocation(
-                        filepath=self._clean_file_path(diag.file_path),
-                        line_start=diag.line_number,
-                        line_end=diag.line_number,
-                    )
-                ],
+                locations=locations,
+                suggested_fixes=suggested_fixes,
                 linter="clang_tidy",
             )
-            for diag in diagnostics
-        ]
+            findings.append(finding)
+        return findings
 
     def _fetch_golint_lints(self) -> List[LinterFinding]:
         """Get lints created by Golint during emerge."""
@@ -427,9 +482,17 @@ class BuildLinter:
                     filepath=file_location,
                     line_start=lint_line_number,
                     line_end=lint_line_number,
+                    # FIXME(b/244362509): Extend more details support to Golang
+                    contents="",
+                    col_start=None,
+                    col_end=None,
                 )
                 yield LinterFinding(
-                    message=message, locations=[location], linter="go_lint"
+                    message=message,
+                    locations=[location],
+                    linter="go_lint",
+                    # FIXME(b/244362509): Extend more details support to Golang
+                    name="",
                 )
 
             packages_seen.add(package_name)
@@ -502,3 +565,25 @@ class BuildLinter:
             ]:
                 return True
         return False
+
+    def _get_file_contents(
+        self,
+        path: Text,
+        line_start: int,
+        line_end: int,
+        col_start: int = None,
+        col_end: int = None,
+    ):
+        """Attempt to get the contents of a file."""
+        try:
+            with Path(path).open(encoding="utf-8") as file_reader:
+                file_contents = file_reader.readlines()
+        except FileNotFoundError:
+            return []
+        # Note: line numbers are 1 indexed
+        lines = file_contents[line_start - 1 : line_end]
+        if lines and col_start is not None and col_end is not None:
+            if col_start < len(lines[0]):
+                lines[0] = lines[0][col_start:]
+                lines[-1] = lines[-1][: col_end + 1]
+        return "\n".join(lines)
