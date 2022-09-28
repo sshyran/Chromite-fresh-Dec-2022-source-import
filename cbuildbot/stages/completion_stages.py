@@ -5,6 +5,7 @@
 """Module containing the completion stages."""
 
 import logging
+import os
 
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import commands
@@ -14,10 +15,11 @@ from chromite.cbuildbot.stages import sync_stages
 from chromite.lib import alerts
 from chromite.lib import buildbucket_v2
 from chromite.lib import builder_status_lib
+from chromite.lib import chroot_lib
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import failures_lib
-from chromite.lib import portage_util
+from chromite.service import binhost as binhost_service
 
 
 def GetBuilderSuccessMap(builder_run, overall_success):
@@ -845,10 +847,16 @@ class PublishUprevChangesStage(generic_stages.BuilderStage):
                     self._boards,
                     overlay_type=self._run.config.overlays,
                 )
-                push_overlays = portage_util.FindOverlays(
-                    self._run.config.push_overlays, buildroot=self._build_root
+                chroot = chroot_lib.Chroot(
+                    path=os.path.join(
+                        self._build_root, constants.DEFAULT_CHROOT_PATH
+                    )
                 )
-                commands.RegenPortageCache(push_overlays)
+                binhost_service.RegenBuildCache(
+                    chroot,
+                    self._run.config.push_overlays,
+                    buildroot=self._build_root,
+                )
 
         # When prebuilts is True, if it's a successful run, update binhost conf.
         if self._run.config.prebuilts and self.success:

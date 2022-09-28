@@ -35,6 +35,7 @@ from chromite.lib import parallel
 from chromite.lib import portage_util
 from chromite.lib import request_build
 from chromite.lib.parser import package_info
+from chromite.service import binhost as binhost_service
 from chromite.service import image as image_service
 
 
@@ -1099,7 +1100,11 @@ class RegenPortageCacheStage(generic_stages.BuilderStage):
     category = constants.CI_INFRA_STAGE
 
     def PerformStage(self):
-        push_overlays = portage_util.FindOverlays(
-            self._run.config.push_overlays, buildroot=self._build_root
+        chroot = chroot_lib.Chroot(
+            path=os.path.join(self._build_root, constants.DEFAULT_CHROOT_PATH)
         )
-        commands.RegenPortageCache(push_overlays)
+        binhost_service.RegenBuildCache(
+            chroot,
+            self._run.config.push_overlays,
+            buildroot=self._build_root,
+        )

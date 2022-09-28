@@ -8,7 +8,7 @@ import functools
 import logging
 import os
 import tempfile
-from typing import List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING, Union
 
 from chromite.lib import binpkg
 from chromite.lib import constants
@@ -231,18 +231,21 @@ def SetBinhost(target: str, key: str, uri: str, private: bool = True) -> str:
 
 
 def RegenBuildCache(
-    chroot: "chroot_lib.Chroot", overlay_type: str
+    chroot: "chroot_lib.Chroot",
+    overlay_type: str,
+    buildroot: Union[str, os.PathLike] = constants.SOURCE_ROOT,
 ) -> List[str]:
     """Regenerate the Build Cache for the given target.
 
     Args:
-      chroot: The chroot where the regen command will be run.
-      overlay_type: one of "private", "public", or "both".
+        chroot: The chroot where the regen command will be run.
+        overlay_type: one of "private", "public", or "both".
+        buildroot: Source root to find overlays.
 
     Returns:
-      The overlays with updated caches.
+        The overlays with updated caches.
     """
-    overlays = portage_util.FindOverlays(overlay_type)
+    overlays = portage_util.FindOverlays(overlay_type, buildroot=buildroot)
 
     repos_config = portage_util.generate_repositories_configuration(chroot)
 
