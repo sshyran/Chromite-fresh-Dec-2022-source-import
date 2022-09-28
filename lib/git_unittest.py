@@ -819,6 +819,8 @@ class ManifestCheckoutTest(cros_test_lib.TempDirTestCase):
             os.path.join(self.tempdir, ".repo", "manifest.xml")
         )
 
+    # TODO(b/245813531): Renable when repo v2.29 is stable.
+    @unittest.skip("Skip until staging and prod are on repo v2.29 b/245333797")
     def testManifestInheritance(self):
         osutils.WriteFile(
             self.active_manifest,
@@ -853,6 +855,8 @@ class ManifestCheckoutTest(cros_test_lib.TempDirTestCase):
         self.assertEqual(list(manifest.checkouts_by_name), ["monkeys"])
         self.assertEqual(list(manifest.remotes), ["foon"])
 
+    # TODO(b/245813531): Renable when repo v2.29 is stable.
+    @unittest.skip("Skip until staging and prod are on repo v2.29 b/245333797")
     def testGetManifestsBranch(self):
         # pylint: disable=protected-access
         func = git.ManifestCheckout._GetManifestsBranch
