@@ -7560,6 +7560,17 @@
         {
           "board_name": "nissa",
           "name": "pujjo",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7206,
@@ -7568,14 +7579,36 @@
         {
           "board_name": "nissa",
           "name": "pujjoteen",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7206,
           "is_active": true
         },
         {
-          "board_name": "nissa",
+          "board_name": "nirwen",
           "name": "pujjoteen15w",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7206,
