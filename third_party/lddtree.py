@@ -20,6 +20,7 @@ import functools
 import mmap
 import optparse
 import os
+import re
 import shutil
 import sys
 
@@ -114,7 +115,7 @@ def interp_supports_argv0(interp) -> bool:
       return mm.find(b'--argv0') >= 0
 
 
-def GenerateLdsoWrapper(root, path, interp, libpaths=()):
+def GenerateLdsoWrapper(root, path, interp, libpaths=(), preload=None):
   """Generate a shell script wrapper which uses local ldso to run the ELF
 
   Since we cannot rely on the host glibc (or other libraries), we need to
@@ -131,6 +132,12 @@ def GenerateLdsoWrapper(root, path, interp, libpaths=()):
   interp_dir, interp_name = os.path.split(interp)
   # Add ldso interpreter dir to end of libpaths as a fallback library path.
   libpaths = dedupe(list(libpaths) + [interp_dir])
+  if preload:
+    # If preload is an absolute path, calculate it from basedir.
+    preload_prefix = f'${{basedir}}/{os.path.relpath("/", basedir)}'
+    preload = ':'.join(f'{preload_prefix}{x}' if os.path.isabs(x) else x
+                       for x in re.split(r'[ :]', preload))
+
   replacements = {
     'interp': os.path.join(os.path.relpath(interp_dir, basedir),
                            interp_name),
@@ -138,6 +145,7 @@ def GenerateLdsoWrapper(root, path, interp, libpaths=()):
     'libpaths': ':'.join(['${basedir}/' + os.path.relpath(p, basedir)
                           for p in libpaths]),
     'argv0_arg': '--argv0 "$0"' if interp_supports_argv0(root + interp) else '',
+    'preload_arg': f'--preload "{preload}"' if preload else '',
   }
 
   # Keep path relativeness of argv0. This allows to remove absolute path from
@@ -159,6 +167,7 @@ basedir=${base%%/*}
 LD_ARGV0_REL="%(interp_rel)s" exec \
   "${basedir}/%(interp)s" \
   %(argv0_arg)s \
+  %(preload_arg)s \
   --library-path "%(libpaths)s" \
   --inhibit-rpath '' \
   "${base}.elf" \
@@ -521,7 +530,7 @@ def _ActionCopy(options, elf):
     return path[len(options.root) - 1:]
 
   def _copy(realsrc, src, striproot=True, wrapit=False, libpaths=(),
-            outdir=None):
+            outdir=None, preload=None):
     if realsrc is None:
       return
 
@@ -570,7 +579,7 @@ def _ActionCopy(options, elf):
         interp = os.path.join(options.libdir, os.path.basename(elf['interp']))
       else:
         interp = _StripRoot(elf['interp'])
-      GenerateLdsoWrapper(options.dest, subdst, interp, libpaths)
+      GenerateLdsoWrapper(options.dest, subdst, interp, libpaths, preload)
 
   # XXX: We should automatically import libgcc_s.so whenever libpthread.so
   # is copied over (since we know it can be dlopen-ed by NPTL at runtime).
@@ -599,7 +608,7 @@ def _ActionCopy(options, elf):
   #_copy(elf['interp'], outdir=options.libdir)
   _copy(elf['realpath'], elf['path'], striproot=options.auto_root,
         wrapit=options.generate_wrappers, libpaths=libpaths,
-        outdir=options.bindir)
+        outdir=options.bindir, preload=options.wrapper_preload)
 
 
 def main(argv):
@@ -684,6 +693,9 @@ they need will be placed into /foo/lib/ only.""")
   group.add_option('--copy-non-elfs',
     action='store_true', default=False,
     help='Copy over plain (non-ELF) files instead of warn+ignore')
+  group.add_option('--wrapper-preload',
+    default=None, type='string',
+    help='Have wrapper add --preload to the ldso invocation')
   parser.add_option_group(group)
 
   (options, paths) = parser.parse_args(argv)
