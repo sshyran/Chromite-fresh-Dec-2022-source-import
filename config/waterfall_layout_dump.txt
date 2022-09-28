@@ -181,6 +181,7 @@
     hatch-connectivitynext-release
     hatch-kernelnext-release
     hatch-release
+    herobrine-kernelnext-release
     herobrine-release
     herobrine-userdebug-release
     jacuzzi-kernelnext-release
@@ -797,6 +798,11 @@
   hatch-payloads-tryjob
   hatch-release-tryjob
   herobrine-full-tryjob
+  herobrine-kernelnext-full-tryjob
+  herobrine-kernelnext-llvm-next-toolchain-tryjob
+  herobrine-kernelnext-llvm-toolchain-tryjob
+  herobrine-kernelnext-payloads-tryjob
+  herobrine-kernelnext-release-tryjob
   herobrine-llvm-next-toolchain-tryjob
   herobrine-llvm-toolchain-tryjob
   herobrine-payloads-tryjob
@@ -995,6 +1001,7 @@
     hatch-connectivitynext-release-tryjob
     hatch-kernelnext-release-tryjob
     hatch-release-tryjob
+    herobrine-kernelnext-release-tryjob
     herobrine-release-tryjob
     herobrine-userdebug-release-tryjob
     jacuzzi-kernelnext-release-tryjob
