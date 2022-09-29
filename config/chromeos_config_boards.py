@@ -132,7 +132,14 @@ termina_boards = frozenset(
     ]
 )
 
-nofactory_boards = termina_boards | reven_boards
+labstation_boards = frozenset(
+    [
+        "fizz-labstation",
+        "guado_labstation",
+    ]
+)
+
+nofactory_boards = termina_boards | reven_boards | labstation_boards
 
 toolchains_from_source = frozenset(
     [
