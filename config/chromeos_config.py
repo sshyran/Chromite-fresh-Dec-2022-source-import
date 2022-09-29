@@ -2418,10 +2418,7 @@ def BranchScheduleConfig():
     RELEASES = [
         (
             "release-R107-15117.B",
-            [
-                "kevin-android-pi-pre-flight-branch",
-                "hatch-android-rvc-pre-flight-branch",
-            ],
+            [],
             "",
             [],
             [],
