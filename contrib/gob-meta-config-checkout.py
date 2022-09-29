@@ -28,10 +28,6 @@ import urllib.request
 assert sys.version_info >= (3, 7), "Python 3.7+ required"
 
 
-# This uses PEP8 4-space indent.
-# pylint: disable=bad-indentation
-
-
 # Terminal escape sequence to erase the current line after the cursor.
 CSI_ERASE_LINE_AFTER = "\x1b[K"
 
@@ -128,6 +124,7 @@ def create_repo(opts: argparse.Namespace, repo: Path):
         "remote.origin.fetch",
         "+refs/meta/config:refs/remotes/origin/meta-config",
     )
+    config.set("remote.origin.push", "HEAD:refs/meta/config")
     if head.read_text().strip() != "ref: refs/heads/meta-config":
         result = run(
             ["git", "fetch", "-q", "origin"],
