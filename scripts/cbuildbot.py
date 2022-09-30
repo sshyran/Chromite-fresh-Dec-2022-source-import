@@ -1224,7 +1224,7 @@ def main(argv):
         if not options.resume:
             # If we're in resume mode, use our parents tempdir rather than
             # nesting another layer.
-            stack.Add(osutils.TempDir, prefix="cbuildbot-tmp", set_global=True)
+            stack.Add(osutils.TempDir, prefix="cbb", set_global=True)
             logging.debug("Cbuildbot tempdir is %r.", os.environ.get("TMP"))
 
         if options.cgroups:
