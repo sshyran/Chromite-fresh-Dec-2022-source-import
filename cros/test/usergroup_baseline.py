@@ -361,6 +361,7 @@ GROUP_BASELINE = dict(
                 "crash",
                 "dlp",
                 "image-burner",
+                "seneschal",
                 "spaced",
             },
         ),
