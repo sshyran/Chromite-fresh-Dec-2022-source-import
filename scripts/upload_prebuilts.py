@@ -1155,6 +1155,6 @@ def main(argv):
             options.toolchain_upload_path,
         )
 
-    if options.json:
-        with options.json.open("w") as f:
+    if options.output:
+        with open(options.output, "w") as f:
             pformat.json(report, fp=f)
