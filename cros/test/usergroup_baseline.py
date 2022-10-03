@@ -326,7 +326,7 @@ GROUP_BASELINE = dict(
             },
         ),
         GroupEntry(
-            group="cros_fp-access",
+            group="fpdev",
             gid=426,
             users={
                 "biod",
