@@ -1684,6 +1684,20 @@ class GetLatestVersionTest(cros_test_lib.TestCase):
             packages._get_latest_version_from_refs(self.prefix, []), None
         )
 
+    def test_ref_prefix(self):
+        """Test refs with a different prefix isn't used"""
+        # pylint: disable=protected-access
+        # Add refs/tags/foo_100.0.0 to the refs, which should be ignored in
+        # _get_latest_version_from_refs because the prefix doesn't match, even
+        # if its version number is larger.
+        refs = self.refs + [
+            uprev_lib.GitRef("/path", "refs/tags/foo_100.0.0", "abc123")
+        ]
+        self.assertEqual(
+            self.latest,
+            packages._get_latest_version_from_refs(self.prefix, refs),
+        )
+
 
 class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
     """Tests for needs_chrome_source."""

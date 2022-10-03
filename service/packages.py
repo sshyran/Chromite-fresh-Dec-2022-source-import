@@ -483,12 +483,12 @@ def uprev_perfetto(_build_targets, refs, chroot):
     result = uprev_lib.UprevVersionedPackageResult()
 
     PERFETTO_REFS_PREFIX = "refs/tags/v"
+    # |perfetto_version| is only used in determining the ebuild version. The
+    # package is always updated to the latest HEAD.
     perfetto_version = _get_latest_version_from_refs(PERFETTO_REFS_PREFIX, refs)
     if not perfetto_version:
         # No valid Perfetto version is identified.
         return result
-
-    logging.debug("Perfetto version determined from refs: %s", perfetto_version)
 
     # Attempt to uprev perfetto package.
     PERFETTO_PATH = "src/third_party/chromiumos-overlay/chromeos-base/perfetto"
@@ -498,7 +498,7 @@ def uprev_perfetto(_build_targets, refs, chroot):
         perfetto_version,
         chroot,
         allow_downrev=False,
-        ref=PERFETTO_REFS_PREFIX + perfetto_version,
+        # Use default ref="HEAD"
     )
 
     if not uprev_result:
@@ -858,10 +858,10 @@ def _get_latest_version_from_refs(
 
     Args:
       refs_prefix: The refs prefix of the tag format.
-      refs: The tags to parse for the latest Perfetto version.
+      refs: The tags to parse for the latest version.
 
     Returns:
-      The latest Perfetto version to use.
+      The latest version to use as string.
     """
     valid_refs = []
     for gitiles in refs:
