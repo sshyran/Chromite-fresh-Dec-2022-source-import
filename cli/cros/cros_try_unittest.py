@@ -11,8 +11,8 @@ from chromite.lib import cros_test_lib
 from chromite.scripts import cros
 
 
-MOCK_MYJOB_DIR = Path("/tmp/myjob")
-MOCK_MYJOB_BIN = MOCK_MYJOB_DIR / "myjob"
+MOCK_TRY_DIR = Path("/tmp/try")
+MOCK_TRY_BIN = MOCK_TRY_DIR / "try"
 
 
 class TryCommandTest(cros_test_lib.RunCommandTestCase):
@@ -21,7 +21,7 @@ class TryCommandTest(cros_test_lib.RunCommandTestCase):
     def setUp(self):
         """Create patches."""
         self.PatchObject(
-            cros_try, "_InstallMyjobPackage", return_value=MOCK_MYJOB_BIN
+            cros_try, "_InstallTryPackage", return_value=MOCK_TRY_BIN
         )
 
     def runCrosTry(self, try_args: List[str]):
@@ -29,16 +29,14 @@ class TryCommandTest(cros_test_lib.RunCommandTestCase):
         return cros.main(["try"] + try_args)
 
     def testArgsForwarding(self):
-        """Test that calling `cros try` forwards args to the myjob binary."""
+        """Test that calling `cros try` forwards args to the try binary."""
         self.runCrosTry(["release", "-staging"])
         self.rc.assertCommandCalled(
-            [str(MOCK_MYJOB_BIN), "release", "-staging"], check=False
+            [str(MOCK_TRY_BIN), "release", "-staging"], check=False
         )
 
     def testExitCode(self):
-        """Test that `cros try` returns the myjob binary's exit code."""
-        self.rc.AddCmdResult(
-            [str(MOCK_MYJOB_BIN), "invalid-cmd"], returncode=128
-        )
+        """Test that `cros try` returns the try binary's exit code."""
+        self.rc.AddCmdResult([str(MOCK_TRY_BIN), "invalid-cmd"], returncode=128)
         actual_retcode = self.runCrosTry(["invalid-cmd"])
         self.assertEqual(actual_retcode, 128)

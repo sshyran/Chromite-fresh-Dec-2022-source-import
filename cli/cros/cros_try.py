@@ -1,14 +1,11 @@
 # Copyright 2022 The ChromiumOS Authors
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-"""Implement the `cros try` CLI, which forwards to the myjob binary.
+"""Implement the `cros try` CLI, which forwards to the try binary.
 
-The myjob binary is defined in the infra/infra repository, and distributed via
+The try binary is defined in the infra/infra repository, and distributed via
 CIPD. This CLI ensures that the CIPD package is installed and up-to-date,
-captures all input arguments, and forwards them to the myjob binary.
-
-TODO (b/250076720): Update all `myjob` references to the new `try` package,
-once it exists.
+captures all input arguments, and forwards them to the try binary.
 """
 
 import argparse
@@ -20,7 +17,7 @@ from chromite.lib import cipd
 from chromite.lib import cros_build_lib
 
 
-PINNED_MYJOB_VERSION = "TtpakXXGnP2zeWvAG79iLTROZZU2tL0eIUgQvijeWHkC"
+PINNED_TRY_VERSION = "KV2Fc_xe8IsjZRypqi10EN5N0w4pp28KaTEN-_oFTN4C"
 
 
 @command.command_decorator("try")
@@ -28,8 +25,8 @@ class TryCommand(command.CliCommand):
     """Implementation of the `cros try` command."""
 
     EPILOG = """
-Run a builder with bespoke configurations via the myjob package.
-For help, run `cros myjob help` (with no hyphens).
+Run a builder with bespoke configurations via the try package.
+For help, run `cros try help` (with no hyphens).
 """
 
     @classmethod
@@ -39,31 +36,31 @@ For help, run `cros myjob help` (with no hyphens).
         parser.add_argument("input", action="append", nargs=argparse.REMAINDER)
 
     def Run(self) -> int:
-        """Install and run the myjob binary.
+        """Install and run the try binary.
 
         Returns:
-            The return code of the completed myjob process.
+            The return code of the completed try process.
         """
-        myjob_bin = _InstallMyjobPackage()
-        return self._RunMyjob(myjob_bin, self.options.input[0])
+        try_bin = _InstallTryPackage()
+        return self._RunTry(try_bin, self.options.input[0])
 
-    def _RunMyjob(self, myjob_bin: Path, args: List[str]) -> int:
-        """Run the `myjob` command with the specified arguments.
+    def _RunTry(self, try_bin: Path, args: List[str]) -> int:
+        """Run the `try` command with the specified arguments.
 
         Args:
-            myjob_bin: Path to the myjob binary.
-            args: command-line args to pass into myjob.
+            try_bin: Path to the try binary.
+            args: command-line args to pass into try.
 
         Returns:
-            The return code of the completed myjob process.
+            The return code of the completed try process.
         """
-        cmd = [str(myjob_bin)] + args
+        cmd = [str(try_bin)] + args
         p = cros_build_lib.run(cmd, check=False)
         return p.returncode
 
 
-def _InstallMyjobPackage(version: str = PINNED_MYJOB_VERSION) -> Path:
-    """Install the `myjob` package from CIPD, and save its path.
+def _InstallTryPackage(version: str = PINNED_TRY_VERSION) -> Path:
+    """Install the `try` package from CIPD, and save its path.
 
     If the package is already present in the CIPD cache, it will be updated
     to the specified version.
@@ -73,11 +70,11 @@ def _InstallMyjobPackage(version: str = PINNED_MYJOB_VERSION) -> Path:
             an instance ID or a ref.
 
     Returns:
-        The path to the myjob binary.
+        The path to the try binary.
     """
-    myjob_dir = cipd.InstallPackage(
+    try_dir = cipd.InstallPackage(
         cipd.GetCIPDFromCache(),
-        "chromiumos/infra/myjob/linux-amd64",
+        "chromiumos/infra/try/linux-amd64",
         version,
     )
-    return Path(myjob_dir) / "myjob"
+    return Path(try_dir) / "try"
