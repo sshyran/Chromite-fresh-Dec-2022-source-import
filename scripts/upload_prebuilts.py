@@ -157,7 +157,7 @@ def UpdateLocalFile(filename, value, key="PORTAGE_BINHOST"):
     return made_changes
 
 
-def RevGitFile(filename, data, report, dryrun=False):
+def RevGitFile(filename, data, report=None, dryrun=False):
     """Update and push the git file.
 
     Args:
@@ -166,6 +166,8 @@ def RevGitFile(filename, data, report, dryrun=False):
       report: Dict in which to collect information to report to the user.
       dryrun: If True, do not actually commit the change.
     """
+    if report is None:
+        report = {}
     prebuilt_branch = "prebuilt_branch"
     cwd = os.path.abspath(os.path.dirname(filename))
     remote_name = git.RunGit(cwd, ["remote"]).stdout.strip()
