@@ -32,7 +32,10 @@ class TryCommandTest(cros_test_lib.RunCommandTestCase):
         """Test that calling `cros try` forwards args to the try binary."""
         self.runCrosTry(["release", "-staging"])
         self.rc.assertCommandCalled(
-            [str(MOCK_TRY_BIN), "release", "-staging"], check=False
+            [str(MOCK_TRY_BIN), "release", "-staging"],
+            check=False,
+            stderr=True,
+            encoding="utf-8",
         )
 
     def testExitCode(self):
@@ -40,3 +43,16 @@ class TryCommandTest(cros_test_lib.RunCommandTestCase):
         self.rc.AddCmdResult([str(MOCK_TRY_BIN), "invalid-cmd"], returncode=128)
         actual_retcode = self.runCrosTry(["invalid-cmd"])
         self.assertEqual(actual_retcode, 128)
+
+    def testDoubleDashes(self):
+        """Unit tests for _ModifyFlagsToDoubleDashes."""
+        # pylint: disable=protected-access
+        for (in_str, expected_out) in (
+            ("-flag", "--flag"),
+            ("\n-flag", "\n--flag"),
+            ("--flag", "--flag"),
+            ("-contains-dash", "--contains-dash"),
+            ("[-flag]", "[--flag]"),
+        ):
+            actual_out = cros_try._ModifyFlagsToDoubleDashes(in_str)
+            self.assertEqual(actual_out, expected_out)

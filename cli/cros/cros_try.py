@@ -10,6 +10,8 @@ captures all input arguments, and forwards them to the try binary.
 
 import argparse
 from pathlib import Path
+import re
+import sys
 from typing import List
 
 from chromite.cli import command
@@ -55,8 +57,28 @@ For help, run `cros try help` (with no hyphens).
             The return code of the completed try process.
         """
         cmd = [str(try_bin)] + args
-        p = cros_build_lib.run(cmd, check=False)
+        p = cros_build_lib.run(cmd, check=False, stderr=True, encoding="utf-8")
+        # Modify usage messages to refer to double-dash flags ('--foo').
+        # The gobin's usage messages are sent to stderr and contain 'usage:'.
+        if "usage:" in p.stderr:
+            p.stderr = _ModifyFlagsToDoubleDashes(p.stderr)
+        print(p.stderr, file=sys.stderr)
         return p.returncode
+
+
+def _ModifyFlagsToDoubleDashes(message: str) -> str:
+    """Take a message with single-dash flags, and make them double-dashes.
+
+    Go bins like `try` accept both one-dash flags (-foo) and two-dash flags
+    (--foo). But their help messages only report the one-dash version. For
+    consistency with other `cros` tools, we want to print a help message with
+    two dashes.
+
+    This function edits the messages output by `try` into the desired format.
+    """
+    return re.sub(
+        r"(^|[^A-Za-z0-9_\-])-(\w[A-Za-z0-9_\-]*)\b", r"\1--\2", message
+    )
 
 
 def _InstallTryPackage(version: str = PINNED_TRY_VERSION) -> Path:
