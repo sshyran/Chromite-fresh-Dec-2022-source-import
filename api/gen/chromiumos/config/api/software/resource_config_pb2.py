@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z1go.chromium.org/chromiumos/config/go/api/software',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n4chromiumos/config/api/software/resource_config.proto\x12\x1e\x63hromiumos.config.api.software\"\x8c\x08\n\x0eResourceConfig\x12Q\n\x02\x61\x63\x18\x05 \x01(\x0b\x32\x45.chromiumos.config.api.software.ResourceConfig.PowerSourcePreferences\x12Q\n\x02\x64\x63\x18\x06 \x01(\x0b\x32\x45.chromiumos.config.api.software.ResourceConfig.PowerSourcePreferences\x1a\x66\n\x10OndemandGovernor\x12&\n\x0epowersave_bias\x18\x01 \x01(\rR\x0epowersave-bias\x12*\n\x10sampling_rate_ms\x18\x02 \x01(\rR\x10sampling-rate-ms\x1ak\n\x08Governor\x12S\n\x08ondemand\x18\x01 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.OndemandGovernorH\x00\x42\n\n\x08governor\x1a]\n\x10PowerPreferences\x12I\n\x08governor\x18\x01 \x01(\x0b\x32\x37.chromiumos.config.api.software.ResourceConfig.Governor\x1a\x9f\x04\n\x16PowerSourcePreferences\x12}\n\x19\x64\x65\x66\x61ult_power_preferences\x18\x01 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x19\x64\x65\x66\x61ult-power-preferences\x12}\n\x19web_rtc_power_preferences\x18\x02 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x19web-rtc-power-preferences\x12\x89\x01\n\"fullscreen_video_power_preferences\x18\x03 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x1c\x66ullscreen-power-preferences\x12{\n\x18gaming_power_preferences\x18\x04 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x18gaming-power-preferencesB3Z1go.chromium.org/chromiumos/config/go/api/softwareb\x06proto3'
+  serialized_pb=b'\n4chromiumos/config/api/software/resource_config.proto\x12\x1e\x63hromiumos.config.api.software\"\xa6\n\n\x0eResourceConfig\x12Q\n\x02\x61\x63\x18\x05 \x01(\x0b\x32\x45.chromiumos.config.api.software.ResourceConfig.PowerSourcePreferences\x12Q\n\x02\x64\x63\x18\x06 \x01(\x0b\x32\x45.chromiumos.config.api.software.ResourceConfig.PowerSourcePreferences\x1a\x66\n\x10OndemandGovernor\x12&\n\x0epowersave_bias\x18\x01 \x01(\rR\x0epowersave-bias\x12*\n\x10sampling_rate_ms\x18\x02 \x01(\rR\x10sampling-rate-ms\x1ak\n\x08Governor\x12S\n\x08ondemand\x18\x01 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.OndemandGovernorH\x00\x42\n\n\x08governor\x1a]\n\x10PowerPreferences\x12I\n\x08governor\x18\x01 \x01(\x0b\x32\x37.chromiumos.config.api.software.ResourceConfig.Governor\x1a\xb9\x06\n\x16PowerSourcePreferences\x12}\n\x19\x64\x65\x66\x61ult_power_preferences\x18\x01 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x19\x64\x65\x66\x61ult-power-preferences\x12}\n\x19web_rtc_power_preferences\x18\x02 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x19web-rtc-power-preferences\x12\x89\x01\n\"fullscreen_video_power_preferences\x18\x03 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x1c\x66ullscreen-power-preferences\x12{\n\x18gaming_power_preferences\x18\x04 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x18gaming-power-preferences\x12\x8d\x01\n!borealis_gaming_power_preferences\x18\x05 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR!borealis-gaming-power-preferences\x12\x87\x01\n\x1e\x61rcvm_gaming_power_preferences\x18\x06 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x1e\x61rcvm-gaming-power-preferencesB3Z1go.chromium.org/chromiumos/config/go/api/softwareb\x06proto3'
 )
 
 
@@ -166,6 +166,20 @@ _RESOURCECONFIG_POWERSOURCEPREFERENCES = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, json_name='gaming-power-preferences', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='borealis_gaming_power_preferences', full_name='chromiumos.config.api.software.ResourceConfig.PowerSourcePreferences.borealis_gaming_power_preferences', index=4,
+      number=5, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, json_name='borealis-gaming-power-preferences', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='arcvm_gaming_power_preferences', full_name='chromiumos.config.api.software.ResourceConfig.PowerSourcePreferences.arcvm_gaming_power_preferences', index=5,
+      number=6, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, json_name='arcvm-gaming-power-preferences', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -179,7 +193,7 @@ _RESOURCECONFIG_POWERSOURCEPREFERENCES = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=582,
-  serialized_end=1125,
+  serialized_end=1407,
 )
 
 _RESOURCECONFIG = _descriptor.Descriptor(
@@ -217,7 +231,7 @@ _RESOURCECONFIG = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=89,
-  serialized_end=1125,
+  serialized_end=1407,
 )
 
 _RESOURCECONFIG_ONDEMANDGOVERNOR.containing_type = _RESOURCECONFIG
@@ -232,6 +246,8 @@ _RESOURCECONFIG_POWERSOURCEPREFERENCES.fields_by_name['default_power_preferences
 _RESOURCECONFIG_POWERSOURCEPREFERENCES.fields_by_name['web_rtc_power_preferences'].message_type = _RESOURCECONFIG_POWERPREFERENCES
 _RESOURCECONFIG_POWERSOURCEPREFERENCES.fields_by_name['fullscreen_video_power_preferences'].message_type = _RESOURCECONFIG_POWERPREFERENCES
 _RESOURCECONFIG_POWERSOURCEPREFERENCES.fields_by_name['gaming_power_preferences'].message_type = _RESOURCECONFIG_POWERPREFERENCES
+_RESOURCECONFIG_POWERSOURCEPREFERENCES.fields_by_name['borealis_gaming_power_preferences'].message_type = _RESOURCECONFIG_POWERPREFERENCES
+_RESOURCECONFIG_POWERSOURCEPREFERENCES.fields_by_name['arcvm_gaming_power_preferences'].message_type = _RESOURCECONFIG_POWERPREFERENCES
 _RESOURCECONFIG_POWERSOURCEPREFERENCES.containing_type = _RESOURCECONFIG
 _RESOURCECONFIG.fields_by_name['ac'].message_type = _RESOURCECONFIG_POWERSOURCEPREFERENCES
 _RESOURCECONFIG.fields_by_name['dc'].message_type = _RESOURCECONFIG_POWERSOURCEPREFERENCES

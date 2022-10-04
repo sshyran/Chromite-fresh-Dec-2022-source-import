@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n4chromiumos/config/api/software/resource_config.proto\x12\x1e\x63hromiumos.config.api.software\"\x8c\x08\n\x0eResourceConfig\x12Q\n\x02\x61\x63\x18\x05 \x01(\x0b\x32\x45.chromiumos.config.api.software.ResourceConfig.PowerSourcePreferences\x12Q\n\x02\x64\x63\x18\x06 \x01(\x0b\x32\x45.chromiumos.config.api.software.ResourceConfig.PowerSourcePreferences\x1a\x66\n\x10OndemandGovernor\x12&\n\x0epowersave_bias\x18\x01 \x01(\rR\x0epowersave-bias\x12*\n\x10sampling_rate_ms\x18\x02 \x01(\rR\x10sampling-rate-ms\x1ak\n\x08Governor\x12S\n\x08ondemand\x18\x01 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.OndemandGovernorH\x00\x42\n\n\x08governor\x1a]\n\x10PowerPreferences\x12I\n\x08governor\x18\x01 \x01(\x0b\x32\x37.chromiumos.config.api.software.ResourceConfig.Governor\x1a\x9f\x04\n\x16PowerSourcePreferences\x12}\n\x19\x64\x65\x66\x61ult_power_preferences\x18\x01 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x19\x64\x65\x66\x61ult-power-preferences\x12}\n\x19web_rtc_power_preferences\x18\x02 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x19web-rtc-power-preferences\x12\x89\x01\n\"fullscreen_video_power_preferences\x18\x03 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x1c\x66ullscreen-power-preferences\x12{\n\x18gaming_power_preferences\x18\x04 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x18gaming-power-preferencesB3Z1go.chromium.org/chromiumos/config/go/api/softwareb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n4chromiumos/config/api/software/resource_config.proto\x12\x1e\x63hromiumos.config.api.software\"\xa6\n\n\x0eResourceConfig\x12Q\n\x02\x61\x63\x18\x05 \x01(\x0b\x32\x45.chromiumos.config.api.software.ResourceConfig.PowerSourcePreferences\x12Q\n\x02\x64\x63\x18\x06 \x01(\x0b\x32\x45.chromiumos.config.api.software.ResourceConfig.PowerSourcePreferences\x1a\x66\n\x10OndemandGovernor\x12&\n\x0epowersave_bias\x18\x01 \x01(\rR\x0epowersave-bias\x12*\n\x10sampling_rate_ms\x18\x02 \x01(\rR\x10sampling-rate-ms\x1ak\n\x08Governor\x12S\n\x08ondemand\x18\x01 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.OndemandGovernorH\x00\x42\n\n\x08governor\x1a]\n\x10PowerPreferences\x12I\n\x08governor\x18\x01 \x01(\x0b\x32\x37.chromiumos.config.api.software.ResourceConfig.Governor\x1a\xb9\x06\n\x16PowerSourcePreferences\x12}\n\x19\x64\x65\x66\x61ult_power_preferences\x18\x01 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x19\x64\x65\x66\x61ult-power-preferences\x12}\n\x19web_rtc_power_preferences\x18\x02 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x19web-rtc-power-preferences\x12\x89\x01\n\"fullscreen_video_power_preferences\x18\x03 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x1c\x66ullscreen-power-preferences\x12{\n\x18gaming_power_preferences\x18\x04 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x18gaming-power-preferences\x12\x8d\x01\n!borealis_gaming_power_preferences\x18\x05 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR!borealis-gaming-power-preferences\x12\x87\x01\n\x1e\x61rcvm_gaming_power_preferences\x18\x06 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x1e\x61rcvm-gaming-power-preferencesB3Z1go.chromium.org/chromiumos/config/go/api/softwareb\x06proto3')
 
 
 
@@ -67,7 +67,7 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'Z1go.chromium.org/chromiumos/config/go/api/software'
   _RESOURCECONFIG._serialized_start=89
-  _RESOURCECONFIG._serialized_end=1125
+  _RESOURCECONFIG._serialized_end=1407
   _RESOURCECONFIG_ONDEMANDGOVERNOR._serialized_start=273
   _RESOURCECONFIG_ONDEMANDGOVERNOR._serialized_end=375
   _RESOURCECONFIG_GOVERNOR._serialized_start=377
@@ -75,5 +75,5 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _RESOURCECONFIG_POWERPREFERENCES._serialized_start=486
   _RESOURCECONFIG_POWERPREFERENCES._serialized_end=579
   _RESOURCECONFIG_POWERSOURCEPREFERENCES._serialized_start=582
-  _RESOURCECONFIG_POWERSOURCEPREFERENCES._serialized_end=1125
+  _RESOURCECONFIG_POWERSOURCEPREFERENCES._serialized_end=1407
 # @@protoc_insertion_point(module_scope)
