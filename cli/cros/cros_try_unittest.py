@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import List
 
 from chromite.cli.cros import cros_try
+from chromite.lib import cipd
 from chromite.lib import cros_test_lib
 from chromite.scripts import cros
 
@@ -20,8 +21,8 @@ class TryCommandTest(cros_test_lib.RunCommandTestCase):
 
     def setUp(self):
         """Create patches."""
-        self.PatchObject(
-            cros_try, "_InstallTryPackage", return_value=MOCK_TRY_BIN
+        self._cipd_install_patch = self.PatchObject(
+            cipd, "InstallPackage", return_value=MOCK_TRY_DIR
         )
 
     def runCrosTry(self, try_args: List[str]):
@@ -56,3 +57,26 @@ class TryCommandTest(cros_test_lib.RunCommandTestCase):
         ):
             actual_out = cros_try._ModifyFlagsToDoubleDashes(in_str)
             self.assertEqual(actual_out, expected_out)
+
+    def testCIPDVersion(self):
+        """Test the default/overridden CIPD version."""
+        self.runCrosTry(["release"])
+        self._cipd_install_patch.assert_called_with(
+            cipd.GetCIPDFromCache(),
+            cros_try.CIPD_TRY_PACKAGE,
+            cros_try.PINNED_TRY_VERSION,
+        )
+        self.runCrosTry(
+            ["--cipd-version", "my-cool-version", "release", "--staging"]
+        )
+        self._cipd_install_patch.assert_called_with(
+            cipd.GetCIPDFromCache(),
+            cros_try.CIPD_TRY_PACKAGE,
+            "my-cool-version",
+        )
+        self.rc.assertCommandCalled(
+            [str(MOCK_TRY_BIN), "release", "--staging"],
+            check=False,
+            stderr=True,
+            encoding="utf-8",
+        )

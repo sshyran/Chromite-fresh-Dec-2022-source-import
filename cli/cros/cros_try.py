@@ -19,6 +19,7 @@ from chromite.lib import cipd
 from chromite.lib import cros_build_lib
 
 
+CIPD_TRY_PACKAGE = "chromiumos/infra/try/linux-amd64"
 PINNED_TRY_VERSION = "KV2Fc_xe8IsjZRypqi10EN5N0w4pp28KaTEN-_oFTN4C"
 
 
@@ -35,6 +36,11 @@ For help, run `cros try help` (with no hyphens).
     def AddParser(cls, parser: argparse.ArgumentParser):
         """Capture all CLI args to forward to the go bin."""
         super().AddParser(parser)
+        parser.add_argument(
+            "--cipd-version",
+            default=PINNED_TRY_VERSION,
+            help="CIPD version of the try CLI. Can be instance ID or ref. Must be provided before other try subcommands/flags.",
+        )
         parser.add_argument("input", action="append", nargs=argparse.REMAINDER)
 
     def Run(self) -> int:
@@ -43,7 +49,7 @@ For help, run `cros try help` (with no hyphens).
         Returns:
             The return code of the completed try process.
         """
-        try_bin = _InstallTryPackage()
+        try_bin = _InstallTryPackage(self.options.cipd_version)
         return self._RunTry(try_bin, self.options.input[0])
 
     def _RunTry(self, try_bin: Path, args: List[str]) -> int:
@@ -81,7 +87,7 @@ def _ModifyFlagsToDoubleDashes(message: str) -> str:
     )
 
 
-def _InstallTryPackage(version: str = PINNED_TRY_VERSION) -> Path:
+def _InstallTryPackage(version: str) -> Path:
     """Install the `try` package from CIPD, and save its path.
 
     If the package is already present in the CIPD cache, it will be updated
@@ -96,7 +102,7 @@ def _InstallTryPackage(version: str = PINNED_TRY_VERSION) -> Path:
     """
     try_dir = cipd.InstallPackage(
         cipd.GetCIPDFromCache(),
-        "chromiumos/infra/try/linux-amd64",
+        CIPD_TRY_PACKAGE,
         version,
     )
     return Path(try_dir) / "try"
