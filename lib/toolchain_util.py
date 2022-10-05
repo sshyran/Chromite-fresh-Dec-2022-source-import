@@ -13,7 +13,7 @@ import logging
 import os
 import re
 import shutil
-from typing import Iterable, Optional
+from typing import Any, Callable, Iterable, Optional
 
 from chromite.lib import alerts
 from chromite.lib import constants
@@ -78,6 +78,8 @@ MERGED_AFDO_NAME = "chromeos-chrome-{arch}-{name}"
 KERNEL_ALLOWED_STALE_DAYS = 42
 # How old can the Kernel AFDO data be before detective got noticed? (in days).
 KERNEL_WARN_STALE_DAYS = 14
+# How old an Arm profile can be before it gets replaced with atom.
+CHROME_ARM_CWP_ALLOWED_STALE_DAYS = 21
 
 # For merging release Chrome profiles.
 RELEASE_CWP_MERGE_WEIGHT = 75
@@ -203,6 +205,10 @@ class ProfilesNameHelperError(Error):
 
 class UpdateEbuildWithAFDOArtifactsError(Error):
     """Error for UpdateEbuildWithAFDOArtifacts class."""
+
+
+class NoProfilesInGsBucketError(Error):
+    """Raised when _FindLatestAFDOArtifact doesn't find profiles."""
 
 
 def _ParseBenchmarkProfileName(profile_name):
@@ -584,7 +590,7 @@ class GenerateChromeOrderfile(object):
         )
 
 
-def _RankValidCWPProfiles(name):
+def _RankValidCWPProfiles(name: str) -> int:
     """Calculate a value used to rank valid CWP profiles.
 
     Args:
@@ -607,7 +613,7 @@ def _GetProfileAge(profile: str, artifact_type: str) -> int:
       profile: Name of the profile. Different artifact_type has different
       format. For kernel_afdo, it looks like: R78-12371.11-1565602499.
       The last part is the timestamp.
-      artifact_type: Only 'kernel_afdo' is supported now.
+      artifact_type: Only 'kernel_afdo' and 'cwp' are supported now.
 
     Returns:
       Age of profile_version in days.
@@ -615,14 +621,15 @@ def _GetProfileAge(profile: str, artifact_type: str) -> int:
     Raises:
       ValueError: if the artifact_type is not supported.
     """
-
-    if artifact_type == "kernel_afdo":
+    if artifact_type in ("kernel_afdo", "cwp"):
         return (
             datetime.datetime.utcnow()
             - datetime.datetime.utcfromtimestamp(int(profile.split("-")[-1]))
         ).days
 
-    raise ValueError("Only kernel afdo is supported to check profile age.")
+    raise ValueError(
+        f"'{artifact_type}' is currently not supported to check profile age."
+    )
 
 
 def _WarnDetectiveAboutKernelProfileExpiration(
@@ -861,7 +868,11 @@ class _CommonPrepareBundle(object):
             gs_urls, self._ValidOrderfileVersion
         )
 
-    def _FindLatestAFDOArtifact(self, gs_urls, rank_func):
+    def _FindLatestAFDOArtifact(
+        self,
+        gs_urls: Iterable[str],
+        rank_func: Callable[[str], Any],
+    ) -> str:
         """Find the latest AFDO artifact in a bucket.
 
         Args:
@@ -876,7 +887,8 @@ class _CommonPrepareBundle(object):
           The path of the latest eligible AFDO artifact.
 
         Raises:
-          RuntimeError: If no files matches the regex in the bucket.
+          NoProfilesInGsBucketError: If no profiles in GS bucket.
+          RuntimeError: If no valid latest profiles.
           ValueError: if regex is not valid.
         """
 
@@ -897,12 +909,25 @@ class _CommonPrepareBundle(object):
             """
             # Filter out those not match pattern. And filter out text files for legacy
             # PFQ like latest-chromeos-chrome-amd64-79.afdo.
-            return [
-                x
-                for x in all_files
-                if "latest-" not in x.url
-                and ("R%s-" % branch in x.url or "-%s." % branch in x.url)
-            ]
+            results = []
+            for x in all_files:
+                if "latest-" in x.url:
+                    continue
+
+                x_name = os.path.basename(x.url)
+                # Filter in CWP, benchmark AFDO and Orderfiles.
+                if (
+                    x_name.startswith(f"R{branch}")
+                    or x_name.startswith(
+                        f"chromeos-chrome-orderfile-field-{branch}"
+                    )
+                    or x_name.startswith(
+                        f"chromeos-chrome-{self.arch}-{branch}"
+                    )
+                ):
+                    results.append(x)
+
+            return results
 
         # Obtain all files from the gs_urls.
         all_files = []
@@ -921,7 +946,7 @@ class _CommonPrepareBundle(object):
             )
 
         if not results:
-            raise RuntimeError(
+            raise NoProfilesInGsBucketError(
                 "No files for branch %s found in %s"
                 % (self.chrome_branch, " ".join(gs_urls))
             )
@@ -1320,23 +1345,23 @@ class _CommonPrepareBundle(object):
         benchmark_url = self.input_artifacts.get(
             "UnverifiedChromeBenchmarkAfdoFile", [BENCHMARK_AFDO_GS_URL]
         )[0]
-        benchmark_listing = self.gs_context.List(
-            os.path.join(
-                benchmark_url, f"chromeos-chrome-{self.arch}-*" + profile_suffix
-            ),
-            details=True,
-        )
-
-        if not benchmark_listing:
-            raise RuntimeError(
-                "GS URL %s has no valid benchmark profiles"
-                % (
-                    self.input_artifacts.get(
-                        "UnverifiedChromeBenchmarkAfdoFile",
-                        [BENCHMARK_AFDO_GS_URL],
-                    )[0]
-                )
+        try:
+            benchmark_listing = self.gs_context.List(
+                os.path.join(
+                    benchmark_url,
+                    f"chromeos-chrome-{self.arch}-*" + profile_suffix,
+                ),
+                details=True,
             )
+        except (gs.GSCommandError, gs.GSNoSuchKey) as e:
+            # This can happen in a new GS bucket where there are no profiles
+            # yet.
+            logging.warning(
+                "Did not find valid benchmark profiles: %s. Skip profile merge.",
+                e.stdout,
+            )
+            return None
+
         unmerged_version = _ParseBenchmarkProfileName(unmerged_name)
 
         def _GetOrderedMergeableProfiles(
@@ -1360,7 +1385,7 @@ class _CommonPrepareBundle(object):
         benchmark_profiles = _GetOrderedMergeableProfiles(benchmark_listing)
         if not benchmark_profiles:
             logging.warning(
-                "Skipping merged profile creation: no merge candidates " "found"
+                "Skipping merged profile creation: no merge candidates found"
             )
             return None
 
@@ -1824,11 +1849,38 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
             "UnverifiedChromeCwpAfdoFile", [CWP_AFDO_GS_URL]
         )
 
-        # This will raise a RuntimeError if no artifact is found.
+        # This will raise a NoProfilesInGsBucketError if no artifact is found.
         bench = self._FindLatestAFDOArtifact(
             bench_locs, self._ValidBenchmarkProfileVersion
         )
-        cwp = self._FindLatestAFDOArtifact(cwp_locs, _RankValidCWPProfiles)
+        try:
+            cwp = self._FindLatestAFDOArtifact(cwp_locs, _RankValidCWPProfiles)
+        except NoProfilesInGsBucketError:
+            # Missing arm profiles will be handled below.
+            if self.arch == "arm":
+                cwp = None
+            else:
+                raise
+        # If there are no new arm profiles use cwp profiles from atom.
+        # TODO(b/243198050): Remove workaround when the issue with Arm CWP
+        # profiles is fixed.
+        if (
+            not cwp
+            or _GetProfileAge(
+                os.path.split(cwp)[1].replace(".afdo.xz", ""), "cwp"
+            )
+            > CHROME_ARM_CWP_ALLOWED_STALE_DAYS
+        ):
+            cwp_atom_locs = [os.path.join(CWP_AFDO_GS_URL, "atom")]
+            logging.warning(
+                "No arm profiles found at %s or profiles are too old. "
+                "Will use the latest profile from %s.",
+                cwp_locs,
+                cwp_atom_locs,
+            )
+            cwp = self._FindLatestAFDOArtifact(
+                cwp_atom_locs, _RankValidCWPProfiles
+            )
         bench_name = os.path.split(bench)[1]
         cwp_name = os.path.split(cwp)[1]
 

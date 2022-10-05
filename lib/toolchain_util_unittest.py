@@ -242,7 +242,7 @@ class ProfilesNameHelperTest(cros_test_lib.MockTempDirTestCase):
                 current_day_profile, "unsupported_type"
             )
         self.assertEqual(
-            "Only kernel afdo is supported to check profile age.",
+            "'unsupported_type' is currently not supported to check profile age.",
             str(context.exception),
         )
 
@@ -389,6 +389,7 @@ class PrepBundLatestAFDOArtifactTest(PrepareBundleTest):
         )
         files_in_gs_bucket = [
             # Benchmark profiles
+            ("chromeos-chrome-arm-78.0.3892.0_rc-r1.afdo.bz2", 1.0),
             ("chromeos-chrome-amd64-78.0.3893.0_rc-r1.afdo.bz2", 2.0),
             ("chromeos-chrome-amd64-78.0.3896.0_rc-r1.afdo.bz2", 1.0),  # Latest
             ("chromeos-chrome-amd64-78.0.3897.0_rc-r1-merged.afdo.bz2", 3.0),
@@ -426,7 +427,7 @@ class PrepBundLatestAFDOArtifactTest(PrepareBundleTest):
         ver_none = self.obj._ValidBenchmarkProfileVersion(prof)
         self.assertIsNone(ver_none)
 
-    def testFindLatestAFDOArtifactPassWithBenchmarkAFDO(self):
+    def testFindLatestAFDOArtifactPassWithBenchmarkAfdo(self):
         """Test _FindLatestAFDOArtifact returns latest benchmark AFDO."""
         latest_afdo = self.obj._FindLatestAFDOArtifact(
             [self.gs_url], self.obj._ValidBenchmarkProfileVersion
@@ -435,6 +436,19 @@ class PrepBundLatestAFDOArtifactTest(PrepareBundleTest):
             latest_afdo,
             os.path.join(
                 self.gs_url, "chromeos-chrome-amd64-78.0.3896.0_rc-r1.afdo.bz2"
+            ),
+        )
+
+    def testFindLatestAFDOArtifactPassWithBenchmarkAfdoArm(self):
+        """Test _FindLatestAFDOArtifact returns latest benchmark Arm AFDO."""
+        self.obj.arch = "arm"
+        latest_afdo = self.obj._FindLatestAFDOArtifact(
+            [self.gs_url], self.obj._ValidBenchmarkProfileVersion
+        )
+        self.assertEqual(
+            latest_afdo,
+            os.path.join(
+                self.gs_url, "chromeos-chrome-arm-78.0.3892.0_rc-r1.afdo.bz2"
             ),
         )
 
@@ -481,7 +495,9 @@ class PrepBundLatestAFDOArtifactTest(PrepareBundleTest):
             ),
         )
         self.gsc_list.side_effect = gs.GSNoSuchKey("No files")
-        with self.assertRaises(RuntimeError) as context:
+        with self.assertRaises(
+            toolchain_util.NoProfilesInGsBucketError
+        ) as context:
             self.obj._FindLatestAFDOArtifact(
                 [self.gs_url], self.obj._ValidOrderfileVersion
             )
@@ -491,11 +507,12 @@ class PrepBundLatestAFDOArtifactTest(PrepareBundleTest):
         )
 
     def testFindLatestAFDOArtifactsFindMaxFromInvalidFiles(self):
-        """Test function fails when searching max from list of invalid files."""
+        """Test function fails when finds only invalid files."""
         mock_gs_list = [
             self.MockListResult(
+                # Invalid chrome version (not full).
                 url=os.path.join(
-                    self.gs_url, "Invalid-name-but-end-in-78.afdo"
+                    self.gs_url, "chromeos-chrome-amd64-78.afdo.bz2"
                 ),
                 creation_time=1.0,
             )
@@ -528,7 +545,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
             "benchmark-78.0.3893.0-r1.orderfile"
         )
         self.verified_afdo_name = (
-            "chromeos-chrome-amd64-atom-78-3877.0-1658747184-"
+            "chromeos-chrome-amd64-atom-78-3876.0-1658253984-"
             "benchmark-78.0.3839.0-r1-redacted.afdo"
         )
         self.afdo_name = "chromeos-chrome-amd64-78.0.3893.0-r1.afdo"
@@ -543,6 +560,49 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
             return_value=self.orderfile_name
             + toolchain_util.XZ_COMPRESSION_SUFFIX,
         )
+        self.cwp_gs_location = "gs://path/to/gs_bucket/cwp"
+        self.benchmark_gs_location = "gs://path/to/gs_bucket/benchmark"
+        self.PatchObject(
+            toolchain_util, "CWP_AFDO_GS_URL", new=self.cwp_gs_location
+        )
+        self.PatchObject(
+            toolchain_util,
+            "BENCHMARK_AFDO_GS_URL",
+            new=self.benchmark_gs_location,
+        )
+        # Save datetime for use in mocks.
+        self.dt = datetime.datetime
+        self.utcnow = datetime.datetime.utcfromtimestamp(
+            1658747184
+        ) + datetime.timedelta(days=1)
+        self.day_old_ts = int(
+            datetime.datetime.timestamp(
+                self.utcnow - datetime.timedelta(days=1)
+            )
+        )
+        self.week_old_ts = int(
+            datetime.datetime.timestamp(
+                self.utcnow - datetime.timedelta(weeks=1)
+            )
+        )
+        self.month_old_ts = int(
+            datetime.datetime.timestamp(
+                self.utcnow - datetime.timedelta(days=30)
+            )
+        )
+
+        class mock_datetime(object):
+            """Class for mocking datetime.datetime."""
+
+            @staticmethod
+            def utcfromtimestamp(ts):
+                return self.dt.utcfromtimestamp(ts)
+
+            @staticmethod
+            def utcnow():
+                return self.utcnow
+
+        self.PatchObject(toolchain_util.datetime, "datetime", new=mock_datetime)
 
     def SetUpPrepare(
         self,
@@ -919,20 +979,58 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
             ebuild_data, cwp_old_ver=cwp_old_ver, cwp_new_ver=cwp_new_ver
         )
 
-    def setupPrepareVerifiedReleaseAfdoFileMocks(self):
+    def mockFindLatestAFDOArtifactAtom(self, gs_urls, _):
+        """Return artifacts from atom's bench and cwp gs buckets."""
+        atom_cwp_location = os.path.join(self.cwp_gs_location, "atom")
+        if toolchain_util.BENCHMARK_AFDO_GS_URL in gs_urls:
+            return os.path.join(
+                toolchain_util.BENCHMARK_AFDO_GS_URL,
+                "chromeos-chrome-amd64-78.0.3839.0_rc-r1.afdo.bz2",
+            )
+        if atom_cwp_location in gs_urls:
+            return os.path.join(
+                atom_cwp_location,
+                f"R78-3876.0-{self.week_old_ts}.afdo.xz",
+            )
+        raise toolchain_util.NoProfilesInGsBucketError("no profiles")
+
+    def mockFindLatestAFDOArtifactNewArm(self, gs_urls, rank):
+        """Return atom profiles and fresh profiles from the arm's cwp gs buckets."""
+        arm_cwp_location = os.path.join(self.cwp_gs_location, "arm")
+        try:
+            return self.mockFindLatestAFDOArtifactAtom(gs_urls, rank)
+        except toolchain_util.NoProfilesInGsBucketError:
+            if arm_cwp_location in gs_urls:
+                # 1656180384 is 1-month older than self.utcnow.
+                return os.path.join(
+                    arm_cwp_location,
+                    f"R78-3877.0-{self.day_old_ts}.afdo.xz",
+                )
+            else:
+                raise
+
+    def mockFindLatestAFDOArtifactOldArm(self, gs_urls, rank):
+        """Return a 1-month old profile from the arm's cwp gs buckets."""
+        arm_cwp_location = os.path.join(self.cwp_gs_location, "arm")
+        try:
+            return self.mockFindLatestAFDOArtifactAtom(gs_urls, rank)
+        except toolchain_util.NoProfilesInGsBucketError:
+            if arm_cwp_location in gs_urls:
+                # 1656180384 is 1-month older than self.utcnow.
+                return os.path.join(
+                    arm_cwp_location,
+                    f"R78-3875.0-{self.month_old_ts}.afdo.xz",
+                )
+            else:
+                raise
+
+    def setupPrepareVerifiedReleaseAfdoFileMocks(self, find_latest_mock=None):
+        if not find_latest_mock:
+            find_latest_mock = self.mockFindLatestAFDOArtifactAtom
         self.PatchObject(
             self.obj,
             "_FindLatestAFDOArtifact",
-            side_effect=(
-                os.path.join(
-                    toolchain_util.BENCHMARK_AFDO_GS_URL,
-                    "chromeos-chrome-amd64-78.0.3839.0_rc-r1.afdo.bz2",
-                ),
-                os.path.join(
-                    toolchain_util.CWP_AFDO_GS_URL,
-                    "R78-3877.0-1658747184.afdo.xz",
-                ),
-            ),
+            side_effect=find_latest_mock,
         )
         self.PatchObject(self.obj.chroot, "tempdir", return_value=self.tempdir)
         self.PatchObject(self.obj, "_MergeAFDOProfiles")
@@ -944,7 +1042,15 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
         profile_info_extra = {"chrome_cwp_profile": "atom"}
         self.SetUpPrepare(
             "VerifiedReleaseAfdoFile",
-            {"VerifiedReleaseAfdoFile": ["gs://path/to/vetted"]},
+            {
+                "UnverifiedChromeBenchmarkAfdoFile": [
+                    self.benchmark_gs_location
+                ],
+                "UnverifiedChromeCwpAfdoFile": [
+                    os.path.join(self.cwp_gs_location, "atom")
+                ],
+                "VerifiedReleaseAfdoFile": ["gs://path/to/vetted"],
+            },
             profile_info_extra=profile_info_extra,
         )
         self.setupPrepareVerifiedReleaseAfdoFileMocks()
@@ -958,7 +1064,9 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
         self.patch_ebuild.assert_called_once()
 
     def setupPrepareVerifiedReleaseAfdoFileInputProperties(
-        self, profile_info_extra=None
+        self,
+        profile_info_extra=None,
+        arch="atom",
     ):
         self.SetUpPrepare(
             "VerifiedReleaseAfdoFile",
@@ -966,16 +1074,19 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
                 "UnverifiedChromeBenchmarkAfdoFile": [
                     toolchain_util.BENCHMARK_AFDO_GS_URL
                 ],
-                "UnverifiedChromeCwpAfdoFile": [toolchain_util.CWP_AFDO_GS_URL],
+                "UnverifiedChromeCwpAfdoFile": [
+                    os.path.join(toolchain_util.CWP_AFDO_GS_URL, arch)
+                ],
             },
             profile_info_extra=profile_info_extra,
         )
 
     def testPrepareVerifiedReleaseAfdoFile(self):
         """Normal flow, build is needed, all artifacts are present."""
-        profile_info_extra = {"chrome_cwp_profile": "atom"}
+        pi_extra = {"chrome_cwp_profile": "atom"}
         self.setupPrepareVerifiedReleaseAfdoFileInputProperties(
-            profile_info_extra
+            profile_info_extra=pi_extra,
+            arch="atom",
         )
         self.setupPrepareVerifiedReleaseAfdoFileMocks()
         # Published artifact is missing, debug binary is present, perf.data is
@@ -989,7 +1100,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
                 os.path.join(
                     toolchain_util.RELEASE_AFDO_GS_URL_VETTED,
                     (
-                        "chromeos-chrome-amd64-atom-78-3877.0-1658747184-"
+                        f"chromeos-chrome-amd64-atom-78-3876.0-{self.week_old_ts}-"
                         "benchmark-78.0.3839.0-r1-redacted.afdo.xz"
                     ),
                 )
@@ -1002,7 +1113,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
                 "UNVETTED_AFDO_FILE": os.path.join(
                     self.tempdir,
                     (
-                        "tmp/chromeos-chrome-amd64-atom-78-3877.0-1658747184-"
+                        f"tmp/chromeos-chrome-amd64-atom-78-3876.0-{self.week_old_ts}-"
                         "benchmark-78.0.3839.0-r1-redacted.afdo"
                     ),
                 )
@@ -1010,11 +1121,11 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
             uprev=True,
         )
 
-    def testPrepareVerifiedReleaseAfdoFileArmProfile(self):
-        """Normal flow with Arm, build is needed, all artifacts are present."""
-        profile_info_extra = {"chrome_cwp_profile": "arm"}
+    def testPrepareVerifiedReleaseAfdoFileArmAtomProfile(self):
+        """Test no arm profiles but there is atom."""
+        pi_extra = {"chrome_cwp_profile": "arm"}
         self.setupPrepareVerifiedReleaseAfdoFileInputProperties(
-            profile_info_extra
+            profile_info_extra=pi_extra, arch="arm"
         )
         self.setupPrepareVerifiedReleaseAfdoFileMocks()
         # Published artifact is missing, debug binary is present, perf.data is
@@ -1023,24 +1134,72 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
         self.assertEqual(
             toolchain_util.PrepareForBuildReturn.NEEDED, self.obj.Prepare()
         )
-        # Expect to see -arm-none-.
-        expected_exists = [
-            mock.call(
-                os.path.join(
-                    toolchain_util.RELEASE_AFDO_GS_URL_VETTED,
-                    "chromeos-chrome-arm-none-78-3877.0-1658747184-"
-                    "benchmark-78.0.3839.0-r1-redacted.afdo.xz",
-                )
-            ),
-        ]
-        self.assertEqual(expected_exists, self.gs_context.Exists.call_args_list)
+        # Note that the merged -arm- profile uses atom's version
+        # 78-3877.0- since there are NO arm profiles.
         self.patch_ebuild.assert_called_once_with(
             self.obj._GetEbuildInfo(toolchain_util.constants.CHROME_PN),
             {
                 "UNVETTED_AFDO_FILE": os.path.join(
                     self.tempdir,
                     (
-                        "tmp/chromeos-chrome-arm-none-78-3877.0-1658747184-"
+                        f"tmp/chromeos-chrome-arm-none-78-3876.0-{self.week_old_ts}-"
+                        "benchmark-78.0.3839.0-r1-redacted.afdo"
+                    ),
+                )
+            },
+            uprev=True,
+        )
+
+    def testPrepareVerifiedReleaseAfdoFileArmProfile(self):
+        """Test fresh arm profiles."""
+        pi_extra = {"chrome_cwp_profile": "arm"}
+        self.setupPrepareVerifiedReleaseAfdoFileInputProperties(
+            profile_info_extra=pi_extra, arch="arm"
+        )
+        self.setupPrepareVerifiedReleaseAfdoFileMocks(
+            find_latest_mock=self.mockFindLatestAFDOArtifactNewArm
+        )
+        self.gsc_exists.return_value = False
+        self.assertEqual(
+            toolchain_util.PrepareForBuildReturn.NEEDED, self.obj.Prepare()
+        )
+        # The merged -arm- profile uses the arm's version 78-3877.0-.
+        self.patch_ebuild.assert_called_once_with(
+            self.obj._GetEbuildInfo(toolchain_util.constants.CHROME_PN),
+            {
+                "UNVETTED_AFDO_FILE": os.path.join(
+                    self.tempdir,
+                    (
+                        f"tmp/chromeos-chrome-arm-none-78-3877.0-{self.day_old_ts}-"
+                        "benchmark-78.0.3839.0-r1-redacted.afdo"
+                    ),
+                )
+            },
+            uprev=True,
+        )
+
+    def testPrepareVerifiedReleaseAfdoFileOldArmProfile(self):
+        """Test old arm profiles when there is a newer atom."""
+        pi_extra = {"chrome_cwp_profile": "arm"}
+        self.setupPrepareVerifiedReleaseAfdoFileInputProperties(
+            profile_info_extra=pi_extra, arch="arm"
+        )
+        self.setupPrepareVerifiedReleaseAfdoFileMocks(
+            find_latest_mock=self.mockFindLatestAFDOArtifactOldArm
+        )
+        self.gsc_exists.return_value = False
+        self.assertEqual(
+            toolchain_util.PrepareForBuildReturn.NEEDED, self.obj.Prepare()
+        )
+        # Note that the merged -arm- profile uses atom's version
+        # 78-38776.0- since the arm profile is 1-month old.
+        self.patch_ebuild.assert_called_once_with(
+            self.obj._GetEbuildInfo(toolchain_util.constants.CHROME_PN),
+            {
+                "UNVETTED_AFDO_FILE": os.path.join(
+                    self.tempdir,
+                    (
+                        f"tmp/chromeos-chrome-arm-none-78-3876.0-{self.week_old_ts}-"
                         "benchmark-78.0.3839.0-r1-redacted.afdo"
                     ),
                 )
