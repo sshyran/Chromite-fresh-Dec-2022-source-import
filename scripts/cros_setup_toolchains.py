@@ -1108,7 +1108,7 @@ def _BuildInitialPackageRoot(
     osutils.SafeMakedirs(libdir)
     donelibs = set()
     basenamelibs = set()
-    glibc_re = re.compile(r"/lib(c|pthread)-[0-9.]+\.so$")
+    glibc_re = re.compile(r"/lib(c|pthread)[0-9.-]*\.so[0-9.-]*")
     for elf in elfs:
         e = lddtree.ParseELF(elf, root=root, ldpaths=ldpaths)
         logging.debug("Parsed elf %s data: %s", elf, e)
