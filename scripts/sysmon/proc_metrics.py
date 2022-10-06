@@ -35,13 +35,22 @@ class _ProcessMetricsCollector(object):
     def __init__(self):
         self._metrics = [
             _ProcessMetric("autoserv", test_func=_is_parent_autoserv),
+            _ProcessMetric(
+                "common-tls", test_func=partial(_is_process_name, "common-tls")
+            ),
             _ProcessMetric("curl", test_func=partial(_is_process_name, "curl")),
             _ProcessMetric(
-                "getty", test_func=partial(_is_process_name, "getty")
+                "dnsmasq", test_func=partial(_is_process_name, "dnsmasq")
             ),
             _ProcessMetric(
-                "gs_archive_server",
-                test_func=partial(_is_python_module, "gs_archive_server"),
+                "drone-agent",
+                test_func=partial(_is_process_name, "drone-agent")
+            ),
+            _ProcessMetric(
+                "fleet-tlw", test_func=partial(_is_process_name, "fleet-tlw")
+            ),
+            _ProcessMetric(
+                "getty", test_func=partial(_is_process_name, "getty")
             ),
             _ProcessMetric(
                 "gs_offloader",
@@ -49,6 +58,9 @@ class _ProcessMetricsCollector(object):
             ),
             _ProcessMetric("gsutil", test_func=_is_gsutil),
             _ProcessMetric("java", test_func=partial(_is_process_name, "java")),
+            _ProcessMetric(
+                "labservice", test_func=partial(_is_process_name, "labservice")
+            ),
             _ProcessMetric(
                 "lxc-attach", test_func=partial(_is_process_name, "lxc-attach")
             ),
@@ -61,6 +73,7 @@ class _ProcessMetricsCollector(object):
                 "sysmon",
                 test_func=partial(_is_python_module, "chromite.scripts.sysmon"),
             ),
+            _ProcessMetric("tko_proxy", test_func=_is_tko_proxy),
         ]
         self._other_metric = _ProcessMetric("other")
 
@@ -170,4 +183,20 @@ def _is_gsutil(proc):
         len(cmdline) >= 2
         and cmdline[0] == "python"
         and cmdline[1].endswith("gsutil")
+    )
+
+
+def _is_tko_proxy(proc):
+    """Return whether proc is a tko proxy.
+
+    A tk proxy process is like
+    '/opt/cloud_sql_proxy -dir=<...>
+        -instances=google.com:chromeos-lab:us-central1:tko
+        -credential_file=<...>'.
+    """
+    cmdline = proc.cmdline()
+    return (
+        len(cmdline) == 4
+        and cmdline[0].split("/")[-1] == 'cloud_sql_proxy'
+        and cmdline[2] == '-instances=google.com:chromeos-lab:us-central1:tko'
     )

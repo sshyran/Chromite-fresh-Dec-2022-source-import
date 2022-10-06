@@ -170,18 +170,6 @@ class TestProcMetrics(cros_test_lib.TestCase):
                 _mock_process(
                     name="curl", cmdline=["curl", "server:port/path"]
                 ),
-                _mock_process(
-                    name="python",
-                    cmdline=[
-                        "python",
-                        "-m",
-                        "gs_archive_server",
-                        "-p",
-                        "18000",
-                        "-c",
-                        "127.0.0.1:8082",
-                    ],
-                ),
                 _mock_process(name="java", cmdline=["java", "-Xmx4g", "..."]),
                 _mock_process(
                     name="python",
@@ -195,23 +183,56 @@ class TestProcMetrics(cros_test_lib.TestCase):
                         "gs://eve-release/R100-14488.0.0/file",
                     ],
                 ),
+                _mock_process(
+                    name="common-tls",
+                    cmdline=["/opt/infra-tools/common-tls", "-port", "..."]
+                ),
+                _mock_process(
+                    name="fleet-tlw",
+                    cmdline=["/opt/infra-tools/fleet-tlw", "-port", "..."]
+                ),
+                _mock_process(
+                    name="drone-agent",
+                    cmdline=["/opt/infra-tools/drone-agent"]
+                ),
+                _mock_process(
+                    name="dnsmasq",
+                    cmdline=["dnsmasq", "..."]
+                ),
+                _mock_process(
+                    name="labservice",
+                    cmdline=["/opt/infra-tools/labservice", "-addr", "..."]
+                ),
+                _mock_process(
+                    name="cloud_sql_proxy",
+                    cmdline=[
+                        "/opt/cloud_sql_proxy", "-dir=/var/run/tko_proxy",
+                        "-instances=google.com:chromeos-lab:us-central1:tko",
+                        "-credential_file=..."
+                    ],
+                ),
             ]
             proc_metrics.collect_proc_info()
 
         setter = self.store.set
         calls = []
         calls.extend(_expected_calls_for("autoserv"))
+        calls.extend(_expected_calls_for("common-tls"))
         calls.extend(_expected_calls_for("curl"))
+        calls.extend(_expected_calls_for("dnsmasq"))
+        calls.extend(_expected_calls_for("drone-agent"))
+        calls.extend(_expected_calls_for("fleet-tlw"))
         calls.extend(_expected_calls_for("getty"))
-        calls.extend(_expected_calls_for("gs_archive_server"))
         calls.extend(_expected_calls_for("gs_offloader"))
         calls.extend(_expected_calls_for("gsutil"))
         calls.extend(_expected_calls_for("java"))
+        calls.extend(_expected_calls_for("labservice"))
         calls.extend(_expected_calls_for("lxc-attach"))
         calls.extend(_expected_calls_for("lxc-start"))
         calls.extend(_expected_calls_for("sshd"))
         calls.extend(_expected_calls_for("swarming_bot"))
         calls.extend(_expected_calls_for("sysmon"))
+        calls.extend(_expected_calls_for("tko_proxy"))
         calls.extend(_expected_calls_for("other"))
         setter.assert_has_calls(calls)
         self.assertEqual(len(setter.mock_calls), len(calls))
