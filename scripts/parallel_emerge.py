@@ -162,6 +162,13 @@ def main(argv):
 
     emerge_args.append("--jobs=%s" % parsed_args["jobs"])
 
+    # The -v/--verbose flag gets eaten by the commandline.ArgumentParser to
+    # set the log_level, but it was almost certainly meant to be passed through
+    # to emerge. Check for -v/--verbose directly to avoid coupling this to the
+    # semantics of chromite logging CLI args.
+    if "-v" in argv or "--verbose" in argv:
+        emerge_args.append("--verbose")
+
     emerge_args.append("--rebuild-exclude=chromeos-base/chromeos-chrome")
     for pkg in constants.OTHER_CHROME_PACKAGES:
         emerge_args.append("--rebuild-exclude=%s" % pkg)
