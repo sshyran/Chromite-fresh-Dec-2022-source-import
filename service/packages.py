@@ -486,16 +486,25 @@ def uprev_perfetto(_build_targets, refs, chroot):
     result = uprev_lib.UprevVersionedPackageResult()
 
     PERFETTO_REFS_PREFIX = "refs/tags/v"
-    # |perfetto_version| is only used in determining the ebuild version. The
-    # package is always updated to the latest HEAD.
+    PERFETTO_PATH = os.path.join(
+        constants.CHROMIUMOS_OVERLAY_DIR, "chromeos-base/perfetto"
+    )
+
+    # Decide the version number to uprev to:
+    # * If |refs| contains refs/tags/v*, get the latest from them.
     perfetto_version = _get_latest_version_from_refs(PERFETTO_REFS_PREFIX, refs)
+    # * Or if |refs| contains only the latest trunk revisions, use the current
+    #   stable ebuild version for a revision bump.
+    if refs and not perfetto_version:
+        perfetto_version = uprev_lib.get_stable_ebuild_version(PERFETTO_PATH)
+
     if not perfetto_version:
         # No valid Perfetto version is identified.
         return result
 
     # Attempt to uprev perfetto package.
-    PERFETTO_PATH = "src/third_party/chromiumos-overlay/chromeos-base/perfetto"
-
+    # |perfetto_version| is only used in determining the ebuild version. The
+    # package is always updated to the latest HEAD.
     uprev_result = uprev_lib.uprev_workon_ebuild_to_version(
         PERFETTO_PATH,
         perfetto_version,

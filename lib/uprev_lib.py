@@ -45,9 +45,20 @@ _CHROME_OVERLAY_PATH = os.path.join(
 
 GitRef = collections.namedtuple("GitRef", ["path", "ref", "revision"])
 
+# An alias of constants.SOURCE_ROOT. Can be mocked in unit tests.
+SRC_ROOT = constants.SOURCE_ROOT
+
 
 class Error(Exception):
     """Base error class for the module."""
+
+
+class UnstableEbuildNotWorkonError(Error):
+    """When an unstable ebuild doesn't inherit cros-workon."""
+
+
+class TooManyStableEbuildsError(Error):
+    """When too many stable ebuilds are found."""
 
 
 class EbuildUprevError(Error):
@@ -844,6 +855,63 @@ class UprevVersionedPackageResult(object):
         return bool(self.modified)
 
 
+def _get_ebuilds(
+    package_path: str,
+) -> Tuple[portage_util.EBuild, portage_util.EBuild]:
+    """Get stable and unstable ebuilds for a given package path.
+
+    Args:
+      package_path: The path of the package relative to the src root. This path
+        should contain an unstable 9999 ebuild and optionally a stable ebuild.
+
+    Returns:
+      The stable and unstable ebuilds.
+
+    Raises:
+      NoUnstableEbuildError: if the package path doesn't contain an unstable ebuild.
+      TooManyStableEbuildsError: if the package path contains more than 1 stable ebuild.
+    """
+    package_path = str(package_path)
+    package = os.path.basename(package_path)
+
+    package_src_path = os.path.join(SRC_ROOT, package_path)
+    ebuild_paths = list(portage_util.EBuild.List(package_src_path))
+    stable_ebuild = None
+    unstable_ebuild = None
+    for path in ebuild_paths:
+        ebuild = portage_util.EBuild(path)
+        if ebuild.is_stable:
+            stable_ebuild = ebuild
+        else:
+            unstable_ebuild = ebuild
+
+    if len(ebuild_paths) > 2:
+        raise TooManyStableEbuildsError(
+            f"Found too many ebuilds for {package}: "
+            "expected one stable and one unstable"
+        )
+    if unstable_ebuild is None:
+        raise NoUnstableEbuildError(f"No unstable ebuild found for {package}")
+
+    return stable_ebuild, unstable_ebuild
+
+
+def get_stable_ebuild_version(
+    package_path: Union[str, "pathlib.Path"],
+) -> str:
+    """Get the version number (without revision) of a stable ebuild.
+
+    Args:
+      package_path: The path of the package relative to the src root. This path
+        should contain a stable ebuild.
+    """
+    stable_ebuild, _ = _get_ebuilds(str(package_path))
+
+    if stable_ebuild is None:
+        return None
+    return stable_ebuild.version_no_rev
+
+
 def uprev_ebuild_from_pin(
     package_path: str, version_no_rev: str, chroot: Chroot
 ) -> UprevVersionedPackageResult:
@@ -861,27 +929,17 @@ def uprev_ebuild_from_pin(
       The uprev result.
     """
     package = os.path.basename(package_path)
-
     package_src_path = os.path.join(constants.SOURCE_ROOT, package_path)
-    ebuild_paths = list(portage_util.EBuild.List(package_src_path))
+
     stable_ebuild = None
     unstable_ebuild = None
-    for path in ebuild_paths:
-        ebuild = portage_util.EBuild(path)
-        if ebuild.is_stable:
-            stable_ebuild = ebuild
-        else:
-            unstable_ebuild = ebuild
+    try:
+        stable_ebuild, unstable_ebuild = _get_ebuilds(package_path)
+    except Error as e:
+        raise EbuildUprevError(str(e))
 
     if stable_ebuild is None:
         raise EbuildUprevError("No stable ebuild found for %s" % package)
-    if unstable_ebuild is None:
-        raise EbuildUprevError("No unstable ebuild found for %s" % package)
-    if len(ebuild_paths) > 2:
-        raise EbuildUprevError(
-            "Found too many ebuilds for %s: "
-            "expected one stable and one unstable" % package
-        )
 
     # If the new version is the same as the old version, bump the revision number,
     # otherwise reset it to 1
@@ -931,7 +989,6 @@ def uprev_workon_ebuild_to_version(
     *,
     allow_downrev: bool = True,
     ref: str = "HEAD",
-    src_root: str = constants.SOURCE_ROOT,
     chroot_src_root: str = constants.CHROOT_SOURCE_ROOT,
 ) -> UprevResult:
     """Uprev a cros-workon ebuild to a specified version.
@@ -945,41 +1002,30 @@ def uprev_workon_ebuild_to_version(
       allow_downrev: Whether the downrev should be proceed. If not and the target
         version is older than the existing version, abort this downrev.
       ref: The target version's ref tag in the git repository to be used.
-      src_root: Path to the root of the source checkout. Only for testing.
       chroot_src_root: Path to the root of the source checkout when inside the
         chroot. Only override for testing.
     """
     package_path = str(package_path)
     package = os.path.basename(package_path)
 
-    package_src_path = os.path.join(src_root, package_path)
-    ebuild_paths = list(portage_util.EBuild.List(package_src_path))
+    package_src_path = os.path.join(SRC_ROOT, package_path)
+
     stable_ebuild = None
     unstable_ebuild = None
-    for path in ebuild_paths:
-        ebuild = portage_util.EBuild(path)
-        if ebuild.is_stable:
-            stable_ebuild = ebuild
-        else:
-            unstable_ebuild = ebuild
-
-    outcome = None
-
-    if stable_ebuild is None:
-        outcome = outcome or Outcome.NEW_EBUILD_CREATED
-    if unstable_ebuild is None:
-        raise EbuildUprevError(f"No unstable ebuild found for {package}")
-    if len(ebuild_paths) > 2:
-        raise EbuildUprevError(
-            f"Found too many ebuilds for {package}: "
-            "expected one stable and one unstable"
-        )
+    try:
+        stable_ebuild, unstable_ebuild = _get_ebuilds(package_path)
+    except Error as e:
+        raise EbuildUprevError(str(e))
 
     if not unstable_ebuild.is_workon:
         raise EbuildUprevError(
             "A workon ebuild was expected "
             f"but {unstable_ebuild.ebuild_path} is not workon."
         )
+
+    outcome = None
+    if stable_ebuild is None:
+        outcome = outcome or Outcome.NEW_EBUILD_CREATED
 
     # If downrev is not allowed, and the new version is older than the existing
     # version, early return without uprevving.
@@ -1004,7 +1050,7 @@ def uprev_workon_ebuild_to_version(
     new_ebuild_path = os.path.join(
         package_path, f"{package}-{output_version}.ebuild"
     )
-    new_ebuild_src_path = os.path.join(src_root, new_ebuild_path)
+    new_ebuild_src_path = os.path.join(SRC_ROOT, new_ebuild_path)
     manifest_src_path = os.path.join(package_src_path, "Manifest")
 
     # Go through the normal uprev process for a cros-workon ebuild, by calculating

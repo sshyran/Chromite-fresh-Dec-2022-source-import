@@ -2189,6 +2189,23 @@ class UprevPerfettoTest(cros_test_lib.MockTestCase):
         output = packages.uprev_perfetto(None, self.refs, None)
         self.assertTrue(output.uprevved)
 
+    def test_revision_bump_trunk(self):
+        """Test revision bump on receiving non-versioned trunk refs."""
+        refs = [GitRef(path="/foo", ref="refs/heads/main", revision="123")]
+        perfetto_outcome = self.revisionBumpOutcome(
+            self.MOCK_PERFETTO_EBUILD_PATH
+        )
+        self.PatchObject(
+            uprev_lib, "get_stable_ebuild_version", return_value="12.0"
+        )
+        self.PatchObject(
+            uprev_lib,
+            "uprev_workon_ebuild_to_version",
+            side_effect=[perfetto_outcome],
+        )
+        output = packages.uprev_perfetto(None, refs, None)
+        self.assertTrue(output.uprevved)
+
 
 class UprevLacrosTest(cros_test_lib.MockTestCase):
     """Tests for uprev_lacros"""

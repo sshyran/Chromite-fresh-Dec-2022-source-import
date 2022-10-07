@@ -519,8 +519,79 @@ def test_chrome_uprev_no_existing_stable(overlay_stack):
     assert stable_chrome.cpv in overlay
 
 
+def test_get_stable_ebuild_version(overlay_stack, monkeypatch):
+    """Test getting the stable ebuild version."""
+    (overlay,) = overlay_stack(1)
+    unstable_package = cr.test.Package(
+        "chromeos-base",
+        "test-package",
+        version="9999",
+        keywords="~*",
+        inherit="cros-workon",
+    )
+    stable_package = cr.test.Package(
+        "chromeos-base", "test-package", version="30.0"
+    )
+
+    overlay.add_package(unstable_package)
+    overlay.add_package(stable_package)
+
+    monkeypatch.setattr(uprev_lib, "SRC_ROOT", overlay.path)
+    stable_version = uprev_lib.get_stable_ebuild_version(
+        pathlib.Path(unstable_package.category) / unstable_package.package,
+    )
+
+    assert stable_version == stable_package.package_info.version
+
+
+def test_get_stable_ebuild_version_2_stable_ebuilds(overlay_stack, monkeypatch):
+    """Test getting the stable ebuild version on multiple stable ebuilds."""
+    (overlay,) = overlay_stack(1)
+    unstable_package = cr.test.Package(
+        "chromeos-base",
+        "test-package",
+        version="9999",
+        keywords="~*",
+        inherit="cros-workon",
+    )
+    stable_package_30 = cr.test.Package(
+        "chromeos-base", "test-package", version="30.0"
+    )
+    stable_package_31 = cr.test.Package(
+        "chromeos-base", "test-package", version="31.0"
+    )
+
+    overlay.add_package(unstable_package)
+    overlay.add_package(stable_package_30)
+    overlay.add_package(stable_package_31)
+
+    monkeypatch.setattr(uprev_lib, "SRC_ROOT", overlay.path)
+    with pytest.raises(uprev_lib.TooManyStableEbuildsError):
+        _ = uprev_lib.get_stable_ebuild_version(
+            pathlib.Path(unstable_package.category) / unstable_package.package,
+        )
+
+
+def test_get_stable_ebuild_version_no_unstable(overlay_stack, monkeypatch):
+    """Test getting the stable ebuild version on no unstable ebuild."""
+    (overlay,) = overlay_stack(1)
+    stable_package = cr.test.Package(
+        "chromeos-base", "test-package", version="30.0"
+    )
+
+    overlay.add_package(stable_package)
+
+    monkeypatch.setattr(uprev_lib, "SRC_ROOT", overlay.path)
+    with pytest.raises(uprev_lib.NoUnstableEbuildError):
+        _ = uprev_lib.get_stable_ebuild_version(
+            pathlib.Path(stable_package.category) / stable_package.package,
+        )
+
+
 @pytest.mark.inside_only
-def test_non_workon_fails_uprev_workon_ebuild_to_version(overlay_stack):
+def test_non_workon_fails_uprev_workon_ebuild_to_version(
+    overlay_stack, monkeypatch
+):
     (overlay,) = overlay_stack(1)
     unstable_package = cr.test.Package(
         "chromeos-base",
@@ -531,12 +602,12 @@ def test_non_workon_fails_uprev_workon_ebuild_to_version(overlay_stack):
 
     overlay.add_package(unstable_package)
 
+    monkeypatch.setattr(uprev_lib, "SRC_ROOT", overlay.path)
     with pytest.raises(uprev_lib.EbuildUprevError):
         uprev_lib.uprev_workon_ebuild_to_version(
             pathlib.Path(unstable_package.category) / unstable_package.package,
             target_version="1",
             chroot=None,
-            src_root=overlay.path,
             chroot_src_root=overlay.path,
         )
 
@@ -551,7 +622,7 @@ def test_non_workon_fails_uprev_workon_ebuild_to_version(overlay_stack):
 
 
 @pytest.mark.inside_only
-def test_simple_uprev_workon_ebuild_to_version(overlay_stack):
+def test_simple_uprev_workon_ebuild_to_version(overlay_stack, monkeypatch):
     (overlay,) = overlay_stack(1)
     unstable_package = cr.test.Package(
         "chromeos-base",
@@ -565,11 +636,11 @@ def test_simple_uprev_workon_ebuild_to_version(overlay_stack):
 
     overlay.add_package(unstable_package)
 
+    monkeypatch.setattr(uprev_lib, "SRC_ROOT", overlay.path)
     res = uprev_lib.uprev_workon_ebuild_to_version(
         pathlib.Path(unstable_package.category) / unstable_package.package,
         target_version="1",
         chroot=None,
-        src_root=overlay.path,
         chroot_src_root=overlay.path,
     )
 
@@ -585,7 +656,9 @@ def test_simple_uprev_workon_ebuild_to_version(overlay_stack):
     assert stable_package in overlay
 
 
-def test_uprev_workon_ebuild_to_version_newer_exists(overlay_stack):
+def test_uprev_workon_ebuild_to_version_newer_exists(
+    overlay_stack, monkeypatch
+):
     """Test no uprev occurs when downrev not allowed and newer version exists."""
     (overlay,) = overlay_stack(1)
     unstable_ebuild = cr.test.Package(
@@ -602,11 +675,11 @@ def test_uprev_workon_ebuild_to_version_newer_exists(overlay_stack):
     overlay.add_package(unstable_ebuild)
     overlay.add_package(stable_ebuild)
 
+    monkeypatch.setattr(uprev_lib, "SRC_ROOT", overlay.path)
     result = uprev_lib.uprev_workon_ebuild_to_version(
         "chromeos-base/uprev-test",
         "1.2.3",
         allow_downrev=False,
-        src_root=overlay.path,
         chroot_src_root=overlay.path,
     )
 
