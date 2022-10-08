@@ -2471,6 +2471,18 @@ class CreateAndUploadMergedAFDOProfileTest(PrepBundLatestAFDOArtifactTest):
             mocks.uncompress_file.assert_not_called()
             mocks.compress_file.assert_not_called()
 
+    def testCreateAndUploadMergedAFDOProfileNoProfiles(self):
+        unmerged_name = self._benchmark_afdo_profile_name(major=10, build=13)
+        merged_name = None
+        self.gs_context.List = mock.MagicMock()
+        self.gs_context.List.side_effect = gs.GSNoSuchKey("No objects")
+
+        merged_name = self.obj._CreateAndUploadMergedAFDOProfile(
+            unmerged_name, self.output_dir
+        )
+
+        self.assertIsNone(merged_name)
+
 
 class GetUpdatedFilesTest(cros_test_lib.MockTempDirTestCase):
     """Test functions in class GetUpdatedFilesForCommit."""

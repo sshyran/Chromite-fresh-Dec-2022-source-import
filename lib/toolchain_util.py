@@ -1353,12 +1353,11 @@ class _CommonPrepareBundle(object):
                 ),
                 details=True,
             )
-        except (gs.GSCommandError, gs.GSNoSuchKey) as e:
+        except (gs.GSCommandError, gs.GSNoSuchKey):
             # This can happen in a new GS bucket where there are no profiles
             # yet.
             logging.warning(
-                "Did not find valid benchmark profiles: %s. Skip profile merge.",
-                e.stdout,
+                "Did not find valid benchmark profiles. Skip profile merge.",
             )
             return None
 
