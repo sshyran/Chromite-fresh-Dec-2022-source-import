@@ -178,7 +178,6 @@ disable=
     bad-indentation,
     line-too-long,
     docstring-section-indent,
-    docstring-trailing-quotes,
 
 [REPORTS]
 
