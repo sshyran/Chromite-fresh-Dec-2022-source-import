@@ -99,9 +99,9 @@ class ApiConfig(object):
         """Get the config as a proto.
 
         Args:
-          for_inside_execution: Allows avoiding propagating configs that are
-            irrelevant for the build api process executed inside the chroot.
-            Enabled by default.
+            for_inside_execution: Allows avoiding propagating configs that are
+                irrelevant for the build api process executed inside the chroot.
+                Enabled by default.
         """
         config = build_api_config_pb2.BuildApiConfig()
         config.call_type = self.ENUM_TYPE_MAP[self._call_type]
@@ -119,7 +119,7 @@ def build_config_from_proto(
     """Build an ApiConfig instance from a BuildApiConfig message.
 
     Args:
-      config_proto: The proto config.
+        config_proto: The proto config.
     """
 
     if config_proto.call_type not in ApiConfig.TYPE_ENUM_MAP:

@@ -16,9 +16,9 @@ def all_responses(faux_result_factory):
     single function.
 
     Args:
-      faux_result_factory: A function with the same signature as a regular
-          API endpoint function that populates the output with success or error
-          results, as requested, without executing the endpoint.
+        faux_result_factory: A function with the same signature as a regular
+            API endpoint function that populates the output with success or
+            error results, as requested, without executing the endpoint.
     """
     assert faux_result_factory
 
@@ -41,8 +41,8 @@ def success(faux_result_factory):
     """A decorator to handle mock call responses.
 
     Args:
-      faux_result_factory: A function with the same signature as a regular
-          API endpoint function that populates the output
+        faux_result_factory: A function with the same signature as a regular
+            API endpoint function that populates the output
     """
     assert faux_result_factory
 

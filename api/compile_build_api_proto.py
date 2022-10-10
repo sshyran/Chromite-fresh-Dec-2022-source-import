@@ -121,7 +121,7 @@ def _CleanTargetDirectory(directory: Path):
     diagnosing accidental __init__.py changes.
 
     Args:
-      directory: Path to be cleaned up.
+        directory: Path to be cleaned up.
     """
     logging.info("Cleaning old files from %s.", directory)
     for current in directory.rglob("*_pb2.py"):
@@ -143,11 +143,11 @@ def _GenerateFiles(
     """Generate the proto files from the |source| tree into |output|.
 
     Args:
-      source: Path to the proto source root directory.
-      output: Path to the output root directory.
-      protoc_version: Which protoc to use.
-      dir_subset: The subset of the proto to compile.
-      protoc_bin_path: The protoc command to use.
+        source: Path to the proto source root directory.
+        output: Path to the output root directory.
+        protoc_version: Which protoc to use.
+        dir_subset: The subset of the proto to compile.
+        protoc_bin_path: The protoc command to use.
     """
     logging.info("Generating files to %s.", output)
     osutils.SafeMakedirs(output)
@@ -206,9 +206,9 @@ def _PostprocessFiles(directory: Path, protoc_version: ProtocVersion):
     """Do postprocessing on the generated files.
 
     Args:
-      directory: The root directory containing the generated files that are
-        to be processed.
-      protoc_version: Which protoc is being used to generate the files.
+        directory: The root directory containing the generated files that are
+            to be processed.
+        protoc_version: Which protoc is being used to generate the files.
     """
     logging.info("Postprocessing: Fix imports in %s.", directory)
     # We are using a negative address here (the /address/! portion of the sed
@@ -270,10 +270,10 @@ def CompileProto(
     in the default location.
 
     Args:
-      output: The output directory.
-      protoc_version: Which protoc to use for the compile.
-      dir_subset: What proto to compile.
-      postprocess: Whether to run the postprocess step.
+        output: The output directory.
+        protoc_version: Which protoc to use for the compile.
+        dir_subset: What proto to compile.
+        postprocess: Whether to run the postprocess step.
     """
     protoc_version = protoc_version or ProtocVersion.CHROMITE
     source = protoc_version.get_proto_dir() / "src"

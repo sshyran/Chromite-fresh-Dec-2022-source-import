@@ -197,11 +197,11 @@ class RouterTest(
         """Helper to create the implementation mock to test chroot assertions.
 
         Args:
-          expect_called: Whether the implementation should be called.
-           When False, an assertion will fail if it is called.
+            expect_called: Whether the implementation should be called.
+                When False, an assertion will fail if it is called.
 
         Returns:
-          The implementation.
+            The implementation.
         """
 
         def impl(_input_msg, _output_msg, _config):

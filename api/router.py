@@ -165,11 +165,11 @@ class Router(object):
         """Register the services from a generated proto module.
 
         Args:
-          proto_module: The generated proto module to register.
+            proto_module: The generated proto module to register.
 
         Raises:
-          ServiceModuleNotDefinedError when the service cannot be found in the
-            provided module.
+            ServiceModuleNotDefinedError when the service cannot be found in the
+                provided module.
         """
         services = proto_module.DESCRIPTOR.services_by_name
         for service_name, svc in services.items():
@@ -225,21 +225,23 @@ class Router(object):
         """Dispatch the request.
 
         Args:
-          service_name: The fully qualified service name.
-          method_name: The name of the method being called.
-          config: The call configs.
-          input_handler: The request message handler.
-          output_handlers: The response message handlers.
-          config_handler: The config message handler.
+            service_name: The fully qualified service name.
+            method_name: The name of the method being called.
+            config: The call configs.
+            input_handler: The request message handler.
+            output_handlers: The response message handlers.
+            config_handler: The config message handler.
 
         Returns:
-          The return code.
+            The return code.
 
         Raises:
-          InvalidInputFileError when the input file cannot be read.
-          InvalidOutputFileError when the output file cannot be written.
-          ServiceModuleNotFoundError when the service module cannot be imported.
-          MethodNotFoundError when the method cannot be retrieved from the module.
+            InvalidInputFileError when the input file cannot be read.
+            InvalidOutputFileError when the output file cannot be written.
+            ServiceModuleNotFoundError when the service module cannot be
+                imported.
+            MethodNotFoundError when the method cannot be retrieved from the
+                module.
         """
         input_msg = self.get_input_message_instance(service_name, method_name)
         input_handler.read_into(input_msg)
@@ -294,18 +296,19 @@ class Router(object):
         method_options: "google.protobuf.Message",
         config: "api_config.ApiConfig",
     ) -> bool:
-        """Check the chroot options, and execute assertion or note reexec as needed.
+        """Check the chroot options; execute assertion or note reexec as needed.
 
         Args:
-          service_options: The service options.
-          method_options: The method options.
-          config: The Build API call config instance.
+            service_options: The service options.
+            method_options: The method options.
+            config: The Build API call config instance.
 
         Returns:
-          True iff it needs to be reexeced inside the chroot.
+            True iff it needs to be reexeced inside the chroot.
 
         Raises:
-          cros_build_lib.DieSystemExit when the chroot setting cannot be satisfied.
+            cros_build_lib.DieSystemExit when the chroot setting cannot be
+                satisfied.
         """
         if not config.run_endpoint:
             # Do not enter the chroot for validate only and mock calls.
@@ -341,14 +344,14 @@ class Router(object):
         """Re-execute the service inside the chroot.
 
         Args:
-          input_msg: The parsed input message.
-          output_msg: The empty output message instance.
-          config: The call configs.
-          input_handler: Input message handler.
-          output_handlers: Output message handlers.
-          config_handler: Config message handler.
-          service_name: The name of the service to run.
-          method_name: The name of the method to run.
+            input_msg: The parsed input message.
+            output_msg: The empty output message instance.
+            config: The call configs.
+            input_handler: Input message handler.
+            output_handlers: Output message handlers.
+            config_handler: Config message handler.
+            service_name: The name of the service to run.
+            method_name: The name of the method to run.
         """
         # Parse the chroot and clear the chroot field in the input message.
         chroot = field_handler.handle_chroot(input_msg)
@@ -449,15 +452,16 @@ class Router(object):
         """Get the implementation of the method for the service module.
 
         Args:
-          module_name: The name of the service module.
-          method_name: The name of the method.
+            module_name: The name of the service module.
+            method_name: The name of the method.
 
         Returns:
-          The method.
+            The method.
 
         Raises:
-          MethodNotFoundError when the method cannot be found in the module.
-          ServiceModuleNotFoundError when the service module cannot be imported.
+            MethodNotFoundError when the method cannot be found in the module.
+            ServiceModuleNotFoundError when the service module cannot be
+                imported.
         """
         try:
             module = importlib.import_module(
@@ -475,7 +479,7 @@ def RegisterServices(router: Router):
     """Register all the services.
 
     Args:
-      router: The router.
+        router: The router.
     """
     router.Register(android_pb2)
     router.Register(api_pb2)

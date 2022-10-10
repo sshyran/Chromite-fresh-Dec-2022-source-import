@@ -26,11 +26,11 @@ def _value(
     """Helper function to fetch the value of the field.
 
     Args:
-      field: The field name. Can be nested via . separation.
-      message: The protobuf message it is being fetched from.
+        field: The field name. Can be nested via . separation.
+        message: The protobuf message it is being fetched from.
 
     Returns:
-      The value of the field.
+        The value of the field.
     """
     if not field:
         return message
@@ -54,8 +54,8 @@ def exists(*fields: str):
     """Validate that the paths in |fields| exist.
 
     Args:
-      fields (str): The fields being checked. Can be . separated nested
-        fields.
+        fields (str): The fields being checked. Can be . separated nested
+            fields.
     """
     assert fields
 
@@ -83,8 +83,8 @@ def is_in(field: str, values: Iterable):
     """Validate |field| is an element of |values|.
 
     Args:
-      field: The field being checked. May be . separated nested fields.
-      values: The possible values field may take.
+        field: The field being checked. May be . separated nested fields.
+        values: The possible values field may take.
     """
     assert field
     assert values
@@ -117,11 +117,11 @@ def each_in(
     """Validate each |subfield| of the repeated |field| is in |values|.
 
     Args:
-      field: The field being checked. May be . separated nested fields.
-      subfield: The field in the repeated |field| to validate, or None
-        when |field| is not a repeated message, e.g. enum, scalars.
-      values: The possible values field may take.
-      optional: Also allow the field to be empty when True.
+        field: The field being checked. May be . separated nested fields.
+        subfield: The field in the repeated |field| to validate, or None
+            when |field| is not a repeated message, e.g. enum, scalars.
+        values: The possible values field may take.
+        optional: Also allow the field to be empty when True.
     """
     assert field
     assert values
@@ -168,7 +168,7 @@ def constraint(description):
     and logging.
 
     Args:
-      description: Human readable description of the constraint
+        description: Human readable description of the constraint
     """
 
     def decorator(func):
@@ -186,8 +186,8 @@ def check_constraint(field: str, checkfunc: Callable):
     """Validate all values of |field| pass a constraint.
 
     Args:
-      field: The field being checked. May be . separated nested fields.
-      checkfunc: A constraint function to check on each value
+        field: The field being checked. May be . separated nested fields.
+        checkfunc: A constraint function to check on each value
     """
     assert field
     assert constraint
@@ -235,7 +235,7 @@ def require(*fields: str):
     """Verify |fields| have all been set to truthy values.
 
     Args:
-      fields: The fields being checked. May be . separated nested fields.
+        fields: The fields being checked. May be . separated nested fields.
     """
     assert fields
 
@@ -262,7 +262,7 @@ def require_any(*fields: str):
     """Verify at least one of |fields| have been set.
 
     Args:
-      fields: The fields being checked. May be . separated nested fields.
+        fields: The fields being checked. May be . separated nested fields.
     """
     assert fields
 
@@ -298,10 +298,10 @@ def require_each(
     also have at least one entry.
 
     Args:
-      field: The repeated field being checked. May be . separated nested
-          fields.
-      subfields: The fields of the repeated message to validate.
-      allow_empty: Also require at least one entry in the repeated field.
+        field: The repeated field being checked. May be . separated nested
+            fields.
+        subfields: The fields of the repeated message to validate.
+        allow_empty: Also require at least one entry in the repeated field.
     """
     assert field
     assert subfields

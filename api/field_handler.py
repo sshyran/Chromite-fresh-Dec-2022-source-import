@@ -124,13 +124,13 @@ class PathHandler(object):
         """Path handler initialization.
 
         Args:
-          field: The Path message.
-          destination: The destination base path.
-          delete: Whether the copied file(s) should be deleted on cleanup.
-          prefix: A path prefix to remove from the destination path when moving
-            files inside the chroot, or to add to the source paths when moving files
-            out of the chroot.
-          reset: Whether to reset the state on cleanup.
+            field: The Path message.
+            destination: The destination base path.
+            delete: Whether the copied file(s) should be deleted on cleanup.
+            prefix: A path prefix to remove from the destination path when
+                moving files inside the chroot, or to add to the source paths
+                when moving files out of the chroot.
+            reset: Whether to reset the state on cleanup.
         """
         assert isinstance(field, common_pb2.Path)
         assert field.path
@@ -152,9 +152,9 @@ class PathHandler(object):
         """Copy the file or directory to its destination.
 
         Args:
-          direction: The direction files are being copied (into or out of the
-            chroot). Specifying the direction allows avoiding performing unnecessary
-            copies.
+            direction: The direction files are being copied (into or out of the
+            chroot). Specifying the direction allows avoiding performing
+            unnecessary copies.
         """
         if self._transferred:
             return
@@ -256,14 +256,14 @@ def copy_paths_in(
     """Context manager function to transfer and cleanup all Path messages.
 
     Args:
-      message: A message whose Path messages should be transferred.
-      destination: The base destination path.
-      delete: Whether the file(s) should be deleted.
-      prefix: A prefix path to remove from the final destination path in the Path
-        message (i.e. remove the chroot path).
+        message: A message whose Path messages should be transferred.
+        destination: The base destination path.
+        delete: Whether the file(s) should be deleted.
+        prefix: A prefix path to remove from the final destination path in the
+            Path message (i.e. remove the chroot path).
 
     Yields:
-      list[PathHandler]: The path handlers.
+        list[PathHandler]: The path handlers.
     """
     assert destination
 
@@ -288,18 +288,18 @@ def sync_dirs(
     """Context manager function to handle SyncedDir messages.
 
     The sync semantics are effectively:
-      rsync -r --del source/ destination/
-      * The endpoint runs. *
-      rsync -r --del destination/ source/
+        rsync -r --del source/ destination/
+        * The endpoint runs. *
+        rsync -r --del destination/ source/
 
     Args:
-      message: A message whose SyncedPath messages should be synced.
-      destination: The destination path.
-      prefix: A prefix path to remove from the final destination path in the Path
-        message (i.e. remove the chroot path).
+        message: A message whose SyncedPath messages should be synced.
+        destination: The destination path.
+        prefix: A prefix path to remove from the final destination path in the
+            Path message (i.e. remove the chroot path).
 
     Yields:
-      The handlers.
+        The handlers.
     """
     assert destination
 
@@ -330,10 +330,10 @@ def extract_results(
     """Transfer all response Path messages to the request's ResultPath.
 
     Args:
-      request_message: The request message containing a ResultPath message.
-      response_message: The response message whose Path message(s) are to be
-        transferred.
-      chroot: The chroot the files are being copied out of.
+        request_message: The request message containing a ResultPath message.
+        response_message: The response message whose Path message(s) are to be
+            transferred.
+        chroot: The chroot the files are being copied out of.
     """
     # Find the ResultPath.
     for descriptor in request_message.DESCRIPTOR.fields:

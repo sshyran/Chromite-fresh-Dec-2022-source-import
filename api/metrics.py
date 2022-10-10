@@ -22,8 +22,8 @@ def deserialize_metrics_log(output_events, prefix=None):
     infra/proto/src/chromiumos/metrics.proto output type.
 
     Args:
-      output_events: A chromiumos.MetricEvent protobuf message.
-      prefix: A string to prepend to all metric event names.
+        output_events: A chromiumos.MetricEvent protobuf message.
+        prefix: A string to prepend to all metric event names.
     """
     counters = collections.defaultdict(int)
     counter_times = {}

@@ -92,8 +92,8 @@ class Serializer(object):
         """Deserialize the data into the given message.
 
         Args:
-          data: The message data to deserialize.
-          message: The message to load the data into.
+            data: The message data to deserialize.
+            message: The message to load the data into.
         """
 
     # pylint: disable=unused-argument
@@ -101,10 +101,10 @@ class Serializer(object):
         """Serialize the message data.
 
         Args:
-          message: The message to be serialized.
+            message: The message to be serialized.
 
         Returns:
-          The message's serialized data.
+            The message's serialized data.
         """
         return ""
 
@@ -173,12 +173,12 @@ class MessageHandler(object):
     api data.
 
     Examples:
-      message_handler = MessageHandler(path, ...)
-      message = ...
-      # Parse path into message.
-      message_handler.read_into(message)
-      # Write message to a different file.
-      message_handler.write_into(message, path=other_path)
+        message_handler = MessageHandler(path, ...)
+        message = ...
+        # Parse path into message.
+        message_handler.read_into(message)
+        # Write message to a different file.
+        message_handler.write_into(message, path=other_path)
     """
 
     def __init__(
@@ -193,15 +193,15 @@ class MessageHandler(object):
         """MessageHandler init.
 
         Args:
-          path: The path to the main file associated with this handler.
-          serializer: The serializer to be used for the messages.
-          binary: Whether the serialized content is binary.
-          input_arg: The --input-x argument used for this type. Used for
-            reexecution inside the chroot.
-          output_arg: The --output-x argument used for this type. Used for
-            reexecution inside the chroot.
-          config_arg: The --config-x argument used for this type. Used for
-            reexecution inside the chroot.
+            path: The path to the main file associated with this handler.
+            serializer: The serializer to be used for the messages.
+            binary: Whether the serialized content is binary.
+            input_arg: The --input-x argument used for this type. Used for
+                reexecution inside the chroot.
+            output_arg: The --output-x argument used for this type. Used for
+                reexecution inside the chroot.
+            config_arg: The --config-x argument used for this type. Used for
+                reexecution inside the chroot.
         """
         self.path = path
         self.serializer = serializer
@@ -217,12 +217,12 @@ class MessageHandler(object):
         """Read a file containing serialized data into a message.
 
         Args:
-          message: The message to populate.
-          path: A path to read. Uses the instance's path when not given.
+            message: The message to populate.
+            path: A path to read. Uses the instance's path when not given.
 
         Raises:
-          InvalidInputFileError: When a path has not been given, does not exist,
-            or cannot be read.
+            InvalidInputFileError: When a path has not been given, does not
+                exist, or cannot be read.
         """
         target_path = path or self.path
         if not target_path:
@@ -248,11 +248,11 @@ class MessageHandler(object):
         """Write serialized data from the message to a file.
 
         Args:
-          message: The message to serialize and persist.
-          path: An optional override of the instance's path.
+            message: The message to serialize and persist.
+            path: An optional override of the instance's path.
 
         Raises:
-          InvalidOutputFileError: When no path given, or it cannot be written to.
+            InvalidOutputFileError: When no path given, or it cannot be written to.
         """
         if not path and not self.path:
             raise InvalidOutputFileError("No output file has been specified.")

@@ -120,10 +120,10 @@ class EachInTest(cros_test_lib.TestCase, api_config.ApiConfigMixin):
         """Build a request instance, filling out the messages field.
 
         Args:
-          messages: Each messages data (id, name, flag, enum) as lists. Only
-            requires as many as are set. e.g. _request([1], [2]) will create two
-            messages with only ids set. _request([1, 'name']) will create one with
-            id and name set, but not flag or enum.
+            messages: Each messages data (id, name, flag, enum) as lists. Only
+                requires as many as are set. e.g. _request([1], [2]) will create
+                two messages with only ids set. _request([1, 'name']) will
+                create one with id and name set, but not flag or enum.
         """
         request = build_api_test_pb2.TestRequestMessage()
         for message in messages or []:
