@@ -646,8 +646,8 @@ class BuildPackagesTest(
             config, "GetForceLocalBuildPackages", return_value=["test/package1"]
         )
         sdk_pkgs = " ".join(
-            sysroot._CRITICAL_SDK_PACKAGES
-        )  # pylint: disable=protected-access
+            sysroot._CRITICAL_SDK_PACKAGES  # pylint: disable=protected-access
+        )
 
         with cros_test_lib.LoggingCapturer() as logs:
             sysroot.BuildPackages(self.target, self.sysroot, config)
