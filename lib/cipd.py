@@ -55,11 +55,11 @@ def _ChromeInfraRequest(method, request):
     """Makes a request to the Chrome Infra Packages API with httplib2.
 
     Args:
-      method: Name of RPC method to call.
-      request: RPC request body.
+        method: Name of RPC method to call.
+        request: RPC request body.
 
     Returns:
-      Deserialized RPC response body.
+        Deserialized RPC response body.
     """
     resp, body = httplib2.Http().request(
         uri=CHROME_INFRA_PACKAGES_API_BASE + method,
@@ -85,10 +85,10 @@ def _DownloadCIPD(instance_sha256):
     """Finds the CIPD download link and requests the binary.
 
     Args:
-      instance_sha256: The version of CIPD client to download.
+        instance_sha256: The version of CIPD client to download.
 
     Returns:
-      The CIPD binary as a string.
+        The CIPD binary as a string.
     """
     # Grab the signed URL to fetch the client binary from.
     resp = _ChromeInfraRequest(
@@ -147,7 +147,7 @@ def GetCIPDFromCache():
     """Checks the cache, downloading CIPD if it is missing.
 
     Returns:
-      Path to the CIPD binary.
+        Path to the CIPD binary.
     """
     cache_dir = os.path.join(path_util.GetCacheDir(), "cipd")
     bin_cache = CipdCache(cache_dir)
@@ -161,13 +161,13 @@ def GetInstanceID(cipd_path, package, version, service_account_json=None):
     """Get the latest instance ID for ref latest.
 
     Args:
-      cipd_path: The path to a cipd executable. GetCIPDFromCache can give this.
-      package: A string package name.
-      version: A string version of package.
-      service_account_json: The path of the service account credentials.
+        cipd_path: Path to a cipd executable. GetCIPDFromCache can give this.
+        package: A string package name.
+        version: A string version of package.
+        service_account_json: The path of the service account credentials.
 
     Returns:
-      A string instance ID.
+        A string instance ID.
     """
     service_account_flag = []
     if service_account_json:
@@ -195,19 +195,20 @@ def InstallPackage(
     """Installs a package at a given destination using cipd.
 
     Args:
-      cipd_path: The path to a cipd executable. GetCIPDFromCache can give this.
-      package: A package name.
-      version: The CIPD version of the package to install (can be instance ID or a
-          ref).
-      destination: The folder to install the package under.
-      service_account_json: The path of the service account credentials.
+        cipd_path: Path to a cipd executable. GetCIPDFromCache can give this.
+        package: A package name.
+        version: The CIPD version of the package to install (can be instance ID
+            or a ref).
+        destination: The folder to install the package under.
+        service_account_json: The path of the service account credentials.
 
     Returns:
       The path of the package.
     """
     if not destination:
-        # GetCacheDir does a non-trivial amount of work, too much for a constant.
-        # If needed elsewhere, a memoized function would be a good alternative.
+        # GetCacheDir does a non-trivial amount of work,
+        # too much for a constant. If needed elsewhere, a
+        # memoized function would be a good alternative.
         destination = (
             Path(path_util.GetCacheDir()).absolute() / "cipd" / "packages"
         )
@@ -235,12 +236,12 @@ def CreatePackage(cipd_path, package, in_dir, tags, refs, cred_path=None):
     """Create (build and register) a package using cipd.
 
     Args:
-      cipd_path: The path to a cipd executable. GetCIPDFromCache can give this.
-      package: A package name.
-      in_dir: The directory to create the package from.
-      tags: A mapping of tags to apply to the package.
-      refs: An Iterable of refs to apply to the package.
-      cred_path: The path of the service account credentials.
+        cipd_path: Path to a cipd executable. GetCIPDFromCache can give this.
+        package: A package name.
+        in_dir: The directory to create the package from.
+        tags: A mapping of tags to apply to the package.
+        refs: An Iterable of refs to apply to the package.
+        cred_path: The path of the service account credentials.
     """
     args = [
         cipd_path,
