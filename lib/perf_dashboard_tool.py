@@ -145,7 +145,7 @@ def main(argv):
         cros_version=opts.cros_version,
         chrome_version=opts.chrome_version,
         dashboard=opts.url,
-        master_name=opts.master,
+        main_name=opts.master,
         test_prefix="",
         platform_prefix="",
         dry_run=opts.dry_run,
