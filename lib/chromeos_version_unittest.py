@@ -117,9 +117,12 @@ class VersionInfoTest(cros_test_lib.MockTempDirTestCase):
         info.IncrementVersion()
         info.UpdateVersionFile(message, dry_run=False)
 
+        # pylint: disable=protected-access
         create_mock.assert_called_once_with(
             self.tempdir, chromeos_version._PUSH_BRANCH
-        )  # pylint: disable=protected-access
+        )
+        # pylint: enable=protected-access
+
         push_mock.assert_called_once_with(self.tempdir, message, False, None)
         clean_mock.assert_called_once_with(self.tempdir)
 
