@@ -82,6 +82,7 @@ COMPRESSED_ASH_FILE = "chrome.squashfs"
 RAW_ASH_FILE = "chrome"
 COMPRESSED_ASH_PATH = os.path.join(_CHROME_DIR, COMPRESSED_ASH_FILE)
 RAW_ASH_PATH = os.path.join(_CHROME_DIR, RAW_ASH_FILE)
+COMPRESSED_ASH_OVERLAY_SUFFIX = "-compressed-ash"
 
 LACROS_DIR = "/usr/local/lacros-chrome"
 _CONF_FILE = "/etc/chrome_dev.conf"
@@ -1242,9 +1243,17 @@ def _PrepareStagingDir(
     if options.compressed_ash:
         # Setup SDK here so mksquashfs is still found in no-shell + nostrip
         # configuration.
+        # HACH(b/247397013, dlunev): to not setup release builders for SDK while
+        # this is in test, cut the known suffix of experimental overlays.
+        sdk_orig_board = options.board
+        if sdk_orig_board.endswith(COMPRESSED_ASH_OVERLAY_SUFFIX):
+            sdk_orig_board = sdk_orig_board[
+                : -len(COMPRESSED_ASH_OVERLAY_SUFFIX)
+            ]
+
         sdk = cros_chrome_sdk.SDKFetcher(
             options.cache_dir,
-            options.board,
+            sdk_orig_board,
             use_external_config=options.use_external_config,
         )
         with sdk.Prepare(
