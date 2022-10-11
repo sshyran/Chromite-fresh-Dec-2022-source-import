@@ -41,9 +41,9 @@ def GetImageSizeData(
     """Kick off data reshaping and retrieval for ImageSize dataset.
 
     Args:
-      input_proto: The data provided by the request.
-      output_proto: The resulting output message.
-      config: The config provided with the API call.
+        input_proto: The data provided by the request.
+        output_proto: The resulting output message.
+        _config: The config provided with the API call.
     """
     reshaped_input = {}
     for image in input_proto.built_images:
@@ -69,9 +69,10 @@ def _build_package_size_output(
     """Convert package size data to equivalent proto format.
 
     Args:
-      image_type: The string representation of the type of image (base, dev, test)
-      package_sizes: The structured Python dict of partition:(PackageId:size)
-      output_proto: The proto to insert structured data into
+        image_type: The string representation of the type of image
+            (base, dev, test).
+        package_sizes: The structured Python dict of partition:(PackageId:size)
+        output_proto: The proto to insert structured data into
     """
     image_data_proto = output_proto.image_data.add()
     image_data_proto.image_type = _IMAGE_MAPPING[image_type]
@@ -103,11 +104,11 @@ def _get_package_identifier_proto(
     """Convert PackageIdentifier named tuple to PackageIdentifier protocol buffer.
 
     Args:
-      python_copy: The named tuple version of PackageIdentifier.
-      proto_copy: The protobuf version of PackageIdentifier.
+        python_copy: The named tuple version of PackageIdentifier.
+        proto_copy: The protobuf version of PackageIdentifier.
 
     Returns:
-      None
+        None
     """
     proto_copy.package_name.atom = python_copy.package_name.atom
     proto_copy.package_name.category = python_copy.package_name.category

@@ -339,9 +339,9 @@ class InstallToolchainTest(
         """Creates a log file for testing for individual packages built by Portage.
 
         Args:
-          log_path: The PORTAGE_LOGDIR path.
-          pkg_info: Package name used to name the log file.
-          timestamp: Timestamp used to name the file.
+            log_path: The PORTAGE_LOGDIR path.
+            pkg_info: Package name used to name the log file.
+            timestamp: Timestamp used to name the file.
         """
         path = os.path.join(
             log_path,
@@ -568,9 +568,9 @@ class InstallPackagesTest(
         """Creates a log file for testing.
 
         Args:
-          goma_log_dir: Directory where the file will be created.
-          name: Log file 'base' name that is combined with the timestamp.
-          timestamp: Timestamp that is written to the file.
+            goma_log_dir: Directory where the file will be created.
+            name: Log file 'base' name that is combined with the timestamp.
+            timestamp: Timestamp that is written to the file.
         """
         path = os.path.join(
             goma_log_dir,
@@ -591,9 +591,9 @@ class InstallPackagesTest(
         """Creates a log file for testing for individual packages built by Portage.
 
         Args:
-          log_path: The PORTAGE_LOGDIR path.
-          pkg_info: Package name used to name the log file.
-          timestamp: Timestamp used to name the file.
+            log_path: The PORTAGE_LOGDIR path.
+            pkg_info: Package name used to name the log file.
+            timestamp: Timestamp used to name the file.
         """
         path = os.path.join(
             log_path,

@@ -34,8 +34,8 @@ def _GetGomaLogDirectory():
     """Get goma's log directory based on the env variables.
 
     Returns:
-      a string of a directory name where goma's log may exist, or None if no
-      potential directories exist.
+        a string of a directory name where goma's log may exist, or None if no
+        potential directories exist.
     """
     # TODO(crbug.com/1045001): Replace environment variable with query to
     # goma object after goma refactoring allows this.
@@ -104,14 +104,14 @@ def GetArtifacts(
     paths to the desired files.
 
     Args:
-      in_proto: Proto request defining reqs.
-      chroot: The chroot class used for these artifacts.
-      sysroot_class: The sysroot class used for these artifacts.
-      build_target: The build target used for these artifacts.
-      output_dir: The path to write artifacts to.
+        in_proto: Proto request defining reqs.
+        chroot: The chroot class used for these artifacts.
+        sysroot_class: The sysroot class used for these artifacts.
+        build_target: The build target used for these artifacts.
+        output_dir: The path to write artifacts to.
 
     Returns:
-      A list of dictionary mappings of ArtifactType to list of paths.
+        A list of dictionary mappings of ArtifactType to list of paths.
     """
     generated = []
     artifact_types = {

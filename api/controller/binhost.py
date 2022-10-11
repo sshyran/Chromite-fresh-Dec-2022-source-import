@@ -103,9 +103,9 @@ def PrepareBinhostUploads(
     See BinhostService documentation in api/proto/binhost.proto.
 
     Args:
-      input_proto: The input proto.
-      output_proto: The output proto.
-      config: The API call config.
+        input_proto: The input proto.
+        output_proto: The output proto.
+        config: The API call config.
     """
     if input_proto.sysroot.build_target.name:
         build_target_msg = input_proto.sysroot.build_target
@@ -176,9 +176,9 @@ def PrepareDevInstallBinhostUploads(
     See BinhostService documentation in api/proto/binhost.proto.
 
     Args:
-      input_proto: The input proto.
-      output_proto: The output proto.
-      config: The API call config.
+        input_proto: The input proto.
+        output_proto: The output proto.
+        config: The API call config.
     """
     sysroot_path = input_proto.sysroot.path
 
@@ -242,9 +242,9 @@ def SetBinhost(
     See BinhostService documentation in api/proto/binhost.proto.
 
     Args:
-      input_proto: The input proto.
-      output_proto: The output proto.
-      _config: The API call config.
+        input_proto: The input proto.
+        output_proto: The output proto.
+        _config: The API call config.
     """
     target = input_proto.build_target.name
     key = binhost_pb2.BinhostKey.Name(input_proto.key)
@@ -276,9 +276,9 @@ def RegenBuildCache(
     See BinhostService documentation in api/proto/binhost.proto.
 
     Args:
-      input_proto: The input proto.
-      output_proto: The output proto.
-      _config: The API call config.
+        input_proto: The input proto.
+        output_proto: The output proto.
+        _config: The API call config.
     """
     chroot = controller_util.ParseChroot(input_proto.chroot)
     overlay_type = input_proto.overlay_type

@@ -707,10 +707,10 @@ class BundleSimpleChromeArtifactsTest(
         """Helper to create a request message instance.
 
         Args:
-          chroot: The chroot path.
-          sysroot: The sysroot path.
-          build_target: The build target name.
-          output_dir: The output directory.
+            chroot: The chroot path.
+            sysroot: The sysroot path.
+            build_target: The build target name.
+            output_dir: The output directory.
         """
         return artifacts_pb2.BundleRequest(
             sysroot={"path": sysroot, "build_target": {"name": build_target}},
@@ -863,10 +863,10 @@ class BundleVmFilesTest(
         """Helper to build out an input message instance.
 
         Args:
-          chroot: The chroot path.
-          sysroot: The sysroot path relative to the chroot.
-          test_results_dir: The test results directory relative to the sysroot.
-          output_dir: The directory where the results tarball should be saved.
+            chroot: The chroot path.
+            sysroot: The sysroot path relative to the chroot.
+            test_results_dir: The test results directory relative to the sysroot.
+            output_dir: The directory where the results tarball should be saved.
         """
         return artifacts_pb2.BundleVmFilesRequest(
             chroot={"path": chroot},

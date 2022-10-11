@@ -51,12 +51,12 @@ def GeneratePayload(
     """Generate a update payload ('do paygen').
 
     Args:
-      input_proto: Input proto.
-      output_proto: Output proto.
-      config: The API call config.
+        input_proto: Input proto.
+        output_proto: Output proto.
+        config: The API call config.
 
     Returns:
-      A controller return code (e.g. controller.RETURN_CODE_SUCCESS).
+        A controller return code (e.g. controller.RETURN_CODE_SUCCESS).
     """
 
     # Resolve the tgt image oneof.
@@ -138,9 +138,9 @@ def _SetGeneratePayloadOutputProto(
     """Set the output proto with the results from the service class.
 
     Args:
-      output_proto: The output proto.
-      local_path: set output_proto with the local path, or ''.
-      remote_uri: set output_proto with the remote uri, or ''.
+        output_proto: The output proto.
+        local_path: set output_proto with the local path, or ''.
+        remote_uri: set output_proto with the remote uri, or ''.
     """
     output_proto.success = True
     output_proto.local_path = local_path or ""

@@ -287,11 +287,11 @@ class RecoveryImageTest(
         """Helper to create Mock build_image results.
 
         Args:
-          image_types: A list of image types for which the mock BuildResult has to
-            be creates.
+            image_types: A list of image types for which the mock BuildResult has to
+                be creates.
 
         Returns:
-          A list of mock BuildResult.
+            A list of mock BuildResult.
         """
         image_types_names = [
             image_controller.SUPPORTED_IMAGE_TYPES[x]

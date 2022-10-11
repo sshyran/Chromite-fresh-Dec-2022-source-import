@@ -157,9 +157,9 @@ def PrepareForBuild(
     This function sets output_proto.build_relevance to the result.
 
     Args:
-      input_proto: The input proto
-      output_proto: The output proto
-      _config): The API call config.
+        input_proto: The input proto
+        output_proto: The output proto
+        _config): The API call config.
     """
     if input_proto.chroot.path:
         chroot = controller_util.ParseChroot(input_proto.chroot)
@@ -229,18 +229,18 @@ def BundleArtifacts(
         sysroot_path (str): sysroot path inside the chroot (e.g., /build/atlas),
             or None.
         chrome_root (str): path to chrome root. (e.g., /b/s/w/ir/k/chrome)
-        build_target_name (str): name of the build target (e.g., atlas), or None.
+        build_target_name (str): name of the build target (e.g. atlas), or None.
         output_dir (str): absolute path where artifacts are being bundled.
-          (e.g., /b/s/w/ir/k/recipe_cleanup/artifactssptfMU)
+            (e.g., /b/s/w/ir/k/recipe_cleanup/artifactssptfMU)
         profile_info ({(str) name: (str) value}) Dictionary containing profile
             information.
 
     Note: the actual upload to GS is done by CI, not here.
 
     Args:
-      input_proto: The input proto
-      output_proto: The output proto
-      _config: The API call config.
+        input_proto: The input proto
+        output_proto: The output proto
+        _config: The API call config.
     """
     chroot = controller_util.ParseChroot(input_proto.chroot)
 
@@ -317,14 +317,14 @@ def GetUpdatedFiles(
     The function will call toolchain_util.GetUpdatedFiles using the type of
     uploaded artifacts to make some changes in a checkout, and return the list
     of change files together with commit message.
-       updated_artifacts: A list of UpdatedArtifacts type which contains a tuple
-          of artifact info and profile info.
+        updated_artifacts: A list of UpdatedArtifacts type which contains a
+            tuple of artifact info and profile info.
     Note: the actual creation of the commit is done by CI, not here.
 
     Args:
-      input_proto: The input proto
-      output_proto: The output proto
-      _config: The API call config.
+        input_proto: The input proto
+        output_proto: The output proto
+        _config: The API call config.
     """
     commit_message = ""
     for artifact in input_proto.uploaded_artifacts:
@@ -355,10 +355,10 @@ def _GetProfileInfoDict(profile_info: "toolchain_pb2.ArtifactProfileInfo"):
     """Convert profile_info to a dict.
 
     Args:
-      profile_info: The artifact profile_info.
+        profile_info: The artifact profile_info.
 
     Returns:
-      A dictionary containing profile info.
+        A dictionary containing profile info.
     """
     ret = {}
     which = profile_info.WhichOneof("artifact_profile_info")
@@ -393,9 +393,9 @@ def EmergeWithLinting(
     """Emerge packages with linter features enabled and retrieves all findings.
 
     Args:
-      input_proto: The nput proto with package and sysroot info.
-      output_proto: The output proto where findings are stored.
-      _config: The API call config (unused).
+        input_proto: The nput proto with package and sysroot info.
+        output_proto: The output proto where findings are stored.
+        _config: The API call config (unused).
     """
     packages = [
         controller_util.deserialize_package_info(package)
@@ -454,9 +454,9 @@ def GetToolchainsForBoard(
     """Gets the default and non-default toolchains for a board.
 
     Args:
-      input_proto: The input proto with board and sysroot info.
-      output_proto: The output proto where findings are stored.
-      _config: The API call config (unused).
+        input_proto: The input proto with board and sysroot info.
+        output_proto: The output proto where findings are stored.
+        _config: The API call config (unused).
     """
     toolchains = toolchain_lib.GetToolchainsForBoard(input_proto.board)
     output_proto.default_toolchains.extend(

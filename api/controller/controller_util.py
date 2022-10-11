@@ -37,13 +37,13 @@ def ParseChroot(chroot_message: common_pb2.Chroot) -> chroot_lib.Chroot:
     """Create a chroot object from the chroot message.
 
     Args:
-      chroot_message: The chroot message.
+        chroot_message: The chroot message.
 
     Returns:
-      Chroot: The parsed chroot object.
+        Chroot: The parsed chroot object.
 
     Raises:
-      AssertionError: When the message is not a Chroot message.
+        AssertionError: When the message is not a Chroot message.
     """
     assert isinstance(chroot_message, common_pb2.Chroot)
 
@@ -76,13 +76,13 @@ def ParseSysroot(sysroot_message: sysroot_pb2.Sysroot) -> sysroot_lib.Sysroot:
     """Create a sysroot object from the sysroot message.
 
     Args:
-      sysroot_message: The sysroot message.
+        sysroot_message: The sysroot message.
 
     Returns:
-      Sysroot: The parsed sysroot object.
+        Sysroot: The parsed sysroot object.
 
     Raises:
-      AssertionError: When the message is not a Sysroot message.
+        AssertionError: When the message is not a Sysroot message.
     """
     assert isinstance(sysroot_message, sysroot_pb2.Sysroot)
 
@@ -149,14 +149,14 @@ def ParseBuildTarget(
     """Create a BuildTarget object from a build_target message.
 
     Args:
-      build_target_message: The BuildTarget message.
-      profile_message: The profile message.
+        build_target_message: The BuildTarget message.
+        profile_message: The profile message.
 
     Returns:
-      BuildTarget: The parsed instance.
+        BuildTarget: The parsed instance.
 
     Raises:
-      AssertionError: When the field is not a BuildTarget message.
+        AssertionError: When the field is not a BuildTarget message.
     """
     assert isinstance(build_target_message, common_pb2.BuildTarget)
     assert profile_message is None or isinstance(
@@ -173,13 +173,13 @@ def ParseBuildTargets(repeated_build_target_field):
     """Create a BuildTarget for each entry in the repeated field.
 
     Args:
-      repeated_build_target_field: The repeated BuildTarget field.
+        repeated_build_target_field: The repeated BuildTarget field.
 
     Returns:
-      list[BuildTarget]: The parsed BuildTargets.
+        list[BuildTarget]: The parsed BuildTargets.
 
     Raises:
-      AssertionError: When the field contains non-BuildTarget messages.
+        AssertionError: When the field contains non-BuildTarget messages.
     """
     return [ParseBuildTarget(target) for target in repeated_build_target_field]
 
@@ -221,10 +221,10 @@ def retrieve_package_log_paths(
     """Get the path to the log file for each package that failed to build.
 
     Args:
-      packages: A list of packages which failed to build.
-      output_proto: The Response message for a given API call. This response proto
-        must contain a failed_package_data field.
-      target_sysroot: The sysroot used by the build step.
+        packages: A list of packages which failed to build.
+        output_proto: The Response message for a given API call. This response
+            proto must contain a failed_package_data field.
+        target_sysroot: The sysroot used by the build step.
     """
     for pkg_info in packages:
         # Grab the paths to the log files for each failed package from the

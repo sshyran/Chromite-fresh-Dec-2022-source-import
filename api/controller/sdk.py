@@ -38,12 +38,12 @@ def Create(
     """Chroot creation, includes support for replacing an existing chroot.
 
     Args:
-      input_proto: The input proto.
-      output_proto: The output proto.
-      config: The API call config.
+        input_proto: The input proto.
+        output_proto: The output proto.
+        config: The API call config.
 
     Returns:
-      An error code, None otherwise.
+        An error code, None otherwise.
     """
     replace = not input_proto.flags.no_replace
     bootstrap = input_proto.flags.bootstrap
@@ -94,9 +94,9 @@ def Update(
     """Update the chroot.
 
     Args:
-      input_proto: The input proto.
-      output_proto: The output proto.
-      _config: The API call config.
+        input_proto: The input proto.
+        output_proto: The output proto.
+        _config: The API call config.
     """
     build_source = input_proto.flags.build_source
     targets = [target.name for target in input_proto.toolchain_targets]

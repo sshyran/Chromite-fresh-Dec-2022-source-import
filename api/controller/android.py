@@ -77,9 +77,9 @@ def MarkStable(
     See AndroidService documentation in api/proto/android.proto.
 
     Args:
-      input_proto: The input proto.
-      output_proto: The output proto.
-      _config: The call config.
+        input_proto: The input proto.
+        output_proto: The output proto.
+        _config: The call config.
     """
     chroot = controller_util.ParseChroot(input_proto.chroot)
     build_targets = controller_util.ParseBuildTargets(input_proto.build_targets)
@@ -129,9 +129,9 @@ def UnpinVersion(
     See AndroidService documentation in api/proto/android.proto.
 
     Args:
-      _input_proto: The input proto. (not used.)
-      _output_proto: The output proto. (not used.)
-      _config: The call config.
+        _input_proto: The input proto. (not used.)
+        _output_proto: The output proto. (not used.)
+        _config: The call config.
     """
     osutils.SafeUnlink(ANDROIDPIN_MASK_PATH)
 

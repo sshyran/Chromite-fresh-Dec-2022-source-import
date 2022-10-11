@@ -434,14 +434,14 @@ def GetArtifacts(
     paths to the desired files.
 
     Args:
-      in_proto: Proto request defining reqs.
-      chroot: The chroot class used for these artifacts.
-      sysroot_class: The sysroot class used for these artifacts.
-      build_target: The build target used for these artifacts.
-      output_dir: The path to write artifacts to.
+        in_proto: Proto request defining reqs.
+        chroot: The chroot class used for these artifacts.
+        sysroot_class: The sysroot class used for these artifacts.
+        build_target: The build target used for these artifacts.
+        output_dir: The path to write artifacts to.
 
     Returns:
-      A list of dictionary mappings of ArtifactType to list of paths.
+        A list of dictionary mappings of ArtifactType to list of paths.
     """
     generated = []
 

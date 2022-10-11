@@ -63,9 +63,9 @@ def Get(
     stop uploading it via the individual bundler function.
 
     Args:
-      input_proto: The input proto.
-      output_proto: The output proto.
-      _config: The API call config.
+        input_proto: The input proto.
+        output_proto: The output proto.
+        _config: The API call config.
     """
     output_dir = input_proto.result_path.path.path
 
@@ -153,9 +153,9 @@ def BuildSetup(
     individual bundler function.
 
     Args:
-      _input_proto: The input proto.
-      output_proto: The output proto.
-      _config: The API call config.
+        _input_proto: The input proto.
+        output_proto: The output proto.
+        _config: The API call config.
     """
     # If any artifact_type says "NEEDED", the return is NEEDED.
     # Otherwise, if any artifact_type says "UNKNOWN", the return is UNKNOWN.
@@ -170,11 +170,11 @@ def _GetImageDir(build_root: str, target: str) -> Optional[str]:
     TODO(saklein) Expand image_lib.GetLatestImageLink to support this use case.
 
     Args:
-      build_root: Path to checkout where build occurs.
-      target: Name of the build target.
+        build_root: Path to checkout where build occurs.
+        target: Name of the build target.
 
     Returns:
-      Path to the latest directory containing target images or None.
+        Path to the latest directory containing target images or None.
     """
     image_dir = os.path.join(build_root, "src/build/images", target, "latest")
     if not os.path.exists(image_dir):
@@ -238,9 +238,9 @@ def BundleImageZip(
     """Bundle image.zip.
 
     Args:
-      input_proto: The input proto.
-      output_proto: The output proto.
-      _config: The API call config.
+        input_proto: The input proto.
+        output_proto: The output proto.
+        _config: The API call config.
     """
     target = input_proto.build_target.name
     output_dir = input_proto.output_dir
@@ -278,9 +278,9 @@ def BundleTestUpdatePayloads(
     """Generate minimal update payloads for the build target for testing.
 
     Args:
-      input_proto: The input proto.
-      output_proto: The output proto.
-      _config: The API call config.
+        input_proto: The input proto.
+        output_proto: The output proto.
+        _config: The API call config.
     """
     target = input_proto.build_target.name
     output_dir = input_proto.output_dir
@@ -421,9 +421,9 @@ def FetchMetadata(
     This implements ArtifactsService.FetchMetadata.
 
     Args:
-      input_proto: The input proto.
-      output_proto: The output proto.
-      config: The API call config.
+        input_proto: The input proto.
+        output_proto: The output proto.
+        config: The API call config.
     """
     chroot = controller_util.ParseChroot(input_proto.chroot)
     sysroot = controller_util.ParseSysroot(input_proto.sysroot)
@@ -495,9 +495,9 @@ def BundleFpmcuUnittests(
     """Tar the fingerprint MCU unittest binaries for a build target.
 
     Args:
-      input_proto: The input proto.
-      output_proto: The output proto.
-      _config: The API call config.
+        input_proto: The input proto.
+        output_proto: The output proto.
+        _config: The API call config.
     """
     output_dir = input_proto.output_dir
     chroot = controller_util.ParseChroot(input_proto.chroot)
@@ -657,9 +657,9 @@ def BundleVmFiles(
     """Tar VM disk and memory files.
 
     Args:
-      input_proto: The input proto.
-      output_proto: The output proto.
-      _config: The API call config.
+        input_proto: The input proto.
+        output_proto: The output proto.
+        _config: The API call config.
     """
     chroot = controller_util.ParseChroot(input_proto.chroot)
     test_results_dir = input_proto.test_results_dir
@@ -725,9 +725,9 @@ def BundleGceTarball(
     """Bundle the test image into a tarball suitable for importing into GCE.
 
     Args:
-      input_proto: The input proto.
-      output_proto: The output proto.
-      _config: The API call config.
+        input_proto: The input proto.
+        output_proto: The output proto.
+        _config: The API call config.
     """
     target = input_proto.build_target.name
     output_dir = input_proto.output_dir

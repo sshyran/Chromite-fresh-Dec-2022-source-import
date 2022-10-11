@@ -27,10 +27,10 @@ def get_fw_loc(fw_loc: int) -> str:
     """Get firmware_builder.py location.
 
     Args:
-      fw_loc: FwLocation enum.
+        fw_loc: FwLocation enum.
 
     Returns:
-      path to firmware_builder.py for valid fw_loc.
+        path to firmware_builder.py for valid fw_loc.
     """
     return {
         common_pb2.PLATFORM_EC: "src/platform/ec/",

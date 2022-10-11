@@ -171,14 +171,14 @@ def GetArtifacts(
     are located within output_artifact.artifact_type.
 
     Args:
-      in_proto: Proto request defining reqs.
-      chroot: The chroot proto used for these artifacts.
-      sysroot_class: The sysroot proto used for these artifacts.
-      build_target: The build target used for these artifacts.
-      output_dir: The path to write artifacts to.
+        in_proto: Proto request defining reqs.
+        chroot: The chroot proto used for these artifacts.
+        sysroot_class: The sysroot proto used for these artifacts.
+        build_target: The build target used for these artifacts.
+        output_dir: The path to write artifacts to.
 
     Returns:
-      A list of dictionary mappings of ArtifactType to list of paths.
+        A list of dictionary mappings of ArtifactType to list of paths.
     """
     base_path = chroot.full_path(sysroot_class.path)
     board = build_target.name
@@ -244,9 +244,9 @@ def Create(
     """Build images.
 
     Args:
-      input_proto: The input message.
-      output_proto: The output message.
-      _config: The API call config.
+        input_proto: The input message.
+        output_proto: The output message.
+        _config: The API call config.
     """
     board = input_proto.build_target.name
 
@@ -401,10 +401,10 @@ def _ParseImagesToCreate(to_build: List[int]) -> ImageTypes:
     the requisite image types if they're not explicitly defined.
 
     Args:
-      to_build: The image type list.
+        to_build: The image type list.
 
     Returns:
-      ImageTypes: The parsed images to build.
+        ImageTypes: The parsed images to build.
     """
     image_types = set()
     vm_types = set()
@@ -473,9 +473,9 @@ def SignerTest(
     """Run image tests.
 
     Args:
-      input_proto: The input message.
-      output_proto: The output message.
-      _config: The API call config.
+        input_proto: The input message.
+        output_proto: The output message.
+        _config: The API call config.
     """
     image_path = input_proto.image.path
 
@@ -505,9 +505,9 @@ def Test(
     """Run image tests.
 
     Args:
-      input_proto: The input message.
-      output_proto: The output message.
-      config: The API call config.
+        input_proto: The input message.
+        output_proto: The output message.
+        config: The API call config.
     """
     image_path = input_proto.image.path
     board = input_proto.build_target.name
@@ -543,12 +543,12 @@ def PushImage(
     Wraps chromite/scripts/pushimage.py.
 
     Args:
-      input_proto: Input proto.
-      _output_proto: Output proto.
-      config: The API call config.
+        input_proto: Input proto.
+        _output_proto: Output proto.
+        config: The API call config.
 
     Returns:
-      A controller return code (e.g. controller.RETURN_CODE_SUCCESS).
+        A controller return code (e.g. controller.RETURN_CODE_SUCCESS).
     """
     sign_types = []
     if input_proto.sign_types:

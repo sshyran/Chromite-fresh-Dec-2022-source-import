@@ -161,9 +161,9 @@ class BuildTargetUnitTestTest(
         """Creates a log file for testing for individual packages built by Portage.
 
         Args:
-          log_path: The PORTAGE_LOGDIR path.
-          pkg_info: name components for log file.
-          timestamp: Timestamp used to name the file.
+            log_path: The PORTAGE_LOGDIR path.
+            pkg_info: name components for log file.
+            timestamp: Timestamp used to name the file.
         """
         path = os.path.join(
             log_path,

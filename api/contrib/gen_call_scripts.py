@@ -55,7 +55,7 @@ def _get_services():
     Parses chromite.api.FooService/Method to foo: [method, ...].
 
     Returns:
-      dict
+        dict
     """
     router = router_lib.GetRouter()
     return router.ListMethods()

@@ -24,10 +24,10 @@ def AugmentDepGraphProtoFromJsonMap(json_map, graph):
     """Augment package deps from |json_map| to graph object.
 
     Args:
-      json_map: the json object that stores the portage package. This is
-        generated from chromite.lib.service.dependency.GetBuildDependency()
-      graph: the proto object that represents the dependency graph (see DepGraph
-        message in chromite/api/depgraph.proto)
+        json_map: the json object that stores the portage package. This is
+            generated from chromite.lib.service.dependency.GetBuildDependency()
+        graph: the proto object that represents the dependency graph (see DepGraph
+            message in chromite/api/depgraph.proto)
     """
     graph.sysroot.build_target.name = json_map["target_board"]
     graph.sysroot.path = json_map["sysroot_path"]
@@ -68,9 +68,9 @@ def GetBuildDependencyGraph(
     """Create the build dependency graph.
 
     Args:
-      input_proto: The input arguments message.
-      output_proto: The empty output message.
-      _config: The API call config.
+        input_proto: The input arguments message.
+        output_proto: The empty output message.
+        _config: The API call config.
     """
     if input_proto.HasField("sysroot"):
         board = input_proto.sysroot.build_target.name
@@ -113,9 +113,9 @@ def List(
     """Get a list of package dependencies.
 
     Args:
-      input_proto: The input arguments message.
-      output_proto: The empty output message.
-      _config: The API call config.
+        input_proto: The input arguments message.
+        output_proto: The empty output message.
+        _config: The API call config.
     """
     sysroot_path = input_proto.sysroot.path
     src_paths = [src_path.path for src_path in input_proto.src_paths]
