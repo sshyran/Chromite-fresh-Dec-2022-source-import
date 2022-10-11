@@ -6,25 +6,6 @@
 
 from chromite.lib.firmware import servo_lib
 
-
-_COMMON_PACKAGES = (
-    'chromeos-ec',
-    'coreboot',
-    'depthcharge',
-    'libpayload',
-    'vboot_reference',
-)
-
-BUILD_WORKON_PACKAGES = _COMMON_PACKAGES + (
-    'coreboot-private-files-baseboard-brya',)
-
-BUILD_PACKAGES = _COMMON_PACKAGES + (
-    'chromeos-bootimage',
-    'coreboot-private-files',
-    'intel-adlfsp',
-)
-
-
 def get_config(servo: servo_lib.Servo) -> servo_lib.ServoConfig:
   """Get DUT controls and programmer argument to flash Draco.
 
