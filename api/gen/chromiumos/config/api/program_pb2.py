@@ -26,7 +26,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z(go.chromium.org/chromiumos/config/go/api',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n#chromiumos/config/api/program.proto\x12\x15\x63hromiumos.config.api\x1a%chromiumos/config/api/component.proto\x1a\"chromiumos/config/api/design.proto\x1a%chromiumos/config/api/design_id.proto\x1a+chromiumos/config/api/device_brand_id.proto\x1a&chromiumos/config/api/program_id.proto\x1a$chromiumos/config/api/topology.proto\x1a=chromiumos/config/public_replication/public_replication.proto\":\n\x1c\x46irmwareConfigurationSegment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04mask\x18\x02 \x01(\r\"k\n\x15\x44\x65signConfigIdSegment\x12\x32\n\tdesign_id\x18\x01 \x01(\x0b\x32\x1f.chromiumos.config.api.DesignId\x12\x0e\n\x06min_id\x18\x02 \x01(\r\x12\x0e\n\x06max_id\x18\x03 \x01(\r\"\xa2\x01\n\x12\x44\x65viceSignerConfig\x12\x38\n\x08\x62rand_id\x18\x01 \x01(\x0b\x32$.chromiumos.config.api.DeviceBrandIdH\x00\x12\x34\n\tdesign_id\x18\x03 \x01(\x0b\x32\x1f.chromiumos.config.api.DesignIdH\x00\x12\x0e\n\x06key_id\x18\x02 \x01(\tB\x0c\n\nidentifier\"\xa3\x0e\n\x07Program\x12S\n\x12public_replication\x18\x08 \x01(\x0b\x32\x37.chromiumos.config.public_replication.PublicReplication\x12,\n\x02id\x18\x01 \x01(\x0b\x32 .chromiumos.config.api.ProgramId\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x1b\n\x13mosys_platform_name\x18\n \x01(\t\x12\x39\n\x08platform\x18\x0b \x01(\x0b\x32\'.chromiumos.config.api.Program.Platform\x12@\n\x0c\x61udio_config\x18\x0c \x01(\x0b\x32*.chromiumos.config.api.Program.AudioConfig\x12&\n\x1egenerate_camera_media_profiles\x18\r \x01(\x08\x12R\n\x19\x64\x65sign_config_constraints\x18\x03 \x03(\x0b\x32/.chromiumos.config.api.Design.Config.Constraint\x12G\n\x0f\x63omponent_quals\x18\x04 \x03(\x0b\x32..chromiumos.config.api.Component.Qualification\x12\\\n\x1f\x66irmware_configuration_segments\x18\x05 \x03(\x0b\x32\x33.chromiumos.config.api.FirmwareConfigurationSegment\x12J\n\rssfc_segments\x18\t \x03(\x0b\x32\x33.chromiumos.config.api.FirmwareConfigurationSegment\x12O\n\x19\x64\x65sign_config_id_segments\x18\x07 \x03(\x0b\x32,.chromiumos.config.api.DesignConfigIdSegment\x12H\n\x15\x64\x65vice_signer_configs\x18\x06 \x03(\x0b\x32).chromiumos.config.api.DeviceSignerConfig\x1a\xcd\x06\n\x08Platform\x12\x12\n\nsoc_family\x18\x01 \x01(\t\x12>\n\x08soc_arch\x18\x02 \x01(\x0e\x32,.chromiumos.config.api.Program.Platform.Arch\x12\x12\n\ngpu_family\x18\x03 \x01(\t\x12J\n\rgraphics_apis\x18\x04 \x03(\x0e\x32\x33.chromiumos.config.api.Program.Platform.GraphicsApi\x12S\n\x0cvideo_codecs\x18\x05 \x03(\x0e\x32=.chromiumos.config.api.Program.Platform.AcceleratedVideoCodec\x12J\n\x0c\x63\x61pabilities\x18\x06 \x01(\x0b\x32\x34.chromiumos.config.api.Program.Platform.Capabilities\x1aP\n\x0c\x43\x61pabilities\x12\x17\n\x0fsuspend_to_idle\x18\x01 \x01(\x08\x12\x13\n\x0b\x64\x61rk_resume\x18\x02 \x01(\x08\x12\x12\n\nwake_on_dp\x18\x03 \x01(\x08\"A\n\x04\x41rch\x12\x10\n\x0c\x41RCH_UNKNOWN\x10\x00\x12\x07\n\x03X86\x10\x01\x12\n\n\x06X86_64\x10\x02\x12\x07\n\x03\x41RM\x10\x03\x12\t\n\x05\x41RM64\x10\x04\"\xf6\x01\n\x15\x41\x63\x63\x65leratedVideoCodec\x12\x13\n\x0f\x43ODEC_UNDEFINED\x10\x00\x12\x0f\n\x0bH264_DECODE\x10\x01\x12\x0f\n\x0bH264_ENCODE\x10\x02\x12\x0e\n\nVP8_DECODE\x10\x03\x12\x0e\n\nVP8_ENCODE\x10\x04\x12\x0e\n\nVP9_DECODE\x10\x05\x12\x0e\n\nVP9_ENCODE\x10\x06\x12\x10\n\x0cVP9_2_DECODE\x10\x07\x12\x10\n\x0cVP9_2_ENCODE\x10\x08\x12\x0f\n\x0bH265_DECODE\x10\t\x12\x0f\n\x0bH265_ENCODE\x10\n\x12\x0f\n\x0bMJPG_DECODE\x10\x0b\x12\x0f\n\x0bMJPG_ENCODE\x10\x0c\"^\n\x0bGraphicsApi\x12\x1a\n\x16GRAPHICS_API_UNDEFINED\x10\x00\x12\x17\n\x13GRAPHICS_API_OPENGL\x10\x01\x12\x1a\n\x16GRAPHICS_API_OPENGL_ES\x10\x02\x1a\x92\x01\n\x0b\x41udioConfig\x12N\n\x0c\x63\x61rd_configs\x18\x01 \x03(\x0b\x32\x38.chromiumos.config.api.HardwareFeatures.Audio.CardConfig\x12\x17\n\x0fhas_module_file\x18\x02 \x01(\x08\x12\x1a\n\x12\x64\x65\x66\x61ult_ucm_suffix\x18\x03 \x01(\tB*Z(go.chromium.org/chromiumos/config/go/apib\x06proto3'
+  serialized_pb=b'\n#chromiumos/config/api/program.proto\x12\x15\x63hromiumos.config.api\x1a%chromiumos/config/api/component.proto\x1a\"chromiumos/config/api/design.proto\x1a%chromiumos/config/api/design_id.proto\x1a+chromiumos/config/api/device_brand_id.proto\x1a&chromiumos/config/api/program_id.proto\x1a$chromiumos/config/api/topology.proto\x1a=chromiumos/config/public_replication/public_replication.proto\":\n\x1c\x46irmwareConfigurationSegment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04mask\x18\x02 \x01(\r\"k\n\x15\x44\x65signConfigIdSegment\x12\x32\n\tdesign_id\x18\x01 \x01(\x0b\x32\x1f.chromiumos.config.api.DesignId\x12\x0e\n\x06min_id\x18\x02 \x01(\r\x12\x0e\n\x06max_id\x18\x03 \x01(\r\"\xa2\x01\n\x12\x44\x65viceSignerConfig\x12\x38\n\x08\x62rand_id\x18\x01 \x01(\x0b\x32$.chromiumos.config.api.DeviceBrandIdH\x00\x12\x34\n\tdesign_id\x18\x03 \x01(\x0b\x32\x1f.chromiumos.config.api.DesignIdH\x00\x12\x0e\n\x06key_id\x18\x02 \x01(\tB\x0c\n\nidentifier\"\xc8\x0f\n\x07Program\x12S\n\x12public_replication\x18\x08 \x01(\x0b\x32\x37.chromiumos.config.public_replication.PublicReplication\x12,\n\x02id\x18\x01 \x01(\x0b\x32 .chromiumos.config.api.ProgramId\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x1b\n\x13mosys_platform_name\x18\n \x01(\t\x12\x39\n\x08platform\x18\x0b \x01(\x0b\x32\'.chromiumos.config.api.Program.Platform\x12@\n\x0c\x61udio_config\x18\x0c \x01(\x0b\x32*.chromiumos.config.api.Program.AudioConfig\x12&\n\x1egenerate_camera_media_profiles\x18\r \x01(\x08\x12R\n\x19\x64\x65sign_config_constraints\x18\x03 \x03(\x0b\x32/.chromiumos.config.api.Design.Config.Constraint\x12G\n\x0f\x63omponent_quals\x18\x04 \x03(\x0b\x32..chromiumos.config.api.Component.Qualification\x12\\\n\x1f\x66irmware_configuration_segments\x18\x05 \x03(\x0b\x32\x33.chromiumos.config.api.FirmwareConfigurationSegment\x12J\n\rssfc_segments\x18\t \x03(\x0b\x32\x33.chromiumos.config.api.FirmwareConfigurationSegment\x12O\n\x19\x64\x65sign_config_id_segments\x18\x07 \x03(\x0b\x32,.chromiumos.config.api.DesignConfigIdSegment\x12H\n\x15\x64\x65vice_signer_configs\x18\x06 \x03(\x0b\x32).chromiumos.config.api.DeviceSignerConfig\x1a\xf2\x07\n\x08Platform\x12\x12\n\nsoc_family\x18\x01 \x01(\t\x12>\n\x08soc_arch\x18\x02 \x01(\x0e\x32,.chromiumos.config.api.Program.Platform.Arch\x12\x12\n\ngpu_family\x18\x03 \x01(\t\x12J\n\rgraphics_apis\x18\x04 \x03(\x0e\x32\x33.chromiumos.config.api.Program.Platform.GraphicsApi\x12S\n\x0cvideo_codecs\x18\x05 \x03(\x0e\x32=.chromiumos.config.api.Program.Platform.AcceleratedVideoCodec\x12J\n\x0c\x63\x61pabilities\x18\x06 \x01(\x0b\x32\x34.chromiumos.config.api.Program.Platform.Capabilities\x12M\n\x0escheduler_tune\x18\x07 \x01(\x0b\x32\x35.chromiumos.config.api.Program.Platform.SchedulerTune\x1aP\n\x0c\x43\x61pabilities\x12\x17\n\x0fsuspend_to_idle\x18\x01 \x01(\x08\x12\x13\n\x0b\x64\x61rk_resume\x18\x02 \x01(\x08\x12\x12\n\nwake_on_dp\x18\x03 \x01(\x08\x1aT\n\rSchedulerTune\x12\x14\n\x0c\x62oost_urgent\x18\x01 \x01(\r\x12\x18\n\x10\x63puset_nonurgent\x18\x02 \x01(\t\x12\x13\n\x0binput_boost\x18\x03 \x01(\r\"A\n\x04\x41rch\x12\x10\n\x0c\x41RCH_UNKNOWN\x10\x00\x12\x07\n\x03X86\x10\x01\x12\n\n\x06X86_64\x10\x02\x12\x07\n\x03\x41RM\x10\x03\x12\t\n\x05\x41RM64\x10\x04\"\xf6\x01\n\x15\x41\x63\x63\x65leratedVideoCodec\x12\x13\n\x0f\x43ODEC_UNDEFINED\x10\x00\x12\x0f\n\x0bH264_DECODE\x10\x01\x12\x0f\n\x0bH264_ENCODE\x10\x02\x12\x0e\n\nVP8_DECODE\x10\x03\x12\x0e\n\nVP8_ENCODE\x10\x04\x12\x0e\n\nVP9_DECODE\x10\x05\x12\x0e\n\nVP9_ENCODE\x10\x06\x12\x10\n\x0cVP9_2_DECODE\x10\x07\x12\x10\n\x0cVP9_2_ENCODE\x10\x08\x12\x0f\n\x0bH265_DECODE\x10\t\x12\x0f\n\x0bH265_ENCODE\x10\n\x12\x0f\n\x0bMJPG_DECODE\x10\x0b\x12\x0f\n\x0bMJPG_ENCODE\x10\x0c\"^\n\x0bGraphicsApi\x12\x1a\n\x16GRAPHICS_API_UNDEFINED\x10\x00\x12\x17\n\x13GRAPHICS_API_OPENGL\x10\x01\x12\x1a\n\x16GRAPHICS_API_OPENGL_ES\x10\x02\x1a\x92\x01\n\x0b\x41udioConfig\x12N\n\x0c\x63\x61rd_configs\x18\x01 \x03(\x0b\x32\x38.chromiumos.config.api.HardwareFeatures.Audio.CardConfig\x12\x17\n\x0fhas_module_file\x18\x02 \x01(\x08\x12\x1a\n\x12\x64\x65\x66\x61ult_ucm_suffix\x18\x03 \x01(\tB*Z(go.chromium.org/chromiumos/config/go/apib\x06proto3'
   ,
   dependencies=[chromiumos_dot_config_dot_api_dot_component__pb2.DESCRIPTOR,chromiumos_dot_config_dot_api_dot_design__pb2.DESCRIPTOR,chromiumos_dot_config_dot_api_dot_design__id__pb2.DESCRIPTOR,chromiumos_dot_config_dot_api_dot_device__brand__id__pb2.DESCRIPTOR,chromiumos_dot_config_dot_api_dot_program__id__pb2.DESCRIPTOR,chromiumos_dot_config_dot_api_dot_topology__pb2.DESCRIPTOR,chromiumos_dot_config_dot_public__replication_dot_public__replication__pb2.DESCRIPTOR,])
 
@@ -67,8 +67,8 @@ _PROGRAM_PLATFORM_ARCH = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1965,
-  serialized_end=2030,
+  serialized_start=2130,
+  serialized_end=2195,
 )
 _sym_db.RegisterEnumDescriptor(_PROGRAM_PLATFORM_ARCH)
 
@@ -147,8 +147,8 @@ _PROGRAM_PLATFORM_ACCELERATEDVIDEOCODEC = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2033,
-  serialized_end=2279,
+  serialized_start=2198,
+  serialized_end=2444,
 )
 _sym_db.RegisterEnumDescriptor(_PROGRAM_PLATFORM_ACCELERATEDVIDEOCODEC)
 
@@ -177,8 +177,8 @@ _PROGRAM_PLATFORM_GRAPHICSAPI = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2281,
-  serialized_end=2375,
+  serialized_start=2446,
+  serialized_end=2540,
 )
 _sym_db.RegisterEnumDescriptor(_PROGRAM_PLATFORM_GRAPHICSAPI)
 
@@ -360,8 +360,53 @@ _PROGRAM_PLATFORM_CAPABILITIES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1883,
-  serialized_end=1963,
+  serialized_start=1962,
+  serialized_end=2042,
+)
+
+_PROGRAM_PLATFORM_SCHEDULERTUNE = _descriptor.Descriptor(
+  name='SchedulerTune',
+  full_name='chromiumos.config.api.Program.Platform.SchedulerTune',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='boost_urgent', full_name='chromiumos.config.api.Program.Platform.SchedulerTune.boost_urgent', index=0,
+      number=1, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='cpuset_nonurgent', full_name='chromiumos.config.api.Program.Platform.SchedulerTune.cpuset_nonurgent', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='input_boost', full_name='chromiumos.config.api.Program.Platform.SchedulerTune.input_boost', index=2,
+      number=3, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=2044,
+  serialized_end=2128,
 )
 
 _PROGRAM_PLATFORM = _descriptor.Descriptor(
@@ -414,10 +459,17 @@ _PROGRAM_PLATFORM = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='scheduler_tune', full_name='chromiumos.config.api.Program.Platform.scheduler_tune', index=6,
+      number=7, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
-  nested_types=[_PROGRAM_PLATFORM_CAPABILITIES, ],
+  nested_types=[_PROGRAM_PLATFORM_CAPABILITIES, _PROGRAM_PLATFORM_SCHEDULERTUNE, ],
   enum_types=[
     _PROGRAM_PLATFORM_ARCH,
     _PROGRAM_PLATFORM_ACCELERATEDVIDEOCODEC,
@@ -430,7 +482,7 @@ _PROGRAM_PLATFORM = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=1530,
-  serialized_end=2375,
+  serialized_end=2540,
 )
 
 _PROGRAM_AUDIOCONFIG = _descriptor.Descriptor(
@@ -474,8 +526,8 @@ _PROGRAM_AUDIOCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2378,
-  serialized_end=2524,
+  serialized_start=2543,
+  serialized_end=2689,
 )
 
 _PROGRAM = _descriptor.Descriptor(
@@ -590,7 +642,7 @@ _PROGRAM = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=697,
-  serialized_end=2524,
+  serialized_end=2689,
 )
 
 _DESIGNCONFIGIDSEGMENT.fields_by_name['design_id'].message_type = chromiumos_dot_config_dot_api_dot_design__id__pb2._DESIGNID
@@ -603,10 +655,12 @@ _DEVICESIGNERCONFIG.oneofs_by_name['identifier'].fields.append(
   _DEVICESIGNERCONFIG.fields_by_name['design_id'])
 _DEVICESIGNERCONFIG.fields_by_name['design_id'].containing_oneof = _DEVICESIGNERCONFIG.oneofs_by_name['identifier']
 _PROGRAM_PLATFORM_CAPABILITIES.containing_type = _PROGRAM_PLATFORM
+_PROGRAM_PLATFORM_SCHEDULERTUNE.containing_type = _PROGRAM_PLATFORM
 _PROGRAM_PLATFORM.fields_by_name['soc_arch'].enum_type = _PROGRAM_PLATFORM_ARCH
 _PROGRAM_PLATFORM.fields_by_name['graphics_apis'].enum_type = _PROGRAM_PLATFORM_GRAPHICSAPI
 _PROGRAM_PLATFORM.fields_by_name['video_codecs'].enum_type = _PROGRAM_PLATFORM_ACCELERATEDVIDEOCODEC
 _PROGRAM_PLATFORM.fields_by_name['capabilities'].message_type = _PROGRAM_PLATFORM_CAPABILITIES
+_PROGRAM_PLATFORM.fields_by_name['scheduler_tune'].message_type = _PROGRAM_PLATFORM_SCHEDULERTUNE
 _PROGRAM_PLATFORM.containing_type = _PROGRAM
 _PROGRAM_PLATFORM_ARCH.containing_type = _PROGRAM_PLATFORM
 _PROGRAM_PLATFORM_ACCELERATEDVIDEOCODEC.containing_type = _PROGRAM_PLATFORM
@@ -660,6 +714,13 @@ Program = _reflection.GeneratedProtocolMessageType('Program', (_message.Message,
       # @@protoc_insertion_point(class_scope:chromiumos.config.api.Program.Platform.Capabilities)
       })
     ,
+
+    'SchedulerTune' : _reflection.GeneratedProtocolMessageType('SchedulerTune', (_message.Message,), {
+      'DESCRIPTOR' : _PROGRAM_PLATFORM_SCHEDULERTUNE,
+      '__module__' : 'chromiumos.config.api.program_pb2'
+      # @@protoc_insertion_point(class_scope:chromiumos.config.api.Program.Platform.SchedulerTune)
+      })
+    ,
     'DESCRIPTOR' : _PROGRAM_PLATFORM,
     '__module__' : 'chromiumos.config.api.program_pb2'
     # @@protoc_insertion_point(class_scope:chromiumos.config.api.Program.Platform)
@@ -679,6 +740,7 @@ Program = _reflection.GeneratedProtocolMessageType('Program', (_message.Message,
 _sym_db.RegisterMessage(Program)
 _sym_db.RegisterMessage(Program.Platform)
 _sym_db.RegisterMessage(Program.Platform.Capabilities)
+_sym_db.RegisterMessage(Program.Platform.SchedulerTune)
 _sym_db.RegisterMessage(Program.AudioConfig)
 
 

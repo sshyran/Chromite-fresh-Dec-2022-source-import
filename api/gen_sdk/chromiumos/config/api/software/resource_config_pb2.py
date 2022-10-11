@@ -14,21 +14,61 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n4chromiumos/config/api/software/resource_config.proto\x12\x1e\x63hromiumos.config.api.software\"\xa6\n\n\x0eResourceConfig\x12Q\n\x02\x61\x63\x18\x05 \x01(\x0b\x32\x45.chromiumos.config.api.software.ResourceConfig.PowerSourcePreferences\x12Q\n\x02\x64\x63\x18\x06 \x01(\x0b\x32\x45.chromiumos.config.api.software.ResourceConfig.PowerSourcePreferences\x1a\x66\n\x10OndemandGovernor\x12&\n\x0epowersave_bias\x18\x01 \x01(\rR\x0epowersave-bias\x12*\n\x10sampling_rate_ms\x18\x02 \x01(\rR\x10sampling-rate-ms\x1ak\n\x08Governor\x12S\n\x08ondemand\x18\x01 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.OndemandGovernorH\x00\x42\n\n\x08governor\x1a]\n\x10PowerPreferences\x12I\n\x08governor\x18\x01 \x01(\x0b\x32\x37.chromiumos.config.api.software.ResourceConfig.Governor\x1a\xb9\x06\n\x16PowerSourcePreferences\x12}\n\x19\x64\x65\x66\x61ult_power_preferences\x18\x01 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x19\x64\x65\x66\x61ult-power-preferences\x12}\n\x19web_rtc_power_preferences\x18\x02 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x19web-rtc-power-preferences\x12\x89\x01\n\"fullscreen_video_power_preferences\x18\x03 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x1c\x66ullscreen-power-preferences\x12{\n\x18gaming_power_preferences\x18\x04 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x18gaming-power-preferences\x12\x8d\x01\n!borealis_gaming_power_preferences\x18\x05 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR!borealis-gaming-power-preferences\x12\x87\x01\n\x1e\x61rcvm_gaming_power_preferences\x18\x06 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x1e\x61rcvm-gaming-power-preferencesB3Z1go.chromium.org/chromiumos/config/go/api/softwareb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n4chromiumos/config/api/software/resource_config.proto\x12\x1e\x63hromiumos.config.api.software\"\xd5\r\n\x0eResourceConfig\x12Q\n\x02\x61\x63\x18\x05 \x01(\x0b\x32\x45.chromiumos.config.api.software.ResourceConfig.PowerSourcePreferences\x12Q\n\x02\x64\x63\x18\x06 \x01(\x0b\x32\x45.chromiumos.config.api.software.ResourceConfig.PowerSourcePreferences\x1a\x16\n\x14\x43onservativeGovernor\x1a\x66\n\x10OndemandGovernor\x12&\n\x0epowersave_bias\x18\x01 \x01(\rR\x0epowersave-bias\x12*\n\x10sampling_rate_ms\x18\x02 \x01(\rR\x10sampling-rate-ms\x1a\x15\n\x13PerformanceGovernor\x1a\x13\n\x11PowersaveGovernor\x1a\x13\n\x11SchedutilGovernor\x1a\x13\n\x11UserspaceGovernor\x1a\xa8\x04\n\x08Governor\x12[\n\x0c\x63onservative\x18\x02 \x01(\x0b\x32\x43.chromiumos.config.api.software.ResourceConfig.ConservativeGovernorH\x00\x12S\n\x08ondemand\x18\x01 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.OndemandGovernorH\x00\x12Y\n\x0bperformance\x18\x03 \x01(\x0b\x32\x42.chromiumos.config.api.software.ResourceConfig.PerformanceGovernorH\x00\x12U\n\tpowersave\x18\x04 \x01(\x0b\x32@.chromiumos.config.api.software.ResourceConfig.PowersaveGovernorH\x00\x12U\n\tschedutil\x18\x05 \x01(\x0b\x32@.chromiumos.config.api.software.ResourceConfig.SchedutilGovernorH\x00\x12U\n\tuserspace\x18\x06 \x01(\x0b\x32@.chromiumos.config.api.software.ResourceConfig.UserspaceGovernorH\x00\x42\n\n\x08governor\x1a]\n\x10PowerPreferences\x12I\n\x08governor\x18\x01 \x01(\x0b\x32\x37.chromiumos.config.api.software.ResourceConfig.Governor\x1a\xbc\x05\n\x16PowerSourcePreferences\x12}\n\x19\x64\x65\x66\x61ult_power_preferences\x18\x01 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x19\x64\x65\x66\x61ult-power-preferences\x12}\n\x19web_rtc_power_preferences\x18\x02 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x19web-rtc-power-preferences\x12\x89\x01\n\"fullscreen_video_power_preferences\x18\x03 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x1c\x66ullscreen-power-preferences\x12\x8d\x01\n!borealis_gaming_power_preferences\x18\x05 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR!borealis-gaming-power-preferences\x12\x87\x01\n\x1e\x61rcvm_gaming_power_preferences\x18\x06 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x1e\x61rcvm-gaming-power-preferencesB3Z1go.chromium.org/chromiumos/config/go/api/softwareb\x06proto3')
 
 
 
 _RESOURCECONFIG = DESCRIPTOR.message_types_by_name['ResourceConfig']
+_RESOURCECONFIG_CONSERVATIVEGOVERNOR = _RESOURCECONFIG.nested_types_by_name['ConservativeGovernor']
 _RESOURCECONFIG_ONDEMANDGOVERNOR = _RESOURCECONFIG.nested_types_by_name['OndemandGovernor']
+_RESOURCECONFIG_PERFORMANCEGOVERNOR = _RESOURCECONFIG.nested_types_by_name['PerformanceGovernor']
+_RESOURCECONFIG_POWERSAVEGOVERNOR = _RESOURCECONFIG.nested_types_by_name['PowersaveGovernor']
+_RESOURCECONFIG_SCHEDUTILGOVERNOR = _RESOURCECONFIG.nested_types_by_name['SchedutilGovernor']
+_RESOURCECONFIG_USERSPACEGOVERNOR = _RESOURCECONFIG.nested_types_by_name['UserspaceGovernor']
 _RESOURCECONFIG_GOVERNOR = _RESOURCECONFIG.nested_types_by_name['Governor']
 _RESOURCECONFIG_POWERPREFERENCES = _RESOURCECONFIG.nested_types_by_name['PowerPreferences']
 _RESOURCECONFIG_POWERSOURCEPREFERENCES = _RESOURCECONFIG.nested_types_by_name['PowerSourcePreferences']
 ResourceConfig = _reflection.GeneratedProtocolMessageType('ResourceConfig', (_message.Message,), {
 
+  'ConservativeGovernor' : _reflection.GeneratedProtocolMessageType('ConservativeGovernor', (_message.Message,), {
+    'DESCRIPTOR' : _RESOURCECONFIG_CONSERVATIVEGOVERNOR,
+    '__module__' : 'chromiumos.config.api.software.resource_config_pb2'
+    # @@protoc_insertion_point(class_scope:chromiumos.config.api.software.ResourceConfig.ConservativeGovernor)
+    })
+  ,
+
   'OndemandGovernor' : _reflection.GeneratedProtocolMessageType('OndemandGovernor', (_message.Message,), {
     'DESCRIPTOR' : _RESOURCECONFIG_ONDEMANDGOVERNOR,
     '__module__' : 'chromiumos.config.api.software.resource_config_pb2'
     # @@protoc_insertion_point(class_scope:chromiumos.config.api.software.ResourceConfig.OndemandGovernor)
+    })
+  ,
+
+  'PerformanceGovernor' : _reflection.GeneratedProtocolMessageType('PerformanceGovernor', (_message.Message,), {
+    'DESCRIPTOR' : _RESOURCECONFIG_PERFORMANCEGOVERNOR,
+    '__module__' : 'chromiumos.config.api.software.resource_config_pb2'
+    # @@protoc_insertion_point(class_scope:chromiumos.config.api.software.ResourceConfig.PerformanceGovernor)
+    })
+  ,
+
+  'PowersaveGovernor' : _reflection.GeneratedProtocolMessageType('PowersaveGovernor', (_message.Message,), {
+    'DESCRIPTOR' : _RESOURCECONFIG_POWERSAVEGOVERNOR,
+    '__module__' : 'chromiumos.config.api.software.resource_config_pb2'
+    # @@protoc_insertion_point(class_scope:chromiumos.config.api.software.ResourceConfig.PowersaveGovernor)
+    })
+  ,
+
+  'SchedutilGovernor' : _reflection.GeneratedProtocolMessageType('SchedutilGovernor', (_message.Message,), {
+    'DESCRIPTOR' : _RESOURCECONFIG_SCHEDUTILGOVERNOR,
+    '__module__' : 'chromiumos.config.api.software.resource_config_pb2'
+    # @@protoc_insertion_point(class_scope:chromiumos.config.api.software.ResourceConfig.SchedutilGovernor)
+    })
+  ,
+
+  'UserspaceGovernor' : _reflection.GeneratedProtocolMessageType('UserspaceGovernor', (_message.Message,), {
+    'DESCRIPTOR' : _RESOURCECONFIG_USERSPACEGOVERNOR,
+    '__module__' : 'chromiumos.config.api.software.resource_config_pb2'
+    # @@protoc_insertion_point(class_scope:chromiumos.config.api.software.ResourceConfig.UserspaceGovernor)
     })
   ,
 
@@ -57,7 +97,12 @@ ResourceConfig = _reflection.GeneratedProtocolMessageType('ResourceConfig', (_me
   # @@protoc_insertion_point(class_scope:chromiumos.config.api.software.ResourceConfig)
   })
 _sym_db.RegisterMessage(ResourceConfig)
+_sym_db.RegisterMessage(ResourceConfig.ConservativeGovernor)
 _sym_db.RegisterMessage(ResourceConfig.OndemandGovernor)
+_sym_db.RegisterMessage(ResourceConfig.PerformanceGovernor)
+_sym_db.RegisterMessage(ResourceConfig.PowersaveGovernor)
+_sym_db.RegisterMessage(ResourceConfig.SchedutilGovernor)
+_sym_db.RegisterMessage(ResourceConfig.UserspaceGovernor)
 _sym_db.RegisterMessage(ResourceConfig.Governor)
 _sym_db.RegisterMessage(ResourceConfig.PowerPreferences)
 _sym_db.RegisterMessage(ResourceConfig.PowerSourcePreferences)
@@ -67,13 +112,23 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'Z1go.chromium.org/chromiumos/config/go/api/software'
   _RESOURCECONFIG._serialized_start=89
-  _RESOURCECONFIG._serialized_end=1407
-  _RESOURCECONFIG_ONDEMANDGOVERNOR._serialized_start=273
-  _RESOURCECONFIG_ONDEMANDGOVERNOR._serialized_end=375
-  _RESOURCECONFIG_GOVERNOR._serialized_start=377
-  _RESOURCECONFIG_GOVERNOR._serialized_end=484
-  _RESOURCECONFIG_POWERPREFERENCES._serialized_start=486
-  _RESOURCECONFIG_POWERPREFERENCES._serialized_end=579
-  _RESOURCECONFIG_POWERSOURCEPREFERENCES._serialized_start=582
-  _RESOURCECONFIG_POWERSOURCEPREFERENCES._serialized_end=1407
+  _RESOURCECONFIG._serialized_end=1838
+  _RESOURCECONFIG_CONSERVATIVEGOVERNOR._serialized_start=273
+  _RESOURCECONFIG_CONSERVATIVEGOVERNOR._serialized_end=295
+  _RESOURCECONFIG_ONDEMANDGOVERNOR._serialized_start=297
+  _RESOURCECONFIG_ONDEMANDGOVERNOR._serialized_end=399
+  _RESOURCECONFIG_PERFORMANCEGOVERNOR._serialized_start=401
+  _RESOURCECONFIG_PERFORMANCEGOVERNOR._serialized_end=422
+  _RESOURCECONFIG_POWERSAVEGOVERNOR._serialized_start=424
+  _RESOURCECONFIG_POWERSAVEGOVERNOR._serialized_end=443
+  _RESOURCECONFIG_SCHEDUTILGOVERNOR._serialized_start=445
+  _RESOURCECONFIG_SCHEDUTILGOVERNOR._serialized_end=464
+  _RESOURCECONFIG_USERSPACEGOVERNOR._serialized_start=466
+  _RESOURCECONFIG_USERSPACEGOVERNOR._serialized_end=485
+  _RESOURCECONFIG_GOVERNOR._serialized_start=488
+  _RESOURCECONFIG_GOVERNOR._serialized_end=1040
+  _RESOURCECONFIG_POWERPREFERENCES._serialized_start=1042
+  _RESOURCECONFIG_POWERPREFERENCES._serialized_end=1135
+  _RESOURCECONFIG_POWERSOURCEPREFERENCES._serialized_start=1138
+  _RESOURCECONFIG_POWERSOURCEPREFERENCES._serialized_end=1838
 # @@protoc_insertion_point(module_scope)
