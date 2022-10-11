@@ -69,18 +69,27 @@ class MissingLKGMFile(Exception):
 class MissingSDK(Exception):
     """Error thrown when we cannot find an SDK."""
 
-    def _ConstructLegolandURL(self, config):
-        """Returns a link to the given board's release builder."""
-        return (
-            "https://dashboards.corp.google.com/chromeos_ci_release?"
-            "f=cbb_config:in:%s" % config
-        )
+    def _ConstructDashboardURL(self, config, board):
+        """Returns link to the given board's dashboard."""
+        if config.endswith(f"-{config_lib.CONFIG_TYPE_RELEASE}"):
+            return "http://go/rubik-release-?f=build_target:in:%s" % board
+        elif config.endswith(f"-{config_lib.CONFIG_TYPE_PUBLIC}"):
+            return (
+                "http://go/cros-ci-builds-/public/?f=build_target:in:%s" % board
+            )
+        else:
+            return ""
 
-    def __init__(self, config, version=None):
+    def __init__(self, config, board, version=None):
         msg = "Cannot find SDK for %s" % config
         if version is not None:
             msg += " with version %s" % version
-        msg += " from its builder: %s" % self._ConstructLegolandURL(config)
+        msg += " from its builder"
+
+        dashboard_url = self._ConstructDashboardURL(config, board)
+        if dashboard_url != "":
+            msg += f": {dashboard_url}"
+
         Exception.__init__(self, msg)
 
 
@@ -790,7 +799,7 @@ class SDKFetcher(object):
             full_version = self._GetFullVersionFromLatest(version)
 
             if full_version is None:
-                raise MissingSDK(self.config_name, version)
+                raise MissingSDK(self.config_name, self.board, version)
 
             ref.AssignText(full_version)
             return full_version
