@@ -36,6 +36,10 @@ class _ProcessMetricsCollector(object):
         self._metrics = [
             _ProcessMetric("autoserv", test_func=_is_parent_autoserv),
             _ProcessMetric(
+                "cache-downloader",
+                test_func=partial(_is_process_name, "downloader")
+            ),
+            _ProcessMetric(
                 "common-tls", test_func=partial(_is_process_name, "common-tls")
             ),
             _ProcessMetric("curl", test_func=partial(_is_process_name, "curl")),

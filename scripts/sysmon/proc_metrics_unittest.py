@@ -211,12 +211,17 @@ class TestProcMetrics(cros_test_lib.TestCase):
                         "-credential_file=..."
                     ],
                 ),
+                _mock_process(
+                    name="downloader",
+                    cmdline=["./downloader", "-credential-file", "..."]
+                ),
             ]
             proc_metrics.collect_proc_info()
 
         setter = self.store.set
         calls = []
         calls.extend(_expected_calls_for("autoserv"))
+        calls.extend(_expected_calls_for("cache-downloader"))
         calls.extend(_expected_calls_for("common-tls"))
         calls.extend(_expected_calls_for("curl"))
         calls.extend(_expected_calls_for("dnsmasq"))
