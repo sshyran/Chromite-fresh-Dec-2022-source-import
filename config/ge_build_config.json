@@ -5238,6 +5238,17 @@
         {
           "board_name": "hana-kernelnext",
           "name": "hana",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 422,
@@ -5246,6 +5257,17 @@
         {
           "board_name": "hana-kernelnext",
           "name": "maple",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 422,
@@ -5262,6 +5284,17 @@
         {
           "board_name": "hana-kernelnext",
           "name": "sycamore",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 422,
@@ -5270,6 +5303,17 @@
         {
           "board_name": "hana-kernelnext",
           "name": "sycamore360",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 422,
@@ -5278,6 +5322,17 @@
         {
           "board_name": "hana-kernelnext",
           "name": "telesu",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 422,
@@ -11273,7 +11328,7 @@
           "is_active": true
         }
       ],
-      "rubik_target_milestone": 103
+      "rubik_target_milestone": 107
     },
     {
       "name": "trogdor-zephyr",
