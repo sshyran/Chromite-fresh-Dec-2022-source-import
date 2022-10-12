@@ -79,7 +79,7 @@ class ShellTest(cros_test_lib.MockTempDirTestCase):
         """Tests a non-interactive command as a single argument.
 
         Examples:
-          cros shell 127.0.0.1 "ls -l /etc"
+            cros shell 127.0.0.1 "ls -l /etc"
         """
         self.SetupCommandMock([self.DEVICE_IP, "ls -l /etc"])
         self.cmd_mock.inst.Run()
@@ -90,7 +90,7 @@ class ShellTest(cros_test_lib.MockTempDirTestCase):
         """Tests a non-interactive command as multiple arguments with "--".
 
         Examples:
-          cros shell 127.0.0.1 -- ls -l /etc
+            cros shell 127.0.0.1 -- ls -l /etc
         """
         self.SetupCommandMock([self.DEVICE_IP, "--", "ls", "-l", "/etc"])
         self.cmd_mock.inst.Run()

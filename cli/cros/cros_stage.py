@@ -40,11 +40,11 @@ def GSURLRegexHelper(gsurl):
     """Helper to do regex matching on a Google Storage URL
 
     Args:
-      gsurl: Google Storage URL to match.
+        gsurl: Google Storage URL to match.
 
     Returns:
-      Regex Match Object with groups(board, type, & build_name) or None if there
-      was no match.
+        Regex Match Object with groups(board, type, & build_name) or None if
+        there was no match.
     """
     return re.match(
         r"gs://.*/(trybot-)?(?P<board>[\w-]+)-(?P<type>\w+)/"
@@ -167,14 +167,14 @@ NOTES:
         the image path.
 
         Args:
-          image: Path to image we want to stage. It should be in the format of
-                 /.../.../board/build/<image>.bin
+            image: Path to image we want to stage. It should be in the format of
+                /.../.../board/build/<image>.bin
 
         Returns:
-          Name the image will be staged as.
+            Name the image will be staged as.
 
         Raises:
-          CustomImageStagingException: If the image name supplied is not valid.
+            CustomImageStagingException: If the image name supplied is not valid.
         """
         realpath = osutils.ExpandPath(image)
         if not realpath.endswith(".bin"):
@@ -201,14 +201,14 @@ NOTES:
         the image path.
 
         Args:
-          image: GS Url to the image we want to stage. It should be in the format
-                 gs://<bucket-name>/<board>-<builder type>/<build name>
+            image: GS Url to the image we want to stage. It should be in the format
+                gs://<bucket-name>/<board>-<builder type>/<build name>
 
         Returns:
-          Name the image will be staged as.
+            Name the image will be staged as.
 
         Raises:
-          CustomImageStagingException: If the image name supplied is not valid.
+            CustomImageStagingException: If the image name supplied is not valid.
         """
         match = GSURLRegexHelper(image)
         if not match:
@@ -225,7 +225,7 @@ NOTES:
         """Download from GS the update payloads we require.
 
         Args:
-          tempdir: Temporary Directory to store the downloaded payloads.
+            tempdir: Temporary Directory to store the downloaded payloads.
         """
         gs_context = gs.GSContext(boto_file=self.options.boto_file)
         gs_context.Copy(
@@ -237,7 +237,7 @@ NOTES:
         """Generate the update payloads we require.
 
         Args:
-          tempdir: Temporary Directory to store the generated payloads.
+            tempdir: Temporary Directory to store the generated payloads.
         """
         # Devservers will look for a file named *_full_*.
         payload = os.path.join(tempdir, "update_full_dev.bin")
@@ -250,7 +250,7 @@ NOTES:
         """Generate and transfer to the Moblab the test bits we require.
 
         Args:
-          tempdir: Temporary Directory to store the generated test artifacts.
+            tempdir: Temporary Directory to store the generated test artifacts.
         """
         build_root = build_target_lib.get_default_sysroot_path(self.board)
         cwd = os.path.join(build_root, BOARD_BUILD_DIR)
@@ -260,8 +260,8 @@ NOTES:
         """Stage the generated payloads and test bits on a moblab device.
 
         Args:
-          tempdir: Temporary Directory that contains the generated payloads and
-                   test bits.
+            tempdir: Temporary Directory that contains the generated payloads and
+                test bits.
         """
         with remote_access.ChromiumOSDeviceHandler(
             self.options.remote
@@ -303,8 +303,8 @@ NOTES:
         """Stage the generated payloads and test bits into a Google Storage bucket.
 
         Args:
-          tempdir: Temporary Directory that contains the generated payloads and
-                   test bits.
+            tempdir: Temporary Directory that contains the generated payloads and
+                test bits.
         """
         gs_context = gs.GSContext(boto_file=self.options.boto_file)
         for f in os.listdir(tempdir):

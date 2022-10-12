@@ -81,7 +81,7 @@ Examples:
         """Build the parser.
 
         Args:
-          parser: The parser.
+            parser: The parser.
         """
         super().AddParser(parser)
 

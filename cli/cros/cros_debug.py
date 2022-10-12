@@ -27,13 +27,13 @@ class DebugCommand(command.CliCommand):
 
     EPILOG = """
 To list all running processes of an executable:
-  cros debug device --list --exe=/path/to/executable
+    cros debug device --list --exe=/path/to/executable
 
 To debug an executable:
-  cros debug device --exe=/path/to/executable
+    cros debug device --exe=/path/to/executable
 
 To debug a process by its pid:
-  cros debug device --pid=1234
+    cros debug device --pid=1234
 """
 
     def __init__(self, options):

@@ -55,12 +55,12 @@ class CrosFlashTest(
         parsed properly and handed to flash.Flash() as expected.
 
         Args:
-          device: expected device hostname; currently only SSH devices
-              are supported.
-          image: expected image parameter.
-          kwargs: keyword arguments expected in the call to flash.Flash().
-              Arguments unspecified here are checked against their default
-              value for `cros flash`.
+            device: expected device hostname; currently only SSH devices
+                are supported.
+            image: expected image parameter.
+            kwargs: keyword arguments expected in the call to flash.Flash().
+                Arguments unspecified here are checked against their default
+                value for `cros flash`.
         """
         flash_args, flash_kwargs = self.flash_mock.call_args
         self.assertEqual(device, flash_args[0].hostname)

@@ -44,8 +44,8 @@ def Log(*args, **kwargs):
     """Conditional logging.
 
     Args:
-      silent: If set to True, then logs with level DEBUG.  logs with level INFO
-        otherwise.  Defaults to False.
+        silent: If set to True, then logs with level DEBUG. logs with level INFO
+            otherwise. Defaults to False.
     """
     silent = kwargs.pop("silent", False)
     level = logging.DEBUG if silent else logging.INFO
@@ -146,21 +146,21 @@ class SDKFetcher(object):
         """Initialize the class.
 
         Args:
-          cache_dir: The toplevel cache dir to use.
-          board: The board to manage the SDK for.
-          clear_cache: Clears the sdk cache during __init__.
-          chrome_src: The location of the chrome checkout.  If unspecified, the
-            cwd is presumed to be within a chrome checkout.
-          sdk_path: The path (whether a local directory or a gs:// path) to fetch
-            SDK components from.
-          toolchain_path: The path (whether a local directory or a gs:// path) to
-            fetch toolchain components from.
-          silent: If set, the fetcher prints less output.
-          use_external_config: When identifying the configuration for a board,
-            force usage of the external configuration if both external and internal
-            are available.
-          fallback_versions: The number of versions to consider.
-          is_lacros: whether it's Lacros-Chrome build or not.
+            cache_dir: The toplevel cache dir to use.
+            board: The board to manage the SDK for.
+            clear_cache: Clears the sdk cache during __init__.
+            chrome_src: The location of the chrome checkout. If unspecified, the
+                cwd is presumed to be within a chrome checkout.
+            sdk_path: The path (whether a local directory or a gs:// path) to
+                fetch SDK components from.
+            toolchain_path: The path (whether a local directory or a gs:// path)
+                to fetch toolchain components from.
+            silent: If set, the fetcher prints less output.
+            use_external_config: When identifying the configuration for a board,
+                force usage of the external configuration if both external and
+                internal are available.
+            fallback_versions: The number of versions to consider.
+            is_lacros: whether it's Lacros-Chrome build or not.
         """
         self.cache_base = os.path.join(cache_dir, COMMAND_NAME)
         if clear_cache:
@@ -217,12 +217,12 @@ class SDKFetcher(object):
         we instead simply assume that everything but the "*-generic" boards have
         internal configs.
 
-        TODO(b/241964080): Inspect gs://chromeos-build-release-console here instead
-        if/when ACLs on that bucket are opened up.
+        TODO(b/241964080): Inspect gs://chromeos-build-release-console here
+            instead if/when ACLs on that bucket are opened up.
 
         Returns:
-          True if there's an internal builder available that publishes SDKs for the
-          board.
+            True if there's an internal builder available that publishes SDKs
+            for the board.
         """
         if "generic" in self.board:
             return False
@@ -273,8 +273,8 @@ class SDKFetcher(object):
         """Worker function to fetch tarballs.
 
         Args:
-          ref_queue: A queue.PriorityQueue of tuples containing (pri, cache key,
-              GS url, cache.CacheReference)
+            ref_queue: A queue.PriorityQueue of tuples containing (pri, cache
+                key, GS url, cache.CacheReference)
         """
         while True:
             try:
@@ -303,8 +303,8 @@ class SDKFetcher(object):
         """Adds a symlink to the cache pointing at the given source.
 
         Args:
-          ref: cache.CacheReference of the link to be created.
-          source_path: Absolute path that the symlink will point to.
+            ref: cache.CacheReference of the link to be created.
+            source_path: Absolute path that the symlink will point to.
         """
         with osutils.TempDir(
             base_dir=self.symlink_cache.staging_dir
@@ -388,10 +388,10 @@ class SDKFetcher(object):
         """Get the CHROMEOS LKGM checked into the Chrome tree.
 
         Args:
-          chrome_src_dir: chrome source directory.
+            chrome_src_dir: chrome source directory.
 
         Returns:
-          Version number in format '10171.0.0'.
+            Version number in format '10171.0.0'.
         """
         if not chrome_src_dir:
             chrome_src_dir = path_util.DetermineCheckout().chrome_src_dir
@@ -406,15 +406,15 @@ class SDKFetcher(object):
     def _LookupMiscCache(cls, cache_dir, key):
         """Looks up an item in the misc cache.
 
-        This should be used when inspecting an SDK that's already been initialized
-        elsewhere.
+        This should be used when inspecting an SDK that's already been
+        initialized elsewhere.
 
         Args:
-          cache_dir: The toplevel cache dir to search in.
-          key: Key of item in the cache.
+            cache_dir: The toplevel cache dir to search in.
+            key: Key of item in the cache.
 
         Returns:
-          Value of the item, or None if the item is missing.
+            Value of the item, or None if the item is missing.
         """
         misc_cache_path = os.path.join(cache_dir, COMMAND_NAME, cls.MISC_CACHE)
         misc_cache = cache.DiskCache(misc_cache_path)
@@ -430,11 +430,11 @@ class SDKFetcher(object):
         Look at the environment variable, and then the misc cache.
 
         Args:
-          cache_dir: The toplevel cache dir to search in.
-          board: The board to search for.
+            cache_dir: The toplevel cache dir to search in.
+            board: The board to search for.
 
         Returns:
-          SDK version string, if found.
+            SDK version string, if found.
         """
         sdk_version = os.environ.get(cls.SDK_VERSION_ENV)
         if sdk_version:
@@ -448,11 +448,11 @@ class SDKFetcher(object):
         """Get full version from the misc cache.
 
         Args:
-          cache_dir: The toplevel cache dir to search in.
-          board: The board to search for.
+            cache_dir: The toplevel cache dir to search in.
+            board: The board to search for.
 
         Returns:
-          Full version from the misc cache, if found.
+            Full version from the misc cache, if found.
         """
         assert board
         sdk_version = cls.GetSDKVersion(cache_dir, board)
@@ -467,16 +467,16 @@ class SDKFetcher(object):
     def GetCachePath(cls, key, cache_dir, board):
         """Gets the path to an item in the cache.
 
-        This should be used when inspecting an SDK that's already been initialized
-        elsewhere.
+        This should be used when inspecting an SDK that's already been
+        initialized elsewhere.
 
         Args:
-          key: Key of item in the cache.
-          cache_dir: The toplevel cache dir to search in.
-          board: The board to search for.
+            key: Key of item in the cache.
+            cache_dir: The toplevel cache dir to search in.
+            board: The board to search for.
 
         Returns:
-          Path to the item, or None if the item is missing.
+            Path to the item, or None if the item is missing.
         """
         # The board is always known in the simple chrome SDK shell.
         if board is None:
@@ -504,9 +504,9 @@ class SDKFetcher(object):
         Inspects the entire cache, not just a single board's items.
 
         Args:
-          cache_dir: Location of the cache to be cleaned up.
-          max_age_days: Any item in the cache not created/modified within this
-            amount of time will be removed.
+            cache_dir: Location of the cache to be cleaned up.
+            max_age_days: Any item in the cache not created/modified within this
+                amount of time will be removed.
         """
         tarball_cache_path = os.path.join(
             cache_dir, COMMAND_NAME, cls.TARBALL_CACHE
@@ -536,10 +536,10 @@ class SDKFetcher(object):
         """Get SDK version from metadata.
 
         Args:
-          version: LKGM version, e.g. 12345.0.0
+            version: LKGM version, e.g. 12345.0.0
 
         Returns:
-          sdk_version, e.g. 2018.06.04.200410
+            sdk_version, e.g. 2018.06.04.200410
         """
         metadata = self._GetMetadata(version)
         build_report = self._GetBuildReport(version)
@@ -549,11 +549,11 @@ class SDKFetcher(object):
         """Get the build manifest from the cache, downloading it if necessary.
 
         Args:
-          version: LKGM version, e.g. 12345.0.0
+            version: LKGM version, e.g. 12345.0.0
 
         Returns:
-          build manifest as a python dictionary. The build manifest contains build
-          versions for packages built by the SDK builder.
+            build manifest as a python dictionary. The build manifest contains
+            build versions for packages built by the SDK builder.
         """
         with self.misc_cache.Lookup(("manifest", self.board, version)) as ref:
             if ref.Exists(lock=True):
@@ -573,12 +573,12 @@ class SDKFetcher(object):
         """Get google storage path of prebuilt binary package.
 
         Args:
-          version: LKGM version, e.g. 12345.0.0
-          key: key in build manifest, for e.g. 'app-emulation/qemu'
+            version: LKGM version, e.g. 12345.0.0
+            key: key in build manifest, for e.g. 'app-emulation/qemu'
 
         Returns:
-          GS path, for e.g. gs://chromeos-prebuilt/board/amd64-host/
-          chroot-2018.10.23.171742/packages/app-emulation/qemu-3.0.0.tbz2
+            GS path, for e.g. gs://chromeos-prebuilt/board/amd64-host/
+            chroot-2018.10.23.171742/packages/app-emulation/qemu-3.0.0.tbz2
         """
         if not version or not key:
             # A version and key is needed to locate the package in Google Storage.
@@ -595,8 +595,9 @@ class SDKFetcher(object):
         """Get a path in the tarball cache.
 
         Args:
-          component: component name, for e.g. 'app-emulation/qemu'
-          url: Google Storage url, e.g. 'gs://chromiumos-sdk/2019/some-tarball.tar'
+            component: component name, for e.g. 'app-emulation/qemu'
+            url: Google Storage url, e.g.
+                'gs://chromiumos-sdk/2019/some-tarball.tar'
         """
         cache_key = self._GetTarballCacheKey(component, url)
         with self.tarball_cache.Lookup(cache_key) as ref:
@@ -610,7 +611,7 @@ class SDKFetcher(object):
         Fix broken seabios symlinks in the qemu package.
 
         Args:
-          version: LKGM version, e.g. 12345.0.0
+            version: LKGM version, e.g. 12345.0.0
         """
         self._CreateSeabiosFWSymlinks(version)
 
@@ -625,7 +626,7 @@ class SDKFetcher(object):
         <cache>+app-emulation/qemu/usr/share/
 
         Args:
-          version: LKGM version, e.g. 12345.0.0
+            version: LKGM version, e.g. 12345.0.0
         """
         qemu_bin_path = self._GetTarballCachePath(
             self.QEMU_BIN_PATH,
@@ -654,10 +655,10 @@ class SDKFetcher(object):
         """Cat |version_file| in google storage.
 
         Args:
-          version_file: google storage path of the version file.
+            version_file: google storage path of the version file.
 
         Returns:
-          Version number in the format 'R30-3929.0.0' or None.
+            Version number in the format 'R30-3929.0.0' or None.
         """
         try:
             # If the version doesn't exist in google storage,
@@ -677,11 +678,11 @@ class SDKFetcher(object):
         LATEST- file to get a valid full version from.
 
         Args:
-          version: The version number to look backwards from. If version is not a
-          canary version (ending in .0.0), returns None.
+            version: The version number to look backwards from. If version is
+            not a canary version (ending in .0.0), returns None.
 
         Returns:
-          Version number in the format 'R30-3929.0.0' or None.
+            Version number in the format 'R30-3929.0.0' or None.
         """
 
         # If version does not end in .0.0 it is not a canary so fail.
@@ -712,10 +713,10 @@ class SDKFetcher(object):
         """Gets the full version number from the LATEST-{version} file.
 
         Args:
-          version: The version number or branch to look at.
+            version: The version number or branch to look at.
 
         Returns:
-          Version number in the format 'R30-3929.0.0' or None.
+            Version number in the format 'R30-3929.0.0' or None.
         """
         version_file = "%s/LATEST-%s" % (self.gs_base, version)
         full_version = self._GetFullVersionFromStorage(version_file)
@@ -755,9 +756,9 @@ class SDKFetcher(object):
         """Update the version that we default to using.
 
         Returns:
-          A tuple of the form (version, updated), where |version| is the
-          version number in the format '3929.0.0', and |updated| indicates
-          whether the version was indeed updated.
+            A tuple of the form (version, updated), where |version| is the
+            version number in the format '3929.0.0', and |updated| indicates
+            whether the version was indeed updated.
         """
         checkout_dir = self.chrome_src if self.chrome_src else os.getcwd()
         checkout = path_util.DetermineCheckout(checkout_dir)
@@ -780,12 +781,13 @@ class SDKFetcher(object):
         for the current board.
 
         Args:
-          version: A ChromeOS platform number of the form XXXX.XX.XX, i.e.,
-            3918.0.0. If a full version is provided, it will be returned unmodified.
+            version: A ChromeOS platform number of the form XXXX.XX.XX, i.e.,
+                3918.0.0. If a full version is provided, it will be returned
+                unmodified.
 
         Returns:
-          The version with release branch and build number added, as needed. E.g.
-          R28-3918.0.0-b1234.
+            The version with release branch and build number added, as needed.
+            E.g. R28-3918.0.0-b1234.
         """
         if version.startswith("R"):
             return version
@@ -815,7 +817,8 @@ class SDKFetcher(object):
     def _GetTarballCacheKey(self, component, url):
         """Builds the cache key tuple for an SDK component.
 
-        Returns a key based of the component name + the URL of its location in GS.
+        Returns a key based of the component name + the URL of its location in
+        GS.
         """
         key = self.sdk_path if self.sdk_path else url.strip("gs://")
         key = key.replace("/", "-")
@@ -845,22 +848,23 @@ class SDKFetcher(object):
         function requires metadata.json for the given version to exist.
 
         Args:
-          gs_ctx: GSContext object.
-          components: A list of specific components(tarballs) to prepare.
-          version: The version to prepare.  If not set, uses the version returned by
-            GetDefaultVersion().  If there is no default version set (this is the
-            first time we are being executed), then we update the default version.
-          target_tc: Target toolchain name to use, e.g. x86_64-cros-linux-gnu
-          toolchain_url: Format pattern for path to fetch toolchain from,
-            e.g. 2014/04/%(target)s-2014.04.23.220740.tar.xz
+            gs_ctx: GSContext object.
+            components: A list of specific components(tarballs) to prepare.
+            version: The version to prepare. If not set, uses the version
+                returned by GetDefaultVersion(). If there is no default version
+                set (this is the first time we are being executed), then we
+                update the default version.
+            target_tc: Target toolchain name to use, e.g. x86_64-cros-linux-gnu
+            toolchain_url: Format pattern for path to fetch toolchain from,
+                e.g. 2014/04/%(target)s-2014.04.23.220740.tar.xz
 
         Yields:
-          An SDKFetcher.SDKContext namedtuple object.  The attributes of the
-          object are:
-            version: The version that was prepared.
-            target_tc: Target toolchain name.
-            key_map: Dictionary that contains CacheReference objects for the SDK
-              artifacts, indexed by cache key.
+            An SDKFetcher.SDKContext namedtuple object. The attributes of the
+            object are:
+                version: The version that was prepared.
+                target_tc: Target toolchain name.
+                key_map: Dictionary that contains CacheReference objects for the
+                    SDK artifacts, indexed by cache key.
         """
         if version is None and self.sdk_path is None:
             version = self.GetDefaultVersion()
@@ -1335,9 +1339,9 @@ class ChromeSDKCommand(command.CliCommand):
         instead of the stock sysroot by prepending an asterisk to the version.
 
         Args:
-          board: The SDK board.
-          version: The SDK version.
-          chroot: The path to the chroot, if set.
+            board: The SDK board.
+            version: The SDK version.
+            chroot: The path to the chroot, if set.
         """
         current_ps1 = cros_build_lib.run(
             ["bash", "-l", "-c", 'echo "$PS1"'],
@@ -1503,11 +1507,11 @@ class ChromeSDKCommand(command.CliCommand):
         cache hit rate in distributed build systems (i.e. goma).
 
         Args:
-          binary: Name of toolchain binary.
-          tc_path: Path to toolchain directory.
+            binary: Name of toolchain binary.
+            tc_path: Path to toolchain directory.
 
         Returns:
-          Absolute path to the binary in the toolchain dir.
+            Absolute path to the binary in the toolchain dir.
         """
         # If binary doesn't contain a '/', assume it's located in the toolchain dir.
         if os.path.basename(binary) == binary:
@@ -1522,10 +1526,10 @@ class ChromeSDKCommand(command.CliCommand):
         The wrapper adds a flag to preserve symlinks which are used by CrOS clang.
 
         Args:
-          board: Target board name to be used as a config name and a wrapper name.
+            board: Target board name to be used as a config and wrapper name.
 
         Returns:
-          Absolute path to the wrapper script to be used as --gomacc-path.
+            Absolute path to the wrapper script to be used as --gomacc-path.
         """
         shared_dir = os.path.join(self.options.chrome_src, self._BUILD_ARGS_DIR)
 
@@ -1828,7 +1832,7 @@ class ChromeSDKCommand(command.CliCommand):
         ChromeOS.
 
         Args:
-          user_rc: User-supplied rc file.
+            user_rc: User-supplied rc file.
         """
         user_env = osutils.SourceEnvironment(user_rc, ["PATH"])
         goma_ctl = osutils.Which("goma_ctl.py", user_env.get("PATH"))
@@ -1844,7 +1848,7 @@ class ChromeSDKCommand(command.CliCommand):
         """Verify that the user has not set a chromite bin/ dir in user_rc.
 
         Args:
-          user_rc: User-supplied rc file.
+            user_rc: User-supplied rc file.
         """
         user_env = osutils.SourceEnvironment(user_rc, ["PATH"])
         chromite_bin = osutils.Which("parallel_emerge", user_env.get("PATH"))
@@ -1864,9 +1868,9 @@ class ChromeSDKCommand(command.CliCommand):
         directory.  That rc file is created if it doesn't already exist.
 
         Args:
-          env: A dictionary of environment variables that will be set by the rc
-            file.
-          user_rc: User-supplied rc file.
+            env: A dictionary of environment variables that will be set by the
+                rc file.
+            user_rc: User-supplied rc file.
         """
         if not os.path.exists(user_rc):
             osutils.Touch(user_rc, makedirs=True)
@@ -1921,8 +1925,8 @@ class ChromeSDKCommand(command.CliCommand):
         """Find installed Goma and start Goma.
 
         Returns:
-          A tuple (dir, port) containing the path to the cached goma/ dir and the
-          Goma port.
+            A tuple (dir, port) containing the path to the cached goma/ dir and
+            the Goma port.
         """
         goma_dir = self._GomaDir(self.options.gomadir)
         if not goma_dir:

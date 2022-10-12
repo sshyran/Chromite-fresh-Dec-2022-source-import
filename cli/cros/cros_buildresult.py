@@ -31,11 +31,11 @@ def FetchBuildStatuses(buildstore, options):
     The results are NOT filtered or fixed up.
 
     Args:
-      buildstore: BuildStore instance to make db calls.
-      options: Parsed command line options set.
+        buildstore: BuildStore instance to make db calls.
+        options: Parsed command line options set.
 
     Returns:
-      List of build_status dicts from Buildbucket, or None.
+        List of build_status dicts from Buildbucket, or None.
     """
     if options.buildbucket_id:
         build_status = buildstore.GetBuildStatuses([options.buildbucket_id])[0]
@@ -58,10 +58,10 @@ def IsBuildStatusFinished(build_status):
     """Populates the 'artifacts_url' and 'stages' build_status fields.
 
     Args:
-      build_status: Single build_status dict returned by any Fetch method.
+        build_status: Single build_status dict returned by any Fetch method.
 
     Returns:
-      build_status dict with additional fields populated.
+        build_status dict with additional fields populated.
     """
     return build_status["status"] in _FINISHED_STATUSES
 
@@ -72,11 +72,11 @@ def FixUpBuildStatus(buildstore, build_status):
     Populates the 'artifacts_url' and 'stages' build_status fields.
 
     Args:
-      buildstore: BuildStore instance to make DB calls.
-      build_status: Single build_status dict returned by any Fetch method.
+        buildstore: BuildStore instance to make DB calls.
+        build_status: Single build_status dict returned by any Fetch method.
 
     Returns:
-      build_status dict with additional fields populated.
+        build_status dict with additional fields populated.
     """
     # We don't actually store the artifacts_url, but we store a URL for a specific
     # artifact we can use to derive it.
@@ -98,10 +98,10 @@ def Report(build_statuses):
     """Generate the stdout description of a given build.
 
     Args:
-      build_statuses: List of build_status dict's from FetchBuildStatus.
+        build_statuses: List of build_status dict's from FetchBuildStatus.
 
     Returns:
-      str to display as the final report.
+        str to display as the final report.
     """
     result = ""
 
@@ -126,10 +126,10 @@ def ReportJson(build_statuses):
     """Generate the json description of a given build.
 
     Args:
-      build_statuses: List of build_status dict's from FetchBuildStatus.
+        build_statuses: List of build_status dict's from FetchBuildStatus.
 
     Returns:
-      str to display as the final report.
+        str to display as the final report.
     """
     report = {}
 
@@ -151,24 +151,24 @@ class BuildResultCommand(command.CliCommand):
 
     EPILOG = """
 Look up a single build result:
-  cros buildresult --buildbucket-id 1234567890123
+    cros buildresult --buildbucket-id 1234567890123
 
 Look up results by build config name:
-  cros buildresult --build-config hatch-pre-cq
-  cros buildresult --build-config hatch-pre-cq --date 2018-1-2
-  cros buildresult --build-config hatch-pre-cq \
-      --start-date 2018-1-2 --end-date 2018-1-7
+    cros buildresult --build-config hatch-pre-cq
+    cros buildresult --build-config hatch-pre-cq --date 2018-1-2
+    cros buildresult --build-config hatch-pre-cq \
+        --start-date 2018-1-2 --end-date 2018-1-7
 
 Output can be json formatted with:
-  cros buildresult --buildbucket-id 1234567890123 --report json
+    cros buildresult --buildbucket-id 1234567890123 --report json
 
 Note:
-  This tool does NOT work for main-*-tryjob, precq-launcher-try, or
-  builds on branches older than CL:942097.
+    This tool does NOT work for main-*-tryjob, precq-launcher-try, or
+    builds on branches older than CL:942097.
 
 Note:
-  Exit code 1: A script error or bad options combination.
-  Exit code 2: No matching finished builds were found.
+    Exit code 1: A script error or bad options combination.
+    Exit code 2: No matching finished builds were found.
 """
 
     @classmethod

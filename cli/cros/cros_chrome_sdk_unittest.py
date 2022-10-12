@@ -158,10 +158,10 @@ class SDKFetcherMock(partial_mock.PartialMock):
         """Initializes the mock.
 
         Args:
-          external_mocks: A list of already started PartialMock/patcher instances.
-            stop() will be called on each element every time execution enters one of
-            our the mocked out methods, and start() called on it once execution
-            leaves the mocked out method.
+            external_mocks: A list of already started PartialMock/patcher
+                instances. stop() will be called on each element every time
+                execution enters one of our the mocked out methods, and start()
+                called on it once execution leaves the mocked out method.
         """
         partial_mock.PartialMock.__init__(self)
         self.external_mocks = external_mocks or []

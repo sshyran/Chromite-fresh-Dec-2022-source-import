@@ -58,11 +58,11 @@ class CrosDeployTest(
         parsed properly.
 
         Args:
-          device: expected device hostname.
-          packages: expected packages list.
-          kwargs: keyword arguments expected in the call to Deployer.Run().
-              Arguments unspecified here are checked against their default
-              value for `cros deploy`.
+            device: expected device hostname.
+            packages: expected packages list.
+            kwargs: keyword arguments expected in the call to Deployer.Run().
+                Arguments unspecified here are checked against their default
+                value for `cros deploy`.
         """
         deploy_args, deploy_kwargs = self.deploy_mock.call_args
         self.assertEqual(device, deploy_args[0].hostname)

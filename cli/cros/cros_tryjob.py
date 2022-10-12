@@ -31,12 +31,12 @@ def ConfigsToPrint(site_config, production, build_config_fragments):
     """Select a list of buildbot configs to print out.
 
     Args:
-      site_config: config_lib.SiteConfig containing all config info.
-      production: Display tryjob or production configs?.
-      build_config_fragments: List of strings to filter config names with.
+        site_config: config_lib.SiteConfig containing all config info.
+        production: Display tryjob or production configs?.
+        build_config_fragments: List of strings to filter config names with.
 
     Returns:
-      List of config_lib.BuildConfig objects.
+        List of config_lib.BuildConfig objects.
     """
     configs = site_config.values()
 
@@ -63,9 +63,9 @@ def PrintKnownConfigs(site_config, production, build_config_fragments):
     """Print a list of known buildbot configs.
 
     Args:
-      site_config: config_lib.SiteConfig containing all config info.
-      production: Display tryjob or production configs?.
-      build_config_fragments: List of strings to filter config names with.
+        site_config: config_lib.SiteConfig containing all config info.
+        production: Display tryjob or production configs?.
+        build_config_fragments: List of strings to filter config names with.
     """
     configs = ConfigsToPrint(site_config, production, build_config_fragments)
 
@@ -88,10 +88,10 @@ def CbuildbotArgs(options):
     This are pre-api version filtering.
 
     Args:
-      options: Parsed cros tryjob tryjob arguments.
+        options: Parsed cros tryjob tryjob arguments.
 
     Returns:
-      List of strings in ['arg1', 'arg2'] format
+        List of strings in ['arg1', 'arg2'] format
     """
     args = []
 
@@ -165,10 +165,10 @@ def CreateBuildrootIfNeeded(buildroot):
     """Create the buildroot is it doesn't exist with confirmation prompt.
 
     Args:
-      buildroot: The buildroot path to create as a string.
+        buildroot: The buildroot path to create as a string.
 
     Returns:
-      boolean: Does the buildroot now exist?
+        boolean: Does the buildroot now exist?
     """
     if os.path.exists(buildroot):
         return True
@@ -188,10 +188,10 @@ def RunLocal(options):
     """Run a local tryjob.
 
     Args:
-      options: Parsed cros tryjob tryjob arguments.
+        options: Parsed cros tryjob tryjob arguments.
 
     Returns:
-      Exit code of build as an int.
+        Exit code of build as an int.
     """
     if cros_build_lib.IsInsideChroot():
         cros_build_lib.Die("Local tryjobs cannot be started inside the chroot.")
@@ -218,10 +218,10 @@ def RunCbuildbot(options):
     """Run a cbuildbot build.
 
     Args:
-      options: Parsed cros tryjob tryjob arguments.
+        options: Parsed cros tryjob tryjob arguments.
 
     Returns:
-      Exit code of build as an int.
+        Exit code of build as an int.
     """
     if cros_build_lib.IsInsideChroot():
         cros_build_lib.Die(
@@ -248,12 +248,12 @@ def DisplayLabel(site_config, options, build_config_name):
     """Decide which display_label to use.
 
     Args:
-      site_config: config_lib.SiteConfig containing all config info.
-      options: Parsed command line options for cros tryjob.
-      build_config_name: Name of the build config we are scheduling.
+        site_config: config_lib.SiteConfig containing all config info.
+        options: Parsed command line options for cros tryjob.
+        build_config_name: Name of the build config we are scheduling.
 
     Returns:
-      String to use as the cbb_build_label value.
+        String to use as the cbb_build_label value.
     """
     # Production tryjobs always display as production tryjobs.
     if options.production:
@@ -277,10 +277,10 @@ def FindUserEmail(options):
     """Decide which email address is submitting the job.
 
     Args:
-      options: Parsed command line options for cros tryjob.
+        options: Parsed command line options for cros tryjob.
 
     Returns:
-      Email address for the tryjob as a string.
+        Email address for the tryjob as a string.
     """
 
     if options.committer_email:
@@ -294,12 +294,12 @@ def PushLocalPatches(local_patches, user_email, dryrun=False):
     """Push local changes to a remote ref, and generate args to send.
 
     Args:
-      local_patches: patch_pool.local_patches from verified patch_pool.
-      user_email: Unique id for user submitting this tryjob.
-      dryrun: Is this a dryrun? If so, don't really push.
+        local_patches: patch_pool.local_patches from verified patch_pool.
+        user_email: Unique id for user submitting this tryjob.
+        dryrun: Is this a dryrun? If so, don't really push.
 
     Returns:
-      List of strings to pass to builder to include these patches.
+        List of strings to pass to builder to include these patches.
     """
     manifest = git.ManifestCheckout.Cached(constants.SOURCE_ROOT)
 
@@ -392,8 +392,8 @@ def VerifyOptions(options, site_config):
     """Verify that our command line options make sense.
 
     Args:
-      options: Parsed cros tryjob tryjob arguments.
-      site_config: config_lib.SiteConfig containing all config info.
+        options: Parsed cros tryjob tryjob arguments.
+        site_config: config_lib.SiteConfig containing all config info.
     """
     # Handle --list before checking that everything else is valid.
     if options.list:

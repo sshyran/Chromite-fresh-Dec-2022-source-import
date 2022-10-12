@@ -262,14 +262,14 @@ def _ShellLintFile(
     """Returns result of running lint checks on |path|.
 
     Args:
-      path: The path to the script on which to run the linter.
-      output_format: The format of the output that the linter should emit. See
-                     |SHLINT_OUTPUT_FORMAT_MAP|.
-      debug: Whether to print out the linter command.
-      gentoo_format: Whether to treat this file as an ebuild style script.
+        path: The path to the script on which to run the linter.
+        output_format: The format of the output that the linter should emit. See
+            |SHLINT_OUTPUT_FORMAT_MAP|.
+        debug: Whether to print out the linter command.
+        gentoo_format: Whether to treat this file as an ebuild style script.
 
     Returns:
-      A CompletedProcess object.
+        A CompletedProcess object.
     """
     # TODO: Try using `checkbashisms`.
     syntax_check = _ToolRunCommand(["bash", "-n", path], debug)

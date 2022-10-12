@@ -47,10 +47,10 @@ class DocStringSectionDetails(object):
         """Initialize.
 
         Args:
-          name: The name of this section, e.g. "Args".
-          header: The raw header of this section, e.g. "  Args:".
-          lines: The raw lines making up the section.
-          lineno: The first line of the section in the overall docstring.
+            name: The name of this section, e.g. "Args".
+            header: The raw header of this section, e.g. "  Args:".
+            lines: The raw lines making up the section.
+            lineno: The first line of the section in the overall docstring.
             This counts from one and includes the section header line.
         """
         self.name = name
@@ -97,12 +97,12 @@ def _PylintrcConfig(config_file, section, opts):
     indent-string = '  '
 
     Args:
-      config_file: Path to the pylintrc file to read.
-      section: The section to read.
-      opts: The specific settings to return.
+        config_file: Path to the pylintrc file to read.
+        section: The section to read.
+        opts: The specific settings to return.
 
     Returns:
-      A pylint configuration object.  Use option_value('...') to read.
+        A pylint configuration object. Use option_value('...') to read.
     """
 
     class ConfigReader(ConfigurationMixIn):
@@ -508,13 +508,13 @@ class DocStringChecker(pylint.checkers.BaseChecker):
         """Find all the sections and return them
 
         Args:
-          node: The python object we're checking.
-          lines: Parsed docstring lines.
+            node: The python object we're checking.
+            lines: Parsed docstring lines.
 
         Returns:
-          An ordered dict of sections and their (start, end) line numbers.
-          The start line does not include the section header itself.
-          {'Args': [start_line_number, end_line_number], ...}
+            An ordered dict of sections and their (start, end) line numbers.
+            The start line does not include the section header itself.
+            {'Args': [start_line_number, end_line_number], ...}
         """
         sections = collections.OrderedDict()
         invalid_sections_map = self._invalid_sections_map()

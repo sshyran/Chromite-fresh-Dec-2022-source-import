@@ -30,22 +30,22 @@ class ShellCommand(command.CliCommand):
 
     EPILOG = """
 Examples:
-  Start an interactive session:
-    cros shell <ip>
-    cros shell <user>@<ip>:<port>
+    Start an interactive session:
+        cros shell <ip>
+        cros shell <user>@<ip>:<port>
 
-  Non-interactive remote command:
-    cros shell <ip> -- cat var/log/messages
+    Non-interactive remote command:
+        cros shell <ip> -- cat var/log/messages
 
 Quoting can be tricky; the rules are the same as with ssh:
-  Special symbols will end the command unless quoted:
-    cros shell <ip> -- cat /var/log/messages > log.txt   (saves locally)
-    cros shell <ip> -- "cat /var/log/messages > log.txt" (saves remotely)
+    Special symbols will end the command unless quoted:
+        cros shell <ip> -- cat /var/log/messages > log.txt   (saves locally)
+        cros shell <ip> -- "cat /var/log/messages > log.txt" (saves remotely)
 
-  One set of quotes is consumed locally, so remote commands that
-  require quotes will need double quoting:
-    cros shell <ip> -- sh -c "exit 42"    (executes: sh -c exit 42)
-    cros shell <ip> -- sh -c "'exit 42'"  (executes: sh -c 'exit 42')
+    One set of quotes is consumed locally, so remote commands that
+    require quotes will need double quoting:
+        cros shell <ip> -- sh -c "exit 42"    (executes: sh -c exit 42)
+        cros shell <ip> -- sh -c "'exit 42'"  (executes: sh -c 'exit 42')
 """
 
     def __init__(self, options):
@@ -126,7 +126,7 @@ Quoting can be tricky; the rules are the same as with ssh:
         |self.device| is valid.
 
         Returns:
-          True if the user is OK with a changed host key.
+            True if the user is OK with a changed host key.
         """
         return cros_build_lib.BooleanPrompt(
             prolog='The host ID for "%s" has changed since last connect.\n'
@@ -149,10 +149,10 @@ Quoting can be tricky; the rules are the same as with ssh:
         SSH configuration.
 
         Returns:
-          The SSH return code.
+            The SSH return code.
 
         Raises:
-          SSHConnectionError on SSH connect failure.
+            SSHConnectionError on SSH connect failure.
         """
         # Create the ChromiumOSDevice the first time through this function.
         if not self.device:

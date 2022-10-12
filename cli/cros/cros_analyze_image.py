@@ -17,7 +17,7 @@ $ cros analyze-image --board=coral --version=R86-13421.0.0 --spreadsheet
 
 Example run, first download then process image numbers:
 $ cros analyze-image --board=coral --version=R86-13421.0.0 \
-  --local-path=/tmp/cros-analyze-coral-m86.bin
+    --local-path=/tmp/cros-analyze-coral-m86.bin
 $ cros analyze-image --image=/tmp/cros-analyze-coral-m86.bin
 """
 
@@ -75,10 +75,10 @@ def sub_paths_size_iter(
     """Calculates sizes for paths below root_path.
 
     Args:
-      root_path: path to start analyzing from
+        root_path: path to start analyzing from
 
     Returns:
-      Generator tuple of path and int size of path.
+        Generator tuple of path and int size of path.
     """
     root_path_len = len(root_path)
 
@@ -103,13 +103,13 @@ def get_image_sizes(
     """Extracts an image to a temporary directory and calls sub_paths_size_iter.
 
     Args:
-      image_filepath: The filepath of the image to analyze.
-      required_paths: get sizes for only these paths
-      min_size: if required_paths not set will filter to only return
-        paths where size of path is at least min_size
+        image_filepath: The filepath of the image to analyze.
+        required_paths: get sizes for only these paths
+        min_size: if required_paths not set will filter to only return
+            paths where size of path is at least min_size
 
     Returns:
-      A dictionary of path -> size.
+        A dictionary of path -> size.
     """
     sizes = {}
     with osutils.TempDir(
@@ -134,12 +134,12 @@ def fetch_image(board: str, version: str, local_path: str = None) -> str:
     """Downloads an image from Google Storage.
 
     Args:
-      board: The name of the board.
-      version: The version to download.
-      local_path: directory to save image to.
+        board: The name of the board.
+        version: The version to download.
+        local_path: directory to save image to.
 
     Returns:
-      Local path to image file.
+        Local path to image file.
     """
     _, image_path = ds_wrapper.GetImagePathWithXbuddy(
         "xBuddy://remote", board, version
@@ -168,11 +168,11 @@ def write_sizes(
     """Writes the sizes in CSV format.
 
     Args:
-      sizes: A dictionary of path -> size.
-      required_paths: list of paths to order results by
-      human_readable: set to True when user wants output in human readable format
-      output_format: output format (json or csv)
-      output_path: path to write output to
+        sizes: A dictionary of path -> size.
+        required_paths: list of paths to order results by
+        human_readable: set to True to output in a human-readable format.
+        output_format: output format (json or csv)
+        output_path: path to write output to
     """
 
     def size_string(sz):

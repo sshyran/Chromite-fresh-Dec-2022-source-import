@@ -19,11 +19,11 @@ class ChrootCommand(command.CliCommand):
         """Run the specified command inside the chroot.
 
         Args:
-          cmd: A list or tuple of strings to use as a command and its arguments.
-               If empty, run 'bash'.
+            cmd: A list or tuple of strings to use as a command and its
+                arguments. If empty, run 'bash'.
 
         Returns:
-          The commands result code.
+            The commands result code.
         """
         # If there is no command, run bash.
         if not cmd:
