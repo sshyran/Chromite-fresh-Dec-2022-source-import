@@ -13,10 +13,10 @@ def Data(data: str) -> str:
     """Clean up basic whitespace problems in |data|.
 
     Args:
-      data: The file content to lint.
+        data: The file content to lint.
 
     Returns:
-      Formatted data.
+        Formatted data.
     """
     # If the file is one line, assume it should be condensed.  If it isn't, assume
     # it should be human readable.

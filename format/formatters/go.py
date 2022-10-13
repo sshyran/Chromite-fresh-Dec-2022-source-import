@@ -11,10 +11,10 @@ def Data(data: str) -> str:
     """Format Go |data|.
 
     Args:
-      data: The file content to format.
+        data: The file content to format.
 
     Returns:
-      Formatted data.
+        Formatted data.
     """
     result = cros_build_lib.run(
         ["gofmt"],

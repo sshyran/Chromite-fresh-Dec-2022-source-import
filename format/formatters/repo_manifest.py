@@ -150,10 +150,10 @@ def Data(data: str) -> str:
     """Format |data|.
 
     Args:
-      data: The file content to lint.
+        data: The file content to lint.
 
     Returns:
-      Formatted data.
+        Formatted data.
     """
     ONE_LINE_NODES = {"annotation", "copyfile", "linkfile"}
 

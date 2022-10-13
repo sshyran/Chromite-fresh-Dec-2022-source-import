@@ -14,10 +14,10 @@ def Data(data: str) -> str:
     """Format python |data|.
 
     Args:
-     data: The file content to lint.
+        data: The file content to lint.
 
     Returns:
-      Formatted data.
+        Formatted data.
     """
     # We run through isort first to enforce module sorting order, then run that
     # result through black. We can't run isort independently (or after black)

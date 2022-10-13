@@ -14,10 +14,10 @@ def Data(data: str) -> str:
     """Format C & C++ |data|.
 
     Args:
-      data: The file content to lint.
+        data: The file content to lint.
 
     Returns:
-      Formatted data.
+        Formatted data.
     """
     result = cros_build_lib.run(
         ["clang-format", "--style=file"],

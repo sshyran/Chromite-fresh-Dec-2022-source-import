@@ -11,10 +11,10 @@ def Data(data: str) -> str:
     """Clean up Rust format problems in |data|.
 
     Args:
-      data: The file content to lint.
+        data: The file content to lint.
 
     Returns:
-      Formatted data.
+        Formatted data.
     """
     result = cros_build_lib.run(
         ["rustfmt", "--edition", "2018"],

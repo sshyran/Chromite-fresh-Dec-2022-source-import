@@ -9,10 +9,10 @@ def Data(data: str) -> str:
     """Clean up basic whitespace problems in |data|.
 
     Args:
-      data: The file content to lint.
+        data: The file content to lint.
 
     Returns:
-      Formatted data.
+        Formatted data.
     """
     # Remove all leading/trailing newlines.
     data = data.strip()

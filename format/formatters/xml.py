@@ -17,10 +17,10 @@ def Data(data: str) -> str:
     """Format XML |data|.
 
     Args:
-      data: The file content to lint.
+        data: The file content to lint.
 
     Returns:
-      Formatted data.
+        Formatted data.
     """
     root = ElementTree.fromstring(data)
     if root.tag == "manifest":

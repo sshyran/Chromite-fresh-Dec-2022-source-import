@@ -24,10 +24,10 @@ def Data(data: str) -> str:
     """Format GN |data|.
 
     Args:
-      data: The file content to lint.
+        data: The file content to lint.
 
     Returns:
-      Formatted data.
+        Formatted data.
     """
     result = cros_build_lib.run(
         [_find_gn(), "format", "--stdin"],
