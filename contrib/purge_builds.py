@@ -67,14 +67,14 @@ def ParseBranchName(branch):
     would also collide.
 
     Args:
-      branch: Branch name as string.
+        branch: Branch name as string.
 
     Returns:
-      version as string.
+        version as string.
 
     Raises:
-      ParseException if the branch isn't a conventially named firmware/factory
-      branch.
+        ParseException if the branch isn't a conventionally named
+        firmware/factory branch.
     """
     PATTERN = r"(factory|firmware)-([a-zA-Z_]+-)?([0-9\.]+)\.B$"
     m = re.search(PATTERN, branch)
@@ -90,7 +90,7 @@ def ProtectedBranchVersions(remote_branches):
     meaning they are either factory or firmware branches.
 
     Returns:
-      List of branch versions as strings.
+        List of branch versions as strings.
     """
     result = []
     for branch in remote_branches:
@@ -107,13 +107,13 @@ def ParseChromeosReleasesBuildUri(uri):
     'gs://chromeos-releases/canary-channel/duck/6652.0.0/' -> '6652.0.0'
 
     Args:
-      uri: string describing a build URI.
+        uri: string describing a build URI.
 
     Returns:
-      version as string.
+        version as string.
 
     Raises:
-      ParseException if the URI does not describe a build output directory.
+        ParseException if the URI does not describe a build output directory.
     """
     PATTERN = r"^gs://.*/.*/.*/([0-9\.]+)/$"
     m = re.match(PATTERN, uri)
@@ -134,11 +134,11 @@ def VersionBranchMatch(version, branch):
     See ParseBranchName for a fuller explaination of branch versions.
 
     Args:
-      version: As a string ('1.2.3').
-      branch: As a string for a partial version that was branched from.
+        version: As a string ('1.2.3').
+        branch: As a string for a partial version that was branched from.
 
     Returns:
-      boolean telling if the version is part of the branch.
+        boolean telling if the version is part of the branch.
     """
     version_parts = [int(n) for n in version.split(".")]
     branch_parts = [int(n) for n in branch.split(".")]
@@ -162,12 +162,11 @@ def InBranches(version, branch_versions):
     """Does a specific build match any of the given parse branch names?
 
     Args:
-      board: Board name of the build.
-      version: Version of the build.
-      branch_versions: List of parsed branch names.
+        version: Version of the build.
+        branch_versions: List of parsed branch names.
 
     Returns:
-      boolean telling if there was a match.
+        boolean telling if there was a match.
     """
     return any(
         VersionBranchMatch(version, b_version) for b_version in branch_versions
@@ -178,7 +177,7 @@ def ListRemoteBranches():
     """Get a list of all remote branches for the chromite repository.
 
     Returns:
-      List of branch names as strings.
+        List of branch names as strings.
     """
     ret = git.RunGit(constants.CHROMITE_DIR, ["branch", "-lr"])
     return [l.strip() for l in ret.stdout.splitlines()]
@@ -220,11 +219,11 @@ def LocateChromeosReleasesProtectedPrefixes(ctx, protected_branches):
     produced binaries which may be used for long periods of time.
 
     Args:
-      ctx: GS context.
-      protected_branches: List of branch versions as strings.
+        ctx: GS context.
+        protected_branches: List of branch versions as strings.
 
     Returns:
-      Returns an iterator of URL prefixes to exclude.
+        Returns an iterator of URL prefixes to exclude.
     """
     result = [
         "gs://chromeos-releases/Attic",
@@ -269,10 +268,10 @@ def LocateChromeosImageArchiveProtectedPrefixes(ctx):
     periodically, so we need to keep the images in gs to provide the access.
 
     Args:
-      ctx: GS context.
+        ctx: GS context.
 
     Returns:
-      Returns an iterator of URL prefixes to exclude.
+        Returns an iterator of URL prefixes to exclude.
     """
     result = []
     top_levels = SafeList(ctx, "gs://chromeos-image-archive/")
@@ -299,13 +298,13 @@ def ProduceFilteredCandidates(ctx, root_url, prefixes, search_depth):
     """Given a root URL and a list of prefixes get a list of purge candidates.
 
     Args:
-      ctx: GS context.
-      root_url: Url of base directory to consider. IE: gs://chromeos-releases/
-      prefixes: Iterable list of URLs to exclude from results.
-      search_depth: Minimum directory depth of a directory result.
+        ctx: GS context.
+        root_url: Url of base directory to consider. IE: gs://chromeos-releases/
+        prefixes: Iterable list of URLs to exclude from results.
+        search_depth: Minimum directory depth of a directory result.
 
     Returns:
-      Returns an iterable of gs.GSListResult objects for files.
+        Returns an iterable of gs.GSListResult objects for files.
     """
 
     def depth(url):
@@ -350,11 +349,11 @@ def Expand(ctx, candidate):
     Directories will be expanded to all files inside the directory.
 
     Args:
-      ctx: GS context.
-      candidate: gs.GSListResult object representing a file or directory.
+        ctx: GS context.
+        candidate: gs.GSListResult object representing a file or directory.
 
     Returns:
-      Returns an iterable of gs.GSListResult objects.
+        Returns an iterable of gs.GSListResult objects.
     """
     if candidate.creation_time is not None:
         # If it's a details populated file, return as is.
@@ -373,9 +372,9 @@ def Expire(ctx, dryrun, url):
     """Given a url, move it to the backup buckets.
 
     Args:
-      ctx: GS context.
-      dryrun: Do we actually move the file?
-      url: Address of file to move.
+        ctx: GS context.
+        dryrun: Do we actually move the file?
+        url: Address of file to move.
     """
     logging.info("Expiring: %s", url)
     # Move gs://foo/some/file -> gs://foo-backup/some/file
@@ -397,10 +396,10 @@ def ExpandAndExpire(ctx, dryrun, expired_cutoff, candidate):
     """Given a list of candidate, expand to files, and expire if needed.
 
     Args:
-      ctx: GS context.
-      dryrun: Flag to turn on/off bucket updates.
-      expired_cutoff: datetime.datetime of cutoff for expiring candidates.
-      candidate: gs.GSListResult object of a file or directory.
+        ctx: GS context.
+        dryrun: Flag to turn on/off bucket updates.
+        expired_cutoff: datetime.datetime of cutoff for expiring candidates.
+        candidate: gs.GSListResult object of a file or directory.
     """
     for file_candidate in Expand(ctx, candidate):
         if file_candidate.creation_time < expired_cutoff:
@@ -411,10 +410,10 @@ def Examine(ctx, dryrun, expired_cutoff, candidates):
     """Given a list of candidates to move, move them to the backup buckets.
 
     Args:
-      ctx: GS context.
-      dryrun: Flag to turn on/off bucket updates.
-      expired_cutoff: datetime.datetime of cutoff for expiring candidates.
-      candidates: Iterable of gs.GSListResult objects.
+        ctx: GS context.
+        dryrun: Flag to turn on/off bucket updates.
+        expired_cutoff: datetime.datetime of cutoff for expiring candidates.
+        candidates: Iterable of gs.GSListResult objects.
     """
     # Scale our processes with CPUs, but overload since we mostly block on
     # external calls.

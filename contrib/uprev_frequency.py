@@ -42,12 +42,12 @@ def get_directory_commits(
     """Get all commits in the given directory.
 
     Args:
-      directory: The directory in question. Must be in a git project.
-      start_date: The earliest datetime to consider, if any.
-      end_date: The latest datetime to consider, if any.
+        directory: The directory in question. Must be in a git project.
+        start_date: The earliest datetime to consider, if any.
+        end_date: The latest datetime to consider, if any.
 
     Returns:
-      The commits relating to that directory.
+        The commits relating to that directory.
     """
     # TODO(evanhernandez): I am not sure how --after/--until consider timezones.
     # For a script like this, the differences are probably negligible, but I
@@ -78,10 +78,10 @@ def get_uprev_commits(commits: List[Commit]) -> List[Commit]:
     Preserves order.
 
     Args:
-      commits: The git commits in question.
+        commits: The git commits in question.
 
     Returns:
-      list: Only commits that were uprevs of some ebuild.
+        list: Only commits that were uprevs of some ebuild.
     """
     uprev_commits = []
     for commit in commits:
@@ -99,10 +99,10 @@ def get_commit_timestamps(commits: List[Commit]) -> List[int]:
     """Get all commit timestamps for the given ebuild.
 
     Args:
-      commits: The commits in question.
+        commits: The commits in question.
 
     Returns:
-      list: The uprev commit unix timestamps, in order.
+        list: The uprev commit unix timestamps, in order.
     """
     return [int(commit.timestamp) for commit in commits]
 
@@ -111,10 +111,10 @@ def get_average_timestamp_delta_days(timestamps: List[int]) -> List[int]:
     """Return the delta in seconds between each consecutive timestamp.
 
     Args:
-      timestamps: The unix timestamps.
+        timestamps: The unix timestamps.
 
     Returns:
-      The deltas (in seconds) between consecutive timestamps.
+        The deltas (in seconds) between consecutive timestamps.
     """
     if not len(timestamps) > 2:
         raise ValueError(

@@ -43,7 +43,7 @@ def parse_args(argv: List[str]):
     """Parse the arguments
 
     Args:
-      argv: array of arguments passed to the script.
+        argv: array of arguments passed to the script.
     """
     parser = commandline.ArgumentParser(description=__doc__)
     group = parser.add_mutually_exclusive_group(required=True)
