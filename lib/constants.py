@@ -1069,13 +1069,4 @@ MINIOS_KEYBLOCK = "minios_kernel.keyblock"
 
 # LegacyRelease allowlist.
 # TODO(b/238925754): Delete when Rubik is fully rolled out.
-LEGACY_RELEASE_ALLOWLIST = [
-    "betty-pi-arc-release",  # b/240524235
-    "coral-release",
-    "dedede-release",
-    "hana-release",
-    "jacuzzi-release",
-    "octopus-release",
-    "reven-vmtest-release",  # b/240524235
-    "snappy-release",
-]
+LEGACY_RELEASE_ALLOWLIST = []
