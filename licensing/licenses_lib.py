@@ -216,15 +216,16 @@ def GetLicenseTypesFromEbuild(
     intended to be used for tasks such as presubmission checks.
 
     Args:
-      ebuild_contents: contents of ebuild.
-      overlay_path: path of the overlay containing the ebuild
-      buildroot: base directory, usually constants.SOURCE_ROOT, useful for tests
+        ebuild_contents: contents of ebuild.
+        overlay_path: path of the overlay containing the ebuild
+        buildroot: base directory, usually constants.SOURCE_ROOT, useful for
+            tests
 
     Returns:
-      list of licenses read from ebuild.
+        list of licenses read from ebuild.
 
     Raises:
-      ValueError: ebuild errors.
+        ValueError: ebuild errors.
     """
     ebuild_env_tmpl = """
 has() { [[ " ${*:2} " == *" $1 "* ]]; }
@@ -292,11 +293,11 @@ class PackageInfo(object):
         """Package info initializer.
 
         Args:
-          sysroot: The board this package was built for.
-          fullnamerev: package name of the form 'x11-base/X.Org-1.9.3-r23'
+            sysroot: The board this package was built for.
+            fullnamerev: package name of the form 'x11-base/X.Org-1.9.3-r23'
 
         Raises:
-          ValueError if |fullnamerev| is not a valid package string.
+            ValueError if |fullnamerev| is not a valid package string.
         """
 
         self.sysroot = sysroot
@@ -358,11 +359,11 @@ class PackageInfo(object):
         """Run a list of ebuild phases on an ebuild.
 
         Args:
-          ebuild_path: exact path of the ebuild file.
-          phases: list of phases like ['clean', 'fetch'] or ['unpack'].
+            ebuild_path: exact path of the ebuild file.
+            phases: list of phases like ['clean', 'fetch'] or ['unpack'].
 
         Returns:
-          ebuild command output
+            ebuild command output
         """
         ebuild_cmd = cros_build_lib.GetSysrootToolPath(self.sysroot, "ebuild")
         return cros_build_lib.run(
@@ -383,7 +384,7 @@ class PackageInfo(object):
         instead of using dev-util/bsdiff as an override).
 
         Returns:
-          False (no license found) or a multiline license string.
+            False (no license found) or a multiline license string.
         """
         license_read = None
         # dev-util/bsdiff-4.3-r5 -> bsdiff-4.3-r5
@@ -433,8 +434,8 @@ class PackageInfo(object):
         files as defined in LICENSE_NAMES_REGEX.
 
         Raises:
-          AssertionError: on runtime errors
-          PackageLicenseError: couldn't find copyright attribution file.
+            AssertionError: on runtime errors
+            PackageLicenseError: couldn't find copyright attribution file.
         """
         license_override = self._GetOverrideLicense()
         if license_override:
@@ -585,7 +586,7 @@ to assign.  Once you've found it, copy the entire license file to:
         Sets self.skip to True if a reason was found.
 
         Returns:
-          True if a reason was found.
+            True if a reason was found.
         """
         if self.category in SKIPPED_CATEGORIES:
             logging.info(
@@ -603,10 +604,10 @@ to assign.  Once you've found it, copy the entire license file to:
         This method is not valid during the emerge hook process.
 
         Returns:
-          full path file name of the ebuild file for this package.
+            full path file name of the ebuild file for this package.
 
         Raises:
-          AssertionError if it can't be discovered for some reason.
+            AssertionError if it can't be discovered for some reason.
         """
         equery_cmd = cros_build_lib.GetSysrootToolPath(self.sysroot, "equery")
         args = [equery_cmd, "-q", "-C", "which", self.fullnamerev]
@@ -635,7 +636,7 @@ to assign.  Once you've found it, copy the entire license file to:
         """Populate the license related fields.
 
         Fields populated:
-          license_names, license_text_scanned, homepages, skip, tainted
+            license_names, license_text_scanned, homepages, skip, tainted
 
         Some packages have static license mappings applied to them that get
         retrieved from the ebuild.
@@ -644,14 +645,15 @@ to assign.  Once you've found it, copy the entire license file to:
         add licenses found there.
 
         Args:
-          build_info_dir: Path to the build_info for the ebuild. This can be from
-            the working directory during the emerge hook, or in the portage pkg db.
-          src_dir: Directory to the expanded source code for this package. If None,
-            the source will be expanded, if needed (slow).
+            build_info_dir: Path to the build_info for the ebuild. This can be
+                from the working directory during the emerge hook, or in the
+                portage pkg db.
+            src_dir: Directory to the expanded source code for this package.
+                If None, the source will be expanded, if needed (slow).
 
         Raises:
-          AssertionError: on runtime errors
-          PackageLicenseError: couldn't find license in ebuild and source.
+            AssertionError: on runtime errors
+            PackageLicenseError: couldn't find license in ebuild and source.
         """
         # If the total size installed is zero, we installed no content to license.
         if _BuildInfo(build_info_dir, "SIZE").strip() == "0":
@@ -778,7 +780,7 @@ to assign.  Once you've found it, copy the entire license file to:
         credits page generation.
 
         Args:
-          save_file: File to save the yaml contents into.
+            save_file: File to save the yaml contents into.
         """
         logging.debug("Saving license to %s", save_file)
         yaml_dump = list(self.__dict__.items())
@@ -788,13 +790,14 @@ to assign.  Once you've found it, copy the entire license file to:
         """AssertCorrectness runs various correctness checks on the package.
 
         Args:
-          build_info_dir: Path to the build_info for the ebuild. This can be from
-            the working directory during the emerge hook, or in the portage pkg db.
-          ebuild_path: Path to the ebuild. Unknown and therefore None during the
-            emerge hook.
+            build_info_dir: Path to the build_info for the ebuild. This can be
+                from the working directory during the emerge hook, or in the
+                portage pkg db.
+            ebuild_path: Path to the ebuild. Unknown and therefore None during
+                the emerge hook.
 
         Raises:
-          PackageCorrectnessError: if one of the checks fails.
+            PackageCorrectnessError: if one of the checks fails.
         """
         self._AssertMetapackageNoContent(build_info_dir)
         if ebuild_path is not None:
@@ -804,11 +807,12 @@ to assign.  Once you've found it, copy the entire license file to:
         """_AssertMetapackageNoContent ensures metapackages do not install files.
 
         Args:
-          build_info_dir: Path to the build_info for the ebuild. This can be from
-            the working directory during the emerge hook, or in the portage pkg db.
+            build_info_dir: Path to the build_info for the ebuild. This can be
+                from the working directory during the emerge hook, or in the
+                portage pkg db.
 
         Raises:
-          PackageCorrectnessError: if metapackage installs files.
+            PackageCorrectnessError: if metapackage installs files.
         """
         if _BuildInfo(build_info_dir, "LICENSE") == "metapackage":
             content = _BuildInfo(build_info_dir, "CONTENTS")
@@ -825,12 +829,14 @@ to assign.  Once you've found it, copy the entire license file to:
         """_AssertVirtualIsMetapackage ensures that virtual pkgs are metapackages.
 
         Args:
-          ebuild_path: Path to the ebuild.
-          build_info_dir: Path to the build_info for the ebuild. This can be from
-            the working directory during the emerge hook, or in the portage pkg db.
+            ebuild_path: Path to the ebuild.
+            build_info_dir: Path to the build_info for the ebuild. This can be
+                from the working directory during the emerge hook, or in the
+                portage pkg db.
 
         Raises:
-          PackageCorrectnessError: if virtual pkg does not use metapackage license.
+            PackageCorrectnessError: if virtual pkg does not use metapackage
+                license.
         """
         category = ebuild_path.split("/")[-3]
         overlay = ebuild_path.split("/")[-4]
@@ -857,15 +863,15 @@ def _GetLicenseDirectories(
     With a |board| argument, allows searching without a compiled sysroot.
 
     Args:
-      board: Which board to use to search a hierarchy.  Does not require the board
-          be setup or compiled yet.
-      sysroot: A setup board sysroot to query.
-      dir_set: Whether to fetch stock, custom, or both sets of directories.
-          See the _(STOCK|CUSTOM|BOTH)_DIRS constants.
-      buildroot: (Typically) the root chromiumos path.
+        board: Which board to use to search a hierarchy. Does not require the
+            board be setup or compiled yet.
+        sysroot: A setup board sysroot to query.
+        dir_set: Whether to fetch stock, custom, or both sets of directories.
+            See the _(STOCK|CUSTOM|BOTH)_DIRS constants.
+        buildroot: (Typically) the root chromiumos path.
 
     Returns:
-      list - all matching "licenses" directories
+        list - all matching "licenses" directories
     """
     stock = [os.path.join(buildroot, d) for d in STOCK_LICENSE_DIRS]
     if board is not None:
@@ -1111,10 +1117,10 @@ class Licensing(object):
         ProcessPackages.
 
         Args:
-          fullnamerev: package name of the form x11-base/X.Org-1.9.3-r23
-          homepages: list of url strings.
-          license_names: list of license name strings.
-          license_texts: custom license text to use, mostly for attribution.
+            fullnamerev: package name of the form x11-base/X.Org-1.9.3-r23
+            homepages: list of url strings.
+            license_names: list of license name strings.
+            license_texts: custom license text to use, mostly for attribution.
         """
         pkg = PackageInfo(self.sysroot, fullnamerev)
         pkg.homepages = homepages
@@ -1140,18 +1146,18 @@ class Licensing(object):
         Ignores the overlay_path if sysroot is provided.
 
         Args:
-          license_name: The license name
-          board: Which board to use to search a hierarchy.  Does not require the
-               board be setup or compiled yet.
-          sysroot: A setup board sysroot to query.
-          overlay_path: Which overlay directory to use as the search base
-          buildroot: source root
+            license_name: The license name
+            board: Which board to use to search a hierarchy. Does not require
+                the board be setup or compiled yet.
+            sysroot: A setup board sysroot to query.
+            overlay_path: Which overlay directory to use as the search base
+            buildroot: source root
 
         Returns:
-          str - license type
+            str - license type
 
         Raises:
-          AssertionError when the license couldn't be found
+            AssertionError when the license couldn't be found
         """
         if license_name == TAINTED:
             return TAINTED
@@ -1242,14 +1248,14 @@ after fixing the license."""
         the pkg source tree, if any.
 
         Args:
-          pkg: PackageInfo object
-          license_text: the license in plain text.
+            pkg: PackageInfo object
+            license_text: the license in plain text.
 
         Returns:
-          The license for a file->package in HTML format.
+            The license for a file->package in HTML format.
 
         Raises:
-          AssertionError: on runtime errors
+            AssertionError: on runtime errors
         """
         license_pointers = []
         # sln: shared license name.
@@ -1295,7 +1301,7 @@ after fixing the license."""
         the pkg source tree, if any.
 
         Args:
-          pkg: PackageInfo object
+            pkg: PackageInfo object
         """
         license_text = []
         for license_text_scanned in pkg.license_text_scanned:
@@ -1359,10 +1365,10 @@ after fixing the license."""
         """Generate the combined html license file.
 
         Args:
-          output_file: resulting HTML license output.
-          output_template: template for the entire HTML file.
-          entry_template: template for per package entries.
-          license_template: template for shared license entries.
+            output_file: resulting HTML license output.
+            output_template: template for the entire HTML file.
+            entry_template: template for per package entries.
+            license_template: template for shared license entries.
         """
         self.entry_template = ReadUnknownEncodedFile(entry_template)
         license_txts = self.GenerateLicenseText()
@@ -1503,11 +1509,11 @@ def ReadUnknownEncodedFile(file_path, logging_text=None):
     """Read a file of unknown encoding (UTF-8 or latin) by trying in sequence.
 
     Args:
-      file_path: what to read.
-      logging_text: what to display for logging depending on file read.
+        file_path: what to read.
+        logging_text: what to display for logging depending on file read.
 
     Returns:
-      File content, possibly converted from latin1 to UTF-8.
+        File content, possibly converted from latin1 to UTF-8.
     """
     try:
         with codecs.open(file_path, encoding="utf-8") as c:
@@ -1551,11 +1557,11 @@ def _BuildInfo(build_info_path, filename):
      'CATEGORY', 'PF', 'SIZE', 'HOMEPAGE', 'LICENSE'
 
     Args:
-      build_info_path: Path to the build_info directory to read from.
-      filename: Name of the file to read.
+        build_info_path: Path to the build_info directory to read from.
+        filename: Name of the file to read.
 
     Returns:
-      Contents of the file as a string, or "".
+        Contents of the file as a string, or "".
     """
     filename = os.path.join(build_info_path, filename)
 
@@ -1574,8 +1580,8 @@ def HookPackageProcess(pkg_build_path: str, sysroot: Optional[str] = "/"):
     This is called instead of LoadPackageInfo when called by a package build.
 
     Args:
-      pkg_build_path: unpacked being built by emerge.
-      sysroot: The sysroot we're building for.
+        pkg_build_path: unpacked being built by emerge.
+        sysroot: The sysroot we're building for.
     """
     build_info_dir = os.path.join(pkg_build_path, "build-info")
     if not os.path.isdir(build_info_dir):
