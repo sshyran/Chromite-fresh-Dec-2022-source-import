@@ -11,11 +11,11 @@ def LintData(path: str, data: str) -> bool:
     """Run basic whitespace checks on |data|.
 
     Args:
-      path: The name of the file (for diagnostics).
-      data: The file content to lint.
+        path: The name of the file (for diagnostics).
+        data: The file content to lint.
 
     Returns:
-      True if everything passed.
+        True if everything passed.
     """
     ret = True
 

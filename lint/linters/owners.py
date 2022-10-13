@@ -27,11 +27,11 @@ def lint_data(path: Union[str, os.PathLike], data: str) -> bool:
     """Run basic checks on |data|.
 
     Args:
-      path: The name of the file (for diagnostics).
-      data: The file content to lint.
+        path: The name of the file (for diagnostics).
+        data: The file content to lint.
 
     Returns:
-      True if everything passed.
+        True if everything passed.
     """
     ret = whitespace.LintData(path, data)
 
@@ -93,10 +93,10 @@ def lint_path(path: Union[str, os.PathLike]) -> bool:
     """Run basic checks on |path|.
 
     Args:
-      path: The name of the file.
+        path: The name of the file.
 
     Returns:
-      True if everything passed.
+        True if everything passed.
     """
     path = Path(path)
     if path.exists():
