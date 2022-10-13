@@ -49,10 +49,10 @@ def ImportCommand(name):
     will automatically get added to |_commands|.
 
     Args:
-      name: The subcommand to load.
+        name: The subcommand to load.
 
     Returns:
-      A reference to the subcommand class.
+        A reference to the subcommand class.
     """
     module_path = os.path.join(
         _SUBCOMMAND_MODULE_DIRECTORY, "cros_%s" % (name.replace("-", "_"),)
@@ -156,9 +156,9 @@ class CliCommand(object):
         This standardizes the help message across all subcommands.
 
         Args:
-          parser: The parser to add the device argument to.
-          schemes: List of device schemes or single scheme to allow.
-          positional: Whether it should be a positional or named argument.
+            parser: The parser to add the device argument to.
+            schemes: List of device schemes or single scheme to allow.
+            positional: Whether it should be a positional or named argument.
         """
         help_strings = []
         schemes = list(cros_build_lib.iflatten_instance(schemes))

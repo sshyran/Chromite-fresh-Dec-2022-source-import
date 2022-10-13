@@ -82,8 +82,8 @@ class CommandVMTest(object):
         """Initializes CommandVMTest.
 
         Args:
-          board: Board for the VM to run tests.
-          image_path: Path to the image for the VM to run tests.
+            board: Board for the VM to run tests.
+            image_path: Path to the image for the VM to run tests.
         """
         self.board = board
         self.image_path = image_path
@@ -94,10 +94,10 @@ class CommandVMTest(object):
         """Builds a CLI command.
 
         Args:
-          command: The sub-command to build on (e.g. 'flash', 'deploy').
-          device: The device's address for the command.
-          pos_args: A list of positional arguments for the command.
-          opt_args: A list of optional arguments for the command.
+            command: The sub-command to build on (e.g. 'flash', 'deploy').
+            device: The device's address for the command.
+            pos_args: A list of positional arguments for the command.
+            opt_args: A list of optional arguments for the command.
         """
         raise NotImplementedError()
 

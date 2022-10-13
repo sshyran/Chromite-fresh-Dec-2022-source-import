@@ -84,7 +84,7 @@ class BrilloDeployOperation(operation.ProgressBarOperation):
         """Construct BrilloDeployOperation object.
 
         Args:
-          emerge: True if emerge, False is unmerge.
+            emerge: True if emerge, False is unmerge.
         """
         super().__init__()
         if emerge:
@@ -114,8 +114,8 @@ class _InstallPackageScanner(object):
     packages only), or it will be updated if its sysroot version and build time
     are different from the target. Common usage:
 
-      pkg_scanner = _InstallPackageScanner(sysroot)
-      pkgs = pkg_scanner.Run(...)
+        pkg_scanner = _InstallPackageScanner(sysroot)
+        pkgs = pkg_scanner.Run(...)
     """
 
     class VartreeError(Exception):
@@ -194,10 +194,10 @@ print(json.dumps(pkg_info))
         """Returns a code snippet for dumping the vartree on the target.
 
         Args:
-          root: The installation root.
+            root: The installation root.
 
         Returns:
-          The said code snippet (string) with parameters filled in.
+            The said code snippet (string) with parameters filled in.
         """
         return cls._GET_VARTREE % {"root": root}
 
@@ -257,15 +257,15 @@ print(json.dumps(pkg_info))
         available.
 
         Args:
-          dep_str: A raw dependency string.
-          installed_db: A database of installed packages.
-          avail_db: A database of packages available for installation.
+            dep_str: A raw dependency string.
+            installed_db: A database of installed packages.
+            avail_db: A database of packages available for installation.
 
         Returns:
-          A list of pairs (CP, slot).
+            A list of pairs (CP, slot).
 
         Raises:
-          ValueError: the dependencies string is malformed.
+            ValueError: the dependencies string is malformed.
         """
 
         def ProcessSubDeps(dep_exp, disjunct):
@@ -330,20 +330,20 @@ print(json.dumps(pkg_info))
         """Returns a database of packages given a list of CPV info.
 
         Args:
-          cpv_info: A list of tuples containing package CPV and attributes.
-          process_rdeps: Whether to populate forward dependencies.
-          process_rev_rdeps: Whether to populate reverse dependencies.
-          installed_db: A database of installed packages for filtering disjunctive
-            choices against; if None, using own built database.
+            cpv_info: A list of tuples containing package CPV and attributes.
+            process_rdeps: Whether to populate forward dependencies.
+            process_rev_rdeps: Whether to populate reverse dependencies.
+            installed_db: A database of installed packages for filtering
+                disjunctive choices against; if None, using own built database.
 
         Returns:
-          A map from CP values to another dictionary that maps slots to package
-          attribute tuples. Tuples contain a CPV value (string), build time
-          (string), runtime dependencies (set), and reverse dependencies (set,
-          empty if not populated).
+            A map from CP values to another dictionary that maps slots
+            to package attribute tuples. Tuples contain a CPV value
+            (string), build time (string), runtime dependencies (set),
+            and reverse dependencies (set, empty if not populated).
 
         Raises:
-          ValueError: If more than one CPV occupies a single slot.
+            ValueError: If more than one CPV occupies a single slot.
         """
         db = {}
         logging.debug("Populating package DB...")
@@ -499,11 +499,12 @@ print(json.dumps(pkg_info))
         qualifier in the result.
 
         Args:
-          cpv_pattern: A CPV pattern, potentially partial and/or having wildcards.
+            cpv_pattern: A CPV pattern, potentially partial and/or having
+                wildcards.
 
         Returns:
-          A list of (CPV, slot) pairs of packages in the binpkgs database that
-          match the pattern.
+            A list of (CPV, slot) pairs of packages in the binpkgs database that
+            match the pattern.
         """
         attrs = package_info.SplitCPV(cpv_pattern, strict=False)
         cp_pattern = os.path.join(attrs.category or "*", attrs.package or "*")
@@ -528,14 +529,15 @@ print(json.dumps(pkg_info))
         """Returns the (CP, slot) pair for a package matching |pkg|.
 
         Args:
-          pkg: Path to a binary package or a (partial) package CPV specifier.
+            pkg: Path to a binary package or a (partial) package CPV specifier.
 
         Returns:
-          A (CP, slot) pair for the given package; slot may be None (unspecified).
+            A (CP, slot) pair for the given package; slot may be None
+            (unspecified).
 
         Raises:
-          ValueError: if |pkg| is not a binpkg file nor does it match something
-          that's in the bintree.
+            ValueError: if |pkg| is not a binpkg file nor does it match
+            something that's in the bintree.
         """
         if pkg.endswith(".tbz2") and os.path.isfile(pkg):
             package = os.path.basename(os.path.splitext(pkg)[0])
@@ -560,17 +562,17 @@ print(json.dumps(pkg_info))
         """Returns whether a package needs to be installed on the target.
 
         Args:
-          cpv: Fully qualified CPV (string) of the package.
-          slot: Slot identifier (string).
-          build_time: The BUILT_TIME value (string) of the binpkg.
-          optional: Whether package is optional on the target.
+            cpv: Fully qualified CPV (string) of the package.
+            slot: Slot identifier (string).
+            build_time: The BUILT_TIME value (string) of the binpkg.
+            optional: Whether package is optional on the target.
 
         Returns:
-          A tuple (install, update) indicating whether to |install| the package and
-          whether it is an |update| to an existing package.
+            A tuple (install, update) indicating whether to |install| the
+            package and whether it is an |update| to an existing package.
 
         Raises:
-          ValueError: if slot is not provided.
+            ValueError: if slot is not provided.
         """
         # If not checking installed packages, always install.
         if not self.target_db:
@@ -622,8 +624,8 @@ print(json.dumps(pkg_info))
         """Enqueues dependencies for processing.
 
         Args:
-          deps: List of dependencies to enqueue.
-          reverse: Whether these are reverse dependencies.
+            deps: List of dependencies to enqueue.
+            reverse: Whether these are reverse dependencies.
         """
         if not deps:
             return
@@ -647,14 +649,14 @@ print(json.dumps(pkg_info))
         """Returns a dictionary of packages that need to be installed on the target.
 
         Args:
-          process_rdeps: Whether to trace forward dependencies.
-          process_rev_rdeps: Whether to trace backward dependencies as well.
+            process_rdeps: Whether to trace forward dependencies.
+            process_rev_rdeps: Whether to trace backward dependencies as well.
 
         Returns:
-          A dictionary mapping CP values (string) to tuples containing a CPV
-          (string), a slot (string), a boolean indicating whether the package
-          was initially listed in the queue, and a boolean indicating whether this
-          is an update to an existing package.
+            A dictionary mapping CP values (string) to tuples containing
+            a CPV (string), a slot (string), a boolean indicating whether
+            the package was initially listed in the queue, and a boolean
+            indicating whether this is an update to an existing package.
         """
         installs = {}
         while self.queue:
@@ -709,13 +711,13 @@ print(json.dumps(pkg_info))
         package database.
 
         Args:
-          installs: Dictionary of packages to install indexed by CP.
+            installs: Dictionary of packages to install indexed by CP.
 
         Returns:
-          A list of package CPVs (string).
+            A list of package CPVs (string).
 
         Raises:
-          ValueError: If dependency graph contains a cycle.
+            ValueError: If dependency graph contains a cycle.
         """
         not_visited = set(installs.keys())
         curr_path = []
@@ -774,21 +776,22 @@ print(json.dumps(pkg_info))
         """Computes the list of packages that need to be installed on a target.
 
         Args:
-          device: Target handler object.
-          root: Package installation root.
-          listed_pkgs: Package names/files listed by the user.
-          update: Whether to read the target's installed package database.
-          process_rdeps: Whether to trace forward dependencies.
-          process_rev_rdeps: Whether to trace backward dependencies as well.
+            device: Target handler object.
+            root: Package installation root.
+            listed_pkgs: Package names/files listed by the user.
+            update: Whether to read the target's installed package database.
+            process_rdeps: Whether to trace forward dependencies.
+            process_rev_rdeps: Whether to trace backward dependencies as well.
 
         Returns:
-          A tuple (sorted, listed, num_updates, install_attrs) where |sorted| is a
-          list of package CPVs (string) to install on the target in an order that
-          satisfies their inter-dependencies, |listed| the subset that was
-          requested by the user, and |num_updates| the number of packages being
-          installed over preexisting versions. Note that installation order should
-          be reversed for removal, |install_attrs| is a dictionary mapping a package
-          CPV (string) to some of its extracted environment attributes.
+            A tuple (sorted, listed, num_updates, install_attrs) where |sorted|
+            is a list of package CPVs (string) to install on the target
+            in an order that satisfies their inter-dependencies, |listed|
+            the subset that was requested by the user, and |num_updates|
+            the number of packages being installed over preexisting
+            versions. Note that installation order should be reversed for
+            removal, |install_attrs| is a dictionary mapping a package
+            CPV (string) to some of its extracted environment attributes.
         """
         if process_rev_rdeps and not process_rdeps:
             raise ValueError(
@@ -856,13 +859,13 @@ def _Emerge(device, pkg_paths, root, extra_args=None):
     """Copies |pkg_paths| to |device| and emerges them.
 
     Args:
-      device: A ChromiumOSDevice object.
-      pkg_paths: (Local) paths to binary packages.
-      root: Package installation root path.
-      extra_args: Extra arguments to pass to emerge.
+        device: A ChromiumOSDevice object.
+        pkg_paths: (Local) paths to binary packages.
+        root: Package installation root path.
+        extra_args: Extra arguments to pass to emerge.
 
     Raises:
-      DeployError: Unrecoverable error during emerge.
+        DeployError: Unrecoverable error during emerge.
     """
 
     def path_to_name(pkg_path):
@@ -976,9 +979,9 @@ def _RestoreSELinuxContext(device, pkgpath, root):
     are installed to /
 
     Args:
-      device: a ChromiumOSDevice object
-      pkgpath: path to tarball
-      root: Package installation root path.
+        device: a ChromiumOSDevice object
+        pkgpath: path to tarball
+        root: Package installation root path.
     """
     pkgroot = os.path.join(device.work_dir, "packages")
     pkg_dirname = os.path.basename(os.path.dirname(pkgpath))
@@ -1008,15 +1011,15 @@ def _GetPackagesByCPV(cpvs, strip, sysroot):
     """Returns paths to binary packages corresponding to |cpvs|.
 
     Args:
-      cpvs: List of CPV components given by package_info.SplitCPV().
-      strip: True to run strip_package.
-      sysroot: Sysroot path.
+        cpvs: List of CPV components given by package_info.SplitCPV().
+        strip: True to run strip_package.
+        sysroot: Sysroot path.
 
     Returns:
-      List of paths corresponding to |cpvs|.
+        List of paths corresponding to |cpvs|.
 
     Raises:
-      DeployError: If a package is missing.
+        DeployError: If a package is missing.
     """
     packages_dir = None
     if strip:
@@ -1058,12 +1061,12 @@ def _GetPackagesPaths(pkgs, strip, sysroot):
     """Returns paths to binary |pkgs|.
 
     Args:
-      pkgs: List of package CPVs string.
-      strip: Whether or not to run strip_package for CPV packages.
-      sysroot: The sysroot path.
+        pkgs: List of package CPVs string.
+        strip: Whether or not to run strip_package for CPV packages.
+        sysroot: The sysroot path.
 
     Returns:
-      List of paths corresponding to |pkgs|.
+        List of paths corresponding to |pkgs|.
     """
     cpvs = [package_info.SplitCPV(p) for p in pkgs]
     return _GetPackagesByCPV(cpvs, strip, sysroot)
@@ -1073,9 +1076,9 @@ def _Unmerge(device, pkgs, root):
     """Unmerges |pkgs| on |device|.
 
     Args:
-      device: A RemoteDevice object.
-      pkgs: Package names.
-      root: Package installation root path.
+        device: A RemoteDevice object.
+        pkgs: Package names.
+        root: Package installation root path.
     """
     pkg_names = ", ".join(os.path.basename(x) for x in pkgs)
     # This message is read by BrilloDeployOperation.
@@ -1194,11 +1197,11 @@ def _DeployDLCImage(device, sysroot, board, dlc_id, dlc_package):
     """Deploy (install and mount) a DLC image.
 
     Args:
-      device: A device object.
-      sysroot: The sysroot path.
-      board: Board to use.
-      dlc_id: The DLC ID.
-      dlc_package: The DLC package name.
+        device: A device object.
+        sysroot: The sysroot path.
+        board: Board to use.
+        dlc_id: The DLC ID.
+        dlc_package: The DLC package name.
     """
     # Requires `sudo_rm` because installations of files are running with sudo.
     with osutils.TempDir(sudo_rm=True) as tempdir:
@@ -1297,13 +1300,13 @@ def _GetDLCInfo(device, pkg_path, from_dut):
     """Returns information of a DLC given its package path.
 
     Args:
-      device: commandline.Device object; None to use the default device.
-      pkg_path: path to the package.
-      from_dut: True if extracting DLC info from DUT, False if extracting DLC
-                info from host.
+        device: commandline.Device object; None to use the default device.
+        pkg_path: path to the package.
+        from_dut: True if extracting DLC info from DUT, False if extracting DLC
+            info from host.
 
     Returns:
-      A tuple (dlc_id, dlc_package).
+        A tuple (dlc_id, dlc_package).
     """
     environment_content = ""
     if from_dut:
@@ -1362,25 +1365,25 @@ def Deploy(
     """Deploys packages to a device.
 
     Args:
-      device: commandline.Device object; None to use the default device.
-      packages: List of packages (strings) to deploy to device.
-      board: Board to use; None to automatically detect.
-      emerge: True to emerge package, False to unmerge.
-      update: Check installed version on device.
-      deep: Install dependencies also. Implies |update|.
-      deep_rev: Install reverse dependencies. Implies |deep|.
-      clean_binpkg: Clean outdated binary packages.
-      root: Package installation root path.
-      strip: Run strip_package to filter out preset paths in the package.
-      emerge_args: Extra arguments to pass to emerge.
-      ssh_private_key: Path to an SSH private key file; None to use test keys.
-      ping: True to ping the device before trying to connect.
-      force: Ignore confidence checks and prompts.
-      dry_run: Print deployment plan but do not deploy anything.
+        device: commandline.Device object; None to use the default device.
+        packages: List of packages (strings) to deploy to device.
+        board: Board to use; None to automatically detect.
+        emerge: True to emerge package, False to unmerge.
+        update: Check installed version on device.
+        deep: Install dependencies also. Implies |update|.
+        deep_rev: Install reverse dependencies. Implies |deep|.
+        clean_binpkg: Clean outdated binary packages.
+        root: Package installation root path.
+        strip: Run strip_package to filter out preset paths in the package.
+        emerge_args: Extra arguments to pass to emerge.
+        ssh_private_key: Path to an SSH private key file; None to use test keys.
+        ping: True to ping the device before trying to connect.
+        force: Ignore confidence checks and prompts.
+        dry_run: Print deployment plan but do not deploy anything.
 
     Raises:
-      ValueError: Invalid parameter or parameter combination.
-      DeployError: Unrecoverable failure during deploy.
+        ValueError: Invalid parameter or parameter combination.
+        DeployError: Unrecoverable failure during deploy.
     """
     if deep_rev:
         deep = True

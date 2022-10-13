@@ -92,8 +92,8 @@ def _IsFilePathGPTDiskImage(file_path, require_pmbr=False):
     """Determines if a file is a valid GPT disk.
 
     Args:
-      file_path: Path to the file to test.
-      require_pmbr: Whether to require a PMBR in LBA0.
+        file_path: Path to the file to test.
+        require_pmbr: Whether to require a PMBR in LBA0.
     """
     if os.path.isfile(file_path):
         with open(file_path, "rb") as image_file:
@@ -118,7 +118,7 @@ def _ChooseImageFromDirectory(dir_path):
     """Lists all image files in |dir_path| and ask user to select one.
 
     Args:
-      dir_path: Path to the directory.
+        dir_path: Path to the directory.
     """
     images = sorted(
         [
@@ -164,10 +164,10 @@ class USBImager(object):
         """Returns a informational description of the removable |device|.
 
         Args:
-          device: the device name (e.g. sdc).
+            device: the device name (e.g. sdc).
 
         Returns:
-          A string describing |device| (e.g. Patriot Memory 7918 MB).
+            A string describing |device| (e.g. Patriot Memory 7918 MB).
         """
         desc = [
             osutils.GetDeviceInfo(device, keyword="manufacturer"),
@@ -181,7 +181,7 @@ class USBImager(object):
         """Returns a list of removable devices.
 
         Returns:
-          A list of device names (e.g. ['sdb', 'sdc']).
+            A list of device names (e.g. ['sdb', 'sdc']).
         """
         devices = osutils.ListBlockDevices()
         removable_devices = []
@@ -195,10 +195,10 @@ class USBImager(object):
         """Lists all removable devices and asks user to select/confirm.
 
         Args:
-          devices: a list of device names (e.g. ['sda', 'sdb']).
+            devices: a list of device names (e.g. ['sda', 'sdb']).
 
         Returns:
-          The device name chosen by the user.
+            The device name chosen by the user.
         """
         idx = cros_build_lib.GetChoice(
             "Removable device(s) found. Please select/confirm to continue:",
@@ -211,8 +211,8 @@ class USBImager(object):
         """Copies |image| to the removable |device|.
 
         Args:
-          image: Path to the image to copy.
-          device: Device to copy to.
+            image: Path to the image to copy.
+            device: Device to copy to.
         """
         cmd = [
             "dd",
@@ -388,31 +388,35 @@ def Flash(
     same underlying functionality.
 
     Args:
-      device: commandline.Device object; None to use the default device.
-      image: Path (string) to the update image. Can be a local or xbuddy path;
-          non-existant local paths are converted to xbuddy.
-      board: Board to use; None to automatically detect.
-      no_rootfs_update: Don't update rootfs partition; SSH |device| scheme only.
-      no_stateful_update: Don't update stateful partition; SSH |device| scheme
-          only.
-      no_minios_update: Don't update miniOS partition; SSH |device| scheme only.
-      clobber_stateful: Clobber stateful partition; SSH |device| scheme only.
-      clear_tpm_owner: Clear the TPM owner on reboot; SSH |device| scheme only.
-      reboot: Reboot device after update; SSH |device| scheme only.
-      ssh_private_key: Path to an SSH private key file; None to use test keys.
-      ping: Ping the device before attempting update; SSH |device| scheme only.
-      disable_rootfs_verification: Remove rootfs verification after update; SSH
-          |device| scheme only.
-      clear_cache: Clear the devserver static directory.
-      yes: Assume "yes" for any prompt.
-      force: Ignore confidence checks and prompts. Overrides |yes| if True.
-      debug: Print additional debugging messages.
-      version: Default version.
-      delta: Whether to use delta compression when tranferring image bytes.
+        device: commandline.Device object; None to use the default device.
+        image: Path (string) to the update image. Can be a local or xbuddy path;
+            non-existent local paths are converted to xbuddy.
+        board: Board to use; None to automatically detect.
+        no_rootfs_update: Don't update rootfs partition; SSH |device| scheme
+            only.
+        no_stateful_update: Don't update stateful partition; SSH |device| scheme
+            only.
+        no_minios_update: Don't update miniOS partition; SSH |device| scheme
+            only.
+        clobber_stateful: Clobber stateful partition; SSH |device| scheme only.
+        clear_tpm_owner: Clear the TPM owner on reboot; SSH |device| scheme
+            only.
+        reboot: Reboot device after update; SSH |device| scheme only.
+        ssh_private_key: Path to an SSH private key file; None to use test keys.
+        ping: Ping the device before attempting update; SSH |device| scheme
+            only.
+        disable_rootfs_verification: Remove rootfs verification after update;
+            SSH |device| scheme only.
+        clear_cache: Clear the devserver static directory.
+        yes: Assume "yes" for any prompt.
+        force: Ignore confidence checks and prompts. Overrides |yes| if True.
+        debug: Print additional debugging messages.
+        version: Default version.
+        delta: Whether to use delta compression when transferring image bytes.
 
     Raises:
-      FlashError: An unrecoverable error occured.
-      ValueError: Invalid parameter combination.
+        FlashError: An unrecoverable error occurred.
+        ValueError: Invalid parameter combination.
     """
     if force:
         yes = True

@@ -90,19 +90,20 @@ class DeviceImager(object):
         """Initialize DeviceImager for flashing a Chromium OS device.
 
         Args:
-          device: The ChromiumOSDevice to be updated.
-          image: The target image path (can be xBuddy path).
-          board: Board to use.
-          version: Image version to use.
-          no_rootfs_update: Whether to do rootfs partition update.
-          no_stateful_update: Whether to do stateful partition update.
-          no_minios_update: Whether to do minios partition update.
-          no_reboot: Whether to reboot device after update. The default is True.
-          disable_verification: Whether to disabling rootfs verification on the
-              device.
-          clobber_stateful: Whether to do a clean stateful partition.
-          clear_tpm_owner: If true, it will clear the TPM owner on reboot.
-          delta: Whether to use delta compression when transferring image bytes.
+            device: The ChromiumOSDevice to be updated.
+            image: The target image path (can be xBuddy path).
+            board: Board to use.
+            version: Image version to use.
+            no_rootfs_update: Whether to do rootfs partition update.
+            no_stateful_update: Whether to do stateful partition update.
+            no_minios_update: Whether to do minios partition update.
+            no_reboot: Whether to reboot device after update, default True.
+            disable_verification: Whether to disable rootfs verification on the
+                device.
+            clobber_stateful: Whether to do a clean stateful partition.
+            clear_tpm_owner: If true, it will clear the TPM owner on reboot.
+            delta: Whether to use delta compression when transferring image
+                bytes.
         """
 
         self._device = device
@@ -215,11 +216,11 @@ class DeviceImager(object):
         """Splits the given /dev/x path into prefix and the dev number.
 
         Args:
-          path: The path to a block dev device.
+            path: The path to a block dev device.
 
         Returns:
-          A tuple of representing the prefix and the index of the dev path.
-          e.g.: '/dev/mmcblk0p1' -> ['/dev/mmcblk0p', 1]
+            A tuple of representing the prefix and the index of the dev path.
+            e.g.: '/dev/mmcblk0p1' -> ['/dev/mmcblk0p', 1]
         """
         match = re.search(r"(.*)([0-9]+)$", path)
         if match is None:
@@ -231,8 +232,8 @@ class DeviceImager(object):
         """Returns the kernel state.
 
         Returns:
-          A tuple of two dictionaries: The current active kernel state and the
-          inactive kernel state. (Look at A and B constants in this class.)
+            A tuple of two dictionaries: The current active kernel state and the
+            inactive kernel state. (Look at A and B constants in this class.)
         """
         if root_num == self.A[Partition.ROOTFS]:
             return self.A, self.B
@@ -245,8 +246,8 @@ class DeviceImager(object):
         """Returns the miniOS state.
 
         Returns:
-          A tuple of dictionaries: The current active miniOS state and the inactive
-          miniOS state.
+            A tuple of dictionaries: The current active miniOS state and the
+            inactive miniOS state.
         """
         if minios_num == self.MINIOS_A[Partition.MINIOS]:
             return self.MINIOS_A, self.MINIOS_B
@@ -371,7 +372,7 @@ class ReaderBase(threading.Thread):
         """Initializes the class.
 
         Args:
-          use_named_pipes: Whether to use a named pipe or anonymous file
+            use_named_pipes: Whether to use a named pipe or anonymous file
             descriptors.
         """
         super().__init__()
@@ -471,10 +472,10 @@ class PartialFileReader(ReaderBase):
         """Initializes the class.
 
         Args:
-          image: The path to an image (local or remote directory).
-          offset: The offset (in bytes) to read from the image.
-          length: The length (in bytes) to read from the image.
-          compression_command: The command to compress transferred bytes.
+            image: The path to an image (local or remote directory).
+            offset: The offset (in bytes) to read from the image.
+            length: The length (in bytes) to read from the image.
+            compression_command: The command to compress transferred bytes.
         """
         super().__init__()
 
@@ -509,7 +510,7 @@ class GsFileCopier(ReaderBase):
         """Initializes the class.
 
         Args:
-          image: The path to an image (local or remote directory).
+            image: The path to an image (local or remote directory).
         """
         super().__init__(use_named_pipes=True)
         self._image = image
@@ -533,10 +534,10 @@ class PartitionUpdaterBase(object):
         """Initializes this base class with values that most sub-classes will need.
 
         Args:
-          device: The ChromiumOSDevice to be updated.
-          image: The target image path for the partition update.
-          image_type: The type of the image (ImageType).
-          target: The target path (e.g. block dev) to install the update.
+            device: The ChromiumOSDevice to be updated.
+            image: The target image path for the partition update.
+            image_type: The type of the image (ImageType).
+            target: The target path (e.g. block dev) to install the update.
         """
         self._device = device
         self._image = image
@@ -595,8 +596,8 @@ class RawPartitionUpdater(PartitionUpdaterBase):
         """Updates the device's partition from a local Chromium OS image.
 
         Args:
-          part_name: The name of the partition in the source image that needs to be
-            extracted.
+            part_name: The name of the partition in the source image that needs
+                to be extracted.
         """
         offset, length = self._GetPartLocation(part_name)
         offset, length = self._OptimizePartLocation(offset, length)
@@ -628,8 +629,8 @@ class RawPartitionUpdater(PartitionUpdaterBase):
         """Writes bytes source to the target device on DUT.
 
         Returns:
-          A string command to run on a device to read data from stdin, uncompress it
-          and write it to the target partition.
+            A string command to run on a device to read data from stdin,
+            uncompress it and write it to the target partition.
         """
         # Using oflag=direct to tell the OS not to cache the writes (faster).
         cmd = " ".join(
@@ -648,11 +649,11 @@ class RawPartitionUpdater(PartitionUpdaterBase):
         """Extracts the location and size of the raw partition from the image.
 
         Args:
-          part_name: The name of the partition in the source image that needs to be
-            extracted.
+            part_name: The name of the partition in the source image that needs
+            to be extracted.
 
         Returns:
-          A tuple of offset and length (in bytes) from the image.
+            A tuple of offset and length (in bytes) from the image.
         """
         try:
             parts = image_lib.GetImageDiskPartitionInfo(self._image)
@@ -676,11 +677,11 @@ class RawPartitionUpdater(PartitionUpdaterBase):
         defined in the PGT partition layout.
 
         Args:
-          offset: The offset (in bytes) of the partition in the image.
-          length: The length (in bytes) of the partition.
+            offset: The offset (in bytes) of the partition in the image.
+            length: The length (in bytes) of the partition.
 
         Returns:
-          A tuple of offset and length (in bytes) from the image.
+            A tuple of offset and length (in bytes) from the image.
         """
         return offset, length
 
@@ -688,7 +689,7 @@ class RawPartitionUpdater(PartitionUpdaterBase):
         """Downloads the partition from a remote path and writes it into target.
 
         Args:
-          file_name: The file name in the remote directory self._image.
+            file_name: The file name in the remote directory self._image.
         """
         image_path = os.path.join(self._image, file_name)
         with GsFileCopier(image_path) as generator:
@@ -729,8 +730,8 @@ class RootfsUpdater(RawPartitionUpdater):
         """Initializes the class.
 
         Args:
-          current_root: The current root device path.
-          *args: See PartitionUpdaterBase
+            current_root: The current root device path.
+            *args: See PartitionUpdaterBase
         """
         super().__init__(*args)
 
@@ -773,10 +774,10 @@ class RootfsUpdater(RawPartitionUpdater):
         """Runs the postinst process in the root partition.
 
         Args:
-          on_target: If true the postinst is run on the target (inactive)
-            partition. This is used when doing normal updates. If false, the
-            postinst is run on the current (active) partition. This is used when
-            reverting an update.
+            on_target: If true the postinst is run on the target (inactive)
+                partition. This is used when doing normal updates. If false, the
+                postinst is run on the current (active) partition. This is used
+                when reverting an update.
         """
         try:
             postinst_dir = "/"
@@ -822,7 +823,7 @@ class MiniOSUpdater(RawPartitionUpdater):
         """Initializes the class.
 
         Args:
-          *args: See PartitionUpdaterBase
+            *args: See PartitionUpdaterBase
         """
         super().__init__(*args)
 
@@ -920,7 +921,7 @@ class StatefulPayloadGenerator(ReaderBase):
         """Initializes that class.
 
         Args:
-          image: The path to a local Chromium OS image.
+            image: The path to a local Chromium OS image.
         """
         super().__init__()
         self._image = image
@@ -942,8 +943,8 @@ class StatefulUpdater(PartitionUpdaterBase):
         """Initializes the class
 
         Args:
-          clobber_stateful: Whether to clobber the stateful or not.
-          *args: Look at PartitionUpdaterBase.
+            clobber_stateful: Whether to clobber the stateful or not.
+            *args: Look at PartitionUpdaterBase.
         """
         super().__init__(*args)
         self._clobber_stateful = clobber_stateful
@@ -988,8 +989,8 @@ class ProgressWatcher(threading.Thread):
         """Initializes the class.
 
         Args:
-          device: The ChromiumOSDevice to be updated.
-          target_root: The target root partition to monitor the progress of.
+            device: The ChromiumOSDevice to be updated.
+            target_root: The target root partition to monitor the progress of.
         """
         super().__init__()
 
@@ -1069,7 +1070,7 @@ class DeviceImagerOperation(operation.ProgressBarOperation):
         """Override function to parse the output and provide progress.
 
         Args:
-          output: The stderr or stdout.
+            output: The stderr or stdout.
         """
         output = self._stdout.read()
         match = re.findall(r"RootFS progress: (\d+(?:\.\d+)?)", output)
