@@ -120,11 +120,11 @@ def GetAndroidPackageDir(
     """Returns the Portage package directory of the given Android package.
 
     Args:
-      android_package: the Android package name e.g. 'android-vm-rvc'
-      overlay_dir: specify to override the default overlay.
+        android_package: the Android package name e.g. 'android-vm-rvc'
+        overlay_dir: specify to override the default overlay.
 
     Returns:
-      The Portage package directory
+        The Portage package directory
     """
     return os.path.join(overlay_dir, "chromeos-base", android_package)
 
@@ -133,10 +133,10 @@ def GetAndroidBranchForPackage(android_package: str) -> str:
     """Returns the corresponding Android branch of given Android package.
 
     Args:
-      android_package: the Android package name e.g. 'android-vm-rvc'
+        android_package: the Android package name e.g. 'android-vm-rvc'
 
     Returns:
-      The corresponding Android branch e.g. 'git_rvc-arc'
+        The corresponding Android branch e.g. 'git_rvc-arc'
     """
     mapping = {
         constants.ANDROID_PI_PACKAGE: constants.ANDROID_PI_BUILD_BRANCH,
@@ -160,13 +160,13 @@ def IsBuildIdValid(
     be found and that the zip file is present in that subdirectory.
 
     Args:
-      build_branch: branch of Android builds
-      build_id: A string. The Android build id number to check.
-      bucket_url: URL of Android build gs bucket
+        build_branch: branch of Android builds
+        build_id: A string. The Android build id number to check.
+        bucket_url: URL of Android build gs bucket
 
     Returns:
-      Returns subpaths dictionary if build_id is valid.
-      None if the build_id is not valid.
+        Returns subpaths dictionary if build_id is valid.
+        None if the build_id is not valid.
     """
     targets = ARTIFACTS_TO_COPY[build_branch]
     gs_context = gs.GSContext()
@@ -219,12 +219,12 @@ def GetLatestBuild(
     """Searches the gs bucket for the latest green build.
 
     Args:
-      build_branch: branch of Android builds
-      bucket_url: URL of Android build gs bucket
+        build_branch: branch of Android builds
+        bucket_url: URL of Android build gs bucket
 
     Returns:
-      Tuple of (latest version string, subpaths dictionary)
-      If no latest build can be found, returns None, None
+        Tuple of (latest version string, subpaths dictionary)
+        If no latest build can be found, returns None, None
     """
     targets = ARTIFACTS_TO_COPY[build_branch]
     gs_context = gs.GSContext()
@@ -272,11 +272,11 @@ def _GetAcl(target: str, package_dir: str) -> str:
     """Returns the path to ACL file corresponding to target.
 
     Args:
-      target: Android build target.
-      package_dir: Path to the Android portage package.
+        target: Android build target.
+        package_dir: Path to the Android portage package.
 
     Returns:
-      Path to the ACL definition file.
+        Path to the ACL definition file.
     """
     if "arm" in target:
         return os.path.join(package_dir, ARC_BUCKET_ACL_ARM)
@@ -301,12 +301,12 @@ def CopyToArcBucket(
     Applies build specific ACLs for each file.
 
     Args:
-      android_bucket_url: URL of Android build gs bucket
-      build_branch: branch of Android builds
-      build_id: A string. The Android build id number to check.
-      subpaths: Subpath dictionary for each build to copy.
-      arc_bucket_url: URL of the target ARC build gs bucket
-      package_dir: Path to the Android portage package.
+        android_bucket_url: URL of Android build gs bucket
+        build_branch: branch of Android builds
+        build_id: A string. The Android build id number to check.
+        subpaths: Subpath dictionary for each build to copy.
+        arc_bucket_url: URL of the target ARC build gs bucket
+        package_dir: Path to the Android portage package.
     """
     targets = ARTIFACTS_TO_COPY[build_branch]
     gs_context = gs.GSContext()
@@ -395,15 +395,15 @@ def MirrorArtifacts(
     with setting ACLs.
 
     Args:
-      android_bucket_url: URL of Android build gs bucket
-      android_build_branch: branch of Android builds
-      arc_bucket_url: URL of the target ARC build gs bucket
-      package_dir: Path to the Android portage package.
-      version: A string. The Android build id number to check.
-          If not passed, detect latest good build version.
+        android_bucket_url: URL of Android build gs bucket
+        android_build_branch: branch of Android builds
+        arc_bucket_url: URL of the target ARC build gs bucket
+        package_dir: Path to the Android portage package.
+        version: A string. The Android build id number to check.
+            If not passed, detect latest good build version.
 
     Returns:
-      Mirrored version.
+        Mirrored version.
     """
     if version:
         subpaths = IsBuildIdValid(
@@ -443,11 +443,11 @@ def WriteLKGB(android_package_dir: str, build_id: str) -> str:
     """Writes the LKGB file under the given Android package directory.
 
     Args:
-      android_package_dir: The Android package directory.
-      build_id: The last known good Android build ID.
+        android_package_dir: The Android package directory.
+        build_id: The last known good Android build ID.
 
     Returns:
-      Path to the updated file.
+        Path to the updated file.
     """
     path = os.path.join(android_package_dir, _LKGB_JSON)
     lkgb = {"build_id": build_id}
@@ -461,14 +461,14 @@ def ReadLKGB(android_package_dir: str) -> str:
     """Reads the LKGB file under the given Android package directory.
 
     Args:
-      android_package_dir: The Android package directory.
+        android_package_dir: The Android package directory.
 
     Returns:
-      The last known good Android build ID as described in the file.
+        The last known good Android build ID as described in the file.
 
     Raises:
-      MissingLKGBError: If the LKGB file is not found under android_package_dir.
-      InvalidLKGBError: If the LKGB file contains invalid content.
+        MissingLKGBError: If the LKGB file is not found under android_package_dir.
+        InvalidLKGBError: If the LKGB file contains invalid content.
     """
     path = os.path.join(android_package_dir, _LKGB_JSON)
     if not os.path.exists(path):

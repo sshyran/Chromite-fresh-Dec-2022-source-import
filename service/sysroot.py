@@ -115,21 +115,21 @@ class SetupBoardRunConfig(object):
         """Initialize method.
 
         Args:
-          set_default: Whether to set the passed board as the default.
-          force: Force a new sysroot creation when it already exists.
-          usepkg: Whether to use binary packages to bootstrap.
-          jobs: Max number of simultaneous packages to build.
-          regen_configs: Whether to only regen the configs.
-          quiet: Whether to print notification when sysroot exists.
-          update_toolchain: Update the toolchain?
-          upgrade_chroot: Upgrade the chroot before building?
-          init_board_pkgs: Emerging packages to sysroot?
-          local_build: Bootstrap only from local packages?
-          toolchain_changed: Has a toolchain change occurred? Implies 'force'.
-          package_indexes: List of information about available prebuilts, youngest
-              first, or None.
-          expanded_binhost_inheritance: Allow expanded binhost inheritance.
-          backtrack: emerge --backtrack value.
+            set_default: Whether to set the passed board as the default.
+            force: Force a new sysroot creation when it already exists.
+            usepkg: Whether to use binary packages to bootstrap.
+            jobs: Max number of simultaneous packages to build.
+            regen_configs: Whether to only regen the configs.
+            quiet: Whether to print notification when sysroot exists.
+            update_toolchain: Update the toolchain?
+            upgrade_chroot: Upgrade the chroot before building?
+            init_board_pkgs: Emerging packages to sysroot?
+            local_build: Bootstrap only from local packages?
+            toolchain_changed: Has a toolchain change occurred? Implies 'force'.
+            package_indexes: List of information about available prebuilts,
+                youngest first, or None.
+            expanded_binhost_inheritance: Allow expanded binhost inheritance.
+            backtrack: emerge --backtrack value.
         """
         self.set_default = set_default
         self.force = force or toolchain_changed
@@ -149,7 +149,7 @@ class SetupBoardRunConfig(object):
         """Create a list containing the relevant update_chroot arguments.
 
         Returns:
-          The list of arguments
+            The list of arguments
         """
         args = [f"--backtrack={self.backtrack}"]
         if self.usepkg:
@@ -201,42 +201,43 @@ class BuildPackagesRunConfig(object):
         """Init method.
 
         Args:
-          usepkg: Whether to use binpkgs or build from source. False currently
-            triggers a local build, which will enable local reuse.
-          install_debug_symbols: Whether to include the debug symbols for all
-            packages.
-          packages: The list of packages to install, by default install all packages
-            for the target.
-          use_flags: A list of use flags to set.
-          use_goma: Whether to enable goma.
-          use_remoteexec: Whether to use RBE for remoteexec.
-          incremental_build: Whether to treat the build as an incremental build or a
-            fresh build. Always treating it as an incremental build is safe, but
-            certain operations can be faster when we know we are doing a fresh
-            build.
-          package_indexes: List of information about available prebuilts, youngest
-            first, or None.
-          dryrun: Whether to do a dryrun and not actually build any packages.
-          usepkgonly: Only use binary packages to bootstrap; abort if any are
-            missing.
-          workon: Force-build workon packages.
-          install_auto_test: Build autotest client code.
-          autosetgov: Automatically set cpu governor to 'performance'.
-          autosetgov_sticky: Remember --autosetgov setting for future runs.
-          use_any_chrome: Use any Chrome prebuilt available, even if the prebuilt
-            doesn't match exactly.
-          internal_chrome: Build the internal version of chrome.
-          clean_build: Perform a clean build; delete sysroot if it exists before
-            building.
-          eclean: Run eclean to delete old binpkgs.
-          rebuild_dep: Rebuild dependencies.
-          jobs: How many packages to build in parallel at maximum.
-          local_pkg: Bootstrap from local packages instead of remote packages.
-          dev_image: Build useful developer friendly utilities.
-          factory_image: Build factory installer.
-          test_image: Build packages required for testing.
-          debug_version: Build debug versions of Chromium-OS-specific packages.
-          backtrack: emerge --backtrack value.
+            usepkg: Whether to use binpkgs or build from source. False currently
+                triggers a local build, which will enable local reuse.
+            install_debug_symbols: Whether to include the debug symbols for all
+                packages.
+            packages: The list of packages to install, by default install all
+                packages for the target.
+            use_flags: A list of use flags to set.
+            use_goma: Whether to enable goma.
+            use_remoteexec: Whether to use RBE for remoteexec.
+            incremental_build: Whether to treat the build as an incremental
+                build or a fresh build. Always treating it as an incremental
+                build is safe, but certain operations can be faster when we know
+                we are doing a fresh build.
+            package_indexes: List of information about available prebuilts,
+                youngest first, or None.
+            dryrun: Whether to do a dryrun and not actually build any packages.
+            usepkgonly: Only use binary packages to bootstrap; abort if any are
+                missing.
+            workon: Force-build workon packages.
+            install_auto_test: Build autotest client code.
+            autosetgov: Automatically set cpu governor to 'performance'.
+            autosetgov_sticky: Remember --autosetgov setting for future runs.
+            use_any_chrome: Use any Chrome prebuilt available, even if the
+                prebuilt doesn't match exactly.
+            internal_chrome: Build the internal version of chrome.
+            clean_build: Perform a clean build; delete sysroot if it exists
+                before building.
+            eclean: Run eclean to delete old binpkgs.
+            rebuild_dep: Rebuild dependencies.
+            jobs: How many packages to build in parallel at maximum.
+            local_pkg: Bootstrap from local packages instead of remote packages.
+            dev_image: Build useful developer friendly utilities.
+            factory_image: Build factory installer.
+            test_image: Build packages required for testing.
+            debug_version: Build debug versions of Chromium-OS-specific
+                packages.
+            backtrack: emerge --backtrack value.
         """
         self.usepkg = usepkg
         self.install_debug_symbols = install_debug_symbols
@@ -331,18 +332,20 @@ class BuildPackagesRunConfig(object):
         """Get the set of force local build packages for this config.
 
         This includes:
-          1. Getting packages for a test image.
-          2. Getting packages and reverse dependencies for cros workon packages.
-          3. Getting packages and reverse dependencies for base install packages.
+            1. Getting packages for a test image.
+            2. Getting packages and reverse dependencies for cros workon
+                packages.
+            3. Getting packages and reverse dependencies for base install
+                packages.
 
         Args:
-          sysroot: The sysroot to get packages for.
+            sysroot: The sysroot to get packages for.
 
         Returns:
-          A list of packages to build from source.
+            A list of packages to build from source.
 
         Raises:
-          cros_build_lib.RunCommandError
+            cros_build_lib.RunCommandError
         """
         sysroot_path = Path(sysroot.path)
         force_local_build_packages = set()
@@ -495,12 +498,12 @@ def SetupBoard(
     This is the entry point to run the setup_board script.
 
     Args:
-      target: The build target configuration.
-      accept_licenses: The additional licenses to accept.
-      run_configs: The run configs.
+        target: The build target configuration.
+        accept_licenses: The additional licenses to accept.
+        run_configs: The run configs.
 
     Raises:
-      sysroot_lib.ToolchainInstallError when the toolchain fails to install.
+        sysroot_lib.ToolchainInstallError when the toolchain fails to install.
     """
     if not cros_build_lib.IsInsideChroot():
         raise NotInChrootError("SetupBoard must be run from inside the chroot")
@@ -528,9 +531,9 @@ def Create(
     creation and configuration of a sysroot, including installing portage.
 
     Args:
-      target: The build target being installed in the sysroot being created.
-      run_configs: The run configs.
-      accept_licenses: The additional licenses to accept.
+        target: The build target being installed in the sysroot being created.
+        run_configs: The run configs.
+        accept_licenses: The additional licenses to accept.
     """
     cros_build_lib.AssertInsideChroot()
 
@@ -609,12 +612,12 @@ def GenerateArchive(
     """Generate a sysroot tarball for informational builders.
 
     Args:
-      output_dir: Directory to contain the created the sysroot.
-      build_target_name: The build target for the sysroot being created.
-      pkg_list: List of 'category/package' package strings.
+        output_dir: Directory to contain the created the sysroot.
+        build_target_name: The build target for the sysroot being created.
+        pkg_list: List of 'category/package' package strings.
 
     Returns:
-      Path to the sysroot tar file.
+        Path to the sysroot tar file.
     """
     cmd = [
         "cros_generate_sysroot",
@@ -690,13 +693,13 @@ def CreateSimpleChromeSysroot(
     """Create a sysroot for SimpleChrome to use.
 
     Args:
-      chroot: The chroot class used for these artifacts.
-      sysroot_class: The sysroot class used for these artifacts.
-      build_target: The build target used for these artifacts.
-      output_dir: The path to write artifacts to.
+        chroot: The chroot class used for these artifacts.
+        sysroot_class: The sysroot class used for these artifacts.
+        build_target: The build target used for these artifacts.
+        output_dir: The path to write artifacts to.
 
     Returns:
-      Path to the sysroot tar file.
+        Path to the sysroot tar file.
     """
     return _create_sysroot(
         chroot,
@@ -745,13 +748,13 @@ def CreateChromeEbuildEnv(
     """Generate Chrome ebuild environment.
 
     Args:
-      chroot: The chroot class used for these artifacts.
-      sysroot_class: The sysroot where the original environment archive can be
+        chroot: The chroot class used for these artifacts.
+        sysroot_class: The sysroot where the original environment archive can be
         found.
-      output_dir: Where the result should be stored.
+        output_dir: Where the result should be stored.
 
     Returns:
-      The path to the archive, or None.
+        The path to the archive, or None.
     """
     pkg_dir = chroot.full_path(sysroot_class.path, portage_util.VDB_PATH)
     files = glob.glob(os.path.join(pkg_dir, constants.CHROME_CP) + "-*")
@@ -795,9 +798,9 @@ def InstallToolchain(
     Everything else must have been done already for this to be successful.
 
     Args:
-      target: The target whose toolchain is being installed.
-      sysroot: The sysroot where the toolchain is being installed.
-      run_configs: The run configs.
+        target: The target whose toolchain is being installed.
+        sysroot: The sysroot where the toolchain is being installed.
+        run_configs: The run configs.
     """
     cros_build_lib.AssertInsideChroot()
     if not sysroot.Exists():
@@ -822,12 +825,12 @@ def BuildPackages(
     """Build and install packages into a sysroot.
 
     Args:
-      target: The target whose packages are being installed.
-      sysroot: The sysroot where the packages are being installed.
-      run_configs: The run configs.
+        target: The target whose packages are being installed.
+        sysroot: The sysroot where the packages are being installed.
+        run_configs: The run configs.
 
     Raises:
-      sysroot_lib.PackageInstallError when packages fail to install.
+        sysroot_lib.PackageInstallError when packages fail to install.
     """
     cros_build_lib.AssertInsideChroot()
     cros_build_lib.AssertNonRootUser()
@@ -920,10 +923,10 @@ def _CleanStaleBinpkgs(sysroot: Union[str, os.PathLike]) -> None:
     """Clean any accumulated stale binpkgs.
 
     Args:
-      sysroot: The sysroot to clean stale binpkgs for.
+        sysroot: The sysroot to clean stale binpkgs for.
 
     Raises:
-      cros_build_lib.RunCommandError
+        cros_build_lib.RunCommandError
     """
     logging.info("Cleaning stale binpkgs.")
     exclude_pkgs = [
@@ -943,10 +946,10 @@ def _GetCrosWorkonPackages(sysroot: Union[str, os.PathLike]) -> _PACKAGE_LIST:
     """Get cros_workon packages.
 
     Args:
-      sysroot: The sysroot to get cros_workon packages for.
+        sysroot: The sysroot to get cros_workon packages for.
 
     Raises:
-      cros_build_lib.RunCommandError
+        cros_build_lib.RunCommandError
     """
     # TODO(xcl): Migrate this to calling an imported Python lib
     cmd = ["cros_list_modified_packages", "--sysroot", sysroot]
@@ -970,12 +973,12 @@ def _GetBaseInstallPackages(
     """Get packages to determine reverse dependencies for.
 
     Args:
-      sysroot: The sysroot to get packages for.
-      emerge_flags: Emerge flags to run the command with.
-      packages: The packages to get dependencies for.
+        sysroot: The sysroot to get packages for.
+        emerge_flags: Emerge flags to run the command with.
+        packages: The packages to get dependencies for.
 
     Raises:
-      cros_build_lib.RunCommandError
+        cros_build_lib.RunCommandError
     """
     # Do a pretend `emerge` command to get a list of what would be built.
     # Sample output:
@@ -1034,7 +1037,7 @@ def _CreateSysrootSkeleton(sysroot: sysroot_lib.Sysroot) -> None:
     Creates the sysroot directory structure and installs the portage hooks.
 
     Args:
-      sysroot: The sysroot.
+        sysroot: The sysroot.
     """
     sysroot.CreateSkeleton()
 
@@ -1048,8 +1051,8 @@ def _InstallConfigs(
     Installs the main, board setup, and user make.conf files.
 
     Args:
-      sysroot: The sysroot.
-      target: The build target being setup in the sysroot.
+        sysroot: The sysroot.
+        target: The build target being setup in the sysroot.
     """
     sysroot.InstallMakeConf()
     sysroot.InstallMakeConfBoardSetup(target.name)
@@ -1071,13 +1074,14 @@ def _InstallPortageConfigs(
     Refresh the workon symlinks to compensate for crbug.com/679831.
 
     Args:
-      sysroot: The sysroot.
-      target: The build target being installed in the sysroot.
-      accept_licenses: Additional accepted licenses as a string.
-      local_build: If the build is a local only build.
-      package_indexes: List of information about available prebuilts, youngest
-        first, or None.
-      expanded_binhost_inheritance: Whether to allow expanded binhost inheritance.
+        sysroot: The sysroot.
+        target: The build target being installed in the sysroot.
+        accept_licenses: Additional accepted licenses as a string.
+        local_build: If the build is a local only build.
+        package_indexes: List of information about available prebuilts, youngest
+            first, or None.
+        expanded_binhost_inheritance: Whether to allow expanded binhost
+            inheritance.
     """
     sysroot.CreateAllWrappers(friendly_name=target.name)
     _ChooseProfile(target, sysroot)
@@ -1099,14 +1103,14 @@ def _InstallToolchain(
     """Install toolchain and packages.
 
     Dependencies: Portage configs and wrappers have been installed
-      (InstallPortageConfigs).
+        (InstallPortageConfigs).
     Install the toolchain and the implicit dependencies.
 
     Args:
-      sysroot: The sysroot to install to.
-      target: The build target whose toolchain is being installed.
-      local_init: Whether to use local packages to bootstrap implicit
-        dependencies.
+        sysroot: The sysroot to install to.
+        target: The build target whose toolchain is being installed.
+        local_init: Whether to use local packages to bootstrap implicit
+            dependencies.
     """
     sysroot.UpdateToolchain(target.name, local_init=local_init)
 
@@ -1123,8 +1127,8 @@ def _RefreshWorkonSymlinks(target: str, sysroot: sysroot_lib.Sysroot) -> None:
     instantiated since it refreshes the symlinks in its __init__.
 
     Args:
-      target: The build target name.
-      sysroot: The board's sysroot.
+        target: The build target name.
+        sysroot: The board's sysroot.
     """
     workon_helper.WorkonHelper(sysroot.path, friendly_name=target)
 
@@ -1138,8 +1142,8 @@ def _ChooseProfile(
     call here, and by extension this method all together.
 
     Args:
-      target: The build target whose profile is being chosen.
-      sysroot: The sysroot for which the profile is being chosen.
+        target: The build target whose profile is being chosen.
+        sysroot: The sysroot for which the profile is being chosen.
     """
     choose_profile = [
         "cros_choose_profile",
@@ -1173,13 +1177,13 @@ def BundleDebugSymbols(
     these files are present.
 
     Args:
-      chroot: The chroot class used for these artifacts.
-      sysroot_class: The sysroot class used for these artifacts.
-      build_target: The build target used for these artifacts.
-      output_dir: The path to write artifacts to.
+        chroot: The chroot class used for these artifacts.
+        sysroot_class: The sysroot class used for these artifacts.
+        build_target: The build target used for these artifacts.
+        output_dir: The path to write artifacts to.
 
     Returns:
-      A string path to the output debug.tgz artifact, or None.
+        A string path to the output debug.tgz artifact, or None.
     """
     base_path = chroot.full_path(sysroot_class.path)
     debug_dir = os.path.join(base_path, "usr/lib/debug")
@@ -1230,13 +1234,13 @@ def BundleBreakpadSymbols(
     Call the GenerateBreakpadSymbols function and archive this into a tar.gz.
 
     Args:
-      chroot: The chroot class used for these artifacts.
-      sysroot_class: The sysroot class used for these artifacts.
-      build_target: The build target used for these artifacts.
-      output_dir: The path to write artifacts to.
+        chroot: The chroot class used for these artifacts.
+        sysroot_class: The sysroot class used for these artifacts.
+        build_target: The build target used for these artifacts.
+        output_dir: The path to write artifacts to.
 
     Returns:
-      A string path to the output debug_breakpad.tar.gz artifact, or None.
+        A string path to the output debug_breakpad.tar.gz artifact, or None.
     """
     base_path = chroot.full_path(sysroot_class.path)
 
@@ -1310,9 +1314,9 @@ def GenerateBreakpadSymbols(
     cros_generate_breakpad_symbols.
 
     Args:
-      chroot: The chroot in which the sysroot should be built.
-      build_target: The sysroot's build target.
-      debug: Include extra debugging output.
+        chroot: The chroot in which the sysroot should be built.
+        build_target: The sysroot's build target.
+        debug: Include extra debugging output.
     """
     # The firmware directory contains elf symbols that we have trouble parsing
     # and that don't help with breakpad debugging (see https://crbug.com/213670).
@@ -1356,17 +1360,17 @@ def GatherSymbolFiles(
     Note: this function is recursive for tar files.
 
     Args:
-      tempdir: Path to use for temporary files.
-      destdir: All .sym files are copied to this path. Tarfiles are opened inside
-        a tempdir and any .sym files within them are copied to destdir from within
-        that temp path.
-      paths: A list of input paths to walk. Files are returned based on .sym name
-        w/out any checking internal symbol file format.
-        Dirs are searched for files that end in ".sym". Urls are not handled.
-        Tarballs are unpacked and walked.
+        tempdir: Path to use for temporary files.
+        destdir: All .sym files are copied to this path. Tarfiles are opened
+            inside a tempdir and any .sym files within them are copied to
+            destdir from within that temp path.
+        paths: A list of input paths to walk. Files are returned based on .sym
+            name w/out any checking internal symbol file format. Dirs are
+            searched for files that end in ".sym". Urls are not handled.
+            Tarballs are unpacked and walked.
 
     Yields:
-      A SymbolFileTuple for every symbol file found in paths.
+        A SymbolFileTuple for every symbol file found in paths.
     """
     logging.info(
         "GatherSymbolFiles tempdir %s destdir %s paths %s",
@@ -1453,11 +1457,11 @@ def RemoteExecution(use_goma: bool, use_remoteexec: bool) -> Iterator[None]:
     either the goma or remote exec instance.
 
     Args:
-      use_goma: If true, start the goma instance.
-      use_remoteexec: If true, start the remoteexec instance.
+        use_goma: If true, start the goma instance.
+        use_remoteexec: If true, start the remoteexec instance.
 
     Yields:
-      Iterator.
+        Iterator.
     """
     goma_dir = Path(os.environ.get("GOMA_DIR", Path.home() / "goma"))
     goma_tmp_dir = os.environ.get("GOMA_TMP_DIR")

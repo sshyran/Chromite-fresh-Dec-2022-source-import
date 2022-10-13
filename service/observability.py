@@ -75,12 +75,12 @@ def get_image_size_data(
     """Entry point method to parse input data and retrieve new data.
 
     Args:
-      image_details: A mapping of the path to the image and the image type (dev,
-        test, etc).
+        image_details: A mapping of the path to the image and the image type
+            (dev, test, etc).
 
     Returns:
-      A mapping of the image type (base, dev, test) to a partition:package
-      mapping.
+        A mapping of the image type (base, dev, test) to a partition:package
+        mapping.
     """
     package_sizes = {}
     for image_path, image_type in image_details.items():
@@ -100,11 +100,11 @@ def get_installed_package_data(
     produces the dataset of installed packages and their sizes.
 
     Args:
-      image_type: The type of image being queried (base, dev, test).
-      image_path: The path to the image in question.
+        image_type: The type of image being queried (base, dev, test).
+        image_path: The path to the image in question.
 
     Returns:
-      A mapping of the partition type (stateful, rootfs) to package details.
+        A mapping of the partition type (stateful, rootfs) to package details.
     """
     if image_type not in _SUPPORTED_ISCP_PARTITIONS:
         logging.warning("Provided image type is not supported.")
@@ -178,10 +178,10 @@ def get_package_details_for_partition(
     """Retrieve package size and format name details for a given set of packages.
 
     Args:
-      installation_path: The path to the partition's root that the package's
-        installed files are relative to.
-      pkgs: The packages of interest in the partition (typically, the entire
-        contents of the package db).
+        installation_path: The path to the partition's root that the package's
+            installed files are relative to.
+        pkgs: The packages of interest in the partition (typically, the entire
+            contents of the package db).
     """
     details = {}
     for installed_package, pkg_fileset in pkgs:

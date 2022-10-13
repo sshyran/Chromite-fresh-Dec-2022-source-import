@@ -55,26 +55,26 @@ class BuildConfig(NamedTuple):
     """Named tuple to hold the build configuration options.
 
     Attributes:
-      builder_path: The value to which the builder path lsb key should be
-        set, the build_name installed on DUT during hwtest.
-      disk_layout: The disk layout type.
-      enable_rootfs_verification: Whether the rootfs verification is enabled.
-      replace: Whether to replace existing output if any exists.
-      version: The version string to use for the image.
-      build_attempt: The build_attempt number to pass to build_image.
-      symlink: Symlink name (defaults to "latest").
-      output_dir_suffix: String to append to the image build directory.
-      adjust_partition: Adjustments to apply to partition table (LABEL:[+-=]SIZE)
-        e.g. ROOT-A:+1G
-      boot_args: Additional boot arguments to pass to the commandline.
-      enable_bootcache: Enable bootloaders to use boot cache.
-      output_root: Directory in which to place image result directories.
-      build_root: Directory in which to compose the image, before copying it to
-        output_root.
-      enable_serial: Enable serial port for printks. Example values: ttyS0
-      kernel_loglevel: The loglevel to add to the kernel command line.
-      jobs: Number of packages to process in parallel at maximum.
-      base_is_recovery: Copy the base image to recovery_image.bin.
+        builder_path: The value to which the builder path lsb key should be
+            set, the build_name installed on DUT during hwtest.
+        disk_layout: The disk layout type.
+        enable_rootfs_verification: Whether the rootfs verification is enabled.
+        replace: Whether to replace existing output if any exists.
+        version: The version string to use for the image.
+        build_attempt: The build_attempt number to pass to build_image.
+        symlink: Symlink name (defaults to "latest").
+        output_dir_suffix: String to append to the image build directory.
+        adjust_partition: Adjustments to apply to partition table
+            (LABEL:[+-=]SIZE) e.g. ROOT-A:+1G
+        boot_args: Additional boot arguments to pass to the commandline.
+        enable_bootcache: Enable bootloaders to use boot cache.
+        output_root: Directory in which to place image result directories.
+        build_root: Directory in which to compose the image, before copying it
+            to output_root.
+        enable_serial: Enable serial port for printks. Example values: ttyS0
+        kernel_loglevel: The loglevel to add to the kernel command line.
+        jobs: Number of packages to process in parallel at maximum.
+        base_is_recovery: Copy the base image to recovery_image.bin.
     """
 
     builder_path: Optional[str] = None
@@ -108,12 +108,12 @@ def GetBuildImageCommand(
     """Get the build_image command for the configuration.
 
     Args:
-      config: BuildConfig to use to generate the command.
-      image_names: A set of image names that needs to be built.
-      board: The board for which the image to be built.
+        config: BuildConfig to use to generate the command.
+        image_names: A set of image names that need to be built.
+        board: The board for which the image to be built.
 
     Returns:
-      List with build_image command with arguments.
+        List with build_image command with arguments.
     """
     cmd = [
         Path(constants.CROSUTILS_DIR) / "build_image.sh",
@@ -159,7 +159,7 @@ class BuildResult(object):
         """Init method.
 
         Args:
-          image_types: A list of image names that were requested to be built.
+            image_types: A list of image names that were requested to be built.
         """
         self._unbuilt_image_types = image_types
         self.images = {}
@@ -233,13 +233,13 @@ def Build(
     """Build an image.
 
     Args:
-      board: The board name.
-      images: The image types to build.
-      config: The build configuration options.
-      extra_env: Environment variables to set for build_image.
+        board: The board name.
+        images: The image types to build.
+        config: The build configuration options.
+        extra_env: Environment variables to set for build_image.
 
     Returns:
-      BuildResult
+        BuildResult
     """
     cros_build_lib.AssertInsideChroot()
 
@@ -372,12 +372,12 @@ def _GetResultAndAddImage(
     """Add an image to the BuildResult.
 
     Args:
-      board: The board name.
-      cmd: An array of command-line arguments.
-      image_path: The chrooted path to the image.
+        board: The board name.
+        cmd: An array of command-line arguments.
+        image_path: The chrooted path to the image.
 
     Returns:
-      BuildResult
+        BuildResult
     """
     build_result = BuildResult([constants.IMAGE_TYPE_RECOVERY])
     result = cros_build_lib.run(cmd, enter_chroot=True, check=False)
@@ -408,11 +408,11 @@ def CopyBaseToRecovery(board: str, image_path: Path) -> BuildResult:
     Recovery Utility, GoldenEye and other locations.
 
     Args:
-      board: The board name.
-      image_path: The chrooted path to the base image.
+        board: The board name.
+        image_path: The chrooted path to the base image.
 
     Returns:
-      BuildResult
+        BuildResult
     """
     image_name = constants.IMAGE_TYPE_TO_NAME[constants.IMAGE_TYPE_RECOVERY]
     recovery_image_path = image_path.parent / image_name
@@ -428,11 +428,12 @@ def BuildRecoveryImage(
     This must be done after a base image has been created.
 
     Args:
-      board: The board name.
-      image_path: The chrooted path to the image, defaults to chromiums_image.bin.
+        board: The board name.
+        image_path: The chrooted path to the image, defaults to
+            chromiums_image.bin.
 
     Returns:
-      BuildResult
+        BuildResult
     """
     if not board:
         raise InvalidArgumentError("board is required.")
@@ -461,14 +462,14 @@ def CreateVm(
     """Create a VM from an image.
 
     Args:
-      board: The board for which the VM is being created.
-      disk_layout: The disk layout type.
-      is_test: Whether it is a test image.
-      chroot: The chroot where the image lives.
-      image_dir: The built image directory.
+        board: The board for which the VM is being created.
+        disk_layout: The disk layout type.
+        is_test: Whether it is a test image.
+        chroot: The chroot where the image lives.
+        image_dir: The built image directory.
 
     Returns:
-      str: Path to the created VM .bin file.
+        str: Path to the created VM .bin file.
     """
     assert board
     cmd = ["./image_to_vm.sh", "--board", board]
@@ -517,13 +518,13 @@ def CreateGuestVm(
     """Convert an existing image into a guest VM image.
 
     Args:
-      board: The name of the board to convert.
-      is_test: Flag to create a test guest VM image.
-      chroot: The chroot where the cros image lives.
-      image_dir: The directory containing the built images.
+        board: The name of the board to convert.
+        is_test: Flag to create a test guest VM image.
+        chroot: The chroot where the cros image lives.
+        image_dir: The directory containing the built images.
 
     Returns:
-      Path to the created guest VM folder.
+        Path to the created guest VM folder.
     """
     assert board
 
@@ -574,13 +575,13 @@ def _get_dlc_images_path(base_path: str) -> str:
     """Get the source path containing the dlc images.
 
     Specifically files expected to be in:
-      /.../build/rootfs/dlc
+        /.../build/rootfs/dlc
 
     Args:
-      base_path: Base path wherein DLC images are expected to be.
+        base_path: Base path wherein DLC images are expected to be.
 
     Returns:
-      Full path for the dlc images.
+        Full path for the dlc images.
     """
     return os.path.join(base_path, "build", "rootfs", "dlc")
 
@@ -589,11 +590,11 @@ def copy_dlc_image(base_path: str, output_dir: str) -> List[str]:
     """Copies DLC image folder from base_path to output_dir.
 
     Args:
-      base_path: Base path wherein DLC images are expected to be.
-      output_dir: Folder destination for DLC images folder.
+        base_path: Base path wherein DLC images are expected to be.
+        output_dir: Folder destination for DLC images folder.
 
     Returns:
-      A list of folder paths after move or None if the source path doesn't exist
+        A list of folder paths after move or None if the source path doesn't exist
     """
     dlc_source_path = _get_dlc_images_path(base_path)
     if not os.path.exists(dlc_source_path):
@@ -610,12 +611,12 @@ def copy_license_credits(
     """Copies license_credits.html from image build dir to output_dir.
 
     Args:
-      board: The board name.
-      output_dir: Folder destination for license_credits.html.
-      symlink: Symlink name to use instead of "latest".
+        board: The board name.
+        output_dir: Folder destination for license_credits.html.
+        symlink: Symlink name to use instead of "latest".
 
     Returns:
-      The output path or None if the source path doesn't exist.
+        The output path or None if the source path doesn't exist.
     """
     filename = "license_credits.html"
     license_credits_source_path = os.path.join(
@@ -635,14 +636,14 @@ def Test(board: str, result_directory: str, image_dir: str = None) -> bool:
     Currently this is just running test_image.
 
     Args:
-      board: The board name.
-      result_directory: Root directory where the results should be stored
-        relative to the chroot.
-      image_dir: The path to the image. Uses the board's default image
+        board: The board name.
+        result_directory: Root directory where the results should be stored
+            relative to the chroot.
+        image_dir: The path to the image. Uses the board's default image
         build path when not provided.
 
     Returns:
-      True if all tests passed, False otherwise.
+        True if all tests passed, False otherwise.
     """
     if not board:
         raise InvalidArgumentError("Board is required.")
@@ -684,15 +685,15 @@ def create_factory_image_zip(
     """Build factory_image.zip in archive_dir.
 
     Args:
-      chroot: The chroot class used for these artifacts.
-      sysroot_class: The sysroot where the original environment archive
-        can be found.
-      factory_shim_dir: Directory containing factory shim.
-      version: if not None, version to include in factory_image.zip
-      output_dir: Directory to store factory_image.zip.
+        chroot: The chroot class used for these artifacts.
+        sysroot_class: The sysroot where the original environment archive
+            can be found.
+        factory_shim_dir: Directory containing factory shim.
+        version: if not None, version to include in factory_image.zip
+        output_dir: Directory to store factory_image.zip.
 
     Returns:
-      The path to the zipfile if it could be created, else None.
+        The path to the zipfile if it could be created, else None.
     """
     filename = "factory_image.zip"
 
@@ -757,12 +758,12 @@ def create_stripped_packages_tar(
     """Build stripped_packages.tar in archive_dir.
 
     Args:
-      chroot: The chroot class used for these artifacts.
-      build_target: The build target.
-      output_dir: Directory to store stripped_packages.tar.
+        chroot: The chroot class used for these artifacts.
+        build_target: The build target.
+        output_dir: Directory to store stripped_packages.tar.
 
     Returns:
-      The path to the zipfile if it could be created, else None.
+        The path to the zipfile if it could be created, else None.
     """
     package_globs = [
         "chromeos-base/chromeos-chrome",
@@ -822,8 +823,8 @@ def create_netboot_kernel(
     """Build netboot kernel artifacts in output_dir.
 
     Args:
-      board: The board being built.
-      output_dir: Directory to place the artifact
+        board: The board being built.
+        output_dir: Directory to place the artifact
     """
     cmd = ["./make_netboot.sh", f"--board={board}", f"--image_dir={output_dir}"]
     cros_build_lib.run(cmd, enter_chroot=True)

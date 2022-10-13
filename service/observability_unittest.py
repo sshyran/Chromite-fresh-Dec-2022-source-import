@@ -117,19 +117,19 @@ def make_portage_db(
     therein.
 
     Args:
-      tmp_path: A temporary path to build a fake image filesystem in. Provided by
-        calling methods only; can use tmp_path for pytest or some other temporary
-        path.
-      pkgs: A dictionary mapping category to PVR values. If not provided, a set
-        of default values is used.
-      fake_vdb_subdir: A relative path from the mount point's root to the Portage
-        database fileset. Since different partitions use different defaults
-        for the database fileset, allow custom VDB paths to more easily mimic
-        that behavior.
-      fake_install_subdir: A relative path from the mount point's root to the
-        location of the installed package files on the image. Again, different
-        partitions use different defaults, so we want to mimic that behavior if
-        needed.
+        tmp_path: A temporary path to build a fake image filesystem in. Provided
+            by calling methods only; can use tmp_path for pytest or some other
+            temporary path.
+        pkgs: A dictionary mapping category to PVR values. If not provided, a
+            set of default values is used.
+        fake_vdb_subdir: A relative path from the mount point's root to the
+            Portage database fileset. Since different partitions use different
+            defaults for the database fileset, allow custom VDB paths to more
+            easily mimic that behavior.
+        fake_install_subdir: A relative path from the mount point's root to the
+            location of the installed package files on the image. Again,
+            different partitions use different defaults, so we want to mimic
+            that behavior if needed.
     """
     if pkgs is None:
         pkgs = {

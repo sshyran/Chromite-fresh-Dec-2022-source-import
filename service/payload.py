@@ -57,13 +57,13 @@ class PayloadConfig(object):
         """Init method, sets up all the paths and configuration.
 
         Args:
-          tgt_image: Proto for destination image.
-          src_image: Proto for source image.
-          dest_bucket: Destination bucket to place the final artifacts in.
-          minios: Whether the payload is for the image's miniOS partition.
-          verify: If delta is made, verify the integrity of the payload.
-          upload: Whether the payload generation results should be uploaded.
-          cache_dir: The cache dir for paygen to use or None for default.
+            tgt_image: Proto for destination image.
+            src_image: Proto for source image.
+            dest_bucket: Destination bucket to place the final artifacts in.
+            minios: Whether the payload is for the image's miniOS partition.
+            verify: If delta is made, verify the integrity of the payload.
+            upload: Whether the payload generation results should be uploaded.
+            cache_dir: The cache dir for paygen to use or None for default.
         """
 
         # Set when we call GeneratePayload on this object.
@@ -120,15 +120,15 @@ class PayloadConfig(object):
         """Do payload generation (& maybe sign) on Google Storage CrOS images.
 
         Returns:
-          A tuple of containing:
-              The location of the local generated artifact.
-                (e.g. /tmp/wdjaio/delta.bin)
-              The remote location that the payload was uploaded or None.
-                (e.g. 'gs://cr/beta-channel/coral/12345.0.1/payloads/...')
+            A tuple of containing:
+                The location of the local generated artifact.
+                    (e.g. /tmp/wdjaio/delta.bin)
+                The remote location that the payload was uploaded or None.
+                    (e.g. 'gs://cr/beta-channel/coral/12345.0.1/payloads/...')
 
         Raises:
-          paygen_payload_lib.PayloadGenerationSkippedException: If paygen was
-              skipped for any reason.
+            paygen_payload_lib.PayloadGenerationSkippedException: If paygen was
+                skipped for any reason.
         """
         # Leave the generated artifact local. This is ok because if we're testing
         # it's likely we want the artifact anyway, and in production this is ran on
@@ -166,12 +166,12 @@ def _GenSignedGSPath(
     """Take a SignedImage_pb2 and return a gspaths.Image.
 
     Args:
-      image: The build to create the gspath from.
-      image_type: The image type, either "recovery" or "base".
-      minios: Whether or not it's a miniOS image.
+        image: The build to create the gspath from.
+        image_type: The image type, either "recovery" or "base".
+        minios: Whether or not it's a miniOS image.
 
     Returns:
-      A gspaths.Image instance.
+        A gspaths.Image instance.
     """
     build = gspaths.Build(
         board=image.build.build_target.name,
@@ -200,12 +200,12 @@ def _GenUnsignedGSPath(
     """Take an UnsignedImage_pb2 and return a gspaths.UnsignedImageArchive.
 
     Args:
-      image: The build to create the gspath from.
-      image_type: The image type, either "recovery" or "test".
-      minios: Whether or not it's a miniOS image.
+        image: The build to create the gspath from.
+        image_type: The image type, either "recovery" or "test".
+        minios: Whether or not it's a miniOS image.
 
     Returns:
-      A gspaths.UnsignedImageArchive instance.
+        A gspaths.UnsignedImageArchive instance.
     """
     build = gspaths.Build(
         board=image.build.build_target.name,
@@ -240,10 +240,10 @@ def _GenDLCImageGSPath(image: payload_pb2.DLCImage) -> gspaths.DLCImage:
     """Take a DLCImage_pb2 and return a gspaths.DLCImage.
 
     Args:
-      image: The dlc image to create the gspath from.
+        image: The dlc image to create the gspath from.
 
     Returns:
-      A gspaths.DLCImage instance.
+        A gspaths.DLCImage instance.
     """
     build = gspaths.Build(
         board=image.build.build_target.name,

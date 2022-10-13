@@ -46,38 +46,38 @@ def GenerateSourcePathMapping(
 ) -> Mapping[str, List[str]]:
     """Returns a map from each package to the source paths it depends on.
 
-    A source path is considered dependency of a package if modifying files in that
-    path might change the content of the resulting package.
+    A source path is considered dependency of a package if modifying files in
+    that path might change the content of the resulting package.
 
     Notes:
-      1) This method errs on the side of returning unneeded dependent paths.
-         i.e: for a given package X, some of its dependency source paths may
-         contain files which doesn't affect the content of X.
+        1) This method errs on the side of returning unneeded dependent paths.
+            i.e: for a given package X, some of its dependency source paths may
+            contain files which doesn't affect the content of X.
 
-         On the other hand, any missing dependency source paths for package X is
-         considered a bug.
-      2) This only outputs the direct dependency source paths for a given package
-         and does not takes include the dependency source paths of dependency
-         packages.
-         e.g: if package A depends on B (DEPEND=B), then results of computing
-         dependency source paths of A doesn't include dependency source paths
-         of B.
+            On the other hand, any missing dependency source paths for package
+            X is considered a bug.
+        2) This only outputs the direct dependency source paths for a given
+            package and does not takes include the dependency source paths of
+            dependency packages.
+            e.g: if package A depends on B (DEPEND=B), then results of computing
+            dependency source paths of A doesn't include dependency source paths
+            of B.
 
     Args:
-      packages: The list of packages CPV names (str)
-      sysroot_path: The path to the sysroot. Optional if |board| set and using
-        default sysroot. If the packages are board agnostic, you can set |sdk|
-        instead. Must not be set when using |sdk|.
-      board: The name of the board. Optional if |sysroot| is set and in the
-        default location. If the packages are board agnostic, you can set |sdk|
-        instead. Must not be set when using |sdk|.
-      sdk: Use the SDK's overlays instead of a board's overlays to find packages.
-        This is effectively the set of shared, public overlays.
+        packages: The list of packages CPV names (str)
+        sysroot_path: The path to the sysroot. Optional if |board| set and using
+            default sysroot. If the packages are board agnostic, you can set
+            |sdk| instead. Must not be set when using |sdk|.
+        board: The name of the board. Optional if |sysroot| is set and in the
+            default location. If the packages are board agnostic, you can set
+            |sdk| instead. Must not be set when using |sdk|.
+        sdk: Use the SDK's overlays instead of a board's overlays to find
+            packages. This is effectively the set of shared, public overlays.
 
     Returns:
-      Map from each package to the source path (relative to the repo checkout
+        Map from each package to the source path (relative to the repo checkout
         root, i.e: ~/chromiumos/ in your cros_sdk) it depends on.
-      For each source path which is a directory, the string is ended with a
+        For each source path which is a directory, the string is ended with a
         trailing '/'.
     """
     assert not sdk or (
@@ -116,18 +116,19 @@ def GetBuildDependency(
     """Return the build dependency and package -> source path map for |board|.
 
     Args:
-      sysroot_path: The path to the sysroot, or None if no sysroot is being used.
-      board: The name of the board whose artifacts are being created, or None if
-          no sysroot is being used.
-      packages: The packages that need to be built, or empty / None to use the
-          default list.
+        sysroot_path: The path to the sysroot, or None if no sysroot is being
+            used.
+        board: The name of the board whose artifacts are being created, or None
+            if no sysroot is being used.
+        packages: The packages that need to be built, or empty / None to use the
+            default list.
 
     Returns:
-      JSON build dependencies report for the given board which includes:
-        - Package level deps graph from portage
-        - Map from each package to the source path
-        (relative to the repo checkout root, i.e: ~/chromiumos/ in your cros_sdk)
-        it depends on
+        JSON build dependencies report for the given board which includes:
+            - Package level deps graph from portage
+            - Map from each package to the source path
+            (relative to the repo checkout root, i.e: ~/chromiumos/ in your
+            cros_sdk) it depends on
     """
     if not sysroot_path:
         sysroot_path = build_target_lib.get_default_sysroot_path(board)
@@ -213,8 +214,8 @@ def determine_package_relevance(
     list of source paths. If no source paths are given, the default is True.
 
     Args:
-      dep_src_paths: List of source paths the package depends on.
-      src_paths: List of source paths of interest.
+        dep_src_paths: List of source paths the package depends on.
+        src_paths: List of source paths of interest.
     """
     if not src_paths:
         return True
@@ -238,17 +239,17 @@ def GetDependencies(
     """Return the packages dependent on the given source paths for |board|.
 
     Args:
-      sysroot_path: The path to the sysroot.
-      src_paths: List of paths for which to get a list of dependent packages. If
-        empty / None returns all package dependencies.
-      packages: The packages that need to be built, or empty / None to use the
-        default list.
-      include_rev_dependencies: Whether to include the reverse dependencies of
-        relevant packages.
+        sysroot_path: The path to the sysroot.
+        src_paths: List of paths for which to get a list of dependent packages.
+            If empty / None returns all package dependencies.
+        packages: The packages that need to be built, or empty / None to use the
+            default list.
+        include_rev_dependencies: Whether to include the reverse dependencies of
+            relevant packages.
 
     Returns:
-      The relevant package dependencies based on the given list of packages and
-        src_paths.
+        The relevant package dependencies based on the given list of packages
+        and src_paths.
     """
     cros_build_lib.AssertInsideChroot()
     dep_graph = depgraph.get_sysroot_dependency_graph(
@@ -279,7 +280,7 @@ def DetermineToolchainSourcePaths() -> List[str]:
     Returned paths are relative to the root of the project checkout.
 
     Returns:
-      A list of paths considered relevant to toolchain packages.
+        A list of paths considered relevant to toolchain packages.
     """
     source_paths = set()
     toolchain_pkgs = portage_util.GetFlattenedDepsForPackage(

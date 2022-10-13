@@ -53,8 +53,8 @@ class BuildTargetUnitTestResult(object):
         """Init method.
 
         Args:
-          return_code: The return code from the command execution.
-          failed_pkgs: List of packages whose tests failed.
+            return_code: The return code from the command execution.
+            failed_pkgs: List of packages whose tests failed.
         """
         self.return_code = return_code
         self.failed_pkgs = failed_pkgs or []
@@ -77,19 +77,20 @@ def BuildTargetUnitTest(
     """Run the ebuild unit tests for the target.
 
     Args:
-      build_target: The build target.
-      packages: Packages to be tested. If none, uses all testable packages.
-      blocklist: Tests to skip.
-      was_built: Whether packages were built.
-      code_coverage: Whether to produce code coverage data.
-      rust_code_coverage: Whether to produce code coverage data for rust packages.
-      testable_packages_optional: Whether to allow no testable packages to be
-        found.
-      filter_only_cros_workon: Whether to filter out non-cros_workon packages from
-        input package list.
+        build_target: The build target.
+        packages: Packages to be tested. If none, uses all testable packages.
+        blocklist: Tests to skip.
+        was_built: Whether packages were built.
+        code_coverage: Whether to produce code coverage data.
+        rust_code_coverage: Whether to produce code coverage data for rust
+            packages.
+        testable_packages_optional: Whether to allow no testable packages to be
+            found.
+        filter_only_cros_workon: Whether to filter out non-cros_workon packages
+            from input package list.
 
     Returns:
-      BuildTargetUnitTestResult
+        BuildTargetUnitTestResult
     """
     cros_build_lib.AssertInsideChroot()
     # TODO(saklein) Refactor commands.RunUnitTests to use this/the API.
@@ -149,14 +150,14 @@ def BundleHwqualTarball(
     """Build the hwqual tarball.
 
     Args:
-      board: The board name.
-      version: The version string to use for the image.
-      chroot: Chroot where the tests were run.
-      sysroot: The sysroot where the tests were run.
-      result_path: The directory where the archive should be created.
+        board: The board name.
+        version: The version string to use for the image.
+        chroot: Chroot where the tests were run.
+        sysroot: The sysroot where the tests were run.
+        result_path: The directory where the archive should be created.
 
     Returns:
-      The output path or None.
+        The output path or None.
     """
     # Create an autotest.tar.bz2 file to pass to archive_hwqual
 
@@ -216,10 +217,10 @@ def DebugInfoTest(sysroot_path: str) -> bool:
     """Run the debug info tests.
 
     Args:
-      sysroot_path: The sysroot being tested.
+        sysroot_path: The sysroot being tested.
 
     Returns:
-      True iff all tests passed, False otherwise.
+        True iff all tests passed, False otherwise.
     """
     cmd = ["debug_info_test", os.path.join(sysroot_path, "usr/lib/debug")]
     result = cros_build_lib.run(cmd, enter_chroot=True, check=False)
@@ -231,7 +232,7 @@ def ChromiteUnitTest() -> bool:
     """Run chromite unittests.
 
     Returns:
-      True iff all tests passed, False otherwise.
+        True iff all tests passed, False otherwise.
     """
     cmd = [
         os.path.join(constants.CHROMITE_DIR, "run_tests"),
@@ -245,7 +246,7 @@ def RulesCrosUnitTest() -> bool:
     """Run rules_cros unittests.
 
     Returns:
-      True iff all tests passed, False otherwise.
+        True iff all tests passed, False otherwise.
     """
     cmd = [
         os.path.join(constants.RULES_CROS_PATH, "run_tests.sh"),
@@ -264,10 +265,10 @@ def SimpleChromeWorkflowTest(
     """Execute SimpleChrome workflow tests
 
     Args:
-      sysroot_path: The sysroot path for testing Chrome.
-      build_target_name: Board build target
-      chrome_root: Path to Chrome source root.
-      goma: Goma object or None.
+        sysroot_path: The sysroot path for testing Chrome.
+        build_target_name: Board build target
+        chrome_root: Path to Chrome source root.
+        goma: Goma object or None.
     """
     board_dir = "out_%s" % build_target_name
 
@@ -300,14 +301,14 @@ def _InitSimpleChromeSDK(
     """Create ChromeSDK object for executing 'cros chrome-sdk' commands.
 
     Args:
-      tempdir: Tempdir for command execution.
-      build_target_name: Board build target.
-      sysroot_path: Sysroot for Chrome to use.
-      chrome_root: Path to Chrome.
-      use_goma: Whether to use goma.
+        tempdir: Tempdir for command execution.
+        build_target_name: Board build target.
+        sysroot_path: Sysroot for Chrome to use.
+        chrome_root: Path to Chrome.
+        use_goma: Whether to use goma.
 
     Returns:
-      A ChromeSDK object.
+        A ChromeSDK object.
     """
     extra_args = ["--cwd", chrome_root, "--sdk-path", sysroot_path]
     cache_dir = os.path.join(tempdir, "cache")
@@ -327,7 +328,7 @@ def _VerifySDKEnvironment(out_board_dir: str) -> None:
     """Make sure the SDK environment is set up properly.
 
     Args:
-      out_board_dir: Output SDK dir for board.
+        out_board_dir: Output SDK dir for board.
     """
     if not os.path.exists(out_board_dir):
         raise AssertionError("%s not created!" % out_board_dir)
@@ -345,10 +346,10 @@ def _BuildChrome(
     """Build Chrome with SimpleChrome environment.
 
     Args:
-      sdk_cmd: sdk_cmd to run cros chrome-sdk commands.
-      chrome_root: Path to Chrome.
-      out_board_dir: Path to board directory.
-      goma: Goma object or None
+        sdk_cmd: sdk_cmd to run cros chrome-sdk commands.
+        chrome_root: Path to Chrome.
+        out_board_dir: Path to board directory.
+        goma: Goma object or None
     """
     # Validate fetching of the SDK and setting everything up.
     sdk_cmd.Run(["true"])
@@ -410,8 +411,8 @@ def _TestDeployChrome(sdk_cmd: commands.ChromeSDK, out_board_dir: str) -> None:
     """Test SDK deployment.
 
     Args:
-      sdk_cmd: sdk_cmd to run cros chrome-sdk commands.
-      out_board_dir: Path to board directory.
+        sdk_cmd: sdk_cmd to run cros chrome-sdk commands.
+        out_board_dir: Path to board directory.
     """
     with osutils.TempDir(prefix="chrome-sdk-stage") as tempdir:
         # Use the TOT deploy_chrome.
@@ -443,8 +444,8 @@ def _VMTestChrome(board: str, sdk_cmd: commands.ChromeSDK) -> None:
     """Run cros_run_test.
 
     Args:
-      board: The name of the board.
-      sdk_cmd: sdk_cmd to run cros chrome-sdk commands.
+        board: The name of the board.
+        sdk_cmd: sdk_cmd to run cros chrome-sdk commands.
     """
     image_dir_symlink = image_lib.GetLatestImageLink(board)
     image_path = os.path.join(image_dir_symlink, constants.VM_IMAGE_BIN)
@@ -460,10 +461,10 @@ def _GetZeroCoverageDirectories(
     """Get the list of directories to generate zero coverage for.
 
     Args:
-      build_target: The build target we want to choose directories for.
+        build_target: The build target we want to choose directories for.
 
     Returns:
-      List of directories that we should generate zero coverage for.
+        List of directories that we should generate zero coverage for.
     """
     # TODO(b/244365763): Get this mapping dynamically instead of the static json.
     owners_path = os.path.join(
@@ -502,13 +503,13 @@ def BundleCodeCoverageRustLlvmJson(
     """Bundle code coverage llvm json into a tarball for importing into GCE.
 
     Args:
-      build_target: The build target.
-      chroot: The chroot class used for these artifacts.
-      sysroot_class: The sysroot class used for these artifacts.
-      output_dir: The path to write artifacts to.
+        build_target: The build target.
+        chroot: The chroot class used for these artifacts.
+        sysroot_class: The sysroot class used for these artifacts.
+        output_dir: The path to write artifacts to.
 
     Returns:
-      A string path to the output code_coverage.tar.xz artifact, or None.
+        A string path to the output code_coverage.tar.xz artifact, or None.
     """
     return _BundleCodeCoverageLlvmJson(
         build_target=build_target,
@@ -528,13 +529,13 @@ def BundleCodeCoverageLlvmJson(
     """Bundle code coverage llvm json into a tarball for importing into GCE.
 
     Args:
-      build_target: The build target.
-      chroot: The chroot class used for these artifacts.
-      sysroot_class: The sysroot class used for these artifacts.
-      output_dir: The path to write artifacts to.
+        build_target: The build target.
+        chroot: The chroot class used for these artifacts.
+        sysroot_class: The sysroot class used for these artifacts.
+        output_dir: The path to write artifacts to.
 
     Returns:
-      A string path to the output code_coverage.tar.xz artifact, or None.
+        A string path to the output code_coverage.tar.xz artifact, or None.
     """
     return _BundleCodeCoverageLlvmJson(
         build_target=build_target,
@@ -555,14 +556,14 @@ def _BundleCodeCoverageLlvmJson(
     """Bundle code coverage llvm json into a tarball for importing into GCE.
 
     Args:
-      build_target: The build target.
-      chroot: The chroot class used for these artifacts.
-      sysroot_class: The sysroot class used for these artifacts.
-      output_dir: The path to write artifacts to.
-      rust_coverage: Whether we are bundling rust coverage artifacts.
+        build_target: The build target.
+        chroot: The chroot class used for these artifacts.
+        sysroot_class: The sysroot class used for these artifacts.
+        output_dir: The path to write artifacts to.
+        rust_coverage: Whether we are bundling rust coverage artifacts.
 
     Returns:
-      A string path to the output code_coverage.tar.xz artifact, or None.
+        A string path to the output code_coverage.tar.xz artifact, or None.
     """
     lang = "CPP"
     if rust_coverage:
@@ -665,14 +666,14 @@ class GatherCodeCoverageLlvmJsonFileResult(NamedTuple):
 def GatherCodeCoverageLlvmJsonFile(path: str):
     """Locate code coverage llvm json files in |path|.
 
-     This function locates all the coverage llvm json files and merges them
-     into one file, in the correct llvm json format.
+    This function locates all the coverage llvm json files and merges them
+    into one file, in the correct llvm json format.
 
     Args:
-      path: The input path to walk.
+        path: The input path to walk.
 
     Returns:
-      Code coverage json llvm format.
+        Code coverage json llvm format.
     """
     joined_file_paths = []
     coverage_data = []

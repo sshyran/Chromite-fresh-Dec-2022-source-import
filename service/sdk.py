@@ -64,15 +64,15 @@ class CreateArguments(object):
         """Create arguments init.
 
         Args:
-          replace: Whether an existing chroot should be deleted.
-          bootstrap: Whether to build the SDK from source.
-          use_image: Whether to mount the chroot on a loopback image or create it
-            directly in a directory.
-          chroot_path: Path to where the chroot should be reside.
-          cache_dir: Alternative directory to use as a cache for the chroot.
-          sdk_version: Specific SDK version to use, e.g. 2022.01.20.073008.
-          skip_chroot_upgrade: Whether or not to skip any chroot upgrades (using
-            the --skip-chroot-upgrade arg to cros_sdk).
+            replace: Whether an existing chroot should be deleted.
+            bootstrap: Whether to build the SDK from source.
+            use_image: Whether to mount the chroot on a loopback image or create
+                it directly in a directory.
+            chroot_path: Path to where the chroot should reside.
+            cache_dir: Alternative directory to use as a cache for the chroot.
+            sdk_version: Specific SDK version to use, e.g. 2022.01.20.073008.
+            skip_chroot_upgrade: Whether to skip any chroot upgrades (using
+                the --skip-chroot-upgrade arg to cros_sdk).
         """
         self.replace = replace
         self.bootstrap = bootstrap
@@ -86,7 +86,7 @@ class CreateArguments(object):
         """Get the list of the corresponding command line arguments.
 
         Returns:
-          The list of the corresponding command line arguments.
+            The list of the corresponding command line arguments.
         """
         args = []
 
@@ -130,11 +130,11 @@ class UpdateArguments(object):
         """Update arguments init.
 
         Args:
-          build_source: Whether to build the source or use prebuilts.
-          toolchain_targets: The list of build targets whose toolchains should be
-            updated.
-          toolchain_changed: Whether a toolchain change has occurred. Implies
-            build_source.
+            build_source: Whether to build the source or use prebuilts.
+            toolchain_targets: The list of build targets whose toolchains should
+                be updated.
+            toolchain_changed: Whether a toolchain change has occurred. Implies
+                build_source.
         """
         self.build_source = build_source or toolchain_changed
         self.toolchain_targets = toolchain_targets
@@ -143,7 +143,7 @@ class UpdateArguments(object):
         """Get the list of the corresponding command line arguments.
 
         Returns:
-          The list of the corresponding command line arguments.
+            The list of the corresponding command line arguments.
         """
         args = []
 
@@ -170,17 +170,17 @@ def Clean(
     """Clean the chroot.
 
     See:
-      cros clean -h
+        cros clean -h
 
     Args:
-      chroot: The chroot to clean.
-      images: Remove all built images.
-      sysroots: Remove all of the sysroots.
-      tmp: Clean the tmp/ directory.
-      safe: Clean all produced artifacts.
-      cache: Clean the shared cache.
-      logs: Clean up various logs.
-      workdirs: Clean out various package build work directories.
+        chroot: The chroot to clean.
+        images: Remove all built images.
+        sysroots: Remove all of the sysroots.
+        tmp: Clean the tmp/ directory.
+        safe: Clean all produced artifacts.
+        cache: Clean the shared cache.
+        logs: Clean up various logs.
+        workdirs: Clean out various package build work directories.
     """
     if not (images or sysroots or tmp or safe or cache or logs or workdirs):
         # Nothing specified to clean.
@@ -211,10 +211,10 @@ def Create(arguments: CreateArguments) -> Optional[int]:
     """Create or replace the chroot.
 
     Args:
-      arguments: The various arguments to create a chroot.
+        arguments: The various arguments to create a chroot.
 
     Returns:
-      The version of the resulting chroot.
+        The version of the resulting chroot.
     """
     cros_build_lib.AssertOutsideChroot()
 
@@ -253,8 +253,8 @@ def Delete(
     """Delete the chroot.
 
     Args:
-      chroot: The chroot being deleted, or None for the default chroot.
-      force: Whether to apply the --force option.
+        chroot: The chroot being deleted, or None for the default chroot.
+        force: Whether to apply the --force option.
     """
     # Delete the chroot itself.
     logging.info("Removing the SDK.")
@@ -275,7 +275,7 @@ def Unmount(chroot: Optional["chroot_lib.Chroot"] = None) -> None:
     """Unmount the chroot.
 
     Args:
-      chroot: The chroot being unmounted, or None for the default chroot.
+        chroot: The chroot being unmounted, or None for the default chroot.
     """
     logging.info("Unmounting the chroot.")
     cmd = [os.path.join(constants.CHROMITE_BIN_DIR, "cros_sdk"), "--unmount"]
@@ -289,7 +289,7 @@ def UnmountPath(path: str) -> None:
     """Unmount the specified path.
 
     Args:
-      path: The path being unmounted.
+        path: The path being unmounted.
     """
     logging.info("Unmounting path %s", path)
     try:
@@ -303,10 +303,10 @@ def GetChrootVersion(chroot_path: Optional[str] = None) -> Optional[int]:
     """Get the chroot version.
 
     Args:
-      chroot_path: The chroot path, or None for the default chroot path.
+        chroot_path: The chroot path, or None for the default chroot path.
 
     Returns:
-      The version of the chroot if the chroot is valid, else None.
+        The version of the chroot if the chroot is valid, else None.
     """
     if chroot_path:
         path = chroot_path
@@ -322,10 +322,10 @@ def Update(arguments: UpdateArguments) -> Optional[int]:
     """Update the chroot.
 
     Args:
-      arguments: The various arguments for updating a chroot.
+        arguments: The various arguments for updating a chroot.
 
     Returns:
-      The version of the chroot after the update, or None if the chroot is
+        The version of the chroot after the update, or None if the chroot is
         invalid.
     """
     # TODO: This should be able to be run either in or out of the chroot.
@@ -352,12 +352,12 @@ def CreateSnapshot(
     """Create a logical volume snapshot of a chroot.
 
     Args:
-      chroot: The chroot to perform the operation on.
-      replace_if_needed: If True, will replace the existing chroot with a new one
-        capable of being mounted as a loopback image if needed.
+        chroot: The chroot to perform the operation on.
+        replace_if_needed: If True, will replace the existing chroot with a new
+            one capable of being mounted as a loopback image if needed.
 
     Returns:
-      The name of the snapshot created.
+        The name of the snapshot created.
     """
     _EnsureSnapshottableState(chroot, replace=replace_if_needed)
 
@@ -383,10 +383,10 @@ def RestoreSnapshot(
     """Restore a logical volume snapshot of a chroot.
 
     Args:
-      snapshot_token: The name of the snapshot to restore. Typically an opaque
-        generated name returned from `CreateSnapshot`.
-      chroot: The chroot to perform the operation on, or None for the default
-        chroot.
+        snapshot_token: The name of the snapshot to restore. Typically an opaque
+            generated name returned from `CreateSnapshot`.
+        chroot: The chroot to perform the operation on, or None for the default
+            chroot.
     """
     # Unmount to clean up stale processes that may still be in the chroot, in
     # order to prevent 'device busy' errors from umount.
@@ -410,10 +410,10 @@ def _EnsureSnapshottableState(
     """Ensures that a chroot is in a capable state to create an LVM snapshot.
 
     Args:
-      chroot: The chroot to perform the operation on, or None for the default
-        chroot.
-      replace: If true, will replace the existing chroot with a new one capable of
-        being mounted as a loopback image if needed.
+        chroot: The chroot to perform the operation on, or None for the default
+            chroot.
+        replace: If true, will replace the existing chroot with a new one
+            capable of being mounted as a loopback image if needed.
     """
     cmd = [
         os.path.join(constants.CHROMITE_BIN_DIR, "cros_sdk"),
@@ -455,7 +455,7 @@ def BuildPrebuilts(chroot: "chroot_lib.Chroot"):
     """Builds the binary packages that comprise the Chromium OS SDK.
 
     Args:
-      chroot: The chroot in which to run the build.
+        chroot: The chroot in which to run the build.
     """
     cros_build_lib.run(
         ["./build_sdk_board"],
@@ -474,12 +474,12 @@ def CreateBinhostCLs(
     The CLs are *not* automatically submitted.
 
     Args:
-      prepend_version: String to prepend to version.
-      version: The SDK version string.
-      upload_location: prefix of the upload path (e.g. 'gs://bucket')
+        prepend_version: String to prepend to version.
+        version: The SDK version string.
+        upload_location: prefix of the upload path (e.g. 'gs://bucket')
 
     Returns:
-      List of URIs of the created CLs.
+        List of URIs of the created CLs.
     """
     with tempfile.NamedTemporaryFile() as report:
         cros_build_lib.run(
@@ -520,11 +520,10 @@ def UploadPrebuiltPackages(
     """Uploads prebuilt packages (such as built by BuildSdkPrebuilts).
 
     Args:
-      chroot: The chroot that contains the packages to upload.
-      build_path: Location of the sources.
-      prepend_version: String to prepend to version.
-      version: The SDK version string.
-      upload_location: prefix of the upload path (e.g. 'gs://bucket')
+        chroot: The chroot that contains the packages to upload.
+        prepend_version: String to prepend to version.
+        version: The SDK version string.
+        upload_location: prefix of the upload path (e.g. 'gs://bucket')
     """
     cros_build_lib.run(
         [

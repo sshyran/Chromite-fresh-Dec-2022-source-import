@@ -131,8 +131,8 @@ class ArchiveChromeEbuildEnvTest(cros_test_lib.MockTempDirTestCase):
         """Setup a chrome package directory.
 
         Args:
-          path: The full chrome package path.
-          populate: Whether to include the environment bz2.
+            path: The full chrome package path.
+            populate: Whether to include the environment bz2.
         """
         osutils.SafeMakedirs(path)
         if populate:
