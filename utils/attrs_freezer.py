@@ -18,7 +18,7 @@ class Class(type):
     freeze attribute values with the Freeze method.
 
     Use by including this line in the class signature:
-      class ...(..., metaclass=attrs_freezer.Class)
+        class ...(..., metaclass=attrs_freezer.Class)
     """
 
     _FROZEN_ERR_MSG = "Attribute values are frozen, cannot alter %s."

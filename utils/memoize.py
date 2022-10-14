@@ -70,18 +70,18 @@ def SafeRun(functors, combine_exceptions=False):
     """Executes a list of functors, continuing on exceptions.
 
     Args:
-      functors: An iterable of functors to call.
-      combine_exceptions: If set, and multiple exceptions are encountered,
-        SafeRun will raise a RuntimeError containing a list of all the exceptions.
-        If only one exception is encountered, then the default behavior of
-        re-raising the original exception with unmodified stack trace will be
-        kept.
+        functors: An iterable of functors to call.
+        combine_exceptions: If set, and multiple exceptions are encountered,
+            SafeRun will raise a RuntimeError containing a list of all the
+            exceptions. If only one exception is encountered, then the default
+            behavior of re-raising the original exception with unmodified stack
+            trace will be kept.
 
     Raises:
-      The first exception encountered, with corresponding backtrace, unless
-      |combine_exceptions| is specified and there is more than one exception
-      encountered, in which case a RuntimeError containing a list of all the
-      exceptions that were encountered is raised.
+        The first exception encountered, with corresponding backtrace, unless
+        |combine_exceptions| is specified and there is more than one exception
+        encountered, in which case a RuntimeError containing a list of all the
+        exceptions that were encountered is raised.
     """
     errors = []
 

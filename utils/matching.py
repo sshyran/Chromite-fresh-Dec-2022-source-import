@@ -19,15 +19,15 @@ def GetMostLikelyMatchedObject(
     """Matches objects whose names are most likely matched with target.
 
     Args:
-      haystack: Objects to search against.
-      needle: The name to match.
-      name_func: Function to get object name to match. Default is the identity
-          function.
-      matched_score_threshold: The threshold of likelihood to match.  Must be in
-          the range [0,1].
+        haystack: Objects to search against.
+        needle: The name to match.
+        name_func: Function to get object name to match. Default is the identity
+            function.
+        matched_score_threshold: The threshold of likelihood to match.  Must be in
+            the range [0,1].
 
     Returns:
-      A list of entities from |haystack| whose names are likely |needle|.
+        A list of entities from |haystack| whose names are likely |needle|.
     """
 
     def _Score(obj):
@@ -55,13 +55,13 @@ def FindFilesMatching(
     |target|='/path/to'             =>  /path/to/example.txt
 
     Args:
-      pattern: the pattern used to match the filenames.
-      target: the target directory to search.
-      cwd: current working directory.
-      exclude_dirs: Directories to not include when searching.
+        pattern: the pattern used to match the filenames.
+        target: the target directory to search.
+        cwd: current working directory.
+        exclude_dirs: Directories to not include when searching.
 
     Returns:
-      A list of paths of the matched files.
+        A list of paths of the matched files.
     """
     assert cwd
     assert os.path.exists(cwd)

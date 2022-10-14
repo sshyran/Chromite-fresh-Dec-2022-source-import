@@ -70,7 +70,7 @@ def _cmp_versions(v1: str, v2: str) -> int:
     See: https://dev.gentoo.org/~ulm/pms/head/pms.html#x1-260003.3
 
     Returns:
-      int: 0 if v1==v2, 1 if v1 > v2, or -1 if v1 < v2.
+        int: 0 if v1==v2, 1 if v1 > v2, or -1 if v1 < v2.
     """
     if not v1 or not v2:
         raise ValueError("Version cannot be empty.")

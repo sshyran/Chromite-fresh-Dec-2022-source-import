@@ -23,28 +23,28 @@ class Timer(object):
     done manually.
 
     Examples:
-      with Timer():
-        code_to_be_timed()
+        with Timer():
+            code_to_be_timed()
 
-      with Timer() as t: ->  str(t) == "{formatted_delta}"
-      with Timer('name') as t: -> str(t) == "name: {formatted_delta}"
+        with Timer() as t: ->  str(t) == "{formatted_delta}"
+        with Timer('name') as t: -> str(t) == "name: {formatted_delta}"
 
-      To get an average:
+        To get an average:
 
-      timers = []
-      for _ in range(10):
-        with Timer() as t:
-          code_to_be_timed()
-        timers.append(t)
-      avg = sum(timers, start=Timer('Average')) / len(times)
-      avg.output() -> prints "Average: {formatted_delta}"
+        timers = []
+        for _ in range(10):
+            with Timer() as t:
+                code_to_be_timed()
+            timers.append(t)
+        avg = sum(timers, start=Timer('Average')) / len(times)
+        avg.output() -> prints "Average: {formatted_delta}"
     """
 
     def __init__(self, name: Optional[str] = None):
         """Init.
 
         Args:
-          name: A string to identify the timer, especially when using multiple.
+            name: A string to identify the timer.
         """
         self.name = name
         self.start = 0.0

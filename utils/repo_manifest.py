@@ -28,9 +28,9 @@ class Manifest(object):
         """Initialize Manifest.
 
         Args:
-          etree: An ElementTree object representing a manifest XML file.
-          allow_unsupported_features: If true, will not explode if manifest
-              contains unsupported features such as includes.
+            etree: An ElementTree object representing a manifest XML file.
+            allow_unsupported_features: If true, will not explode if manifest
+                contains unsupported features such as includes.
         """
         self._etree = etree
         self._allow_unsupported_features = allow_unsupported_features
@@ -56,7 +56,7 @@ class Manifest(object):
         """Raise Error if self._etree is not a valid manifest tree.
 
         Args:
-          allow_unsupported_features: If true, ignore unsupported features.
+            allow_unsupported_features: If true, ignore unsupported features.
         """
         root = self._etree.getroot()
         if root is None:
@@ -81,12 +81,12 @@ class Manifest(object):
         """Parse XML into a Manifest.
 
         Args:
-          source: A string path or file object containing XML data.
-          allow_unsupported_features: If true, will not explode if manifest
-              contains unsupported features such as includes.
+            source: A string path or file object containing XML data.
+            allow_unsupported_features: If true, will not explode if manifest
+                contains unsupported features such as includes.
 
         Raises:
-          Error: If source couldn't be parsed into a Manifest.
+            Error: If source couldn't be parsed into a Manifest.
         """
         return cls(
             ElementTree.parse(source),
@@ -98,12 +98,12 @@ class Manifest(object):
         """Parse XML into a Manifest.
 
         Args:
-          data: A string containing XML data.
-          allow_unsupported_features: If true, will not explode if manifest
-              contains unsupported features such as includes.
+            data: A string containing XML data.
+            allow_unsupported_features: If true, will not explode if manifest
+                contains unsupported features such as includes.
 
         Raises:
-          Error: If data couldn't be parsed into a Manifest.
+            Error: If data couldn't be parsed into a Manifest.
         """
         root = ElementTree.fromstring(data)
         return cls(
@@ -115,10 +115,10 @@ class Manifest(object):
         """Write the Manifest as XML.
 
         Args:
-          dest: A string path or file object to write to.
+            dest: A string path or file object to write to.
 
         Raises:
-          Error: If the Manifest contains invalid data.
+            Error: If the Manifest contains invalid data.
         """
         self._ValidateTree()
         self._etree.write(dest, encoding="UTF-8", xml_declaration=True)
@@ -152,7 +152,7 @@ class Manifest(object):
         """Return the Remote with the given name.
 
         Raises:
-          ValueError: If no Remote has the given name.
+            ValueError: If no Remote has the given name.
         """
         for remote in self.Remotes():
             if remote.name == name:
@@ -168,11 +168,11 @@ class Manifest(object):
         """Return the unique Project with the given name and optional branch.
 
         Args:
-          name: The name of the project to search for.
-          branch: The optional branch to search (without the 'refs/heads/').
+            name: The name of the project to search for.
+            branch: The optional branch to search (without the 'refs/heads/').
 
         Raises:
-          ValueError: If there is not exactly one Project with the given name/branch
+            ValueError: If there is not exactly one Project with the given name/branch
         """
         projects = []
         for project in self.Projects():

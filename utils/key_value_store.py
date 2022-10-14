@@ -28,12 +28,12 @@ def LoadData(data, multiline=False, source="<data>"):
     Only UTF-8 content is supported currently.
 
     Args:
-      data: The data to parse.
-      multiline: Allow a value enclosed by quotes to span multiple lines.
-      source: Helpful string for users to diagnose source of errors.
+        data: The data to parse.
+        multiline: Allow a value enclosed by quotes to span multiple lines.
+        source: Helpful string for users to diagnose source of errors.
 
     Returns:
-      a dict of all the key=value pairs found in the file.
+        a dict of all the key=value pairs found in the file.
     """
     d = {}
 
@@ -84,12 +84,12 @@ def LoadFile(obj, ignore_missing=False, multiline=False):
     Only UTF-8 content is supported currently.
 
     Args:
-      obj: The file to read.  Can be a path or an open file object.
-      ignore_missing: If the file does not exist, return an empty dict.
-      multiline: Allow a value enclosed by quotes to span multiple lines.
+        obj: The file to read.  Can be a path or an open file object.
+        ignore_missing: If the file does not exist, return an empty dict.
+        multiline: Allow a value enclosed by quotes to span multiple lines.
 
     Returns:
-      a dict of all the key=value pairs found in the file.
+        a dict of all the key=value pairs found in the file.
     """
     try:
         with _Open(obj) as f:

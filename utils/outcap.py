@@ -31,11 +31,11 @@ class _FdCapturer(object):
         Does not start capturing until Start() is called.
 
         Args:
-          source: A file object to capture. Typically sys.stdout or
-            sys.stderr, but will work with anything that implements flush()
-            and fileno().
-          output: A file name where the captured output is to be stored. If None,
-            then the output will be stored to a temporary file.
+            source: A file object to capture. Typically sys.stdout or
+                sys.stderr, but will work with anything that implements flush()
+                and fileno().
+            output: A file name where the captured output is to be stored. If
+                None, then the output will be stored to a temporary file.
         """
         self._source = source
         self._captured = ""
@@ -56,7 +56,7 @@ class _FdCapturer(object):
         the file.
 
         Args:
-          tempfile_obj: A tempfile object.
+            tempfile_obj: A tempfile object.
         """
         self._tempfile = tempfile_obj
         os.unlink(tempfile_obj.name)
@@ -119,21 +119,21 @@ class OutputCapturer(object):
     Class is designed as a 'ContextManager'.
 
     Examples:
-      with cros_build_lib.OutputCapturer() as output:
-        # Capturing of stdout/stderr automatically starts now.
-        # Do stuff that sends output to stdout/stderr.
-        # Capturing automatically stops at end of 'with' block.
+        with cros_build_lib.OutputCapturer() as output:
+            # Capturing of stdout/stderr automatically starts now.
+            # Do stuff that sends output to stdout/stderr.
+            # Capturing automatically stops at end of 'with' block.
 
-      # stdout/stderr can be retrieved from the OutputCapturer object:
-      stdout = output.GetStdoutLines() # Or other access methods
+        # stdout/stderr can be retrieved from the OutputCapturer object:
+        stdout = output.GetStdoutLines() # Or other access methods
 
-      # Some Assert methods are only valid if capturing was used in test.
-      self.AssertOutputContainsError() # Or other related methods
+        # Some Assert methods are only valid if capturing was used in test.
+        self.AssertOutputContainsError() # Or other related methods
 
-      # OutputCapturer can also be used to capture output to specified files.
-      with self.OutputCapturer(stdout_path='/tmp/stdout.txt') as output:
-        # Do stuff.
-        # stdout will be captured to /tmp/stdout.txt.
+        # OutputCapturer can also be used to capture output to specified files.
+        with self.OutputCapturer(stdout_path='/tmp/stdout.txt') as output:
+            # Do stuff.
+            # stdout will be captured to /tmp/stdout.txt.
     """
 
     OPER_MSG_SPLIT_RE = re.compile(
@@ -149,10 +149,12 @@ class OutputCapturer(object):
         to, then those files are used. Otherwise, temporary files are created.
 
         Args:
-          stdout_path: File to capture stdout to. If None, a temporary file is used.
-          stderr_path: File to capture stderr to. If None, a temporary file is used.
-          quiet_fail: If True fail quietly without printing the captured stdout and
-            stderr.
+            stdout_path: File to capture stdout to. If None, a temporary file is
+                used.
+            stderr_path: File to capture stderr to. If None, a temporary file is
+                used.
+            quiet_fail: If True fail quietly without printing the captured
+                stdout and stderr.
         """
         self._stdout_capturer = _FdCapturer(sys.stdout, output=stdout_path)
         self._stderr_capturer = _FdCapturer(sys.stderr, output=stderr_path)

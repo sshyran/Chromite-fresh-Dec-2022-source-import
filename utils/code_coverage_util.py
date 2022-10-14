@@ -23,15 +23,15 @@ LLVM_COVERAGE_VERSION = "2.0.1"
 def _IsInstrumented(line: str, exclude_line_prefixes: Tuple[str]) -> bool:
     """Returns if the input line is instrumented or not.
 
-      Method does a simple prefix based check to determine if
-      a line is instrumendted or not.
+    Method does a simple prefix based check to determine if
+    a line is instrumendted or not.
 
     Args:
-      line: Single code line to test for instrumentation.
-      exclude_line_prefixes: tuple of un-instrumented line prefixes.
+        line: Single code line to test for instrumentation.
+        exclude_line_prefixes: tuple of un-instrumented line prefixes.
 
     Returns:
-      True if the line is instrumented, otherwise false.
+        True if the line is instrumented, otherwise false.
     """
     line = line.lstrip()
     if not line:
@@ -42,17 +42,17 @@ def _IsInstrumented(line: str, exclude_line_prefixes: Tuple[str]) -> bool:
 def _CreateOpenSegment(line_number: int):
     """Create a segment corresponding to start of instrumented code region.
 
-      Method to create and return a segment which represents start of an
-      instrumented code region. For zero coverage purpose an open segment
-      is always considered to start from col 1.
+    Method to create and return a segment which represents start of an
+    instrumented code region. For zero coverage purpose an open segment
+    is always considered to start from col 1.
 
-      More details about segments can be found here: go/chromeos-zero-coverage.
+    More details about segments can be found here: go/chromeos-zero-coverage.
 
     Args:
-      line_number: The line number from where the instrumented code region starts.
+        line_number: The line number from where the instrumented code region starts.
 
     Returns:
-      An open segment.
+        An open segment.
     """
     return [
         line_number,
@@ -67,16 +67,16 @@ def _CreateOpenSegment(line_number: int):
 def _CreateCloseSegment(line_number: int, col: int):
     """Create a segment corresponding to end of instrumented code region.
 
-      Method to create and return a segment which represents end of an
-      instrumented code region.
-      More details about segments can be found here: go/chromeos-zero-coverage.
+    Method to create and return a segment which represents end of an
+    instrumented code region.
+    More details about segments can be found here: go/chromeos-zero-coverage.
 
     Args:
-      line_number: Marks the end of instrumented code region.
-      col: The col number which marks the end of the instrumented code region.
+        line_number: Marks the end of instrumented code region.
+        col: The col number which marks the end of the instrumented code region.
 
     Returns:
-      A close segment.
+        A close segment.
     """
     return [line_number, col, ZERO_COVERAGE_EXEC_COUNT, False, False, False]
 
@@ -85,10 +85,10 @@ def _ExtractLlvmCoverageData(coverage_json: Dict) -> List:
     """Extract coverage data from coverage json.
 
     Args:
-      coverage_json: llvm formatted coverage json.
+        coverage_json: llvm formatted coverage json.
 
     Returns:
-      List of coverage data objects.
+        List of coverage data objects.
     """
     if not coverage_json or not coverage_json.get("data"):
         return []
@@ -101,20 +101,20 @@ def _GenerateZeroCoverageLLVMForFile(
 ) -> Dict:
     """Generates LLVM json formatted zero % coverage for the given file.
 
-      Method to identify all the instrumented lines within a file and generate
-      mock coverage data json. The mock json marks all the instrumented lines
-      as not-covered by unit tests.
+    Method to identify all the instrumented lines within a file and generate
+    mock coverage data json. The mock json marks all the instrumented lines
+    as not-covered by unit tests.
 
-      More detials: go/chromeos-zero-coverage.
+    More detials: go/chromeos-zero-coverage.
 
     Args:
-      file_path: path to the src file.
-      src_prefix_path: prefix path for source code
-      exclude_line_prefixes: Used to determine un-instrumented lines
-      in the file.
+        file_path: path to the src file.
+        src_prefix_path: prefix path for source code
+        exclude_line_prefixes: Used to determine un-instrumented lines
+            in the file.
 
     Returns:
-      Dict representing zero coverage data for the file.
+        Dict representing zero coverage data for the file.
     """
 
     segments = []
@@ -172,18 +172,18 @@ def _ShouldExclude(
 ) -> bool:
     """Determine if the filename should be excluded from zero coverage.
 
-      This method first does the suffixes based exclude check.
-      Next it iterates over all |exclude_files| to search for |file|.
-      Note that LLVM generated file paths are absolute paths, however
-      |file| is relative to src.
+    This method first does the suffixes based exclude check.
+    Next it iterates over all |exclude_files| to search for |file|.
+    Note that LLVM generated file paths are absolute paths, however
+    |file| is relative to src.
 
     Args:
-      file: Chromium src root relative file path.
-      exclude_files: List of llvm generated file paths to exclude.
-      exclude_files_suffixes: Used to exclude files based on suffixes
+        file: Chromium src root relative file path.
+        exclude_files: List of llvm generated file paths to exclude.
+        exclude_files_suffixes: Used to exclude files based on suffixes
 
     Returns:
-      True if a file should be excluded otherwise False.
+        True if a file should be excluded otherwise False.
     """
     should_exclude = False
     if file.endswith(exclude_files_suffixes):
@@ -203,10 +203,10 @@ def _ValidatePathMappingEntryList(data: Dict) -> None:
     """Function to validate path mapping json.
 
     Args:
-      data: Dict of path mapping entries.
+        data: Dict of path mapping entries.
 
     Returns:
-      Nothing. Throws exception in case the entry is invalid.
+        Nothing. Throws exception in case the entry is invalid.
     """
     if not data:
         raise ValueError(
@@ -231,23 +231,23 @@ def _CleanLlvmFileName(
 ) -> str:
     """Clean LLVM generated file name.
 
-       Convert the destination work directory paths into
-       paths relative to src root. LLVM generated coverage reports
-       contains filepaths under work directory. Something like
-       " /build/nami/tmp/portage/<category>/<packagename>/work
-       /<packagename>/abc.cc". It needs to be cleaned and mapped
-       to corresponding chromeos src file path. This method achieves
-       this by using |path_mapping_list|. LLVM also reports coverage
-       for generated files. So this method discards any file that does
-       not exists in chromeos codebase.
+    Convert the destination work directory paths into
+    paths relative to src root. LLVM generated coverage reports
+    contains filepaths under work directory. Something like
+    " /build/nami/tmp/portage/<category>/<packagename>/work
+    /<packagename>/abc.cc". It needs to be cleaned and mapped
+    to corresponding chromeos src file path. This method achieves
+    this by using |path_mapping_list|. LLVM also reports coverage
+    for generated files. So this method discards any file that does
+    not exists in chromeos codebase.
 
     Args:
-      filename: file name that needs to be cleaned.
-      path_mapping_list: Path mapping list.
-      source_root: source root path.
+        filename: file name that needs to be cleaned.
+        path_mapping_list: Path mapping list.
+        source_root: source root path.
 
     Returns:
-      Cleaned filename, None if the unable to clean file.
+        Cleaned filename, None if the unable to clean file.
     """
 
     if not filename:
@@ -271,22 +271,22 @@ def CleanLlvmFileNames(
 ) -> Dict:
     """Clean LLVM generated file names.
 
-       Method to convert the destination work directory paths into
-       paths relative to src root. LLVM generated coverage reports
-       contains filepaths under work directory. Something like
-       " /build/nami/tmp/portage/<category>/<packagename>/work
-       /<packagename>/abc.cc". It needs to be cleaned and mapped
-       to corresponding chromeos src file path. LLVM also reports coverage
-       for generated files. So this method discards any file that does
-       not exists in chromeos codebase.
+    Method to convert the destination work directory paths into
+    paths relative to src root. LLVM generated coverage reports
+    contains filepaths under work directory. Something like
+    " /build/nami/tmp/portage/<category>/<packagename>/work
+    /<packagename>/abc.cc". It needs to be cleaned and mapped
+    to corresponding chromeos src file path. LLVM also reports coverage
+    for generated files. So this method discards any file that does
+    not exist in chromeos codebase.
 
     Args:
-      coverage_json: llvm coverage json.
-      source_root: source root path.
-      path_mapping_list: List of src and work destination dir tuple.
+        coverage_json: llvm coverage json.
+        source_root: source root path.
+        path_mapping_list: List of src and work destination dir tuple.
 
     Returns:
-      llvm coverage json after required cleaning up the file names.
+        llvm coverage json after required cleaning up the file names.
     """
 
     if not coverage_json:
@@ -308,14 +308,14 @@ def CleanLlvmFileNames(
 def GatherPathMapping(search_directory: str) -> List:
     """Method to gather path mapping json.
 
-       Walk through search_directory and read and merge all
-       json files containing mapping of src to build destination.
+    Walk through search_directory and read and merge all
+    json files containing mapping of src to build destination.
 
     Args:
-      search_directory: Directory to look for path mapping json.
+        search_directory: Directory to look for path mapping json.
 
     Returns:
-      List of path mapping entries.
+        List of path mapping entries.
     """
     if not os.path.exists(search_directory):
         logging.warning(
@@ -358,11 +358,11 @@ def LogLlvmCoverageJsonInformation(coverage_json: Dict, message: str):
     Method to log list of file paths in the coverage json.
 
     Args:
-      coverage_json: llvm coverage json.
-      message: Logging message.
+        coverage_json: llvm coverage json.
+        message: Logging message.
 
     Returns:
-      llvm coverage json after required entries are removed.
+        llvm coverage json after required entries are removed.
     """
     if not coverage_json:
         return
@@ -381,15 +381,15 @@ def GetLLVMCoverageWithFilesExcluded(
 ) -> Dict:
     """Removes and returns required file entries from coverage json.
 
-       Method to remove file entries in coverage json which ends with one of
-       the suffixes mentioned in |exclude_files_suffixes|.
+    Method to remove file entries in coverage json which ends with one of
+    the suffixes mentioned in |exclude_files_suffixes|.
 
     Args:
-      coverage_json: llvm coverage json
-      exclude_files_suffixes: Used to remove files based on suffixes
+        coverage_json: llvm coverage json
+        exclude_files_suffixes: Used to remove files based on suffixes
 
     Returns:
-      llvm coverage json after required entries are removed.
+        llvm coverage json after required entries are removed.
     """
     if not exclude_files_suffixes:
         return coverage_json
@@ -410,11 +410,11 @@ def MergeLLVMCoverageJson(coverage_json_1: Dict, coverage_json_2: Dict) -> Dict:
     """Merge coverage data of two coverage json and return single coverage json.
 
     Args:
-      coverage_json_1: llvm coverage json to merge.
-      coverage_json_2: llvm coverage json to merge.
+        coverage_json_1: llvm coverage json to merge.
+        coverage_json_2: llvm coverage json to merge.
 
     Returns:
-      Single merged llvm formatted coverage json.
+        Single merged llvm formatted coverage json.
     """
     coverage_data_1 = _ExtractLlvmCoverageData(coverage_json_1)
     coverage_data_2 = _ExtractLlvmCoverageData(coverage_json_2)
@@ -429,10 +429,10 @@ def ExtractFilenames(coverage_json: Dict) -> List[str]:
     """Extracts filenames from coverage json.
 
     Args:
-      coverage_json: The coverage json in LLVM format.
+        coverage_json: The coverage json in LLVM format.
 
     Returns:
-      List of filenames.
+        List of filenames.
     """
     if (
         not coverage_json
@@ -453,10 +453,10 @@ def CreateLlvmCoverageJson(coverage_data: List) -> Dict:
     """Given coverage_data, generate llvm format coverage json.
 
     Args:
-      coverage_data: The coverage data containing array of file cov info.
+        coverage_data: The coverage data containing array of file cov info.
 
     Returns:
-      coverage json llvm format.
+        coverage json llvm format.
     """
     coverage_json = {
         "data": [
@@ -480,18 +480,18 @@ def GenerateZeroCoverageLlvm(
 ) -> Dict:
     """Generate zero coverage for all src files under  |path_to_src_directories|.
 
-       More details on how to generate zero coverage: go/chromeos-zero-coverage.
+    More details on how to generate zero coverage: go/chromeos-zero-coverage.
 
     Args:
-      path_to_src_directories: Dir to look for files to generate zero coverage.
-      src_file_extensions: Filter files based on these extensions.
-      exclude_line_prefixes: Used to determine un-instrumented code.
-      exclude_files: files to exclude from zero coverage.
-      exclude_files_suffixes: Used to exclude files based on suffixes
-      src_prefix_path: prefix path for source code
+        path_to_src_directories: Dir to look for files to generate zero coverage.
+        src_file_extensions: Filter files based on these extensions.
+        exclude_line_prefixes: Used to determine un-instrumented code.
+        exclude_files: files to exclude from zero coverage.
+        exclude_files_suffixes: Used to exclude files based on suffixes
+        src_prefix_path: prefix path for source code
 
     Returns:
-      llvm format coverage json.
+        llvm format coverage json.
     """
     coverage_data = []
     filenames = []
@@ -520,10 +520,10 @@ def GetLlvmJsonCoverageDataIfValid(path_to_file: str):
     """Gets the content of a file if it matches the llvm coverage json format.
 
     Args:
-      path_to_file: The path of the file to read.
+        path_to_file: The path of the file to read.
 
     Returns:
-      The file contents if they match the llvm json structure, otherwise None.
+        The file contents if they match the llvm json structure, otherwise None.
     """
     try:
         # Only coverage.json files matter for llvm json coverage.

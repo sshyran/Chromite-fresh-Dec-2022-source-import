@@ -14,10 +14,10 @@ def _MergeDictWithPathParts(
     """Merges source into destination based on path_parts.
 
     Args:
-      path_parts: Parts of a single FieldMask path as an element.
-          E.g. path 'a.b.c' would be ['a', 'b', 'c'].
-      source: The source dict.
-      destination: The destination message to be merged into.
+        path_parts: Parts of a single FieldMask path as an element.
+            E.g. path 'a.b.c' would be ['a', 'b', 'c'].
+        source: The source dict.
+        destination: The destination message to be merged into.
     """
     assert path_parts
     cur_part = path_parts[0]
@@ -73,8 +73,8 @@ def CreateFilteredDict(field_mask: "FieldMask", source: Dict):
     e.g. parsed from JSON.
 
     Args:
-      field_mask: The FieldMask to apply.
-      source: The source dict.
+        field_mask: The FieldMask to apply.
+        source: The source dict.
     """
     destination = {}
     for path in field_mask.paths:

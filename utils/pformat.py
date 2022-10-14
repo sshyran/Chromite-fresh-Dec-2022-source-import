@@ -18,10 +18,10 @@ def timedelta(delta):
     Useful when printing durations >= 1 second in logs.
 
     Args:
-      delta: A datetime.timedelta.
+        delta: A datetime.timedelta.
 
     Returns:
-      Formatted string of the delta like '1d2h3m4.000s'.
+        Formatted string of the delta like '1d2h3m4.000s'.
     """
     if not isinstance(delta, datetime.timedelta):
         raise TypeError("delta must be of type datetime.timedelta")
@@ -47,14 +47,14 @@ def json(
     """Convert an object to JSON with the right format.
 
     Args:
-      obj: The object to serialize & format.
-      fp: By default, the JSON string is returned.  The |fp| allows specifying a
-          file object (in text mode) to write to instead.
-      compact: Whether the output will be compact (flattened to one line), or
-          human readable (spread over multiple lines).
+        obj: The object to serialize & format.
+        fp: By default, the JSON string is returned.  The |fp| allows specifying
+            a file object (in text mode) to write to instead.
+        compact: Whether the output will be compact (flattened to one line), or
+            human readable (spread over multiple lines).
 
     Returns:
-      A string if |fp| is not specified, else None.
+        A string if |fp| is not specified, else None.
     """
     kwargs = {
         "cls": cls,
@@ -81,10 +81,10 @@ def size(bytesize: float) -> str:
     """Convert bytes to human readable format.
 
     Args:
-      bytesize: Number to humanize
+        bytesize: Number to humanize
 
     Returns:
-      Size as string in human-readable format (e.g. 1.8MiB)
+        Size as string in human-readable format (e.g. 1.8MiB)
     """
     if bytesize < 1024:
         return f"{bytesize}B"

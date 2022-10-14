@@ -29,13 +29,13 @@ def prctl(
     https://man7.org/linux/man-pages/man2/prctl.2.html
 
     Examples:
-      # For options that only take input integers, the API is simple.
-      prctl.prctl(prctl.Option.SET_PDEATHSIG, signal.SIGHUP)
+        # For options that only take input integers, the API is simple.
+        prctl.prctl(prctl.Option.SET_PDEATHSIG, signal.SIGHUP)
 
-      # For options that output arguments, the caller needs to pass in pointers.
-      arg2 = ctypes.c_int()
-      prctl.prctl(prctl.Option.GET_PDEATHSIG, ctypes.byref(arg2))
-      print(arg2.value)
+        # For options that output arguments, the caller must pass in pointers.
+        arg2 = ctypes.c_int()
+        prctl.prctl(prctl.Option.GET_PDEATHSIG, ctypes.byref(arg2))
+        print(arg2.value)
     """
     libc_name = ctypes.util.find_library("c")
     libc = ctypes.CDLL(libc_name)
