@@ -215,6 +215,7 @@ def RunUnittests(
 
     if verbose:
         command += ["--show-output"]
+        command += ["--verbose"]
 
     if retries is not None:
         command += ["--retries=%s" % retries]

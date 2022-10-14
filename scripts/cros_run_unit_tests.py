@@ -38,10 +38,18 @@ def ParseArgs(argv):
     parser = commandline.ArgumentParser(description=__doc__)
 
     target = parser.add_mutually_exclusive_group(required=True)
+
     target.add_argument("--sysroot", type="path", help="Path to the sysroot.")
     target.add_argument("--board", help="Board name.")
     target.add_argument(
         "--host", action="store_true", help="Run tests for the host SDK."
+    )
+
+    parser.add_argument(
+        "--emerge-verbose",
+        default=False,
+        action="store_true",
+        help="Output emerge details.",
     )
 
     parser.add_argument(
@@ -238,6 +246,7 @@ def main(argv):
             extra_env=env,
             keep_going=keep_going,
             jobs=opts.jobs,
+            verbose=opts.emerge_verbose,
         )
     except cros_build_lib.RunCommandError:
         logging.error("Unittests failed.")

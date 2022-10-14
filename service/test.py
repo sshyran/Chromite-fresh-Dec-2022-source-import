@@ -96,6 +96,9 @@ def BuildTargetUnitTest(
     # TODO(crbug.com/960805) Move cros_run_unit_tests logic here.
     cmd = ["cros_run_unit_tests"]
 
+    # Show emerge type output.
+    cmd.extend(["--emerge-verbose"])
+
     if build_target.is_host():
         cmd.extend(["--host"])
     else:
