@@ -270,8 +270,8 @@ def _LoadStackedPartitionConfig(filename):
     # When there are no parents, just apply the common layout into
     # the other ones.
     if not parents:
-        common_layout = config["layouts"].setdefault(COMMON_LAYOUT, [])
-        for layout_name, layout in config["layouts"].items():
+        common_layout = config.get("layouts", {}).setdefault(COMMON_LAYOUT, [])
+        for layout_name, layout in config.get("layouts", {}).items():
             # Don't apply on yourself.
             if layout_name == COMMON_LAYOUT or layout_name == "_comment":
                 continue
@@ -317,12 +317,12 @@ def _LoadStackedPartitionConfig(filename):
         # building these layout files based on the parent configs and overriding
         # new values, we first add the new layouts not previously defined in the
         # parent config using a copy of the base layout from that parent config.
-        parent_layouts = set(parent_config["layouts"])
-        config_layouts = set(config["layouts"])
+        parent_layouts = set(parent_config.get("layouts", {}))
+        config_layouts = set(config.get("layouts", {}))
         new_layouts = config_layouts - parent_layouts
 
         # Actually add the copy. Use a copy such that each is unique.
-        parent_common_layout = parent_config["layouts"].setdefault(
+        parent_common_layout = parent_config.get("layouts", {}).setdefault(
             COMMON_LAYOUT, []
         )
         for layout_name in new_layouts:
@@ -332,12 +332,16 @@ def _LoadStackedPartitionConfig(filename):
 
         # Iterate through each layout in the parent config and apply the new
         # layout.
-        common_layout = config["layouts"].setdefault(COMMON_LAYOUT, [])
-        for layout_name, parent_layout in parent_config["layouts"].items():
+        common_layout = config.get("layouts", {}).setdefault(COMMON_LAYOUT, [])
+        for layout_name, parent_layout in parent_config.get(
+            "layouts", {}
+        ).items():
             if layout_name == "_comment":
                 continue
 
-            layout_override = config["layouts"].setdefault(layout_name, [])
+            layout_override = config.get("layouts", {}).setdefault(
+                layout_name, []
+            )
             if layout_name != COMMON_LAYOUT:
                 _ApplyLayoutOverrides(parent_layout, common_layout)
 

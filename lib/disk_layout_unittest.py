@@ -123,6 +123,77 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
         layout = disk_layout._LoadStackedPartitionConfig(self.layout_json)
         self.assertEqual(parent_layout, layout)
 
+    def testJSONEmptyParent(self):
+        """Test that absence of layout section in parent is supported."""
+        with open(self.parent_layout_json, "w") as f:
+            f.write("""{}""")
+        with open(self.layout_json, "w") as f:
+            f.write(
+                """{
+  "parent": "%s",
+  "layouts": {
+    "common": [
+      {
+        "num": 2,
+        "name": "Part 2"
+      }
+    ]
+  }
+}"""
+                % self.parent_layout_json
+            )
+        # pylint: disable-msg=W0212
+        disk_layout._LoadStackedPartitionConfig(self.layout_json)
+
+    def testJSONEmptyLayout(self):
+        """Test that absence of layout section in child is supported."""
+        with open(self.parent_layout_json, "w") as f:
+            f.write(
+                """{
+  "layouts": {
+    "common": [
+      {
+        "num": 3,
+        "name": "Part 3"
+      }
+    ]
+  }
+}"""
+            )
+        # pylint: disable-msg=W0212
+        parent_layout = disk_layout._LoadStackedPartitionConfig(
+            self.parent_layout_json
+        )
+        with open(self.layout_json, "w") as f:
+            f.write(
+                """{
+  "parent": "%s"
+}"""
+                % self.parent_layout_json
+            )
+        # pylint: disable-msg=W0212
+        layout = disk_layout._LoadStackedPartitionConfig(self.layout_json)
+        self.assertEqual(parent_layout, layout)
+
+    def testJSONDoubleEmptyLayout(self):
+        """Test that no layout section in both child and parent is supported."""
+        with open(self.parent_layout_json, "w") as f:
+            f.write("""{} """)
+        # pylint: disable-msg=W0212
+        parent_layout = disk_layout._LoadStackedPartitionConfig(
+            self.parent_layout_json
+        )
+        with open(self.layout_json, "w") as f:
+            f.write(
+                """{
+  "parent": "%s"
+}"""
+                % self.parent_layout_json
+            )
+        # pylint: disable-msg=W0212
+        layout = disk_layout._LoadStackedPartitionConfig(self.layout_json)
+        self.assertEqual(parent_layout, layout)
+
     def testPartitionOrderPreservedWithBase(self):
         """Test the order of the partitions is the same as in the parent."""
         with open(self.parent_layout_json, "w") as f:
