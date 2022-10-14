@@ -124,6 +124,7 @@
     asurada-release
     atlas-kernelnext-release
     atlas-release
+    aurora-borealis-release
     betty-arc-r-release
     betty-arc-t-release
     betty-arc-u-release
@@ -337,6 +338,11 @@
   atlas-payloads-tryjob
   atlas-release-basic-tryjob
   atlas-release-tryjob
+  aurora-borealis-full-tryjob
+  aurora-borealis-llvm-next-toolchain-tryjob
+  aurora-borealis-llvm-toolchain-tryjob
+  aurora-borealis-payloads-tryjob
+  aurora-borealis-release-tryjob
   beaglebone-full-tryjob
   beaglebone-llvm-next-toolchain-tryjob
   beaglebone-llvm-toolchain-tryjob
@@ -943,6 +949,7 @@
     asurada-release-tryjob
     atlas-kernelnext-release-tryjob
     atlas-release-tryjob
+    aurora-borealis-release-tryjob
     betty-arc-r-release-tryjob
     betty-arc-t-release-tryjob
     betty-arc-u-release-tryjob
