@@ -18,6 +18,9 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
         self.parent_layout_json = os.path.join(
             self.tempdir, "test_layout_parent.json"
         )
+        self.another_parent_layout_json = os.path.join(
+            self.tempdir, "test_layout_another_parent.json"
+        )
 
     def testJSONComments(self):
         """Test that we ignore comments in JSON in lines starting with #."""
@@ -120,6 +123,62 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
         layout = disk_layout._LoadStackedPartitionConfig(self.layout_json)
         self.assertEqual(parent_layout, layout)
 
+    def testPartitionOrderPreservedWithBase(self):
+        """Test the order of the partitions is the same as in the parent."""
+        with open(self.parent_layout_json, "w") as f:
+            f.write(
+                """{
+  "layouts": {
+    "common": [
+      {
+        "num": 3,
+        "name": "Part 3"
+      },
+      {
+        "num": 2,
+        "name": "Part 2"
+      },
+      {
+        "num": 1,
+        "name": "Part 1"
+      }
+    ],
+    "base": []
+  }
+}"""
+            )
+        # pylint: disable-msg=W0212
+        parent_layout = disk_layout._LoadStackedPartitionConfig(
+            self.parent_layout_json
+        )
+
+        # Test also that even overriding one partition keeps all of them in
+        # order.
+        with open(self.layout_json, "w") as f:
+            f.write(
+                """{
+  "parent": "%s",
+  "layouts": {
+    "common": [
+      {
+        "num": 2,
+        "name": "Part 2"
+      }
+    ],
+    "base": [
+      {
+        "num": 1,
+        "name": "Part 1"
+      }
+    ]
+  }
+}"""
+                % self.parent_layout_json
+            )
+        # pylint: disable-msg=W0212
+        layout = disk_layout._LoadStackedPartitionConfig(self.layout_json)
+        self.assertEqual(parent_layout, layout)
+
     def testGetStartByteOffsetIsAccurate(self):
         """Test that padding_bytes results in a valid start sector."""
 
@@ -150,6 +209,7 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                     % (i[0], i[1] * i[0])
                 )
 
+            # pylint: disable-msg=W0212
             config = disk_layout.LoadPartitionConfig(self.layout_json)
 
             class Options(object):
@@ -201,6 +261,7 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                     % (i[0], i[1] * i[0], i[2])
                 )
 
+            # pylint: disable-msg=W0212
             config = disk_layout.LoadPartitionConfig(self.layout_json)
 
             class Options(object):
@@ -222,6 +283,85 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
             )
 
             self.assertEqual(totals["byte_count"], total_size)
+
+    def testMultipleParents(self):
+        """Test that multiple inheritance works."""
+        with open(self.parent_layout_json, "w") as f:
+            f.write(
+                """{
+  "layouts": {
+    "common": [
+      {
+        "num": 1,
+        "name": "Part 1"
+      }
+    ],
+    "base": [
+      {
+        "num": 2,
+        "name": "Part 2",
+        "fs_size_min": 1000
+      },
+      {
+        "num": 12,
+        "fs_size": 1000
+      }
+    ]
+  }
+}"""
+            )
+        with open(self.another_parent_layout_json, "w") as f:
+            f.write(
+                """{
+  "layouts": {
+    "common": [
+      {
+        "num": 1,
+        "fs_size_min": 2000
+      }
+    ],
+    "base": [
+      {
+        "num": 2,
+        "name": "new Part 2",
+        "fs_size_min": 2000
+      }
+    ]
+  }
+}"""
+            )
+        with open(self.layout_json, "w") as f:
+            f.write(
+                """{
+  "parent": "%s %s",
+  "layouts": {
+    "common": [
+      {
+        "num": 1,
+        "name": "new Part 1"
+      }
+    ]
+  }
+}"""
+                % (self.parent_layout_json, self.another_parent_layout_json)
+            )
+
+        # pylint: disable-msg=W0212
+        self.assertEqual(
+            disk_layout._LoadStackedPartitionConfig(self.layout_json),
+            {
+                "layouts": {
+                    "common": [
+                        {"fs_size_min": 2000, "name": "new Part 1", "num": 1}
+                    ],
+                    "base": [
+                        {"fs_size_min": 2000, "name": "new Part 2", "num": 2},
+                        {"fs_size": 1000, "num": 12},
+                        {"fs_size_min": 2000, "name": "new Part 1", "num": 1},
+                    ],
+                }
+            },
+        )
 
     def testGapPartitionsAreIncluded(self):
         """Test empty partitions (gaps) can be included in the child layout."""

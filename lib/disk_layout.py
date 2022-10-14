@@ -263,21 +263,29 @@ def _LoadStackedPartitionConfig(filename):
         )
     config = json_lib.ParseJsonFileWithComments(filename)
 
-    # Let's first apply our new configs onto base.
-    common_layout = config["layouts"].setdefault(COMMON_LAYOUT, [])
-    for layout_name, layout in config["layouts"].items():
-        # Don't apply on yourself.
-        if layout_name == COMMON_LAYOUT or layout_name == "_comment":
-            continue
+    parents = config.get("parent", "").split()
+    if isinstance(parents, list):
+        parents.reverse()
 
-        # Need to copy a list of dicts so make a deep copy.
-        working_layout = copy.deepcopy(common_layout)
-        _ApplyLayoutOverrides(working_layout, layout)
-        config["layouts"][layout_name] = working_layout
+    # When there are no parents, just apply the common layout into
+    # the other ones.
+    if not parents:
+        common_layout = config["layouts"].setdefault(COMMON_LAYOUT, [])
+        for layout_name, layout in config["layouts"].items():
+            # Don't apply on yourself.
+            if layout_name == COMMON_LAYOUT or layout_name == "_comment":
+                continue
+
+            # Need to copy a list of dicts so make a deep copy.
+            working_layout = copy.deepcopy(common_layout)
+            _ApplyLayoutOverrides(working_layout, layout)
+            config["layouts"][layout_name] = working_layout
+        return config
 
     dirname = os.path.dirname(filename)
-    # Now let's inherit the values from all our parents.
-    for parent in config.get("parent", "").split():
+    # When there is parent, apply the current config on top of a parent,
+    # and reuse that produced config for the next parent.
+    for parent in parents:
         parent_filename = os.path.join(dirname, parent)
         if not os.path.exists(parent_filename):
             # Try loading the parent file from the src/scripts/build_library
@@ -314,12 +322,12 @@ def _LoadStackedPartitionConfig(filename):
         new_layouts = config_layouts - parent_layouts
 
         # Actually add the copy. Use a copy such that each is unique.
-        parent_cmn_layout = parent_config["layouts"].setdefault(
+        parent_common_layout = parent_config["layouts"].setdefault(
             COMMON_LAYOUT, []
         )
         for layout_name in new_layouts:
             parent_config["layouts"][layout_name] = copy.deepcopy(
-                parent_cmn_layout
+                parent_common_layout
             )
 
         # Iterate through each layout in the parent config and apply the new
