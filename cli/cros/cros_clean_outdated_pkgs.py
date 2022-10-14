@@ -32,6 +32,7 @@ SYSTEM_PACKAGES = {
     "app-misc/pax-utils",
     "app-shells/",
     "dev-vcs/",
+    "net-misc/",
     "sys-apps/",
     "sys-devel/",
     "sys-libs/",
