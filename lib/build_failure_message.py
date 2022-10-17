@@ -20,12 +20,12 @@ class BuildFailureMessage(object):
         """Create a BuildFailureMessage instance.
 
         Args:
-          message_summary: The message summary string to print.
-          failure_messages: A list of failure messages (instances of
-            StageFailureMessage), if any.
-          internal: Whether this failure occurred on an internal builder.
-          reason: A string describing the failure.
-          builder: The builder the failure occurred on.
+            message_summary: The message summary string to print.
+            failure_messages: A list of failure messages (instances of
+                StageFailureMessage), if any.
+            internal: Whether this failure occurred on an internal builder.
+            reason: A string describing the failure.
+            builder: The builder the failure occurred on.
         """
         self.message_summary = str(message_summary)
         self.failure_messages = failure_messages or []
@@ -52,12 +52,12 @@ class BuildFailureMessage(object):
         """Check if all of the failure_messages match the exception_categories.
 
         Args:
-          exception_categories: A set of exception categories (members of
-            constants.EXCEPTION_CATEGORY_ALL_CATEGORIES).
+            exception_categories: A set of exception categories (members of
+                constants.EXCEPTION_CATEGORY_ALL_CATEGORIES).
 
         Returns:
-          True if all of the failure_messages match a member in
-          exception_categories; else, False.
+            True if all of the failure_messages match a member in
+            exception_categories; else, False.
         """
         for failure in self.failure_messages:
             if failure.exception_category not in exception_categories:
@@ -74,12 +74,12 @@ class BuildFailureMessage(object):
         """Check if any of the failure_messages match the exception_categories.
 
         Args:
-          exception_categories: A set of exception categories (members of
+            exception_categories: A set of exception categories (members of
             constants.EXCEPTION_CATEGORY_ALL_CATEGORIES).
 
         Returns:
-          True if any of the failure_messages match a member in
-          exception_categories; else, False.
+            True if any of the failure_messages match a member in
+            exception_categories; else, False.
         """
         for failure in self.failure_messages:
             if failure.exception_category in exception_categories:

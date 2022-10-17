@@ -42,14 +42,14 @@ class PackageIndex(object):
 
     The Portage Packages index file serves to keep track of what packages are
     included in a tree. It contains the following sections:
-      1) The header. The header tracks general key/value pairs that don't apply
-         to any specific package. E.g., it tracks the base URL of the packages
-         file, and the number of packages included in the file. The header is
-         terminated by a blank line.
-      2) The body. The body is a list of packages. Each package contains a list
-         of key/value pairs. Packages are either terminated by a blank line or
-         by the end of the file. Every package has a CPV entry, which serves as
-         a unique identifier for the package.
+        1) The header. The header tracks general key/value pairs that don't
+            apply to any specific package. E.g., it tracks the base URL of the
+            packages file, and the number of packages included in the file. The
+            header is terminated by a blank line.
+        2) The body. The body is a list of packages. Each package contains a
+            list of key/value pairs. Packages are either terminated by a blank
+            line or by the end of the file. Every package has a CPV entry, which
+            serves as a unique identifier for the package.
     """
 
     def __init__(self):
@@ -62,7 +62,7 @@ class PackageIndex(object):
         # A list of packages (stored as a list of dictionaries).
         self.packages = []
 
-        # Whether or not the PackageIndex has been modified since the last time it
+        # Whether the PackageIndex has been modified since the last time it
         # was written.
         self.modified = False
 
@@ -70,8 +70,8 @@ class PackageIndex(object):
         """Populate db with SHA1 -> URL mapping for packages.
 
         Args:
-          db: Dictionary to populate with SHA1 -> URL mapping for packages.
-          expires: The time at which prebuilts expire from the binhost.
+            db: Dictionary to populate with SHA1 -> URL mapping for packages.
+            expires: The time at which prebuilts expire from the binhost.
         """
 
         uri = gs.CanonicalizeURL(self.header["URI"])
@@ -109,10 +109,10 @@ class PackageIndex(object):
         fils is reached, an empty dictionary is returned.
 
         Args:
-          pkgfile: A python file object.
+            pkgfile: A python file object.
 
         Returns:
-          The dictionary of key-value pairs that was read from the file.
+            The dictionary of key-value pairs that was read from the file.
         """
         d = {}
         for line in pkgfile:
@@ -132,7 +132,7 @@ class PackageIndex(object):
         """Formats lines for _WritePkgIndex.
 
         Args:
-          entry: The key/value pairs to write.
+            entry: The key/value pairs to write.
         """
         lines = ["%s: %s" % (k, v) for k, v in sorted(entry.items()) if v]
         if lines:
@@ -149,8 +149,8 @@ class PackageIndex(object):
         will be terminated by a blank line.
 
         Args:
-          pkgfile: A python file object.
-          entry: A dictionary of the key/value pairs to write.
+            pkgfile: A python file object.
+            entry: A dictionary of the key/value pairs to write.
         """
         lines = self._FormatPkgIndex(entry)
         pkgfile.write("%s\n" % "\n".join(lines))
@@ -159,7 +159,7 @@ class PackageIndex(object):
         """Read header of packages file.
 
         Args:
-          pkgfile: A python file object.
+            pkgfile: A python file object.
         """
         assert not self.header, "Should only read header once."
         self.header = self._ReadPkgIndex(pkgfile)
@@ -171,7 +171,7 @@ class PackageIndex(object):
         _ReadHeader).
 
         Args:
-          pkgfile: A python file object.
+            pkgfile: A python file object.
         """
         assert self.header, "Should read header first."
         assert not self.packages, "Should only read body once."
@@ -189,7 +189,7 @@ class PackageIndex(object):
         """Read the entire packages file.
 
         Args:
-          pkgfile: A python file object.
+            pkgfile: A python file object.
         """
         self._ReadHeader(pkgfile)
         self._ReadBody(pkgfile)
@@ -198,7 +198,7 @@ class PackageIndex(object):
         """Read the packages file path.
 
         Args:
-          pkgfile_path: The path to the file.
+            pkgfile_path: The path to the file.
         """
         with open(pkgfile_path) as f:
             self.Read(f)
@@ -207,8 +207,8 @@ class PackageIndex(object):
         """Remove packages which match filter_fn.
 
         Args:
-          filter_fn: A function which operates on packages. If it returns True,
-                     the package should be removed.
+            filter_fn: A function which operates on packages. If it returns
+                True, the package should be removed.
         """
 
         filtered = [p for p in self.packages if not filter_fn(p)]
@@ -225,11 +225,11 @@ class PackageIndex(object):
         have to upload the file.
 
         Args:
-          pkgindexes: A list of PackageIndex objects containing info about packages
-            that have already been uploaded.
+            pkgindexes: A list of PackageIndex objects containing info about
+                packages that have already been uploaded.
 
         Returns:
-          A list of the packages that still need to be uploaded.
+            A list of the packages that still need to be uploaded.
         """
         db = {}
         now = int(time.time())
@@ -270,11 +270,12 @@ class PackageIndex(object):
         """Set upload location to base_uri + path_prefix.
 
         Args:
-          base_uri: Base URI for all packages in the file. We set
-            self.header['URI'] to this value, so all packages must live under
-            this directory.
-          path_prefix: Path prefix to use for all current packages in the file.
-            This will be added to the beginning of the path for every package.
+            base_uri: Base URI for all packages in the file. We set
+                self.header['URI'] to this value, so all packages must live
+                under this directory.
+            path_prefix: Path prefix to use for all current packages in the
+                file. This will be added to the beginning of the path for every
+                package.
         """
         self.header["URI"] = base_uri.rstrip("/")
         for pkg in self.packages:
@@ -288,7 +289,7 @@ class PackageIndex(object):
         will be updated before writing to disk.
 
         Args:
-          pkgfile: A python file object.
+            pkgfile: A python file object.
         """
         self._ModifiedHeaderUpdate()
         self._WritePkgIndex(pkgfile, self.header)
@@ -299,7 +300,7 @@ class PackageIndex(object):
         """Write pkgindex to a temporary file.
 
         Returns:
-          A temporary file containing the packages from pkgindex.
+            A temporary file containing the packages from pkgindex.
         """
         # pylint: disable=R1732
         # This method returns an open file, so we cannot use a 'with' here (without
@@ -335,11 +336,11 @@ class PackageIndexInfo(object):
     """A parser for PackageIndex metadata.
 
     Attributes:
-      snapshot_sha (str): The git SHA of the manifest snapshot.
-      snapshot_number (int): The snapshot number.
-      build_target (build_target_lib.BuildTarget): The build_target.
-      profile (Profile): The build_target.
-      location (str): The GS path for the prebuilts directory.
+        snapshot_sha (str): The git SHA of the manifest snapshot.
+        snapshot_number (int): The snapshot number.
+        build_target (build_target_lib.BuildTarget): The build_target.
+        profile (Profile): The build_target.
+        location (str): The GS path for the prebuilts directory.
     """
 
     def __init__(
@@ -389,10 +390,10 @@ class PackageIndexInfo(object):
         """Return a PackageIndexInfo object for the given PackageIndexInfo protobuf.
 
         Args:
-          message: The protobuf to parse
+            message: The protobuf to parse
 
         Returns:
-          The parsed instance.
+            The parsed instance.
         """
         return cls(
             snapshot_sha=message.snapshot_sha,
@@ -412,11 +413,11 @@ def _RetryUrlOpen(url, tries=3):
     for HTTP errors with a non-5xx code.
 
     Args:
-      url: The specified url.
-      tries: The number of times to try.
+        url: The specified url.
+        tries: The number of times to try.
 
     Returns:
-      The result of urllib.request.urlopen(url).
+        The result of urllib.request.urlopen(url).
     """
     for i in range(tries):
         try:
@@ -441,12 +442,12 @@ def GrabRemotePackageIndex(binhost_url, **kwargs):
     """Grab the latest binary package database from the specified URL.
 
     Args:
-      binhost_url: Base URL of remote packages (PORTAGE_BINHOST).
-      kwargs: Additional RunCommand parameters.
+        binhost_url: Base URL of remote packages (PORTAGE_BINHOST).
+        kwargs: Additional RunCommand parameters.
 
     Returns:
-      A PackageIndex object, if the Packages file can be retrieved. If the
-      packages file cannot be retrieved, then None is returned.
+        A PackageIndex object, if the Packages file can be retrieved. If the
+        packages file cannot be retrieved, then None is returned.
     """
     url = "%s/Packages" % binhost_url.rstrip("/")
     pkgindex = PackageIndex()
@@ -483,10 +484,10 @@ def GrabLocalPackageIndex(package_path):
     """Read a local packages file from disk into a PackageIndex() object.
 
     Args:
-      package_path: Directory containing Packages file.
+        package_path: Directory containing Packages file.
 
     Returns:
-      A PackageIndex object.
+        A PackageIndex object.
     """
     with open(os.path.join(package_path, "Packages")) as f:
         pkgindex = PackageIndex()
@@ -517,8 +518,8 @@ def _DownloadURLs(urls, dest_dir):
     """Copy URLs into the specified |dest_dir|.
 
     Args:
-      urls: List of URLs to fetch.
-      dest_dir: Destination directory.
+        urls: List of URLs to fetch.
+        dest_dir: Destination directory.
     """
     gs_ctx = gs.GSContext()
     cmd = ["cp"] + urls + [dest_dir]
@@ -533,8 +534,8 @@ def FetchTarballs(binhost_urls, pkgdir):
     to Portage.
 
     Args:
-      binhost_urls: List of binhost URLs to fetch.
-      pkgdir: Location to store the fetched packages.
+        binhost_urls: List of binhost URLs to fetch.
+        pkgdir: Location to store the fetched packages.
     """
     categories = {}
     for binhost_url in binhost_urls:

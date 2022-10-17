@@ -86,11 +86,11 @@ class AccountDatabaseTest(cros_test_lib.MockTestCase):
         """Return a AccountDatabase that has read a file with |contents|.
 
         Args:
-          contents: desired contents of accounts database to parse.
-          db: existing account db to override with new definitions.
+            contents: desired contents of accounts database to parse.
+            db: existing account db to override with new definitions.
 
         Returns:
-          an instance of AccountDatabase.
+            an instance of AccountDatabase.
         """
         if db is None:
             db = accounts_lib.AccountDatabase()
@@ -102,13 +102,13 @@ class AccountDatabaseTest(cros_test_lib.MockTestCase):
         """Return a AccountDatabase based on the account database stack in |specs|.
 
         Args:
-          specs: list of json fragments (encoded as strings) to compose into a
-              consistent account database.  This list is assumed to be in
-              increasing priority order so that later entries override earlier
-              entries.
+            specs: list of json fragments (encoded as strings) to compose into a
+                consistent account database.  This list is assumed to be in
+                increasing priority order so that later entries override earlier
+                entries.
 
         Returns:
-          an instance of AccountDatabase.
+            an instance of AccountDatabase.
         """
         db = accounts_lib.AccountDatabase()
         for spec in specs:

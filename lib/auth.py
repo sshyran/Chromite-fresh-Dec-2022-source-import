@@ -40,10 +40,10 @@ def GetLuciAuth(
     deployed.
 
     Args:
-      instance_id: The instance-id of the package to install.
+        instance_id: The instance-id of the package to install.
 
     Returns:
-      the path to the luci-auth binary.
+        the path to the luci-auth binary.
     """
     return _GetCipdBinary(
         "infra/tools/luci-auth/linux-amd64", "luci-auth", instance_id
@@ -60,10 +60,10 @@ def GetLuciGitCreds(
     already deployed.
 
     Args:
-      instance_id: The instance-id of the package to install.
+        instance_id: The instance-id of the package to install.
 
     Returns:
-      the path to the git-credential-luci binary.
+        the path to the git-credential-luci binary.
     """
     return _GetCipdBinary(
         "infra/tools/luci/git-credential-luci/linux-amd64",
@@ -78,10 +78,10 @@ def Login(service_account_json=None):
     Runs 'luci-auth login' to get a OAuth2 refresh token.
 
     Args:
-      service_account_json: A optional path to a service account.
+        service_account_json: A optional path to a service account.
 
     Raises:
-      AccessTokenError if login command failed.
+        AccessTokenError if login command failed.
     """
     logging.info(
         "Logging into chrome-infra-auth with service_account %s",
@@ -106,13 +106,13 @@ def Token(service_account_json=None):
     Runs 'luci-auth token' to get the OAuth2 token.
 
     Args:
-      service_account_json: A optional path to a service account.
+        service_account_json: A optional path to a service account.
 
     Returns:
-      The token string if the command succeeded;
+        The token string if the command succeeded;
 
     Raises:
-      AccessTokenError if token command failed.
+        AccessTokenError if token command failed.
     """
     cmd = [GetLuciAuth(), "token"]
     if service_account_json and os.path.isfile(service_account_json):
@@ -139,15 +139,15 @@ def _TokenAndLoginIfNeed(service_account_json=None, force_token_renew=False):
     _TokenAndLoginIfNeed.
 
     Args:
-      service_account_json: A optional path to a service account.
-      force_token_renew: Boolean indicating whether to force login to renew token
-        before returning a token. Default to False.
+        service_account_json: A optional path to a service account.
+        force_token_renew: Boolean indicating whether to force login to renew
+            token before returning a token. Default to False.
 
     Returns:
-      The token string if the command succeeded; else, None.
+        The token string if the command succeeded; else, None.
 
     Raises:
-      AccessTokenError if the Token operation failed.
+        AccessTokenError if the Token operation failed.
     """
     if force_token_renew:
         Login(service_account_json=service_account_json)
@@ -168,10 +168,10 @@ def GetAccessToken(**kwargs):
     AccessTokenError.
 
     Args:
-      kwargs: A list of keyword arguments to pass to _TokenAndLoginIfNeed.
+        kwargs: A list of keyword arguments to pass to _TokenAndLoginIfNeed.
 
     Returns:
-      The access token string or None if failed to get access token.
+        The access token string or None if failed to get access token.
     """
     service_account_json = kwargs.get("service_account_json")
     force_token_renew = kwargs.get("force_token_renew", False)
@@ -198,13 +198,13 @@ def GitCreds(service_account_json=None):
     """Get the git credential using git-credential-luci.
 
     Args:
-      service_account_json: A optional path to a service account.
+        service_account_json: A optional path to a service account.
 
     Returns:
-      The git credential if the command succeeded;
+        The git credential if the command succeeded;
 
     Raises:
-      AccessTokenError if token command failed.
+        AccessTokenError if token command failed.
     """
     cmd = [GetLuciGitCreds(), "get"]
     if service_account_json and os.path.isfile(service_account_json):

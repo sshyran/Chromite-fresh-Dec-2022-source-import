@@ -64,7 +64,7 @@ class AccountDatabase(object):
         Overrides previously loaded accounts.
 
         Args:
-          account_db_path: path to file containing an account database.
+            account_db_path: path to file containing an account database.
         """
         raw_db = json_lib.ParseJsonFileWithComments(account_db_path)
         json_lib.AssertIsInstance(raw_db, dict, "accounts database")
@@ -101,9 +101,9 @@ class AccountDatabase(object):
         """Add a user to this account database based on |user_spec|.
 
         Args:
-          user_spec: dict of information from an accounts database.
-              This fragment is expected to have been parsed from
-              developer supplied JSON and will be type checked.
+            user_spec: dict of information from an accounts database.
+                This fragment is expected to have been parsed from
+                developer supplied JSON and will be type checked.
         """
         # By default, user accounts are locked and cannot be logged into.
         user_spec.setdefault(USER_PASSWORD_KEY, "!")
@@ -174,9 +174,9 @@ class AccountDatabase(object):
         """Add a group to this account database based on |group_spec|.
 
         Args:
-          group_spec: dict of information from an accounts database.
-              This fragment is expected to have been parsed from
-              developer supplied JSON and will be type checked.
+            group_spec: dict of information from an accounts database.
+                This fragment is expected to have been parsed from
+                developer supplied JSON and will be type checked.
         """
         # By default, groups don't get a fixed GID.
         group_spec.setdefault(GROUP_FIXED_ID_KEY, False)
@@ -240,13 +240,13 @@ class AccountDatabase(object):
         """Install a user in |sysroot_user_db|.
 
         Args:
-          username: name of user to install.
-          sysroot_user_db: user_db.UserDB instance representing the installed users
-              of a particular sysroot.
-          uid: ebuild specified uid.
-          shell: ebuild specified shell.
-          homedir: ebuild specified home directory.
-          primary_group: ebuild specified primary group for user.
+            username: name of user to install.
+            sysroot_user_db: user_db.UserDB instance representing the installed
+                users of a particular sysroot.
+            uid: ebuild specified uid.
+            shell: ebuild specified shell.
+            homedir: ebuild specified home directory.
+            primary_group: ebuild specified primary group for user.
         """
         if not username in self.users:
             raise ValueError('Cannot add unknown user "%s"' % username)
@@ -297,10 +297,10 @@ class AccountDatabase(object):
         """Install a group in |sysroot_user_db|.
 
         Args:
-          groupname: name of group to install.
-          sysroot_user_db: user_db.UserDB instance representing the installed
-              groups.
-          gid: ebuild specified gid.
+            groupname: name of group to install.
+            sysroot_user_db: user_db.UserDB instance representing the installed
+                groups.
+            gid: ebuild specified gid.
         """
         if not groupname in self.groups:
             raise ValueError('Cannot add unknown group "%s"' % groupname)

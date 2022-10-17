@@ -19,18 +19,18 @@ class BuildSummary(object):
     carrying around dictionary key constants.
 
     Attributes:
-      build_number: The build number of this build, as passed in with
-          --buildnumber, or 0 if --buildnumber wasn't passed.
-      buildbucket_id: The buildbucket id of this build, as passed in with
-          --buildbucket-id, or 0 if --buildbucket-id wasn't passed.
-      master_build_id: The CIDB id of the associated master build if there is one,
-          or 0 if there isn't one.
-      status: One of the status constants from
-          chromite.lib.constants.BUILDER_ALL_STATUSES
-      buildroot_layout: Version of the buildroot layout.
-      branch: Name of the branch this repository is associated with.
-      distfiles_ts: Float unix timestamp recording the last time the distfiles
-          cache was cleaned.
+        build_number: The build number of this build, as passed in with
+            --buildnumber, or 0 if --buildnumber wasn't passed.
+        buildbucket_id: The buildbucket id of this build, as passed in with
+            --buildbucket-id, or 0 if --buildbucket-id wasn't passed.
+        master_build_id: The CIDB id of the associated master build if there is
+            one, or 0 if there isn't one.
+        status: One of the status constants from
+            chromite.lib.constants.BUILDER_ALL_STATUSES
+        buildroot_layout: Version of the buildroot layout.
+        branch: Name of the branch this repository is associated with.
+        distfiles_ts: Float unix timestamp recording the last time the distfiles
+            cache was cleaned.
     """
 
     # List of attributes that should be saved and restored to represent
@@ -82,10 +82,10 @@ class BuildSummary(object):
         remain unchanged.
 
         Args:
-          raw_json: String containing valid JSON representing a BuildSummary.
+            raw_json: String containing valid JSON representing a BuildSummary.
 
         Raises:
-          ValueError: |raw_json| is not valid JSON.
+            ValueError: |raw_json| is not valid JSON.
         """
         new_state = json.loads(raw_json)
         for key, val in new_state.items():
@@ -106,7 +106,7 @@ class BuildSummary(object):
         BuildSummary with the same values.
 
         Returns:
-          A string containing a JSON-encoded representation of this object.
+            A string containing a JSON-encoded representation of this object.
         """
         state = {}
         for a in self._PERSIST_ATTRIBUTES:
@@ -126,7 +126,7 @@ class BuildSummary(object):
         used for logging or display, but should not be parsed for database lookups.
 
         Returns:
-          String describing which build id is set, or "local build" if none are set.
+            String describing which build id is set, or "local build" if none are set.
         """
         if self.buildbucket_id:
             return "buildbucket_id=%s" % self.buildbucket_id

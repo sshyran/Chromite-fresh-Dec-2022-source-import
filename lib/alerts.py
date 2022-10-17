@@ -41,10 +41,10 @@ class MailServer(object):
         Override by sub-classes.
 
         Args:
-          message: A MIMEMultipart() object containing the body of the message.
+            message: A MIMEMultipart() object containing the message body.
 
         Returns:
-          True if the email was sent, else False.
+            True if the email was sent, else False.
         """
         raise NotImplementedError("Should be implemented by sub-classes.")
 
@@ -68,13 +68,13 @@ def ReadRefreshTokenJson(path):
     """Returns RefreshToken by reading it from the JSON file.
 
     Args:
-      path: Path to the json file that contains the credential tokens.
+        path: Path to the json file that contains the credential tokens.
 
     Returns:
-      A RefreshToken object.
+        A RefreshToken object.
 
     Raises:
-      AuthenticationError if failed to read from json file.
+        AuthenticationError if failed to read from json file.
     """
     try:
         with open(path, "r") as f:
@@ -108,9 +108,9 @@ class GmailServer(MailServer):
         cache file.
 
         Args:
-          token_cache_file: Absolute path to gmail credentials cache file.
-          token_json_file: Absolute path to a json file that contains
-                           refresh token for gmail.
+            token_cache_file: Absolute path to gmail credentials cache file.
+            token_json_file: Absolute path to a json file that contains
+                refresh token for gmail.
         """
         self._token_cache_file = token_cache_file
         self._token_json_file = token_json_file
@@ -119,10 +119,10 @@ class GmailServer(MailServer):
         """Get credentials from cached file or json file.
 
         Returns:
-          OAuth2Credentials object.
+            OAuth2Credentials object.
 
         Raises:
-          AuthenticationError on failure to read json file.
+            AuthenticationError on failure to read json file.
         """
         storage = oauth_client_fileio.Storage(self._token_cache_file)
         # Try loading credentials from existing token cache file.
@@ -154,10 +154,10 @@ class GmailServer(MailServer):
         """Send an e-mail via Gmail API.
 
         Args:
-          message: A MIMEMultipart() object containing the body of the message.
+            message: A MIMEMultipart() object containing the message body.
 
         Returns:
-          True if the email was sent, else False.
+            True if the email was sent, else False.
         """
         try:
             credentials = self._GetCachedCredentials()
@@ -199,7 +199,7 @@ class SmtpServer(MailServer):
         """Initialize SmtpServer.
 
         Args:
-          smtp_server: The server with which to send the message.
+            smtp_server: The server with which to send the message.
         """
         self._smtp_server = smtp_server or self.DEFAULT_SERVER
 
@@ -211,10 +211,10 @@ class SmtpServer(MailServer):
         caught here.
 
         Args:
-          message: A MIMEMultipart() object containing the body of the message.
+            message: A MIMEMultipart() object containing the message body.
 
         Returns:
-          True if the email was sent, else False.
+            True if the email was sent, else False.
         """
 
         def _Send():
@@ -250,16 +250,16 @@ def CreateEmail(
     """Create an email message object.
 
     Args:
-      subject: E-mail subject.
-      recipients: List of e-mail recipients.
-      message: (optional) Message to put in the e-mail body.
-      attachment: (optional) text to attach.
-      extra_fields: (optional) A dictionary of additional message header fields
-                    to be added to the message. Custom field names should begin
-                    with the prefix 'X-'.
+        subject: E-mail subject.
+        recipients: List of e-mail recipients.
+        message: (optional) Message to put in the e-mail body.
+        attachment: (optional) text to attach.
+        extra_fields: (optional) A dictionary of additional message header
+            fields to be added to the message. Custom field names should begin
+            with the prefix 'X-'.
 
     Returns:
-      A MIMEMultipart object, or None if recipients is empty.
+        A MIMEMultipart object, or None if recipients is empty.
     """
     # Ignore if the list of recipients is empty.
     if not recipients:
@@ -303,14 +303,14 @@ def SendEmail(
     """Send an e-mail job notification with the given message in the body.
 
     Args:
-      subject: E-mail subject.
-      recipients: List of e-mail recipients.
-      server: A MailServer instance. Default to local SmtpServer.
-      message: Message to put in the e-mail body.
-      attachment: Text to attach.
-      extra_fields: A dictionary of additional message header fields
-                    to be added to the message. Custom field names should begin
-                    with the prefix 'X-'.
+        subject: E-mail subject.
+        recipients: List of e-mail recipients.
+        server: A MailServer instance. Default to local SmtpServer.
+        message: Message to put in the e-mail body.
+        attachment: Text to attach.
+        extra_fields: A dictionary of additional message header fields
+            to be added to the message. Custom field names should begin
+            with the prefix 'X-'.
     """
     if server is None:
         server = SmtpServer()
@@ -332,15 +332,15 @@ def SendEmailLog(
     """Send an e-mail with a stack trace and log snippets.
 
     Args:
-      subject: E-mail subject.
-      recipients: list of e-mail recipients.
-      server: A MailServer instance. Default to local SmtpServer.
-      inc_trace: Append a backtrace of the current stack.
-      message: Message to put at the top of the e-mail body.
-      log: List of lines (log data) to include in the notice.
-      extra_fields: (optional) A dictionary of additional message header fields
-                    to be added to the message. Custom fields names should begin
-                    with the prefix 'X-'.
+        subject: E-mail subject.
+        recipients: list of e-mail recipients.
+        server: A MailServer instance. Default to local SmtpServer.
+        inc_trace: Append a backtrace of the current stack.
+        message: Message to put at the top of the e-mail body.
+        log: List of lines (log data) to include in the notice.
+        extra_fields: (optional) A dictionary of additional message header
+            fields to be added to the message. Custom fields names should begin
+            with the prefix 'X-'.
     """
     if server is None:
         server = SmtpServer()
@@ -382,8 +382,8 @@ def GetUpdatedEmailNotify(builder_run, failure_streak):
     threshold.
 
     Args:
-      builder_run: BuilderRun for the main cbuildbot run.
-      failure_streak: number of consecutive failures for the builder.
+        builder_run: BuilderRun for the main cbuildbot run.
+        failure_streak: number of consecutive failures for the builder.
     """
     email_notify = []
     for entry in builder_run.config.notification_configs:
@@ -410,12 +410,12 @@ def SendHealthAlert(builder_run, subject, body, extra_fields=None):
     Health alerts are only sent for regular buildbots and Pre-CQ buildbots.
 
     Args:
-      builder_run: BuilderRun for the main cbuildbot run.
-      subject: The subject of the health alert email.
-      body: The body of the health alert email.
-      extra_fields: (optional) A dictionary of additional message header fields
-                    to be added to the message. Custom field names should begin
-                    with the prefix 'X-'.
+        builder_run: BuilderRun for the main cbuildbot run.
+        subject: The subject of the health alert email.
+        body: The body of the health alert email.
+        extra_fields: (optional) A dictionary of additional message header
+            fields to be added to the message. Custom field names should begin
+            with the prefix 'X-'.
     """
     if builder_run.InEmailReportingEnvironment():
         server = GmailServer(

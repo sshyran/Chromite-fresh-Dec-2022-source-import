@@ -5,6 +5,7 @@
 """Autotest utilities."""
 
 import os
+from typing import Optional
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -44,18 +45,18 @@ class AutotestTarballBuilder(object):
         """Init function.
 
         Args:
-          archive_basedir: The base directory from which the archives will be
-            created. This path should contain the `autotest` directory.
-          output_directory: The directory where the archives will be written.
+            archive_basedir: The base directory from which the archives will be
+                created. This path should contain the `autotest` directory.
+            output_directory: The directory where the archives will be written.
         """
         self.archive_basedir = archive_basedir
         self.output_directory = output_directory
 
-    def BuildAutotestControlFilesTarball(self):
+    def BuildAutotestControlFilesTarball(self) -> Optional[str]:
         """Tar up the autotest control files.
 
         Returns:
-          str|None - Path of the partial autotest control files tarball if created.
+            Path of the partial autotest control files tarball if created.
         """
         # Find the control files in autotest/.
         input_list = matching.FindFilesMatching(
@@ -76,7 +77,7 @@ class AutotestTarballBuilder(object):
         """Tar up the autotest packages.
 
         Returns:
-          str|None - Path of the partial autotest packages tarball if created.
+            str|None - Path of the partial autotest packages tarball if created.
         """
         input_list = ["autotest/packages"]
         tarball = os.path.join(self.output_directory, self._PACKAGES_ARCHIVE)
@@ -89,7 +90,7 @@ class AutotestTarballBuilder(object):
         """Tar up the autotest test suite control files.
 
         Returns:
-          str|None - Path of the autotest test suites tarball if created.
+            str|None - Path of the autotest test suites tarball if created.
         """
         input_list = ["autotest/test_suites"]
         tarball = os.path.join(self.output_directory, self._TEST_SUITES_ARCHIVE)
@@ -98,11 +99,11 @@ class AutotestTarballBuilder(object):
         else:
             return None
 
-    def BuildAutotestServerPackageTarball(self):
+    def BuildAutotestServerPackageTarball(self) -> Optional[str]:
         """Tar up the autotest files required by the server package.
 
         Returns:
-          str|None - The path of the autotest server package tarball if created.
+            The path of the autotest server package tarball if created.
         """
         # Find all files in autotest excluding certain directories.
         tast_files, transforms = self._GetTastServerFilesAndTarTransforms()
@@ -135,7 +136,7 @@ class AutotestTarballBuilder(object):
         """Tar up the full autotest directory.
 
         Returns:
-          str|None - The path of the autotest tarball if created.
+            str|None - The path of the autotest tarball if created.
         """
 
         input_list = ["autotest/"]
@@ -151,13 +152,13 @@ class AutotestTarballBuilder(object):
         """Tars and zips files and directories from input_list to tarball_path.
 
         Args:
-          input_list: A list of files and directories to be archived.
-          tarball_path: Path of output tar archive file.
-          compressed: Whether or not the tarball should be compressed with pbzip2.
-          **kwargs: Keyword arguments to pass to CreateTarball.
+            input_list: A list of files and directories to be archived.
+            tarball_path: Path of output tar archive file.
+            compressed: Whether the tarball should be compressed with pbzip2.
+            **kwargs: Keyword arguments to pass to CreateTarball.
 
         Returns:
-          Return value of cros_build_lib.CreateTarball.
+            Return value of cros_build_lib.CreateTarball.
         """
         for pathname in input_list:
             if os.path.exists(os.path.join(self.archive_basedir, pathname)):
@@ -194,7 +195,7 @@ class AutotestTarballBuilder(object):
         appropriate destinations in the tarball.
 
         Returns:
-          (files, transforms), where files is a list of absolute paths to Tast
+            (files, transforms), where files is a list of absolute paths to Tast
             server files/directories and transforms is a list of --transform
             arguments to pass to GNU tar when archiving those files.
         """
@@ -217,7 +218,7 @@ class AutotestTarballBuilder(object):
         """Build out the paths to the tast SSP files.
 
         Returns:
-          list[str] - The paths to the files.
+            list[str] - The paths to the files.
         """
         files = []
         if cros_build_lib.IsInsideChroot():

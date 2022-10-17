@@ -5,11 +5,11 @@
 """Unit tests for the auto_updater module.
 
 The main parts of unittest include:
-  1. test transfer methods in ChromiumOSUpdater.
-  2. test precheck methods in ChromiumOSUpdater.
-  3. test update methods in ChromiumOSUpdater.
-  4. test reboot and verify method in ChromiumOSUpdater.
-  5. test error raising in ChromiumOSUpdater.
+    1. test transfer methods in ChromiumOSUpdater.
+    2. test precheck methods in ChromiumOSUpdater.
+    3. test update methods in ChromiumOSUpdater.
+    4. test reboot and verify method in ChromiumOSUpdater.
+    5. test error raising in ChromiumOSUpdater.
 """
 
 import json

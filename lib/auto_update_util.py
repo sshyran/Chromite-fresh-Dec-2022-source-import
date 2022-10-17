@@ -12,13 +12,14 @@ def GetChromeosBuildInfo(lsb_release_content=None, regex=None):
     """Get chromeos build info in device under test as string. None on fail.
 
     Args:
-      lsb_release_content: A string represents the content of lsb-release.
-          If the caller is from drone, it can pass in the file content here.
-      regex: A regular expression, refers to which line this func tries to fetch
-          from lsb_release_content.
+        lsb_release_content: A string represents the content of lsb-release.
+            If the caller is from drone, it can pass in the file content here.
+        regex: A regular expression, refers to which line this func tries to
+            fetch from lsb_release_content.
 
     Returns:
-      A kind of chromeos build info in device under test as string. None on fail.
+        A kind of chromeos build info in device under test as string. None on
+        fail.
     """
     if not lsb_release_content or not regex:
         return None
@@ -72,13 +73,13 @@ def VersionMatch(build_version, release_version):
     to find out the date string from update url.
 
     Args:
-      build_version: Build name for cros version, e.g.
-          peppy-release/R43-6809.0.0 or R43-6809.0.0
-      release_version: Release version retrieved from lsb-release,
-          e.g., 6809.0.0
+        build_version: Build name for cros version, e.g.
+            peppy-release/R43-6809.0.0 or R43-6809.0.0
+        release_version: Release version retrieved from lsb-release,
+            e.g., 6809.0.0
 
     Returns:
-      True if the values match, otherwise returns False.
+        True if the values match, otherwise returns False.
     """
     # If the build is from release, CQ or PFQ builder, cros-version label must
     # be ended with release version in lsb-release.

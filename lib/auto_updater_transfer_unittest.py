@@ -69,13 +69,14 @@ class CrosTransferBaseClassTest(cros_test_lib.MockTestCase):
         """Create auto_updater_transfer.LocalTransfer instance.
 
         Args:
-          device: a remote_access.ChromiumOSDeviceHandler object.
-          kwargs: contains parameter name and value pairs for any argument accepted
-            by auto_updater_transfer.LocalTransfer. The values provided through
-            kwargs will supersede the defaults set within this function.
+            device: a remote_access.ChromiumOSDeviceHandler object.
+            kwargs: contains parameter name and value pairs for any argument
+                accepted by auto_updater_transfer.LocalTransfer. The values
+                provided through kwargs will supersede the defaults set within
+                this function.
 
         Returns:
-          An instance of auto_updater_transfer.LocalTransfer.
+            An instance of auto_updater_transfer.LocalTransfer.
         """
         default_args = copy.deepcopy(_DEFAULT_ARGS)
 
@@ -153,13 +154,14 @@ class CrosLocalTransferTest(cros_test_lib.MockTempDirTestCase):
         """Create auto_updater_transfer.LocalTransfer instance.
 
         Args:
-          device: a remote_access.ChromiumOSDeviceHandler object.
-          kwargs: contains parameter name and value pairs for any argument accepted
-            by auto_updater_transfer.LocalTransfer. The values provided through
-            kwargs will supersede the defaults set within this function.
+            device: a remote_access.ChromiumOSDeviceHandler object.
+            kwargs: contains parameter name and value pairs for any argument
+                accepted by auto_updater_transfer.LocalTransfer. The values
+                provided through kwargs will supersede the defaults set within
+                this function.
 
         Returns:
-          An instance of auto_updater_transfer.LocalTransfer.
+            An instance of auto_updater_transfer.LocalTransfer.
         """
         default_args = copy.deepcopy(_DEFAULT_ARGS)
 
@@ -239,13 +241,14 @@ class CrosLabEndToEndPayloadTransferTest(cros_test_lib.MockTempDirTestCase):
         """Create auto_updater_transfer.LabEndToEndPayloadTransfer instance.
 
         Args:
-          device: a remote_access.ChromiumOSDeviceHandler object.
-          kwargs: contains parameter name and value pairs for any argument accepted
-            by auto_updater_transfer.LabEndToEndPayloadTransfer. The values provided
-            through kwargs will supersede the defaults set within this function.
+            device: a remote_access.ChromiumOSDeviceHandler object.
+            kwargs: contains parameter name and value pairs for any argument
+                accepted by auto_updater_transfer.LabEndToEndPayloadTransfer.
+                The values provided through kwargs will supersede the defaults
+                set within this function.
 
         Returns:
-          An instance of auto_updater_transfer.LabEndToEndPayloadTransfer.
+            An instance of auto_updater_transfer.LabEndToEndPayloadTransfer.
         """
         default_args = copy.deepcopy(_DEFAULT_ARGS)
         default_args["staging_server"] = "http://0.0.0.0:8000"

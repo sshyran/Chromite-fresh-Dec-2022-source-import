@@ -105,22 +105,22 @@ class Transfer(object, metaclass=abc.ABCMeta):
         """Initialize Base Class for transferring payloads functionality.
 
         Args:
-          device: The ChromiumOSDevice to be updated.
-          payload_dir: The directory of payload(s).
-          tempdir: The temp directory in caller, not in the device. For example,
-              the tempdir for cros flash is /tmp/cros-flash****/, used to
-              temporarily keep files when transferring update-utils package, and
-              reserve nebraska and update engine logs.
-          payload_name: Filename of exact payload file to use for update.
-          cmd_kwargs: Keyword arguments that are sent along with the commands that
-              are run on the device.
-          device_payload_dir: Path to the payload directory in the device's work
-              directory.
-          payload_mode: The payload mode - it can be 'parallel' or 'scp'.
-          transfer_stateful_update: Whether to transfer payloads necessary for
-              stateful update. The default is True.
-          transfer_rootfs_update: Whether to transfer payloads necessary for
-              rootfs update. The default is True.
+            device: The ChromiumOSDevice to be updated.
+            payload_dir: The directory of payload(s).
+            tempdir: The temp directory in caller, not in the device. For
+                example, the tempdir for cros flash is /tmp/cros-flash****/,
+                used to temporarily keep files when transferring update-utils
+                package, and reserve nebraska and update engine logs.
+            payload_name: Filename of exact payload file to use for update.
+            cmd_kwargs: Keyword arguments that are sent along with the commands
+                that are run on the device.
+            device_payload_dir: Path to the payload directory in the device's
+                work directory.
+            payload_mode: The payload mode - it can be 'parallel' or 'scp'.
+            transfer_stateful_update: Whether to transfer payloads necessary for
+                stateful update. The default is True.
+            transfer_rootfs_update: Whether to transfer payloads necessary for
+                rootfs update. The default is True.
         """
         self._device = device
         self._payload_dir = payload_dir
@@ -180,7 +180,7 @@ class Transfer(object, metaclass=abc.ABCMeta):
         """Mkdir the directory no matther whether this directory exists on host.
 
         Args:
-          directory: The directory to be made on the device.
+            directory: The directory to be made on the device.
         """
         self._device.run(["mkdir", "-p", directory], **self._cmd_kwargs)
 
@@ -192,10 +192,10 @@ class LocalTransfer(Transfer):
         """Initialize LocalTransfer to handle transferring files from local to DUT.
 
         Args:
-          *args: The list of arguments to be passed. See Base class for a complete
-              list of accepted arguments.
-          **kwargs: Any keyword arguments to be passed. See Base class for a
-              complete list of accepted keyword arguments.
+            *args: The list of arguments to be passed. See Base class for a
+                complete list of accepted arguments.
+            **kwargs: Any keyword arguments to be passed. See Base class for a
+                complete list of accepted keyword arguments.
         """
         super().__init__(*args, **kwargs)
 
@@ -284,11 +284,11 @@ class LabEndToEndPayloadTransfer(Transfer):
         """Initialize to transfer files from staging server to DUT.
 
         Args:
-          staging_server: Url of the server that's staging the payload files.
-          *args: The list of arguments to be passed. See Base class for a complete
-              list of accepted arguments.
-          **kwargs: Any keyword arguments to be passed. See Base class for a
-              complete list of accepted keyword arguments.
+            staging_server: Url of the server that's staging the payload files.
+            *args: The list of arguments to be passed. See Base class for a
+                complete list of accepted arguments.
+            **kwargs: Any keyword arguments to be passed. See Base class for a
+                complete list of accepted keyword arguments.
         """
         self._staging_server = staging_server
         super().__init__(*args, **kwargs)
@@ -300,8 +300,8 @@ class LabEndToEndPayloadTransfer(Transfer):
         successfully.
 
         Args:
-          cmd: (list) the command to be run.
-          stdout: True if the stdout of the command should be captured.
+            cmd: (list) the command to be run.
+            stdout: True if the stdout of the command should be captured.
         """
         ip = urllib.parse.urlparse(self._staging_server).hostname
         return cros_build_lib.run(
@@ -342,13 +342,13 @@ class LabEndToEndPayloadTransfer(Transfer):
         """Returns a valid url to check availability of staged files.
 
         Args:
-          staged_filename: Name of the staged file.
-          build_id: This is the path at which the needed file can be found. It
-            is usually of the format <board_name>-release/R79-12345.6.0. By default,
-            the path is set to be None.
+            staged_filename: Name of the staged file.
+            build_id: This is the path at which the needed file can be found. It
+                is usually of the format <board_name>-release/R79-12345.6.0. By
+                default, the path is set to be None.
 
         Returns:
-          A URL in the format:
+            A URL in the format:
             http://<ip>:<port>/static/<board>-release/<version>/<staged_filename>
         """
         # Formulate the download URL out of components.
@@ -366,23 +366,24 @@ class LabEndToEndPayloadTransfer(Transfer):
         """Returns a valid curl command to download payloads into device tmp dir.
 
         Args:
-          payload_dir: Path to the payload directory on the device.
-          payload_filename: Name of the file by which the downloaded payload should
-            be saved. This is assumed to be the same as the name of the payload.
-            If the payload_name must is in this format:
-            payloads/whatever_file_name, the 'payloads/' at the start will be
-            removed while saving the file as the files need to be saved in specific
-            directories for their subsequent installation. Keeping the 'payloads/'
-            at the beginning of the payload_filename, adds a new directory that
-            messes up its installation.
-          build_id: This is the path at which the needed payload can be found. It
-            is usually of the format <board_name>-release/R79-12345.6.0. By default,
-            the path is set to None.
+            payload_dir: Path to the payload directory on the device.
+            payload_filename: Name of the file by which the downloaded payload
+                should be saved. This is assumed to be the same as the name of
+                the payload. If the payload_name must is in this format:
+                payloads/whatever_file_name, the 'payloads/' at the start will
+                be removed while saving the file as the files need to be saved
+                in specific directories for their subsequent installation.
+                Keeping the 'payloads/' at the beginning of the
+                payload_filename, adds a new directory that messes up its
+                installation.
+            build_id: This is the path at which the needed payload can be found.
+                It is usually of the format <board_name>-release/R79-12345.6.0.
+                By default, the path is set to None.
 
         Returns:
-          A fully formed curl command in the format:
-          ['curl', '-o', '<path where payload should be saved>',
-          '<payload download URL>']
+            A fully formed curl command in the format:
+            ['curl', '-o', '<path where payload should be saved>',
+            '<payload download URL>']
         """
         saved_filename = payload_filename
         if saved_filename.startswith("payloads/"):

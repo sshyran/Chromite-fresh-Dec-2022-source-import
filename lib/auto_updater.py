@@ -162,47 +162,48 @@ class ChromiumOSUpdater(BaseUpdater):
         """Initialize a ChromiumOSUpdater for auto-update a chromium OS device.
 
         Args:
-          device: the ChromiumOSDevice to be updated.
-          build_name: the target update version for the device.
-          payload_dir: the directory of payload(s).
-          transfer_class: A reference to any subclass of
-              auto_updater_transfer.Transfer class.
-          log_file: The file to save running logs.
-          tempdir: the temp directory in caller, not in the device. For example,
-              the tempdir for cros flash is /tmp/cros-flash****/, used to
-              temporarily keep files when transferring update-utils package, and
-              reserve nebraska and update engine logs.
-          do_rootfs_update: whether to do rootfs partition update. The default is
-              True.
-          do_stateful_update: whether to do stateful partition update. The default
-              is True.
-          reboot: whether to reboot device after update. The default is True.
-          disable_verification: whether to disabling rootfs verification on the
-              device. The default is False.
-          clobber_stateful: whether to do a clean stateful update. The default is
-              False.
-          yes: Assume "yes" (True) for any prompt. The default is False. However,
-              it should be set as True if we want to disable all the prompts for
-              auto-update.
-          payload_filename: Filename of exact payload file to use for update.
-          send_payload_in_parallel: whether to transfer payload in chunks
-              in parallel. The default is False.
-          staging_server: URL (str) of the server that's staging the payload files.
-              Assuming transfer_class is None, if value for staging_server is None
-              or empty, an auto_updater_transfer.LocalTransfer reference must be
-              passed through the transfer_class parameter.
-          clear_tpm_owner: If true, it will clear the TPM owner on reboot. The
-              default is False.
-          resolve_app_id_mismatch: Fixes the update payloads App ID if it is
-              different than the devices's App ID so the nebraska.py can properly
-              create a response.
-          ignore_appid: True to tell Nebraska to ignore the update request's
-              App ID. This allows mismatching the source and target version boards.
-              One specific use case is updating between <board> and
-              <board>-kernelnext images which have different App IDs.
-          copy_payloads_to_device: If True, update payloads are copied to the
-              Chromium OS device first. Otherwise, they are piped through SSH.
-              Currently, this only applies to the stateful payloads.
+            device: the ChromiumOSDevice to be updated.
+            build_name: the target update version for the device.
+            payload_dir: the directory of payload(s).
+            transfer_class: A reference to any subclass of
+                auto_updater_transfer.Transfer class.
+            log_file: The file to save running logs.
+            tempdir: the temp directory in caller, not in the device. For
+                example, the tempdir for cros flash is /tmp/cros-flash****/,
+                used to temporarily keep files when transferring update-utils
+                package, and reserve nebraska and update engine logs.
+            do_rootfs_update: whether to do rootfs partition update. The default
+                is True.
+            do_stateful_update: whether to do stateful partition update. The
+                default is True.
+            reboot: whether to reboot device after update. The default is True.
+            disable_verification: whether to disabling rootfs verification on
+                the device. The default is False.
+            clobber_stateful: whether to do a clean stateful update. The default
+                is False.
+            yes: Assume "yes" (True) for any prompt. The default is False.
+                However, it should be set as True if we want to disable all the
+                prompts for auto-update.
+            payload_filename: Filename of exact payload file to use for update.
+            send_payload_in_parallel: whether to transfer payload in chunks
+                in parallel. The default is False.
+            staging_server: URL (str) of the server that's staging the payload
+                files. Assuming transfer_class is None, if value for
+                staging_server is None or empty, an
+                auto_updater_transfer.LocalTransfer reference must be passed
+                through the transfer_class parameter.
+            clear_tpm_owner: If true, it will clear the TPM owner on reboot. The
+                default is False.
+            resolve_app_id_mismatch: Fixes the update payloads App ID if it is
+                different than the device's App ID so the nebraska.py can
+                properly create a response.
+            ignore_appid: True to tell Nebraska to ignore the update request's
+                App ID. This allows mismatching the source and target version
+                boards. One specific use case is updating between <board> and
+                <board>-kernelnext images which have different App IDs.
+            copy_payloads_to_device: If True, update payloads are copied to the
+                Chromium OS device first. Otherwise, they are piped through SSH.
+                Currently, this only applies to the stateful payloads.
         """
         super().__init__(device, payload_dir)
 
@@ -264,7 +265,7 @@ class ChromiumOSUpdater(BaseUpdater):
         """Returns path to the nebraska request logfiles directory.
 
         Returns:
-          A complete path to the logfiles directory.
+            A complete path to the logfiles directory.
         """
         return self.tempdir
 
@@ -272,8 +273,8 @@ class ChromiumOSUpdater(BaseUpdater):
         """Create the correct Transfer class.
 
         Args:
-          transfer_class: A variable that contains a reference to one of the
-              Transfer classes in auto_updater_transfer.
+            transfer_class: A variable that contains a reference to one of the
+                Transfer classes in auto_updater_transfer.
         """
         assert issubclass(transfer_class, auto_updater_transfer.Transfer)
 
@@ -342,12 +343,12 @@ class ChromiumOSUpdater(BaseUpdater):
         in the status.
 
         Args:
-          device: A ChromiumOSDevice object.
-          keys: the keys to look for in the status result (defaults to
-              ['CURRENT_OP']).
+            device: A ChromiumOSDevice object.
+            keys: the keys to look for in the status result (defaults to
+                ['CURRENT_OP']).
 
         Returns:
-          A list of values in the order of |keys|.
+            A list of values in the order of |keys|.
         """
         keys = keys or ["CURRENT_OP"]
         result = device.run(
@@ -385,7 +386,7 @@ class ChromiumOSUpdater(BaseUpdater):
         """Starts update-engine service if it is not running.
 
         Args:
-          device: a ChromiumOSDevice object, defines the target root device.
+            device: a ChromiumOSDevice object, defines the target root device.
         """
         try:
             result = device.run(
@@ -783,7 +784,7 @@ class ChromiumOSUpdater(BaseUpdater):
         """Return numeric priority for the specified kernel.
 
         Args:
-          kernel: information of the given kernel, KERNEL_A or KERNEL_B.
+            kernel: information of the given kernel, KERNEL_A or KERNEL_B.
         """
         return self._cgpt("-P", kernel)
 
@@ -791,7 +792,7 @@ class ChromiumOSUpdater(BaseUpdater):
         """Return boolean success flag for the specified kernel.
 
         Args:
-          kernel: information of the given kernel, KERNEL_A or KERNEL_B.
+            kernel: information of the given kernel, KERNEL_A or KERNEL_B.
         """
         return self._cgpt("-S", kernel) != 0
 
@@ -799,7 +800,7 @@ class ChromiumOSUpdater(BaseUpdater):
         """Return tries count for the specified kernel.
 
         Args:
-          kernel: information of the given kernel, KERNEL_A or KERNEL_B.
+            kernel: information of the given kernel, KERNEL_A or KERNEL_B.
         """
         return self._cgpt("-T", kernel)
 
@@ -839,8 +840,8 @@ class ChromiumOSUpdater(BaseUpdater):
         """Check the image running in DUT has the expected version.
 
         Returns:
-          True if the DUT's image version matches the version that the
-          ChromiumOSUpdater tries to update to.
+            True if the DUT's image version matches the version that the
+            ChromiumOSUpdater tries to update to.
         """
         if not self.update_version:
             return False
@@ -860,10 +861,11 @@ class ChromiumOSUpdater(BaseUpdater):
         OS has marked the kernel as good.
 
         Args:
-          expected_kernel_state: kernel state that we're verifying with i.e. I
-            expect to be booted onto partition 4 etc. See output of _GetKernelState.
-          rollback_message: string to raise as a RootfsUpdateError if we booted
-            with the wrong partition.
+            expected_kernel_state: kernel state that we're verifying with i.e. I
+                expect to be booted onto partition 4 etc. See output of
+                _GetKernelState.
+            rollback_message: string to raise as a RootfsUpdateError if we
+                booted with the wrong partition.
         """
         logging.debug("Start verifying boot expectations...")
         # Figure out the newly active kernel
@@ -932,11 +934,11 @@ class ChromiumOSUpdater(BaseUpdater):
         """Retry commands if SSHConnectionError happens.
 
         Args:
-          cmd: the command to be run by device.
-          kwargs: the parameters for device to run the command.
+            cmd: the command to be run by device.
+            kwargs: the parameters for device to run the command.
 
         Returns:
-          the output of running the command.
+            the output of running the command.
         """
         return retry_util.RetryException(
             remote_access.SSHConnectionError,
