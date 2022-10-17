@@ -31,7 +31,7 @@ class _FdCapturer(object):
         Does not start capturing until Start() is called.
 
         Args:
-            source: A file object to capture. Typically sys.stdout or
+            source: A file object to capture. Typically, sys.stdout or
                 sys.stderr, but will work with anything that implements flush()
                 and fileno().
             output: A file name where the captured output is to be stored. If
@@ -51,9 +51,9 @@ class _FdCapturer(object):
         (1) Stash away a reference to the tempfile.
         (2) Unlink the file from the filesystem.
 
-        (2) ensures that if we crash, the file gets deleted. (1) ensures that while
-        we are running, we hold a reference to the file so the system does not close
-        the file.
+        (2) ensures that if we crash, the file gets deleted. (1) ensures that
+        while we are running, we hold a reference to the file so the system does
+        not close the file.
 
         Args:
             tempfile_obj: A tempfile object.
@@ -64,8 +64,8 @@ class _FdCapturer(object):
     def Start(self):
         """Begin capturing output."""
         if self._capturefile_name is None:
-            # Disable pylint from suggesting to use context manager. The open files
-            # are closed explicitly in the Stop() function.
+            # Disable pylint from suggesting to use context manager. The open
+            # files are closed explicitly in the Stop() function.
             # pylint: disable=consider-using-with
             tempfile_obj = tempfile.NamedTemporaryFile(delete=False)
             self._capturefile = tempfile_obj.file
@@ -143,10 +143,11 @@ class OutputCapturer(object):
     __slots__ = ["_stdout_capturer", "_stderr_capturer", "_quiet_fail"]
 
     def __init__(self, stdout_path=None, stderr_path=None, quiet_fail=False):
-        """Initalize OutputCapturer with capture files.
+        """Initialize OutputCapturer with capture files.
 
-        If OutputCapturer is initialized with filenames to capture stdout and stderr
-        to, then those files are used. Otherwise, temporary files are created.
+        If OutputCapturer is initialized with filenames to capture stdout and
+        stderr to, then those files are used. Otherwise, temporary files are
+        created.
 
         Args:
             stdout_path: File to capture stdout to. If None, a temporary file is
