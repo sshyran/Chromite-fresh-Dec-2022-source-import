@@ -24,7 +24,7 @@ def _IsInstrumented(line: str, exclude_line_prefixes: Tuple[str]) -> bool:
     """Returns if the input line is instrumented or not.
 
     Method does a simple prefix based check to determine if
-    a line is instrumendted or not.
+    a line is instrumented or not.
 
     Args:
         line: Single code line to test for instrumentation.
@@ -49,7 +49,8 @@ def _CreateOpenSegment(line_number: int):
     More details about segments can be found here: go/chromeos-zero-coverage.
 
     Args:
-        line_number: The line number from where the instrumented code region starts.
+        line_number: The line number from where the instrumented code region
+            starts.
 
     Returns:
         An open segment.
@@ -105,7 +106,7 @@ def _GenerateZeroCoverageLLVMForFile(
     mock coverage data json. The mock json marks all the instrumented lines
     as not-covered by unit tests.
 
-    More detials: go/chromeos-zero-coverage.
+    More details: go/chromeos-zero-coverage.
 
     Args:
         file_path: path to the src file.
@@ -239,7 +240,7 @@ def _CleanLlvmFileName(
     to corresponding chromeos src file path. This method achieves
     this by using |path_mapping_list|. LLVM also reports coverage
     for generated files. So this method discards any file that does
-    not exists in chromeos codebase.
+    not exist in chromeos codebase.
 
     Args:
         filename: file name that needs to be cleaned.
@@ -478,7 +479,7 @@ def GenerateZeroCoverageLlvm(
     exclude_files_suffixes: Tuple[str],
     src_prefix_path: str,
 ) -> Dict:
-    """Generate zero coverage for all src files under  |path_to_src_directories|.
+    """Generate zero coverage for all src files under |path_to_src_directories|.
 
     More details on how to generate zero coverage: go/chromeos-zero-coverage.
 
