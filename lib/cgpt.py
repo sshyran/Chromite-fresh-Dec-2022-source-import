@@ -34,8 +34,8 @@ class Disk(object):
     """GPT disk image manager.
 
     Attributes:
-      image_file: cros disk image
-      partitions: OrderedDict of partitions, indexed by part_num
+        image_file: cros disk image
+        partitions: OrderedDict of partitions, indexed by part_num
     """
 
     def __init__(self, image_file, partitions=None):
@@ -47,8 +47,8 @@ class Disk(object):
         """Returns new Disk initialized from given |image_file|.
 
         Raises:
-          RunCommandError: if error running cgpt command
-          CgptError: if error parsing out output of cgpt command
+            RunCommandError: if error running cgpt command
+            CgptError: if error parsing out output of cgpt command
         """
         # If 'cgpt' binary doesn't exist in path, try within chroot.
         enter_chroot = osutils.Which("cpgt") is None
@@ -127,8 +127,8 @@ class Disk(object):
         """Returns Partition with the given |label|.
 
         Raises:
-          MultiplePartitionLabel: multiple partitions with that label found
-          KeyError: label not found
+            MultiplePartitionLabel: multiple partitions with that label found
+            KeyError: label not found
         """
         part = None
         for part_next in self.partitions.values():
@@ -147,7 +147,7 @@ class Disk(object):
         """Returns Partitions with the given |type_guid|.
 
         Raises:
-          KeyError: if the type GUID is not found
+            KeyError: if the type GUID is not found
         """
         parts = [
             x for x in self.partitions.values() if x.part_type == type_guid

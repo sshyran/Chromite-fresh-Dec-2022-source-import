@@ -29,8 +29,8 @@ class BuildIdentifier(object):
         """Instantiate a container class for all IDs.
 
         Args:
-          cidb_id: ID of the build in CIDB.
-          buildbucket_id: ID of the build in Buildbucket.
+            cidb_id: ID of the build in CIDB.
+            buildbucket_id: ID of the build in Buildbucket.
         """
         self.cidb_id = cidb_id
         self.buildbucket_id = buildbucket_id
@@ -52,11 +52,12 @@ class BuildStore(object):
         """Get an instance of the BuildStore.
 
         Args:
-          _read_from_bb: Specify the read source.
-          _write_to_bb: Determines whether information is written to Buildbucket.
-          _write_to_cidb: Determines whether information is written to CIDB.
-          cidb_creds: CIDB credentials for scripts running outside of cbuildbot.
-          for_service: Argument for CIDBConnection.__init__().
+            _read_from_bb: Specify the read source.
+            _write_to_bb: Determines whether information is written to
+                Buildbucket.
+            _write_to_cidb: Determines whether information is written to CIDB.
+            cidb_creds: CIDB credentials for scripts running outside cbuildbot.
+            for_service: Argument for CIDBConnection.__init__().
         """
         self._read_from_bb = _read_from_bb
         self._write_to_bb = _write_to_bb
@@ -71,7 +72,7 @@ class BuildStore(object):
         """Checks to see if CIDB client is needed and is missing.
 
         Returns:
-          Boolean indicating the state of CIDB client.
+            Boolean indicating the state of CIDB client.
         """
         need_for_cidb = self._write_to_cidb or not self._read_from_bb
         cidb_is_running = self.cidb_conn is not None
@@ -82,7 +83,7 @@ class BuildStore(object):
         """Checks to see if Buildbucket v2 client is needed and is missing.
 
         Returns:
-          Boolean indicating the state of Buildbucket v2 client.
+            Boolean indicating the state of Buildbucket v2 client.
         """
         need_for_bb = self._write_to_bb or self._read_from_bb
         bb_is_running = self.bb_client is not None
@@ -93,7 +94,7 @@ class BuildStore(object):
         """Retrieve cidb_conn.
 
         Returns:
-          self.cidb_conn if initialized.
+            self.cidb_conn if initialized.
         """
         if not self.InitializeClients():
             raise BuildStoreException(
@@ -109,7 +110,7 @@ class BuildStore(object):
         """Check if underlying clients are initialized.
 
         Returns:
-          A boolean indicating the client statuses.
+            A boolean indicating the client statuses.
         """
         pid_mismatch = self.process_id != os.getpid()
         if self._IsCIDBClientMissing() or pid_mismatch:
@@ -152,21 +153,23 @@ class BuildStore(object):
         """Insert a build row.
 
         Args:
-          builder_name: buildbot builder name.
-          build_number: buildbot build number.
-          build_config: cbuildbot config of build
-          bot_hostname: hostname of bot running the build
-          master_build_id: (Optional) primary key of master build to this build.
-          timeout_seconds: (Optional) If provided, total time allocated for this
-                           build. A deadline is recorded in CIDB for the current
-                           build to end.
-          important: (Optional) If provided, the |important| value for this build.
-          buildbucket_id: (Optional) If provided, the |buildbucket_id| value for
-                           this build.
-          branch: (Optional) Manifest branch name of this build.
+            builder_name: buildbot builder name.
+            build_number: buildbot build number.
+            build_config: cbuildbot config of build
+            bot_hostname: hostname of bot running the build
+            master_build_id: (Optional) primary key of master build to this
+                build.
+            timeout_seconds: (Optional) If provided, total time allocated for
+                this build. A deadline is recorded in CIDB for the current build
+                to end.
+            important: (Optional) If provided, the |important| value for this
+                build.
+            buildbucket_id: (Optional) If provided, the |buildbucket_id| value
+                for this build.
+            branch: (Optional) Manifest branch name of this build.
 
         Returns:
-          build_id: incremental primary ID of the build in CIDB.
+            build_id: incremental primary ID of the build in CIDB.
         """
         if not self.InitializeClients():
             raise BuildStoreException(
@@ -196,12 +199,12 @@ class BuildStore(object):
         """Gets the statuses of slave builders to given build.
 
         Args:
-          master_build_identifier: BuildIdentifier of the master build to fetch the
-              slave statuses for.
+            master_build_identifier: BuildIdentifier of the master build to
+                fetch the slave statuses for.
 
         Returns:
-          A list containing a dictionary with keys BUILD_STATUS_KEYS.
-          The list contains all child builds of the given master.
+            A list containing a dictionary with keys BUILD_STATUS_KEYS.
+            The list contains all child builds of the given master.
         """
         if not self.InitializeClients():
             raise BuildStoreException(
@@ -226,10 +229,10 @@ class BuildStore(object):
         """Get the child builds that were killed by the given master.
 
         Args:
-          build_identifier: The master build to get children for.
+            build_identifier: The master build to get children for.
 
         Returns:
-          A list of child buildbucket_ids of the build that were killed.
+            A list of child buildbucket_ids of the build that were killed.
         """
         if not self.InitializeClients():
             raise BuildStoreException(
@@ -268,25 +271,25 @@ class BuildStore(object):
         restrict the result to older builds.
 
         Args:
-          build_config: config name of the build to get history.
-          num_results: Number of builds to search back.
-          ignore_build_id: (Optional) Ignore a specific build. This is most useful
-              to ignore the current build when querying recent past builds from a
-              build in flight.
-          start_date: (Optional, type: datetime.date) Get builds that occured on or
-              after this date.
-          end_date: (Optional, type:datetime.date) Get builds that occured on or
-              before this date.
-          branch: (Optional) Return only results for this branch.
-          platform_version: (Optional) Return only results for this
-              platform_version.
-          starting_build_id: (Optional) The oldest build_id till which builds should
-              be retrieved.
+            build_config: config name of the build to get history.
+            num_results: Number of builds to search back.
+            ignore_build_id: (Optional) Ignore a specific build. This is most
+                useful to ignore the current build when querying recent past
+                builds from a build in flight.
+            start_date: (Optional, type: datetime.date) Get builds that occurred
+                on or after this date.
+            end_date: (Optional, type:datetime.date) Get builds that occurred on
+                or before this date.
+            branch: (Optional) Return only results for this branch.
+            platform_version: (Optional) Return only results for this
+                platform_version.
+            starting_build_id: (Optional) The oldest build_id till which builds
+                should be retrieved.
 
         Returns:
-          A sorted list of dicts containing up to |number| dictionaries for
-          build statuses in descending order (if |reverse| is True, ascending
-          order).
+            A sorted list of dicts containing up to |number| dictionaries for
+            build statuses in descending order (if |reverse| is True, ascending
+            order).
         """
         if not self.InitializeClients():
             raise BuildStoreException(
@@ -324,14 +327,15 @@ class BuildStore(object):
         """Insert a build stage entry into database.
 
         Args:
-          build_id: primary key of the build in buildTable.
-          name: Full name of build stage.
-          board: (Optional) board name, if this is a board-specific stage.
-          status: (Optional) stage status, one of constants.BUILDER_ALL_STATUSES.
-                  Default constants.BUILDER_STATUS_PLANNED.
+            build_id: primary key of the build in buildTable.
+            name: Full name of build stage.
+            board: (Optional) board name, if this is a board-specific stage.
+            status: (Optional) stage status, one of
+                constants.BUILDER_ALL_STATUSES.
+                Default constants.BUILDER_STATUS_PLANNED.
 
         Returns:
-          Integer primary key of inserted stage, i.e. build_stage_id
+            Integer primary key of inserted stage, i.e. build_stage_id
         """
         if not self.InitializeClients():
             raise BuildStoreException(
@@ -353,11 +357,11 @@ class BuildStore(object):
         """Insert a build message into database.
 
         Args:
-          build_id: primary key of build recording this message.
-          message_type: Optional str name of message type.
-          message_subtype: Optional str name of message subtype.
-          message_value: Optional value of message.
-          board: Optional str name of the board.
+            build_id: primary key of build recording this message.
+            message_type: Optional str name of message type.
+            message_subtype: Optional str name of message subtype.
+            message_value: Optional value of message.
+            board: Optional str name of the board.
         """
         assert isinstance(message_value, list)
         if not self.InitializeClients():
@@ -382,8 +386,8 @@ class BuildStore(object):
         """Update the buildbucket build with luci-notify specific properties.
 
         Args:
-          email_notify: List of luci-notify email_notify values representing the
-                        recipients of failure alerts to for this builder.
+            email_notify: List of luci-notify email_notify values representing
+                the recipients of failure alerts to for this builder.
         """
         if not self.InitializeClients():
             raise BuildStoreException(
@@ -408,18 +412,20 @@ class BuildStore(object):
         This will also mark the row's final=True.
 
         Args:
-          build_id: id of row to update.
-          status: Final build status, one of
-                  constants.BUILDER_COMPLETED_STATUSES.
-          summary: A summary of the build (failures) collected from all slaves.
-          metadata_url: google storage url to metadata.json file for this build,
-                        e.g. ('gs://chromeos-image-archive/master-paladin/'
-                              'R39-6225.0.0-rc1/metadata.json')
-          strict: If |strict| is True, can only update the build status when 'final'
-            is False. |strict| can only be False when the caller wants to change the
-            entry ignoring the 'final' value (For example, a build was marked as
-            status='aborted' and final='true', a cron job to adjust the finish_time
-            will call this method with strict=False).
+            build_id: id of row to update.
+            status: Final build status, one of
+                constants.BUILDER_COMPLETED_STATUSES.
+            summary: A summary of the build (failures) collected from all
+                slaves.
+            metadata_url: google storage url to metadata.json file for this
+                build, e.g. ('gs://chromeos-image-archive/master-paladin/'
+                'R39-6225.0.0-rc1/metadata.json')
+            strict: If |strict| is True, can only update the build status when
+                'final' is False. |strict| can only be False when the caller
+                wants to change the entry ignoring the 'final' value (For
+                example, a build was marked as status='aborted' and
+                final='true', a cron job to adjust the finish_time will call
+                this method with strict=False).
         """
         if not self.InitializeClients():
             raise BuildStoreException(
@@ -445,11 +451,11 @@ class BuildStore(object):
         were used in a build.
 
         Args:
-          build_id: primary key of the build in the buildTable
-          child_config: String child_config name.
-          status: Final child_config status, one of
-                  constants.BUILDER_COMPLETED_STATUSES or None
-                  for default "inflight".
+            build_id: primary key of the build in the buildTable
+            child_config: String child_config name.
+            status: Final child_config status, one of
+                constants.BUILDER_COMPLETED_STATUSES or None
+                for default "inflight".
         """
         if not self.InitializeClients():
             raise BuildStoreException(
@@ -464,7 +470,7 @@ class BuildStore(object):
         """Marks a build stage as inflight, in the database.
 
         Args:
-          build_stage_id: primary key of the build stage in buildStageTable.
+            build_stage_id: primary key of the build stage in buildStageTable.
         """
         if not self.InitializeClients():
             raise BuildStoreException(
@@ -477,7 +483,7 @@ class BuildStore(object):
         """Marks a build stage as waiting, in the database.
 
         Args:
-          build_stage_id: primary key of the build stage in buildStageTable.
+            build_stage_id: primary key of the build stage in buildStageTable.
         """
         if not self.InitializeClients():
             raise BuildStoreException(
@@ -490,8 +496,8 @@ class BuildStore(object):
         """Marks a build stage as finished, in the database.
 
         Args:
-          build_stage_id: primary key of the build stage in buildStageTable.
-          status: one of constants.BUILDER_COMPLETED_STATUSES
+            build_stage_id: primary key of the build stage in buildStageTable.
+            status: one of constants.BUILDER_COMPLETED_STATUSES
         """
         if not self.InitializeClients():
             raise BuildStoreException(
@@ -507,10 +513,10 @@ class BuildStore(object):
         UpdateBoardPerBuildMetadata of CIDB.
 
         Args:
-          build_id: CIDB id of the build.
-          board: Board of the build.
-          board_metadata: A dict with keys - 'main-firmware-version' and
-          'ec-firmware-version'.
+            build_id: CIDB id of the build.
+            board: Board of the build.
+            board_metadata: A dict with keys - 'main-firmware-version' and
+                'ec-firmware-version'.
         """
         if not self.InitializeClients():
             raise BuildStoreException(
@@ -541,8 +547,8 @@ class BuildStore(object):
         """Update the given metadata row in database.
 
         Args:
-          build_id: CIDB id of the build to update.
-          metadata: CBuildbotMetadata instance to update with.
+            build_id: CIDB id of the build to update.
+            metadata: CBuildbotMetadata instance to update with.
         """
         if not self.InitializeClients():
             raise BuildStoreException(
@@ -559,11 +565,12 @@ class BuildStore(object):
         """Gets the failure entries for all listed buildbucket_ids.
 
         Args:
-          buildbucket_ids: list of build ids of the builds to fetch failures for.
+            buildbucket_ids: list of build ids of the builds to fetch failures
+                for.
 
         Returns:
-          A list of failure_message_lib.StageFailure instances. This will change
-          with Buildbucket implementation.
+            A list of failure_message_lib.StageFailure instances. This will
+            change with Buildbucket implementation.
         """
         if not self.InitializeClients():
             raise BuildStoreException(
@@ -607,12 +614,12 @@ class BuildStore(object):
         """Gets all the stages for all listed build_ids.
 
         Args:
-          buildbucket_ids: list of Buildbucket IDs to query for.
+            buildbucket_ids: list of Buildbucket IDs to query for.
 
         Returns:
-          A list containing, for each stage of the builds found, a dictionary with
-          keys (id, build_id, name, board, status, last_updated, start_time,
-          finish_time, final).
+            A list containing, for each stage of the builds found, a dictionary
+            with keys (id, build_id, name, board, status, last_updated,
+            start_time, finish_time, final).
         """
         if not self.InitializeClients():
             raise BuildStoreException(
@@ -637,13 +644,13 @@ class BuildStore(object):
         an error will be raised. If both are absent, an empty list will be returned.
 
         Args:
-          buildbucket_ids: list of buildbucket_id's to query.
-          build_ids: list of CIDB id's to query.
+            buildbucket_ids: list of buildbucket_id's to query.
+            build_ids: list of CIDB id's to query.
 
         Returns:
-          A list of Dictionaries with keys (id, build_config, start_time,
-          finish_time, status, platform_version, full_version,
-          milestone_version, important).
+            A list of Dictionaries with keys (id, build_config, start_time,
+            finish_time, status, platform_version, full_version,
+            milestone_version, important).
         """
         if not self.InitializeClients():
             raise BuildStoreException(

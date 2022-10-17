@@ -27,9 +27,9 @@ class BuildTarget(object):
         """Build Target init.
 
         Args:
-          name: The full name of the target.
-          profile: The profile name.
-          build_root: The path to the buildroot.
+            name: The full name of the target.
+            profile: The profile name.
+            build_root: The path to the buildroot.
         """
         self._name = name or None
         self.profile = profile
@@ -85,10 +85,10 @@ class BuildTarget(object):
         TODO: Add optional validation the command exists.
 
         Args:
-          base_command: The wrapped command.
+            base_command: The wrapped command.
 
         Returns:
-          The build target's command wrapper.
+            The build target's command wrapper.
         """
         if self.is_host():
             return base_command

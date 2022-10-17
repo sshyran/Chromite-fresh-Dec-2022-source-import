@@ -16,8 +16,8 @@ class Annotation(object):
         """Initialize instance.
 
         Args:
-          name: Annotation name.
-          args: A sequence of string arguments.
+            name: Annotation name.
+            args: A sequence of string arguments.
         """
         self.name = name
         self.args = args
@@ -116,6 +116,6 @@ def _EscapeArgText(text):
     """Escape annotation argument text.
 
     Args:
-      text: String to escape.
+        text: String to escape.
     """
     return text.replace("@", "-AT-")

@@ -54,11 +54,11 @@ def AssertSiteIndependentParameters(site_config):
     """Helper function to test that SiteConfigs contain site-independent values.
 
     Args:
-      site_config: A SiteConfig object.
+        site_config: A SiteConfig object.
 
     Returns:
-      A boolean. True if the config contained all site-independent values.
-      False otherwise.
+        A boolean. True if the config contained all site-independent values.
+        False otherwise.
     """
     # Enumerate the necessary site independent parameter keys.
     # All keys must be documented.
@@ -237,9 +237,9 @@ class BuildConfigClassTest(cros_test_lib.TestCase):
         """Assert that |obj3| is a deep copy of |obj1|.
 
         Args:
-          obj1: Object that was copied.
-          obj2: A true deep copy of obj1 (produced using copy.deepcopy).
-          obj3: The purported deep copy of obj1.
+            obj1: Object that was copied.
+            obj2: A true deep copy of obj1 (produced using copy.deepcopy).
+            obj3: The purported deep copy of obj1.
         """
         # Check whether the item was copied by deepcopy. If so, then it
         # must have been copied by our algorithm as well.

@@ -44,12 +44,12 @@ class Chroot(object):
         """Initialize.
 
         Args:
-          path: Path to the chroot.
-          cache_dir: Path to a directory that will be used for caching files.
-          chrome_root: Root of the Chrome browser source checkout.
-          env: Extra environment settings to use.
-          goma: Interface for utilizing goma.
-          remoteexec: Interface for utilizing remoteexec client.
+            path: Path to the chroot.
+            cache_dir: Path to a directory that will be used for caching files.
+            chrome_root: Root of the Chrome browser source checkout.
+            env: Extra environment settings to use.
+            goma: Interface for utilizing goma.
+            remoteexec: Interface for utilizing remoteexec client.
         """
         # Strip trailing / if present for consistency.
         # TODO(vapier): Switch this to Path instead of str.

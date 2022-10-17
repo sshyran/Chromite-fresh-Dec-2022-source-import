@@ -30,7 +30,7 @@ class VersionInfo(object):
 
     You can instantiate this class in three ways.
     1) using a version file, specifically chromeos_version.sh,
-       which contains the version information.
+        which contains the version information.
     2) passing in a string with the 3 version components.
     3) using a source repo and calling from_repo().
     """
@@ -51,14 +51,16 @@ class VersionInfo(object):
         """Initialize.
 
         Args:
-          version_string: Optional 3 component version string to parse.  Contains:
-              build_number: release build number.
-              branch_build_number: current build number on a branch.
-              patch_number: patch number.
-          chrome_branch: If version_string specified, specify chrome_branch i.e. 13.
-          incr_type: How we should increment this version -
-            chrome_branch|build|branch|patch
-          version_file: version file location.
+            version_string: Optional 3 component version string to parse.
+                Contains:
+                    build_number: release build number.
+                    branch_build_number: current build number on a branch.
+                    patch_number: patch number.
+            chrome_branch: If version_string specified, specify chrome_branch
+                i.e. 13.
+            incr_type: How we should increment this version -
+                chrome_branch|build|branch|patch
+            version_file: version file location.
         """
         if version_file:
             if isinstance(version_file, str):
@@ -146,11 +148,11 @@ class VersionInfo(object):
         """Push the final commit into the git repo.
 
         Args:
-          git_repo: Path to the git repository.
-          message: Commit message.
-          dry_run: If true, don't actually push changes to the server.
-          push_to: The remote branch to push the changes to. Defaults to the
-            tracking branch of the current branch.
+            git_repo: Path to the git repository.
+            message: Commit message.
+            dry_run: If true, don't actually push changes to the server.
+            push_to: The remote branch to push the changes to. Defaults to the
+                tracking branch of the current branch.
         """
         if push_to is None:
             push_to = git.GetTrackingBranch(
@@ -180,12 +182,12 @@ class VersionInfo(object):
         """Given the key find the value from the line, if it finds key = value
 
         Args:
-          key: key to look for
-          line: string to search
+            key: key to look for
+            line: string to search
 
         Returns:
-          None: on a non match
-          value: for a matching key
+            None: on a non match
+            value: for a matching key
         """
         match = re.search(self.KEY_VALUE_PATTERN % (key,), line)
         return match.group(1) if match else None
@@ -217,9 +219,9 @@ class VersionInfo(object):
         """Update the version file with our current version.
 
         Args:
-          message: Commit message.
-          dry_run: Git dryrun.
-          push_to: A git.RemoteRef object.
+            message: Commit message.
+            dry_run: Git dryrun.
+            push_to: A git.RemoteRef object.
         """
 
         if not self.version_file:

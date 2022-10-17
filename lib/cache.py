@@ -60,16 +60,16 @@ class CacheReference(object):
 
     @contextlib.contextmanager
     def FetchFromCache()
-      with cache.Lookup(key) as ref:
-         # If entry doesn't exist in cache already, generate it ourselves, and
-         # insert it into the cache, acquiring a read lock on it in the process.
-         # If the entry does exist, we grab a read lock on it.
-        if not ref.Exists(lock=True):
-          path = PrepareItem()
-          ref.SetDefault(path, lock=True)
+        with cache.Lookup(key) as ref:
+            # If entry doesn't exist in cache already, generate it ourselves,
+            # and insert it into the cache, acquiring a read lock on it in the
+            # process. If the entry does exist, we grab a read lock on it.
+            if not ref.Exists(lock=True):
+                path = PrepareItem()
+                ref.SetDefault(path, lock=True)
 
-        # yield the path to the cached entry to consuming code.
-        yield ref.path
+            # yield the path to the cached entry to consuming code.
+            yield ref.path
     """
 
     def __init__(self, cache, key):
@@ -149,7 +149,7 @@ class CacheReference(object):
         """Create a file containing |text| and assign it to the key.
 
         Args:
-          text: Can be a string or an iterable.
+            text: Can be a string or an iterable.
         """
         self._AssignText(text)
 
@@ -163,7 +163,7 @@ class CacheReference(object):
         """Tests for existence of entry.
 
         Args:
-          lock: If the entry exists, acquire and maintain a read lock on it.
+            lock: If the entry exists, acquire and maintain a read lock on it.
         """
         if self._Exists():
             if lock:
@@ -176,8 +176,8 @@ class CacheReference(object):
         """Assigns default_path if the entry doesn't exist.
 
         Args:
-          default_path: The path to assign if the entry doesn't exist.
-          lock: Acquire and maintain a read lock on the entry.
+            default_path: The path to assign if the entry doesn't exist.
+            lock: Acquire and maintain a read lock on the entry.
         """
         if not self._Exists():
             self._Assign(default_path)
@@ -283,11 +283,11 @@ class DiskCache(object):
         """Removes any item from the cache that was modified after a given lifetime.
 
         Args:
-          max_age: An instance of datetime.timedelta. Any item not modified within
-              this amount of time will be removed.
+            max_age: An instance of datetime.timedelta. Any item not modified
+                within this amount of time will be removed.
 
         Returns:
-          List of keys removed.
+            List of keys removed.
         """
         if not isinstance(max_age, datetime.timedelta):
             raise TypeError(

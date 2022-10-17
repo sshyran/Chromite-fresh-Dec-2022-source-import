@@ -52,9 +52,9 @@ class ChrootRequiredError(Exception):
         """Constructor for ChrootRequiredError.
 
         Args:
-          cmd: Command line to run inside the chroot as a list of strings.
-          chroot_args: Arguments to pass directly to cros_sdk.
-          extra_env: Environmental variables to set in the chroot.
+            cmd: Command line to run inside the chroot as a list of strings.
+            chroot_args: Arguments to pass directly to cros_sdk.
+            extra_env: Environmental variables to set in the chroot.
         """
         super().__init__()
         self.cmd = cmd
@@ -77,7 +77,7 @@ class ExecRequiredError(Exception):
         """Constructor for ExecRequiredError.
 
         Args:
-          cmd: Command line to run inside the chroot as a list of strings.
+            cmd: Command line to run inside the chroot as a list of strings.
         """
         super().__init__()
         self.cmd = cmd
@@ -131,10 +131,10 @@ def ParseBool(value):
     any string value passed in to bool(x), it will always return True.
 
     Args:
-      value: String representing a boolean value.
+        value: String representing a boolean value.
 
     Returns:
-      True or False.
+        True or False.
     """
     return cros_build_lib.BooleanShellValue(value, False)
 
@@ -143,10 +143,10 @@ def ParseDate(value):
     """Parse date argument into a datetime.date object.
 
     Args:
-      value: String representing a single date in "YYYY-MM-DD" format.
+        value: String representing a single date in "YYYY-MM-DD" format.
 
     Returns:
-      A datetime.date object.
+        A datetime.date object.
     """
     try:
         return datetime.datetime.strptime(value, "%Y-%m-%d").date()
@@ -208,28 +208,31 @@ class DeviceParser(object):
     be printed and the program will exit.
 
     Valid device inputs are:
-      - [ssh://][username@]hostname[:port].
-      - usb://[path].
-      - file://path or /absolute_path.
-      - servo:port[:port] to use a port via dut-control, e.g. servo:port:1234.
-      - servo:serial:serial-number to use the servo's serial number,
-          e.g. servo:serial:641220-00057 servo:serial:C1230024192.
-      - [ssh://]:vm:.
+        - [ssh://][username@]hostname[:port].
+        - usb://[path].
+        - file://path or /absolute_path.
+        - servo:port[:port] to use a port via dut-control, e.g. servo:port:1234.
+        - servo:serial:serial-number to use the servo's serial number,
+            e.g. servo:serial:641220-00057 servo:serial:C1230024192.
+        - [ssh://]:vm:.
 
     The last item above is an alias for ssh'ing into a virtual machine on a
     localhost.  It gets translated into 'localhost:9222'.
 
     Examples:
-      parser = argparse.ArgumentParser()
+        parser = argparse.ArgumentParser()
 
-      parser.add_argument(
-        'ssh_device',
-        type=commandline.DeviceParser(commandline.DEVICE_SCHEME_SSH))
+        parser.add_argument(
+            'ssh_device',
+            type=commandline.DeviceParser(commandline.DEVICE_SCHEME_SSH)
+        )
 
-      parser.add_argument(
-        'usb_or_file_device',
-        type=commandline.DeviceParser([commandline.DEVICE_SCHEME_USB,
-                                       commandline.DEVICE_SCHEME_FILE]))
+        parser.add_argument(
+            "usb_or_file_device",
+            type=commandline.DeviceParser(
+                [commandline.DEVICE_SCHEME_USB, commandline.DEVICE_SCHEME_FILE]
+            ),
+        )
     """
 
     def __init__(self, schemes):
@@ -238,7 +241,7 @@ class DeviceParser(object):
         See the class comments for usage examples.
 
         Args:
-          schemes: A scheme or list of schemes to accept.
+            schemes: A scheme or list of schemes to accept.
         """
         self.schemes = [schemes] if isinstance(schemes, str) else schemes
         # Provide __name__ for argparse to print on failure, or else it will use
@@ -253,14 +256,14 @@ class DeviceParser(object):
         argparse to use.
 
         Args:
-          value: String representing a device target. See class comments for
+            value: String representing a device target. See class comments for
             valid device input formats.
 
         Returns:
-          A Device object.
+            A Device object.
 
         Raises:
-          ValueError: |value| is not a valid device specifier or doesn't
+            ValueError: |value| is not a valid device specifier or doesn't
             match the supported list of schemes.
         """
         try:
@@ -282,11 +285,11 @@ class DeviceParser(object):
         expects. Additional constraints can be added if needed.
 
         Args:
-          device: Device object.
-          value: String representing a device target.
+            device: Device object.
+            value: String representing a device target.
 
         Raises:
-          ValueError: |device| has the wrong scheme.
+            ValueError: |device| has the wrong scheme.
         """
         if device.scheme not in self.schemes:
             raise ValueError(
@@ -298,13 +301,13 @@ class DeviceParser(object):
         """Parse a device argument.
 
         Args:
-          value: String representing a device target.
+            value: String representing a device target.
 
         Returns:
-          A Device object.
+            A Device object.
 
         Raises:
-          ValueError: |value| is not a valid device specifier.
+            ValueError: |value| is not a valid device specifier.
         """
         # ':vm:' is an alias for ssh'ing into a virtual machihne on localhost;
         # translate it appropriately.
@@ -386,9 +389,9 @@ class DeviceParser(object):
         """Parse a servo device from the parsed servo uri info.
 
         Args:
-          servo_type: The servo identifier type, either port or serial.
-          servo_id: The servo identifier, either the port number it is
-            communicating through or its serial number.
+            servo_type: The servo identifier type, either port or serial.
+            servo_id: The servo identifier, either the port number it is
+                communicating through or its serial number.
         """
         servo_port = None
         serial_number = None
@@ -496,10 +499,10 @@ class _SplitExtendAction(argparse.Action):
     """Callback to split the argument and extend existing value.
 
     We normalize whitespace before splitting.  This is to support the forms:
-      cbuildbot -p 'proj:branch ' ...
-      cbuildbot -p ' proj:branch' ...
-      cbuildbot -p 'proj:branch  proj2:branch' ...
-      cbuildbot -p "$(some_command_that_returns_nothing)" ...
+        cbuildbot -p 'proj:branch ' ...
+        cbuildbot -p ' proj:branch' ...
+        cbuildbot -p 'proj:branch  proj2:branch' ...
+        cbuildbot -p "$(some_command_that_returns_nothing)" ...
     """
 
     def __call__(self, parser, namespace, values, option_string=None):
@@ -622,10 +625,10 @@ class ColoredFormatter(logging.Formatter):
         """Initializes the formatter.
 
         Args:
-          args: See logging.Formatter for specifics.
-          kwargs: See logging.Formatter for specifics.
-          enable_color: Whether to enable colored logging. Defaults
-            to None, where terminal.Color will set to a reasonable default.
+            args: See logging.Formatter for specifics.
+            kwargs: See logging.Formatter for specifics.
+            enable_color: Whether to enable colored logging. Defaults
+                to None, where terminal.Color will set to a reasonable default.
         """
         self.color = terminal.Color(enabled=kwargs.pop("enable_color", None))
         super().__init__(*args, **kwargs)
@@ -661,28 +664,29 @@ class BaseParser(object):
         """Initialize this parser instance.
 
         kwargs:
-          logging: Defaults to ALLOW_LOGGING from the class; if given,
-            add --log-level.
-          default_log_level: If logging is enabled, override the default logging
-            level.  Defaults to the class's DEFAULT_LOG_LEVEL value.
-          log_levels: If logging is enabled, this overrides the enumeration of
-            allowed logging levels.  If not given, defaults to the classes
-            DEFAULT_LOG_LEVELS value.
-          manual_debug: If logging is enabled and this is True, suppress addition
-            of a --debug alias.  This option defaults to True unless 'debug' has
-            been exempted from the allowed logging level targets.
-          caching: If given, must be either a callable that discerns the cache
-            location if it wasn't specified (the prototype must be akin to
-            lambda parser, values:calculated_cache_dir_path; it may return None to
-            indicate that it handles setting the value on its own later in the
-            parsing including setting the env), or True; if True, the
-            machinery defaults to invoking the class's FindCacheDir method
-            (which can be overridden).  FindCacheDir $CROS_CACHEDIR, falling
-            back to $REPO/.cache, finally falling back to $TMP.
-            Note that the cache_dir is not created, just discerned where it
-            should live.
-            If False, or caching is not given, then no --cache-dir option will be
-            added.
+            logging: Defaults to ALLOW_LOGGING from the class; if given,
+                add --log-level.
+            default_log_level: If logging is enabled, override the default
+                logging level. Defaults to the class's DEFAULT_LOG_LEVEL value.
+            log_levels: If logging is enabled, this overrides the enumeration of
+                allowed logging levels. If not given, defaults to the classes
+                DEFAULT_LOG_LEVELS value.
+            manual_debug: If logging is enabled and this is True, suppress
+                addition of a --debug alias. This option defaults to True unless
+                'debug' has been exempted from the allowed logging level
+                targets.
+            caching: If given, must be either a callable that discerns the cache
+                location if it wasn't specified (the prototype must be akin to
+                lambda parser, values:calculated_cache_dir_path; it may return
+                None to indicate that it handles setting the value on its own
+                later in the parsing including setting the env), or True; if
+                True, the machinery defaults to invoking the class's
+                FindCacheDir method (which can be overridden). FindCacheDir
+                $CROS_CACHEDIR, falling back to $REPO/.cache, finally falling
+                back to $TMP. Note that the cache_dir is not created, just
+                discerned where it should live.
+                If False, or caching is not given, then no --cache-dir option
+                will be added.
         """
         self.debug_enabled = False
         self.caching_group = None
@@ -829,11 +833,11 @@ class BaseParser(object):
         This can be anything from logging setup to positional arg count validation.
 
         Args:
-          opts: optparse.Values or argparse.Namespace instance
-          args: position arguments unconsumed from parsing.
+            opts: optparse.Values or argparse.Namespace instance
+            args: position arguments unconsumed from parsing.
 
         Returns:
-          (opts, args), w/ whatever modification done.
+            (opts, args), w/ whatever modification done.
         """
         for dest, default in self._cros_defaults.items():
             if not hasattr(opts, dest):
@@ -947,10 +951,10 @@ class FilteringParser(optparse.OptionParser, BaseParser):
         """Add a parsed argument with attributes.
 
         Args:
-          opt_inst: An instance of a raw optparse.Option object that represents the
-                    option.
-          opt_str: The option string.
-          value_str: A list of string-ified values dentified by OptParse.
+            opt_inst: An instance of a raw optparse.Option object that
+                represents the option.
+            opt_str: The option string.
+            value_str: A list of string-ified values dentified by OptParse.
         """
         self.values.parsed_args.append(
             PassedOption(opt_inst, opt_str, value_str)
@@ -961,14 +965,14 @@ class FilteringParser(optparse.OptionParser, BaseParser):
         """Filter the argument by passing it through a function.
 
         Args:
-          parsed_args: The list of parsed argument namedtuples to filter.  Tuples
-            are of the form (opt_inst, opt_str, value_str).
-          filter_fn: A function with signature f(PassedOption), and returns True if
-            the argument is to be passed through.  False if not.
+            parsed_args: The list of parsed argument namedtuples to filter.
+                Tuples are of the form (opt_inst, opt_str, value_str).
+            filter_fn: A function with signature f(PassedOption), and returns
+                True if the argument is to be passed through. False if not.
 
         Returns:
-          A tuple containing two lists - one of accepted arguments and one of
-          removed arguments.
+            A tuple containing two lists - one of accepted arguments and one of
+            removed arguments.
         """
         removed = []
         accepted = []
@@ -1087,10 +1091,10 @@ def _RestartInChroot(cmd, chroot_args, extra_env):
     """Rerun inside the chroot.
 
     Args:
-      cmd: Command line to run inside the chroot as a list of strings.
-      chroot_args: Arguments to pass directly to cros_sdk (or None).
-      extra_env: Dictionary of environmental variables to set inside the
-          chroot (or None).
+        cmd: Command line to run inside the chroot as a list of strings.
+        chroot_args: Arguments to pass directly to cros_sdk (or None).
+        extra_env: Dictionary of environmental variables to set inside the
+            chroot (or None).
     """
     return cros_build_lib.run(
         cmd,
@@ -1110,9 +1114,10 @@ def RunInsideChroot(command=None, chroot_args=None):
     in ScriptWrapperMain.
 
     Args:
-      command: An instance of CliCommand to be restarted inside the chroot.
-               |command| can be None if you do not wish to modify the log_level.
-      chroot_args: List of command-line arguments to pass to cros_sdk, if invoked.
+        command: An instance of CliCommand to be restarted inside the chroot.
+            |command| can be None if you do not wish to modify the log_level.
+        chroot_args: List of command-line arguments to pass to cros_sdk, if
+            invoked.
     """
     if cros_build_lib.IsInsideChroot():
         return
@@ -1135,12 +1140,12 @@ def RunAsRootUser(argv: List[str], preserve_env: bool = False):
     """Run the given command as the root user.
 
     Args:
-      argv: Command line arguments to run as the root user.
-      preserve_env: If True, preserve existing environment variables when
-          re-executing.
+        argv: Command line arguments to run as the root user.
+        preserve_env: If True, preserve existing environment variables when
+            re-executing.
 
     Raises:
-      ValueError: If a command is not provided.
+        ValueError: If a command is not provided.
     """
     if not argv:
         raise ValueError("Command not provided to run as the root user.")
@@ -1183,17 +1188,17 @@ def ScriptWrapperMain(
     Note that this function invokes sys.exit on the way out by default.
 
     Args:
-      find_target_func: a function, which, when given the absolute
-        pathway the script was invoked via (for example,
-        /home/ferringb/chromiumos/chromite/bin/cros_sdk; note that any
-        trailing .py from the path name will be removed),
-        will return the main function to invoke (that functor will take
-        a single arg- a list of arguments, and shall return either None
-        or an integer, to indicate the exit code).
-      argv: sys.argv, or an equivalent tuple for testing.  If nothing is
-        given, sys.argv is defaulted to.
-      log_level: Default logging level to start at.
-      log_format: Default logging format to use.
+        find_target_func: a function, which, when given the absolute
+            pathway the script was invoked via (for example,
+            /home/ferringb/chromiumos/chromite/bin/cros_sdk; note that any
+            trailing .py from the path name will be removed),
+            will return the main function to invoke (that functor will take
+            a single arg- a list of arguments, and shall return either None
+            or an integer, to indicate the exit code).
+        argv: sys.argv, or an equivalent tuple for testing. If nothing is
+            given, sys.argv is defaulted to.
+        log_level: Default logging level to start at.
+        log_format: Default logging format to use.
     """
     if argv is None:
         argv = sys.argv[:]

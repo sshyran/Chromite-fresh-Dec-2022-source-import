@@ -152,13 +152,13 @@ class DeviceParseTest(cros_test_lib.OutputTestCase):
         """Checks that parsing a device input gives the expected result.
 
         Args:
-          device_input: Input specifying a device.
-          scheme: Expected scheme.
-          username: Expected username.
-          hostname: Expected hostname.
-          port: Expected port.
-          path: Expected path.
-          serial: Expected serial number.
+            device_input: Input specifying a device.
+            scheme: Expected scheme.
+            username: Expected username.
+            hostname: Expected hostname.
+            port: Expected port.
+            path: Expected path.
+            serial: Expected serial number.
         """
         parser = commandline.ArgumentParser()
         parser.add_argument("device", type=commandline.DeviceParser(scheme))
@@ -174,8 +174,8 @@ class DeviceParseTest(cros_test_lib.OutputTestCase):
         """Checks that parsing a device input fails.
 
         Args:
-          device_input: String input specifying a device.
-          schemes: A scheme or list of allowed schemes, by default allows all.
+            device_input: String input specifying a device.
+            schemes: A scheme or list of allowed schemes, by default allows all.
         """
         parser = commandline.ArgumentParser()
         parser.add_argument("device", type=commandline.DeviceParser(schemes))
@@ -575,10 +575,10 @@ class ParseArgsTest(cros_test_lib.TestCase):
         """Create a class of optparse.OptionParser with prepared config.
 
         Args:
-          cls: Some subclass of optparse.OptionParser.
+            cls: Some subclass of optparse.OptionParser.
 
         Returns:
-          The created OptionParser object.
+            The created OptionParser object.
         """
         usage = "usage: some usage"
         parser = cls(usage=usage)
@@ -606,10 +606,10 @@ class ParseArgsTest(cros_test_lib.TestCase):
         """Create a class of argparse.ArgumentParser with prepared config.
 
         Args:
-          cls: Some subclass of argparse.ArgumentParser.
+            cls: Some subclass of argparse.ArgumentParser.
 
         Returns:
-          The created ArgumentParser object.
+            The created ArgumentParser object.
         """
         usage = "usage: some usage"
         parser = cls(usage=usage)
@@ -833,10 +833,10 @@ class TestRunInsideChroot(cros_test_lib.MockTestCase):
         """Run RunInsideChroot, and verify it raises with expected values.
 
         Args:
-          expected_cmd: Command that should be executed inside the chroot.
-          expected_chroot_args: Args that should be passed as chroot args.
-          log_level_args: Args that set the log level of cros_sdk.
-          kwargs: Additional args to pass to RunInsideChroot().
+            expected_cmd: Command that should be executed inside the chroot.
+            expected_chroot_args: Args that should be passed as chroot args.
+            log_level_args: Args that set the log level of cros_sdk.
+            kwargs: Additional args to pass to RunInsideChroot().
         """
         with self.assertRaises(commandline.ChrootRequiredError) as cm:
             commandline.RunInsideChroot(self.cmd, **kwargs)

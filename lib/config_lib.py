@@ -118,10 +118,10 @@ def isTryjobConfig(build_config):
     """Is a given build config a tryjob config, or a production config?
 
     Args:
-      build_config: A fully populated instance of BuildConfig.
+        build_config: A fully populated instance of BuildConfig.
 
     Returns:
-      Boolean. True if it's a tryjob config.
+        Boolean. True if it's a tryjob config.
     """
     return build_config.luci_builder in [LUCI_BUILDER_RAPID, LUCI_BUILDER_TRY]
 
@@ -177,12 +177,12 @@ def GetHWTestEnv(builder_run_config, model_config=None, suite_config=None):
     """Return the env of a suite to run for a given build/model.
 
     Args:
-      builder_run_config: The BuildConfig object inside a BuilderRun object.
-      model_config: A ModelTestConfig object to test against.
-      suite_config: A HWTestConfig object to test against.
+        builder_run_config: The BuildConfig object inside a BuilderRun object.
+        model_config: A ModelTestConfig object to test against.
+        suite_config: A HWTestConfig object to test against.
 
     Returns:
-      A string variable to indiate the hwtest environment.
+        A string variable to indiate the hwtest environment.
     """
     enable_suite = True if suite_config is None else suite_config.enable_skylab
     enable_model = True if model_config is None else model_config.enable_skylab
@@ -258,11 +258,11 @@ class BuildConfig(AttrDict):
         value for the given key (or None) to compute the new value.
 
         Args:
-          args: Dictionaries or templates to update this config with.
-          kwargs: Settings to inject; see DefaultSettings for valid values.
+            args: Dictionaries or templates to update this config with.
+            kwargs: Settings to inject; see DefaultSettings for valid values.
 
         Returns:
-          self after changes are applied.
+            self after changes are applied.
         """
         inherits = list(args)
         inherits.append(kwargs)
@@ -314,11 +314,11 @@ class BuildConfig(AttrDict):
         value for the given key (or None) to compute the new value.
 
         Args:
-          args: Mapping instances to mixin.
-          kwargs: Settings to inject; see DefaultSettings for valid values.
+            args: Mapping instances to mixin.
+            kwargs: Settings to inject; see DefaultSettings for valid values.
 
         Returns:
-          A new _config instance.
+            A new _config instance.
         """
         return self.deepcopy().apply(*args, **kwargs)
 
@@ -349,15 +349,15 @@ class VMTestConfig(object):
     """Config object for virtual machine tests suites.
 
     Attributes:
-      test_type: Test type to be run.
-      test_suite: Test suite to be run in VMTest.
-      timeout: Number of seconds to wait before timing out waiting for
-               results.
-      retry: Whether we should retry tests that fail in a suite run.
-      max_retries: Integer, maximum job retries allowed at suite level.
-                   None for no max.
-      warn_only: Boolean, failure on VM tests warns only.
-      use_ctest: Use the old ctest code path rather than the new chromite one.
+        test_type: Test type to be run.
+        test_suite: Test suite to be run in VMTest.
+        timeout: Number of seconds to wait before timing out waiting for
+            results.
+        retry: Whether we should retry tests that fail in a suite run.
+        max_retries: Integer, maximum job retries allowed at suite level.
+            None for no max.
+        warn_only: Boolean, failure on VM tests warns only.
+        use_ctest: Use the old ctest code path rather than the new chromite one.
     """
 
     DEFAULT_TEST_TIMEOUT = 90 * 60
@@ -389,11 +389,11 @@ class GCETestConfig(object):
     """Config object for GCE tests suites.
 
     Attributes:
-      test_type: Test type to be run.
-      test_suite: Test suite to be run in GCETest.
-      timeout: Number of seconds to wait before timing out waiting for
-               results.
-      use_ctest: Use the old ctest code path rather than the new chromite one.
+        test_type: Test type to be run.
+        test_suite: Test suite to be run in GCETest.
+        timeout: Number of seconds to wait before timing out waiting for
+            results.
+        use_ctest: Use the old ctest code path rather than the new chromite one.
     """
 
     DEFAULT_TEST_TIMEOUT = 60 * 60
@@ -419,12 +419,12 @@ class TastVMTestConfig(object):
     """Config object for a Tast virtual-machine-based test suite.
 
     Attributes:
-      name: String containing short human-readable name describing test suite.
-      test_exprs: List of string expressions describing which tests to run; this
-                  is passed directly to the 'tast run' command. See
-                  https://goo.gl/UPNEgT for info about test expressions.
-      timeout: Number of seconds to wait before timing out waiting for
-               results.
+        name: String containing short human-readable name describing test suite.
+        test_exprs: List of string expressions describing which tests to run;
+            this is passed directly to the 'tast run' command. See
+            https://goo.gl/UPNEgT for info about test expressions.
+        timeout: Number of seconds to wait before timing out waiting for
+            results.
     """
 
     DEFAULT_TEST_TIMEOUT = 60 * 60
@@ -447,8 +447,8 @@ class MoblabVMTestConfig(object):
     """Config object for moblab tests suites.
 
     Attributes:
-      test_type: Test type to be run.
-      timeout: Number of seconds to wait before timing out waiting for
+        test_type: Test type to be run.
+        timeout: Number of seconds to wait before timing out waiting for
                results.
     """
 
@@ -467,9 +467,9 @@ class ModelTestConfig(object):
     """Model specific config that controls which test suites are executed.
 
     Attributes:
-      name: The name of the model that will be tested (matches model label)
-      lab_board_name: The name of the board in the lab (matches board label)
-      test_suites: List of hardware test suites that will be executed.
+        name: The name of the model that will be tested (matches model label)
+        lab_board_name: The name of the board in the lab (matches board label)
+        test_suites: List of hardware test suites that will be executed.
     """
 
     def __init__(
@@ -489,42 +489,42 @@ class HWTestConfig(object):
     """Config object for hardware tests suites.
 
     Attributes:
-      suite: Name of the test suite to run.
-      timeout: Number of seconds to wait before timing out waiting for
-               results.
-      pool: Pool to use for hw testing.
-      blocking: Setting this to true requires that this suite must PASS for suites
-                scheduled after it to run. This also means any suites that are
-                scheduled before a blocking one are also blocking ones scheduled
-                after. This should be used when you want some suites to block
-                whether or not others should run e.g. only run longer-running
-                suites if some core ones pass first.
+        suite: Name of the test suite to run.
+        timeout: Number of seconds to wait before timing out waiting for
+            results.
+        pool: Pool to use for hw testing.
+        blocking: Setting this to true requires that this suite must PASS for
+            suites scheduled after it to run. This also means any suites that
+            are scheduled before a blocking one are also blocking ones scheduled
+            after. This should be used when you want some suites to block
+            whether others should run e.g. only run longer-running suites if
+            some core ones pass first.
 
-                Note, if you want multiple suites to block other suites but run
-                in parallel, you should only mark the last one scheduled as
-                blocking (it effectively serves as a thread/process join).
-      async: Fire-and-forget suite.
-      warn_only: Failure on HW tests warns only (does not generate error).
-      critical: Usually we consider structural failures here as OK.
-      priority:  Priority at which tests in the suite will be scheduled in
-                 the hw lab.
-      file_bugs: Should we file bugs if a test fails in a suite run.
-      minimum_duts: minimum number of DUTs required for testing in the hw lab.
-      retry: Whether we should retry tests that fail in a suite run.
-      max_retries: Integer, maximum job retries allowed at suite level.
-                   None for no max.
-      suite_min_duts: Preferred minimum duts. Lab will prioritize on getting such
-                      number of duts even if the suite is competing with
-                      other suites that have higher priority.
-      suite_args: Arguments passed to the suite.  This should be a dict
-                  representing keyword arguments.  The value is marshalled
-                  using repr(), so the dict values should be basic types.
-      quota_account: The quotascheduler account to use for all tests in this
-                     suite.
+            Note, if you want multiple suites to block other suites but run
+            in parallel, you should only mark the last one scheduled as
+            blocking (it effectively serves as a thread/process join).
+        async: Fire-and-forget suite.
+        warn_only: Failure on HW tests warns only (does not generate error).
+        critical: Usually we consider structural failures here as OK.
+        priority:  Priority at which tests in the suite will be scheduled in
+            the hw lab.
+        file_bugs: Should we file bugs if a test fails in a suite run.
+        minimum_duts: minimum number of DUTs required for testing in the hw lab.
+        retry: Whether we should retry tests that fail in a suite run.
+        max_retries: Integer, maximum job retries allowed at suite level.
+            None for no max.
+        suite_min_duts: Preferred minimum duts. Lab will prioritize on getting
+            such number of duts even if the suite is competing with other suites
+            that have higher priority.
+        suite_args: Arguments passed to the suite. This should be a dict
+            representing keyword arguments. The value is marshalled using
+            repr(), so the dict values should be basic types.
+        quota_account: The quotascheduler account to use for all tests in this
+            suite.
 
     Some combinations of member settings are invalid:
-      * A suite config may not specify both blocking and async.
-      * A suite config may not specify both warn_only and critical.
+        * A suite config may not specify both blocking and async.
+        * A suite config may not specify both warn_only and critical.
     """
 
     _MINUTE = 60
@@ -646,12 +646,12 @@ class NotificationConfig(object):
     """Config object for defining notification settings.
 
     Attributes:
-      email: Email address that receives failure notifications.
-      threshold: Number of consecutive failures that should occur in order to
-                be notified. This number should be greater than or equal to 1. If
-                none is specified, default is 1.
-      template: Email template luci-notify should use when sending the email
-                notification. If none is specified, uses the default template.
+        email: Email address that receives failure notifications.
+        threshold: Number of consecutive failures that should occur in order to
+            be notified. This number should be greater than or equal to 1. If
+            none is specified, default is 1.
+        template: Email template luci-notify should use when sending the email
+            notification. If none is specified, uses the default template.
     """
 
     DEFAULT_TEMPLATE = "legacy_release"
@@ -1236,14 +1236,14 @@ class SiteConfig(dict):
         """Init.
 
         Args:
-          defaults: Dictionary of key value pairs to use as BuildConfig values.
-                    All BuildConfig values should be defined here. If None,
-                    the DefaultSettings() is used. Most sites should use
-                    DefaultSettings(), and then update to add any site specific
-                    values needed.
-          templates: Dictionary of template names to partial BuildConfigs
-                     other BuildConfigs can be based on. Mostly used to reduce
-                     verbosity of the config dump file format.
+            defaults: Dictionary of key value pairs to use as BuildConfig
+                values. All BuildConfig values should be defined here. If None,
+                the DefaultSettings() is used. Most sites should use
+                DefaultSettings(), and then update to add any site specific
+                values needed.
+            templates: Dictionary of template names to partial BuildConfigs
+                other BuildConfigs can be based on. Mostly used to reduce
+                verbosity of the config dump file format.
         """
         super().__init__()
         self._defaults = DefaultSettings()
@@ -1282,11 +1282,11 @@ class SiteConfig(dict):
         """Returns full builder configs for a board.
 
         Args:
-          board: The board to match. By default, match all boards.
+            board: The board to match. By default, match all boards.
 
         Returns:
-          A tuple containing a list of matching external configs and a list of
-          matching internal release configs for a board.
+            A tuple containing a list of matching external configs and a list of
+            matching internal release configs for a board.
         """
         ext_cfgs = []
         int_cfgs = []
@@ -1331,17 +1331,18 @@ class SiteConfig(dict):
         itself.
 
         Args:
-          master_config: A build config for a master builder.
-          options: The options passed on the commandline. This argument is required
-          for normal operation, but we accept None to assist with testing.
-          important_only: If True, only get the important slaves.
+            master_config: A build config for a master builder.
+            options: The options passed on the commandline. This argument is
+                required for normal operation, but we accept None to assist with
+                testing.
+            important_only: If True, only get the important slaves.
 
         Returns:
-          A slave_name to slave_config map, corresponding to the slaves for the
-          master represented by master_config.
+            A slave_name to slave_config map, corresponding to the slaves for
+            the master represented by master_config.
 
         Raises:
-          AssertionError if the given config is not a master config or it does
+            AssertionError if the given config is not a master config or it does
             not have a manifest_version.
         """
         assert master_config.master
@@ -1370,10 +1371,10 @@ class SiteConfig(dict):
         """Get a list of qualified build slave configs given the master_config.
 
         Args:
-          master_config: A build config for a master builder.
-          options: The options passed on the commandline. This argument is optional,
-                   and only makes sense when called from cbuildbot.
-          important_only: If True, only get the important slaves.
+            master_config: A build config for a master builder.
+            options: The options passed on the commandline. This argument is
+                optional, and only makes sense when called from cbuildbot.
+            important_only: If True, only get the important slaves.
         """
         slave_map = self.GetSlaveConfigMapForMaster(
             master_config, options=options, important_only=important_only
@@ -1387,42 +1388,40 @@ class SiteConfig(dict):
         """Add a new BuildConfig to the SiteConfig.
 
         Examples:
-          # Creates default build named foo.
-          site_config.Add('foo')
+            # Creates default build named foo.
+            site_config.Add('foo')
 
-          # Creates default build with board 'foo_board'
-          site_config.Add('foo',
-                          boards=['foo_board'])
+            # Creates default build with board 'foo_board'
+            site_config.Add('foo', boards=['foo_board'])
 
-          # Creates build based on template_build for 'foo_board'.
-          site_config.Add('foo',
-                          template_build,
-                          boards=['foo_board'])
+            # Creates build based on template_build for 'foo_board'.
+            site_config.Add(
+                'foo', template_build, boards=['foo_board']
+            )
 
-          # Creates build based on template for 'foo_board'. with mixin.
-          # Inheritance order is default, template, mixin, arguments.
-          site_config.Add('foo',
-                          template_build,
-                          mixin_build_config,
-                          boards=['foo_board'])
+            # Creates build based on template for 'foo_board'. with mixin.
+            # Inheritance order is default, template, mixin, arguments.
+            site_config.Add(
+                'foo', template_build, mixin_build_config, boards=['foo_board']
+            )
 
-          # Creates build without a template but with mixin.
-          # Inheritance order is default, template, mixin, arguments.
-          site_config.Add('foo',
-                          None,
-                          mixin_build_config,
-                          boards=['foo_board'])
+            # Creates build without a template but with mixin.
+            # Inheritance order is default, template, mixin, arguments.
+            site_config.Add(
+                'foo', None, mixin_build_config, boards=['foo_board']
+            )
 
         Args:
-          name: The name to label this configuration; this is what cbuildbot
+            name: The name to label this configuration; this is what cbuildbot
                 would see.
-          template: BuildConfig to use as a template for this build.
-          args: BuildConfigs to patch into this config. First one (if present) is
-                considered the template. See AddTemplate for help on templates.
-          kwargs: BuildConfig values to explicitly set on this config.
+            template: BuildConfig to use as a template for this build.
+            args: BuildConfigs to patch into this config. First one (if present)
+                is considered the template. See AddTemplate for help on
+                templates.
+            kwargs: BuildConfig values to explicitly set on this config.
 
         Returns:
-          The BuildConfig just added to the SiteConfig.
+            The BuildConfig just added to the SiteConfig.
         """
         assert name not in self, "%s already exists." % name
 
@@ -1458,15 +1457,15 @@ class SiteConfig(dict):
         """Create a new group of build configurations.
 
         Args:
-          name: The name to label this configuration; this is what cbuildbot
+            name: The name to label this configuration; this is what cbuildbot
                 would see.
-          args: Configurations to build in this group. The first config in
+            args: Configurations to build in this group. The first config in
                 the group is considered the primary configuration and is used
                 for syncing and creating the chroot.
-          kwargs: Override values to use for the parent config.
+            kwargs: Override values to use for the parent config.
 
         Returns:
-          A new BuildConfig instance.
+            A new BuildConfig instance.
         """
         child_configs = [x.deepcopy().apply(grouped=True) for x in args]
         return self.Add(name, args[0], child_configs=child_configs, **kwargs)
@@ -1477,15 +1476,15 @@ class SiteConfig(dict):
         """Create configs for all boards in |boards|.
 
         Args:
-          suffix: Config name is <board>-<suffix>.
-          boards: A list of board names as strings.
-          per_board: A dictionary of board names to BuildConfigs, or None.
-          template: The template to use for all configs created.
-          *args: Mixin templates to apply.
-          **kwargs: Additional keyword arguments to be used in AddConfig.
+            suffix: Config name is <board>-<suffix>.
+            boards: A list of board names as strings.
+            per_board: A dictionary of board names to BuildConfigs, or None.
+            template: The template to use for all configs created.
+            *args: Mixin templates to apply.
+            **kwargs: Additional keyword arguments to be used in AddConfig.
 
         Returns:
-          List of the configs created.
+            List of the configs created.
         """
         result = []
 
@@ -1506,13 +1505,13 @@ class SiteConfig(dict):
         """Update configs for all boards in |boards|.
 
         Args:
-          suffix: Config name is <board>-<suffix>.
-          boards: A list of board names as strings.
-          *args: Mixin templates to apply.
-          **kwargs: Additional keyword arguments to be used in AddConfig.
+            suffix: Config name is <board>-<suffix>.
+            boards: A list of board names as strings.
+            *args: Mixin templates to apply.
+            **kwargs: Additional keyword arguments to be used in AddConfig.
 
         Returns:
-          List of the configs updated.
+            List of the configs updated.
         """
         result = []
 
@@ -1533,9 +1532,9 @@ class SiteConfig(dict):
         only define the template and its settings once.
 
         Args:
-          name: The name of the template.
-          args: See the docstring of BuildConfig.derive.
-          kwargs: See the docstring of BuildConfig.derive.
+            name: The name of the template.
+            args: See the docstring of BuildConfig.derive.
+            kwargs: See the docstring of BuildConfig.derive.
         """
         assert name not in self._templates, "Template %s already exists." % name
 
@@ -1550,11 +1549,11 @@ class SiteConfig(dict):
         """Hide the defaults from a given config entry.
 
         Args:
-          name: Default build name (usually dictionary key).
-          config: A config entry.
+            name: Default build name (usually dictionary key).
+            config: A config entry.
 
         Returns:
-          The same config entry, but without any defaults.
+            The same config entry, but without any defaults.
         """
         defaults = self.GetDefault()
         defaults["name"] = name
@@ -1583,7 +1582,7 @@ class SiteConfig(dict):
         ensure they can be safely saved to json.
 
         Returns:
-          Dict copy of self._templates with all unreferenced templates removed.
+            Dict copy of self._templates with all unreferenced templates removed.
         """
         defaults = self.GetDefault()
 
@@ -1621,7 +1620,7 @@ class SiteConfig(dict):
         """Save this Config to a Json file.
 
         Args:
-          config_file: The file to write too.
+            config_file: The file to write too.
         """
         json_string = self.SaveConfigToString()
         osutils.WriteFile(config_file, json_string)
@@ -1717,10 +1716,11 @@ def GeBuildConfigAllBoards(ge_build_config):
     """Extract a list of board names from the GE Build Config.
 
     Args:
-      ge_build_config: Dictionary containing the decoded GE configuration file.
+        ge_build_config: Dictionary containing the decoded GE configuration
+            file.
 
     Returns:
-      A list of board names as strings.
+        A list of board names as strings.
     """
     return [b["name"] for b in ge_build_config["boards"]]
 
@@ -1732,10 +1732,11 @@ def GetUnifiedBuildConfigAllBuilds(ge_build_config):
     GoldenEye.  See cs/crosbuilds.proto
 
     Args:
-      ge_build_config: Dictionary containing the decoded GE configuration file.
+        ge_build_config: Dictionary containing the decoded GE configuration
+            file.
 
     Returns:
-      A list of unified build configurations (json configs)
+        A list of unified build configurations (json configs)
     """
     return ge_build_config.get("reference_board_unified_builds", [])
 
@@ -1764,11 +1765,11 @@ def GroupBoardsByBuilderAndBoardGroup(board_list):
     """Group boards by builder and board_group.
 
     Args:
-      board_list: board list from the template file.
+        board_list: board list from the template file.
 
     Returns:
-      builder_group_dict: maps builder to {group_n: board_group_n}
-      builder_ungrouped_dict: maps builder to a list of ungrouped boards
+        builder_group_dict: maps builder to {group_n: board_group_n}
+        builder_ungrouped_dict: maps builder to a list of ungrouped boards
     """
     builder_group_dict = {}
     builder_ungrouped_dict = {}
@@ -1867,10 +1868,11 @@ def GetArchBoardDict(ge_build_config):
     """Get a dict mapping arch types to board names.
 
     Args:
-      ge_build_config: Dictionary containing the decoded GE configuration file.
+        ge_build_config: Dictionary containing the decoded GE configuration
+            file.
 
     Returns:
-      A dict mapping arch types to board names.
+        A dict mapping arch types to board names.
     """
     arch_board_dict = {}
 
@@ -1945,11 +1947,11 @@ def _DeserializeConfig(
     """Deserialize config of given type inside build_dict.
 
     Args:
-      build_dict: The build_dict to update (in place)
-      config_key: Key for the config inside build_dict.
-      config_class: The class to instantiate for the config.
-      preserve_none: If True, None values are preserved as is. By default, they
-          are dropped.
+        build_dict: The build_dict to update (in place)
+        config_key: Key for the config inside build_dict.
+        config_class: The class to instantiate for the config.
+        preserve_none: If True, None values are preserved as is. By default,
+            they are dropped.
     """
     serialized_configs = build_dict.pop(config_key, None)
     if serialized_configs is None:
@@ -1977,7 +1979,7 @@ def _DeserializeConfigs(build_dict):
     they can be consumed.
 
     Args:
-      build_dict: The config dictionary to update (in place).
+        build_dict: The config dictionary to update (in place).
     """
     _DeserializeConfig(build_dict, "vm_tests", VMTestConfig)
     _DeserializeConfig(
@@ -2023,7 +2025,7 @@ def GetConfig():
     """Load the current SiteConfig.
 
     Returns:
-      SiteConfig instance to use for this build.
+        SiteConfig instance to use for this build.
     """
     return LoadConfigFromFile(constants.CHROMEOS_CONFIG_FILE)
 
@@ -2036,7 +2038,7 @@ def GetSiteParams():
     SiteConfig.params.
 
     Returns:
-      AttrDict of site parameters
+        AttrDict of site parameters
     """
     site_params = AttrDict()
     site_params.update(DefaultSiteParameters())
@@ -2050,10 +2052,12 @@ def append_useflags(useflags):
     (e.g. appending '-foo' to 'foo' will cause 'foo' to be removed)
 
     Examples:
-      new_config = base_config.derive(useflags=append_useflags(['foo', '-bar'])
+        new_config = base_config.derive(
+            useflags=append_useflags(['foo', '-bar'])
+        )
 
     Args:
-      useflags: List of string useflags to append.
+        useflags: List of string useflags to append.
     """
     assert isinstance(useflags, (list, set))
     shadowed_useflags = {

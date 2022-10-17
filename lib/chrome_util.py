@@ -130,12 +130,12 @@ class Copier(object):
         """Initialization.
 
         Args:
-          strip_bin: Path to the program used to strip binaries.  If set to None,
-                     binaries will not be stripped.
-          strip_flags: A list of flags to pass to the |strip_bin| executable.
-          default_mode: Default permissions to set on files.
-          dir_mode: Mode to set for directories.
-          exe_mode: Permissions to set on executables.
+            strip_bin: Path to the program used to strip binaries. If set to
+                None, binaries will not be stripped.
+            strip_flags: A list of flags to pass to the |strip_bin| executable.
+            default_mode: Default permissions to set on files.
+            dir_mode: Mode to set for directories.
+            exe_mode: Permissions to set on executables.
         """
         self.strip_bin = strip_bin
         self.strip_flags = strip_flags
@@ -152,10 +152,10 @@ class Copier(object):
         """Perform the copy.
 
         Args:
-          src: The path of the file/directory to copy.
-          dest: The exact path of the destination. Does nothing if it already
+            src: The path of the file/directory to copy.
+            dest: The exact path of the destination. Does nothing if it already
                 exists.
-          path: The Path instance containing copy operation modifiers (such as
+            path: The Path instance containing copy operation modifiers (such as
                 Path.exe, Path.strip, etc.)
         """
         assert not os.path.isdir(src), "%s: Not expecting a directory!" % src
@@ -192,13 +192,13 @@ class Copier(object):
         """Copy artifact(s) from source directory to destination.
 
         Args:
-          src_base: The directory to apply the src glob pattern match in.
-          dest_base: The directory to copy matched files to.  |Path.dest|.
-          path: A Path instance that specifies what is to be copied.
-          sloppy: If set, ignore when mandatory artifacts are missing.
+            src_base: The directory to apply the src glob pattern match in.
+            dest_base: The directory to copy matched files to. |Path.dest|.
+            path: A Path instance that specifies what is to be copied.
+            sloppy: If set, ignore when mandatory artifacts are missing.
 
         Returns:
-          A list of the artifacts copied.
+            A list of the artifacts copied.
         """
         copied_paths = []
         src = os.path.join(src_base, path.src)
@@ -283,26 +283,27 @@ class Path(object):
         """Initializes the object.
 
         Args:
-          src: The relative path of the artifact.  Can be a file or a directory.
-               Can be a glob pattern.
-          exe: Identifes the path as either being an executable or containing
-               executables.  Executables may be stripped during copy, and have
-               special permissions set.  We currently only support stripping of
-               specified files and glob patterns that return files.  If |src| is a
-               directory or contains directories, the content of the directory will
-               not be stripped.
-          cond: A condition (see Conditions class) to test for in deciding whether
-                to process this artifact.
-          dest: Name to give to the target file/directory.  Defaults to keeping the
-                same name as the source.
-          mode: The mode to set for the matched files, and the contents of matched
-                directories.
-          optional: Whether to enforce the existence of the artifact.  If unset, the
-                    script errors out if the artifact does not exist.  In 'sloppy'
-                    mode, the Copier class treats all artifacts as optional.
-          strip: If |exe| is set, whether to strip the executable.
-          ignorelist: A list of path patterns to ignore during the copy. This gets
-            added to a default ignorelist pattern.
+            src: The relative path of the artifact. Can be a file or a
+                directory. Can be a glob pattern.
+            exe: Identifies the path as either being an executable or containing
+                executables. Executables may be stripped during copy, and have
+                special permissions set. We currently only support stripping of
+                specified files and glob patterns that return files. If |src| is
+                a directory or contains directories, the content of the
+                directory will not be stripped.
+            cond: A condition (see Conditions class) to test for in deciding
+                whether to process this artifact.
+            dest: Name to give to the target file/directory.  Defaults to
+                keeping the same name as the source.
+            mode: The mode to set for the matched files, and the contents of
+                matched directories.
+            optional: Whether to enforce the existence of the artifact. If
+                unset, the script errors out if the artifact does not exist. In
+                'sloppy' mode, the Copier class treats all artifacts as
+                optional.
+            strip: If |exe| is set, whether to strip the executable.
+            ignorelist: A list of path patterns to ignore during the copy. This
+                gets added to a default ignorelist pattern.
         """
         self.src = src
         self.exe = exe
@@ -321,7 +322,7 @@ class Path(object):
         Ignored files are not copied over to the staging directory.
 
         Args:
-          path: The path of a file, relative to the path of this Path object.
+            path: The path of a file, relative to the path of this Path object.
         """
         for pattern in self.ignorelist:
             if re.match(pattern, path):
@@ -511,11 +512,11 @@ def GetCopyPaths(deployment_type="chrome"):
     """Returns the list of copy paths used as a filter for staging files.
 
     Args:
-      deployment_type: String describing the deployment type. Either "app_shell"
-                       or "chrome".
+        deployment_type: String describing the deployment type. Either
+            "app_shell" or "chrome".
 
     Returns:
-      The list of paths to use as a filter for staging files.
+        The list of paths to use as a filter for staging files.
     """
     paths = _COPY_PATHS_MAP.get(deployment_type)
     if paths is None:
@@ -527,11 +528,11 @@ def _GetGnLabel(build_dir, build_target):
     """Gets the gn label for a build target in a build dir.
 
     Args:
-      build_dir: The build output directory.
-      build_target: The build target whose gn label to be returned.
+        build_dir: The build output directory.
+        build_target: The build target whose gn label to be returned.
 
     Returns:
-      Gn label for the build target as a string.
+        Gn label for the build target as a string.
     """
     src_dir = os.path.dirname(os.path.dirname(build_dir))
     # Look up gn label from testing/buildbot/gn_isolate_map.pyl, which contains
@@ -561,12 +562,12 @@ def GetChromeRuntimeDeps(build_dir, build_target):
     """Returns a list of runtime deps files for the given build target.
 
     Args:
-      build_dir: The build output directory.
-      build_target: A chrome build target.
+        build_dir: The build output directory.
+        build_target: A chrome build target.
 
     Returns:
-      The list of runtime deps files for |build_target| relative to two levels up
-      |build_dir|, i.e. chrome src dir.
+        The list of runtime deps files for |build_target| relative to two levels
+        up |build_dir|, i.e. chrome src dir.
     """
     gn_label = _GetGnLabel(build_dir, build_target)
 
@@ -628,12 +629,13 @@ def GetChromeTestCopyPaths(build_dir, test_target):
     """Returns the list of copy paths for the given chrome test target.
 
     Args:
-      build_dir: The build output directory that |runtime_deps| is relative to.
-      test_target: A build target defined in //chrome/test/BUILD.gn
+        build_dir: The build output directory that |runtime_deps| is relative
+            to.
+        test_target: A build target defined in //chrome/test/BUILD.gn
 
     Returns:
-      The list of paths to stage for |runtime_deps| relative to two levels up
-      |build_dir|, i.e. chrome src dir.
+        The list of paths to stage for |runtime_deps| relative to two levels up
+        |build_dir|, i.e. chrome src dir.
     """
 
     # Ignore list for files in the runtime deps of the test target but are not
@@ -677,15 +679,15 @@ def StageChromeFromBuildDir(
     about that we can find.
 
     Args:
-      staging_dir: Path to an empty staging directory.
-      build_dir: Path to location of Chrome build artifacts.
-      strip_bin: Path to executable used for stripping binaries.
-      sloppy: Ignore when mandatory artifacts are missing.
-      gn_args: A dictionary of args.gn valuses that Chrome was built with.
-      staging_flags: A list of extra staging flags.  Valid flags are specified in
-        STAGING_FLAGS.
-      strip_flags: A list of flags to pass to the tool used to strip binaries.
-      copy_paths: The list of paths to use as a filter for staging files.
+        staging_dir: Path to an empty staging directory.
+        build_dir: Path to location of Chrome build artifacts.
+        strip_bin: Path to executable used for stripping binaries.
+        sloppy: Ignore when mandatory artifacts are missing.
+        gn_args: A dictionary of args.gn valuses that Chrome was built with.
+        staging_flags: A list of extra staging flags. Valid flags are specified
+            in STAGING_FLAGS.
+        strip_flags: A list of flags to pass to the tool used to strip binaries.
+        copy_paths: The list of paths to use as a filter for staging files.
     """
     os.mkdir(os.path.join(staging_dir, "plugins"), 0o755)
 

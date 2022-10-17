@@ -72,13 +72,13 @@ def GetScheduledBuildDict(scheduled_slave_list):
     Treats all listed builds as newly-scheduled.
 
     Args:
-      scheduled_slave_list: A list of scheduled builds recorded in the
-                            orchestrator metadata. In the format of
-                            [(build_config, buildbucket_id, created_ts)].
+        scheduled_slave_list: A list of scheduled builds recorded in the
+            orchestrator metadata. In the format of
+            [(build_config, buildbucket_id, created_ts)].
 
     Returns:
-      A dict mapping build config name to its buildbucket information
-      (in the format of BuildbucketInfo).
+        A dict mapping build config name to its buildbucket information
+        (in the format of BuildbucketInfo).
     """
     if scheduled_slave_list is None:
         return {}
@@ -114,16 +114,16 @@ def GetBuildInfoDict(metadata, exclude_experimental=True):
     """Get buildbucket_info_dict from metadata.
 
     Args:
-      metadata: Instance of metadata_lib.CBuildbotMetadata.
-      exclude_experimental: Whether to exclude the builds which are important in
-        the config but are marked as experimental in the tree status. Default to
-        True.
+        metadata: Instance of metadata_lib.CBuildbotMetadata.
+        exclude_experimental: Whether to exclude the builds which are important
+            in the config but are marked as experimental in the tree status.
+            Default to True.
 
     Returns:
-      buildbucket_info_dict: A dict mapping build config name to its buildbucket
-          information in the format of BuildbucketInfo. Build configs that are
-          marked experimental through the tree status will not be in the dict.
-          (See GetScheduledBuildDict for details.)
+        buildbucket_info_dict: A dict mapping build config name to its
+            buildbucket information in the format of BuildbucketInfo. Build
+            configs that are marked experimental through the tree status will
+            not be in the dict. (See GetScheduledBuildDict for details.)
     """
     assert metadata is not None
 
@@ -148,13 +148,13 @@ def GetBuildbucketIds(metadata, exclude_experimental=True):
     """Get buildbucket_ids of scheduled slave builds from metadata.
 
     Args:
-      metadata: Instance of metadata_lib.CBuildbotMetadata.
-      exclude_experimental: Whether to exclude the builds which are important in
-        the config but are marked as experimental in the tree status. Default to
-        True.
+        metadata: Instance of metadata_lib.CBuildbotMetadata.
+        exclude_experimental: Whether to exclude the builds which are important
+            in the config but are marked as experimental in the tree status.
+            Default to True.
 
     Returns:
-      A list of buildbucket_ids (string) of slave builds.
+        A list of buildbucket_ids (string) of slave builds.
     """
     buildbucket_info_dict = GetBuildInfoDict(
         metadata, exclude_experimental=exclude_experimental
@@ -170,16 +170,16 @@ def FetchCurrentSlaveBuilders(
     """Fetch the current important slave builds.
 
     Args:
-      config: Instance of config_lib.BuildConfig. Config dict of this build.
-      metadata: Instance of metadata_lib.CBuildbotMetadata. Metadata of this
-                build.
-      builders_array: A list of slave build configs to check.
-      exclude_experimental: Whether to exclude the builds which are important in
-        the config but are marked as experimental in the tree status. Default to
-        True.
+        config: Instance of config_lib.BuildConfig. Config dict of this build.
+        metadata: Instance of metadata_lib.CBuildbotMetadata. Metadata of this
+            build.
+        builders_array: A list of slave build configs to check.
+        exclude_experimental: Whether to exclude the builds which are important
+            in the config but are marked as experimental in the tree status.
+            Default to True.
 
     Returns:
-      An updated list of slave build configs for a orchestrator build.
+        An updated list of slave build configs for a orchestrator build.
     """
     if config and metadata:
         scheduled_buildbucket_info_dict = GetBuildInfoDict(
@@ -196,13 +196,13 @@ def GetStringPairValue(content, path, key, default=None):
     Get the (nested) value from a nested dict.
 
     Args:
-      content: A dict of (nested) attributes.
-      path: String list presenting the (nested) attribute to get.
-      key: String representing which key to find.
-      default: Default value to return if the attribute doesn't exist.
+        content: A dict of (nested) attributes.
+        path: String list presenting the (nested) attribute to get.
+        key: String representing which key to find.
+        default: Default value to return if the attribute doesn't exist.
 
     Returns:
-      The corresponding value if the attribute exists; else, default.
+        The corresponding value if the attribute exists; else, default.
     """
     assert isinstance(path, list), "nested_attr must be a list."
 
@@ -244,8 +244,8 @@ def UpdateSelfBuildPropertiesNonBlocking(key, value):
     the property.
 
     Args:
-      key: name of the property.
-      value: value of the property.
+        key: name of the property.
+        value: value of the property.
     """
     if key == "email_notify":
         cbuildbot_alerts.PrintKitchenSetEmailNotifyProperty(key, value)
@@ -278,27 +278,31 @@ def UpdateSelfCommonBuildProperties(
     UpdateSelfBuildPropertiesNonBlocking. All arguments are optional.
 
     Args:
-      critical: (Optional) |important| flag of the build.
-      cidb_id: (Optional) CIDB ID of the build.
-      chrome_version: (Optional) version of chrome of the build. Eg "74.0.3687.0".
-      milestone_version: (Optional) milestone version of  of the build. Eg "74".
-      platform_version: (Optional) platform version of the build. Eg "11671.0.0".
-      full_version: (Optional) full version of the build.
-          Eg "R74-11671.0.0-b3416654".
-      toolchain_url: (Optional) toolchain_url of the build.
-      build_type: (Optional) One of ('full', 'canary', ...).
-      unibuild: (Optional) Boolean indicating whether build is unibuild.
-      suite_scheduling: (Optional)
-      killed_child_builds: (Optional) A list of Buildbucket IDs of child builds
-        that were killed by self-destructed orchestrator build.
-      board: (Optional) board of the build.
-      main_firmware_version: (Optional) main firmware version of the build.
-      ec_firmware_version: (Optional) ec_firmware version of the build.
-      metadata_url: (Optional) google storage url to metadata.json of the build.
-      channels: (Optional) list of channels the build are configured for.
-          e.g. [beta,stable].
-      email_notify: (Optional) list of luci-notify email_notify values
-          representing the recipients of failure alerts to for this builder.
+        critical: (Optional) |important| flag of the build.
+        cidb_id: (Optional) CIDB ID of the build.
+        chrome_version: (Optional) version of chrome of the build.
+            Eg "74.0.3687.0".
+        milestone_version: (Optional) milestone version of  of the build.
+            Eg "74".
+        platform_version: (Optional) platform version of the build.
+            Eg "11671.0.0".
+        full_version: (Optional) full version of the build.
+            Eg "R74-11671.0.0-b3416654".
+        toolchain_url: (Optional) toolchain_url of the build.
+        build_type: (Optional) One of ('full', 'canary', ...).
+        unibuild: (Optional) Boolean indicating whether build is unibuild.
+        suite_scheduling: (Optional)
+        killed_child_builds: (Optional) A list of Buildbucket IDs of child
+            builds that were killed by self-destructed orchestrator build.
+        board: (Optional) board of the build.
+        main_firmware_version: (Optional) main firmware version of the build.
+        ec_firmware_version: (Optional) ec_firmware version of the build.
+        metadata_url: (Optional) google storage url to metadata.json of the
+            build.
+        channels: (Optional) list of channels the build are configured for.
+            e.g. [beta,stable].
+        email_notify: (Optional) list of luci-notify email_notify values
+            representing the recipients of failure alerts to for this builder.
     """
     if critical is not None:
         critical = 1 if critical in [1, True] else 0
@@ -356,7 +360,7 @@ def UpdateBuildMetadata(metadata):
     no guarantee of timely updation.
 
     Args:
-      metadata: CBuildbot Metadata instance to update with.
+        metadata: CBuildbot Metadata instance to update with.
     """
     d = metadata.GetDict()
     versions = d.get("version") or {}
@@ -381,12 +385,12 @@ def BuildStepToDict(step, build_values=None):
     https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/step.proto
 
     Args:
-      step: A step_pb2.Step instance from Buildbucket to be extracted.
-      build_values: A dictionary of values to be included in the result.
+        step: A step_pb2.Step instance from Buildbucket to be extracted.
+        build_values: A dictionary of values to be included in the result.
 
     Returns:
-      A dictionary with the following keys: name, status, start_time and end_time
-      in addition to the keys in build_values.
+        A dictionary with the following keys: name, status, start_time and
+        end_time in addition to the keys in build_values.
     """
     step_info = {"name": step.name}
     if step.status is not None and step.status in BB_STATUS_DICT:
@@ -405,12 +409,12 @@ def DateToTimeRange(start_date=None, end_date=None):
     """Convert two datetime.date objects into a TimeRange instance.
 
     Args:
-      start_date: datetime.date instance to mark the start of the TimeRange.
-      end_date: datetime.date instance to mark the end of the TimeRange.
+        start_date: datetime.date instance to mark the start of the TimeRange.
+        end_date: datetime.date instance to mark the end of the TimeRange.
 
     Returns:
-      A TimeRange object corresponding to the time interval
-      (start_date, end_date).
+        A TimeRange object corresponding to the time interval
+        (start_date, end_date).
     """
     if not (start_date or end_date):
         return None
@@ -431,10 +435,10 @@ def GetBotId(build):
     """Return the bot id that ran a build, or None.
 
     Args:
-      build: BuildbucketV2 build
+        build: BuildbucketV2 build
 
     Returns:
-      hostname: Swarming hostname
+        hostname: Swarming hostname
     """
     # This produces a list of bot_ids for each build (or None).
     # I don't think there can ever be more than one entry in the list, but
@@ -459,8 +463,10 @@ class BuildbucketV2(object):
         """Constructor for Buildbucket V2 Build client.
 
         Args:
-          test_env: Whether to have the client connect to test URL endpoint on GAE.
-          access_token_retriever: An optional callable that returns an access token.
+            test_env: Whether to have the client connect to test URL endpoint
+                on GAE.
+            access_token_retriever: An optional callable that returns an access
+                token.
         """
         if test_env:
             self.client = Client(
@@ -487,13 +493,13 @@ class BuildbucketV2(object):
         """BatchGetBuild repeated GetBuild request with provided ids.
 
         Args:
-          buildbucket_ids: list of ids of the builds in buildbucket.
-          summary_markdown: summary of reason for cancel.
-          properties: fields to include in the response.
+            buildbucket_ids: list of ids of the builds in buildbucket.
+            summary_markdown: summary of reason for cancel.
+            properties: fields to include in the response.
 
         Returns:
-          The corresponding BatchResponse message. See here:
-          https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/builds_service.proto
+            The corresponding BatchResponse message. See here:
+            https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/builds_service.proto
         """
         batch_requests = []
         for buildbucket_id in buildbucket_ids:
@@ -530,12 +536,12 @@ class BuildbucketV2(object):
         """BatchGetBuild repeated GetBuild request with provided ids.
 
         Args:
-          buildbucket_ids: list of ids of the builds in buildbucket.
-          properties: fields to include in the response.
+            buildbucket_ids: list of ids of the builds in buildbucket.
+            properties: fields to include in the response.
 
         Returns:
-          The corresponding BatchResponse message. See here:
-          https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/builds_service.proto
+            The corresponding BatchResponse message. See here:
+            https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/builds_service.proto
         """
         batch_requests = []
         for buildbucket_id in buildbucket_ids:
@@ -569,11 +575,11 @@ class BuildbucketV2(object):
         """SearchBuild RPC call wrapping function.
 
         Args:
-          search_requests: List of SearchBuildRequests
+            search_requests: List of SearchBuildRequests
 
         Returns:
-          The corresponding BatchResponse message. See here:
-          https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/builds_service.proto
+            The corresponding BatchResponse message. See here:
+            https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/builds_service.proto
         """
         requests = []
         for request in search_requests:
@@ -595,13 +601,13 @@ class BuildbucketV2(object):
         """CancelBuild call of a specific build with buildbucket_id.
 
         Args:
-          buildbucket_id: id of the build in buildbucket.
-          summary_markdown: summary of reason for cancel.
-          properties: fields to include in the response.
+            buildbucket_id: id of the build in buildbucket.
+            summary_markdown: summary of reason for cancel.
+            properties: fields to include in the response.
 
         Returns:
-          The corresponding Build proto. See here:
-          https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/build.proto
+            The corresponding Build proto. See here:
+            https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/build.proto
         """
         cancel_build_request = builds_service_pb2.CancelBuildRequest(
             id=buildbucket_id,
@@ -626,12 +632,12 @@ class BuildbucketV2(object):
         """GetBuild call of a specific build with buildbucket_id.
 
         Args:
-          buildbucket_id: id of the build in buildbucket.
-          properties: list or string of fields to include in the response.
+            buildbucket_id: id of the build in buildbucket.
+            properties: list or string of fields to include in the response.
 
         Returns:
-          The corresponding Build proto. See here:
-          https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/build.proto
+            The corresponding Build proto. See here:
+            https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/build.proto
         """
         field_mask = []
         if isinstance(properties, list):
@@ -669,19 +675,19 @@ class BuildbucketV2(object):
         """ScheduleBuild call of a specific build with buildbucket_id.
 
         Args:
-          request_id: unique string used to prevent duplicates.
-          template_build_id: ID of a build to retry.
-          builder: Tuple (builder.project, builder.bucket) defines build ACL
-          properties: properties key in parameters_json
-          gerrit_changes: Repeated GerritChange message type.
-          tags: repeated StringPair of Build.tags to associate with build.
-          dimensions: RequestedDimension Swarming dimension to override in config.
-          fields: fields to include in the response.
-          critical: bool for build.critical.
+            request_id: unique string used to prevent duplicates.
+            template_build_id: ID of a build to retry.
+            builder: Tuple (builder.project, builder.bucket) defines build ACL
+            properties: properties key in parameters_json
+            gerrit_changes: Repeated GerritChange message type.
+            tags: repeated StringPair of Build.tags to associate with build.
+            dimensions: RequestedDimension Swarming dimension to override in config.
+            fields: fields to include in the response.
+            critical: bool for build.critical.
 
         Returns:
-          The corresponding Build proto. See here:
-          https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/build.proto
+            The corresponding Build proto. See here:
+            https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/build.proto
         """
         schedule_build_request = builds_service_pb2.ScheduleBuildRequest(
             request_id=request_id,
@@ -708,13 +714,13 @@ class BuildbucketV2(object):
         """GetBuild call of a specific build with buildbucket_id.
 
         Args:
-          build: Buildbucket build to update.
-          update_properties: fields to update.
-          properties: fields to include in the response.
+            build: Buildbucket build to update.
+            update_properties: fields to update.
+            properties: fields to include in the response.
 
         Returns:
-          The corresponding Build proto. See here:
-          https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/build.proto
+            The corresponding Build proto. See here:
+            https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/build.proto
         """
         update_build_request = builds_service_pb2.UpdateBuildRequest(
             build=build,
@@ -733,11 +739,11 @@ class BuildbucketV2(object):
         """Get IDs of all the builds killed by self-destructed orchestrator build.
 
         Args:
-          buildbucket_id: Buildbucket ID of the orchestrator build.
+            buildbucket_id: Buildbucket ID of the orchestrator build.
 
         Returns:
-          A list of Buildbucket IDs of the child builds that were killed by the
-          orchestrator build or None if the query was unsuccessful.
+            A list of Buildbucket IDs of the child builds that were killed by the
+            orchestrator build or None if the query was unsuccessful.
         """
         properties = "output.properties"
         try:
@@ -762,11 +768,11 @@ class BuildbucketV2(object):
         """Get all the Recipe steps/CBuildbot stages of a build.
 
         Args:
-          buildbucket_id: ID of the build in buildbucket.
+            buildbucket_id: ID of the build in buildbucket.
 
         Returns:
-          A dictionary with keys (id, name, status, last_updated,
-          start_time, finish_time).
+            A dictionary with keys (id, name, status, last_updated,
+            start_time, finish_time).
         """
         properties = "steps"
         build_with_steps = self.GetBuild(buildbucket_id, properties=properties)
@@ -782,13 +788,13 @@ class BuildbucketV2(object):
         """Retrieve the build status for build corresponding to buildbucket_id.
 
         Args:
-          buildbucket_id: Buildbucket ID of the build to be queried for.
+            buildbucket_id: Buildbucket ID of the build to be queried for.
 
         Returns:
-          A Dictionary with keys (build_config, start_time, finish_time, status,
-          platform_version, full_version, milestone_version, critical,
-          buildbucket_id, summary, master_build_id, bot_hostname,
-          deadline, build_type, metadata_url, toolchain_url, branch).
+            A Dictionary with keys (build_config, start_time, finish_time, status,
+            platform_version, full_version, milestone_version, critical,
+            buildbucket_id, summary, master_build_id, bot_hostname,
+            deadline, build_type, metadata_url, toolchain_url, branch).
         """
         CIDB_TO_BB_PROPERTIES_MAP = {
             # A mapping of CIDB property names to their Buildbucket v2 equivalents.
@@ -895,13 +901,13 @@ class BuildbucketV2(object):
         """SearchBuild RPC call wrapping function.
 
         Args:
-          build_predicate: Message containing builder, gerrit_changes and/or
+            build_predicate: Message containing builder, gerrit_changes and/or
             git_commits among other things.
-          fields: A FieldMask instance to dictate the format of the response.
-          page_size: Number of builds to return.
+            fields: A FieldMask instance to dictate the format of the response.
+            page_size: Number of builds to return.
 
         Returns:
-          A SearchBuildResponse instance corresponding to the query.
+            A SearchBuildResponse instance corresponding to the query.
         """
         assert isinstance(build_predicate, builds_service_pb2.BuildPredicate)
         if fields is not None:
@@ -936,25 +942,25 @@ class BuildbucketV2(object):
         restrict the result to older builds.
 
         Args:
-          build_config: config name of the build to get history.
-          num_results: Number of builds to search back. Set this to
-              CIDBConnection.NUM_RESULTS_NO_LIMIT to request no limit on the number
-              of results.
-          ignore_build_id: (Optional) Ignore a specific build. This is most useful
-              to ignore the current build when querying recent past builds from a
-              build in flight.
-          start_date: (Optional, type: datetime.date) Get builds that occured on or
-              after this date.
-          end_date: (Optional, type:datetime.date) Get builds that occured on or
-              before this date.
-          branch: (Optional) Return only results for this branch.
-          start_build_id: (Optional) The oldest build for which data should
-              be retrieved.
+            build_config: config name of the build to get history.
+            num_results: Number of builds to search back. Set this to
+                CIDBConnection.NUM_RESULTS_NO_LIMIT to request no limit on the
+                number of results.
+            ignore_build_id: (Optional) Ignore a specific build. This is most
+                useful to ignore the current build when querying recent past
+                builds from a build in flight.
+            start_date: (Optional, type: datetime.date) Get builds that occurred
+                on or after this date.
+            end_date: (Optional, type:datetime.date) Get builds that occurred on
+                or before this date.
+            branch: (Optional) Return only results for this branch.
+            start_build_id: (Optional) The oldest build for which data should
+                be retrieved.
 
         Returns:
-          A sorted list of dicts containing up to |number| dictionaries for
-          build statuses in descending order (if |reverse| is True, ascending
-          order).
+            A sorted list of dicts containing up to |number| dictionaries for
+            build statuses in descending order (if |reverse| is True, ascending
+            order).
         """
         builder = builder_common_pb2.BuilderID(
             project="chromeos", bucket="general"
@@ -989,11 +995,12 @@ class BuildbucketV2(object):
         """Retrieve statuses of all the child builds.
 
         Args:
-          buildbucket_id: buildbucket_id of the orchestrator build.
+            buildbucket_id: buildbucket_id of the orchestrator build.
 
         Returns:
-          A list of dictionary corresponding to each child build with keys like
-          start_time, end_time, status, version info, critical, build_config, etc.
+            A list of dictionary corresponding to each child build with keys
+            like start_time, end_time, status, version info, critical,
+            build_config, etc.
         """
         builder = builder_common_pb2.BuilderID(
             project="chromeos", bucket="general"
@@ -1014,12 +1021,12 @@ class BuildbucketV2(object):
         """Report on the failed stages of a build.
 
         Args:
-          buildbucket_id: buildbucket_id of the build to query for.
+            buildbucket_id: buildbucket_id of the build to query for.
 
         Returns:
-          A list of dictionary corresponding to each failed stage with following
-          keys - stage_name, stage_status, buildbucket_id, build_config,
-          build_status, important.
+            A list of dictionary corresponding to each failed stage with
+            following keys - stage_name, stage_status, buildbucket_id,
+            build_config, build_status, important.
         """
         build_status = self.GetBuildStatus(buildbucket_id)
         stage_status = self.GetBuildStages(buildbucket_id)

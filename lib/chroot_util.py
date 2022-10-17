@@ -70,16 +70,16 @@ def Emerge(
     """Emerge the specified |packages|.
 
     Args:
-      packages: List of packages to emerge.
-      sysroot: Path to the sysroot in which to emerge.
-      with_deps: Whether to include dependencies.
-      rebuild_deps: Whether to rebuild dependencies.
-      use_binary: Whether to use binary packages.
-      jobs: Number of jobs to run in parallel.
-      debug_output: Emit debug level output.
+        packages: List of packages to emerge.
+        sysroot: Path to the sysroot in which to emerge.
+        with_deps: Whether to include dependencies.
+        rebuild_deps: Whether to rebuild dependencies.
+        use_binary: Whether to use binary packages.
+        jobs: Number of jobs to run in parallel.
+        debug_output: Emit debug level output.
 
     Raises:
-      cros_build_lib.RunCommandError: If emerge returns an error.
+        cros_build_lib.RunCommandError: If emerge returns an error.
     """
     cros_build_lib.AssertInsideChroot()
     if not packages:
@@ -151,10 +151,10 @@ def SetupBoard(
     otherwise instructed.
 
     Args:
-      board: Board name to set up a sysroot for.
-      update_chroot: Whether we should update the chroot first.
-      update_host_packages: Whether to update host packages in the chroot.
-      use_binary: If okay to use binary packages during the update.
+        board: Board name to set up a sysroot for.
+        update_chroot: Whether we should update the chroot first.
+        update_host_packages: Whether to update host packages in the chroot.
+        use_binary: If okay to use binary packages during the update.
     """
     if update_chroot:
         UpdateChroot(board=board, update_host_packages=update_host_packages)
@@ -184,18 +184,19 @@ def RunUnittests(
     """Runs the unit tests for |packages|.
 
     Args:
-      sysroot: Path to the sysroot to build the tests in.
-      packages: List of packages to test.
-      extra_env: Python dictionary containing the extra environment variable to
-        pass to the build command.
-      keep_going: Tolerent package failure from parallel_emerge.
-      verbose: If True, show the output from emerge, even when the tests succeed.
-      retries: Number of time we should retry a failed packages. If None, use
-        parallel_emerge's default.
-      jobs: Max number of parallel jobs. (optional)
+        sysroot: Path to the sysroot to build the tests in.
+        packages: List of packages to test.
+        extra_env: Python dictionary containing the extra environment variable
+            to pass to the build command.
+        keep_going: Tolerent package failure from parallel_emerge.
+        verbose: If True, show the output from emerge, even when the tests
+            succeed.
+        retries: Number of time we should retry a failed packages. If None, use
+            parallel_emerge's default.
+        jobs: Max number of parallel jobs. (optional)
 
     Raises:
-      RunCommandError if the unit tests failed.
+        RunCommandError if the unit tests failed.
     """
     env = extra_env.copy() if extra_env else {}
     env.update(
@@ -233,15 +234,15 @@ def TempDirInChroot(**kwargs):
     """A context to create and use a tempdir inside the chroot.
 
     Args:
-      prefix: See tempfile.mkdtemp documentation.
-      base_dir: The directory to place the temporary directory in the chroot.
-      set_global: See osutils.TempDir documentation.
-      delete: See osutils.TempDir documentation.
-      sudo_rm: See osutils.TempDir documentation.
+        prefix: See tempfile.mkdtemp documentation.
+        base_dir: The directory to place the temporary directory in the chroot.
+        set_global: See osutils.TempDir documentation.
+        delete: See osutils.TempDir documentation.
+        sudo_rm: See osutils.TempDir documentation.
 
     Yields:
-      A host path (not chroot path) to a tempdir inside the chroot. This tempdir
-      is cleaned up when exiting the context.
+        A host path (not chroot path) to a tempdir inside the chroot. This tempdir
+        is cleaned up when exiting the context.
     """
     base_dir = kwargs.pop("base_dir", "/tmp")
     kwargs["base_dir"] = path_util.FromChrootPath(base_dir)

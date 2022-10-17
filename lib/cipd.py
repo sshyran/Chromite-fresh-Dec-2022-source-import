@@ -203,7 +203,7 @@ def InstallPackage(
         service_account_json: The path of the service account credentials.
 
     Returns:
-      The path of the package.
+        The path of the package.
     """
     if not destination:
         # GetCacheDir does a non-trivial amount of work,

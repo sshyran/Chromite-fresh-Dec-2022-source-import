@@ -33,11 +33,11 @@ def GetFailedMessages(statuses, failing):
     """Gathers the BuildFailureMessages from the |failing| builders.
 
     Args:
-      statuses: A dict mapping build config names to their BuilderStatus.
-      failing: Names of the builders that failed.
+        statuses: A dict mapping build config names to their BuilderStatus.
+        failing: Names of the builders that failed.
 
     Returns:
-      A list of build_failure_message.BuildFailureMessage or NoneType objects.
+        A list of build_failure_message.BuildFailureMessage or NoneType objects.
     """
     return [statuses[x].message for x in failing]
 
@@ -46,11 +46,11 @@ def GetBuildersWithNoneMessages(statuses, failing):
     """Returns a list of failed builders with NoneType failure message.
 
     Args:
-      statuses: A dict mapping build config names to their BuilderStatus.
-      failing: Names of the builders that failed.
+        statuses: A dict mapping build config names to their BuilderStatus.
+        failing: Names of the builders that failed.
 
     Returns:
-      A list of builder names.
+        A list of builder names.
     """
     return [x for x in failing if statuses[x].message is None]
 
@@ -59,12 +59,13 @@ def GetSlavesAbortedBySelfDestructedMaster(master_build_identifier, buildstore):
     """Get the build configs of the slaves aborted by self-destruction.
 
     Args:
-      master_build_identifier: The BuildIdentifier instance of the master build.
-      buildstore: A BuildStore instance to make DB calls.
+        master_build_identifier: The BuildIdentifier instance of the master
+            build.
+        buildstore: A BuildStore instance to make DB calls.
 
     Returns:
-      A set of build configs of the slaves recorded in CIDB. An empty set if no
-      db connection created.
+        A set of build configs of the slaves recorded in CIDB. An empty set if
+        no db connection created.
     """
     if not buildstore.AreClientsReady():
         return set()
@@ -92,12 +93,12 @@ class BuilderStatus(object):
         """Constructor for BuilderStatus.
 
         Args:
-          status: Status string (should be one of BUILDER_STATUS_FAILED,
-                  BUILDER_STATUS_PASSED, BUILDER_STATUS_INFLIGHT, or
-                  BUILDER_STATUS_MISSING).
-          message: A build_failure_message.BuildFailureMessage object with details
-                   of builder failure. Or, None.
-          dashboard_url: Optional url linking to builder dashboard for this build.
+            status: Status string (should be one of BUILDER_STATUS_FAILED,
+                BUILDER_STATUS_PASSED, BUILDER_STATUS_INFLIGHT, or
+                BUILDER_STATUS_MISSING).
+            message: A build_failure_message.BuildFailureMessage object with
+                details of builder failure. Or, None.
+            dashboard_url: Optional url linking to builder dashboard for this build.
         """
         self.status = status
         self.message = message
@@ -130,7 +131,7 @@ class BuilderStatus(object):
         """Return the appropriate status constant for a completed build.
 
         Args:
-          success: Whether the build was successful or not.
+            success: Whether the build was successful or not.
         """
         if success:
             return constants.BUILDER_STATUS_PASSED
@@ -141,9 +142,9 @@ class BuilderStatus(object):
         """Returns a flat json-able representation of this builder status.
 
         Returns:
-          A dictionary of the form {'status' : status, 'message' : message,
-          'dashboard_url' : dashboard_url} where all values are guaranteed
-          to be strings. If dashboard_url is None, the key will be excluded.
+            A dictionary of the form {'status' : status, 'message' : message,
+            'dashboard_url' : dashboard_url} where all values are guaranteed
+            to be strings. If dashboard_url is None, the key will be excluded.
         """
         flat_dict = {
             "status": str(self.status),
@@ -182,15 +183,16 @@ class BuilderStatusManager(object):
         """Creates a message summarizing the failures.
 
         Args:
-          build_config: Build config name (string) of a slave build.
-          overlays: The overlays used for the build.
-          dashboard_url: The URL of the build.
-          failure_messages: A list of stage failure messages (instances of
-            StageFailureMessage or its sub-classes) of the given build.
-          aborted_by_self_destruction: Whether the build was canceled by master.
+            build_config: Build config name (string) of a slave build.
+            overlays: The overlays used for the build.
+            dashboard_url: The URL of the build.
+            failure_messages: A list of stage failure messages (instances of
+                StageFailureMessage or its sub-classes) of the given build.
+            aborted_by_self_destruction: Whether the build was canceled by
+                master.
 
         Returns:
-          A build_failure_message.BuildFailureMessage object.
+            A build_failure_message.BuildFailureMessage object.
         """
         internal = overlays in [
             constants.PRIVATE_OVERLAYS,
@@ -223,14 +225,15 @@ class BuilderStatusManager(object):
         """Check BuildStore for whether a specified build was aborted by master.
 
         Args:
-          buildstore: A BuildStore instance to make DB calls.
-          buildbucket_id: The buildbucket ID (int) of the build to get status of
-          master_build_identifier: The build ID (int) of the master build which may
-            have aborted it.
+            buildstore: A BuildStore instance to make DB calls.
+            buildbucket_id: The buildbucket ID (int) of the build to get status
+                of.
+            master_build_identifier: The build ID (int) of the master build
+                which may have aborted it.
 
         Retuns:
-          A boolean for whether the build was canceled by master during
-          self-destruction.
+            A boolean for whether the build was canceled by master during
+            self-destruction.
         """
         if (
             master_build_identifier is None
@@ -276,17 +279,18 @@ class SlaveBuilderStatus(object):
         """Create an instance of SlaveBuilderStatus for a given master build.
 
         Args:
-          master_build_identifier: The build_identifier of the master build.
-          buildstore: A BuildStore instance to make DB calls with.
-          config: Instance of config_lib.BuildConfig. Config dict of this build.
-          metadata: Instance of metadata_lib.CBuildbotMetadata. Metadata of this
-                    build.
-          buildbucket_client: Instance of buildbucket_v2.BuildbucketV2 client.
-          builders_array: List of the expected and important slave builds.
-          dry_run: Boolean indicating whether it's a dry run. Default to True.
-          exclude_experimental: Whether to exclude the builds which are important in
-            the config but are marked as experimental in the tree status. Default to
-            True.
+            master_build_identifier: The build_identifier of the master build.
+            buildstore: A BuildStore instance to make DB calls with.
+            config: Instance of config_lib.BuildConfig. Config dict of this
+                build.
+            metadata: Instance of metadata_lib.CBuildbotMetadata. Metadata of
+                this build.
+            buildbucket_client: Instance of buildbucket_v2.BuildbucketV2 client.
+            builders_array: List of the expected and important slave builds.
+            dry_run: Boolean indicating whether it's a dry run. Default to True.
+            exclude_experimental: Whether to exclude the builds which are
+                important in the config but are marked as experimental in the
+                tree status. Default to True.
         """
         self.master_build_identifier = master_build_identifier
         self.master_build_id = master_build_identifier.cidb_id
@@ -309,13 +313,13 @@ class SlaveBuilderStatus(object):
         """Get a dict mapping slave builds to their build failures.
 
         Args:
-          buildbucket_info_dict: A dict mapping slave build config names
-            (strings) to their BuildbucketInfos.
+            buildbucket_info_dict: A dict mapping slave build config names
+                (strings) to their BuildbucketInfos.
 
         Returns:
-          A dict mapping the slave build config names (strings) to stage failure
-          messages (See return type of
-          FailureMessageManager.ConstructStageFailureMessages)
+            A dict mapping the slave build config names (strings) to stage
+            failure messages (See return type of
+            FailureMessageManager.ConstructStageFailureMessages)
         """
         slave_failures_dict = {}
 
@@ -349,12 +353,12 @@ class SlaveBuilderStatus(object):
         """Get slaves aborted by self-destruction of the master.
 
         Args:
-          cidb_info_dict: A dict mapping slave build config names (strings) to their
-            cidb infos (in the format of CIDBStatusInfo).
+            cidb_info_dict: A dict mapping slave build config names (strings) to
+                their cidb infos (in the format of CIDBStatusInfo).
 
         Returns:
-          A set of build config names (strings) of slaves aborted by
-          self-destruction.
+            A set of build config names (strings) of slaves aborted by
+            self-destruction.
         """
         return set(
             build_config
@@ -394,14 +398,15 @@ class SlaveBuilderStatus(object):
         """Get status of a given build.
 
         Args:
-          build_config: Build config name (string) of a slave build.
-          cidb_info_dict: A dict mapping slave build config names (strings) to their
-            cidb infos (in the format of CIDBStatusInfo).
-          buildbucket_info_dict: A dict mapping slave build config names (strings)
-            to their Buildbucket infos (in the format of BuildbucketInfo).
+            build_config: Build config name (string) of a slave build.
+            cidb_info_dict: A dict mapping slave build config names (strings) to
+                their cidb infos (in the format of CIDBStatusInfo).
+            buildbucket_info_dict: A dict mapping slave build config names
+                (strings) to their Buildbucket infos (in the format of
+                BuildbucketInfo).
 
         Returns:
-          Builder status of the given build.
+            Builder status of the given build.
         """
         cidb_info = cidb_info_dict.get(build_config)
         if cidb_info is None:
@@ -430,15 +435,16 @@ class SlaveBuilderStatus(object):
         """Get dashboard url of a given build.
 
         Args:
-          build_config: Build config name (string) of a slave build.
-          cidb_info_dict: A dict mapping slave build config names (strings) to their
-            cidb infos (in the format of CIDBStatusInfo).
-          buildbucket_info_dict: A dict mapping slave build config names (strings)
-            to their Buildbucket infos (in the format of BuildbucketInfo).
+            build_config: Build config name (string) of a slave build.
+            cidb_info_dict: A dict mapping slave build config names (strings) to
+                their cidb infos (in the format of CIDBStatusInfo).
+            buildbucket_info_dict: A dict mapping slave build config names
+                (strings) to their Buildbucket infos (in the format of
+                BuildbucketInfo).
 
         Returns:
-          Dashboard url of the given build. None if no entry found for this given
-          build in CIDB and buildbucket_info_dict is None.
+            Dashboard url of the given build. None if no entry found for this
+            given build in CIDB and buildbucket_info_dict is None.
         """
         if buildbucket_info_dict is not None:
             # If no entry found in CIDB, get the buildbot url from Buildbucket.
@@ -455,17 +461,19 @@ class SlaveBuilderStatus(object):
         """Get build_failure_message.BuildFailureMessage of a given build.
 
         Args:
-          build_config: Build config name (string) of a slave build.
-          status: The status of the build (See return type of self._GetStatus())
-          dashboard_url: The URL of the build.
-          slave_failures_dict: A dict mapping the slave build config names (strings)
-            to stage failure messages (See return type of _GetSlaveFailures)
-          aborted_slaves: A set of build config names (strings) of slaves aborted by
-            self-destruction.
+            build_config: Build config name (string) of a slave build.
+            status: The status of the build (See return type of
+                self._GetStatus()).
+            dashboard_url: The URL of the build.
+            slave_failures_dict: A dict mapping the slave build config names
+                (strings) to stage failure messages (See return type of
+                _GetSlaveFailures).
+            aborted_slaves: A set of build config names (strings) of slaves
+                aborted by self-destruction.
 
         Returns:
-          A build_failure_message.BuildFailureMessage object if the status is
-          constants.BUILDER_STATUS_FAILED; else, None.
+            A build_failure_message.BuildFailureMessage object if the status is
+            constants.BUILDER_STATUS_FAILED; else, None.
         """
         site_config = config_lib.GetConfig()
         if status == constants.BUILDER_STATUS_FAILED:
@@ -484,10 +492,10 @@ class SlaveBuilderStatus(object):
         """Get BuilderStatus for a given build.
 
         Args:
-          build_config: Build config name (string) of a slave build.
+            build_config: Build config name (string) of a slave build.
 
         Returns:
-          An instance of BuilderStatus of the given build.
+            An instance of BuilderStatus of the given build.
         """
         status = self._GetStatus(
             build_config, self.cidb_info_dict, self.buildbucket_info_dict
@@ -515,15 +523,16 @@ class SlaveBuilderStatus(object):
         result from Buildbucket and return a updated buildbucket_info_dict.
 
         Args:
-          buildbucket_client: Instance of buildbucket_v2.BuildbucketV2 client.
-          scheduled_buildbucket_info_dict: A dict mapping scheduled slave build
-            config name to its buildbucket information in the format of
-            BuildbucketInfo (see buildbucket.GetBuildInfoDict for details).
+            buildbucket_client: Instance of buildbucket_v2.BuildbucketV2 client.
+            scheduled_buildbucket_info_dict: A dict mapping scheduled slave
+                build config name to its buildbucket information in the format
+                of BuildbucketInfo (see buildbucket.GetBuildInfoDict for
+                details).
 
         Returns:
-          A dict mapping all scheduled slave build config names to their
-          BuildbucketInfos (The BuildbucketInfo of the most recently retried one of
-          there're multiple retries for a slave build config).
+            A dict mapping all scheduled slave build config names to their
+            BuildbucketInfos (The BuildbucketInfo of the most recently retried
+            one of their multiple retries for a slave build config).
         """
         # TODO(nxia): Consider replacing this with a more elaborate fix.
         if buildbucket_client is None:
@@ -567,17 +576,17 @@ class SlaveBuilderStatus(object):
         """Get build status information from CIDB for all slaves.
 
         Args:
-          buildstore: An instance of buildstore.BuildStore.
-          master_build_identifier: The BuildIdentifier of the master build.
-          all_buildbucket_info_dict: A dict mapping all build config names to their
-            information fetched from Buildbucket server (in the format of
-            BuildbucketInfo).
+            buildstore: An instance of buildstore.BuildStore.
+            master_build_identifier: The BuildIdentifier of the master build.
+            all_buildbucket_info_dict: A dict mapping all build config names to
+                their information fetched from Buildbucket server (in the format
+                of BuildbucketInfo).
 
         Returns:
-          A dict mapping build config names to their cidb infos (in the format of
-          CIDBStatusInfo). If all_buildbucket_info_dict is not None, the returned
-          map only contains slave builds which are associated with buildbucket_ids
-          recorded in all_buildbucket_info_dict.
+            A dict mapping build config names to their cidb infos (in the format
+            of CIDBStatusInfo). If all_buildbucket_info_dict is not None, the
+            returned map only contains slave builds which are associated with
+            buildbucket_ids recorded in all_buildbucket_info_dict.
         """
         # TODO(buildstore): Make sure buildstore is BuildStore, not CIDBConnection.
         all_cidb_status_dict = {}
@@ -629,21 +638,23 @@ class BuilderStatusesFetcher(object):
         """Initialize BuilderStatusesFetcher.
 
         Args:
-          build_identifier: Build id of the build.
-          buildstore: A BuildStore instance to make DB calls.
-          success: Whether the build succeeded so far.
-          message: The failure message (see return type of
-            generic_stages.GetBuildFailureMessage) of the build.
-          config: Instance of config_lib.BuildConfig. Config dict of this build.
-          metadata: Instance of metadata_lib.CBuildbotMetadata. Metadata of this
-            build.
-          buildbucket_client: Instance of buildbucket_v2.BuildbucketV2 client.
-          builders_array: List of the expected and slave builds, it also contains
-            the builds marked as experimental in the tree status. Default to None.
-          exclude_experimental: Whether to exclude the builds which are important in
-            the config but are marked as experimental in the tree status. Default to
-            True.
-          dry_run: Boolean indicating whether it's a dry run. Default to True.
+            build_identifier: Build id of the build.
+            buildstore: A BuildStore instance to make DB calls.
+            success: Whether the build succeeded so far.
+            message: The failure message (see return type of
+                generic_stages.GetBuildFailureMessage) of the build.
+            config: Instance of config_lib.BuildConfig. Config dict of this
+                build.
+            metadata: Instance of metadata_lib.CBuildbotMetadata. Metadata of
+                this build.
+            buildbucket_client: Instance of buildbucket_v2.BuildbucketV2 client.
+            builders_array: List of the expected and slave builds, it also
+                contains the builds marked as experimental in the tree status.
+                Default to None.
+            exclude_experimental: Whether to exclude the builds which are
+                important in the config but are marked as experimental in the
+                tree status. Default to True.
+            dry_run: Boolean indicating whether it's a dry run. Default to True.
         """
         self.build_identifier = build_identifier
         self.build_id = build_identifier.cidb_id
@@ -668,7 +679,7 @@ class BuilderStatusesFetcher(object):
         """Fetch the BuilderStatus of the local build.
 
         Returns:
-          A dict mapping the bot_id of the build to its builder_status.
+            A dict mapping the bot_id of the build to its builder_status.
         """
         status = BuilderStatus.GetCompletedStatus(self.success)
         status_obj = BuilderStatus(status, self.message)
@@ -678,9 +689,9 @@ class BuilderStatusesFetcher(object):
         """Fetch the BuilderStatus of the slaves if the local build.
 
         Returns:
-          A dict mapping build configs (strings) to their BuilderStatus instances.
-          It contains the statuses for builders marked as experimental in the tree
-          status.
+            A dict mapping build configs (strings) to their BuilderStatus
+            instances. It contains the statuses for builders marked as
+            experimental in the tree status.
         """
         if not self.builders_array:
             return {}
@@ -722,10 +733,11 @@ class BuilderStatusesFetcher(object):
         """Get BuilderStatus of a given build and its slave builds (if any).
 
         Returns:
-          A pair of dict mapping build names (strings) to their BuilderStatus
-          instances. important_statuses only contains builds which are important and
-          not marked experimental in the tree status. experimental_statuses contains
-          builds marked as experimental in the tree status.
+            A pair of dict mapping build names (strings) to their BuilderStatusS
+            instances. important_statuses only contains builds which are
+            important and not marked experimental in the tree status.
+            experimental_statuses contains builds marked as experimental in the
+            tree status.
         """
         statuses = self._FetchLocalBuilderStatus()
 
@@ -762,10 +774,10 @@ class BuilderStatusesFetcher(object):
         """Get the names of builds which are failed.
 
         Args:
-          statuses: A dict mapping build config names to their BuilderStatus.
+            statuses: A dict mapping build config names to their BuilderStatus.
 
         Returns:
-          A set of failed build config names.
+            A set of failed build config names.
         """
         return set(
             builder for builder, status in statuses.items() if status.Failed()
@@ -776,10 +788,10 @@ class BuilderStatusesFetcher(object):
         """Get the names of builds which are inflight.
 
         Args:
-          statuses: A dict mapping build config names to their BuilderStatus.
+            statuses: A dict mapping build config names to their BuilderStatus.
 
         Returns:
-          A set of inflight build config names.
+            A set of inflight build config names.
         """
         return set(
             builder for builder, status in statuses.items() if status.Inflight()
@@ -790,10 +802,10 @@ class BuilderStatusesFetcher(object):
         """Get the names of builds which are missing.
 
         Args:
-          statuses: A dict mapping build config names to their BuilderStatus.
+            statuses: A dict mapping build config names to their BuilderStatus.
 
         Returns:
-          A set of missing build config names.
+            A set of missing build config names.
         """
         return set(
             builder for builder, status in statuses.items() if status.Missing()

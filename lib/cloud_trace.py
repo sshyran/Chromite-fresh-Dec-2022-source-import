@@ -29,7 +29,7 @@ def GetSpanLogFilePath(span):
     """Gets the path to write a span to.
 
     Args:
-      span: The span to write.
+        span: The span to write.
     """
     return SPANS_LOG.format(pid=os.getpid(), span_id=span.spanId)
 
@@ -38,7 +38,7 @@ def LogSpan(span):
     """Serializes and logs a Span to a file.
 
     Args:
-      span: A Span instance to serialize.
+        span: A Span instance to serialize.
     """
     _RecordSpanMetrics(span)
     try:
@@ -72,7 +72,7 @@ def _RecordSpanMetrics(span):
     """Increments the count of spans logged.
 
     Args:
-      span: The span to record.
+        span: The span to record.
     """
     m = metrics.Counter(
         _SPAN_COUNT_METRIC,
@@ -102,14 +102,14 @@ class Span(collections.abc.Mapping):
         """Creates a Span object.
 
         Args:
-          name: The name of the span
-          spanId: (optional) A 64-bit number as a string. If not provided, it will
-              be generated randomly with .GenerateSpanId().
-          labels: (optional) a dict<string, string> of key/values
-          traceId: (optional) A 32 hex digit string referring to the trace
-              containing this span. If not provided, a new trace will be created
-              with a random id.
-          parentSpanId: (optional) The spanId of the parent.
+            name: The name of the span
+            spanId: (optional) A 64-bit number as a string. If not provided, it
+                will be generated randomly with .GenerateSpanId().
+            labels: (optional) a dict<string, string> of key/values
+            traceId: (optional) A 32 hex digit string referring to the trace
+                containing this span. If not provided, a new trace will be
+                created with a random id.
+            parentSpanId: (optional) The spanId of the parent.
         """
         # Visible attributes
         self.name = name
@@ -146,7 +146,7 @@ class Span(collections.abc.Mapping):
         """Exits the span context.
 
         Side-effect:
-          Record the end Timestamp.
+            Record the end Timestamp.
         """
         end = timestamp_pb2.Timestamp()
         end.GetCurrentTime()
@@ -207,7 +207,8 @@ class SpanStack(object):
         labels: (optional) a dict<string, string> of key/values to attach to
             each Span created, or None.
         enabled: (optional) a bool indicating whether we should log the spans
-            to a file for later uploading by the cloud trace log consumer daemon.
+            to a file for later uploading by the cloud trace log consumer
+            daemon.
         """
         self.traceId = traceId
         self.spans = []
@@ -231,8 +232,8 @@ class SpanStack(object):
         """Creates a span instance, setting certain defaults.
 
         Args:
-          name: The name of the span
-          **kwargs: The keyword arguments to configure the span with.
+            name: The name of the span
+            **kwargs: The keyword arguments to configure the span with.
         """
         kwargs.setdefault("traceId", self.traceId)
         kwargs.setdefault("labels", self.labels)
@@ -247,15 +248,15 @@ class SpanStack(object):
         """Enter a new Span context contained within the top Span of the stack.
 
         Args:
-          name: The name of the span to enter
-          **kwargs: The kwargs to construct the span with.
+            name: The name of the span to enter
+            **kwargs: The kwargs to construct the span with.
 
         Side effect:
-          Appends the new span object to |spans|, and yields span while in its
-          context. Pops the span object when exiting the context.
+            Appends the new span object to |spans|, and yields span while in its
+            context. Pops the span object when exiting the context.
 
         Returns:
-          A contextmanager whose __enter__() returns the new Span.
+            A contextmanager whose __enter__() returns the new Span.
         """
         span = self._CreateSpan(name, **kwargs)
         old_span_id, self.last_span_id = self.last_span_id, span.spanId
@@ -277,11 +278,11 @@ class SpanStack(object):
         """A decorator equivalent of 'with span_stack.Span(...)'
 
         Args:
-          *span_args: *args to use with the .Span
-          **span_kwargs: **kwargs to use with the .Span
+            *span_args: *args to use with the .Span
+            **span_kwargs: **kwargs to use with the .Span
 
         Returns:
-          A decorator to wrap the body of a function in a span block.
+            A decorator to wrap the body of a function in a span block.
         """
 
         def SpannedDecorator(f):
@@ -302,18 +303,19 @@ class SpanStack(object):
         From the cloud trace doc explaining this (
         https://cloud.google.com/trace/docs/support?hl=bg)
 
-          'X-Cloud-Trace-Context: TRACE_ID/SPAN_ID;o=TRACE_TRUE'
-          Where:
-            - TRACE_ID is a 32-character hex value representing a 128-bit number.
-            It should be unique between your requests, unless you intentionally
-            want to bundle the requests together. You can use UUIDs.
+            'X-Cloud-Trace-Context: TRACE_ID/SPAN_ID;o=TRACE_TRUE'
+            Where:
+            - TRACE_ID is a 32-character hex value representing a 128-bit
+            number. It should be unique between your requests, unless you
+            intentionally want to bundle the requests together. You can use
+            UUIDs.
             - SPAN_ID should be 0 for the first span in your trace. For
             subsequent requests, set SPAN_ID to the span ID of the parent
             request. See the description of TraceSpan (REST, RPC) for more
             information about nested traces.
             - TRACE_TRUE must be 1 to trace this request. Specify 0 to not trace
             the request. For example, to force a trace with cURL:
-              curl 'http://www.example.com' --header 'X-Cloud-Trace-Context:
+                curl 'http://www.example.com' --header 'X-Cloud-Trace-Context:
                 105445aa7843bc8bf206b120001000/0;o=1'
         """
         if not self.traceId:
@@ -351,13 +353,13 @@ class SpanStack(object):
         See _GetCloudTraceContextHeader.
 
         Args:
-          context: The context variable, either from X-Cloud-Trace-Context
-              or from the CLOUD_TRACE_CONTEXT environment variable.
+            context: The context variable, either from X-Cloud-Trace-Context
+                or from the CLOUD_TRACE_CONTEXT environment variable.
 
         Returns:
-          A dictionary, which if the context string matches
-          CLOUD_TRACE_CONTEXT_PATTERN, contains the matched groups. If not matched,
-          returns an empty dictionary.
+            A dictionary, which if the context string matches
+            CLOUD_TRACE_CONTEXT_PATTERN, contains the matched groups. If not
+            matched, returns an empty dictionary.
         """
         m = SpanStack.CLOUD_TRACE_CONTEXT_PATTERN.match(context)
         if m:
