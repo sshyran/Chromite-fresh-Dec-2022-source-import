@@ -9,7 +9,7 @@ import logging
 import os
 from pathlib import Path
 import pprint
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from chromite.lib import osutils
 
@@ -99,7 +99,7 @@ def _ExtractLlvmCoverageData(coverage_json: Dict) -> List:
 
 def _GenerateZeroCoverageLLVMForFile(
     file_path: str, src_prefix_path: str, exclude_line_prefixes: Tuple[str]
-) -> Dict:
+) -> Optional[Dict]:
     """Generates LLVM json formatted zero % coverage for the given file.
 
     Method to identify all the instrumented lines within a file and generate
@@ -229,7 +229,7 @@ def _ValidatePathMappingEntryList(data: Dict) -> None:
 
 def _CleanLlvmFileName(
     filename: str, path_mapping_list: List, source_root: str
-) -> str:
+) -> Optional[str]:
     """Clean LLVM generated file name.
 
     Convert the destination work directory paths into
@@ -268,8 +268,8 @@ def _CleanLlvmFileName(
 
 
 def CleanLlvmFileNames(
-    coverage_json: Dict, source_root: str, path_mapping_list: Dict
-) -> Dict:
+    coverage_json: Dict, source_root: str, path_mapping_list: List
+) -> Optional[Dict]:
     """Clean LLVM generated file names.
 
     Method to convert the destination work directory paths into
@@ -306,7 +306,7 @@ def CleanLlvmFileNames(
     return CreateLlvmCoverageJson(result_coverage_data)
 
 
-def GatherPathMapping(search_directory: str) -> List:
+def GatherPathMapping(search_directory: str) -> Optional[List]:
     """Method to gather path mapping json.
 
     Walk through search_directory and read and merge all
