@@ -27,13 +27,19 @@ This will shrink the ROOT-A partition size by 10 mebibytes (1024 * 1024 * 10):
 
 import argparse
 import inspect
+import os
 import sys
+from typing import List, Union
 
 from chromite.lib import disk_layout
 
 
 def WritePartitionScript(
-    options, image_type, layout_filename, sfilename, vfilename
+    options: List[str],
+    image_type: str,
+    layout_filename: Union[str, os.PathLike],
+    sfilename: Union[str, os.PathLike],
+    vfilename: Union[str, os.PathLike],
 ):
     """Writes a shell script with functions for the base and requested layouts.
 
@@ -45,76 +51,97 @@ def WritePartitionScript(
         vfilename: Filename to write the partition variables json data to
     """
 
-    return disk_layout.WritePartitionScript(
-        options, image_type, layout_filename, sfilename, vfilename
-    )
+    return disk_layout.DiskLayout(
+        layout_filename, options.adjust_part.split()
+    ).WritePartitionScript(image_type, sfilename, vfilename)
 
 
-def GetBlockSize(_options, layout_filename):
+def GetBlockSize(
+    _options: List[str], layout_filename: Union[str, os.PathLike]
+) -> str:
     """Returns the partition table block size.
 
     Args:
-        options: Flags passed to the script
-        layout_filename: Path to partition configuration file
+        options: Flags passed to the script.
+        layout_filename: Path to partition configuration file.
 
     Returns:
-        Block size of all partitions in the layout
+        Block size of all partitions in the layout.
     """
 
-    return disk_layout.GetBlockSize(_options, layout_filename)
+    return disk_layout.DiskLayout(layout_filename).GetBlockSize()
 
 
-def GetFilesystemBlockSize(_options, layout_filename):
+def GetFilesystemBlockSize(
+    _options: List[str], layout_filename: Union[str, os.PathLike]
+) -> str:
     """Returns the filesystem block size.
 
     This is used for all partitions in the table that have filesystems.
 
     Args:
-        options: Flags passed to the script
-        layout_filename: Path to partition configuration file
+        options: Flags passed to the script.
+        layout_filename: Path to partition configuration file.
 
     Returns:
-        Block size of all filesystems in the layout
+        Block size of all filesystems in the layout.
     """
 
-    return disk_layout.GetFilesystemBlockSize(_options, layout_filename)
+    return disk_layout.DiskLayout(layout_filename).GetFilesystemBlockSize()
 
 
-def GetPartitionSize(options, image_type, layout_filename, num):
+def GetPartitionSize(
+    options: List[str],
+    image_type: str,
+    layout_filename: Union[str, os.PathLike],
+    num: str,
+) -> str:
     """Returns the partition size of a given partition for a given layout type.
 
     Args:
-        options: Flags passed to the script
-        image_type: Type of image eg base/test/dev/factory_install
-        layout_filename: Path to partition configuration file
-        num: Number of the partition you want to read from
+        options: Flags passed to the script.
+        image_type: Type of image eg base/test/dev/factory_install.
+        layout_filename: Path to partition configuration file.
+        num: Number of the partition you want to read from.
 
     Returns:
-        Size of selected partition in bytes
+        Size of selected partition in bytes.
     """
 
-    return disk_layout.GetPartitionSize(
-        options, image_type, layout_filename, num
-    )
+    return disk_layout.DiskLayout(
+        layout_filename, options.adjust_part.split()
+    ).GetPartitionSize(image_type, int(num))
 
 
-def GetFormat(options, image_type, layout_filename, num):
+def GetFormat(
+    options: List[str],
+    image_type: str,
+    layout_filename: Union[str, os.PathLike],
+    num: str,
+) -> str:
     """Returns the format of a given partition for a given layout type.
 
     Args:
-        options: Flags passed to the script
-        image_type: Type of image eg base/test/dev/factory_install
-        layout_filename: Path to partition configuration file
-        num: Number of the partition you want to read from
+        options: Flags passed to the script.
+        image_type: Type of image eg base/test/dev/factory_install.
+        layout_filename: Path to partition configuration file.
+        num: Number of the partition you want to read from.
 
     Returns:
-        Format of the selected partition's filesystem
+        Format of the selected partition's filesystem.
     """
 
-    return disk_layout.GetFormat(options, image_type, layout_filename, num)
+    return disk_layout.DiskLayout(
+        layout_filename, options.adjust_part.split()
+    ).GetFormat(image_type, int(num))
 
 
-def GetFilesystemFormat(options, image_type, layout_filename, num):
+def GetFilesystemFormat(
+    options: List[str],
+    image_type: str,
+    layout_filename: Union[str, os.PathLike],
+    num: str,
+) -> str:
     """Returns the filesystem format of a partition for a given layout type.
 
     Args:
@@ -127,182 +154,246 @@ def GetFilesystemFormat(options, image_type, layout_filename, num):
         Format of the selected partition's filesystem
     """
 
-    return disk_layout.GetFilesystemFormat(
-        options, image_type, layout_filename, num
-    )
+    return disk_layout.DiskLayout(
+        layout_filename, options.adjust_part.split()
+    ).GetFilesystemFormat(image_type, int(num))
 
 
-def GetFilesystemSize(options, image_type, layout_filename, num):
+def GetFilesystemSize(
+    options: List[str],
+    image_type: str,
+    layout_filename: Union[str, os.PathLike],
+    num: str,
+) -> int:
     """Returns the filesystem size of a given partition for a given layout type.
 
     If no filesystem size is specified, returns the partition size.
 
     Args:
-        options: Flags passed to the script
-        image_type: Type of image eg base/test/dev/factory_install
-        layout_filename: Path to partition configuration file
-        num: Number of the partition you want to read from
+        options: Flags passed to the script.
+        image_type: Type of image eg base/test/dev/factory_install.
+        layout_filename: Path to partition configuration file.
+        num: Number of the partition you want to read from.
 
     Returns:
-        Size of selected partition filesystem in bytes
+        Size of selected partition filesystem in bytes.
     """
 
-    return disk_layout.GetFilesystemSize(
-        options, image_type, layout_filename, num
-    )
+    return disk_layout.DiskLayout(
+        layout_filename, options.adjust_part.split()
+    ).GetFilesystemSize(image_type, int(num))
 
 
-def GetImageTypes(_options, layout_filename):
+def GetImageTypes(
+    _options: List[str], layout_filename: Union[str, os.PathLike]
+) -> str:
     """Returns a list of all the image types in the layout.
 
     Args:
-        options: Flags passed to the script
-        layout_filename: Path to partition configuration file
+        options: Flags passed to the script.
+        layout_filename: Path to partition configuration file.
 
     Returns:
-        List of all image types
+        List of all image types.
     """
 
-    return disk_layout.GetImageTypes(_options, layout_filename)
+    image_types = disk_layout.DiskLayout(layout_filename).GetImageTypes()
+    return " ".join(image_types)
 
 
-def GetFilesystemOptions(options, image_type, layout_filename, num):
+def GetFilesystemOptions(
+    options: List[str],
+    image_type: str,
+    layout_filename: Union[str, os.PathLike],
+    num: str,
+) -> str:
     """Returns the filesystem options of a given partition and layout type.
 
     Args:
-        options: Flags passed to the script
-        image_type: Type of image eg base/test/dev/factory_install
-        layout_filename: Path to partition configuration file
-        num: Number of the partition you want to read from
+        options: Flags passed to the script.
+        image_type: Type of image eg base/test/dev/factory_install.
+        layout_filename: Path to partition configuration file.
+        num: Number of the partition you want to read from.
 
     Returns:
-        The selected partition's filesystem options
+        The selected partition's filesystem options.
     """
 
-    return disk_layout.GetFilesystemOptions(
-        options, image_type, layout_filename, num
-    )
+    return disk_layout.DiskLayout(
+        layout_filename, options.adjust_part.split()
+    ).GetFilesystemOptions(image_type, int(num))
 
 
-def GetLabel(options, image_type, layout_filename, num):
+def GetLabel(
+    options: List[str],
+    image_type: str,
+    layout_filename: Union[str, os.PathLike],
+    num: str,
+) -> str:
     """Returns the label for a given partition.
 
     Args:
-        options: Flags passed to the script
-        image_type: Type of image eg base/test/dev/factory_install
-        layout_filename: Path to partition configuration file
-        num: Number of the partition you want to read from
+        options: Flags passed to the script.
+        image_type: Type of image eg base/test/dev/factory_install.
+        layout_filename: Path to partition configuration file.
+        num: Number of the partition you want to read from.
 
     Returns:
-        Label of selected partition, or 'UNTITLED' if none specified
+        Label of selected partition, or 'UNTITLED' if none specified.
     """
 
-    return disk_layout.GetLabel(options, image_type, layout_filename, num)
+    return disk_layout.DiskLayout(
+        layout_filename, options.adjust_part.split()
+    ).GetLabel(image_type, int(num))
 
 
-def GetNumber(options, image_type, layout_filename, label):
+def GetNumber(
+    options: List[str],
+    image_type: str,
+    layout_filename: Union[str, os.PathLike],
+    label,
+) -> int:
     """Returns the partition number of a given label.
 
     Args:
-        options: Flags passed to the script
-        image_type: Type of image eg base/test/dev/factory_install
-        layout_filename: Path to partition configuration file
-        label: Number of the partition you want to read from
+        options: Flags passed to the script.
+        image_type: Type of image eg base/test/dev/factory_install.
+        layout_filename: Path to partition configuration file.
+        label: Number of the partition you want to read from.
 
     Returns:
         The number of the partition corresponding to the label.
     """
 
-    return disk_layout.GetNumber(options, image_type, layout_filename, label)
+    return disk_layout.DiskLayout(
+        layout_filename, options.adjust_part.split()
+    ).GetNumber(image_type, label)
 
 
-def GetReservedEraseBlocks(options, image_type, layout_filename, num):
+def GetReservedEraseBlocks(
+    options: List[str],
+    image_type: str,
+    layout_filename: Union[str, os.PathLike],
+    num: str,
+) -> int:
     """Returns the number of erase blocks reserved in the partition.
 
     Args:
-        options: Flags passed to the script
-        image_type: Type of image eg base/test/dev/factory_install
-        layout_filename: Path to partition configuration file
-        num: Number of the partition you want to read from
+        options: Flags passed to the script.
+        image_type: Type of image eg base/test/dev/factory_install.
+        layout_filename: Path to partition configuration file.
+        num: Number of the partition you want to read from.
 
     Returns:
-        Number of reserved erase blocks
+        Number of reserved erase blocks.
     """
 
-    return disk_layout.GetReservedEraseBlocks(
-        options, image_type, layout_filename, num
-    )
+    return disk_layout.DiskLayout(
+        layout_filename, options.adjust_part.split()
+    ).GetReservedEraseBlocks(image_type, int(num))
 
 
-def GetType(options, image_type, layout_filename, num):
+def GetType(
+    options: List[str],
+    image_type: str,
+    layout_filename: Union[str, os.PathLike],
+    num: str,
+) -> str:
     """Returns the type of a given partition for a given layout.
 
     Args:
-        options: Flags passed to the script
-        image_type: Type of image eg base/test/dev/factory_install
-        layout_filename: Path to partition configuration file
-        num: Number of the partition you want to read from
+        options: Flags passed to the script.
+        image_type: Type of image eg base/test/dev/factory_install.
+        layout_filename: Path to partition configuration file.
+        num: Number of the partition you want to read from.
 
     Returns:
         Type of the specified partition.
     """
 
-    return disk_layout.GetType(options, image_type, layout_filename, num)
+    return disk_layout.DiskLayout(
+        layout_filename, options.adjust_part.split()
+    ).GetType(image_type, int(num))
 
 
-def GetPartitions(options, image_type, layout_filename):
+def GetPartitions(
+    options: List[str],
+    image_type: str,
+    layout_filename: Union[str, os.PathLike],
+) -> str:
     """Returns the partition numbers for the image_type.
 
     Args:
-        options: Flags passed to the script
-        image_type: Type of image eg base/test/dev/factory_install
-        layout_filename: Path to partition configuration file
+        options: Flags passed to the script.
+        image_type: Type of image eg base/test/dev/factory_install.
+        layout_filename: Path to partition configuration file.
 
     Returns:
         A space delimited string of partition numbers.
     """
 
-    return disk_layout.GetPartitions(options, image_type, layout_filename)
+    return disk_layout.DiskLayout(
+        layout_filename, options.adjust_part.split()
+    ).GetPartitions(image_type)
 
 
-def GetUUID(options, image_type, layout_filename, num):
+def GetUUID(
+    options: List[str],
+    image_type: str,
+    layout_filename: Union[str, os.PathLike],
+    num: str,
+) -> str:
     """Returns the filesystem UUID of a given partition for a given layout type.
 
     Args:
-        options: Flags passed to the script
-        image_type: Type of image eg base/test/dev/factory_install
-        layout_filename: Path to partition configuration file
-        num: Number of the partition you want to read from
+        options: Flags passed to the script.
+        image_type: Type of image eg base/test/dev/factory_install.
+        layout_filename: Path to partition configuration file.
+        num: Number of the partition you want to read from.
 
     Returns:
         UUID of specified partition. Defaults to random if not set.
     """
 
-    return disk_layout.GetUUID(options, image_type, layout_filename, num)
+    return disk_layout.DiskLayout(
+        layout_filename, options.adjust_part.split()
+    ).GetUUID(image_type, int(num))
 
 
-def DoDebugOutput(options, layout_filename, image_type):
+def DoDebugOutput(
+    options: List[str],
+    layout_filename: Union[str, os.PathLike],
+    image_type: str,
+):
     """Prints out a human readable disk layout in on-disk order.
 
     Args:
-        options: Flags passed to the script
-        layout_filename: Path to partition configuration file
-        image_type: Type of image e.g. ALL/LIST/base/test/dev/factory_install
+        options: Flags passed to the script.
+        layout_filename: Path to partition configuration file.
+        image_type: Type of image e.g. ALL/LIST/base/test/dev/factory_install.
     """
 
-    return disk_layout.DoDebugOutput(options, layout_filename, image_type)
+    return disk_layout.DiskLayout(
+        layout_filename, options.adjust_part.split()
+    ).DoDebugOutput(image_type)
 
 
-def Validate(options, image_type, layout_filename):
+def Validate(
+    options: List[str],
+    image_type: str,
+    layout_filename: Union[str, os.PathLike],
+):
     """Validates a layout file, used before reading sizes to check for errors.
 
     Args:
-        options: Flags passed to the script
-        image_type: Type of image eg base/test/dev/factory_install
-        layout_filename: Path to partition configuration file
+        options: Flags passed to the script.
+        image_type: Type of image eg base/test/dev/factory_install.
+        layout_filename: Path to partition configuration file.
     """
 
-    return disk_layout.Validate(options, image_type, layout_filename)
+    return disk_layout.DiskLayout(
+        layout_filename, options.adjust_part.split()
+    ).Validate(image_type)
 
 
 class ArgsAction(argparse.Action):  # pylint: disable=no-init

@@ -5,7 +5,9 @@
 """Test chromite.lib.disk_layout"""
 
 import os
+from pathlib import Path
 
+from chromite.lib import constants
 from chromite.lib import cros_test_lib
 from chromite.lib import disk_layout
 
@@ -21,24 +23,57 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
         self.another_parent_layout_json = os.path.join(
             self.tempdir, "test_layout_another_parent.json"
         )
+        self.parent_layout_content = """{
+          "metadata": {
+            "fs_block_size": 4096
+          },
+          "layouts": {
+              "base": [
+                {
+                  "num": 3,
+                  "label": "Part 3",
+                  "type": "rootfs"
+                },
+                {
+                  "num": 2,
+                  "label": "Part 2",
+                  "type": "data"
+                },
+                {
+                  "num": 1,
+                  "label": "Part 1",
+                  "type": "efi"
+                }
+              ]
+            }
+          }"""
 
     def testJSONComments(self):
         """Test that we ignore comments in JSON in lines starting with #."""
         with open(self.layout_json, "w") as f:
             f.write(
                 """# This line is a comment.
-{
-    # Here I have another comment starting with some whitespaces on the left.
-    "layouts": {
-        "common": []
-    }
-}
-"""
+                {
+                    #  comment with some whitespaces on the left.
+                    "metadata": {
+                        "fs_block_size": 4096
+                    },
+                    "layouts": {
+                        "common": [],
+                        "base": []
+                    }
+                }
+                """
             )
+
+        layout = disk_layout.DiskLayout(self.layout_json)
         # pylint: disable-msg=W0212
         self.assertEqual(
-            disk_layout._LoadStackedPartitionConfig(self.layout_json),
-            {"layouts": {"common": []}},
+            layout._disk_layout_config,
+            {
+                "metadata": {"fs_block_size": 4096, "fs_align": 4096},
+                "layouts": {"common": [], "base": []},
+            },
         )
 
     def testJSONCommentsLimitations(self):
@@ -50,78 +85,62 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
         with open(self.layout_json, "w") as f:
             f.write(
                 """{
-    "layouts": { # This is an inline comment, but is not supported.
-        "common": []}}"""
+                    "layouts": { # This is an inline comment.
+                        "common": []
+                    }
+                }"""
             )
-        # pylint: disable-msg=W0212
         self.assertRaises(
             ValueError,
-            disk_layout._LoadStackedPartitionConfig,
+            disk_layout.DiskLayout,
             self.layout_json,
         )
 
     def testPartitionOrderPreserved(self):
         """Test the order of the partitions is the same as in the parent."""
         with open(self.parent_layout_json, "w") as f:
-            f.write(
-                """{
-  "layouts": {
-    "common": [
-      {
-        "num": 3,
-        "name": "Part 3"
-      },
-      {
-        "num": 2,
-        "name": "Part 2"
-      },
-      {
-        "num": 1,
-        "name": "Part 1"
-      }
-    ]
-  }
-}"""
-            )
-        # pylint: disable-msg=W0212
-        parent_layout = disk_layout._LoadStackedPartitionConfig(
-            self.parent_layout_json
-        )
+            f.write(self.parent_layout_content)
+
+        parent_layout = disk_layout.DiskLayout(self.parent_layout_json)
 
         with open(self.layout_json, "w") as f:
             f.write(
                 """{
-  "parent": "%s",
-  "layouts": {
-    "common": []
-  }
-}"""
+                  "parent": "%s",
+                  "layouts": {
+                    "base": []
+                  }
+                }"""
                 % self.parent_layout_json
             )
+        layout = disk_layout.DiskLayout(self.layout_json)
         # pylint: disable-msg=W0212
-        layout = disk_layout._LoadStackedPartitionConfig(self.layout_json)
-        self.assertEqual(parent_layout, layout)
+        self.assertEqual(
+            parent_layout._disk_layout_config, layout._disk_layout_config
+        )
 
         # Test also that even overriding one partition keeps all of them in
         # order.
         with open(self.layout_json, "w") as f:
             f.write(
                 """{
-  "parent": "%s",
-  "layouts": {
-    "common": [
-      {
-        "num": 2,
-        "name": "Part 2"
-      }
-    ]
-  }
-}"""
+                  "parent": "%s",
+                  "layouts": {
+                    "base": [
+                      {
+                        "num": 2,
+                        "label": "Part 2"
+                      }
+                    ]
+                  }
+                }"""
                 % self.parent_layout_json
             )
+        layout = disk_layout.DiskLayout(self.layout_json)
         # pylint: disable-msg=W0212
-        layout = disk_layout._LoadStackedPartitionConfig(self.layout_json)
-        self.assertEqual(parent_layout, layout)
+        self.assertEqual(
+            parent_layout._disk_layout_config, layout._disk_layout_config
+        )
 
     def testJSONEmptyParent(self):
         """Test that absence of layout section in parent is supported."""
@@ -130,174 +149,299 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
         with open(self.layout_json, "w") as f:
             f.write(
                 """{
-  "parent": "%s",
-  "layouts": {
-    "common": [
-      {
-        "num": 2,
-        "name": "Part 2"
-      }
-    ]
-  }
-}"""
+                  "parent": "%s",
+                  "metadata": {
+                    "fs_block_size": 4096
+                  },
+                  "layouts": {
+                    "base": [
+                      {
+                        "num": 2,
+                        "label": "Part 2",
+                        "type": "rootfs"
+                      }
+                    ]
+                  }
+                }"""
                 % self.parent_layout_json
             )
-        # pylint: disable-msg=W0212
-        disk_layout._LoadStackedPartitionConfig(self.layout_json)
+        disk_layout.DiskLayout(self.layout_json)
 
     def testJSONEmptyLayout(self):
         """Test that absence of layout section in child is supported."""
         with open(self.parent_layout_json, "w") as f:
-            f.write(
-                """{
-  "layouts": {
-    "common": [
-      {
-        "num": 3,
-        "name": "Part 3"
-      }
-    ]
-  }
-}"""
-            )
-        # pylint: disable-msg=W0212
-        parent_layout = disk_layout._LoadStackedPartitionConfig(
-            self.parent_layout_json
-        )
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
-  "parent": "%s"
-}"""
-                % self.parent_layout_json
-            )
-        # pylint: disable-msg=W0212
-        layout = disk_layout._LoadStackedPartitionConfig(self.layout_json)
-        self.assertEqual(parent_layout, layout)
+            f.write(self.parent_layout_content)
 
-    def testJSONDoubleEmptyLayout(self):
-        """Test that no layout section in both child and parent is supported."""
-        with open(self.parent_layout_json, "w") as f:
-            f.write("""{} """)
-        # pylint: disable-msg=W0212
-        parent_layout = disk_layout._LoadStackedPartitionConfig(
-            self.parent_layout_json
-        )
+        parent_layout = disk_layout.DiskLayout(self.parent_layout_json)
+
         with open(self.layout_json, "w") as f:
             f.write(
                 """{
-  "parent": "%s"
-}"""
+                  "parent": "%s"
+                }"""
                 % self.parent_layout_json
             )
+        layout = disk_layout.DiskLayout(self.layout_json)
         # pylint: disable-msg=W0212
-        layout = disk_layout._LoadStackedPartitionConfig(self.layout_json)
-        self.assertEqual(parent_layout, layout)
+        self.assertEqual(
+            parent_layout._disk_layout_config, layout._disk_layout_config
+        )
+
+    def testJSONrequiredFields(self):
+        """Test required fields."""
+        # Need Metadata field.
+        with open(self.layout_json, "w") as f:
+            f.write("""{}""")
+
+        with self.assertRaisesRegex(
+            disk_layout.InvalidLayoutError,
+            "Layout is missing required entries: " "'metadata'",
+        ):
+            disk_layout.DiskLayout(self.layout_json)
+
+        # Need fs_block_size in Metadata.
+        with open(self.layout_json, "w") as f:
+            f.write(
+                """{
+                  "metadata": {}
+                }"""
+            )
+
+        with self.assertRaisesRegex(
+            disk_layout.InvalidLayoutError,
+            "Layout is missing required entries: " "'fs_block_size'",
+        ):
+            disk_layout.DiskLayout(self.layout_json)
+
+        # Need base layout.
+        with open(self.layout_json, "w") as f:
+            f.write(
+                """{
+                  "metadata": {
+                    "fs_block_size": 4096
+                  },
+                  "layouts": {}
+                }"""
+            )
+
+        with self.assertRaisesRegex(
+            disk_layout.InvalidLayoutError, 'Missing "base" config.*'
+        ):
+            disk_layout.DiskLayout(self.layout_json)
+        with open(self.layout_json, "w") as f:
+            f.write(
+                """{
+                  "metadata": {
+                    "fs_block_size": 4096
+                  },
+                  "layouts": {
+                    "common": []
+                  }
+                }"""
+            )
+
+        with self.assertRaisesRegex(
+            disk_layout.InvalidLayoutError, 'Missing "base" config.*'
+        ):
+            disk_layout.DiskLayout(self.layout_json)
+
+    def testJSONPartitionRequiredFields(self):
+        """Test partition required fields."""
+        # Need partition type.
+        with open(self.layout_json, "w") as f:
+            f.write(
+                """{
+                  "metadata": {
+                    "fs_block_size": 4096
+                  },
+                  "layouts": {
+                    "base": [
+                      {
+                        "num": 1
+                      }
+                    ]
+                  }
+                }"""
+            )
+
+        with self.assertRaisesRegex(
+            disk_layout.InvalidLayoutError,
+            "Layout is missing required entries: " "'type'",
+        ):
+            disk_layout.DiskLayout(self.layout_json)
+
+        # Need partition label.
+        with open(self.layout_json, "w") as f:
+            f.write(
+                """{
+                  "metadata": {
+                    "fs_block_size": 4096
+                  },
+                  "layouts": {
+                    "base": [
+                      {
+                        "num": 1,
+                        "type": "data"
+                      }
+                    ]
+                  }
+                }"""
+            )
+        with self.assertRaisesRegex(
+            disk_layout.InvalidLayoutError, 'Layout "base" missing "label"'
+        ):
+            disk_layout.DiskLayout(self.layout_json)
+
+        # unknown entry.
+        with open(self.layout_json, "w") as f:
+            f.write(
+                """{
+                  "metadata": {
+                    "fs_block_size": 4096
+                  },
+                  "layouts": {
+                    "base": [
+                      {
+                        "num": 1,
+                        "type": "data",
+                        "label": "rootfs",
+                        "unknown": 1
+                      }
+                    ]
+                  }
+                }"""
+            )
+        with self.assertRaisesRegex(
+            disk_layout.InvalidLayoutError,
+            "Unknown items in layout base: " "{'unknown'}",
+        ):
+            disk_layout.DiskLayout(self.layout_json)
+
+    def testJSONFileSystemFields(self):
+        """Test filesystem fields."""
+        # fs_size > fs_size_min size.
+        with open(self.layout_json, "w") as f:
+            f.write(
+                """{
+                  "metadata": {
+                    "fs_block_size": 4096
+                  },
+                  "layouts": {
+                    "base": [
+                      {
+                        "num": 1,
+                        "type": "data",
+                        "label": "rootfs",
+                        "size": "24 MB",
+                        "fs_size": "3MB",
+                        "fs_align": "2MB"
+                      }
+                    ]
+                  }
+                }"""
+            )
+        with self.assertRaisesRegex(
+            disk_layout.InvalidSizeError,
+            ".*is not an even multiple of fs_align.*",
+        ):
+            disk_layout.DiskLayout(self.layout_json)
+
+        # test fs_align in metadata
+        with open(self.layout_json, "w") as f:
+            f.write(
+                """{
+                  "metadata": {
+                    "fs_block_size": 4096
+                  },
+                  "layouts": {
+                    "base": []
+                  }
+                }"""
+            )
+        layout = disk_layout.DiskLayout(self.layout_json)
+        # pylint: disable-msg=W0212
+        self.assertEqual(
+            layout._disk_layout_config["metadata"]["fs_align"], 4096
+        )
+
+        # test invalid fs_align in metadata
+        with open(self.layout_json, "w") as f:
+            f.write(
+                """{
+                  "metadata": {
+                    "fs_block_size": 400,
+                    "fs_align": 300
+                  },
+                  "layouts": {
+                    "base": []
+                  }
+                }"""
+            )
+        with self.assertRaisesRegex(
+            disk_layout.InvalidLayoutError, "fs_align.*"
+        ):
+            disk_layout.DiskLayout(self.layout_json)
 
     def testPartitionOrderPreservedWithBase(self):
         """Test the order of the partitions is the same as in the parent."""
         with open(self.parent_layout_json, "w") as f:
             f.write(
                 """{
-  "layouts": {
-    "common": [
-      {
-        "num": 3,
-        "name": "Part 3"
-      },
-      {
-        "num": 2,
-        "name": "Part 2"
-      },
-      {
-        "num": 1,
-        "name": "Part 1"
-      }
-    ],
-    "base": []
-  }
-}"""
+                  "metadata": {
+                    "fs_block_size": 4096
+                  },
+                  "layouts": {
+                    "common": [
+                      {
+                        "num": 3,
+                        "label": "Part 3",
+                        "type": "data"
+                      },
+                      {
+                        "num": 2,
+                        "label": "Part 2",
+                        "type": "data"
+                      },
+                      {
+                        "num": 1,
+                        "label": "Part 1",
+                        "type": "data"
+                      }
+                    ],
+                    "base": []
+                  }
+                }"""
             )
-        # pylint: disable-msg=W0212
-        parent_layout = disk_layout._LoadStackedPartitionConfig(
-            self.parent_layout_json
-        )
+        parent_layout = disk_layout.DiskLayout(self.parent_layout_json)
 
         # Test also that even overriding one partition keeps all of them in
         # order.
         with open(self.layout_json, "w") as f:
             f.write(
                 """{
-  "parent": "%s",
-  "layouts": {
-    "common": [
-      {
-        "num": 2,
-        "name": "Part 2"
-      }
-    ],
-    "base": [
-      {
-        "num": 1,
-        "name": "Part 1"
-      }
-    ]
-  }
-}"""
+                  "parent": "%s",
+                  "layouts": {
+                    "common": [
+                      {
+                        "num": 2,
+                        "label": "Part 2"
+                      }
+                    ],
+                    "base": [
+                      {
+                        "num": 1,
+                        "label": "Part 1"
+                      }
+                    ]
+                  }
+                }"""
                 % self.parent_layout_json
             )
+        layout = disk_layout.DiskLayout(self.layout_json)
         # pylint: disable-msg=W0212
-        layout = disk_layout._LoadStackedPartitionConfig(self.layout_json)
-        self.assertEqual(parent_layout, layout)
-
-    def testGetStartByteOffsetIsAccurate(self):
-        """Test that padding_bytes results in a valid start sector."""
-
-        test_params = (
-            # block_size, primary_entry_array_padding_bytes (in blocks)
-            (512, 2),
-            (512, 32768),
-            (1024, 32768),
+        self.assertEqual(
+            parent_layout._disk_layout_config, layout._disk_layout_config
         )
-        for i in test_params:
-            with open(self.layout_json, "w") as f:
-                f.write(
-                    """{
-  "metadata": {
-    "block_size": %d,
-    "fs_block_size": 4096,
-    "primary_entry_array_padding_bytes": %d
-  },
-  "layouts": {
-    "base": [
-      {
-        "type": "blank",
-        "size": "32 MiB"
-      }
-    ]
-  }
-}"""
-                    % (i[0], i[1] * i[0])
-                )
-
-            # pylint: disable-msg=W0212
-            config = disk_layout.LoadPartitionConfig(self.layout_json)
-
-            class Options(object):
-                """Fake options"""
-
-                adjust_part = ""
-
-            partitions = disk_layout.GetPartitionTable(
-                Options(), config, "base"
-            )
-            # pylint: disable-msg=W0212
-            start_offset = disk_layout._GetPartitionStartByteOffset(
-                config, partitions
-            )
-            self.assertEqual(
-                start_offset, disk_layout.START_SECTOR + i[1] * i[0]
-            )
 
     def testGetTableTotalsSizeIsAccurate(self):
         """Test primary_entry_array_lba results in an accurate block count."""
@@ -315,122 +459,160 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
             with open(self.layout_json, "w") as f:
                 f.write(
                     """{
-  "metadata": {
-    "block_size": %d,
-    "fs_block_size": 4096,
-    "primary_entry_array_padding_bytes": %d
-  },
-  "layouts": {
-    "base": [
-      {
-        "type": "blank",
-        "size": "%d MiB"
-      }
-    ]
-  }
-}"""
+                      "metadata": {
+                        "block_size": %d,
+                        "fs_block_size": 4096,
+                        "primary_entry_array_padding_bytes": %d
+                      },
+                      "layouts": {
+                        "base": [
+                          {
+                            "num": 1,
+                            "label": "data",
+                            "type": "blank",
+                            "size": "%d MiB"
+                          }
+                        ]
+                      }
+                    }"""
                     % (i[0], i[1] * i[0], i[2])
                 )
 
+            layout = disk_layout.DiskLayout(self.layout_json)
             # pylint: disable-msg=W0212
-            config = disk_layout.LoadPartitionConfig(self.layout_json)
-
-            class Options(object):
-                """Fake options"""
-
-                adjust_part = ""
-
-            partitions = disk_layout.GetPartitionTable(
-                Options(), config, "base"
-            )
-            totals = disk_layout.GetTableTotals(config, partitions)
-
-            # Calculate the expected image block size.
-            # pylint: disable-msg=W0212
-            total_size = (
-                disk_layout._GetPartitionStartByteOffset(config, partitions)
+            partitions = layout._image_partitions["base"]
+            totals = layout.GetTableTotals(partitions)
+            self.assertEqual(
+                totals["byte_count"],
+                disk_layout.START_SECTOR
+                + i[1] * i[0]
                 + sum([x["bytes"] for x in partitions])
-                + disk_layout.SECONDARY_GPT_BYTES
+                + disk_layout.SECONDARY_GPT_BYTES,
             )
-
-            self.assertEqual(totals["byte_count"], total_size)
 
     def testMultipleParents(self):
         """Test that multiple inheritance works."""
         with open(self.parent_layout_json, "w") as f:
             f.write(
                 """{
-  "layouts": {
-    "common": [
-      {
-        "num": 1,
-        "name": "Part 1"
-      }
-    ],
-    "base": [
-      {
-        "num": 2,
-        "name": "Part 2",
-        "fs_size_min": 1000
-      },
-      {
-        "num": 12,
-        "fs_size": 1000
-      }
-    ]
-  }
-}"""
+                  "metadata": {
+                    "fs_block_size": 1000
+                  },
+                  "layouts": {
+                    "common": [
+                      {
+                        "num": 1,
+                        "label": "Part 1",
+                        "type": "rootfs"
+                      }
+                    ],
+                    "base": [
+                      {
+                        "num": 2,
+                        "label": "Part 2",
+                        "type": "data",
+                        "fs_size_min": 1000
+                      },
+                      {
+                        "num": 12,
+                        "label": "Part 12",
+                        "type": "kernel",
+                        "size": 2000,
+                        "fs_size": 1000
+                      }
+                    ]
+                  }
+                }"""
             )
         with open(self.another_parent_layout_json, "w") as f:
             f.write(
                 """{
-  "layouts": {
-    "common": [
-      {
-        "num": 1,
-        "fs_size_min": 2000
-      }
-    ],
-    "base": [
-      {
-        "num": 2,
-        "name": "new Part 2",
-        "fs_size_min": 2000
-      }
-    ]
-  }
-}"""
+                  "layouts": {
+                    "common": [
+                      {
+                        "num": 1,
+                        "label": "Part 1",
+                        "type": "rootfs",
+                        "size": 3000,
+                        "fs_size_min": 2000
+                      }
+                    ],
+                    "base": [
+                      {
+                        "num": 2,
+                        "label": "new Part 2",
+                        "type": "data",
+                        "fs_size_min": 2000
+                      }
+                    ]
+                  }
+                }"""
             )
         with open(self.layout_json, "w") as f:
             f.write(
                 """{
-  "parent": "%s %s",
-  "layouts": {
-    "common": [
-      {
-        "num": 1,
-        "name": "new Part 1"
-      }
-    ]
-  }
-}"""
+                  "parent": "%s %s",
+                  "layouts": {
+                    "common": [
+                      {
+                        "num": 1,
+                        "label": "new Part 1",
+                        "size": 2000
+                      }
+                    ]
+                  }
+                }"""
                 % (self.parent_layout_json, self.another_parent_layout_json)
             )
 
+        layout = disk_layout.DiskLayout(self.layout_json)
         # pylint: disable-msg=W0212
-        self.assertEqual(
-            disk_layout._LoadStackedPartitionConfig(self.layout_json),
+        self.assertDictEqual(
+            layout._disk_layout_config,
             {
                 "layouts": {
                     "common": [
-                        {"fs_size_min": 2000, "name": "new Part 1", "num": 1}
+                        {
+                            "num": 1,
+                            "label": "new Part 1",
+                            "type": "rootfs",
+                            "fs_size_min": 2000,
+                            "bytes": 2000,
+                            "size": 2000,
+                            "features": [],
+                        }
                     ],
                     "base": [
-                        {"fs_size_min": 2000, "name": "new Part 2", "num": 2},
-                        {"fs_size": 1000, "num": 12},
-                        {"fs_size_min": 2000, "name": "new Part 1", "num": 1},
+                        {
+                            "num": 2,
+                            "label": "new Part 2",
+                            "type": "data",
+                            "fs_size_min": 2000,
+                            "bytes": 1,
+                            "features": [],
+                        },
+                        {
+                            "num": 12,
+                            "label": "Part 12",
+                            "type": "kernel",
+                            "size": 2000,
+                            "fs_size": 1000,
+                            "fs_bytes": 1000,
+                            "bytes": 2000,
+                            "features": [],
+                        },
+                        {
+                            "num": 1,
+                            "label": "new Part 1",
+                            "type": "rootfs",
+                            "fs_size_min": 2000,
+                            "bytes": 2000,
+                            "size": 2000,
+                            "features": [],
+                        },
                     ],
-                }
+                },
+                "metadata": {"fs_block_size": 1000, "fs_align": 1000},
             },
         )
 
@@ -439,39 +621,61 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
         with open(self.layout_json, "w") as f:
             f.write(
                 """{
-  "layouts": {
-    # The common layout is empty but is applied to all the other layouts.
-    "common": [],
-    "base": [
-      {
-        "num": 2,
-        "name": "Part 2"
-      },
-      {
-        # Pad out, but not sure why.
-        "type": "blank",
-        "size": "64 MiB"
-      },
-      {
-        "num": 1,
-        "name": "Part 1"
-      }
-    ]
-  }
-}"""
-            )
-        # pylint: disable-msg=W0212
-        self.assertEqual(
-            disk_layout._LoadStackedPartitionConfig(self.layout_json),
-            {
-                "layouts": {
-                    "common": [],
+                  "metadata": {
+                    "fs_block_size": 1000
+                  },
+                  "layouts": {
                     "base": [
-                        {"num": 2, "name": "Part 2"},
-                        {"type": "blank", "size": "64 MiB"},
-                        {"num": 1, "name": "Part 1"},
+                      {
+                        "num": 2,
+                        "label": "Part 2",
+                        "type": "rootfs"
+                      },
+                      {
+                        # Pad out, but not sure why.
+                        "type": "blank",
+                        "size": "64 MiB"
+                      },
+                      {
+                        "num": 1,
+                        "label": "Part 1",
+                        "type": "data"
+                      }
+                    ]
+                  }
+                }"""
+            )
+        layout = disk_layout.DiskLayout(self.layout_json)
+        # pylint: disable-msg=W0212
+        self.assertDictEqual(
+            layout._disk_layout_config,
+            {
+                "metadata": {"fs_block_size": 1000, "fs_align": 1000},
+                "layouts": {
+                    "base": [
+                        {
+                            "num": 2,
+                            "label": "Part 2",
+                            "type": "rootfs",
+                            "bytes": 1,
+                            "features": [],
+                        },
+                        {
+                            "type": "blank",
+                            "size": "64 MiB",
+                            "bytes": 67108864,
+                            "features": [],
+                        },
+                        {
+                            "num": 1,
+                            "label": "Part 1",
+                            "type": "data",
+                            "bytes": 1,
+                            "features": [],
+                        },
                     ],
-                }
+                    "common": [],
+                },
             },
         )
 
@@ -480,59 +684,115 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
         with open(self.layout_json, "w") as f:
             f.write(
                 """{
-  "layouts": {
-    "common": [
-      {"num": 1},
-      {"num": 2}
-    ],
-    "base": [
-      {"num": 2},
-      {"num": 1}
-    ]
-  }
-}"""
+                  "metadata": {
+                    "fs_block_size": 1000
+                  },
+                  "layouts": {
+                    "common": [
+                      {"num": 1, "type": "rootfs", "label": "Part1"},
+                      {"num": 2, "type": "data", "label": "Part2"}
+                    ],
+                    "base": [
+                      {"num": 2, "type": "data", "label": "Part2"},
+                      {"num": 1, "type": "rootfs", "label": "Part1"}
+                    ]
+                  }
+                }"""
             )
-        # pylint: disable-msg=W0212
-        self.assertRaises(
-            disk_layout.ConflictingPartitionOrderError,
-            disk_layout._LoadStackedPartitionConfig,
-            self.layout_json,
-        )
+        with self.assertRaises(disk_layout.ConflictingPartitionOrderError):
+            disk_layout.DiskLayout(self.layout_json)
 
     def testOnlySharedPartitionsOrderMatters(self):
         """Test that only the order of the partition in both layouts matters."""
         with open(self.layout_json, "w") as f:
             f.write(
                 """{
-  "layouts": {
-    "common": [
-      {"num": 1},
-      {"num": 2},
-      {"num": 3}
-    ],
-    "base": [
-      {"num": 2},
-      {"num": 12},
-      {"num": 3},
-      {"num": 5}
-    ]
-  }
-}"""
-            )
-        # pylint: disable-msg=W0212
-        self.assertEqual(
-            disk_layout._LoadStackedPartitionConfig(self.layout_json),
-            {
-                "layouts": {
-                    "common": [{"num": 1}, {"num": 2}, {"num": 3}],
-                    "base": [
-                        {"num": 1},
-                        {"num": 2},
-                        {"num": 12},
-                        {"num": 3},
-                        {"num": 5},
+                  "metadata": {
+                    "fs_block_size": 1000
+                  },
+                  "layouts": {
+                    "common": [
+                      {"num": 1, "type": "rootfs", "label": "Part1"},
+                      {"num": 2, "type": "data", "label": "Part2"},
+                      {"num": 3, "type": "firmware", "label": "Part3"}
                     ],
-                }
+                    "base": [
+                      {"num": 2, "type": "data", "label": "Part2"},
+                      {"num": 5, "type": "bootloader", "label": "Part5"},
+                      {"num": 3, "type": "firmware", "label": "Part3"},
+                      {"num": 12, "type": "kernel", "label": "Part12"}
+                    ]
+                  }
+                }"""
+            )
+        layout = disk_layout.DiskLayout(self.layout_json)
+        # pylint: disable-msg=W0212
+        self.assertDictEqual(
+            layout._disk_layout_config,
+            {
+                "metadata": {"fs_block_size": 1000, "fs_align": 1000},
+                "layouts": {
+                    "common": [
+                        {
+                            "num": 1,
+                            "type": "rootfs",
+                            "label": "Part1",
+                            "bytes": 1,
+                            "features": [],
+                        },
+                        {
+                            "num": 2,
+                            "type": "data",
+                            "label": "Part2",
+                            "bytes": 1,
+                            "features": [],
+                        },
+                        {
+                            "num": 3,
+                            "type": "firmware",
+                            "label": "Part3",
+                            "bytes": 1,
+                            "features": [],
+                        },
+                    ],
+                    "base": [
+                        {
+                            "num": 1,
+                            "type": "rootfs",
+                            "label": "Part1",
+                            "bytes": 1,
+                            "features": [],
+                        },
+                        {
+                            "num": 2,
+                            "type": "data",
+                            "label": "Part2",
+                            "bytes": 1,
+                            "features": [],
+                        },
+                        {
+                            "num": 5,
+                            "type": "bootloader",
+                            "label": "Part5",
+                            "bytes": 1,
+                            "features": [],
+                        },
+                        {
+                            "num": 3,
+                            "type": "firmware",
+                            "label": "Part3",
+                            "bytes": 1,
+                            "features": [],
+                        },
+                        {
+                            "num": 12,
+                            "type": "kernel",
+                            "label": "Part12",
+                            "bytes": 1,
+                            "features": [],
+                        },
+                    ],
+                },
             },
         )
 
@@ -541,216 +801,207 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
         with open(self.layout_json, "w") as f:
             f.write(
                 """{
-  "metadata": {
-    "block_size": "512",
-    "fs_block_size": "4 KiB"
-  },
-  "layouts": {
-    "base": [
-      {
-        "num": 1,
-        "type": "rootfs",
-        "label": "ROOT-A",
-        "fs_size": "0 KiB"
-      }
-    ]
-  }
-}"""
+                  "metadata": {
+                    "block_size": "512",
+                    "fs_block_size": "4 KiB"
+                  },
+                  "layouts": {
+                    "base": [
+                      {
+                        "num": 1,
+                        "type": "rootfs",
+                        "label": "ROOT-A",
+                        "fs_size": "0 KiB"
+                      }
+                    ]
+                  }
+                }"""
             )
-        try:
-            disk_layout.LoadPartitionConfig(self.layout_json)
-        except disk_layout.InvalidSizeError as e:
-            self.assertTrue("must be positive" in str(e))
-        else:
-            self.fail("InvalidSizeError not raised.")
+        with self.assertRaisesRegex(
+            disk_layout.InvalidSizeError, ".*must be positive"
+        ):
+            disk_layout.DiskLayout(self.layout_json)
 
     def testFileSystemSizeLargerThanPartition(self):
         """Test that file system size must not be greater than partition."""
         with open(self.layout_json, "w") as f:
             f.write(
                 """{
-  "metadata": {
-    "block_size": "512",
-    "fs_block_size": "4 KiB"
-  },
-  "layouts": {
-    "base": [
-      {
-        "num": 1,
-        "type": "rootfs",
-        "label": "ROOT-A",
-        "size": "4 KiB",
-        "fs_size": "8 KiB"
-      }
-    ]
-  }
-}"""
+                  "metadata": {
+                    "block_size": "512",
+                    "fs_block_size": "4 KiB"
+                  },
+                  "layouts": {
+                    "base": [
+                      {
+                        "num": 1,
+                        "type": "rootfs",
+                        "label": "ROOT-A",
+                        "size": "4 KiB",
+                        "fs_size": "8 KiB"
+                      }
+                    ]
+                  }
+                }"""
             )
-        try:
-            disk_layout.LoadPartitionConfig(self.layout_json)
-        except disk_layout.InvalidSizeError as e:
-            self.assertTrue("may not be larger than partition" in str(e))
-        else:
-            self.fail("InvalidSizeError not raised.")
+        with self.assertRaisesRegex(
+            disk_layout.InvalidSizeError, ".*may not be larger than partition.*"
+        ):
+            disk_layout.DiskLayout(self.layout_json)
 
     def testFileSystemSizeNotMultipleBlocks(self):
         """Test file system size must be multiples of file system blocks."""
         with open(self.layout_json, "w") as f:
             f.write(
                 """{
-  "metadata": {
-    "block_size": "512",
-    "fs_block_size": "4 KiB"
-  },
-  "layouts": {
-    "base": [
-      {
-        "num": 1,
-        "type": "rootfs",
-        "label": "ROOT-A",
-        "size": "4 KiB",
-        "fs_size": "3 KiB"
-      }
-    ]
-  }
-}"""
+                  "metadata": {
+                    "block_size": "512",
+                    "fs_block_size": "4 KiB"
+                  },
+                  "layouts": {
+                    "base": [
+                      {
+                        "num": 1,
+                        "type": "rootfs",
+                        "label": "ROOT-A",
+                        "size": "4 KiB",
+                        "fs_size": "3 KiB"
+                      }
+                    ]
+                  }
+                }"""
             )
-        try:
-            disk_layout.LoadPartitionConfig(self.layout_json)
-        except disk_layout.InvalidSizeError as e:
-            self.assertTrue("not an even multiple of fs_align" in str(e))
-        else:
-            self.fail("InvalidSizeError not raised.")
+        with self.assertRaisesRegex(
+            disk_layout.InvalidSizeError, ".*not an even multiple of fs_align.*"
+        ):
+            disk_layout.DiskLayout(self.layout_json)
 
     def testFileSystemSizeForUbiWithNoPageSize(self):
         """Test that "page_size" must be present to calculate UBI fs size."""
         with open(self.layout_json, "w") as f:
             f.write(
                 """{
-  "metadata": {
-    "block_size": "512",
-    "fs_block_size": "4 KiB"
-  },
-  "layouts": {
-    "base": [
-      {
-        "num": 1,
-        "type": "rootfs",
-        "format": "ubi",
-        "label": "ROOT-A",
-        "size": "4 KiB",
-        "fs_size": "4 KiB"
-      }
-    ]
-  }
-}"""
+                  "metadata": {
+                    "block_size": "512",
+                    "fs_block_size": "4 KiB"
+                  },
+                  "layouts": {
+                    "base": [
+                      {
+                        "num": 1,
+                        "type": "rootfs",
+                        "format": "ubi",
+                        "label": "ROOT-A",
+                        "size": "4 KiB",
+                        "fs_size": "4 KiB"
+                      }
+                    ]
+                  }
+                }"""
             )
-        try:
-            disk_layout.LoadPartitionConfig(self.layout_json)
-        except disk_layout.InvalidLayoutError as e:
-            self.assertTrue("page_size" in str(e))
-        else:
-            self.fail("InvalidLayoutError not raised.")
+        with self.assertRaisesRegex(
+            disk_layout.InvalidLayoutError, ".*page_size.*"
+        ):
+            disk_layout.DiskLayout(self.layout_json)
 
     def testFileSystemSizeForUbiWithNoEraseBlockSize(self):
         """Test "erase_block_size" must be present to calculate UBI fs size."""
         with open(self.layout_json, "w") as f:
             f.write(
                 """{
-  "metadata": {
-    "block_size": "512",
-    "fs_block_size": "4 KiB"
-  },
-  "layouts": {
-    "base": [
-      {
-        "num": "metadata",
-        "page_size": "4 KiB"
-      },
-      {
-        "num": 1,
-        "type": "rootfs",
-        "format": "ubi",
-        "label": "ROOT-A",
-        "size": "4 KiB",
-        "fs_size": "4 KiB"
-      }
-    ]
-  }
-}"""
+                  "metadata": {
+                    "block_size": "512",
+                    "fs_block_size": "4 KiB"
+                  },
+                  "layouts": {
+                    "base": [
+                      {
+                        "num": "metadata",
+                        "page_size": "4 KiB"
+                      },
+                      {
+                        "num": 1,
+                        "type": "rootfs",
+                        "format": "ubi",
+                        "label": "ROOT-A",
+                        "size": "4 KiB",
+                        "fs_size": "4 KiB"
+                      }
+                    ]
+                  }
+                }"""
             )
-        try:
-            disk_layout.LoadPartitionConfig(self.layout_json)
-        except disk_layout.InvalidLayoutError as e:
-            self.assertTrue("erase_block_size" in str(e))
-        else:
-            self.fail("InvalidLayoutError not raised.")
+        with self.assertRaisesRegex(
+            disk_layout.InvalidLayoutError, ".*erase_block_size.*"
+        ):
+            disk_layout.DiskLayout(self.layout_json)
 
     def testFileSystemSizeForUbiIsNotMultipleOfUbiEraseBlockSize(self):
         """Test that we raise when fs_size is not multiple of eraseblocks."""
         with open(self.layout_json, "w") as f:
             f.write(
                 """{
-  "metadata": {
-    "block_size": "512",
-    "fs_block_size": "4 KiB"
-  },
-  "layouts": {
-    "base": [
-      {
-        "num": "metadata",
-        "page_size": "4 KiB",
-        "erase_block_size": "262144"
-      },
-      {
-        "num": 1,
-        "type": "rootfs",
-        "format": "ubi",
-        "label": "ROOT-A",
-        "size": "256 KiB",
-        "fs_size": "256 KiB"
-      }
-    ]
-  }
-}"""
+                  "metadata": {
+                    "block_size": "512",
+                    "fs_block_size": "4 KiB"
+                  },
+                  "layouts": {
+                    "base": [
+                      {
+                        "num": "metadata",
+                        "page_size": "4 KiB",
+                        "erase_block_size": "262144"
+                      },
+                      {
+                        "num": 1,
+                        "type": "rootfs",
+                        "format": "ubi",
+                        "label": "ROOT-A",
+                        "size": "256 KiB",
+                        "fs_size": "256 KiB"
+                      }
+                    ]
+                  }
+                }"""
             )
-        try:
-            disk_layout.LoadPartitionConfig(self.layout_json)
-        except disk_layout.InvalidSizeError as e:
-            self.assertTrue('to "248 KiB" in the "common" layout' in str(e))
-        else:
-            self.fail("InvalidSizeError not raised")
+        with self.assertRaisesRegex(
+            disk_layout.InvalidSizeError,
+            '.*to "248 KiB" in the "common" layout.*',
+        ):
+            disk_layout.DiskLayout(self.layout_json)
 
     def testFileSystemSizeForUbiIsMultipleOfUbiEraseBlockSize(self):
         """Test everything is okay when fs_size is multiple of eraseblocks."""
         with open(self.layout_json, "w") as f:
             f.write(
                 """{
-  "metadata": {
-    "block_size": "512",
-    "fs_block_size": "4 KiB"
-  },
-  "layouts": {
-    "base": [
-      {
-        "num": "metadata",
-        "page_size": "4 KiB",
-        "erase_block_size": "262144"
-      },
-      {
-        "num": 1,
-        "type": "rootfs",
-        "format": "ubi",
-        "label": "ROOT-A",
-        "size": "256 KiB",
-        "fs_size": "253952"
-      }
-    ]
-  }
-}"""
+                  "metadata": {
+                    "block_size": "512",
+                    "fs_block_size": "4 KiB"
+                  },
+                  "layouts": {
+                    "base": [
+                      {
+                        "num": "metadata",
+                        "page_size": "4 KiB",
+                        "erase_block_size": "262144"
+                      },
+                      {
+                        "num": 1,
+                        "type": "rootfs",
+                        "format": "ubi",
+                        "label": "ROOT-A",
+                        "size": "256 KiB",
+                        "fs_size": "253952"
+                      }
+                    ]
+                  }
+                }"""
             )
+        layout = disk_layout.DiskLayout(self.layout_json)
+        # pylint: disable-msg=W0212
         self.assertEqual(
-            disk_layout.LoadPartitionConfig(self.layout_json),
+            layout._disk_layout_config,
             {
                 "layouts": {
                     "base": [
@@ -802,9 +1053,22 @@ class UtilityTest(cros_test_lib.MockTestCase):
             ("6GiB", 6 * 2**30),
             ("7TB", 7 * 10**12),
             ("8TiB", 8 * 2**40),
+            ("-4", -4),
+            ("-5GB", -5 * 10**9),
+            ("-6GiB", -6 * 2**30),
+            ("-7TB", -7 * 10**12),
+            ("-8TiB", -8 * 2**40),
         ]
         for inp, exp in test_cases:
             self.assertEqual(disk_layout.ParseHumanNumber(inp), exp)
+
+    def testParseHumanNumberInvalid(self):
+        """Test that ParseHumanNumber raises exception for invalid input."""
+        test_cases = ["10uB", "30 BT", "40 Tg", "TiB", "-GB"]
+
+        for inp in test_cases:
+            with self.assertRaises(disk_layout.InvalidAdjustmentError):
+                disk_layout.ParseHumanNumber(inp)
 
     def testProduceHumanNumber(self):
         """Test that ProduceHumanNumber is correct."""
@@ -827,12 +1091,16 @@ class UtilityTest(cros_test_lib.MockTestCase):
         """Verify GetScriptShell works."""
         data = disk_layout.GetScriptShell()
         self.assertIn("#!/bin/sh", data)
+        self.assertIn(
+            str(Path(constants.CHROMITE_DIR) / "sdk/cgpt_shell.sh"), data
+        )
 
     def testParseProduce(self):
         """Test ParseHumanNumber(ProduceHumanNumber()) yields same value."""
         test_cases = [
             1,
             2,
+            -2,
             1000,
             1024,
             2 * 10**6,
@@ -841,9 +1109,23 @@ class UtilityTest(cros_test_lib.MockTestCase):
             3 * 2**30,
             4 * 10**12,
             4 * 2**40,
+            -4 * 2**40,
         ]
         for n in test_cases:
             self.assertEqual(
                 disk_layout.ParseHumanNumber(disk_layout.ProduceHumanNumber(n)),
                 n,
+            )
+
+    def testParseRelativeNumber(self):
+        """Verify ParseRelativeNumber()."""
+        test_cases = [
+            ((1000, "90%"), 900),
+            ((1000, "-10"), 990),
+            ((1000, "80"), 80),
+            ((1000, "8 TiB"), 8 * 2**40),
+        ]
+        for inp, output in test_cases:
+            self.assertEqual(
+                disk_layout.ParseRelativeNumber(inp[0], inp[1]), output
             )
