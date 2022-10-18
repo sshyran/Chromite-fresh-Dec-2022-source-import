@@ -37,8 +37,8 @@ class DutControl:
         servo_type = self.get_value("servo_type")
 
         if "_and_" in servo_type:
-            # If servod is working with multiple interfaces then servo_type will be
-            # along the lines of "servo_v4p1_with_servo_micro_and_ccd_cr50".
+            # If servod is working with multiple interfaces then servo_type will
+            # be along the lines of "servo_v4p1_with_servo_micro_and_ccd_cr50".
             # We need to pick an interface, so grab everything before "_and_".
             first_servo_type = servo_type.split("_and_")[0]
             logging.warning(
@@ -66,8 +66,8 @@ class DutControl:
         except cros_build_lib.CalledProcessError as e:
             logging.debug("dut-control error: %s", str(e))
             raise DutConnectionError(
-                "Could not establish servo connection. Verify servod is running in "
-                "the background, and the servo is properly connected."
+                "Could not establish servo connection. Verify servod is running"
+                "in the background, and the servo is properly connected."
             )
 
         # Return value from the "key:value" output.
@@ -82,9 +82,9 @@ class DutControl:
         """Run a dut_control command.
 
         Args:
-          cmd_fragment: The dut_control command to run.
-          verbose: Whether to print the command before it's run.
-          dryrun: Whether to actually execute the command or just print it.
+            cmd_fragment: The dut_control command to run.
+            verbose: Whether to print the command before it's run.
+            dryrun: Whether to actually execute the command or just print it.
         """
         cros_build_lib.run(
             self._base_cmd + cmd_fragment, print_cmd=verbose, dryrun=dryrun
@@ -99,9 +99,9 @@ class DutControl:
         """Run multiple dut_control commands in the order given.
 
         Args:
-          cmd_fragments: The dut_control commands to run.
-          verbose: Whether to print the commands as they are run.
-          dryrun: Whether to actually execute the command or just print it.
+            cmd_fragments: The dut_control commands to run.
+            verbose: Whether to print the commands as they are run.
+            dryrun: Whether to actually execute the command or just print it.
         """
         for cmd in cmd_fragments:
             self.run(cmd, verbose=verbose, dryrun=dryrun)
@@ -117,20 +117,20 @@ class DutControl:
         """Runs subprocesses for setting dut controls and executing flash_cmd.
 
         Args:
-          dut_cmd_on: 2d array of dut-control commands
-            in the form [['dut-control', 'cmd1', 'cmd2'...],
-            ['dut-control', 'cmd3'...]]
-            that get executed before the dut_cmd.
-          dut_cmd_off: 2d array of dut-control commands
-            in the same form that get executed after the dut_cmd.
-          flash_cmd: array containing all arguments for
-            the actual command. Run as root user on host.
-          verbose: if True then print out the various
-            commands before running them.
-          dryrun: if True then print the commands without executing.
+            dut_cmd_on: 2d array of dut-control commands
+                in the form [['dut-control', 'cmd1', 'cmd2'...],
+                ['dut-control', 'cmd3'...]]
+                that get executed before the dut_cmd.
+            dut_cmd_off: 2d array of dut-control commands
+                in the same form that get executed after the dut_cmd.
+            flash_cmd: array containing all arguments for
+                the actual command. Run as root user on host.
+            verbose: if True then print out the various
+                commands before running them.
+            dryrun: if True then print the commands without executing.
 
         Returns:
-          bool: True if commands were run successfully, otherwise False.
+            bool: True if commands were run successfully, otherwise False.
         """
         success = True
         try:

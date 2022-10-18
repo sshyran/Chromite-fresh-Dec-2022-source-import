@@ -31,20 +31,20 @@ class FirmwareConfig(NamedTuple):
     """Stores firmware config for a specific board and a specific servo/ssh.
 
     Attributes:
-      dut_control_on:  2d array formatted like [["cmd1", "arg1", "arg2"],
-                                                ["cmd2", "arg3", "arg4"]]
-                         with commands that need to be ran before flashing,
-                         where cmd1 will be run before cmd2.
-      dut_control_off: 2d array formatted like [["cmd1", "arg1", "arg2"],
-                                                ["cmd2", "arg3", "arg4"]]
-                         with commands that need to be ran after flashing,
-                         where cmd1 will be run before cmd2.
-      programmer:      programmer argument (-p) for flashrom and futility.
-      flash_extra_flags_futility: extra flags to flash with futility.
-      flash_extra_flags_flashrom: extra flags to flash with flashrom.
-
-      cros_workon_packages: packages to cros-workon before building.
-      build_packages: packages to build.
+        dut_control_on:  2d array formatted like
+            [["cmd1", "arg1", "arg2"], ["cmd2", "arg3", "arg4"]]
+            with commands that need to be ran before flashing,
+            where cmd1 will be run before cmd2.
+        dut_control_off: 2d array formatted like
+            [["cmd1", "arg1", "arg2"], ["cmd2", "arg3", "arg4"]]
+            with commands that need to be ran after flashing,
+            where cmd1 will be run before cmd2.
+        programmer: programmer argument (-p) for flashrom and futility.
+        force_flashrom: force use of flashrom instead of futility.
+        flash_extra_flags_futility: extra flags to flash with futility.
+        flash_extra_flags_flashrom: extra flags to flash with flashrom.
+        workon_packages: packages to cros-workon before building.
+        build_packages: packages to build.
     """
 
     dut_control_on: List[List[str]]
@@ -63,8 +63,8 @@ def get_config(
     """Return config for a given build target and servo/ssh.
 
     Args:
-      build_target_name: Name of the build target, e.g. 'dedede'.
-      servo: servo: The servo connected to the target DUT. None for SSH.
+        build_target_name: Name of the build target, e.g. 'dedede'.
+        servo: servo: The servo connected to the target DUT. None for SSH.
     """
     module = ap_firmware_config.get(build_target_name, fallback=True)
 
@@ -119,9 +119,10 @@ def export_config_as_json(
     """Exports config for all board:servo pairs in JSON.
 
     Args:
-      build_targets: Names of the boards, e.g. ['dedede']. None for all boards.
-      output_path: Name of the output file. None for stdout.
-      serial: Serial number of the DUT. If None, %s will be used.
+        build_targets: Names of the boards, e.g. ['dedede']. None for all
+            boards.
+        output_path: Name of the output file. None for stdout.
+        serial: Serial number of the DUT. If None, %s will be used.
     """
     if not serial:
         serial = "%s"

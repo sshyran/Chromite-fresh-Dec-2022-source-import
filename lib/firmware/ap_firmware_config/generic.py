@@ -35,10 +35,11 @@ def deploy_extra_flags_futility(servo: Optional[servo_lib.Servo]) -> List[str]:
     """Returns extra flags for flashing with futility.
 
     Args:
-      servo: The servo connected to the target DUT. Return flags for ssh if None.
+        servo: The servo connected to the target DUT. Return flags for ssh if
+            None.
 
     Returns:
-      extra_flags: List of extra flags.
+        extra_flags: List of extra flags.
     """
     if not servo:
         # extra flags for flashing with futility directly over ssh
@@ -53,10 +54,11 @@ def deploy_extra_flags_flashrom(servo: Optional[servo_lib.Servo]) -> List[str]:
     """Returns extra flags for flashing with flashrom.
 
     Args:
-      servo: The servo connected to the target DUT. Return flags for ssh if None.
+        servo: The servo connected to the target DUT. Return flags for ssh if
+            None.
 
     Returns:
-      extra_flags: List of extra flags.
+        extra_flags: List of extra flags.
     """
     if not servo:
         # extra flags for flashing with flashrom directly over ssh
@@ -76,14 +78,14 @@ def get_config(servo: servo_lib.Servo) -> servo_lib.ServoConfig:
     The voltage for this board needs to be set to 1.8 V.
 
     Args:
-      servo: The servo connected to the target DUT.
+        servo: The servo connected to the target DUT.
 
     Returns:
-      servo_lib.ServoConfig:
-        dut_control_{on, off}=2d arrays formatted like [["cmd1", "arg1", "arg2"],
-                                                        ["cmd2", "arg3", "arg4"]]
-                              where cmd1 will be run before cmd2.
-        programmer=programmer argument (-p) for flashrom and futility.
+        servo_lib.ServoConfig:
+            dut_control_{on, off}=2d arrays formatted like
+                [["cmd1", "arg1", "arg2"], ["cmd2", "arg3", "arg4"]]
+                where cmd1 will be run before cmd2.
+            programmer=programmer argument (-p) for flashrom and futility.
     """
     # TODO: modify defaults according to the board needs.
     # TODO: raise UnsupportedServoVersionError for servos that are not supported.

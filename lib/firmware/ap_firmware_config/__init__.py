@@ -26,7 +26,7 @@ def configs() -> Iterator[Tuple[str, ModuleType]]:
     """Iterate over all config modules.
 
     Yields:
-      (board, module): build target name and associated config module.
+        (board, module): build target name and associated config module.
     """
     for _, module_name, _ in pkgutil.iter_modules(__path__):
         if module_name.startswith("_"):
@@ -38,12 +38,12 @@ def get(build_target_name: str, fallback: bool = True) -> ModuleType:
     """Return configuration module for a given build target.
 
     Args:
-      build_target_name: Name of the build target, e.g. 'dedede'.
-      fallback: Allows falling back to generic config if the config for
-                build_target_name is not found.
+        build_target_name: Name of the build target, e.g. 'dedede'.
+        fallback: Allows falling back to generic config if the config for
+            build_target_name is not found.
 
     Returns:
-      module: Python configuration module for a given build target.
+        module: Python configuration module for a given build target.
     """
     name = _CONFIG_MODULE_FULL_NAME % build_target_name
     try:

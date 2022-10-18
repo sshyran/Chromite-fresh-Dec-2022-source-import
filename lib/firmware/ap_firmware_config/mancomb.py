@@ -32,14 +32,14 @@ def get_config(servo: servo_lib.Servo) -> servo_lib.ServoConfig:
     The voltage for this board needs to be set to 1.8 V.
 
     Args:
-      servo: The servo connected to the target DUT.
+        servo: The servo connected to the target DUT.
 
     Returns:
-      servo_lib.ServoConfig:
-        dut_control_{on, off}=2d arrays formatted like [["cmd1", "arg1", "arg2"],
-                                                        ["cmd2", "arg3", "arg4"]]
-                              where cmd1 will be run before cmd2.
-        programmer=programmer argument (-p) for flashrom and futility.
+        servo_lib.ServoConfig:
+            dut_control_{on, off}=2d arrays formatted like
+                [["cmd1", "arg1", "arg2"], ["cmd2", "arg3", "arg4"]]
+                where cmd1 will be run before cmd2.
+            programmer=programmer argument (-p) for flashrom and futility.
     """
     dut_control_on = []
     dut_control_off = []
