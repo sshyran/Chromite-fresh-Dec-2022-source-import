@@ -2522,7 +2522,7 @@ def GeneratePatchesFromRepo(
     sha1s = result.stdout.splitlines()
     if not sha1s:
         if not allow_empty:
-            cros_build_lib.Die("No changes found in %s:%s" % (project, branch))
+            cros_build_lib.Die("No changes found in %s:%s", project, branch)
         return
 
     for sha1 in sha1s:
@@ -2560,7 +2560,7 @@ def _CheckLocalPatches(manifest, local_patches):
 
         checkouts = manifest.FindCheckouts(project)
         if not checkouts:
-            cros_build_lib.Die("Project %s does not exist." % (project,))
+            cros_build_lib.Die("Project %s does not exist.", project)
         if len(checkouts) > 1:
             cros_build_lib.Die(
                 "We do not yet support local patching for projects that are checked "
@@ -2617,7 +2617,7 @@ def PrepareLocalPatches(manifest, patches):
             )
 
         if not project_patch_info:
-            cros_build_lib.Die("No changes found in %s:%s" % (project, branch))
+            cros_build_lib.Die("No changes found in %s:%s", project, branch)
         patch_info.extend(project_patch_info)
 
     return patch_info

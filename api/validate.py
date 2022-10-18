@@ -69,7 +69,7 @@ def exists(*fields: str):
                     value = _value(field, input_proto)
                     if not value or not os.path.exists(value):
                         cros_build_lib.Die(
-                            "%s path does not exist: %s" % (field, value)
+                            "%s path does not exist: %s", field, value
                         )
 
             return func(input_proto, output_proto, config, *args, **kwargs)

@@ -732,7 +732,7 @@ def main(argv):
             inf_cmd.lstrip("/"),
         )
         if not os.path.exists(fname):
-            cros_build_lib.Die("Cannot find program %s." % fname)
+            cros_build_lib.Die("Cannot find program %s.", fname)
     else:
         if inf_args:
             parser.error("Cannot specify arguments without a program.")

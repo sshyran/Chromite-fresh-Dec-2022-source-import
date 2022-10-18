@@ -64,7 +64,7 @@ def GeneratePayload(
     try:
         tgt_image = getattr(input_proto, tgt_name)
     except AttributeError:
-        cros_build_lib.Die("%s is not a known tgt image type" % (tgt_name,))
+        cros_build_lib.Die("%s is not a known tgt image type", tgt_name)
 
     # Resolve the src image oneof.
     src_name = input_proto.WhichOneof("src_image_oneof")
@@ -77,19 +77,20 @@ def GeneratePayload(
         try:
             src_image = getattr(input_proto, src_name)
         except AttributeError:
-            cros_build_lib.Die("%s is not a known src image type" % (src_name,))
+            cros_build_lib.Die("%s is not a known src image type", src_name)
 
     # Ensure they are compatible oneofs.
     if (src_name, tgt_name) not in _VALID_IMAGE_PAIRS:
         cros_build_lib.Die(
-            "%s and %s are not valid image pairs" % (src_image, tgt_image)
+            "%s and %s are not valid image pairs", src_image, tgt_image
         )
 
     # Ensure that miniOS payloads are only requested for compatible image types.
     if input_proto.minios and (src_name, tgt_name) not in _VALID_MINIOS_PAIRS:
         cros_build_lib.Die(
-            "%s and %s are not valid image pairs for miniOS"
-            % (src_image, tgt_image)
+            "%s and %s are not valid image pairs for miniOS",
+            src_image,
+            tgt_image,
         )
 
     # Find the value of bucket or default to 'chromeos-releases'.

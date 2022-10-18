@@ -423,8 +423,9 @@ def _ParseImagesToCreate(to_build: List[int]) -> ImageTypes:
         else:
             # Not expected, but at least it will be obvious if this comes up.
             cros_build_lib.Die(
-                "The service's known image types do not match those in image.proto. "
-                "Unknown Enum ID: %s" % current
+                "The service's known image types do not match those in "
+                "image.proto. Unknown Enum ID: %s",
+                current,
             )
 
     # We can only build one type of these images at a time since image_to_vm.sh

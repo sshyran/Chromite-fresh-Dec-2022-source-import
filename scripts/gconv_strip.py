@@ -266,7 +266,7 @@ def GconvStrip(opts):
     """
     root_st = os.lstat(opts.root)
     if not stat.S_ISDIR(root_st.st_mode):
-        cros_build_lib.Die("root (%s) must be a directory." % opts.root)
+        cros_build_lib.Die("root (%s) must be a directory.", opts.root)
 
     # Detect the possible locations of the gconv-modules file.
     gconv_modules_files = glob.glob(os.path.join(opts.root, GCONV_MODULES_PATH))

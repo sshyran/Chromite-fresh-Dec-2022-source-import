@@ -93,7 +93,7 @@ def FinishParsing(options):
     """Run environment dependent checks on parsed args."""
     target = os.path.join(options.out_dir, options.out_file)
     if os.path.exists(target):
-        cros_build_lib.Die("Output file %r already exists." % target)
+        cros_build_lib.Die("Output file %r already exists.", target)
 
     if not os.path.isdir(options.out_dir):
         cros_build_lib.Die(

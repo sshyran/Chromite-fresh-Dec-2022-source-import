@@ -240,7 +240,7 @@ def GetMatchingCPV(package, vardb):
     """
     matches = vardb.match(package)
     if not matches:
-        cros_build_lib.Die("Could not find package %s" % package)
+        cros_build_lib.Die("Could not find package %s", package)
     if len(matches) != 1:
         cros_build_lib.Die(
             "Ambiguous package name: %s.\n"

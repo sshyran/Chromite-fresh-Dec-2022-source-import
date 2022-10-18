@@ -22,7 +22,7 @@ class LocalManifest(object):
         if os.path.isfile(path):
             return cls(osutils.ReadFile(path))
         elif empty_if_missing:
-            cros_build_lib.Die("Manifest file, %r, not found" % path)
+            cros_build_lib.Die("Manifest file, %r, not found", path)
         return cls()
 
     def __init__(self, text=None):

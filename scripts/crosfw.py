@@ -510,7 +510,7 @@ def SetupBuild(options):
     elif arch == "sandbox":
         compiler = ""
     else:
-        cros_build_lib.Die("Selected arch '%s' not supported." % arch)
+        cros_build_lib.Die("Selected arch '%s' not supported.", arch)
 
     if not options.build:
         options.incremental = True

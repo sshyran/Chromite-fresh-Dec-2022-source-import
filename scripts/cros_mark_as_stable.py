@@ -340,7 +340,7 @@ def main(argv):
     if options.overlays:
         for path in options.overlays.split(":"):
             if not os.path.isdir(path):
-                cros_build_lib.Die("Cannot find overlay: %s" % path)
+                cros_build_lib.Die("Cannot find overlay: %s", path)
             overlays.append(os.path.realpath(path))
     elif options.overlay_type:
         overlays = portage_util.FindOverlays(
