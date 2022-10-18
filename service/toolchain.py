@@ -493,6 +493,7 @@ class BuildLinter:
                     linter="go_lint",
                     # FIXME(b/244362509): Extend more details support to Golang
                     name="",
+                    suggested_fixes=[],
                 )
 
             packages_seen.add(package_name)
