@@ -44,7 +44,7 @@ def deserialize_metrics_log(output_events, prefix=None):
                 input_event.timestamp_epoch_millis,
             )
         elif input_event.op == metrics_lib.OP_STOP_TIMER:
-            # TODO(wbbradley): Drop the None fallback https://crbug.com/1001909.
+            # TODO(b/187788898): Drop the None fallback.
             timer = timers.pop(input_event.arg, None)
             if timer is None:
                 logging.error(
@@ -99,6 +99,6 @@ def deserialize_metrics_log(output_events, prefix=None):
         output_event.timestamp_milliseconds = counter_times[counter]
 
     # Check for any unhandled timers.
-    # TODO(wbbradley): Turn this back into an assert https://crbug.com/1001909.
+    # TODO(b/187788898): Turn this back into an assert.
     if timers:
         logging.error("excess timer metric data left over: %s", timers)

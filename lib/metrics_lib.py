@@ -177,7 +177,7 @@ def read_metrics_events():
         return
 
     logging.info("reading metrics logs from %s", metrics_logfile)
-    # TODO(wbbradley): Drop this once it's stable https://crbug.com/1001909.
+    # TODO(b/187788898): Drop this once it's stable.
     with open(metrics_logfile) as f:
         logging.info("[metrics log file]\n%s", f.read())
     with open(metrics_logfile, "r") as f:
