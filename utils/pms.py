@@ -7,7 +7,7 @@
 See: https://dev.gentoo.org/~ulm/pms/head/pms.html.
 
 This functionality is largely meant to be the invisible backend powering more
-user friendly integration points, like the PackageInfo class
+user-friendly integration points, like the PackageInfo class
 (chromite.lib.parser.package_info). Check for an existing integration point, or
 perhaps where a new one could be added, before using this directly.
 """

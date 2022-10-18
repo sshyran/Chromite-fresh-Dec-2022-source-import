@@ -23,8 +23,8 @@ def GetMostLikelyMatchedObject(
         needle: The name to match.
         name_func: Function to get object name to match. Default is the identity
             function.
-        matched_score_threshold: The threshold of likelihood to match.  Must be in
-            the range [0,1].
+        matched_score_threshold: The threshold of likelihood to match. Must be
+            in the range [0,1].
 
     Returns:
         A list of entities from |haystack| whose names are likely |needle|.

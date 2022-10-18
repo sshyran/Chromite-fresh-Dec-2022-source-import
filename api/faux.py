@@ -12,7 +12,7 @@ from chromite.api import controller
 def all_responses(faux_result_factory):
     """A decorator to handle all mock responses.
 
-    This is syntactic sugar for handling all of the mock response types in a
+    This is syntactic sugar for handling all the mock response types in a
     single function.
 
     Args:
@@ -22,7 +22,7 @@ def all_responses(faux_result_factory):
     """
     assert faux_result_factory
 
-    # Get the decorators for each of the mock types so we can compose them.
+    # Get the decorators for each of the mock types, so we can compose them.
     success_fn = success(faux_result_factory)
     err_fn = error(faux_result_factory)
 

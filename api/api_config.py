@@ -107,7 +107,7 @@ class ApiConfig(object):
         config.call_type = self.ENUM_TYPE_MAP[self._call_type]
 
         if not for_inside_execution:
-            # Add values not needed when reexecuting.
+            # Add values not needed when re-executing.
             config.log_path = self.log_path
 
         return config

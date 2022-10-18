@@ -202,6 +202,7 @@ class PathHandler(object):
         self._transferred = True
 
     def cleanup(self):
+        """Post-execution cleanup."""
         if self.tempdir:
             self.tempdir.Cleanup()
             self.tempdir = None

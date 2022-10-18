@@ -50,15 +50,16 @@ def json(
         obj: The object to serialize & format.
         fp: By default, the JSON string is returned.  The |fp| allows specifying
             a file object (in text mode) to write to instead.
+        cls: Optional custom error class.
         compact: Whether the output will be compact (flattened to one line), or
-            human readable (spread over multiple lines).
+            human-readable (spread over multiple lines).
 
     Returns:
         A string if |fp| is not specified, else None.
     """
     kwargs = {
         "cls": cls,
-        # JSON style guide says Uunicode characters are fully allowed.
+        # JSON style guide says Unicode characters are fully allowed.
         "ensure_ascii": False,
         # We use 2 space indent to match JSON style guide.
         "indent": None if compact else 2,
@@ -78,7 +79,7 @@ def json(
 
 
 def size(bytesize: float) -> str:
-    """Convert bytes to human readable format.
+    """Convert bytes to human-readable format.
 
     Args:
         bytesize: Number to humanize

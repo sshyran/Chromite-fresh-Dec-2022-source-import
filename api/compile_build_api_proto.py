@@ -265,13 +265,13 @@ def CompileProto(
 ):
     """Compile the Build API protobuf files.
 
-    By default this will compile from infra/proto/src to api/gen. The output
+    By default, this will compile from infra/proto/src to api/gen. The output
     directory may be changed, but the imports will always be treated as if it is
     in the default location.
 
     Args:
         output: The output directory.
-        protoc_version: Which protoc to use for the compile.
+        protoc_version: Which protoc to use for the compilation.
         dir_subset: What proto to compile.
         postprocess: Whether to run the postprocess step.
     """
@@ -398,7 +398,7 @@ def main(argv):
     if ProtocVersion.SDK in opts.protoc_version:
         # Compile the SDK bindings.
         if not cros_build_lib.IsInsideChroot():
-            # Rerun inside of the SDK instead of trying to map all of the paths.
+            # Rerun inside the SDK instead of trying to map all the paths.
             cmd = [
                 (
                     Path(constants.CHROOT_SOURCE_ROOT)
