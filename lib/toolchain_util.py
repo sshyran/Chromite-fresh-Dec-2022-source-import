@@ -645,12 +645,16 @@ def _WarnDetectiveAboutKernelProfileExpiration(
         f"[Test Async builder] Kernel AutoFDO profile too old for kernel {kver}"
     )
     alert_msg = (
-        f"AutoFDO profile too old for kernel {kver}. Path={profile_path}"
+        f"The latest AutoFDO profile is too old for the kernel {kver}.\n"
+        f"Path={profile_path}.\n"
+        "Check if this is a known bug at "
+        "https://buganizer.corp.google.com/issues?q=componentid:87200"
+        "%20%22AutoFDO%20profile%20generation%20for%20kernel%22 or contact "
+        "the cwp-team@google.com."
     )
     alerts.SendEmailLog(
         subject_msg,
         AFDO_ALERT_RECIPIENTS,
-        server=alerts.SmtpServer(constants.GOLO_SMTP_SERVER),
         message=alert_msg,
     )
 
