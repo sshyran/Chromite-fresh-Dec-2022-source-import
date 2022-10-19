@@ -13470,7 +13470,8 @@
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine-angle\",\n  \"name\": \"herobrine\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine-angle\",\n  \"name\": \"hoglin\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine-angle\",\n  \"name\": \"villager\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine-angle\",\n  \"name\": \"zoglin\",\n  \"test_suites\": []\n}"
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine-angle\",\n  \"name\": \"zoglin\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine-angle\",\n  \"name\": \"zombie\",\n  \"test_suites\": []\n}"
     ],
     "vm_tests_override": null
   },
@@ -13497,7 +13498,8 @@
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine-angle\",\n  \"name\": \"herobrine\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine-angle\",\n  \"name\": \"hoglin\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine-angle\",\n  \"name\": \"villager\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine-angle\",\n  \"name\": \"zoglin\",\n  \"test_suites\": []\n}"
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine-angle\",\n  \"name\": \"zoglin\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine-angle\",\n  \"name\": \"zombie\",\n  \"test_suites\": []\n}"
     ],
     "paygen": false,
     "push_image": false,
@@ -13636,7 +13638,8 @@
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine\",\n  \"name\": \"herobrine\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine\",\n  \"name\": \"hoglin\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine\",\n  \"name\": \"villager\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine\",\n  \"name\": \"zoglin\",\n  \"test_suites\": []\n}"
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine\",\n  \"name\": \"zoglin\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine\",\n  \"name\": \"zombie\",\n  \"test_suites\": []\n}"
     ],
     "vm_tests_override": null
   },
@@ -13663,7 +13666,8 @@
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine\",\n  \"name\": \"herobrine\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine\",\n  \"name\": \"hoglin\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine\",\n  \"name\": \"villager\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine\",\n  \"name\": \"zoglin\",\n  \"test_suites\": []\n}"
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine\",\n  \"name\": \"zoglin\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine\",\n  \"name\": \"zombie\",\n  \"test_suites\": []\n}"
     ],
     "paygen": false,
     "push_image": false,
@@ -13856,7 +13860,8 @@
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine\",\n  \"name\": \"herobrine\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine\",\n  \"name\": \"hoglin\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine\",\n  \"name\": \"villager\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine\",\n  \"name\": \"zoglin\",\n  \"test_suites\": []\n}"
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine\",\n  \"name\": \"zoglin\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine\",\n  \"name\": \"zombie\",\n  \"test_suites\": []\n}"
     ],
     "vm_tests_override": null
   },
@@ -13883,7 +13888,8 @@
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine\",\n  \"name\": \"herobrine\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine\",\n  \"name\": \"hoglin\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine\",\n  \"name\": \"villager\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine\",\n  \"name\": \"zoglin\",\n  \"test_suites\": []\n}"
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine\",\n  \"name\": \"zoglin\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"herobrine\",\n  \"name\": \"zombie\",\n  \"test_suites\": []\n}"
     ],
     "paygen": false,
     "push_image": false,
