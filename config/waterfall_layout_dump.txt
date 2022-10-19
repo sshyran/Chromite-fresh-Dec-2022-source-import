@@ -14,6 +14,8 @@
     cherry-factory-cherry-14455.B-factorybranch
   factory-coral-10122.B-buildspec
     coral-factory-coral-10122.B-factorybranch
+  factory-corsola-15196.B-buildspec
+    corsola-factory-corsola-15196.B-factorybranch
   factory-dedede-13683.B-buildspec
     dedede-factory-dedede-13683.B-factorybranch
     shotzo-factory-dedede-13683.B-factorybranch
@@ -493,6 +495,7 @@
   coral-master-factorybranch-tryjob
   coral-payloads-tryjob
   coral-release-tryjob
+  corsola-factory-corsola-15196.B-factorybranch-tryjob
   corsola-full-tryjob
   corsola-llvm-next-toolchain-tryjob
   corsola-llvm-toolchain-tryjob
@@ -588,6 +591,8 @@
     cherry-factory-cherry-14455.B-factorybranch-tryjob
   factory-coral-10122.B-buildspec-tryjob
     coral-factory-coral-10122.B-factorybranch-tryjob
+  factory-corsola-15196.B-buildspec-tryjob
+    corsola-factory-corsola-15196.B-factorybranch-tryjob
   factory-dedede-13683.B-buildspec-tryjob
     dedede-factory-dedede-13683.B-factorybranch-tryjob
     shotzo-factory-dedede-13683.B-factorybranch-tryjob

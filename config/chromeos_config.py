@@ -1144,6 +1144,7 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
         (DAILY, "factory-brya-14517.B", ["brya", "brask"]),
         (DAILY, "factory-guybrush-14908.B", ["guybrush"]),
         (WEEKLY, "factory-brya-14909.124.B", ["brya"]),
+        (WEEKLY, "factory-corsola-15196.B", ["corsola"]),
         # This is intended to create master branch tryjobs, NOT for production
         # builds. Update the associated list of boards as needed.
         (
@@ -2424,7 +2425,6 @@ def BranchScheduleConfig():
             [],
             config_lib.LUCI_BUILDER_LEGACY_RELEASE,
         ),
-
         (
             "release-R107-15117.B",
             [],
