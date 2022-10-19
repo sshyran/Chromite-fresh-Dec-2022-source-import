@@ -31,6 +31,9 @@ _OVERLAY_TYPE_TO_NAME = {
     binhost_pb2.OVERLAYTYPE_NONE: None,
 }
 
+# Default maximum number of URIs to be stored in Binhost conf file.
+_DEFAULT_BINHOST_MAX_URIS = 1
+
 
 def _GetBinhostsResponse(_input_proto, output_proto, _config):
     """Add fake binhosts to a successful response."""
@@ -250,9 +253,10 @@ def SetBinhost(
     key = binhost_pb2.BinhostKey.Name(input_proto.key)
     uri = input_proto.uri
     private = input_proto.private
+    max_uris = input_proto.max_uris or _DEFAULT_BINHOST_MAX_URIS
 
     output_proto.output_file = binhost.SetBinhost(
-        target, key, uri, private=private
+        target, key, uri, private=private, max_uris=max_uris
     )
 
 

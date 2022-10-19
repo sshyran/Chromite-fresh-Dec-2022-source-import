@@ -221,6 +221,7 @@ class SetBinhostTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         request.build_target.name = "target"
         request.key = binhost_pb2.POSTSUBMIT_BINHOST
         request.uri = "gs://chromeos-prebuilt/target"
+        request.max_uris = 4
         binhost.SetBinhost(request, self.response, self.mock_call_config)
         patch.assert_not_called()
         self.assertEqual(self.response.output_file, "/path/to/BINHOST.conf")
@@ -236,7 +237,7 @@ class SetBinhostTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         input_proto.private = True
         input_proto.key = binhost_pb2.POSTSUBMIT_BINHOST
         input_proto.uri = "gs://chromeos-prebuilt/target"
-
+        input_proto.max_uris = 4
         binhost.SetBinhost(input_proto, self.response, self.api_config)
 
         self.assertEqual(self.response.output_file, "/path/to/BINHOST.conf")
@@ -245,6 +246,7 @@ class SetBinhostTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
             "POSTSUBMIT_BINHOST",
             "gs://chromeos-prebuilt/target",
             private=True,
+            max_uris=4,
         )
 
 

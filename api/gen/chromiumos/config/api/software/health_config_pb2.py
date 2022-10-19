@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z1go.chromium.org/chromiumos/config/go/api/software',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n2chromiumos/config/api/software/health_config.proto\x12\x1e\x63hromiumos.config.api.software\"\xd1\x03\n\x0cHealthConfig\x12\x45\n\x07\x62\x61ttery\x18\x01 \x01(\x0b\x32\x34.chromiumos.config.api.software.HealthConfig.Battery\x12J\n\ncached_vpd\x18\x02 \x01(\x0b\x32\x36.chromiumos.config.api.software.HealthConfig.CachedVpd\x12G\n\x08routines\x18\x03 \x01(\x0b\x32\x35.chromiumos.config.api.software.HealthConfig.Routines\x1a)\n\x07\x42\x61ttery\x12\x1e\n\x16has_smart_battery_info\x18\x01 \x01(\x08\x1a#\n\tCachedVpd\x12\x16\n\x0ehas_sku_number\x18\x01 \x01(\x08\x1a\x35\n\rBatteryHealth\x12$\n\x1cpercent_battery_wear_allowed\x18\x01 \x01(\r\x1a^\n\x08Routines\x12R\n\x0e\x62\x61ttery_health\x18\x01 \x01(\x0b\x32:.chromiumos.config.api.software.HealthConfig.BatteryHealthB3Z1go.chromium.org/chromiumos/config/go/api/softwareb\x06proto3'
+  serialized_pb=b'\n2chromiumos/config/api/software/health_config.proto\x12\x1e\x63hromiumos.config.api.software\"\xd6\x04\n\x0cHealthConfig\x12\x45\n\x07\x62\x61ttery\x18\x01 \x01(\x0b\x32\x34.chromiumos.config.api.software.HealthConfig.Battery\x12J\n\ncached_vpd\x18\x02 \x01(\x0b\x32\x36.chromiumos.config.api.software.HealthConfig.CachedVpd\x12G\n\x08routines\x18\x03 \x01(\x0b\x32\x35.chromiumos.config.api.software.HealthConfig.Routines\x1a)\n\x07\x42\x61ttery\x12\x1e\n\x16has_smart_battery_info\x18\x01 \x01(\x08\x1a#\n\tCachedVpd\x12\x16\n\x0ehas_sku_number\x18\x01 \x01(\x08\x1a\x35\n\rBatteryHealth\x12$\n\x1cpercent_battery_wear_allowed\x18\x01 \x01(\r\x1a-\n\rNvmeWearLevel\x12\x1c\n\x14wear_level_threshold\x18\x01 \x01(\r\x1a\xb3\x01\n\x08Routines\x12R\n\x0e\x62\x61ttery_health\x18\x01 \x01(\x0b\x32:.chromiumos.config.api.software.HealthConfig.BatteryHealth\x12S\n\x0fnvme_wear_level\x18\x02 \x01(\x0b\x32:.chromiumos.config.api.software.HealthConfig.NvmeWearLevelB3Z1go.chromium.org/chromiumos/config/go/api/softwareb\x06proto3'
 )
 
 
@@ -118,18 +118,18 @@ _HEALTHCONFIG_BATTERYHEALTH = _descriptor.Descriptor(
   serialized_end=456,
 )
 
-_HEALTHCONFIG_ROUTINES = _descriptor.Descriptor(
-  name='Routines',
-  full_name='chromiumos.config.api.software.HealthConfig.Routines',
+_HEALTHCONFIG_NVMEWEARLEVEL = _descriptor.Descriptor(
+  name='NvmeWearLevel',
+  full_name='chromiumos.config.api.software.HealthConfig.NvmeWearLevel',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='battery_health', full_name='chromiumos.config.api.software.HealthConfig.Routines.battery_health', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
+      name='wear_level_threshold', full_name='chromiumos.config.api.software.HealthConfig.NvmeWearLevel.wear_level_threshold', index=0,
+      number=1, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -146,7 +146,45 @@ _HEALTHCONFIG_ROUTINES = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=458,
-  serialized_end=552,
+  serialized_end=503,
+)
+
+_HEALTHCONFIG_ROUTINES = _descriptor.Descriptor(
+  name='Routines',
+  full_name='chromiumos.config.api.software.HealthConfig.Routines',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='battery_health', full_name='chromiumos.config.api.software.HealthConfig.Routines.battery_health', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='nvme_wear_level', full_name='chromiumos.config.api.software.HealthConfig.Routines.nvme_wear_level', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=506,
+  serialized_end=685,
 )
 
 _HEALTHCONFIG = _descriptor.Descriptor(
@@ -181,7 +219,7 @@ _HEALTHCONFIG = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_HEALTHCONFIG_BATTERY, _HEALTHCONFIG_CACHEDVPD, _HEALTHCONFIG_BATTERYHEALTH, _HEALTHCONFIG_ROUTINES, ],
+  nested_types=[_HEALTHCONFIG_BATTERY, _HEALTHCONFIG_CACHEDVPD, _HEALTHCONFIG_BATTERYHEALTH, _HEALTHCONFIG_NVMEWEARLEVEL, _HEALTHCONFIG_ROUTINES, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -191,13 +229,15 @@ _HEALTHCONFIG = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=87,
-  serialized_end=552,
+  serialized_end=685,
 )
 
 _HEALTHCONFIG_BATTERY.containing_type = _HEALTHCONFIG
 _HEALTHCONFIG_CACHEDVPD.containing_type = _HEALTHCONFIG
 _HEALTHCONFIG_BATTERYHEALTH.containing_type = _HEALTHCONFIG
+_HEALTHCONFIG_NVMEWEARLEVEL.containing_type = _HEALTHCONFIG
 _HEALTHCONFIG_ROUTINES.fields_by_name['battery_health'].message_type = _HEALTHCONFIG_BATTERYHEALTH
+_HEALTHCONFIG_ROUTINES.fields_by_name['nvme_wear_level'].message_type = _HEALTHCONFIG_NVMEWEARLEVEL
 _HEALTHCONFIG_ROUTINES.containing_type = _HEALTHCONFIG
 _HEALTHCONFIG.fields_by_name['battery'].message_type = _HEALTHCONFIG_BATTERY
 _HEALTHCONFIG.fields_by_name['cached_vpd'].message_type = _HEALTHCONFIG_CACHEDVPD
@@ -228,6 +268,13 @@ HealthConfig = _reflection.GeneratedProtocolMessageType('HealthConfig', (_messag
     })
   ,
 
+  'NvmeWearLevel' : _reflection.GeneratedProtocolMessageType('NvmeWearLevel', (_message.Message,), {
+    'DESCRIPTOR' : _HEALTHCONFIG_NVMEWEARLEVEL,
+    '__module__' : 'chromiumos.config.api.software.health_config_pb2'
+    # @@protoc_insertion_point(class_scope:chromiumos.config.api.software.HealthConfig.NvmeWearLevel)
+    })
+  ,
+
   'Routines' : _reflection.GeneratedProtocolMessageType('Routines', (_message.Message,), {
     'DESCRIPTOR' : _HEALTHCONFIG_ROUTINES,
     '__module__' : 'chromiumos.config.api.software.health_config_pb2'
@@ -242,6 +289,7 @@ _sym_db.RegisterMessage(HealthConfig)
 _sym_db.RegisterMessage(HealthConfig.Battery)
 _sym_db.RegisterMessage(HealthConfig.CachedVpd)
 _sym_db.RegisterMessage(HealthConfig.BatteryHealth)
+_sym_db.RegisterMessage(HealthConfig.NvmeWearLevel)
 _sym_db.RegisterMessage(HealthConfig.Routines)
 
 

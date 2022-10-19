@@ -20,6 +20,8 @@ from chromite.utils import key_value_store
 
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from chromite.lib import build_target_lib
     from chromite.lib import chroot_lib
     from chromite.lib import sysroot_lib
@@ -42,6 +44,10 @@ class EmptyPrebuiltsRoot(Error):
 
 class NoAclFileFound(Error):
     """No ACL file could be found."""
+
+
+class InvalidMaxUris(Error):
+    """When maximum number of uris to store is less than or equal to 0."""
 
 
 def _ValidateBinhostConf(path: str, key: str) -> None:
@@ -114,6 +120,21 @@ def _ValidatePrebuiltsRoot(
         raise EmptyPrebuiltsRoot(
             "Expected to find prebuilts for build target %s at %s. "
             "Did %s build successfully?" % (target, prebuilts_root, target)
+        )
+
+
+def _ValidateBinhostMaxURIs(max_uris: int) -> None:
+    """Validates that the max_uris is greater or equalt to 1.
+
+    Args:
+      max_uris: Maximum number of uris that we need to store in Binhost conf file.
+
+    Raises:
+      InvalidMaxUris: If max_uris is None or less than or equal to zero.
+    """
+    if max_uris is None or max_uris <= 0:
+        raise InvalidMaxUris(
+            f"Binhost file cannot have {max_uris} number of URIs."
         )
 
 
@@ -201,14 +222,36 @@ def UpdatePackageIndex(
     return package_index_path
 
 
-def SetBinhost(target: str, key: str, uri: str, private: bool = True) -> str:
+def _get_current_uris(
+    conf_file_path: Union[str, "Path"], key: str
+) -> List[str]:
+    """Returns the uri values of the key from the conf file.
+
+    If the file does not exist, then it returns an empty list.
+
+    Args:
+      conf_file_path: Path to the conf file.
+      key: Expected binhost key.
+
+    Returns:
+      List of the current values for the key.
+    """
+    kvs = key_value_store.LoadFile(str(conf_file_path), ignore_missing=True)
+    value = kvs.get(key)
+    return value.split(" ") if value is not None else []
+
+
+def SetBinhost(
+    target: str, key: str, uri: str, private: bool = True, max_uris=1
+) -> str:
     """Set binhost configuration for the given build target.
 
-    A binhost is effectively a key (Portage env variable) pointing to a URL
+    A binhost is effectively a key (Portage env variable) pointing to a set of URLs
     that contains binaries. The configuration is set in .conf files at static
     directories on a build target by build target (and host by host) basis.
 
-    This function updates the .conf file by completely rewriting it.
+    This function updates the .conf file by updating the url list.
+    The list is updated in the FIFO order.
 
     Args:
         target: The build target to set configuration for.
@@ -216,10 +259,12 @@ def SetBinhost(target: str, key: str, uri: str, private: bool = True) -> str:
         uri: The new value for the binhost key,
             e.g. gs://chromeos-prebuilt/foo/bar.
         private: Whether or not the build target is private.
+        max_uris: Maximum number of uris to keep in the conf.
 
     Returns:
         Path to the updated .conf file.
     """
+    _ValidateBinhostMaxURIs(max_uris)
     conf_root = os.path.join(
         constants.SOURCE_ROOT,
         constants.PRIVATE_BINHOST_CONF_DIR
@@ -230,7 +275,8 @@ def SetBinhost(target: str, key: str, uri: str, private: bool = True) -> str:
     conf_file = "%s-%s.conf" % (target, key)
     conf_path = os.path.join(conf_root, conf_file)
     _ValidateBinhostConf(conf_path, key)
-    osutils.WriteFile(conf_path, '%s="%s"' % (key, uri))
+    uris = _get_current_uris(conf_path, key) + [uri]
+    osutils.WriteFile(conf_path, '%s="%s"' % (key, " ".join(uris[-max_uris:])))
     return conf_path
 
 

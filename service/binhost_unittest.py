@@ -134,6 +134,58 @@ class SetBinhostTest(cros_test_lib.MockTempDirTestCase):
         with self.assertRaises(KeyError):
             binhost.SetBinhost("bad-key", "GOOD_KEY", "gs://blah")
 
+    def testSetBinhostMaxURIsIncrease(self):
+        """SetBinhost appends uri in BINHOST conf file."""
+        binhost.SetBinhost("coral", "BINHOST_KEY", "gs://prebuilts", max_uris=1)
+        actual = binhost.SetBinhost(
+            "coral", "BINHOST_KEY", "gs://prebuilts2", max_uris=2
+        )
+        self.assertEqual(
+            osutils.ReadFile(actual),
+            'BINHOST_KEY="gs://prebuilts gs://prebuilts2"',
+        )
+
+    def testSetBinhostMaxURIsRemoveOldest(self):
+        """Setbinhost appends only maximum number of uris and removes in FIFO order."""
+        binhost.SetBinhost(
+            "coral", "BINHOST_KEY", "gs://prebuilts1", max_uris=1
+        )
+        binhost.SetBinhost(
+            "coral", "BINHOST_KEY", "gs://prebuilts2", max_uris=3
+        )
+        binhost.SetBinhost(
+            "coral", "BINHOST_KEY", "gs://prebuilts3", max_uris=3
+        )
+        actual = binhost.SetBinhost(
+            "coral", "BINHOST_KEY", "gs://prebuilts4", max_uris=3
+        )
+        self.assertEqual(
+            osutils.ReadFile(actual),
+            'BINHOST_KEY="gs://prebuilts2 gs://prebuilts3 gs://prebuilts4"',
+        )
+
+        actual = binhost.SetBinhost(
+            "coral", "BINHOST_KEY", "gs://prebuilts5", max_uris=1
+        )
+        self.assertEqual(
+            osutils.ReadFile(actual), 'BINHOST_KEY="gs://prebuilts5"'
+        )
+
+    def testSetBinhostInvalidMaxUris(self):
+        """SetBinhost rejects invalid max_uris"""
+        with self.assertRaises(binhost.InvalidMaxUris):
+            binhost.SetBinhost(
+                "coral", "BINHOST_KEY", "gs://prebuilts", max_uris=0
+            )
+        with self.assertRaises(binhost.InvalidMaxUris):
+            binhost.SetBinhost(
+                "coral", "BINHOST_KEY", "gs://prebuilts", max_uris=-1
+            )
+        with self.assertRaises(binhost.InvalidMaxUris):
+            binhost.SetBinhost(
+                "coral", "BINHOST_KEY", "gs://prebuilts", max_uris=None
+            )
+
 
 class GetPrebuiltsRootTest(cros_test_lib.MockTempDirTestCase):
     """Unittests for GetPrebuiltsRoot."""
