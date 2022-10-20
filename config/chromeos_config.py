@@ -1968,6 +1968,13 @@ def ApplyCustomOverrides(site_config):
             "hw_tests_override": [],
             "hw_tests_disabled_bug": "b/239660108",
         },
+        "skyrim-release": {
+            "sign_types": ["recovery", "factory"],
+            # Skyrim has no DUTs in the lab (b/240824186).
+            "hw_tests": [],
+            "hw_tests_override": [],
+            "hw_tests_disabled_bug": "b/240824186",
+        },
         # --- end from here ---
         # Enable distributed ThinLTO (crbug/877722) only on nocturne for now.
         "nocturne-release": {
