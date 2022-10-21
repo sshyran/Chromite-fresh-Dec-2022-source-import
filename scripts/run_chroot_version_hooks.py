@@ -11,6 +11,8 @@ also calls this script. The chroot version and installed package versions are
 not strongly correlated.
 """
 
+import logging
+
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_sdk_lib
@@ -43,7 +45,7 @@ def _ParseArgs(argv):
 
 def main(argv):
     """Main function."""
-    cros_build_lib.AssertInsideChroot()
+    commandline.RunInsideChroot()
 
     opts = _ParseArgs(argv)
 
@@ -52,5 +54,15 @@ def main(argv):
     else:
         try:
             cros_sdk_lib.RunChrootVersionHooks()
-        except cros_sdk_lib.Error as e:
+        except cros_sdk_lib.InvalidChrootVersionError as e:
             cros_build_lib.Die(e)
+        except cros_sdk_lib.Error as e:
+            logging.error(e)
+            logging.warning(
+                "Chroot version hooks failed. Please file a bug with the CrOS "
+                "Build team with the output above (go/cros-build-bug). "
+                "If you are willing to lose all built boards, you can bypass "
+                "the issue by replacing your chroot with:\n"
+                "\tcros_sdk --replace"
+            )
+            return 1
