@@ -631,6 +631,53 @@ def GenerateArchive(
     return os.path.join(output_dir, constants.TARGET_SYSROOT_TAR)
 
 
+def _create_sysroot(
+    chroot: "chroot_lib.Chroot",
+    _sysroot_class,
+    build_target: "build_target_lib.BuildTarget",
+    output_dir: str,
+    output_file: str,
+    package_list: List[str],
+) -> str:
+    """Create a sysroot to use.
+
+    Args:
+      chroot: The chroot class used for these artifacts.
+      sysroot_class: The sysroot class used for these artifacts.
+      build_target: The build target used for these artifacts.
+      output_dir: The path to write artifacts to.
+      output_file: Name of the archive to output.
+      package_list: List of packages to use.
+
+    Returns:
+      Path to the sysroot tar file.
+    """
+    cmd = [
+        "cros_generate_sysroot",
+        "--out-dir",
+        "/tmp",
+        "--board",
+        build_target.name,
+        "--deps-only",
+        "--package",
+        " ".join(package_list),
+    ]
+    cros_build_lib.run(
+        cmd,
+        cwd=constants.SOURCE_ROOT,
+        enter_chroot=True,
+        chroot_args=chroot.get_enter_args(),
+        extra_env=chroot.env,
+    )
+
+    # Move the artifact out of the chroot.
+    sysroot_tar_path = os.path.join(
+        chroot.path, os.path.join("tmp", output_file)
+    )
+    shutil.copy(sysroot_tar_path, output_dir)
+    return os.path.join(output_dir, output_file)
+
+
 def CreateSimpleChromeSysroot(
     chroot: "chroot_lib.Chroot",
     _sysroot_class,
@@ -648,30 +695,41 @@ def CreateSimpleChromeSysroot(
     Returns:
       Path to the sysroot tar file.
     """
-    cmd = [
-        "cros_generate_sysroot",
-        "--out-dir",
-        "/tmp",
-        "--board",
-        build_target.name,
-        "--deps-only",
-        "--package",
-        constants.CHROME_CP,
-    ]
-    cros_build_lib.run(
-        cmd,
-        cwd=constants.SOURCE_ROOT,
-        enter_chroot=True,
-        chroot_args=chroot.get_enter_args(),
-        extra_env=chroot.env,
+    return _create_sysroot(
+        chroot,
+        _sysroot_class,
+        build_target,
+        output_dir,
+        constants.CHROME_SYSROOT_TAR,
+        [constants.CHROME_CP],
     )
 
-    # Move the artifact out of the chroot.
-    sysroot_tar_path = os.path.join(
-        chroot.path, os.path.join("tmp", constants.CHROME_SYSROOT_TAR)
+
+def CreateFuzzerSysroot(
+    chroot: "chroot_lib.Chroot",
+    _sysroot_class,
+    build_target: "build_target_lib.BuildTarget",
+    output_dir: str,
+) -> str:
+    """Create a sysroot for fuzzer builders.
+
+    Args:
+      chroot: The chroot class used for these artifacts.
+      sysroot_class: The sysroot class used for these artifacts.
+      build_target: The build target used for these artifacts.
+      output_dir: The path to write artifacts to.
+
+    Returns:
+      Path to the sysroot tar file.
+    """
+    return _create_sysroot(
+        chroot,
+        _sysroot_class,
+        build_target,
+        output_dir,
+        "sysroot_virtual_target-os.tar.xz",
+        ["virtual/target-fuzzers"],
     )
-    shutil.copy(sysroot_tar_path, output_dir)
-    return os.path.join(output_dir, constants.CHROME_SYSROOT_TAR)
 
 
 def CreateChromeEbuildEnv(

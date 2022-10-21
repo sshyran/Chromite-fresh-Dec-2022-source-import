@@ -119,6 +119,7 @@ def GetArtifacts(
         in_proto.ArtifactType.CHROME_EBUILD_ENV: sysroot.CreateChromeEbuildEnv,
         in_proto.ArtifactType.BREAKPAD_DEBUG_SYMBOLS: sysroot.BundleBreakpadSymbols,
         in_proto.ArtifactType.DEBUG_SYMBOLS: sysroot.BundleDebugSymbols,
+        in_proto.ArtifactType.FUZZER_SYSROOT: sysroot.CreateFuzzerSysroot,
     }
 
     for output_artifact in in_proto.output_artifacts:
