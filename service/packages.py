@@ -436,6 +436,32 @@ def uprev_virglrenderer(_build_targets, refs, _chroot):
     return result
 
 
+@uprevs_versioned_package("x11-apps/igt-gpu-tools")
+def uprev_igt_gpu_tools(_build_targets, refs, _chroot):
+    """Updates igt-gpu-tools ebuilds.
+
+    See: uprev_versioned_package.
+
+    Returns:
+      UprevVersionedPackageResult: The result of updating igt-gpu-tools ebuilds.
+    """
+    overlay = os.path.join(
+        constants.SOURCE_ROOT, constants.CHROMIUMOS_OVERLAY_DIR
+    )
+    repo_path = os.path.join(
+        constants.SOURCE_ROOT, "src", "third_party", "igt-gpu-tools"
+    )
+    manifest = git.ManifestCheckout.Cached(repo_path)
+
+    uprev_manager = uprev_lib.UprevOverlayManager([overlay], manifest)
+    uprev_manager.uprev(package_list=["x11-apps/igt-gpu-tools"], force=True)
+
+    updated_files = uprev_manager.modified_ebuilds
+    result = uprev_lib.UprevVersionedPackageResult()
+    result.add_result(refs[-1].revision, updated_files)
+    return result
+
+
 @uprevs_versioned_package("chromeos-base/drivefs")
 def uprev_drivefs(_build_targets, refs, chroot):
     """Updates drivefs ebuilds.
