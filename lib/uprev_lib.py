@@ -11,7 +11,15 @@ import functools
 import logging
 import os
 import re
-from typing import Iterable, List, Optional, Tuple, TYPE_CHECKING, Union
+from typing import (
+    Collection,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    TYPE_CHECKING,
+    Union,
+)
 
 from chromite.lib import chromeos_version
 from chromite.lib import constants
@@ -55,7 +63,7 @@ class EbuildManifestError(Error):
 
 
 class ChromeEBuild(portage_util.EBuild):
-    """Thin sub-class of EBuild that adds a few small helpers."""
+    """Thin subclass of EBuild that adds a few small helpers."""
 
     chrome_version_re = re.compile(r".*-(%s|9999).*" % CHROME_VERSION_REGEX)
     chrome_version = ""
@@ -71,6 +79,7 @@ class ChromeEBuild(portage_util.EBuild):
 
     @property
     def is_unstable(self) -> bool:
+        """Check if the Chrome ebuild is unstable."""
         return not self.is_stable
 
     @property
@@ -101,7 +110,8 @@ def get_version_from_refs(refs: List[GitRef]) -> str:
     return best_version(versions)
 
 
-def best_version(versions: List[str]) -> str:
+def best_version(versions: Collection[str]) -> str:
+    """Find the best Chrome version."""
     # Convert each version from a string like "78.0.3876.1" to a list of ints
     # to compare them, find the most recent (max), and then reconstruct the
     # version string.
@@ -136,7 +146,7 @@ def best_chrome_ebuild(ebuilds: List[ChromeEBuild]) -> ChromeEBuild:
 
 
 def get_stable_chrome_version() -> str:
-    """Get the chrome version from the latest, stable chrome ebuild."""
+    """Get the Chrome version from the latest, stable chrome ebuild."""
     return _get_best_stable_chrome_ebuild().chrome_version
 
 
@@ -149,7 +159,7 @@ def _get_best_stable_chrome_ebuild() -> ChromeEBuild:
 
 def _get_best_stable_chrome_ebuild_from_ebuilds(
     stable_ebuilds: List[ChromeEBuild],
-) -> ChromeEBuild:
+) -> Optional[ChromeEBuild]:
     """Get the highest versioned chrome ebuild from a list of stable ebuilds."""
     candidates = []
     # This is an artifact from the old process.
@@ -278,6 +288,7 @@ class UprevResult(object):
 
     @property
     def same_version_exists(self) -> bool:
+        """True when the prospective version already exists."""
         return self.outcome is Outcome.SAME_VERSION_EXISTS
 
     @property
@@ -311,6 +322,7 @@ class UprevChromeManager(object):
 
     @property
     def modified_ebuilds(self) -> List[str]:
+        """The list of ebuilds modified during the uprev."""
         return self._new_ebuild_files + self._removed_ebuild_files
 
     def uprev(self, package: str) -> UprevResult:
@@ -366,7 +378,7 @@ class UprevChromeManager(object):
         if not candidate:
             return True, None
 
-        # A candidate is only a valid uprev candidate if its chrome version
+        # A candidate is only a valid uprev candidate if its Chrome version
         # is no better than the target version. We can uprev equal versions
         # (i.e. a revision bump), but not older. E.g.:
         # Case 1 - Uprev: self._version = 78.0.0.0, Candidate = 77.0.0.0
@@ -399,7 +411,7 @@ class UprevChromeManager(object):
 
         Args:
           stable_candidate: ebuild that corresponds to the stable ebuild we are
-            revving from.  If None, builds the a new ebuild given the version
+            revving from.  If None, builds a new ebuild given the version
             and logic for chrome_rev type with revision set to 1.
           unstable_ebuild: ebuild corresponding to the unstable ebuild for chrome.
           package_name: package name.
@@ -519,7 +531,7 @@ class UprevOverlayManager(object):
         self._removed_ebuild_files = None
         self._overlay_ebuilds = None
 
-        # We cleaned up self referential ebuilds by this version, but don't enforce
+        # We cleaned up self-referential ebuilds by this version, but don't enforce
         # the check on older ones to avoid breaking factory/firmware branches.
         root_version = chromeos_version.VersionInfo.from_repo(
             constants.SOURCE_ROOT
@@ -529,6 +541,7 @@ class UprevOverlayManager(object):
 
     @property
     def modified_ebuilds(self) -> List[str]:
+        """Get the list of ebuilds modified by the uprev."""
         if self._new_ebuild_files is not None:
             return self._new_ebuild_files + self._removed_ebuild_files
         else:
@@ -536,6 +549,7 @@ class UprevOverlayManager(object):
 
     @property
     def revved_packages(self) -> List[str]:
+        """Get the list of packages uprevved by the uprev."""
         return self._revved_packages or []
 
     def uprev(
@@ -548,7 +562,7 @@ class UprevOverlayManager(object):
 
         Args:
           package_list: A list of packages to uprev.
-          force: Boolean indicating whether or not to consider denylisted ebuilds.
+          force: Boolean indicating whether to consider deny-listed ebuilds.
         """
         # Use all found packages if an explicit package_list is not given.
         use_all = not bool(package_list)
@@ -676,7 +690,7 @@ class UprevOverlayManager(object):
             of whether they are in our set of packages.
           package_list: A set of the packages we want to gather. If
           use_all is True, this argument is ignored, and should be None.
-          force: Boolean indicating whether or not to consider denylisted ebuilds.
+          force: Boolean indicating whether to consider deny-listed ebuilds.
         """
         # See crrev.com/c/1257944 for origins of this.
         root_version = chromeos_version.VersionInfo.from_repo(
@@ -813,6 +827,7 @@ class UprevVersionedPackageResult(object):
 
     @property
     def uprevved(self):
+        """Check if there was an uprev."""
         return bool(self.modified)
 
 
