@@ -50,16 +50,28 @@ class Error(Exception):
     """Base error class for the module."""
 
 
-class NoUnstableEbuildError(Error):
-    """When no unstable ebuild can be found."""
-
-
 class EbuildUprevError(Error):
     """An error occurred while uprevving packages."""
 
 
 class EbuildManifestError(Error):
     """Error when running ebuild manifest."""
+
+
+class NoEbuildsError(Error, ValueError):
+    """When no ebuilds are provided."""
+
+
+class NoRefsError(Error, ValueError):
+    """When no git refs are given to fetch a version from."""
+
+
+class NoUnstableEbuildError(Error):
+    """When no unstable ebuild can be found."""
+
+
+class NoVersionsError(Error, ValueError):
+    """When no versions are provided."""
 
 
 class ChromeEBuild(portage_util.EBuild):
@@ -102,7 +114,7 @@ def get_version_from_refs(refs: List[GitRef]) -> str:
       Exception: if no unstable ebuild exists for Chrome.
     """
     if not refs:
-        raise TypeError
+        raise NoRefsError("|refs| must not be empty.")
 
     # Each tag is a version string, e.g. "78.0.3876.1", so extract the
     # tag name from the ref, e.g. "refs/tags/78.0.3876.1".
@@ -116,7 +128,7 @@ def best_version(versions: Collection[str]) -> str:
     # to compare them, find the most recent (max), and then reconstruct the
     # version string.
     if not versions:
-        raise TypeError
+        raise NoVersionsError("|versions| must not be empty.")
 
     version = max([int(part) for part in v.split(".")] for v in versions)
     return ".".join(str(part) for part in version)
@@ -125,9 +137,9 @@ def best_version(versions: Collection[str]) -> str:
 def best_chrome_ebuild(ebuilds: List[ChromeEBuild]) -> ChromeEBuild:
     """Determine the best/newest chrome ebuild from a list of ebuilds."""
     if not ebuilds:
-        raise TypeError
+        raise NoEbuildsError("|ebuilds| must not be empty.")
 
-    version = best_version(ebuild.chrome_version for ebuild in ebuilds)
+    version = best_version([ebuild.chrome_version for ebuild in ebuilds])
     candidates = [
         ebuild for ebuild in ebuilds if ebuild.chrome_version == version
     ]

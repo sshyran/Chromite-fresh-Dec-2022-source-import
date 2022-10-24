@@ -51,7 +51,7 @@ class ChromeVersionTest(cros_test_lib.TestCase):
 
     def test_no_versions_fail(self):
         """Test no versions given."""
-        with self.assertRaises(TypeError):
+        with self.assertRaises(uprev_lib.NoVersionsError):
             uprev_lib.best_version([])
 
     def test_unstable_only(self):
@@ -76,7 +76,7 @@ class ChromeVersionTest(cros_test_lib.TestCase):
 
     def test_no_refs_fail(self):
         """Test no versions given."""
-        with self.assertRaises(TypeError):
+        with self.assertRaises(uprev_lib.NoRefsError):
             uprev_lib.get_version_from_refs([])
 
 
@@ -118,7 +118,7 @@ class ChromeEbuildVersionTest(cros_test_lib.MockTempDirTestCase):
 
     def test_no_ebuilds(self):
         """Test error on no ebuilds provided."""
-        with self.assertRaises(TypeError):
+        with self.assertRaises(uprev_lib.NoEbuildsError):
             uprev_lib.best_chrome_ebuild([])
 
     def test_single_ebuild(self):

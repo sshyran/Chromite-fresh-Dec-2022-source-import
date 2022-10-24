@@ -2333,7 +2333,7 @@ class UprevLacrosInParallelTest(cros_test_lib.MockTestCase):
         self.PatchObject(
             uprev_lib, "uprev_workon_ebuild_to_version", side_effect=[None]
         )
-        with self.assertRaises(TypeError):
+        with self.assertRaises(uprev_lib.NoRefsError):
             packages.uprev_lacros_in_parallel(None, [], None)
 
     def test_lacros_uprev_revision_bump(self):
