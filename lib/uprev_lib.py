@@ -811,6 +811,7 @@ class UprevVersionedPackageResult(object):
     def extend(self, other: "UprevVersionedPackageResult"):
         """Adds another result from an existing result."""
         self.modified.extend(other.modified)
+        return self
 
     def __iadd__(
         self, other: "UprevVersionedPackageResult"
