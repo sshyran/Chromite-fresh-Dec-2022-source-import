@@ -54,6 +54,7 @@ class TryCommandTest(cros_test_lib.RunCommandTestCase):
             ("--flag", "--flag"),
             ("-contains-dash", "--contains-dash"),
             ("[-flag]", "[--flag]"),
+            ("-g", "-g"),
         ):
             actual_out = cros_try._ModifyFlagsToDoubleDashes(in_str)
             self.assertEqual(actual_out, expected_out)

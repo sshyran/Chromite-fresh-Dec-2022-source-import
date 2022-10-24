@@ -78,12 +78,12 @@ def _ModifyFlagsToDoubleDashes(message: str) -> str:
     Go bins like `try` accept both one-dash flags (-foo) and two-dash flags
     (--foo). But their help messages only report the one-dash version. For
     consistency with other `cros` tools, we want to print a help message with
-    two dashes.
+    two dashes. Single-character flags (ex. '-g') should not be modified.
 
     This function edits the messages output by `try` into the desired format.
     """
     return re.sub(
-        r"(^|[^A-Za-z0-9_\-])-(\w[A-Za-z0-9_\-]*)\b", r"\1--\2", message
+        r"(^|[^A-Za-z0-9_\-])-(\w[A-Za-z0-9_\-]+)\b", r"\1--\2", message
     )
 
 
