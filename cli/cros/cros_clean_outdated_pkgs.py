@@ -27,6 +27,7 @@ IGNORED_REPOSITORIES = frozenset(["crossdev"])
 # TODO: better detect all packages that are part of "system profile" or are
 # otherwise crucial, and must never be removed, like bash, portage or awk.
 SYSTEM_PACKAGES = {
+    "app-admin/",
     "app-arch/",
     "app-misc/ca-certificates",
     "app-misc/pax-utils",
@@ -36,6 +37,7 @@ SYSTEM_PACKAGES = {
     "sys-apps/",
     "sys-devel/",
     "sys-libs/",
+    "sys-process/",
 }
 
 CHROME_PACKAGES = [
