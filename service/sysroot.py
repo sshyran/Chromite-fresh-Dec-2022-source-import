@@ -638,6 +638,7 @@ def _create_sysroot(
     output_dir: str,
     output_file: str,
     package_list: List[str],
+    deps_only: bool = True,
 ) -> str:
     """Create a sysroot to use.
 
@@ -648,6 +649,7 @@ def _create_sysroot(
       output_dir: The path to write artifacts to.
       output_file: Name of the archive to output.
       package_list: List of packages to use.
+      deps_only: Whether to pass --deps-only.
 
     Returns:
       Path to the sysroot tar file.
@@ -658,10 +660,11 @@ def _create_sysroot(
         "/tmp",
         "--board",
         build_target.name,
-        "--deps-only",
         "--package",
         " ".join(package_list),
     ]
+    if deps_only:
+        cmd.append("--deps-only")
     cros_build_lib.run(
         cmd,
         cwd=constants.SOURCE_ROOT,
@@ -729,6 +732,7 @@ def CreateFuzzerSysroot(
         output_dir,
         "sysroot_virtual_target-os.tar.xz",
         ["virtual/target-fuzzers"],
+        deps_only=False,
     )
 
 
