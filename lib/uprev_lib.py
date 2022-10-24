@@ -105,10 +105,6 @@ class ChromeEBuild(portage_util.EBuild):
         """Check if the Chrome ebuild is unstable."""
         return not self.is_stable
 
-    @property
-    def atom(self) -> str:
-        return "%s-%s" % (self.package, self.version)
-
 
 def get_version_from_refs(refs: List[GitRef]) -> str:
     """Get the version to use from the list of provided tags.
