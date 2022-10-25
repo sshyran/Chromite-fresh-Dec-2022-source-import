@@ -639,9 +639,9 @@ def _create_sysroot(
     _sysroot_class,
     build_target: "build_target_lib.BuildTarget",
     output_dir: str,
-    output_file: str,
     package_list: List[str],
     deps_only: bool = True,
+    output_file: str = "",
 ) -> str:
     """Create a sysroot to use.
 
@@ -650,9 +650,9 @@ def _create_sysroot(
       sysroot_class: The sysroot class used for these artifacts.
       build_target: The build target used for these artifacts.
       output_dir: The path to write artifacts to.
-      output_file: Name of the archive to output.
       package_list: List of packages to use.
       deps_only: Whether to pass --deps-only.
+      output_file: Name of the archive to output.
 
     Returns:
       Path to the sysroot tar file.
@@ -668,6 +668,8 @@ def _create_sysroot(
     ]
     if deps_only:
         cmd.append("--deps-only")
+    if output_file:
+        cmd.extend(["--out-file", output_file])
     cros_build_lib.run(
         cmd,
         cwd=constants.SOURCE_ROOT,
@@ -706,8 +708,8 @@ def CreateSimpleChromeSysroot(
         _sysroot_class,
         build_target,
         output_dir,
-        constants.CHROME_SYSROOT_TAR,
         [constants.CHROME_CP],
+        output_file=constants.CHROME_SYSROOT_TAR,
     )
 
 
@@ -733,9 +735,9 @@ def CreateFuzzerSysroot(
         _sysroot_class,
         build_target,
         output_dir,
-        "sysroot_virtual_target-os.tar.xz",
         ["virtual/target-fuzzers"],
         deps_only=False,
+        output_file="sysroot_virtual_target-os.tar.xz",
     )
 
 
