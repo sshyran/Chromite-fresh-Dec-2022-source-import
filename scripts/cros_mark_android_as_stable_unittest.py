@@ -78,7 +78,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
 
         archs = ["arm", "arm64", "x86", "x86_64"]
         build_types = ["user", "userdebug"]
-        runtime_datas = ["gms_core_cache", "ureadahead_pack", "tts_cache"]
+        runtime_datas = ["gms_core_cache", "ureadahead_pack_host", "tts_cache"]
 
         for arch in archs:
             for build_type in build_types:
@@ -151,7 +151,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
 
         # Override few as existing.
         path1 = (
-            f"{self.runtime_artifacts_bucket_url}/ureadahead_pack_x86_64_"
+            f"{self.runtime_artifacts_bucket_url}/ureadahead_pack_host_x86_64_"
             f"user_{android_version}.tar"
         )
         self.gs_mock.AddCmdResult(
@@ -181,7 +181,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
         version_reference = "${PV}"
         expectation1 = (
             f"{self.runtime_artifacts_bucket_url}/"
-            f"ureadahead_pack_x86_64_user_{version_reference}.tar"
+            f"ureadahead_pack_host_x86_64_user_{version_reference}.tar"
         )
         expectation2 = (
             f"{self.runtime_artifacts_bucket_url}/"
@@ -193,7 +193,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
         )
         self.assertEqual(
             {
-                "X86_64_USER_UREADAHEAD_PACK": expectation1,
+                "X86_64_USER_UREADAHEAD_PACK_HOST": expectation1,
                 "ARM_USERDEBUG_GMS_CORE_CACHE": expectation2,
                 "ARM64_USER_TTS_CACHE": expectation3,
             },
@@ -209,7 +209,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
 
         # Override few as existing.
         path1 = (
-            f"{self.runtime_artifacts_bucket_url}/ureadahead_pack_x86_64_"
+            f"{self.runtime_artifacts_bucket_url}/ureadahead_pack_host_x86_64_"
             f"user_{android_pin_version}.tar"
         )
         self.gs_mock.AddCmdResult(
@@ -242,7 +242,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
         version_reference = "50"
         expectation1 = (
             f"{self.runtime_artifacts_bucket_url}/"
-            f"ureadahead_pack_x86_64_user_{version_reference}.tar"
+            f"ureadahead_pack_host_x86_64_user_{version_reference}.tar"
         )
         expectation2 = (
             f"{self.runtime_artifacts_bucket_url}/"
@@ -250,7 +250,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
         )
         self.assertEqual(
             {
-                "X86_64_USER_UREADAHEAD_PACK": expectation1,
+                "X86_64_USER_UREADAHEAD_PACK_HOST": expectation1,
                 "ARM_USERDEBUG_GMS_CORE_CACHE": expectation2,
             },
             variables,

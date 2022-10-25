@@ -158,7 +158,7 @@ def FindDataCollectorArtifacts(
     """
     variables = {}
 
-    buckets = ["ureadahead_pack", "gms_core_cache", "tts_cache"]
+    buckets = ["ureadahead_pack_host", "gms_core_cache", "tts_cache"]
     archs = ["arm", "arm64", "x86", "x86_64"]
     build_types = ["user", "userdebug"]
 
