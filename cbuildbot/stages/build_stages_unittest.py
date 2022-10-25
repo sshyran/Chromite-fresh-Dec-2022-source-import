@@ -142,10 +142,7 @@ class UpdateSDKTest(_RunAbstractStageTestCase):
     def _RunBin(self, dir_exists):
         """Helper for testing a binary builder."""
         self._Run(dir_exists)
-        update_nousepkg = (
-            not self._run.config.usepkg_toolchain
-            or self._run.options.latest_toolchain
-        )
+        update_nousepkg = self._run.options.latest_toolchain
         self.assertCommandContains(
             ["./update_chroot", "--nousepkg"], expected=update_nousepkg
         )
@@ -161,12 +158,6 @@ class UpdateSDKTest(_RunAbstractStageTestCase):
         self._PrepareBin()
         self._run.options.latest_toolchain = True
         self._RunBin(dir_exists=True)
-
-    def testBinBuildWithNoToolchainPackages(self):
-        """Tests whether we use --nousepkg for creating the board."""
-        self._PrepareBin()
-        self._run.config.usepkg_toolchain = False
-        self._RunBin(dir_exists=False)
 
 
 class SetupBoardTest(_RunAbstractStageTestCase):
@@ -242,12 +233,6 @@ class SetupBoardTest(_RunAbstractStageTestCase):
         self._PrepareBin()
         self._run.options.latest_toolchain = True
         self._RunBin(dir_exists=True)
-
-    def testBinBuildWithNoToolchainPackages(self):
-        """Tests whether we use --nousepkg for creating the board."""
-        self._PrepareBin()
-        self._run.config.usepkg_toolchain = False
-        self._RunBin(dir_exists=False)
 
     def testSDKBuild(self):
         """Tests whether we use --skip_chroot_upgrade for SDK builds."""
@@ -359,7 +344,7 @@ class BuildPackagesStageTest(
         """Test with the config for the specified bot_id."""
         self._Prepare(bot_id)
         self._run.options.tests = options_tests
-        self.build_packages = os.path.join(
+        build_packages = os.path.join(
             self.tempdir,
             "buildroot",
             constants.CHROMITE_BIN_SUBDIR,
@@ -368,7 +353,7 @@ class BuildPackagesStageTest(
 
         with self.RunStageWithConfig(self._mock_configurator) as rc:
             cfg = self._run.config
-            rc.assertCommandContains([self.build_packages])
+            rc.assertCommandContains([build_packages])
             rc.assertCommandContains(["--skip-chroot-upgrade"])
             rc.assertCommandContains(
                 ["--no-usepkg"], expected=not cfg["usepkg_build_packages"]

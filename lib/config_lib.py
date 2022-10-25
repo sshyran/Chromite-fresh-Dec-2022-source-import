@@ -750,8 +750,6 @@ def DefaultSettings():
         # parallel_emerge, cros_set_lsb_release, and chromeos_version.sh. See
         # bug chromium-os:14649
         chromeos_official=False,
-        # Use binary packages for building the toolchain. (emerge --getbinpkg)
-        usepkg_toolchain=True,
         # Use binary packages for build_packages and setup_board.
         usepkg_build_packages=True,
         # Does this profile need to sync chrome?  If None, we guess based on

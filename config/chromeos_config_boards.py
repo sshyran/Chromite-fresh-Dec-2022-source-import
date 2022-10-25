@@ -66,7 +66,6 @@ x86_internal_release_boards = frozenset(
 x86_external_boards = frozenset(
     [
         "amd64-generic",
-        "x32-generic",
     ]
 )
 
@@ -140,12 +139,6 @@ labstation_boards = frozenset(
 )
 
 nofactory_boards = termina_boards | reven_boards | labstation_boards
-
-toolchains_from_source = frozenset(
-    [
-        "x32-generic",
-    ]
-)
 
 noimagetest_boards = (
     termina_boards | scribe_boards | wshwos_boards | dustbuster_boards

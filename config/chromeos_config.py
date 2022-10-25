@@ -657,8 +657,6 @@ def CreateBoardConfigs(site_config, boards_dict, ge_build_config):
                 factory_install_netboot=False,
                 images=remove_images(["factory_install"]),
             )
-        if board in chromeos_boards.toolchains_from_source:
-            board_config.apply(usepkg_toolchain=False)
         if board in chromeos_boards.noimagetest_boards:
             board_config.apply(image_test=False)
         if board in chromeos_boards.nohwqual_boards:

@@ -587,17 +587,13 @@ class UpdateSDKStage(generic_stages.BuilderStage):
         # Ensure we don't run on SDK builder. https://crbug.com/225509
         assert self._run.config.build_type != constants.CHROOT_BUILDER_TYPE
 
-        usepkg_toolchain = (
-            self._run.config.usepkg_toolchain and not self._latest_toolchain
-        )
-
         chroot_args = None
         if self._run.options.cache_dir:
             chroot_args = ["--cache-dir", self._run.options.cache_dir]
 
         commands.UpdateChroot(
             self._build_root,
-            usepkg=usepkg_toolchain,
+            usepkg=not self._latest_toolchain,
             extra_env=self._portage_extra_env,
             chroot_args=chroot_args,
         )
@@ -617,12 +613,9 @@ class SetupBoardStage(generic_stages.BoardSpecificBuilderStage, InitSDKStage):
         # Ensure we don't run on SDK builder. https://crbug.com/225509
         if self._run.config.build_type != constants.CHROOT_BUILDER_TYPE:
             # Setup board's toolchain.
-            usepkg_toolchain = (
-                self._run.config.usepkg_toolchain and not self._latest_toolchain
-            )
             commands.SetupToolchains(
                 self._build_root,
-                usepkg=usepkg_toolchain,
+                usepkg=not self._latest_toolchain,
                 targets="boards",
                 boards=self._current_board,
                 chroot_args=chroot_args,

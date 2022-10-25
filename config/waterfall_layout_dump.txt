@@ -1430,9 +1430,6 @@
   wristpin-llvm-toolchain-tryjob
   wristpin-rapid
   wristpin-release-tryjob
-  x32-generic-full-tryjob
-  x32-generic-llvm-next-toolchain-tryjob
-  x32-generic-llvm-toolchain-tryjob
   zork-arc-r-full-tryjob
   zork-arc-r-llvm-next-toolchain-tryjob
   zork-arc-r-llvm-toolchain-tryjob
