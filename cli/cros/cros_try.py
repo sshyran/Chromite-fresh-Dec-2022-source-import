@@ -20,7 +20,7 @@ from chromite.lib import cros_build_lib
 
 
 CIPD_TRY_PACKAGE = "chromiumos/infra/try/linux-amd64"
-PINNED_TRY_VERSION = "KV2Fc_xe8IsjZRypqi10EN5N0w4pp28KaTEN-_oFTN4C"
+PINNED_TRY_VERSION = "t7O7YzKiBqEvXQZtDExWYA-bD8s2J1ddodX3Gy4SxbkC"
 
 
 @command.command_decorator("try")
