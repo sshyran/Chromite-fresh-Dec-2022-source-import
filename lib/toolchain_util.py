@@ -623,8 +623,10 @@ def _GetProfileAge(profile: str, artifact_type: str) -> int:
     """
     if artifact_type in ("kernel_afdo", "cwp"):
         return (
-            datetime.datetime.utcnow()
-            - datetime.datetime.utcfromtimestamp(int(profile.split("-")[-1]))
+            datetime.datetime.now(tz=datetime.timezone.utc)
+            - datetime.datetime.fromtimestamp(
+                int(profile.split("-")[-1]), datetime.timezone.utc
+            )
         ).days
 
     raise ValueError(

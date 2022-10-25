@@ -540,15 +540,29 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
         self.gsc_exists = None
         self.gsc_ls = None
         self.patch_ebuild = mock.MagicMock()
+        # Save datetime for use in mocks.
+        self.dt = datetime.datetime
+        self.now = datetime.datetime.fromtimestamp(
+            1658747184,
+            tz=datetime.timezone.utc,
+        )
+        self.day_old_ts = int(
+            datetime.datetime.timestamp(self.now - datetime.timedelta(days=1))
+        )
+        self.week_old_ts = int(
+            datetime.datetime.timestamp(self.now - datetime.timedelta(weeks=1))
+        )
+        self.month_old_ts = int(
+            datetime.datetime.timestamp(self.now - datetime.timedelta(days=30))
+        )
         self.orderfile_name = (
             "chromeos-chrome-orderfile-field-78-3877.0-1567418235-"
             "benchmark-78.0.3893.0-r1.orderfile"
         )
         self.verified_afdo_name = (
-            "chromeos-chrome-amd64-atom-78-3876.0-1658253984-"
+            f"chromeos-chrome-amd64-atom-78-3876.0-{self.week_old_ts}-"
             "benchmark-78.0.3839.0-r1-redacted.afdo"
         )
-        self.afdo_name = "chromeos-chrome-amd64-78.0.3893.0-r1.afdo"
         self.PatchObject(
             toolchain_util._CommonPrepareBundle,
             "_GetOrderfileName",
@@ -570,37 +584,18 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
             "BENCHMARK_AFDO_GS_URL",
             new=self.benchmark_gs_location,
         )
-        # Save datetime for use in mocks.
-        self.dt = datetime.datetime
-        self.utcnow = datetime.datetime.utcfromtimestamp(
-            1658747184
-        ) + datetime.timedelta(days=1)
-        self.day_old_ts = int(
-            datetime.datetime.timestamp(
-                self.utcnow - datetime.timedelta(days=1)
-            )
-        )
-        self.week_old_ts = int(
-            datetime.datetime.timestamp(
-                self.utcnow - datetime.timedelta(weeks=1)
-            )
-        )
-        self.month_old_ts = int(
-            datetime.datetime.timestamp(
-                self.utcnow - datetime.timedelta(days=30)
-            )
-        )
 
         class mock_datetime(object):
             """Class for mocking datetime.datetime."""
 
             @staticmethod
-            def utcfromtimestamp(ts):
-                return self.dt.utcfromtimestamp(ts)
+            def fromtimestamp(ts, tz=None):
+                return self.dt.fromtimestamp(ts, tz)
 
             @staticmethod
-            def utcnow():
-                return self.utcnow
+            def now(tz=None):
+                del tz
+                return self.now
 
         self.PatchObject(toolchain_util.datetime, "datetime", new=mock_datetime)
 
@@ -988,6 +983,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
                 "chromeos-chrome-amd64-78.0.3839.0_rc-r1.afdo.bz2",
             )
         if atom_cwp_location in gs_urls:
+            # Profile is 1-week old compared to self.now.
             return os.path.join(
                 atom_cwp_location,
                 f"R78-3876.0-{self.week_old_ts}.afdo.xz",
@@ -1001,7 +997,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
             return self.mockFindLatestAFDOArtifactAtom(gs_urls, rank)
         except toolchain_util.NoProfilesInGsBucketError:
             if arm_cwp_location in gs_urls:
-                # 1656180384 is 1-month older than self.utcnow.
+                # Profile is 1-day old compared to self.now.
                 return os.path.join(
                     arm_cwp_location,
                     f"R78-3877.0-{self.day_old_ts}.afdo.xz",
@@ -1016,7 +1012,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
             return self.mockFindLatestAFDOArtifactAtom(gs_urls, rank)
         except toolchain_util.NoProfilesInGsBucketError:
             if arm_cwp_location in gs_urls:
-                # 1656180384 is 1-month older than self.utcnow.
+                # Profile is 1-month old compared to self.now.
                 return os.path.join(
                     arm_cwp_location,
                     f"R78-3875.0-{self.month_old_ts}.afdo.xz",
