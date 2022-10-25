@@ -25,7 +25,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z2go.chromium.org/chromiumos/config/go/test/artifact',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n*chromiumos/test/artifact/test_result.proto\x12\x18\x63hromiumos.test.artifact\x1a\x1d\x63hromiumos/storage_path.proto\x1a)chromiumos/test/api/provision_state.proto\x1a,chromiumos/test/api/test_case_metadata.proto\x1a*chromiumos/test/api/test_case_result.proto\x1a!chromiumos/test/api/v1/plan.proto\x1a!chromiumos/test/lab/api/dut.proto\"\x96\x01\n\nTestResult\x12\x0f\n\x07version\x18\x01 \x01(\r\x12\x41\n\x0ftest_invocation\x18\x02 \x01(\x0b\x32(.chromiumos.test.artifact.TestInvocation\x12\x34\n\ttest_runs\x18\x03 \x03(\x0b\x32!.chromiumos.test.artifact.TestRun\"\xe1\x01\n\x0eTestInvocation\x12:\n\x0c\x64ut_topology\x18\x01 \x01(\x0b\x32$.chromiumos.test.lab.api.DutTopology\x12G\n\x16primary_execution_info\x18\x02 \x01(\x0b\x32\'.chromiumos.test.artifact.ExecutionInfo\x12J\n\x19secondary_executions_info\x18\x03 \x03(\x0b\x32\'.chromiumos.test.artifact.ExecutionInfo\"\xd7\x03\n\x07TestRun\x12>\n\x0etest_case_info\x18\x01 \x01(\x0b\x32&.chromiumos.test.artifact.TestCaseInfo\x12*\n\tlogs_info\x18\x02 \x03(\x0b\x32\x17.chromiumos.StoragePath\x12>\n\x0c\x64ut_topology\x18\x03 \x01(\x0b\x32$.chromiumos.test.lab.api.DutTopologyB\x02\x18\x01\x12K\n\x16primary_execution_info\x18\x04 \x01(\x0b\x32\'.chromiumos.test.artifact.ExecutionInfoB\x02\x18\x01\x12N\n\x19secondary_executions_info\x18\x05 \x03(\x0b\x32\'.chromiumos.test.artifact.ExecutionInfoB\x02\x18\x01\x12>\n\x0e\x63ustom_results\x18\x06 \x03(\x0b\x32&.chromiumos.test.artifact.CustomResult\x12\x43\n\x0ctest_plan_id\x18\x07 \x01(\x0b\x32-.chromiumos.test.api.v1.HWTestPlan.TestPlanId\"\xb5\x01\n\x0cTestCaseInfo\x12\x41\n\x12test_case_metadata\x18\x01 \x01(\x0b\x32%.chromiumos.test.api.TestCaseMetadata\x12=\n\x10test_case_result\x18\x02 \x01(\x0b\x32#.chromiumos.test.api.TestCaseResult\x12\x14\n\x0c\x64isplay_name\x18\x03 \x01(\t\x12\r\n\x05suite\x18\x04 \x01(\t\"\xad\x01\n\tBuildInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x11\n\tmilestone\x18\x02 \x01(\x04\x12\x19\n\x11\x63hrome_os_version\x18\x03 \x01(\t\x12\x0e\n\x06source\x18\x04 \x01(\t\x12\x18\n\x10snapshot_version\x18\x05 \x01(\t\x12\x14\n\x0c\x62uild_target\x18\x06 \x01(\t\x12\x15\n\rboard_variant\x18\x07 \x01(\t\x12\r\n\x05\x62oard\x18\x08 \x01(\t\"\xda\x01\n\x07\x44utInfo\x12)\n\x03\x64ut\x18\x01 \x01(\x0b\x32\x1c.chromiumos.test.lab.api.Dut\x12<\n\x0fprovision_state\x18\x02 \x01(\x0b\x32#.chromiumos.test.api.ProvisionState\x12\x39\n\x04tags\x18\x03 \x03(\x0b\x32+.chromiumos.test.artifact.DutInfo.TagsEntry\x1a+\n\tTagsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"}\n\rExecutionInfo\x12\x37\n\nbuild_info\x18\x01 \x01(\x0b\x32#.chromiumos.test.artifact.BuildInfo\x12\x33\n\x08\x64ut_info\x18\x02 \x01(\x0b\x32!.chromiumos.test.artifact.DutInfo\"\x8f\x01\n\x0c\x43ustomResult\x12\x35\n\x14result_artifact_path\x18\x01 \x01(\x0b\x32\x17.chromiumos.StoragePath\x12\x39\n\x03\x63ts\x18\x02 \x01(\x0b\x32*.chromiumos.test.artifact.CustomResult.CtsH\x00\x1a\x05\n\x03\x43tsB\x06\n\x04typeB4Z2go.chromium.org/chromiumos/config/go/test/artifactb\x06proto3'
+  serialized_pb=b'\n*chromiumos/test/artifact/test_result.proto\x12\x18\x63hromiumos.test.artifact\x1a\x1d\x63hromiumos/storage_path.proto\x1a)chromiumos/test/api/provision_state.proto\x1a,chromiumos/test/api/test_case_metadata.proto\x1a*chromiumos/test/api/test_case_result.proto\x1a!chromiumos/test/api/v1/plan.proto\x1a!chromiumos/test/lab/api/dut.proto\"\x96\x01\n\nTestResult\x12\x0f\n\x07version\x18\x01 \x01(\r\x12\x41\n\x0ftest_invocation\x18\x02 \x01(\x0b\x32(.chromiumos.test.artifact.TestInvocation\x12\x34\n\ttest_runs\x18\x03 \x03(\x0b\x32!.chromiumos.test.artifact.TestRun\"\xe1\x01\n\x0eTestInvocation\x12:\n\x0c\x64ut_topology\x18\x01 \x01(\x0b\x32$.chromiumos.test.lab.api.DutTopology\x12G\n\x16primary_execution_info\x18\x02 \x01(\x0b\x32\'.chromiumos.test.artifact.ExecutionInfo\x12J\n\x19secondary_executions_info\x18\x03 \x03(\x0b\x32\'.chromiumos.test.artifact.ExecutionInfo\"\xfa\x01\n\x07TestRun\x12>\n\x0etest_case_info\x18\x01 \x01(\x0b\x32&.chromiumos.test.artifact.TestCaseInfo\x12*\n\tlogs_info\x18\x02 \x03(\x0b\x32\x17.chromiumos.StoragePath\x12>\n\x0e\x63ustom_results\x18\x03 \x03(\x0b\x32&.chromiumos.test.artifact.CustomResult\x12\x43\n\x0ctest_plan_id\x18\x04 \x01(\x0b\x32-.chromiumos.test.api.v1.HWTestPlan.TestPlanId\"\xb5\x01\n\x0cTestCaseInfo\x12\x41\n\x12test_case_metadata\x18\x01 \x01(\x0b\x32%.chromiumos.test.api.TestCaseMetadata\x12=\n\x10test_case_result\x18\x02 \x01(\x0b\x32#.chromiumos.test.api.TestCaseResult\x12\x14\n\x0c\x64isplay_name\x18\x03 \x01(\t\x12\r\n\x05suite\x18\x04 \x01(\t\"\xad\x01\n\tBuildInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x11\n\tmilestone\x18\x02 \x01(\x04\x12\x19\n\x11\x63hrome_os_version\x18\x03 \x01(\t\x12\x0e\n\x06source\x18\x04 \x01(\t\x12\x18\n\x10snapshot_version\x18\x05 \x01(\t\x12\x14\n\x0c\x62uild_target\x18\x06 \x01(\t\x12\x15\n\rboard_variant\x18\x07 \x01(\t\x12\r\n\x05\x62oard\x18\x08 \x01(\t\"\xda\x01\n\x07\x44utInfo\x12)\n\x03\x64ut\x18\x01 \x01(\x0b\x32\x1c.chromiumos.test.lab.api.Dut\x12<\n\x0fprovision_state\x18\x02 \x01(\x0b\x32#.chromiumos.test.api.ProvisionState\x12\x39\n\x04tags\x18\x03 \x03(\x0b\x32+.chromiumos.test.artifact.DutInfo.TagsEntry\x1a+\n\tTagsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"}\n\rExecutionInfo\x12\x37\n\nbuild_info\x18\x01 \x01(\x0b\x32#.chromiumos.test.artifact.BuildInfo\x12\x33\n\x08\x64ut_info\x18\x02 \x01(\x0b\x32!.chromiumos.test.artifact.DutInfo\"\x8f\x01\n\x0c\x43ustomResult\x12\x35\n\x14result_artifact_path\x18\x01 \x01(\x0b\x32\x17.chromiumos.StoragePath\x12\x39\n\x03\x63ts\x18\x02 \x01(\x0b\x32*.chromiumos.test.artifact.CustomResult.CtsH\x00\x1a\x05\n\x03\x43tsB\x06\n\x04typeB4Z2go.chromium.org/chromiumos/config/go/test/artifactb\x06proto3'
   ,
   dependencies=[chromiumos_dot_storage__path__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_provision__state__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_test__case__metadata__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_test__case__result__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_v1_dot_plan__pb2.DESCRIPTOR,chromiumos_dot_test_dot_lab_dot_api_dot_dut__pb2.DESCRIPTOR,])
 
@@ -147,36 +147,15 @@ _TESTRUN = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='dut_topology', full_name='chromiumos.test.artifact.TestRun.dut_topology', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\030\001', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='primary_execution_info', full_name='chromiumos.test.artifact.TestRun.primary_execution_info', index=3,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\030\001', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='secondary_executions_info', full_name='chromiumos.test.artifact.TestRun.secondary_executions_info', index=4,
-      number=5, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\030\001', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='custom_results', full_name='chromiumos.test.artifact.TestRun.custom_results', index=5,
-      number=6, type=11, cpp_type=10, label=3,
+      name='custom_results', full_name='chromiumos.test.artifact.TestRun.custom_results', index=2,
+      number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='test_plan_id', full_name='chromiumos.test.artifact.TestRun.test_plan_id', index=6,
-      number=7, type=11, cpp_type=10, label=1,
+      name='test_plan_id', full_name='chromiumos.test.artifact.TestRun.test_plan_id', index=3,
+      number=4, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -194,7 +173,7 @@ _TESTRUN = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=688,
-  serialized_end=1159,
+  serialized_end=938,
 )
 
 
@@ -246,8 +225,8 @@ _TESTCASEINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1162,
-  serialized_end=1343,
+  serialized_start=941,
+  serialized_end=1122,
 )
 
 
@@ -327,8 +306,8 @@ _BUILDINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1346,
-  serialized_end=1519,
+  serialized_start=1125,
+  serialized_end=1298,
 )
 
 
@@ -366,8 +345,8 @@ _DUTINFO_TAGSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1697,
-  serialized_end=1740,
+  serialized_start=1476,
+  serialized_end=1519,
 )
 
 _DUTINFO = _descriptor.Descriptor(
@@ -411,8 +390,8 @@ _DUTINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1522,
-  serialized_end=1740,
+  serialized_start=1301,
+  serialized_end=1519,
 )
 
 
@@ -450,8 +429,8 @@ _EXECUTIONINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1742,
-  serialized_end=1867,
+  serialized_start=1521,
+  serialized_end=1646,
 )
 
 
@@ -475,8 +454,8 @@ _CUSTOMRESULT_CTS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2000,
-  serialized_end=2005,
+  serialized_start=1779,
+  serialized_end=1784,
 )
 
 _CUSTOMRESULT = _descriptor.Descriptor(
@@ -518,8 +497,8 @@ _CUSTOMRESULT = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=1870,
-  serialized_end=2013,
+  serialized_start=1649,
+  serialized_end=1792,
 )
 
 _TESTRESULT.fields_by_name['test_invocation'].message_type = _TESTINVOCATION
@@ -529,9 +508,6 @@ _TESTINVOCATION.fields_by_name['primary_execution_info'].message_type = _EXECUTI
 _TESTINVOCATION.fields_by_name['secondary_executions_info'].message_type = _EXECUTIONINFO
 _TESTRUN.fields_by_name['test_case_info'].message_type = _TESTCASEINFO
 _TESTRUN.fields_by_name['logs_info'].message_type = chromiumos_dot_storage__path__pb2._STORAGEPATH
-_TESTRUN.fields_by_name['dut_topology'].message_type = chromiumos_dot_test_dot_lab_dot_api_dot_dut__pb2._DUTTOPOLOGY
-_TESTRUN.fields_by_name['primary_execution_info'].message_type = _EXECUTIONINFO
-_TESTRUN.fields_by_name['secondary_executions_info'].message_type = _EXECUTIONINFO
 _TESTRUN.fields_by_name['custom_results'].message_type = _CUSTOMRESULT
 _TESTRUN.fields_by_name['test_plan_id'].message_type = chromiumos_dot_test_dot_api_dot_v1_dot_plan__pb2._HWTESTPLAN_TESTPLANID
 _TESTCASEINFO.fields_by_name['test_case_metadata'].message_type = chromiumos_dot_test_dot_api_dot_test__case__metadata__pb2._TESTCASEMETADATA
@@ -632,8 +608,5 @@ _sym_db.RegisterMessage(CustomResult.Cts)
 
 
 DESCRIPTOR._options = None
-_TESTRUN.fields_by_name['dut_topology']._options = None
-_TESTRUN.fields_by_name['primary_execution_info']._options = None
-_TESTRUN.fields_by_name['secondary_executions_info']._options = None
 _DUTINFO_TAGSENTRY._options = None
 # @@protoc_insertion_point(module_scope)

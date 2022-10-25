@@ -13,6 +13,8 @@ _sym_db = _symbol_database.Default()
 
 from chromite.api.gen.test_platform.skylab_test_runner import config_pb2 as test__platform_dot_skylab__test__runner_dot_config__pb2
 from chromite.api.gen.test_platform.skylab_test_runner import request_pb2 as test__platform_dot_skylab__test__runner_dot_request__pb2
+from chromite.api.gen.test_platform.skylab_test_runner import cft_request_pb2 as test__platform_dot_skylab__test__runner_dot_cft__request__pb2
+from chromite.api.gen.test_platform.skylab_test_runner import common_config_pb2 as test__platform_dot_skylab__test__runner_dot_common__config__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -21,9 +23,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'ZPgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runner/steps',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n;test_platform/skylab_test_runner/steps/test_execution.proto\x12&test_platform.skylab_test_runner.steps\x1a-test_platform/skylab_test_runner/config.proto\x1a.test_platform/skylab_test_runner/request.proto\"\x87\x01\n\x0fRunTestsRequest\x12:\n\x07request\x18\x01 \x01(\x0b\x32).test_platform.skylab_test_runner.Request\x12\x38\n\x06\x63onfig\x18\x02 \x01(\x0b\x32(.test_platform.skylab_test_runner.Config\"2\n\x10RunTestsResponse\x12\x1e\n\x16\x65rror_summary_markdown\x18\x01 \x01(\tBRZPgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runner/stepsb\x06proto3'
+  serialized_pb=b'\n;test_platform/skylab_test_runner/steps/test_execution.proto\x12&test_platform.skylab_test_runner.steps\x1a-test_platform/skylab_test_runner/config.proto\x1a.test_platform/skylab_test_runner/request.proto\x1a\x32test_platform/skylab_test_runner/cft_request.proto\x1a\x34test_platform/skylab_test_runner/common_config.proto\"\x9a\x02\n\x0fRunTestsRequest\x12:\n\x07request\x18\x01 \x01(\x0b\x32).test_platform.skylab_test_runner.Request\x12\x38\n\x06\x63onfig\x18\x02 \x01(\x0b\x32(.test_platform.skylab_test_runner.Config\x12J\n\x10\x63\x66t_test_request\x18\x03 \x01(\x0b\x32\x30.test_platform.skylab_test_runner.CFTTestRequest\x12\x45\n\rcommon_config\x18\x04 \x01(\x0b\x32..test_platform.skylab_test_runner.CommonConfig\"2\n\x10RunTestsResponse\x12\x1e\n\x16\x65rror_summary_markdown\x18\x01 \x01(\tBRZPgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runner/stepsb\x06proto3'
   ,
-  dependencies=[test__platform_dot_skylab__test__runner_dot_config__pb2.DESCRIPTOR,test__platform_dot_skylab__test__runner_dot_request__pb2.DESCRIPTOR,])
+  dependencies=[test__platform_dot_skylab__test__runner_dot_config__pb2.DESCRIPTOR,test__platform_dot_skylab__test__runner_dot_request__pb2.DESCRIPTOR,test__platform_dot_skylab__test__runner_dot_cft__request__pb2.DESCRIPTOR,test__platform_dot_skylab__test__runner_dot_common__config__pb2.DESCRIPTOR,])
 
 
 
@@ -50,6 +52,20 @@ _RUNTESTSREQUEST = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='cft_test_request', full_name='test_platform.skylab_test_runner.steps.RunTestsRequest.cft_test_request', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='common_config', full_name='test_platform.skylab_test_runner.steps.RunTestsRequest.common_config', index=3,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -62,8 +78,8 @@ _RUNTESTSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=199,
-  serialized_end=334,
+  serialized_start=305,
+  serialized_end=587,
 )
 
 
@@ -94,12 +110,14 @@ _RUNTESTSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=336,
-  serialized_end=386,
+  serialized_start=589,
+  serialized_end=639,
 )
 
 _RUNTESTSREQUEST.fields_by_name['request'].message_type = test__platform_dot_skylab__test__runner_dot_request__pb2._REQUEST
 _RUNTESTSREQUEST.fields_by_name['config'].message_type = test__platform_dot_skylab__test__runner_dot_config__pb2._CONFIG
+_RUNTESTSREQUEST.fields_by_name['cft_test_request'].message_type = test__platform_dot_skylab__test__runner_dot_cft__request__pb2._CFTTESTREQUEST
+_RUNTESTSREQUEST.fields_by_name['common_config'].message_type = test__platform_dot_skylab__test__runner_dot_common__config__pb2._COMMONCONFIG
 DESCRIPTOR.message_types_by_name['RunTestsRequest'] = _RUNTESTSREQUEST
 DESCRIPTOR.message_types_by_name['RunTestsResponse'] = _RUNTESTSRESPONSE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)

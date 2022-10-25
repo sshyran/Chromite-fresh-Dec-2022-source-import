@@ -18,7 +18,7 @@ from chromite.api.gen_sdk.chromite.api import sysroot_pb2 as chromite_dot_api_do
 from chromite.api.gen_sdk.chromiumos import common_pb2 as chromiumos_dot_common__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1a\x63hromite/api/binhost.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\x1a\x1a\x63hromite/api/sysroot.proto\x1a\x17\x63hromiumos/common.proto\"-\n\x07\x42inhost\x12\x0b\n\x03uri\x18\x01 \x01(\t\x12\x15\n\rpackage_index\x18\x02 \x01(\t\".\n\x0cPackageIndex\x12\x1e\n\x04path\x18\x01 \x01(\x0b\x32\x10.chromiumos.Path\"?\n\x0e\x41\x63lArgsRequest\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\"k\n\x0f\x41\x63lArgsResponse\x12\x32\n\x04\x61rgs\x18\x01 \x03(\x0b\x32$.chromite.api.AclArgsResponse.AclArg\x1a$\n\x06\x41\x63lArg\x12\x0b\n\x03\x61rg\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"S\n\x11\x42inhostGetRequest\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\x0f\n\x07private\x18\x02 \x01(\x08\"=\n\x12\x42inhostGetResponse\x12\'\n\x08\x62inhosts\x18\x01 \x03(\x0b\x32\x15.chromite.api.Binhost\"\xdf\x01\n\x1cPrepareBinhostUploadsRequest\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\x0b\n\x03uri\x18\x02 \x01(\t\x12\"\n\x06\x63hroot\x18\x03 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\x07sysroot\x18\x04 \x01(\x0b\x32\x15.chromite.api.Sysroot\x12\x37\n\x13package_index_files\x18\x05 \x03(\x0b\x32\x1a.chromite.api.PackageIndex\"\x1c\n\x0cUploadTarget\x12\x0c\n\x04path\x18\x01 \x01(\t\"h\n\x1dPrepareBinhostUploadsResponse\x12\x13\n\x0buploads_dir\x18\x01 \x01(\t\x12\x32\n\x0eupload_targets\x18\x02 \x03(\x0b\x32\x1a.chromite.api.UploadTarget\"\x96\x01\n&PrepareDevInstallBinhostUploadsRequest\x12\x13\n\x0buploads_dir\x18\x01 \x01(\t\x12\x0b\n\x03uri\x18\x02 \x01(\t\x12\"\n\x06\x63hroot\x18\x03 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\x07sysroot\x18\x04 \x01(\x0b\x32\x15.chromite.api.Sysroot\"]\n\'PrepareDevInstallBinhostUploadsResponse\x12\x32\n\x0eupload_targets\x18\x01 \x03(\x0b\x32\x1a.chromite.api.UploadTarget\"\x87\x01\n\x11SetBinhostRequest\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\x0f\n\x07private\x18\x02 \x01(\x08\x12%\n\x03key\x18\x03 \x01(\x0e\x32\x18.chromite.api.BinhostKey\x12\x0b\n\x03uri\x18\x04 \x01(\t\")\n\x12SetBinhostResponse\x12\x13\n\x0boutput_file\x18\x01 \x01(\t\"m\n\x16RegenBuildCacheRequest\x12/\n\x0coverlay_type\x18\x01 \x01(\x0e\x32\x19.chromite.api.OverlayType\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\"|\n\x17RegenBuildCacheResponse\x12H\n\x11modified_overlays\x18\x01 \x03(\x0b\x32-.chromite.api.RegenBuildCacheResponse.Overlay\x1a\x17\n\x07Overlay\x12\x0c\n\x04path\x18\x01 \x01(\t*o\n\nBinhostKey\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\x16\n\x12POSTSUBMIT_BINHOST\x10\x01\x12!\n\x1dLATEST_RELEASE_CHROME_BINHOST\x10\x02\x12\x15\n\x11PREFLIGHT_BINHOST\x10\x03*\x87\x01\n\x0bOverlayType\x12\x1b\n\x17OVERLAYTYPE_UNSPECIFIED\x10\x00\x12\x14\n\x10OVERLAYTYPE_BOTH\x10\x01\x12\x16\n\x12OVERLAYTYPE_PUBLIC\x10\x02\x12\x17\n\x13OVERLAYTYPE_PRIVATE\x10\x03\x12\x14\n\x10OVERLAYTYPE_NONE\x10\x04\x32\x8c\x05\n\x0e\x42inhostService\x12[\n\x03Get\x12\x1f.chromite.api.BinhostGetRequest\x1a .chromite.api.BinhostGetResponse\"\x11\xc2\xed\x1a\r\n\x0bGetBinhosts\x12X\n\x19GetPrivatePrebuiltAclArgs\x12\x1c.chromite.api.AclArgsRequest\x1a\x1d.chromite.api.AclArgsResponse\x12p\n\x15PrepareBinhostUploads\x12*.chromite.api.PrepareBinhostUploadsRequest\x1a+.chromite.api.PrepareBinhostUploadsResponse\x12\x8e\x01\n\x1fPrepareDevInstallBinhostUploads\x12\x34.chromite.api.PrepareDevInstallBinhostUploadsRequest\x1a\x35.chromite.api.PrepareDevInstallBinhostUploadsResponse\x12O\n\nSetBinhost\x12\x1f.chromite.api.SetBinhostRequest\x1a .chromite.api.SetBinhostResponse\x12^\n\x0fRegenBuildCache\x12$.chromite.api.RegenBuildCacheRequest\x1a%.chromite.api.RegenBuildCacheResponse\x1a\x0f\xc2\xed\x1a\x0b\n\x07\x62inhost\x10\x02\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1a\x63hromite/api/binhost.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\x1a\x1a\x63hromite/api/sysroot.proto\x1a\x17\x63hromiumos/common.proto\"-\n\x07\x42inhost\x12\x0b\n\x03uri\x18\x01 \x01(\t\x12\x15\n\rpackage_index\x18\x02 \x01(\t\".\n\x0cPackageIndex\x12\x1e\n\x04path\x18\x01 \x01(\x0b\x32\x10.chromiumos.Path\"?\n\x0e\x41\x63lArgsRequest\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\"k\n\x0f\x41\x63lArgsResponse\x12\x32\n\x04\x61rgs\x18\x01 \x03(\x0b\x32$.chromite.api.AclArgsResponse.AclArg\x1a$\n\x06\x41\x63lArg\x12\x0b\n\x03\x61rg\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"S\n\x11\x42inhostGetRequest\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\x0f\n\x07private\x18\x02 \x01(\x08\"=\n\x12\x42inhostGetResponse\x12\'\n\x08\x62inhosts\x18\x01 \x03(\x0b\x32\x15.chromite.api.Binhost\"\xdf\x01\n\x1cPrepareBinhostUploadsRequest\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\x0b\n\x03uri\x18\x02 \x01(\t\x12\"\n\x06\x63hroot\x18\x03 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\x07sysroot\x18\x04 \x01(\x0b\x32\x15.chromite.api.Sysroot\x12\x37\n\x13package_index_files\x18\x05 \x03(\x0b\x32\x1a.chromite.api.PackageIndex\"\x1c\n\x0cUploadTarget\x12\x0c\n\x04path\x18\x01 \x01(\t\"h\n\x1dPrepareBinhostUploadsResponse\x12\x13\n\x0buploads_dir\x18\x01 \x01(\t\x12\x32\n\x0eupload_targets\x18\x02 \x03(\x0b\x32\x1a.chromite.api.UploadTarget\"\x96\x01\n&PrepareDevInstallBinhostUploadsRequest\x12\x13\n\x0buploads_dir\x18\x01 \x01(\t\x12\x0b\n\x03uri\x18\x02 \x01(\t\x12\"\n\x06\x63hroot\x18\x03 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\x07sysroot\x18\x04 \x01(\x0b\x32\x15.chromite.api.Sysroot\"]\n\'PrepareDevInstallBinhostUploadsResponse\x12\x32\n\x0eupload_targets\x18\x01 \x03(\x0b\x32\x1a.chromite.api.UploadTarget\"\x99\x01\n\x11SetBinhostRequest\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\x0f\n\x07private\x18\x02 \x01(\x08\x12%\n\x03key\x18\x03 \x01(\x0e\x32\x18.chromite.api.BinhostKey\x12\x0b\n\x03uri\x18\x04 \x01(\t\x12\x10\n\x08max_uris\x18\x05 \x01(\x05\")\n\x12SetBinhostResponse\x12\x13\n\x0boutput_file\x18\x01 \x01(\t\"m\n\x16RegenBuildCacheRequest\x12/\n\x0coverlay_type\x18\x01 \x01(\x0e\x32\x19.chromite.api.OverlayType\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\"|\n\x17RegenBuildCacheResponse\x12H\n\x11modified_overlays\x18\x01 \x03(\x0b\x32-.chromite.api.RegenBuildCacheResponse.Overlay\x1a\x17\n\x07Overlay\x12\x0c\n\x04path\x18\x01 \x01(\t*o\n\nBinhostKey\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\x16\n\x12POSTSUBMIT_BINHOST\x10\x01\x12!\n\x1dLATEST_RELEASE_CHROME_BINHOST\x10\x02\x12\x15\n\x11PREFLIGHT_BINHOST\x10\x03*\x87\x01\n\x0bOverlayType\x12\x1b\n\x17OVERLAYTYPE_UNSPECIFIED\x10\x00\x12\x14\n\x10OVERLAYTYPE_BOTH\x10\x01\x12\x16\n\x12OVERLAYTYPE_PUBLIC\x10\x02\x12\x17\n\x13OVERLAYTYPE_PRIVATE\x10\x03\x12\x14\n\x10OVERLAYTYPE_NONE\x10\x04\x32\x8c\x05\n\x0e\x42inhostService\x12[\n\x03Get\x12\x1f.chromite.api.BinhostGetRequest\x1a .chromite.api.BinhostGetResponse\"\x11\xc2\xed\x1a\r\n\x0bGetBinhosts\x12X\n\x19GetPrivatePrebuiltAclArgs\x12\x1c.chromite.api.AclArgsRequest\x1a\x1d.chromite.api.AclArgsResponse\x12p\n\x15PrepareBinhostUploads\x12*.chromite.api.PrepareBinhostUploadsRequest\x1a+.chromite.api.PrepareBinhostUploadsResponse\x12\x8e\x01\n\x1fPrepareDevInstallBinhostUploads\x12\x34.chromite.api.PrepareDevInstallBinhostUploadsRequest\x1a\x35.chromite.api.PrepareDevInstallBinhostUploadsResponse\x12O\n\nSetBinhost\x12\x1f.chromite.api.SetBinhostRequest\x1a .chromite.api.SetBinhostResponse\x12^\n\x0fRegenBuildCache\x12$.chromite.api.RegenBuildCacheRequest\x1a%.chromite.api.RegenBuildCacheResponse\x1a\x0f\xc2\xed\x1a\x0b\n\x07\x62inhost\x10\x02\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3')
 
 _BINHOSTKEY = DESCRIPTOR.enum_types_by_name['BinhostKey']
 BinhostKey = enum_type_wrapper.EnumTypeWrapper(_BINHOSTKEY)
@@ -182,10 +182,10 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _BINHOSTSERVICE._serialized_options = b'\302\355\032\013\n\007binhost\020\002'
   _BINHOSTSERVICE.methods_by_name['Get']._options = None
   _BINHOSTSERVICE.methods_by_name['Get']._serialized_options = b'\302\355\032\r\n\013GetBinhosts'
-  _BINHOSTKEY._serialized_start=1572
-  _BINHOSTKEY._serialized_end=1683
-  _OVERLAYTYPE._serialized_start=1686
-  _OVERLAYTYPE._serialized_end=1821
+  _BINHOSTKEY._serialized_start=1590
+  _BINHOSTKEY._serialized_end=1701
+  _OVERLAYTYPE._serialized_start=1704
+  _OVERLAYTYPE._serialized_end=1839
   _BINHOST._serialized_start=127
   _BINHOST._serialized_end=172
   _PACKAGEINDEX._serialized_start=174
@@ -211,15 +211,15 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _PREPAREDEVINSTALLBINHOSTUPLOADSRESPONSE._serialized_start=1059
   _PREPAREDEVINSTALLBINHOSTUPLOADSRESPONSE._serialized_end=1152
   _SETBINHOSTREQUEST._serialized_start=1155
-  _SETBINHOSTREQUEST._serialized_end=1290
-  _SETBINHOSTRESPONSE._serialized_start=1292
-  _SETBINHOSTRESPONSE._serialized_end=1333
-  _REGENBUILDCACHEREQUEST._serialized_start=1335
-  _REGENBUILDCACHEREQUEST._serialized_end=1444
-  _REGENBUILDCACHERESPONSE._serialized_start=1446
-  _REGENBUILDCACHERESPONSE._serialized_end=1570
-  _REGENBUILDCACHERESPONSE_OVERLAY._serialized_start=1547
-  _REGENBUILDCACHERESPONSE_OVERLAY._serialized_end=1570
-  _BINHOSTSERVICE._serialized_start=1824
-  _BINHOSTSERVICE._serialized_end=2476
+  _SETBINHOSTREQUEST._serialized_end=1308
+  _SETBINHOSTRESPONSE._serialized_start=1310
+  _SETBINHOSTRESPONSE._serialized_end=1351
+  _REGENBUILDCACHEREQUEST._serialized_start=1353
+  _REGENBUILDCACHEREQUEST._serialized_end=1462
+  _REGENBUILDCACHERESPONSE._serialized_start=1464
+  _REGENBUILDCACHERESPONSE._serialized_end=1588
+  _REGENBUILDCACHERESPONSE_OVERLAY._serialized_start=1565
+  _REGENBUILDCACHERESPONSE_OVERLAY._serialized_end=1588
+  _BINHOSTSERVICE._serialized_start=1842
+  _BINHOSTSERVICE._serialized_end=2494
 # @@protoc_insertion_point(module_scope)
