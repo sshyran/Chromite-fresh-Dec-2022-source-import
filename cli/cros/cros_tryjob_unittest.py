@@ -498,6 +498,8 @@ class TryjobTestVerifyOptions(TryjobTest):
             [
                 "-g",
                 "123",
+                "-b",
+                "release-R107-15117.B",
                 "amd64-generic-full-tryjob",
             ]
         )
@@ -511,6 +513,8 @@ class TryjobTestVerifyOptions(TryjobTest):
             [
                 "-g",
                 "123",
+                "-b",
+                "release-R107-15117.B",
                 "--local",
                 "amd64-generic-full-tryjob",
             ]
@@ -521,6 +525,8 @@ class TryjobTestVerifyOptions(TryjobTest):
         """Test option verification with simplest normal options."""
         self.SetupCommandMock(
             [
+                "-b",
+                "release-R107-15117.B",
                 "--cbuildbot",
                 "amd64-generic-full",
             ]
@@ -560,6 +566,8 @@ class TryjobTestVerifyOptions(TryjobTest):
                 "chan",
                 "--pass-through=--cbuild-arg",
                 "--pass-through=bar",
+                "-b",
+                "release-R107-15117.B",
                 "eve-full-tryjob",
                 "eve-release-tryjob",
             ]
@@ -599,6 +607,8 @@ class TryjobTestVerifyOptions(TryjobTest):
                 "chan",
                 "--pass-through=--cbuild-arg",
                 "--pass-through=bar",
+                "-b",
+                "release-R107-15117.B",
                 "eve-full",
                 "eve-release",
             ]
@@ -636,6 +646,8 @@ class TryjobTestVerifyOptions(TryjobTest):
                 "chan",
                 "--pass-through=--cbuild-arg",
                 "--pass-through=bar",
+                "-b",
+                "release-R107-15117.B",
                 "eve-full-tryjob",
                 "eve-release-tryjob",
             ]
@@ -676,7 +688,13 @@ class TryjobTestVerifyOptions(TryjobTest):
     def testProduction(self):
         """Test option verification with production/no patches."""
         self.SetupCommandMock(
-            ["--production", "eve-full-tryjob", "eve-release"]
+            [
+                "--production",
+                "-b",
+                "release-R107-15117.B",
+                "eve-full-tryjob",
+                "eve-release",
+            ]
         )
 
         cros_tryjob.VerifyOptions(self.cmd_mock.inst.options, self.site_config)
@@ -818,13 +836,60 @@ class TryjobTestVerifyOptions(TryjobTest):
 
     def testUnknownBuildYes(self):
         """Test option using yes to force accepting an unknown config."""
-        self.SetupCommandMock(["--yes", "-g", "123", "unknown-config"])
+        self.SetupCommandMock(
+            [
+                "--yes",
+                "-b",
+                "release-R107-15117.B",
+                "-g",
+                "123",
+                "unknown-config",
+            ]
+        )
         cros_tryjob.VerifyOptions(self.cmd_mock.inst.options, self.site_config)
 
     def testNoPatchesYes(self):
         """Test option using yes to force an unknown config, no patches."""
-        self.SetupCommandMock(["--yes", "unknown-config"])
+        self.SetupCommandMock(
+            ["--yes", "-b", "release-R107-15117.B", "unknown-config"]
+        )
         cros_tryjob.VerifyOptions(self.cmd_mock.inst.options, self.site_config)
+
+    def testUnsupportedReleaseBranch(self):
+        """Test that the tool fails for an unsupported release branch."""
+        self.SetupCommandMock(["--branch", "release-R108-15183.B"])
+
+        with self.assertRaises(cros_build_lib.DieSystemExit):
+            cros_tryjob.VerifyOptions(
+                self.cmd_mock.inst.options, self.site_config
+            )
+
+    def testUnsupportedStabilizeBranch(self):
+        """Test that the tool fails for an unsupported stabilize branch."""
+        self.SetupCommandMock(["--branch", "stabilize-15183.14.B"])
+
+        with self.assertRaises(cros_build_lib.DieSystemExit):
+            cros_tryjob.VerifyOptions(
+                self.cmd_mock.inst.options, self.site_config
+            )
+
+    def testUnsupportedFirmwareBranch(self):
+        """Test that the tool fails for an unsupported firmware branch."""
+        self.SetupCommandMock(["--branch", "firmware-corsola-15194.B"])
+
+        with self.assertRaises(cros_build_lib.DieSystemExit):
+            cros_tryjob.VerifyOptions(
+                self.cmd_mock.inst.options, self.site_config
+            )
+
+    def testUnsupportedToT(self):
+        """Test that the tool fails for ToT."""
+        self.SetupCommandMock(["--branch", "main"])
+
+        with self.assertRaises(cros_build_lib.DieSystemExit):
+            cros_tryjob.VerifyOptions(
+                self.cmd_mock.inst.options, self.site_config
+            )
 
 
 class TryjobTestCbuildbotArgs(TryjobTest):
