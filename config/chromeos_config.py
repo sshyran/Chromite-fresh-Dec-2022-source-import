@@ -2425,14 +2425,6 @@ def BranchScheduleConfig():
     # BOT-TAG:RELEASES_START
     RELEASES = [
         (
-            "release-R108-15183.B",
-            [],
-            "",
-            [],
-            [],
-            config_lib.LUCI_BUILDER_LEGACY_RELEASE,
-        ),
-        (
             "release-R107-15117.B",
             [],
             "",
@@ -2473,7 +2465,6 @@ def BranchScheduleConfig():
     # BOT-TAG:RELEASES_END
 
     PFQ_SCHEDULE = [
-        "0 3,7,11,15,19,23 * * *",
         "0 2,6,10,14,18,22 * * *",
         "0 2,6,10,14,18,22 * * *",
         "0 2,6,10,14,18,22 * * *",
