@@ -25,17 +25,10 @@ class GetLatestBuildTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     def setUp(self):
         self._mock = self.PatchObject(service_android, "GetLatestBuild")
         self._mock.return_value = ("7123456", {})
-        self._mock_branch_for_package = self.PatchObject(
-            service_android,
-            "GetAndroidBranchForPackage",
-            return_value="android-branch-for-package",
-        )
         self._output_proto = android_pb2.GetLatestBuildResponse()
 
-    def _GetRequest(self, android_build_branch=None, android_package=None):
+    def _GetRequest(self, android_package=None):
         req = android_pb2.GetLatestBuildRequest()
-        if android_build_branch is not None:
-            req.android_build_branch = android_build_branch
         if android_package is not None:
             req.android_package = android_package
         return req
@@ -55,38 +48,18 @@ class GetLatestBuildTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         self._mock.assert_not_called()
         self.assertEqual(self._output_proto.android_version, "7123456")
 
-    def testFailsIfBranchAndPackageMissing(self):
-        """Fails if both android_build_branch and android_package are missing."""
+    def testFailsIfPackageMissing(self):
+        """Fails if android_package is missing."""
         req = self._GetRequest()
         with self.assertRaises(cros_build_lib.DieSystemExit):
             android.GetLatestBuild(req, self._output_proto, self.api_config)
         self._mock.assert_not_called()
 
-    def testBranchSpecified(self):
-        """Test calling with Android branch specified."""
-        req = self._GetRequest(android_build_branch="android-branch")
-        android.GetLatestBuild(req, self._output_proto, self.api_config)
-        self._mock.assert_called_once_with("android-branch")
-        self._mock_branch_for_package.assert_not_called()
-        self.assertEqual(self._output_proto.android_version, "7123456")
-
-    def testPackageSpecified(self):
-        """Test calling with Android package specified."""
+    def testSuccess(self):
+        """Test a successful call."""
         req = self._GetRequest(android_package="android-package")
         android.GetLatestBuild(req, self._output_proto, self.api_config)
-        self._mock.assert_called_once_with("android-branch-for-package")
-        self._mock_branch_for_package.assert_called_once_with("android-package")
-        self.assertEqual(self._output_proto.android_version, "7123456")
-
-    def testBranchAndPackageSpecified(self):
-        """Test calling with both Android branch and package specified."""
-        req = self._GetRequest(
-            android_build_branch="android-branch",
-            android_package="android-package",
-        )
-        android.GetLatestBuild(req, self._output_proto, self.api_config)
-        self._mock.assert_called_once_with("android-branch")
-        self._mock_branch_for_package.assert_not_called()
+        self._mock.assert_called_once_with("android-package")
         self.assertEqual(self._output_proto.android_version, "7123456")
 
 

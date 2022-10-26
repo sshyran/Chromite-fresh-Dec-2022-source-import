@@ -282,7 +282,8 @@ DEFAULT_CTS_TEST_XML_MAP = {
 DEFAULT_CTS_RESULTS_GSURI = "gs://chromeos-cts-results/"
 DEFAULT_CTS_APFE_GSURI = "gs://chromeos-cts-apfe/"
 
-# List of Android Portage packages.
+# List of Android Portage packages. When adding/removing packages make sure the
+# ANDROID_PACKAGE_TO_BUILD_TARGETS map is also updated.
 ANDROID_PI_PACKAGE = "android-container-pi"
 ANDROID_VMRVC_PACKAGE = "android-vm-rvc"
 ANDROID_VMSC_PACKAGE = "android-vm-sc"
@@ -300,8 +301,7 @@ ANDROID_ALL_PACKAGES = frozenset(
     ]
 )
 
-# List of supported Android branches. When adding/removing branches make sure
-# the ANDROID_BRANCH_TO_BUILD_TARGETS map is also updated.
+# List of supported Android branches.
 ANDROID_PI_BUILD_BRANCH = "git_pi-arc"
 ANDROID_VMRVC_BUILD_BRANCH = "git_rvc-arc"
 ANDROID_VMSC_BUILD_BRANCH = "git_sc-arc-dev"
@@ -313,8 +313,8 @@ ANDROID_VMUDC_BUILD_BRANCH = "git_master-arc-dev"
 # in corresponding variables.
 # TODO(crbug/1192431): Move this next to uprev code once
 # ANDROID_ALL_BUILD_TARGETS is removed.
-ANDROID_BRANCH_TO_BUILD_TARGETS = {
-    ANDROID_PI_BUILD_BRANCH: {
+ANDROID_PACKAGE_TO_BUILD_TARGETS = {
+    ANDROID_PI_PACKAGE: {
         "APPS_TARGET": "apps",
         "ARM_TARGET": "cheets_arm-user",
         "ARM64_TARGET": "cheets_arm64-user",
@@ -327,24 +327,24 @@ ANDROID_BRANCH_TO_BUILD_TARGETS = {
         "SDK_GOOGLE_X86_USERDEBUG_TARGET": "sdk_cheets_x86-userdebug",
         "SDK_GOOGLE_X86_64_USERDEBUG_TARGET": "sdk_cheets_x86_64-userdebug",
     },
-    ANDROID_VMRVC_BUILD_BRANCH: {
+    ANDROID_VMRVC_PACKAGE: {
         "APPS_TARGET": "apps",
         "ARM64_TARGET": "bertha_arm64-user",
         "X86_64_TARGET": "bertha_x86_64-user",
         "ARM64_USERDEBUG_TARGET": "bertha_arm64-userdebug",
         "X86_64_USERDEBUG_TARGET": "bertha_x86_64-userdebug",
     },
-    ANDROID_VMSC_BUILD_BRANCH: {
+    ANDROID_VMSC_PACKAGE: {
         "ARM64_USERDEBUG_TARGET": "bertha_arm64-userdebug",
         "X86_64_USERDEBUG_TARGET": "bertha_x86_64-userdebug",
     },
-    ANDROID_VMTM_BUILD_BRANCH: {
+    ANDROID_VMTM_PACKAGE: {
         "ARM64_TARGET": "bertha_arm64-user",
         "X86_64_TARGET": "bertha_x86_64-user",
         "ARM64_USERDEBUG_TARGET": "bertha_arm64-userdebug",
         "X86_64_USERDEBUG_TARGET": "bertha_x86_64-userdebug",
     },
-    ANDROID_VMUDC_BUILD_BRANCH: {
+    ANDROID_VMUDC_PACKAGE: {
         "ARM64_USERDEBUG_TARGET": "bertha_arm64-userdebug",
         "X86_64_USERDEBUG_TARGET": "bertha_x86_64-userdebug",
     },
@@ -354,7 +354,7 @@ ANDROID_BRANCH_TO_BUILD_TARGETS = {
 # ebuilds to determine the corresponding Android branch.
 # TODO(crbug/1193413): Remove this.
 ANDROID_ALL_BUILD_TARGETS = frozenset(
-    itertools.chain.from_iterable(ANDROID_BRANCH_TO_BUILD_TARGETS.values())
+    itertools.chain.from_iterable(ANDROID_PACKAGE_TO_BUILD_TARGETS.values())
 )
 
 # The bucket where we save Android artifacts indefinitely, to ensure any old

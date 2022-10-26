@@ -19,21 +19,21 @@ class ArtifactsConfigTest(cros_test_lib.TestCase):
     """Tests to ensure artifacts configs are properly written."""
 
     def testAllTargetsAreConfigured(self):
-        """Ensure artifact patterns are configured for all branches and targets."""
+        """Ensure artifact patterns are configured for all packages and targets."""
         self.assertSetEqual(
             set(android.ARTIFACTS_TO_COPY),
-            set(constants.ANDROID_BRANCH_TO_BUILD_TARGETS),
+            set(constants.ANDROID_PACKAGE_TO_BUILD_TARGETS),
             "Branches configured in ARTIFACTS_TO_COPY doesn't "
             "match list of all Android branches",
         )
         for (
-            branch,
+            package,
             ebuild_target,
-        ) in constants.ANDROID_BRANCH_TO_BUILD_TARGETS.items():
+        ) in constants.ANDROID_PACKAGE_TO_BUILD_TARGETS.items():
             self.assertSetEqual(
-                set(android.ARTIFACTS_TO_COPY[branch]),
+                set(android.ARTIFACTS_TO_COPY[package]),
                 set(ebuild_target.values()),
-                f"For branch {branch}, targets configured in "
+                f"For package {package}, targets configured in "
                 "ARTIFACTS_TO_COPY doesn't match list of all "
                 "supported targets",
             )
@@ -45,8 +45,7 @@ class GetAndroidBranchForPackageTest(cros_test_lib.TestCase):
     def testAllPackagesAreMapped(self):
         """Ensure all possible Android packages are mapped to valid branches."""
         for package in constants.ANDROID_ALL_PACKAGES:
-            branch = android.GetAndroidBranchForPackage(package)
-            self.assertIn(branch, android.ARTIFACTS_TO_COPY)
+            android.GetAndroidBranchForPackage(package)
 
     def testRaisesOnUnknownPackage(self):
         """Ensure passing an unknown package raises an exception."""
@@ -105,7 +104,7 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
         self.build_branch = constants.ANDROID_PI_BUILD_BRANCH
         self.gs_mock = self.StartPatcher(gs_unittest.GSContextMock())
         self.arc_bucket_url = "gs://a"
-        self.targets = android.ARTIFACTS_TO_COPY[self.build_branch]
+        self.targets = android.ARTIFACTS_TO_COPY[self.android_package]
 
         targets = {
             "apps": [
@@ -361,7 +360,7 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
     def testIsBuildIdValid(self):
         """Test if checking if build valid."""
         subpaths = android.IsBuildIdValid(
-            self.build_branch, self.old_version, self.bucket_url
+            self.android_package, self.old_version, self.bucket_url
         )
         self.assertTrue(subpaths)
         self.assertEqual(len(subpaths), 11)
@@ -391,24 +390,28 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
         )
 
         subpaths = android.IsBuildIdValid(
-            self.build_branch, self.new_version, self.bucket_url
+            self.android_package, self.new_version, self.bucket_url
         )
         self.assertEqual(subpaths, self.new_subpaths)
 
         subpaths = android.IsBuildIdValid(
-            self.build_branch, self.partial_new_version, self.bucket_url
+            self.android_package,
+            self.partial_new_version,
+            self.bucket_url,
         )
         self.assertEqual(subpaths, None)
 
         subpaths = android.IsBuildIdValid(
-            self.build_branch, self.not_new_version, self.bucket_url
+            self.android_package,
+            self.not_new_version,
+            self.bucket_url,
         )
         self.assertEqual(subpaths, None)
 
     def testGetLatestBuild(self):
         """Test determination of latest build from gs bucket."""
         version, subpaths = android.GetLatestBuild(
-            self.build_branch, self.bucket_url
+            self.android_package, self.bucket_url
         )
         self.assertEqual(version, self.new_version)
         self.assertTrue(subpaths)
@@ -444,7 +447,7 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
         """Test copying of images to ARC bucket."""
         android.CopyToArcBucket(
             self.bucket_url,
-            self.build_branch,
+            self.android_package,
             self.new_version,
             self.new_subpaths,
             self.arc_bucket_url,
