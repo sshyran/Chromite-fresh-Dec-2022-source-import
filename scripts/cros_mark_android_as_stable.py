@@ -9,7 +9,6 @@ Android version atom string included. A caller could then use this atom with
 emerge to build the newly uprevved version of Android e.g.
 
 ./cros_mark_android_as_stable \
-    --android_build_branch=git_pi-arc \
     --android_package=android-container-pi
 
 Returns {"android_atom": "chromeos-base/android-container-pi-6417892-r1"}
@@ -236,7 +235,6 @@ def MarkAndroidEBuildAsStable(
     android_package,
     android_version,
     package_dir,
-    build_branch,
     arc_bucket_url,
     runtime_artifacts_bucket_url,
 ):
@@ -253,7 +251,6 @@ def MarkAndroidEBuildAsStable(
       android_package: android package name.
       android_version: The \d+ build id of Android.
       package_dir: Path to the android-container package dir.
-      build_branch: branch of Android builds.
       arc_bucket_url: URL of the target ARC build gs bucket.
       runtime_artifacts_bucket_url: root of runtime artifacts
 
@@ -289,11 +286,17 @@ def MarkAndroidEBuildAsStable(
         pf = "%s-%s-r1" % (android_package, android_version)
         new_ebuild_path = os.path.join(package_dir, "%s.ebuild" % pf)
 
+    # TODO(b/255705023): Remove build_branch once the following no longer relies
+    # on it.
+    build_branch = android.GetAndroidBranchForPackage(android_package)
     build_targets = constants.ANDROID_BRANCH_TO_BUILD_TARGETS[build_branch]
     variables = {"BASE_URL": arc_bucket_url}
     for var, target in build_targets.items():
+        # TODO(b/255705023): Have MirrorArtifacts generate the mapping for us.
         variables[var] = f"{build_branch}-linux-{target}"
 
+    # TODO(b/255854925): Pin DataCollector artifacts by android_package instead
+    # of build_branch.
     variables.update(
         UpdateDataCollectorArtifacts(
             android_version, runtime_artifacts_bucket_url, build_branch
@@ -376,10 +379,10 @@ def GetParser():
         default=android.ANDROID_BUCKET_URL,
         type="gs_path",
     )
+    # TODO(b/255705023): Clean this up.
     parser.add_argument(
         "--android_build_branch",
-        choices=constants.ANDROID_BRANCH_TO_BUILD_TARGETS,
-        help="Android branch to import from, overriding default",
+        help="DEPRECATED",
     )
     parser.add_argument(
         "--android_package",
@@ -479,19 +482,26 @@ def main(argv):
             )
         return
 
-    # Use default Android branch if not overridden.
-    android_build_branch = (
-        options.android_build_branch
-        or android.GetAndroidBranchForPackage(options.android_package)
+    # TODO(b/255705023): Clean this up.
+    android_build_branch = android.GetAndroidBranchForPackage(
+        options.android_package
     )
+    if (
+        options.android_build_branch
+        and options.android_build_branch != android_build_branch
+    ):
+        logging.warning(
+            "--android_build_branch is deprecated; using default branch %s",
+            android_build_branch,
+        )
 
     (unstable_ebuild, stable_ebuilds) = FindAndroidCandidates(
         android_package_dir
     )
     # Mirror artifacts, i.e., images and some sdk tools (e.g., adb, aapt).
     version_to_uprev = android.MirrorArtifacts(
+        options.android_package,
         options.android_bucket_url,
-        android_build_branch,
         options.arc_bucket_url,
         android_package_dir,
         options.force_version,
@@ -510,7 +520,6 @@ def main(argv):
         options.android_package,
         version_to_uprev,
         android_package_dir,
-        android_build_branch,
         options.arc_bucket_url,
         options.runtime_artifacts_bucket_url,
     )

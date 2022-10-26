@@ -65,7 +65,6 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
         osutils.WriteFile(self.old, self.stable_data, makedirs=True)
         osutils.WriteFile(self.old2, self.stable_data, makedirs=True)
 
-        self.build_branch = constants.ANDROID_PI_BUILD_BRANCH
         self.gs_mock = self.StartPatcher(gs_unittest.GSContextMock())
         self.arc_bucket_url = "gs://a"
         self.runtime_artifacts_bucket_url = "gs://r"
@@ -128,7 +127,6 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
             self.android_package,
             android_version,
             package_dir,
-            self.build_branch,
             self.arc_bucket_url,
             self.runtime_artifacts_bucket_url,
         )
@@ -274,8 +272,6 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
             [
                 "--android_bucket_url",
                 android_bucket_url,
-                "--android_build_branch",
-                self.build_branch,
                 "--android_package",
                 self.android_package,
                 "--arc_bucket_url",
@@ -291,8 +287,8 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
         )
 
         mock_mirror_artifacts.assert_called_once_with(
+            self.android_package,
             android_bucket_url,
-            self.build_branch,
             self.arc_bucket_url,
             self.mock_android_dir,
             android_version,
@@ -326,8 +322,6 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
             [
                 "--android_bucket_url",
                 android_bucket_url,
-                "--android_build_branch",
-                self.build_branch,
                 "--android_package",
                 self.android_package,
                 "--arc_bucket_url",
@@ -343,8 +337,8 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
         )
 
         mock_mirror_artifacts.assert_called_once_with(
+            self.android_package,
             android_bucket_url,
-            self.build_branch,
             self.arc_bucket_url,
             self.mock_android_dir,
             android_version,
