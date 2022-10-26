@@ -6,19 +6,15 @@
 
 from unittest import mock
 
-from chromite.cbuildbot import commands
 from chromite.cbuildbot import manifest_version
-from chromite.cbuildbot import prebuilts
 from chromite.cbuildbot.stages import completion_stages
 from chromite.cbuildbot.stages import generic_stages
 from chromite.cbuildbot.stages import generic_stages_unittest
 from chromite.cbuildbot.stages import sync_stages
 from chromite.cbuildbot.stages import sync_stages_unittest
 from chromite.lib import builder_status_lib
-from chromite.lib import cidb
 from chromite.lib import config_lib
 from chromite.lib import constants
-from chromite.lib import portage_util
 from chromite.lib.buildstore import FakeBuildStore
 
 
@@ -247,134 +243,3 @@ class CanaryCompletionStageTest(generic_stages_unittest.AbstractStageTestCase):
 
         self.assertEqual(stage._GetBuilderStatusesFetcher(), mock_fetcher)
         self.assertEqual(mock_wait.call_count, 1)
-
-
-class PublishUprevChangesStageTest(
-    generic_stages_unittest.AbstractStageTestCase
-):
-    """Tests for the PublishUprevChanges stage."""
-
-    BOT_ID = "hatch-android-rvc-pre-flight-branch"
-
-    def setUp(self):
-        self.PatchObject(
-            completion_stages.PublishUprevChangesStage, "_GetPortageEnvVar"
-        )
-
-        overlays_map = {
-            constants.BOTH_OVERLAYS: ["ext", "int"],
-            constants.PUBLIC_OVERLAYS: ["ext"],
-            constants.PRIVATE_OVERLAYS: ["int"],
-        }
-
-        self.PatchObject(
-            portage_util,
-            "FindOverlays",
-            side_effect=lambda o, buildroot: overlays_map[o],
-        )
-        self.PatchObject(prebuilts.BinhostConfWriter, "Perform")
-        self.push_mock = self.PatchObject(commands, "UprevPush")
-        self.PatchObject(generic_stages.BuilderStage, "GetRepoRepository")
-        self.PatchObject(commands, "UprevPackages")
-
-        self._Prepare()
-        self.buildstore = FakeBuildStore()
-
-    def ConstructStage(self):
-        sync_stage = sync_stages.ManifestVersionedSyncStage(
-            self._run, self.buildstore
-        )
-        sync_stage.pool = mock.MagicMock()
-        return completion_stages.PublishUprevChangesStage(
-            self._run, self.buildstore, sync_stage, success=True
-        )
-
-    def testCheckSlaveUploadPrebuiltsTest(self):
-        """Tests for CheckSlaveUploadPrebuiltsTest."""
-        stage = self.ConstructStage()
-        stage._build_stage_id = "test_build_stage_id"
-
-        mock_cidb = mock.MagicMock()
-        cidb.CIDBConnectionFactory.SetupMockCidb(mock_cidb)
-
-        stage_name = "UploadPrebuilts"
-
-        slave_a = "slave_a"
-        slave_b = "slave_b"
-        slave_c = "slave_c"
-
-        slave_configs_a = [{"name": slave_a}, {"name": slave_b}]
-        slave_stages_a = [
-            {
-                "name": stage_name,
-                "build_config": slave_a,
-                "status": constants.BUILDER_STATUS_PASSED,
-            },
-            {
-                "name": stage_name,
-                "build_config": slave_b,
-                "status": constants.BUILDER_STATUS_PASSED,
-            },
-        ]
-
-        self.PatchObject(
-            completion_stages.PublishUprevChangesStage,
-            "_GetSlaveConfigs",
-            return_value=slave_configs_a,
-        )
-        self.PatchObject(FakeBuildStore, "GetBuildStatuses", return_value=[])
-        self.PatchObject(
-            FakeBuildStore, "GetBuildsStages", return_value=slave_stages_a
-        )
-
-        # All important slaves are covered
-        self.assertTrue(stage.CheckSlaveUploadPrebuiltsTest())
-
-        slave_stages_b = [
-            {
-                "name": stage_name,
-                "build_config": slave_a,
-                "status": constants.BUILDER_STATUS_FAILED,
-            },
-            {
-                "name": stage_name,
-                "build_config": slave_b,
-                "status": constants.BUILDER_STATUS_PASSED,
-            },
-        ]
-        self.PatchObject(
-            completion_stages.PublishUprevChangesStage,
-            "_GetSlaveConfigs",
-            return_value=slave_configs_a,
-        )
-        self.PatchObject(
-            FakeBuildStore, "GetBuildsStages", return_value=slave_stages_b
-        )
-
-        # Slave_a didn't pass the stage
-        self.assertFalse(stage.CheckSlaveUploadPrebuiltsTest())
-
-        slave_configs_b = [
-            {"name": slave_a},
-            {"name": slave_b},
-            {"name": slave_c},
-        ]
-        self.PatchObject(
-            completion_stages.PublishUprevChangesStage,
-            "_GetSlaveConfigs",
-            return_value=slave_configs_b,
-        )
-        self.PatchObject(
-            FakeBuildStore, "GetBuildsStages", return_value=slave_stages_a
-        )
-
-        # No stage information for slave_c
-        self.assertFalse(stage.CheckSlaveUploadPrebuiltsTest())
-
-    def testPerformStageOnChromePFQ(self):
-        """Test PerformStage on ChromePFQ."""
-        stage = self.ConstructStage()
-        stage.PerformStage()
-        self.push_mock.assert_called_once_with(
-            self.build_root, overlay_type="both", dryrun=False
-        )

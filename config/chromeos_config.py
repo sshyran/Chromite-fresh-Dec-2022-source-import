@@ -2272,32 +2272,6 @@ def SpecialtyBuilders(site_config):
             ),
         )
 
-    site_config.Add(
-        "kevin-android-pi-pre-flight-branch",
-        site_config.templates.pre_flight_branch,
-        display_label=config_lib.DISPLAY_LABEL_PI_ANDROID_PFQ,
-        boards=["kevin"],
-        sync_chrome=True,
-        android_rev=constants.ANDROID_REV_LATEST,
-        android_package=constants.ANDROID_PI_PACKAGE,
-        android_import_branch=constants.ANDROID_PI_BUILD_BRANCH,
-        prebuilts=False,
-        unittests=False,
-    )
-
-    site_config.Add(
-        "hatch-android-rvc-pre-flight-branch",
-        site_config.templates.pre_flight_branch,
-        display_label=config_lib.DISPLAY_LABEL_VMRVC_ANDROID_PFQ,
-        boards=["hatch"],
-        sync_chrome=True,
-        android_rev=constants.ANDROID_REV_LATEST,
-        android_package=constants.ANDROID_VMRVC_PACKAGE,
-        android_import_branch=constants.ANDROID_VMRVC_BUILD_BRANCH,
-        prebuilts=False,
-        unittests=False,
-    )
-
 
 def TryjobMirrors(site_config):
     """Create tryjob specialized variants of every build config.
@@ -2432,10 +2406,7 @@ def BranchScheduleConfig():
         ),
         (
             "release-R106-15054.B",
-            [
-                "kevin-android-pi-pre-flight-branch",
-                "hatch-android-rvc-pre-flight-branch",
-            ],
+            [],
             "",
             [],
             [],
@@ -2445,10 +2416,7 @@ def BranchScheduleConfig():
         # BOT-TAG:NO_PRUNE
         (
             "release-R102-14695.B",
-            [
-                "kevin-android-pi-pre-flight-branch",
-                "hatch-android-rvc-pre-flight-branch",
-            ],
+            [],
             "chell-chrome-no-afdo-uprev-pre-flight-branch",
             ["orderfile-generate-toolchain", "orderfile-verify-toolchain"],
             [

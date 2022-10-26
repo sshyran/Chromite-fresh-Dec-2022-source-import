@@ -12650,34 +12650,6 @@
     "suite_scheduling": false,
     "vm_tests_override": null
   },
-  "hatch-android-rvc-pre-flight-branch": {
-    "_template": "pre_flight_branch",
-    "android_import_branch": "git_rvc-arc",
-    "android_package": "android-vm-rvc",
-    "android_rev": "latest_release",
-    "boards": [
-      "hatch"
-    ],
-    "display_label": "vmrvc_android_pfq",
-    "sync_chrome": true,
-    "vm_tests_override": null
-  },
-  "hatch-android-rvc-pre-flight-branch-tryjob": {
-    "_template": "pre_flight_branch",
-    "android_import_branch": "git_rvc-arc",
-    "android_package": "android-vm-rvc",
-    "android_rev": "latest_release",
-    "boards": [
-      "hatch"
-    ],
-    "debug": true,
-    "debug_cidb": true,
-    "display_label": "tryjob",
-    "hw_tests_override": null,
-    "luci_builder": "Try",
-    "sync_chrome": true,
-    "vm_tests_override": null
-  },
   "hatch-arc-r-userdebug-full": {
     "_template": "full",
     "boards": [
@@ -14839,34 +14811,6 @@
     "push_image": false,
     "suite_scheduling": false,
     "workspace_branch": "factory-keeby-14162.B"
-  },
-  "kevin-android-pi-pre-flight-branch": {
-    "_template": "pre_flight_branch",
-    "android_import_branch": "git_pi-arc",
-    "android_package": "android-container-pi",
-    "android_rev": "latest_release",
-    "boards": [
-      "kevin"
-    ],
-    "display_label": "pi_android_pfq",
-    "sync_chrome": true,
-    "vm_tests_override": null
-  },
-  "kevin-android-pi-pre-flight-branch-tryjob": {
-    "_template": "pre_flight_branch",
-    "android_import_branch": "git_pi-arc",
-    "android_package": "android-container-pi",
-    "android_rev": "latest_release",
-    "boards": [
-      "kevin"
-    ],
-    "debug": true,
-    "debug_cidb": true,
-    "display_label": "tryjob",
-    "hw_tests_override": null,
-    "luci_builder": "Try",
-    "sync_chrome": true,
-    "vm_tests_override": null
   },
   "kevin-factory-gru-8652.B-factorybranch": {
     "_template": "factorybranch",

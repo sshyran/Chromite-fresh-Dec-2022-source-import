@@ -786,7 +786,6 @@
   hana-llvm-toolchain-tryjob
   hana-payloads-tryjob
   hana-release-tryjob
-  hatch-android-rvc-pre-flight-branch-tryjob
   hatch-arc-r-userdebug-full-tryjob
   hatch-arc-r-userdebug-llvm-next-toolchain-tryjob
   hatch-arc-r-userdebug-llvm-toolchain-tryjob
@@ -867,7 +866,6 @@
   kalista-payloads-tryjob
   kalista-release-tryjob
   keeby-factory-keeby-14162.B-factorybranch-tryjob
-  kevin-android-pi-pre-flight-branch-tryjob
   kevin-factory-gru-8652.B-factorybranch-tryjob
   kevin-full-tryjob
   kevin-llvm-next-toolchain-tryjob
