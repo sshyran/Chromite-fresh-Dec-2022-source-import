@@ -1961,6 +1961,13 @@ def ApplyCustomOverrides(site_config):
             "hw_tests_override": [],
             "hw_tests_disabled_bug": "b/240824186",
         },
+        "rex-release": {
+            "sign_types": ["recovery", "factory"],
+            # Rex has no DUTs in the lab (b/243985220).
+            "hw_tests": [],
+            "hw_tests_override": [],
+            "hw_tests_disabled_bug": "b/243985220",
+        },
         # --- end from here ---
         # Enable distributed ThinLTO (crbug/877722) only on nocturne for now.
         "nocturne-release": {
