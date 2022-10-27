@@ -6,6 +6,7 @@
 
 import logging
 import os
+from typing import Dict
 
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
@@ -84,17 +85,7 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
     def setUp(self):
         """Setup vars and create mock dir."""
         self.android_package = "android-package"
-
-        self.tmp_overlay = os.path.join(self.tempdir, "chromiumos-overlay")
-        self.mock_android_dir = android.GetAndroidPackageDir(
-            self.android_package, overlay_dir=self.tmp_overlay
-        )
-
-        self.old_version = "25"
-        self.old2_version = "50"
-        self.new_version = "100"
-        self.partial_new_version = "150"
-        self.not_new_version = "200"
+        self.mock_android_dir = os.path.join(self.tempdir, "android-package")
 
         self.arm_acl_data = "-g google.com:READ"
         self.x86_acl_data = "-g google.com:WRITE"
@@ -132,202 +123,198 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
             return_value=self.build_branch,
         )
 
-        targets = {
-            "apps": {
-                self.old_version,
-                self.old2_version,
-                self.new_version,
-            },
-            "target_arm": [
-                self.old_version,
-                self.old2_version,
-                self.new_version,
-                self.partial_new_version,
-            ],
-            "target_x86": [
-                self.old_version,
-                self.old2_version,
-                self.new_version,
-            ],
-        }
+    def setupMockTarget(self, target: str, versions: Dict[str, bool]):
+        """Mocks GS responses for one build target.
 
-        for target, versions in targets.items():
-            url = self.makeSrcTargetUrl(target)
-            versions = "\n".join(
-                os.path.join(url, version) for version in versions
-            )
-            self.gs_mock.AddCmdResult(["ls", "--", url], stdout=versions)
+        Mocks GS responses for the following paths:
+        {src_bucket}/{branch}-linux-{target}
+        {src_bucket}/{branch}-linux-{target}/{version}
+        {src_bucket}/{branch}-linux-{target}/{version}/{subpath}
+        {src_bucket}/{branch}-linux-{target}/{version}/{subpath}/*
+        {dst_bucket}/{branch}-linux-{target}
+        {dst_bucket}/{branch}-linux-{target}/{version}
+        {dst_bucket}/{branch}-linux-{target}/{version}/*
 
-        for version in [self.old_version, self.old2_version, self.new_version]:
-            for target in self.targets:
-                self.setupMockBuild(target, version)
+        Each version can be either valid (artifacts exist) or invalid (returns
+        file not found error), specified via the `versions` dict.
 
-        self.new_subpaths = {
-            "apps": "apps100",
-            "target_arm": "target_arm100",
-            "target_x86": "target_x86100",
-        }
+        Args:
+            target: The build target.
+            versions: A mapping between versions to mock for this target and
+                whether each version is valid.
+        """
+        # `gsutil ls gs://<bucket>/<target>` shows all available versions.
+        url = f"{self.bucket_url}/{self.build_branch}-linux-{target}"
+        stdout = "\n".join(f"{url}/{version}" for version in versions)
+        self.gs_mock.AddCmdResult(["ls", "--", url], stdout=stdout)
 
-        self.setupMockBuild("apps", self.partial_new_version, valid=False)
-        self.setupMockBuild("target_arm", self.partial_new_version)
-        self.setupMockBuild("target_x86", self.partial_new_version, valid=False)
+        for version, valid in versions.items():
+            self.mockOneTargetVersion(target, version, valid)
 
-        for key in self.targets.keys():
-            self.setupMockBuild(key, self.not_new_version, False)
-
-    def setupMockBuild(self, target, version, valid=True):
-        """Helper to mock a build."""
+    def mockOneTargetVersion(self, target, version, valid):
+        """Mock GS responses for one (target, version). See setupMockTarget."""
 
         def _RaiseGSNoSuchKey(*_args, **_kwargs):
             raise gs.GSNoSuchKey("file does not exist")
 
-        src_url = self.makeSrcUrl(target, version)
-        if valid:
-            # Show source subpath directory.
-            src_subdir = os.path.join(
-                src_url, self.makeSubpath(target, version)
-            )
-            self.gs_mock.AddCmdResult(["ls", "--", src_url], stdout=src_subdir)
-
-            # Show files.
-            mock_file_template_list = {
-                "apps": ["foo", "bar", "baz"],
-                "target_arm": [
-                    "foo-%(version)s.zip",
-                    "bar.zip",
-                    "baz",
-                ],
-                "target_x86": [
-                    "foo-%(version)s.zip",
-                    "bar.zip",
-                    "baz",
-                ],
-            }
-            filelist = [
-                template % {"version": version}
-                for template in mock_file_template_list[target]
-            ]
-            src_filelist = [
-                os.path.join(src_subdir, filename) for filename in filelist
-            ]
-            self.gs_mock.AddCmdResult(
-                ["ls", "--", src_subdir], stdout="\n".join(src_filelist)
-            )
-            for src_file in src_filelist:
-                self.gs_mock.AddCmdResult(
-                    ["stat", "--", src_file],
-                    stdout=(self.STAT_OUTPUT) % src_url,
-                )
-
-            # Show nothing in destination.
-            dst_url = self.makeDstUrl(target, version)
-            filelist = [
-                template % {"version": version}
-                for template in mock_file_template_list[target]
-            ]
-            dst_filelist = [
-                os.path.join(dst_url, filename) for filename in filelist
-            ]
-            for dst_file in dst_filelist:
-                self.gs_mock.AddCmdResult(
-                    ["stat", "--", dst_file], side_effect=_RaiseGSNoSuchKey
-                )
-            logging.warning("mocking no %s", dst_url)
-
-            # Allow copying of source to dest.
-            for src_file, dst_file in zip(src_filelist, dst_filelist):
-                self.gs_mock.AddCmdResult(
-                    ["cp", "-v", "--", src_file, dst_file]
-                )
-
-            # Allow setting ACL on dest files.
-            acls = {
-                "apps": self.public_acl_data,
-                "target_arm": self.arm_acl_data,
-                "target_x86": self.x86_acl_data,
-            }
-            for dst_file in dst_filelist:
-                self.gs_mock.AddCmdResult(
-                    ["acl", "ch"] + acls[target].split() + [dst_file]
-                )
-        else:
+        src_url = (
+            f"{self.bucket_url}/{self.build_branch}-linux-{target}/{version}"
+        )
+        if not valid:
             self.gs_mock.AddCmdResult(
                 ["ls", "--", src_url], side_effect=_RaiseGSNoSuchKey
             )
+            return
 
-    def makeSrcTargetUrl(self, target):
-        """Helper to return the url for a target."""
-        return os.path.join(
-            self.bucket_url, f"{self.build_branch}-linux-{target}"
+        # Show source subpath directory.
+        src_subdir = f"{src_url}/{target}{version}"
+        self.gs_mock.AddCmdResult(["ls", "--", src_url], stdout=src_subdir)
+
+        # Show files.
+        mock_file_template_list = {
+            "apps": ["foo", "bar", "baz"],
+            "target_arm": [
+                "foo-%(version)s.zip",
+                "bar.zip",
+                "baz",
+            ],
+            "target_x86": [
+                "foo-%(version)s.zip",
+                "bar.zip",
+                "baz",
+            ],
+        }
+        filelist = [
+            template % {"version": version}
+            for template in mock_file_template_list[target]
+        ]
+        src_filelist = [
+            os.path.join(src_subdir, filename) for filename in filelist
+        ]
+        self.gs_mock.AddCmdResult(
+            ["ls", "--", src_subdir], stdout="\n".join(src_filelist)
         )
+        for src_file in src_filelist:
+            self.gs_mock.AddCmdResult(
+                ["stat", "--", src_file],
+                stdout=(self.STAT_OUTPUT) % src_url,
+            )
 
-    def makeSrcUrl(self, target, version):
-        """Helper to return the url for a build."""
-        return os.path.join(self.makeSrcTargetUrl(target), version)
+        # Show nothing in destination.
+        dst_url = f"{self.arc_bucket_url}/{self.build_branch}-linux-{target}/{version}"
+        filelist = [
+            template % {"version": version}
+            for template in mock_file_template_list[target]
+        ]
+        dst_filelist = [
+            os.path.join(dst_url, filename) for filename in filelist
+        ]
+        for dst_file in dst_filelist:
+            self.gs_mock.AddCmdResult(
+                ["stat", "--", dst_file], side_effect=_RaiseGSNoSuchKey
+            )
+        logging.warning("mocking no %s", dst_url)
 
-    def makeDstTargetUrl(self, target):
-        """Helper to return the url for a target."""
-        return os.path.join(
-            self.arc_bucket_url, f"{self.build_branch}-linux-{target}"
-        )
+        # Allow copying of source to dest.
+        for src_file, dst_file in zip(src_filelist, dst_filelist):
+            self.gs_mock.AddCmdResult(["cp", "-v", "--", src_file, dst_file])
 
-    def makeDstUrl(self, target, version):
-        """Helper to return the url for a build."""
-        return os.path.join(self.makeDstTargetUrl(target), version)
+        # Allow setting ACL on dest files.
+        acls = {
+            "apps": self.public_acl_data,
+            "target_arm": self.arm_acl_data,
+            "target_x86": self.x86_acl_data,
+        }
+        for dst_file in dst_filelist:
+            self.gs_mock.AddCmdResult(
+                ["acl", "ch"] + acls[target].split() + [dst_file]
+            )
 
-    def makeSubpath(self, target, version):
-        """Helper to return the subpath for a build."""
-        return "%s%s" % (target, version)
+    def testIsBuildIdValid_success(self):
+        """Test IsBuildIdValid with a valid build."""
+        self.setupMockTarget("apps", {"1000": True})
+        self.setupMockTarget("target_arm", {"1000": True})
+        self.setupMockTarget("target_x86", {"1000": True})
 
-    def testIsBuildIdValid(self):
-        """Test if checking if build valid."""
         subpaths = android.IsBuildIdValid(
-            self.android_package, self.old_version, self.bucket_url
+            self.android_package, "1000", self.bucket_url
         )
-        self.assertTrue(subpaths)
-        self.assertEqual(len(subpaths), len(self.targets))
-        self.assertEqual(subpaths["apps"], "apps25")
-        self.assertEqual(subpaths["target_arm"], "target_arm25")
-        self.assertEqual(subpaths["target_x86"], "target_x8625")
+        self.assertDictEqual(
+            subpaths,
+            {
+                "apps": "apps1000",
+                "target_arm": "target_arm1000",
+                "target_x86": "target_x861000",
+            },
+        )
 
-        subpaths = android.IsBuildIdValid(
-            self.android_package, self.new_version, self.bucket_url
-        )
-        self.assertEqual(subpaths, self.new_subpaths)
+    def testIsBuildIdValid_partialExist(self):
+        """Test IsBuildIdValid with a partially populated build."""
+        self.setupMockTarget("apps", {"1000": False})
+        self.setupMockTarget("target_arm", {"1000": True})
+        self.setupMockTarget("target_x86", {"1000": True})
 
         subpaths = android.IsBuildIdValid(
             self.android_package,
-            self.partial_new_version,
+            "1000",
             self.bucket_url,
         )
-        self.assertEqual(subpaths, None)
+        self.assertIsNone(subpaths)
+
+    def testIsBuildIdValid_notExist(self):
+        """Test IsBuildIdValid with a nonexistent build."""
+        self.setupMockTarget("apps", {"1000": False})
+        self.setupMockTarget("target_arm", {"1000": False})
+        self.setupMockTarget("target_x86", {"1000": False})
 
         subpaths = android.IsBuildIdValid(
             self.android_package,
-            self.not_new_version,
+            "1000",
             self.bucket_url,
         )
-        self.assertEqual(subpaths, None)
+        self.assertIsNone(subpaths)
 
     def testGetLatestBuild(self):
         """Test determination of latest build from gs bucket."""
+        # - build 900 is valid (all targets are populated)
+        # - build 1000 is valid
+        # - build 1100 is invalid (partially populated)
+        self.setupMockTarget("apps", {"900": True, "1000": True, "1100": False})
+        self.setupMockTarget(
+            "target_arm", {"900": True, "1000": True, "1100": True}
+        )
+        self.setupMockTarget(
+            "target_x86", {"900": True, "1000": True, "1100": True}
+        )
+
         version, subpaths = android.GetLatestBuild(
             self.android_package, self.bucket_url
         )
-        self.assertEqual(version, self.new_version)
-        self.assertTrue(subpaths)
-        self.assertEqual(len(subpaths), len(self.targets))
-        self.assertEqual(subpaths["apps"], "apps100")
-        self.assertEqual(subpaths["target_arm"], "target_arm100")
-        self.assertEqual(subpaths["target_x86"], "target_x86100")
+        self.assertEqual(version, "1000")
+        self.assertDictEqual(
+            subpaths,
+            {
+                "apps": "apps1000",
+                "target_arm": "target_arm1000",
+                "target_x86": "target_x861000",
+            },
+        )
 
     def testCopyToArcBucket(self):
         """Test copying of images to ARC bucket."""
+        self.setupMockTarget("apps", {"1000": True})
+        self.setupMockTarget("target_arm", {"1000": True})
+        self.setupMockTarget("target_x86", {"1000": True})
+
         android.CopyToArcBucket(
             self.bucket_url,
             self.android_package,
-            self.new_version,
-            self.new_subpaths,
+            "1000",
+            {
+                "apps": "apps1000",
+                "target_arm": "target_arm1000",
+                "target_x86": "target_x861000",
+            },
             self.arc_bucket_url,
             self.mock_android_dir,
         )
