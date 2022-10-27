@@ -193,6 +193,83 @@ class CreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         self.assertEqual(sysroot_path, out_proto.sysroot.path)
 
 
+class GetArtifactsTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
+    """GetArtifacts function tests."""
+
+    _artifact_funcs = {
+        common_pb2.ArtifactsByService.Sysroot.ArtifactType.SIMPLE_CHROME_SYSROOT: sysroot_service.CreateSimpleChromeSysroot,
+        common_pb2.ArtifactsByService.Sysroot.ArtifactType.CHROME_EBUILD_ENV: sysroot_service.CreateChromeEbuildEnv,
+        common_pb2.ArtifactsByService.Sysroot.ArtifactType.BREAKPAD_DEBUG_SYMBOLS: sysroot_service.BundleBreakpadSymbols,
+        common_pb2.ArtifactsByService.Sysroot.ArtifactType.DEBUG_SYMBOLS: sysroot_service.BundleDebugSymbols,
+        common_pb2.ArtifactsByService.Sysroot.ArtifactType.FUZZER_SYSROOT: sysroot_service.CreateFuzzerSysroot,
+    }
+
+    def setUp(self):
+        self._mocks = {}
+        for artifact, func in self._artifact_funcs.items():
+            self._mocks[artifact] = self.PatchObject(
+                sysroot_service, func.__name__
+            )
+
+    def _InputProto(
+        self,
+        artifact_types=_artifact_funcs.keys(),
+    ):
+        """Helper to build an input proto instance."""
+        return common_pb2.ArtifactsByService.Sysroot(
+            output_artifacts=[
+                common_pb2.ArtifactsByService.Sysroot.ArtifactInfo(
+                    artifact_types=artifact_types
+                )
+            ]
+        )
+
+    def testNoArtifacts(self):
+        """Test GetArtifacts with no artifact types."""
+        in_proto = self._InputProto(artifact_types=[])
+        sysroot_controller.GetArtifacts(
+            in_proto, None, None, "build_target", ""
+        )
+
+        for _, patch in self._mocks.items():
+            patch.assert_not_called()
+
+    def testArtifactsSuccess(self):
+        """Test GetArtifacts with all artifact types."""
+        sysroot_controller.GetArtifacts(
+            self._InputProto(), None, None, "build_target", ""
+        )
+
+        for _, patch in self._mocks.items():
+            patch.assert_called_once()
+
+    def testArtifactsException(self):
+        """Test GetArtifacts with all artifact types when one type throws an exception."""
+
+        self._mocks[
+            common_pb2.ArtifactsByService.Sysroot.ArtifactType.FUZZER_SYSROOT
+        ].side_effect = Exception("foo bar")
+        generated = sysroot_controller.GetArtifacts(
+            self._InputProto(), None, None, "build_target", ""
+        )
+
+        for _, patch in self._mocks.items():
+            patch.assert_called_once()
+
+        found_artifact = False
+        for data in generated:
+            artifact_type = (
+                common_pb2.ArtifactsByService.Sysroot.ArtifactType.Name(
+                    data["type"]
+                )
+            )
+            if artifact_type == "FUZZER_SYSROOT":
+                found_artifact = True
+                self.assertTrue(data["failed"])
+                self.assertEqual(data["failure_reason"], "foo bar")
+        self.assertTrue(found_artifact)
+
+
 class GenerateArchiveTest(
     cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin
 ):

@@ -12,7 +12,11 @@ from unittest import mock
 from chromite.api import api_config
 from chromite.api.controller import artifacts
 from chromite.api.controller import controller_util
+from chromite.api.controller import image as image_controller
+from chromite.api.controller import sysroot as sysroot_controller
+from chromite.api.controller import test as test_controller
 from chromite.api.gen.chromite.api import artifacts_pb2
+from chromite.api.gen.chromite.api import sysroot_pb2
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.cbuildbot import commands
 from chromite.lib import chroot_lib
@@ -1167,3 +1171,138 @@ class FetchMetadataTestCase(
                 for fp in response.filepaths
             )
         )
+
+
+class GetTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
+    """Get function tests."""
+
+    def setUp(self):
+        self.sysroot_path = "/build/target"
+        self.sysroot = sysroot_lib.Sysroot(self.sysroot_path)
+
+    def _InputProto(self):
+        """Helper to build an input proto instance."""
+        return artifacts_pb2.GetRequest(
+            sysroot=sysroot_pb2.Sysroot(path=self.sysroot_path),
+            artifact_info=common_pb2.ArtifactsByService(
+                sysroot=common_pb2.ArtifactsByService.Sysroot(
+                    output_artifacts=[
+                        common_pb2.ArtifactsByService.Sysroot.ArtifactInfo(
+                            artifact_types=[
+                                common_pb2.ArtifactsByService.Sysroot.ArtifactType.FUZZER_SYSROOT
+                            ]
+                        )
+                    ],
+                ),
+                image=common_pb2.ArtifactsByService.Image(
+                    output_artifacts=[
+                        common_pb2.ArtifactsByService.Image.ArtifactInfo(
+                            artifact_types=[
+                                common_pb2.ArtifactsByService.Image.ArtifactType.LICENSE_CREDITS
+                            ]
+                        )
+                    ],
+                ),
+                test=common_pb2.ArtifactsByService.Test(
+                    output_artifacts=[
+                        common_pb2.ArtifactsByService.Test.ArtifactInfo(
+                            artifact_types=[
+                                common_pb2.ArtifactsByService.Test.ArtifactType.HWQUAL
+                            ]
+                        )
+                    ],
+                ),
+            ),
+            result_path=common_pb2.ResultPath(
+                path=common_pb2.Path(path=str(self.tempdir))
+            ),
+        )
+
+    def _OutputProto(self):
+        """Helper to build an output proto instance."""
+        return artifacts_pb2.GetResponse()
+
+    def testSuccess(self):
+        """Test Get."""
+        image_mock = self.PatchObject(
+            image_controller,
+            "GetArtifacts",
+            return_value=[
+                {
+                    "paths": ["/foo/bar/license_credits.html"],
+                    "type": common_pb2.ArtifactsByService.Image.ArtifactType.LICENSE_CREDITS,
+                }
+            ],
+        )
+        sysroot_mock = self.PatchObject(
+            sysroot_controller,
+            "GetArtifacts",
+            return_value=[
+                {
+                    "type": common_pb2.ArtifactsByService.Sysroot.ArtifactType.FUZZER_SYSROOT,
+                    "failed": True,
+                    "failure_reason": "Bad data!",
+                }
+            ],
+        )
+        test_mock = self.PatchObject(
+            test_controller,
+            "GetArtifacts",
+            return_value=[
+                {
+                    "paths": ["/foo/bar/hwqual.tar.xz"],
+                    "type": common_pb2.ArtifactsByService.Test.ArtifactType.HWQUAL,
+                }
+            ],
+        )
+
+        in_proto = self._InputProto()
+        out_proto = self._OutputProto()
+        artifacts.Get(
+            in_proto,
+            out_proto,
+            self.api_config,
+        )
+
+        image_mock.assert_called_once()
+        sysroot_mock.assert_called_once()
+        test_mock.assert_called_once()
+
+        expected = common_pb2.UploadedArtifactsByService(
+            sysroot=common_pb2.UploadedArtifactsByService.Sysroot(
+                artifacts=[
+                    common_pb2.UploadedArtifactsByService.Sysroot.ArtifactPaths(
+                        artifact_type=common_pb2.ArtifactsByService.Sysroot.ArtifactType.FUZZER_SYSROOT,
+                        failed=True,
+                        failure_reason="Bad data!",
+                    )
+                ]
+            ),
+            image=common_pb2.UploadedArtifactsByService.Image(
+                artifacts=[
+                    common_pb2.UploadedArtifactsByService.Image.ArtifactPaths(
+                        artifact_type=common_pb2.ArtifactsByService.Image.ArtifactType.LICENSE_CREDITS,
+                        paths=[
+                            common_pb2.Path(
+                                path="/foo/bar/license_credits.html",
+                                location=common_pb2.Path.OUTSIDE,
+                            )
+                        ],
+                    )
+                ]
+            ),
+            test=common_pb2.UploadedArtifactsByService.Test(
+                artifacts=[
+                    common_pb2.UploadedArtifactsByService.Test.ArtifactPaths(
+                        artifact_type=common_pb2.ArtifactsByService.Test.ArtifactType.HWQUAL,
+                        paths=[
+                            common_pb2.Path(
+                                path="/foo/bar/hwqual.tar.xz",
+                                location=common_pb2.Path.OUTSIDE,
+                            )
+                        ],
+                    )
+                ]
+            ),
+        )
+        self.assertEqual(out_proto.artifacts, expected)

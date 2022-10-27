@@ -116,14 +116,21 @@ def Get(
 
     for get_res in get_res_list:
         for artifact_dict in get_res.artifact_dict:
+            kwargs = {}
+            # TODO(b/255838545): Remove the kwargs funkness when these fields
+            # have been added for all services.
+            if "failed" in artifact_dict:
+                kwargs["failed"] = artifact_dict.get("failed", False)
+                kwargs["failure_reason"] = artifact_dict.get("failure_reason")
             get_res.output_proto.artifacts.add(
                 artifact_type=artifact_dict["type"],
                 paths=[
                     common_pb2.Path(
                         path=x, location=common_pb2.Path.Location.OUTSIDE
                     )
-                    for x in artifact_dict["paths"]
+                    for x in artifact_dict.get("paths", [])
                 ],
+                **kwargs,
             )
     return controller.RETURN_CODE_SUCCESS
 

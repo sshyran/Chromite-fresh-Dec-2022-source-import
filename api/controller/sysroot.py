@@ -6,6 +6,7 @@
 
 import logging
 import os
+import traceback
 
 from chromite.api import controller
 from chromite.api import faux
@@ -125,7 +126,30 @@ def GetArtifacts(
     for output_artifact in in_proto.output_artifacts:
         for artifact_type, func in artifact_types.items():
             if artifact_type in output_artifact.artifact_types:
-                result = func(chroot, sysroot_class, build_target, output_dir)
+                try:
+                    result = func(
+                        chroot, sysroot_class, build_target, output_dir
+                    )
+                except Exception as e:
+                    generated.append(
+                        {
+                            "type": artifact_type,
+                            "failed": True,
+                            "failure_reason": str(e),
+                        }
+                    )
+                    artifact_name = (
+                        common_pb2.ArtifactsByService.Sysroot.ArtifactType.Name(
+                            artifact_type
+                        )
+                    )
+                    logging.warning(
+                        "%s artifact generation failed with exception %s",
+                        artifact_name,
+                        e,
+                    )
+                    logging.warning("traceback:\n%s", traceback.format_exc())
+                    continue
                 if result:
                     generated.append(
                         {
