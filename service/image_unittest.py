@@ -14,6 +14,7 @@ from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import dlc_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
 from chromite.lib import portage_util
@@ -735,3 +736,48 @@ class TestCreateNetbootKernel(cros_test_lib.MockTempDirTestCase):
                 f"--image_dir={image_dir}",
             ]
         )
+
+
+class TestCopyDlcImage(cros_test_lib.MockTempDirTestCase):
+    """Unittests for copy_dlc_image."""
+
+    def test(self):
+        """Test copy of DLC image."""
+
+        def touchDlc(
+            dlc_id: str,
+            dlc_package: str = dlc_lib.DLC_PACKAGE,
+            dlc_artifact: str = dlc_lib.DLC_IMAGE,
+        ):
+            """Touches the DLC image with given ID and package names.
+
+            Args:
+              dlc_id: The DLC ID.
+              dlc_package: The DLC package.
+              dlc_artifact: The DLC artifact.
+            """
+            build_dir = os.path.join(self.tempdir, dlc_lib.DLC_BUILD_DIR)
+            osutils.Touch(
+                os.path.join(build_dir, dlc_id, dlc_package, dlc_artifact),
+                makedirs=True,
+            )
+
+        good_dlc_ids = ("dlc-a", "dlc-b")
+        for dlc_id in good_dlc_ids:
+            touchDlc(dlc_id)
+
+        dlc_bad_id = "dlc_bad_id"
+        touchDlc(dlc_bad_id)
+
+        dlc_bad_package = "dlc-bad-package"
+        touchDlc(dlc_bad_package, dlc_package="packit")
+
+        dlc_bad_artifact = "dlc-bad-artifact"
+        touchDlc(dlc_bad_artifact, dlc_artifact="some-file")
+
+        dlc_bad_artifact_with_dir = "dlc-bad-artifact-with-dir"
+        touchDlc(dlc_bad_artifact_with_dir, dlc_artifact="some-dir/some-file")
+
+        dst_paths = image.copy_dlc_image(self.tempdir, self.tempdir)
+        self.assertEqual(len(dst_paths), 1)
+        self.assertEqual(sorted(os.listdir(dst_paths[0])), list(good_dlc_ids))

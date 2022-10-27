@@ -9,6 +9,7 @@ import glob
 import logging
 import os
 from pathlib import Path
+import re
 import shutil
 from typing import Iterable, List, NamedTuple, Optional, Union
 
@@ -17,6 +18,7 @@ from chromite.lib import chromeos_version
 from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
+from chromite.lib import dlc_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
@@ -571,37 +573,37 @@ def CreateGuestVm(
     return os.path.realpath(output_path)
 
 
-def _get_dlc_images_path(base_path: str) -> str:
-    """Get the source path containing the dlc images.
-
-    Specifically files expected to be in:
-        /.../build/rootfs/dlc
-
-    Args:
-        base_path: Base path wherein DLC images are expected to be.
-
-    Returns:
-        Full path for the dlc images.
-    """
-    return os.path.join(base_path, "build", "rootfs", "dlc")
-
-
 def copy_dlc_image(base_path: str, output_dir: str) -> List[str]:
-    """Copies DLC image folder from base_path to output_dir.
+    """Copy DLC images from base_path to output_dir.
 
     Args:
         base_path: Base path wherein DLC images are expected to be.
         output_dir: Folder destination for DLC images folder.
 
     Returns:
-        A list of folder paths after move or None if the source path doesn't exist
+      A list of folder paths after move or None if the source path doesn't exist
     """
-    dlc_source_path = _get_dlc_images_path(base_path)
+    dlc_source_path = os.path.join(base_path, dlc_lib.DLC_BUILD_DIR)
     if not os.path.exists(dlc_source_path):
         return None
 
     dlc_dest_path = os.path.join(output_dir, "dlc")
-    shutil.copytree(dlc_source_path, dlc_dest_path)
+    os.mkdir(dlc_dest_path)
+
+    # Only archive DLC images, all other uncompressed files/data should not be
+    # uploaded into archives.
+    pat = f"{dlc_lib.DLC_BUILD_DIR}/({dlc_lib.DLC_ID_RE})/{dlc_lib.DLC_PACKAGE}/{dlc_lib.DLC_IMAGE}$"
+    for path in osutils.DirectoryIterator(dlc_source_path):
+        if not path.is_file():
+            continue
+        m = re.search(pat, str(path))
+        if m:
+            dlc_id = m.group(1)
+            shutil.copytree(
+                os.path.join(dlc_source_path, dlc_id),
+                os.path.join(dlc_dest_path, dlc_id),
+            )
+
     return [dlc_dest_path]
 
 

@@ -29,6 +29,7 @@ DLC_IMAGE = "dlc.img"
 DLC_LOADPIN_FILE_HEADER = "# LOADPIN_TRUSTED_VERITY_ROOT_DIGESTS"
 DLC_LOADPIN_TRUSTED_VERITY_DIGESTS = "_trusted_verity_digests"
 DLC_META_DIR = "opt/google/dlc"
+DLC_PACKAGE = "package"
 DLC_TMP_META_DIR = "meta"
 DLC_UID = 20118
 DLC_VERITY_TABLE = "table"
@@ -36,6 +37,8 @@ EBUILD_PARAMETERS = "ebuild_parameters.json"
 IMAGELOADER_JSON = "imageloader.json"
 LICENSE = "LICENSE"
 LSB_RELEASE = "etc/lsb-release"
+
+DLC_ID_RE = r"[a-zA-Z0-9][a-zA-Z0-9-]*"
 
 # This file has major and minor version numbers that the update_engine client
 # supports. These values are needed for generating a delta/full payload.
