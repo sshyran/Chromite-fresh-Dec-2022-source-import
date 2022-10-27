@@ -22,7 +22,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z6go.chromium.org/chromiumos/infra/proto/go/chromite/api',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1a\x63hromite/api/android.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\x1a\x17\x63hromiumos/common.proto\"T\n\x15GetLatestBuildRequest\x12\x1c\n\x14\x61ndroid_build_branch\x18\x02 \x01(\t\x12\x17\n\x0f\x61ndroid_package\x18\x03 \x01(\tJ\x04\x08\x01\x10\x02\"1\n\x16GetLatestBuildResponse\x12\x17\n\x0f\x61ndroid_version\x18\x01 \x01(\t\"\x8c\x02\n\x11MarkStableRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12\x1b\n\x0ftracking_branch\x18\x02 \x01(\tB\x02\x18\x01\x12\x14\n\x0cpackage_name\x18\x03 \x01(\t\x12\x1c\n\x14\x61ndroid_build_branch\x18\x04 \x01(\t\x12\x17\n\x0f\x61ndroid_version\x18\x05 \x01(\t\x12$\n\x18\x61ndroid_gts_build_branch\x18\x06 \x01(\tB\x02\x18\x01\x12.\n\rbuild_targets\x18\x07 \x03(\x0b\x32\x17.chromiumos.BuildTarget\x12\x13\n\x0bskip_commit\x18\x08 \x01(\x08\"w\n\x12MarkStableResponse\x12\x32\n\x06status\x18\x01 \x01(\x0e\x32\".chromite.api.MarkStableStatusType\x12-\n\x0c\x61ndroid_atom\x18\x02 \x01(\x0b\x32\x17.chromiumos.PackageInfo\"9\n\x13UnpinVersionRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x16\n\x14UnpinVersionResponse\"D\n\x10WriteLKGBRequest\x12\x17\n\x0f\x61ndroid_package\x18\x01 \x01(\t\x12\x17\n\x0f\x61ndroid_version\x18\x02 \x01(\t\"+\n\x11WriteLKGBResponse\x12\x16\n\x0emodified_files\x18\x01 \x03(\t*\x9c\x01\n\x14MarkStableStatusType\x12\"\n\x1eMARK_STABLE_STATUS_UNSPECIFIED\x10\x00\x12\x1e\n\x1aMARK_STABLE_STATUS_SUCCESS\x10\x01\x12\x1d\n\x19MARK_STABLE_STATUS_PINNED\x10\x02\x12!\n\x1dMARK_STABLE_STATUS_EARLY_EXIT\x10\x03\x32\x94\x03\n\x0e\x41ndroidService\x12\x63\n\x0eGetLatestBuild\x12#.chromite.api.GetLatestBuildRequest\x1a$.chromite.api.GetLatestBuildResponse\"\x06\xc2\xed\x1a\x02\x10\x02\x12W\n\nMarkStable\x12\x1f.chromite.api.MarkStableRequest\x1a .chromite.api.MarkStableResponse\"\x06\xc2\xed\x1a\x02\x10\x02\x12]\n\x0cUnpinVersion\x12!.chromite.api.UnpinVersionRequest\x1a\".chromite.api.UnpinVersionResponse\"\x06\xc2\xed\x1a\x02\x10\x01\x12T\n\tWriteLKGB\x12\x1e.chromite.api.WriteLKGBRequest\x1a\x1f.chromite.api.WriteLKGBResponse\"\x06\xc2\xed\x1a\x02\x10\x02\x1a\x0f\xc2\xed\x1a\x0b\n\x07\x61ndroid\x10\x01\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3'
+  serialized_pb=b'\n\x1a\x63hromite/api/android.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\x1a\x17\x63hromiumos/common.proto\"X\n\x15GetLatestBuildRequest\x12 \n\x14\x61ndroid_build_branch\x18\x02 \x01(\tB\x02\x18\x01\x12\x17\n\x0f\x61ndroid_package\x18\x03 \x01(\tJ\x04\x08\x01\x10\x02\"1\n\x16GetLatestBuildResponse\x12\x17\n\x0f\x61ndroid_version\x18\x01 \x01(\t\"\x90\x02\n\x11MarkStableRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12\x1b\n\x0ftracking_branch\x18\x02 \x01(\tB\x02\x18\x01\x12\x14\n\x0cpackage_name\x18\x03 \x01(\t\x12 \n\x14\x61ndroid_build_branch\x18\x04 \x01(\tB\x02\x18\x01\x12\x17\n\x0f\x61ndroid_version\x18\x05 \x01(\t\x12$\n\x18\x61ndroid_gts_build_branch\x18\x06 \x01(\tB\x02\x18\x01\x12.\n\rbuild_targets\x18\x07 \x03(\x0b\x32\x17.chromiumos.BuildTarget\x12\x13\n\x0bskip_commit\x18\x08 \x01(\x08\"w\n\x12MarkStableResponse\x12\x32\n\x06status\x18\x01 \x01(\x0e\x32\".chromite.api.MarkStableStatusType\x12-\n\x0c\x61ndroid_atom\x18\x02 \x01(\x0b\x32\x17.chromiumos.PackageInfo\"9\n\x13UnpinVersionRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x16\n\x14UnpinVersionResponse\"D\n\x10WriteLKGBRequest\x12\x17\n\x0f\x61ndroid_package\x18\x01 \x01(\t\x12\x17\n\x0f\x61ndroid_version\x18\x02 \x01(\t\"+\n\x11WriteLKGBResponse\x12\x16\n\x0emodified_files\x18\x01 \x03(\t*\x9c\x01\n\x14MarkStableStatusType\x12\"\n\x1eMARK_STABLE_STATUS_UNSPECIFIED\x10\x00\x12\x1e\n\x1aMARK_STABLE_STATUS_SUCCESS\x10\x01\x12\x1d\n\x19MARK_STABLE_STATUS_PINNED\x10\x02\x12!\n\x1dMARK_STABLE_STATUS_EARLY_EXIT\x10\x03\x32\x94\x03\n\x0e\x41ndroidService\x12\x63\n\x0eGetLatestBuild\x12#.chromite.api.GetLatestBuildRequest\x1a$.chromite.api.GetLatestBuildResponse\"\x06\xc2\xed\x1a\x02\x10\x02\x12W\n\nMarkStable\x12\x1f.chromite.api.MarkStableRequest\x1a .chromite.api.MarkStableResponse\"\x06\xc2\xed\x1a\x02\x10\x02\x12]\n\x0cUnpinVersion\x12!.chromite.api.UnpinVersionRequest\x1a\".chromite.api.UnpinVersionResponse\"\x06\xc2\xed\x1a\x02\x10\x01\x12T\n\tWriteLKGB\x12\x1e.chromite.api.WriteLKGBRequest\x1a\x1f.chromite.api.WriteLKGBResponse\"\x06\xc2\xed\x1a\x02\x10\x02\x1a\x0f\xc2\xed\x1a\x0b\n\x07\x61ndroid\x10\x01\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3'
   ,
   dependencies=[chromite_dot_api_dot_build__api__pb2.DESCRIPTOR,chromiumos_dot_common__pb2.DESCRIPTOR,])
 
@@ -56,8 +56,8 @@ _MARKSTABLESTATUSTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=827,
-  serialized_end=983,
+  serialized_start=835,
+  serialized_end=991,
 )
 _sym_db.RegisterEnumDescriptor(_MARKSTABLESTATUSTYPE)
 
@@ -83,7 +83,7 @@ _GETLATESTBUILDREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\030\001', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='android_package', full_name='chromite.api.GetLatestBuildRequest.android_package', index=1,
       number=3, type=9, cpp_type=9, label=1,
@@ -104,7 +104,7 @@ _GETLATESTBUILDREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=99,
-  serialized_end=183,
+  serialized_end=187,
 )
 
 
@@ -135,8 +135,8 @@ _GETLATESTBUILDRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=185,
-  serialized_end=234,
+  serialized_start=189,
+  serialized_end=238,
 )
 
 
@@ -175,7 +175,7 @@ _MARKSTABLEREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\030\001', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='android_version', full_name='chromite.api.MarkStableRequest.android_version', index=4,
       number=5, type=9, cpp_type=9, label=1,
@@ -216,8 +216,8 @@ _MARKSTABLEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=237,
-  serialized_end=505,
+  serialized_start=241,
+  serialized_end=513,
 )
 
 
@@ -255,8 +255,8 @@ _MARKSTABLERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=507,
-  serialized_end=626,
+  serialized_start=515,
+  serialized_end=634,
 )
 
 
@@ -287,8 +287,8 @@ _UNPINVERSIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=628,
-  serialized_end=685,
+  serialized_start=636,
+  serialized_end=693,
 )
 
 
@@ -312,8 +312,8 @@ _UNPINVERSIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=687,
-  serialized_end=709,
+  serialized_start=695,
+  serialized_end=717,
 )
 
 
@@ -351,8 +351,8 @@ _WRITELKGBREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=711,
-  serialized_end=779,
+  serialized_start=719,
+  serialized_end=787,
 )
 
 
@@ -383,8 +383,8 @@ _WRITELKGBRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=781,
-  serialized_end=824,
+  serialized_start=789,
+  serialized_end=832,
 )
 
 _MARKSTABLEREQUEST.fields_by_name['chroot'].message_type = chromiumos_dot_common__pb2._CHROOT
@@ -461,7 +461,9 @@ _sym_db.RegisterMessage(WriteLKGBResponse)
 
 
 DESCRIPTOR._options = None
+_GETLATESTBUILDREQUEST.fields_by_name['android_build_branch']._options = None
 _MARKSTABLEREQUEST.fields_by_name['tracking_branch']._options = None
+_MARKSTABLEREQUEST.fields_by_name['android_build_branch']._options = None
 _MARKSTABLEREQUEST.fields_by_name['android_gts_build_branch']._options = None
 
 _ANDROIDSERVICE = _descriptor.ServiceDescriptor(
@@ -471,8 +473,8 @@ _ANDROIDSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=b'\302\355\032\013\n\007android\020\001',
   create_key=_descriptor._internal_create_key,
-  serialized_start=986,
-  serialized_end=1390,
+  serialized_start=994,
+  serialized_end=1398,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetLatestBuild',
