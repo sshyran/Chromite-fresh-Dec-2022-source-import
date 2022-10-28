@@ -4,8 +4,8 @@
 
 """Android service unittests."""
 
-import logging
 import os
+import re
 from typing import Dict
 
 from chromite.lib import cros_test_lib
@@ -213,11 +213,20 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
             self.gs_mock.AddCmdResult(
                 ["stat", "--", dst_file], side_effect=_RaiseGSNoSuchKey
             )
-        logging.warning("mocking no %s", dst_url)
 
-        # Allow copying of source to dest.
         for src_file, dst_file in zip(src_filelist, dst_filelist):
-            self.gs_mock.AddCmdResult(["cp", "-v", "--", src_file, dst_file])
+            # Only allow copying if file name matches target pattern. Otherwise
+            # raise an error to fail the test.
+            side_effect = (
+                None
+                if re.search(self.targets[target], src_file)
+                else Exception(
+                    f"file gets copied while it shouldn't: {src_file}"
+                )
+            )
+            self.gs_mock.AddCmdResult(
+                ["cp", "-v", "--", src_file, dst_file], side_effect=side_effect
+            )
 
         # Allow setting ACL on dest files.
         acls = {
