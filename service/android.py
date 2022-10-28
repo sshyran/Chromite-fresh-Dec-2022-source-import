@@ -19,6 +19,7 @@ from chromite.lib import gs
 # List of Android Portage packages. When adding/removing packages make sure the
 # ANDROID_PACKAGE_TO_BUILD_TARGETS / ARTIFACTS_TO_COPY maps are also updated.
 ANDROID_PI_PACKAGE = "android-container-pi"
+ANDROID_RVC_PACKAGE = "android-container-rvc"
 ANDROID_VMRVC_PACKAGE = "android-vm-rvc"
 ANDROID_VMSC_PACKAGE = "android-vm-sc"
 ANDROID_VMTM_PACKAGE = "android-vm-tm"
@@ -42,6 +43,11 @@ ANDROID_PACKAGE_TO_BUILD_TARGETS = {
         "X86_64_USERDEBUG_TARGET": "cheets_x86_64-userdebug",
         "SDK_GOOGLE_X86_USERDEBUG_TARGET": "sdk_cheets_x86-userdebug",
         "SDK_GOOGLE_X86_64_USERDEBUG_TARGET": "sdk_cheets_x86_64-userdebug",
+    },
+    ANDROID_RVC_PACKAGE: {
+        "APPS_TARGET": "apps",
+        "ARM64_USERDEBUG_TARGET": "cheets_arm64-userdebug",
+        "X86_64_USERDEBUG_TARGET": "cheets_x86_64-userdebug",
     },
     ANDROID_VMRVC_PACKAGE: {
         "APPS_TARGET": "apps",
@@ -88,6 +94,18 @@ ARTIFACTS_TO_COPY = {
         "cheets_x86_64-userdebug": r"\.zip$",
         "sdk_cheets_x86-userdebug": r"\.zip$",
         "sdk_cheets_x86_64-userdebug": r"\.zip$",
+    },
+    ANDROID_RVC_PACKAGE: {
+        # For XkbToKcmConverter, see the comment in pi-arc targets.
+        # org.chromium.cts.helpers.apk contains helpers needed for CTS.  It is
+        # installed on the board, but not into the VM.
+        "apps": "org.chromium.arc.cachebuilder.jar",
+        "cheets_arm64-userdebug": (
+            r"(\.zip|/XkbToKcmConverter" r"|/org.chromium.arc.cts.helpers.apk)$"
+        ),
+        "cheets_x86_64-userdebug": (
+            r"(\.zip|/XkbToKcmConverter" r"|/org.chromium.arc.cts.helpers.apk)$"
+        ),
     },
     ANDROID_VMRVC_PACKAGE: {
         # For XkbToKcmConverter, see the comment in pi-arc targets.
@@ -197,6 +215,7 @@ def GetAndroidBranchForPackage(android_package: str) -> str:
     """
     mapping = {
         ANDROID_PI_PACKAGE: constants.ANDROID_PI_BUILD_BRANCH,
+        ANDROID_RVC_PACKAGE: constants.ANDROID_RVC_BUILD_BRANCH,
         ANDROID_VMRVC_PACKAGE: constants.ANDROID_VMRVC_BUILD_BRANCH,
         ANDROID_VMSC_PACKAGE: constants.ANDROID_VMSC_BUILD_BRANCH,
         ANDROID_VMTM_PACKAGE: constants.ANDROID_VMTM_BUILD_BRANCH,
