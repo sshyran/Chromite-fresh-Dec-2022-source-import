@@ -132,6 +132,12 @@ def GetParser():
         help="Allow indirect mount file generation for DLC.",
     )
     one_dlc.add_argument(
+        "--scaled",
+        default=False,
+        action="store_true",
+        help="DLC will be fed through scaling design.",
+    )
+    one_dlc.add_argument(
         "--reserved",
         default=False,
         action="store_true",
@@ -237,6 +243,7 @@ def main(argv):
             used_by=opts.used_by,
             days_to_purge=opts.days_to_purge,
             fullnamerev=opts.fullnamerev,
+            scaled=opts.scaled,
         )
         params.StoreDlcParameters(
             install_root_dir=opts.install_root_dir, sudo=True

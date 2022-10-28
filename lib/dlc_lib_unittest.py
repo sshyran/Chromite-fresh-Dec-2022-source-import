@@ -17,6 +17,7 @@ from chromite.scripts import cros_set_lsb_release
 _PRE_ALLOCATED_BLOCKS = 100
 _VERSION = "1.0"
 _ID = "id"
+_ID_FOO = "id-foo"
 _PACKAGE = "package"
 _NAME = "name"
 _DESCRIPTION = "description"
@@ -87,6 +88,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
             "mount_file_required": True,
             "reserved": False,
             "critical_update": False,
+            "scaled": True,
         }
 
     def testGetParamsPath(self):
@@ -94,10 +96,24 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
         install_root_dir = os.path.join(self.tempdir, "install_root_dir")
 
         self.assertEqual(
-            dlc_lib.EbuildParams.GetParamsPath(install_root_dir, _ID, _PACKAGE),
+            dlc_lib.EbuildParams.GetParamsPath(
+                install_root_dir, _ID, _PACKAGE, False
+            ),
             os.path.join(
                 install_root_dir,
                 dlc_lib.DLC_BUILD_DIR,
+                _ID,
+                _PACKAGE,
+                dlc_lib.EBUILD_PARAMETERS,
+            ),
+        )
+        self.assertEqual(
+            dlc_lib.EbuildParams.GetParamsPath(
+                install_root_dir, _ID, _PACKAGE, True
+            ),
+            os.path.join(
+                install_root_dir,
+                dlc_lib.DLC_BUILD_DIR_SCALED,
                 _ID,
                 _PACKAGE,
                 dlc_lib.EBUILD_PARAMETERS,
@@ -123,6 +139,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
         reserved=False,
         critical_update=False,
         fullnamerev=_FULLNAME_REV,
+        scaled=False,
     ):
         """Tests EbuildParams JSON values"""
         self.assertDictEqual(
@@ -144,6 +161,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
                 "reserved": reserved,
                 "critical_update": critical_update,
                 "fullnamerev": fullnamerev,
+                "scaled": scaled,
             },
         )
 
@@ -166,6 +184,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
         reserved=False,
         critical_update=False,
         fullnamerev=_FULLNAME_REV,
+        scaled=False,
     ):
         """Creates and Stores DLC params at install_root_dir"""
         params = dlc_lib.EbuildParams(
@@ -185,6 +204,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
             reserved=reserved,
             critical_update=critical_update,
             fullnamerev=fullnamerev,
+            scaled=scaled,
         )
         return params.StoreDlcParameters(
             install_root_dir=install_root_dir, sudo=False
@@ -213,7 +233,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
         self.GenerateParams(sysroot, **params)
         ebuild_params_path = os.path.join(
             sysroot,
-            dlc_lib.DLC_BUILD_DIR,
+            dlc_lib.DLC_BUILD_DIR_SCALED,
             params["dlc_id"],
             params["dlc_package"],
             dlc_lib.EBUILD_PARAMETERS,
@@ -228,7 +248,10 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
         sysroot = os.path.join(self.tempdir, "build_root")
         self.GenerateParams(sysroot)
         ebuild_params_class = dlc_lib.EbuildParams.LoadEbuildParams(
-            sysroot, _ID, _PACKAGE
+            sysroot,
+            _ID,
+            _PACKAGE,
+            False,
         )
         self.CheckParams(ebuild_params_class.__dict__)
 
@@ -238,7 +261,10 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
         params = self.GetVaryingEbuildParams()
         self.GenerateParams(sysroot, **params)
         ebuild_params_class = dlc_lib.EbuildParams.LoadEbuildParams(
-            sysroot, params["dlc_id"], params["dlc_package"]
+            sysroot,
+            params["dlc_id"],
+            params["dlc_package"],
+            params["scaled"],
         )
         self.CheckParams(ebuild_params_class.__dict__, **params)
 
@@ -413,6 +439,7 @@ class DlcGeneratorTest(
                 "reserved": False,
                 "critical-update": False,
                 "loadpin-verity-digest": False,
+                "scaled": False,
             },
         )
 
@@ -488,24 +515,93 @@ class FinalizeDlcsTest(cros_test_lib.MockTempDirTestCase):
         """Setup FinalizeDlcsTest."""
         self.ExpectRootOwnedFiles()
 
-    def testInstallDlcImages(self):
-        """Tests InstallDlcImages to make sure all DLCs are copied correctly"""
+    def testInstallDlcImagesLegacy(self):
+        """Tests InstallDlcImages to make sure all legacy DLCs are copied correctly"""
         sysroot = os.path.join(self.tempdir, "sysroot")
         osutils.WriteFile(
             os.path.join(
-                sysroot, dlc_lib.DLC_BUILD_DIR, _ID, "pkg", dlc_lib.DLC_IMAGE
+                sysroot,
+                dlc_lib.DLC_BUILD_DIR,
+                _ID,
+                dlc_lib.DLC_PACKAGE,
+                dlc_lib.DLC_IMAGE,
             ),
             "content",
             makedirs=True,
         )
         osutils.SafeMakedirs(
-            os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, _ID, "pkg")
+            os.path.join(
+                sysroot, dlc_lib.DLC_BUILD_DIR, _ID, dlc_lib.DLC_PACKAGE
+            )
         )
         output = os.path.join(self.tempdir, "output")
         dlc_lib.InstallDlcImages(
             board=_BOARD, sysroot=sysroot, install_root_dir=output
         )
-        self.assertExists(os.path.join(output, _ID, "pkg", dlc_lib.DLC_IMAGE))
+        self.assertExists(
+            os.path.join(output, _ID, dlc_lib.DLC_PACKAGE, dlc_lib.DLC_IMAGE)
+        )
+
+    def testInstallDlcImagesScaled(self):
+        """Tests InstallDlcImages to make sure all scaled DLCs are copied correctly"""
+        sysroot = os.path.join(self.tempdir, "sysroot")
+        osutils.WriteFile(
+            os.path.join(
+                sysroot,
+                dlc_lib.DLC_BUILD_DIR_SCALED,
+                _ID,
+                dlc_lib.DLC_PACKAGE,
+                dlc_lib.DLC_IMAGE,
+            ),
+            "content",
+            makedirs=True,
+        )
+        osutils.SafeMakedirs(
+            os.path.join(
+                sysroot, dlc_lib.DLC_BUILD_DIR_SCALED, _ID, dlc_lib.DLC_PACKAGE
+            )
+        )
+        output = os.path.join(self.tempdir, "output")
+        dlc_lib.InstallDlcImages(
+            board=_BOARD,
+            sysroot=sysroot,
+            install_root_dir=output,
+        )
+        self.assertExists(
+            os.path.join(output, _ID, dlc_lib.DLC_PACKAGE, dlc_lib.DLC_IMAGE)
+        )
+
+    def testInstallDlcImagesAll(self):
+        """Tests InstallDlcImages to make sure all types of DLCs are copied correctly"""
+        sysroot = os.path.join(self.tempdir, "sysroot")
+        for (p, _id) in (
+            (dlc_lib.DLC_BUILD_DIR, _ID),
+            (dlc_lib.DLC_BUILD_DIR_SCALED, _ID_FOO),
+        ):
+            osutils.WriteFile(
+                os.path.join(
+                    sysroot, p, _id, dlc_lib.DLC_PACKAGE, dlc_lib.DLC_IMAGE
+                ),
+                "content",
+                makedirs=True,
+            )
+            osutils.SafeMakedirs(
+                os.path.join(sysroot, p, _id, dlc_lib.DLC_PACKAGE)
+            )
+        output = os.path.join(self.tempdir, "output")
+        dlc_lib.InstallDlcImages(
+            board=_BOARD,
+            sysroot=sysroot,
+            install_root_dir=output,
+        )
+        self.assertExists(
+            os.path.join(output, _ID, dlc_lib.DLC_PACKAGE, dlc_lib.DLC_IMAGE)
+        )
+        self.assertExists(
+            os.path.join(
+                output, _ID_FOO, dlc_lib.DLC_PACKAGE, dlc_lib.DLC_IMAGE
+            )
+        )
 
     def testInstallDlcImagesNoDlc(self):
         copy_contents_mock = self.PatchObject(osutils, "CopyDirContents")

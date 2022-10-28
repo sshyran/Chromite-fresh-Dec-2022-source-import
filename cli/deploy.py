@@ -1222,9 +1222,6 @@ def _DeployDLCImage(device, sysroot, board, dlc_id, dlc_package):
             logging.error("Failed to uninstall DLC.")
             raise
 
-        # TODO(andrewlassalle): Copy the DLC image to the preload location instead
-        # of to dlc_a and dlc_b, and let dlcserive install the images to their final
-        # location.
         logging.notice("Deploy the DLC image for %s", dlc_id)
         dlc_img_path_src = os.path.join(
             sysroot,
@@ -1233,6 +1230,15 @@ def _DeployDLCImage(device, sysroot, board, dlc_id, dlc_package):
             dlc_package,
             dlc_lib.DLC_IMAGE,
         )
+        if not os.path.exists(dlc_img_path_src):
+            dlc_img_path_src = os.path.join(
+                sysroot,
+                dlc_lib.DLC_BUILD_DIR_SCALED,
+                dlc_id,
+                dlc_package,
+                dlc_lib.DLC_IMAGE,
+            )
+
         dlc_img_path = os.path.join(_DLC_INSTALL_ROOT, dlc_id, dlc_package)
         dlc_img_path_a = os.path.join(dlc_img_path, "dlc_a")
         dlc_img_path_b = os.path.join(dlc_img_path, "dlc_b")
@@ -1266,6 +1272,14 @@ def _DeployDLCImage(device, sysroot, board, dlc_id, dlc_package):
             dlc_package,
             dlc_lib.DLC_TMP_META_DIR,
         )
+        if not os.path.exists(src_meta_dir):
+            src_meta_dir = os.path.join(
+                sysroot,
+                dlc_lib.DLC_BUILD_DIR_SCALED,
+                dlc_id,
+                dlc_package,
+                dlc_lib.DLC_TMP_META_DIR,
+            )
         device.CopyToDevice(
             src_meta_dir + "/",
             dest_meta_dir,
