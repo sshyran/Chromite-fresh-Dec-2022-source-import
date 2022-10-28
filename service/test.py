@@ -11,7 +11,15 @@ import logging
 import os
 import shutil
 import traceback
-from typing import Dict, Iterable, List, NamedTuple, Optional, TYPE_CHECKING
+from typing import (
+    Dict,
+    Iterable,
+    List,
+    NamedTuple,
+    Optional,
+    TYPE_CHECKING,
+    Union,
+)
 
 from chromite.cbuildbot import commands
 from chromite.lib import autotest_util
@@ -494,6 +502,62 @@ def _GetZeroCoverageDirectories(
     return dirs
 
 
+def BundleCodeCoverageGolang(
+    chroot: "chroot_lib.Chroot",
+    output_dir: str,
+) -> Optional[str]:
+    """Bundle code coverage Go .out files into a tarball for importing into GCE.
+
+    Works for host and board packages.
+
+    Args:
+      chroot: The chroot class used for these artifacts.
+      sysroot_class: The sysroot class used for these artifacts.
+      output_dir: The path to write artifacts to.
+
+    Returns:
+      A string path to the output code_coverage.tar.xz artifact, or None.
+    """
+    # Gather host code coverage
+    # Builder sets build target to Brya, code coverage currently only
+    # supports Golang host packages
+    coverage_dir = os.path.join(
+        chroot.path, "var/lib/chromeos/package-artifacts"
+    )
+    go_coverage_data_list = GatherCodeCoverageGolang(coverage_dir)
+    # Create tarball
+    with osutils.TempDir() as dest_tmpdir:
+        for coverage_content in go_coverage_data_list:
+            file_name = coverage_content[0]
+            coverage_data = coverage_content[1]
+            try:
+                osutils.WriteFile(
+                    os.path.join(dest_tmpdir, file_name), coverage_data
+                )
+            except ValueError as e:
+                logging.error(traceback.format_exc())
+                logging.error("BundleCodeCoverageGolang failed %s", e)
+                return None
+        tarball_path = os.path.join(
+            output_dir, constants.CODE_COVERAGE_GOLANG_TAR
+        )
+        try:
+            result = cros_build_lib.CreateTarball(tarball_path, dest_tmpdir)
+        except cros_build_lib.TarballError as e:
+            logging.error(traceback.format_exc())
+            logging.error("BundleCodeCoverageGolang failed %s", e)
+            return None
+        if result.returncode != 0:
+            logging.error(
+                "Error (%d) when creating tarball %s from %s",
+                result.returncode,
+                tarball_path,
+                dest_tmpdir,
+            )
+            return None
+        return tarball_path
+
+
 def BundleCodeCoverageRustLlvmJson(
     build_target: "build_target_lib.BuildTarget",
     chroot: "chroot_lib.Chroot",
@@ -705,6 +769,40 @@ def GatherCodeCoverageLlvmJsonFile(path: str):
                     coverage_data.append(file_data)
 
     return code_coverage_util.CreateLlvmCoverageJson(coverage_data)
+
+
+def GatherCodeCoverageGolang(
+    path: Union[str, os.PathLike] = "/",
+) -> [(str, Union[bytes, str])]:
+    """Locate Golang code coverage files in |path|.
+
+     This function locates all the Golang code coverage files and
+     returns a list of their file paths.
+
+    Args:
+      path: The input path to walk.
+
+    Returns:
+      List of tuple (file_name, Go code coverage file contents)
+    """
+    coverage_data = []
+    if not os.path.exists(path):
+        # Builder might only build packages that does not have
+        # unit test setup, therefore there will be no
+        # coverage_data to gather.
+        logging.info("Path %s does not exist. Returning empty coverage.", path)
+        return []
+    for dirpath, _, files in os.walk(path):
+        for f in files:
+            path_to_file = os.path.join(dirpath, f)
+            # Golang host packages code coverage data will always be stored
+            # in a file with suffix '_cover.out'
+            if "_cover.out" not in os.path.basename(path_to_file):
+                continue
+            coverage_data.append(
+                (os.path.basename(path_to_file), osutils.ReadFile(path_to_file))
+            )
+    return coverage_data
 
 
 def FindAllMetadataFiles(

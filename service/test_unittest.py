@@ -739,6 +739,44 @@ class GatherCodeCoverageLlvmJsonFileTest(cros_test_lib.MockTempDirTestCase):
         self.assertEqual(0, len(all_files))
 
 
+class GatherCodeCoverageGolangTests(cros_test_lib.MockTempDirTestCase):
+    """GatherCodeCoverageGolang Tests."""
+
+    def writeCodeCoverageGolang(self, filename):
+        """Helper to write a code coverage file."""
+        osutils.WriteFile(
+            filename,
+            content="Golang code coverage test",
+            mode="w",
+            makedirs=True,
+        )
+
+    def testJoinedFilePathsMatchesNumFilesProcessed(self):
+        """Test that all coverage files are found."""
+        input_dir = os.path.join(self.tempdir, "input")
+        self.writeCodeCoverageGolang(
+            os.path.join(input_dir, "a/test_cover.out")
+        )
+        self.writeCodeCoverageGolang(
+            os.path.join(input_dir, "a/b/c/test_cover.out")
+        )
+        self.writeCodeCoverageGolang(
+            os.path.join(input_dir, "a/b/c/d/test_cover.out")
+        )
+        self.writeCodeCoverageGolang(
+            os.path.join(input_dir, "a/b/c/d/e/test_cover.out")
+        )
+
+        coverage_data = test.GatherCodeCoverageGolang(input_dir)
+        self.assertEqual(len(coverage_data), 4)
+
+    def testShouldEmptyCoverageIfPathDoesNotExists(self):
+        """Test empty list returned when path does not exist."""
+
+        coverage_data = test.GatherCodeCoverageGolang("/invalid/path")
+        self.assertEqual(0, len(coverage_data))
+
+
 class FindMetadataTestCase(cros_test_lib.MockTestCase):
     """Test case for functions to find metadata files."""
 

@@ -457,12 +457,18 @@ def GetArtifacts(
             build_target.name,
             packages_service.determine_full_version(),
         ),
+        in_proto.ArtifactType.CODE_COVERAGE_GOLANG: functools.partial(
+            test.BundleCodeCoverageGolang
+        ),
     }
 
     for output_artifact in in_proto.output_artifacts:
         for artifact_type, func in artifact_types.items():
             if artifact_type in output_artifact.artifact_types:
-                paths = func(chroot, sysroot_class, output_dir)
+                if artifact_type == in_proto.ArtifactType.CODE_COVERAGE_GOLANG:
+                    paths = func(chroot, output_dir)
+                else:
+                    paths = func(chroot, sysroot_class, output_dir)
                 if paths:
                     generated.append(
                         {
