@@ -738,46 +738,138 @@ class TestCreateNetbootKernel(cros_test_lib.MockTempDirTestCase):
         )
 
 
-class TestCopyDlcImage(cros_test_lib.MockTempDirTestCase):
+class TestCopyDlcImages(cros_test_lib.MockTempDirTestCase):
     """Unittests for copy_dlc_image."""
 
-    def test(self):
-        """Test copy of DLC image."""
+    def touchDlc(
+        self,
+        dlc_id: str,
+        dlc_package: str = dlc_lib.DLC_PACKAGE,
+        dlc_artifact: str = dlc_lib.DLC_IMAGE,
+        dlc_build_dir: str = dlc_lib.DLC_BUILD_DIR,
+    ):
+        """Touches the DLC artifact with the given args.
 
-        def touchDlc(
-            dlc_id: str,
-            dlc_package: str = dlc_lib.DLC_PACKAGE,
-            dlc_artifact: str = dlc_lib.DLC_IMAGE,
-        ):
-            """Touches the DLC image with given ID and package names.
+        Args:
+          dlc_id: The DLC ID.
+          dlc_package: The DLC package.
+          dlc_artifact: The DLC artifact.
+          dlc_build_dir: The DLC build dir.
+        """
+        build_dir = os.path.join(self.tempdir, dlc_build_dir)
+        osutils.Touch(
+            os.path.join(build_dir, dlc_id, dlc_package, dlc_artifact),
+            makedirs=True,
+        )
 
-            Args:
-              dlc_id: The DLC ID.
-              dlc_package: The DLC package.
-              dlc_artifact: The DLC artifact.
-            """
-            build_dir = os.path.join(self.tempdir, dlc_lib.DLC_BUILD_DIR)
-            osutils.Touch(
-                os.path.join(build_dir, dlc_id, dlc_package, dlc_artifact),
-                makedirs=True,
-            )
-
+    def testOnlyLegacyDLCs(self):
+        """Test copy of DLC artifacts for legacy."""
         good_dlc_ids = ("dlc-a", "dlc-b")
         for dlc_id in good_dlc_ids:
-            touchDlc(dlc_id)
+            self.touchDlc(dlc_id)
 
         dlc_bad_id = "dlc_bad_id"
-        touchDlc(dlc_bad_id)
+        self.touchDlc(dlc_bad_id)
 
         dlc_bad_package = "dlc-bad-package"
-        touchDlc(dlc_bad_package, dlc_package="packit")
+        self.touchDlc(dlc_bad_package, dlc_package="packit")
 
         dlc_bad_artifact = "dlc-bad-artifact"
-        touchDlc(dlc_bad_artifact, dlc_artifact="some-file")
+        self.touchDlc(dlc_bad_artifact, dlc_artifact="some-file")
 
         dlc_bad_artifact_with_dir = "dlc-bad-artifact-with-dir"
-        touchDlc(dlc_bad_artifact_with_dir, dlc_artifact="some-dir/some-file")
+        self.touchDlc(
+            dlc_bad_artifact_with_dir, dlc_artifact="some-dir/some-file"
+        )
 
         dst_paths = image.copy_dlc_image(self.tempdir, self.tempdir)
         self.assertEqual(len(dst_paths), 1)
-        self.assertEqual(sorted(os.listdir(dst_paths[0])), list(good_dlc_ids))
+        # pylint: disable=unsubscriptable-object
+        path = dst_paths[0]
+        self.assertEqual(sorted(os.listdir(path)), list(good_dlc_ids))
+        self.assertEqual(os.path.basename(path), dlc_lib.DLC_DIR)
+
+    def testOnlyScaledDLCs(self):
+        """Test copy of DLC artifacts for only scaled."""
+        good_dlc_ids = ("dlc-a", "dlc-b")
+        for dlc_id in good_dlc_ids:
+            self.touchDlc(dlc_id, dlc_build_dir=dlc_lib.DLC_BUILD_DIR_SCALED)
+
+        dlc_bad_id = "dlc_bad_id"
+        self.touchDlc(dlc_bad_id, dlc_build_dir=dlc_lib.DLC_BUILD_DIR_SCALED)
+
+        dlc_bad_package = "dlc-bad-package"
+        self.touchDlc(
+            dlc_bad_package,
+            dlc_package="packit",
+            dlc_build_dir=dlc_lib.DLC_BUILD_DIR_SCALED,
+        )
+
+        dlc_bad_artifact = "dlc-bad-artifact"
+        self.touchDlc(
+            dlc_bad_artifact,
+            dlc_artifact="some-file",
+            dlc_build_dir=dlc_lib.DLC_BUILD_DIR_SCALED,
+        )
+
+        dlc_bad_artifact_with_dir = "dlc-bad-artifact-with-dir"
+        self.touchDlc(
+            dlc_bad_artifact_with_dir,
+            dlc_artifact="some-dir/some-file",
+            dlc_build_dir=dlc_lib.DLC_BUILD_DIR_SCALED,
+        )
+
+        dst_paths = image.copy_dlc_image(self.tempdir, self.tempdir)
+        self.assertEqual(len(dst_paths), 1)
+        # pylint: disable=unsubscriptable-object
+        path = dst_paths[0]
+        self.assertEqual(sorted(os.listdir(path)), list(good_dlc_ids))
+        self.assertEqual(os.path.basename(path), dlc_lib.DLC_DIR_SCALED)
+
+    def testAllDLCs(self):
+        """Test copy of DLC artifacts of all types."""
+        good_dlc_ids = ("dlc-a", "dlc-b")
+        for dlc_id in good_dlc_ids:
+            self.touchDlc(dlc_id)
+            self.touchDlc(dlc_id, dlc_build_dir=dlc_lib.DLC_BUILD_DIR_SCALED)
+
+        dlc_bad_id = "dlc_bad_id"
+        self.touchDlc(dlc_bad_id)
+        self.touchDlc(dlc_bad_id, dlc_build_dir=dlc_lib.DLC_BUILD_DIR_SCALED)
+
+        dlc_bad_package = "dlc-bad-package"
+        self.touchDlc(dlc_bad_package, dlc_package="packit")
+        self.touchDlc(
+            dlc_bad_package,
+            dlc_package="packit",
+            dlc_build_dir=dlc_lib.DLC_BUILD_DIR_SCALED,
+        )
+
+        dlc_bad_artifact = "dlc-bad-artifact"
+        self.touchDlc(dlc_bad_artifact, dlc_artifact="some-file")
+        self.touchDlc(
+            dlc_bad_artifact,
+            dlc_artifact="some-file",
+            dlc_build_dir=dlc_lib.DLC_BUILD_DIR_SCALED,
+        )
+
+        dlc_bad_artifact_with_dir = "dlc-bad-artifact-with-dir"
+        self.touchDlc(
+            dlc_bad_artifact_with_dir, dlc_artifact="some-dir/some-file"
+        )
+        self.touchDlc(
+            dlc_bad_artifact_with_dir,
+            dlc_artifact="some-dir/some-file",
+            dlc_build_dir=dlc_lib.DLC_BUILD_DIR_SCALED,
+        )
+
+        dst_paths = image.copy_dlc_image(self.tempdir, self.tempdir)
+        self.assertEqual(len(dst_paths), 2)
+        # pylint: disable=unsubscriptable-object
+        path0 = dst_paths[0]
+        self.assertEqual(sorted(os.listdir(path0)), list(good_dlc_ids))
+        self.assertEqual(os.path.basename(path0), dlc_lib.DLC_DIR)
+        # pylint: disable=unsubscriptable-object
+        path1 = dst_paths[1]
+        self.assertEqual(sorted(os.listdir(path1)), list(good_dlc_ids))
+        self.assertEqual(os.path.basename(path1), dlc_lib.DLC_DIR_SCALED)

@@ -583,28 +583,39 @@ def copy_dlc_image(base_path: str, output_dir: str) -> List[str]:
     Returns:
       A list of folder paths after move or None if the source path doesn't exist
     """
-    dlc_source_path = os.path.join(base_path, dlc_lib.DLC_BUILD_DIR)
-    if not os.path.exists(dlc_source_path):
-        return None
-
-    dlc_dest_path = os.path.join(output_dir, "dlc")
-    os.mkdir(dlc_dest_path)
-
-    # Only archive DLC images, all other uncompressed files/data should not be
-    # uploaded into archives.
-    pat = f"{dlc_lib.DLC_BUILD_DIR}/({dlc_lib.DLC_ID_RE})/{dlc_lib.DLC_PACKAGE}/{dlc_lib.DLC_IMAGE}$"
-    for path in osutils.DirectoryIterator(dlc_source_path):
-        if not path.is_file():
+    ret = []
+    for (dlc_build_dir, dlc_dir) in (
+        (dlc_lib.DLC_BUILD_DIR, dlc_lib.DLC_DIR),
+        (dlc_lib.DLC_BUILD_DIR_SCALED, dlc_lib.DLC_DIR_SCALED),
+    ):
+        dlc_source_path = os.path.join(base_path, dlc_build_dir)
+        if not os.path.exists(dlc_source_path):
             continue
-        m = re.search(pat, str(path))
-        if m:
-            dlc_id = m.group(1)
-            shutil.copytree(
-                os.path.join(dlc_source_path, dlc_id),
-                os.path.join(dlc_dest_path, dlc_id),
-            )
 
-    return [dlc_dest_path]
+        dlc_dest_path = os.path.join(output_dir, dlc_dir)
+        os.mkdir(dlc_dest_path)
+
+        ret.append(dlc_dest_path)
+
+        # Only archive DLC images, all other uncompressed files/data should not be
+        # uploaded into archives.
+        dlc_re = (
+            f"({dlc_lib.DLC_ID_RE})/{dlc_lib.DLC_PACKAGE}/{dlc_lib.DLC_IMAGE}"
+        )
+        pat = f"/{dlc_build_dir}/{dlc_re}$"
+        for path in osutils.DirectoryIterator(dlc_source_path):
+            if not path.is_file():
+                continue
+            m = re.search(pat, str(path))
+            if m:
+                dlc_id = m.group(1)
+                shutil.copytree(
+                    os.path.join(dlc_source_path, dlc_id),
+                    os.path.join(dlc_dest_path, dlc_id),
+                )
+
+    # Empty list returns `None`.
+    return ret or None
 
 
 def copy_license_credits(

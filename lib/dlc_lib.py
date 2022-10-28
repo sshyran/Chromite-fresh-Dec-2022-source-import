@@ -23,7 +23,10 @@ from chromite.utils import pformat
 
 
 DLC_BUILD_DIR = "build/rootfs/dlc"
+DLC_BUILD_DIR_SCALED = "build/rootfs/dlc-scaled"
 DLC_FACTORY_INSTALL_DIR = "unencrypted/dlc-factory-images"
+DLC_DIR = "dlc"
+DLC_DIR_SCALED = "dlc-scaled"
 DLC_GID = 20118
 DLC_IMAGE = "dlc.img"
 DLC_LOADPIN_FILE_HEADER = "# LOADPIN_TRUSTED_VERITY_ROOT_DIGESTS"
