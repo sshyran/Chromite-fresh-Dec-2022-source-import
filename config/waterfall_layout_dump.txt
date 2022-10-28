@@ -256,7 +256,6 @@
     zork-arc-r-release
     zork-connectivitynext-release
     zork-kernelnext-release
-    zork-minios-release
     zork-release
   master-release-basic
     atlas-release-basic
@@ -1088,7 +1087,6 @@
     zork-arc-r-release-tryjob
     zork-connectivitynext-release-tryjob
     zork-kernelnext-release-tryjob
-    zork-minios-release-tryjob
     zork-release-tryjob
   mistral-factory-mistral-12361.B-factorybranch-tryjob
   mistral-master-factorybranch-tryjob
@@ -1448,10 +1446,5 @@
   zork-kernelnext-release-tryjob
   zork-llvm-next-toolchain-tryjob
   zork-llvm-toolchain-tryjob
-  zork-minios-full-tryjob
-  zork-minios-llvm-next-toolchain-tryjob
-  zork-minios-llvm-toolchain-tryjob
-  zork-minios-payloads-tryjob
-  zork-minios-release-tryjob
   zork-payloads-tryjob
   zork-release-tryjob
