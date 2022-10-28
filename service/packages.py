@@ -302,7 +302,7 @@ def define_uprev_android_lkgb_handlers():
         def _handler(build_targets, _refs, chroot):
             return uprev_android_lkgb(android_package, build_targets, chroot)
 
-    for android_package in constants.ANDROID_ALL_PACKAGES:
+    for android_package in android.GetAllAndroidPackages():
         define_handler(android_package)
 
 
@@ -1385,7 +1385,8 @@ def determine_android_branch(board, package=None):
     ebuild_path = portage_util.FindEbuildForBoardPackage(package, board)
     # We assume all targets pull from the same branch and that we always
     # have at least one of the following targets.
-    targets = constants.ANDROID_ALL_BUILD_TARGETS
+    # TODO(b/187795671): Do this in a less hacky way.
+    targets = android.GetAllAndroidEbuildTargets()
     ebuild_content = osutils.SourceEnvironment(ebuild_path, targets)
     for target in targets:
         if target in ebuild_content:

@@ -7,7 +7,6 @@
 import logging
 import os
 
-from chromite.lib import constants
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
 from chromite.lib import gs_unittest
@@ -22,14 +21,14 @@ class ArtifactsConfigTest(cros_test_lib.TestCase):
         """Ensure artifact patterns are configured for all packages and targets."""
         self.assertSetEqual(
             set(android.ARTIFACTS_TO_COPY),
-            set(constants.ANDROID_PACKAGE_TO_BUILD_TARGETS),
+            set(android.ANDROID_PACKAGE_TO_BUILD_TARGETS),
             "Branches configured in ARTIFACTS_TO_COPY doesn't "
             "match list of all Android branches",
         )
         for (
             package,
             ebuild_target,
-        ) in constants.ANDROID_PACKAGE_TO_BUILD_TARGETS.items():
+        ) in android.ANDROID_PACKAGE_TO_BUILD_TARGETS.items():
             self.assertSetEqual(
                 set(android.ARTIFACTS_TO_COPY[package]),
                 set(ebuild_target.values()),
@@ -44,13 +43,27 @@ class GetAndroidBranchForPackageTest(cros_test_lib.TestCase):
 
     def testAllPackagesAreMapped(self):
         """Ensure all possible Android packages are mapped to valid branches."""
-        for package in constants.ANDROID_ALL_PACKAGES:
+        for package in android.GetAllAndroidPackages():
             android.GetAndroidBranchForPackage(package)
 
     def testRaisesOnUnknownPackage(self):
         """Ensure passing an unknown package raises an exception."""
         with self.assertRaises(ValueError):
             android.GetAndroidBranchForPackage("not-an-android-package")
+
+
+class GetAndroidEbuildTargetsForPackageTest(cros_test_lib.TestCase):
+    """Tests for GetAndroidEbuildTargetsForPackage."""
+
+    def testAllPackagesAreMapped(self):
+        """Ensure all possible Android packages are mapped."""
+        for package in android.GetAllAndroidPackages():
+            android.GetAndroidEbuildTargetsForPackage(package)
+
+    def testRaisesOnUnknownPackage(self):
+        """Ensure passing an unknown package raises an exception."""
+        with self.assertRaises(ValueError):
+            android.GetAndroidEbuildTargetsForPackage("not-an-android-package")
 
 
 class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):

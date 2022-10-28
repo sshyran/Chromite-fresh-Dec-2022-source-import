@@ -163,7 +163,7 @@ class UprevAndroidLKGBTest(cros_test_lib.MockTestCase):
         """Test that each Android package has an uprev handler registered."""
         mock_handler = self.PatchObject(packages, "uprev_android_lkgb")
 
-        for android_package in constants.ANDROID_ALL_PACKAGES:
+        for android_package in android.GetAllAndroidPackages():
             cpv = package_info.SplitCPV(
                 "chromeos-base/" + android_package, strict=False
             )

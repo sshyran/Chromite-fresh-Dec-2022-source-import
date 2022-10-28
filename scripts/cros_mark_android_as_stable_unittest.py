@@ -41,7 +41,27 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
 
     def setUp(self):
         """Setup vars and create mock dir."""
-        self.android_package = constants.ANDROID_PI_PACKAGE
+        self.android_package = "android-package"
+        self.android_branch = "android-branch"
+        self.PatchObject(
+            android,
+            "GetAllAndroidPackages",
+            return_value=[self.android_package],
+        )
+        self.PatchObject(
+            android,
+            "GetAndroidBranchForPackage",
+            return_value=self.android_branch,
+        )
+        self.PatchObject(
+            android,
+            "GetAndroidEbuildTargetsForPackage",
+            return_value={
+                "APPS_TARGET": "apps",
+                "ARM64_TARGET": "target_arm64",
+                "X86_64_TARGET": "target_x86_64",
+            },
+        )
 
         self.tmp_overlay = os.path.join(
             self.tempdir, "private-overlays", "project-cheets-private"
@@ -91,7 +111,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
                     )
         pin_path = (
             f"{self.runtime_artifacts_bucket_url}/"
-            f"{constants.ANDROID_PI_BUILD_BRANCH}_pin_version"
+            f"{self.android_branch}_pin_version"
         )
         self.gs_mock.AddCmdResult(
             ["stat", "--", pin_path], side_effect=_RaiseGSNoSuchKey
@@ -295,7 +315,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
         )
         # pylint: disable=line-too-long
         mock_print.assert_called_once_with(
-            '\n{"android_atom": "chromeos-base/android-container-pi-100-r1", "modified_files": ["chromeos-base/android-container-pi/android-container-pi-100-r1.ebuild", "chromeos-base/android-container-pi/Manifest", "chromeos-base/android-container-pi/android-container-pi-50-r1.ebuild"], "revved": true}'
+            '\n{"android_atom": "chromeos-base/android-package-100-r1", "modified_files": ["chromeos-base/android-package/android-package-100-r1.ebuild", "chromeos-base/android-package/Manifest", "chromeos-base/android-package/android-package-50-r1.ebuild"], "revved": true}'
         )
 
     def testMainNotRevved(self):
