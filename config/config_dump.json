@@ -9519,6 +9519,28 @@
     ],
     "workspace_branch": "factory-nami-10715.B"
   },
+  "factory-nissa-15199.B-buildspec": {
+    "_template": "buildspec",
+    "build_timeout": 43200,
+    "display_label": "factory",
+    "schedule": "with 24h interval",
+    "slave_configs": [
+      "nissa-factory-nissa-15199.B-factorybranch"
+    ],
+    "workspace_branch": "factory-nissa-15199.B"
+  },
+  "factory-nissa-15199.B-buildspec-tryjob": {
+    "_template": "buildspec",
+    "build_timeout": 43200,
+    "debug": true,
+    "debug_cidb": true,
+    "display_label": "tryjob",
+    "luci_builder": "Try",
+    "slave_configs": [
+      "nissa-factory-nissa-15199.B-factorybranch-tryjob"
+    ],
+    "workspace_branch": "factory-nissa-15199.B"
+  },
   "factory-nocturne-11066.B-buildspec": {
     "_template": "buildspec",
     "build_timeout": 43200,
@@ -17245,6 +17267,26 @@
     "push_image": false,
     "suite_scheduling": false,
     "vm_tests_override": null
+  },
+  "nissa-factory-nissa-15199.B-factorybranch": {
+    "_template": "factorybranch",
+    "boards": [
+      "nissa"
+    ],
+    "workspace_branch": "factory-nissa-15199.B"
+  },
+  "nissa-factory-nissa-15199.B-factorybranch-tryjob": {
+    "_template": "factorybranch",
+    "boards": [
+      "nissa"
+    ],
+    "debug": true,
+    "display_label": "tryjob",
+    "hw_tests_override": null,
+    "luci_builder": "Try",
+    "push_image": false,
+    "suite_scheduling": false,
+    "workspace_branch": "factory-nissa-15199.B"
   },
   "nissa-full": {
     "_template": "full",

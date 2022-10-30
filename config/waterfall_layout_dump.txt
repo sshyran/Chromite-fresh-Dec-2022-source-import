@@ -68,6 +68,8 @@
   factory-nami-10715.B-buildspec
     kalista-factory-nami-10715.B-factorybranch
     nami-factory-nami-10715.B-factorybranch
+  factory-nissa-15199.B-buildspec
+    nissa-factory-nissa-15199.B-factorybranch
   factory-nocturne-11066.B-buildspec
     nocturne-factory-nocturne-11066.B-factorybranch
   factory-oak-8182.B-buildspec
@@ -644,6 +646,8 @@
   factory-nami-10715.B-buildspec-tryjob
     kalista-factory-nami-10715.B-factorybranch-tryjob
     nami-factory-nami-10715.B-factorybranch-tryjob
+  factory-nissa-15199.B-buildspec-tryjob
+    nissa-factory-nissa-15199.B-factorybranch-tryjob
   factory-nocturne-11066.B-buildspec-tryjob
     nocturne-factory-nocturne-11066.B-factorybranch-tryjob
   factory-oak-8182.B-buildspec-tryjob
@@ -1107,6 +1111,7 @@
   nautilus-llvm-toolchain-tryjob
   nautilus-payloads-tryjob
   nautilus-release-tryjob
+  nissa-factory-nissa-15199.B-factorybranch-tryjob
   nissa-full-tryjob
   nissa-llvm-next-toolchain-tryjob
   nissa-llvm-toolchain-tryjob
