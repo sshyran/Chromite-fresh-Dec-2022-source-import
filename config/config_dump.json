@@ -9407,7 +9407,7 @@
     "_template": "buildspec",
     "build_timeout": 43200,
     "display_label": "factory",
-    "schedule": "with 24h interval",
+    "schedule": "triggered",
     "slave_configs": [
       "keeby-factory-keeby-14162.B-factorybranch"
     ],
