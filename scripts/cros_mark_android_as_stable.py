@@ -33,6 +33,7 @@ from chromite.lib import portage_util
 from chromite.lib import repo_util
 from chromite.scripts import cros_mark_as_stable
 from chromite.service import android
+from chromite.service import packages
 
 
 # Dir where all the action happens.
@@ -135,7 +136,11 @@ def PrintUprevMetadata(build_branch, stable_candidate, new_ebuild):
 
 
 def FindDataCollectorArtifacts(
-    gs_context, android_version, runtime_artifacts_bucket_url, version_reference
+    gs_context,
+    android_version,
+    package_name,
+    runtime_artifacts_bucket_url,
+    version_reference,
 ):
     r"""Finds and includes into variables artifacts from arc.DataCollector.
 
@@ -145,8 +150,8 @@ def FindDataCollectorArtifacts(
     Args:
       gs_context: context to execute gsutil
       android_version: The \d+ build id of Android.
+      package_name: android package name. Used as folder to locate the cache.
       runtime_artifacts_bucket_url: root of runtime artifacts
-      build_branch: build branch. Used to determine the pinned version if exists.
       version_reference: which version to use as a reference. Could be '${PV}' in
                          case version of data collector artifacts matches the
                          Android version or direct version in case of override.
@@ -164,21 +169,27 @@ def FindDataCollectorArtifacts(
     for bucket in buckets:
         for arch in archs:
             for build_type in build_types:
-                path = (
-                    f"{runtime_artifacts_bucket_url}/{bucket}_{arch}_{build_type}_"
-                    f"{android_version}.tar"
-                )
-                if gs_context.Exists(path):
-                    variables[(f"{arch}_{build_type}_{bucket}").upper()] = (
-                        f"{runtime_artifacts_bucket_url}/{bucket}_{arch}_{build_type}_"
-                        f"{version_reference}.tar"
-                    )
+                # TODO(b/255854925): remove path without |package_name|.
+                # |package_name| is required to separate artefacts for bertha
+                # and cheets.
+                root_paths = [
+                    f"{runtime_artifacts_bucket_url}/{package_name}/{bucket}_{arch}_{build_type}",
+                    f"{runtime_artifacts_bucket_url}/{bucket}_{arch}_{build_type}",
+                ]
+
+                for _, root_path in enumerate(root_paths):
+                    path = f"{root_path}_{android_version}.tar"
+                    if gs_context.Exists(path):
+                        variables[
+                            (f"{arch}_{build_type}_{bucket}").upper()
+                        ] = f"{root_path}_{version_reference}.tar"
+                        break
 
     return variables
 
 
 def UpdateDataCollectorArtifacts(
-    android_version, runtime_artifacts_bucket_url, build_branch
+    android_version, runtime_artifacts_bucket_url, package_name
 ):
     r"""Finds and includes into variables artifacts from arc.DataCollector.
 
@@ -190,7 +201,7 @@ def UpdateDataCollectorArtifacts(
     Args:
       android_version: The \d+ build id of Android.
       runtime_artifacts_bucket_url: root of runtime artifacts
-      build_branch: build branch. Used to determine the pinned version if exists.
+      package_name: android package name. Used to determine the pinned version if exists.
 
     Returns:
       dictionary with filled ebuild variables.
@@ -199,14 +210,19 @@ def UpdateDataCollectorArtifacts(
     gs_context = gs.GSContext()
     # Check the existing version. If we find any artifacts, use them.
     variables = FindDataCollectorArtifacts(
-        gs_context, android_version, runtime_artifacts_bucket_url, "${PV}"
+        gs_context,
+        android_version,
+        package_name,
+        runtime_artifacts_bucket_url,
+        "${PV}",
     )
     if variables:
         # Data artificts were found.
         return variables
 
     # Check pinned version for the current branch.
-    pin_path = f"{runtime_artifacts_bucket_url}/{build_branch}_pin_version"
+    milestone = packages.determine_milestone_version()
+    pin_path = f"{runtime_artifacts_bucket_url}/{package_name}/M{milestone}_pin_version"
     if not gs_context.Exists(pin_path):
         # No pinned version.
         logging.warning(
@@ -217,15 +233,17 @@ def UpdateDataCollectorArtifacts(
     pin_version = gs_context.Cat(pin_path, encoding="utf-8").rstrip()
     logging.info("Pinned version %s overrides %s", pin_version, android_version)
     variables = FindDataCollectorArtifacts(
-        gs_context, pin_version, runtime_artifacts_bucket_url, pin_version
+        gs_context,
+        pin_version,
+        package_name,
+        runtime_artifacts_bucket_url,
+        pin_version,
     )
     if not variables:
         # If pin version set it must contain data.
         raise Exception(
-            "Pinned version %s:%s does not contain artificats"
-            % (build_branch, pin_version)
+            "Pinned version %s does not contain artificats" % pin_path
         )
-
     return variables
 
 
@@ -295,11 +313,11 @@ def MarkAndroidEBuildAsStable(
         # TODO(b/255705023): Have MirrorArtifacts generate the mapping for us.
         variables[var] = f"{build_branch}-linux-{target}"
 
-    # TODO(b/255854925): Pin DataCollector artifacts by android_package instead
-    # of build_branch.
     variables.update(
         UpdateDataCollectorArtifacts(
-            android_version, runtime_artifacts_bucket_url, build_branch
+            android_version,
+            runtime_artifacts_bucket_url,
+            android_package,
         )
     )
 

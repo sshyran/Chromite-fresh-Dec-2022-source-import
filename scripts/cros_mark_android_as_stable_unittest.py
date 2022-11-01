@@ -7,7 +7,6 @@
 import builtins
 import os
 
-from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
@@ -16,6 +15,7 @@ from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.scripts import cros_mark_android_as_stable
 from chromite.service import android
+from chromite.service import packages
 
 
 pytestmark = cros_test_lib.pytestmark_inside_only
@@ -102,20 +102,38 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
         for arch in archs:
             for build_type in build_types:
                 for runtime_data in runtime_datas:
-                    path = (
-                        f"{self.runtime_artifacts_bucket_url}/{runtime_data}_{arch}_"
-                        f"{build_type}_{android_version}.tar"
-                    )
-                    self.gs_mock.AddCmdResult(
-                        ["stat", "--", path], side_effect=_RaiseGSNoSuchKey
-                    )
-        pin_path = (
-            f"{self.runtime_artifacts_bucket_url}/"
-            f"{self.android_branch}_pin_version"
+                    paths = [
+                        (
+                            f"{self.runtime_artifacts_bucket_url}/{self.android_package}/"
+                            f"{runtime_data}_{arch}_{build_type}_{android_version}.tar"
+                        ),
+                        (
+                            f"{self.runtime_artifacts_bucket_url}/"
+                            f"{runtime_data}_{arch}_{build_type}_{android_version}.tar"
+                        ),
+                    ]
+                    for _, path in enumerate(paths):
+                        self.gs_mock.AddCmdResult(
+                            ["stat", "--", path], side_effect=_RaiseGSNoSuchKey
+                        )
+
+        self.PatchObject(
+            packages, "determine_milestone_version", return_value="99"
         )
-        self.gs_mock.AddCmdResult(
-            ["stat", "--", pin_path], side_effect=_RaiseGSNoSuchKey
-        )
+        pin_paths = [
+            (
+                f"{self.runtime_artifacts_bucket_url}/"
+                f"{self.android_package}/M99_pin_version"
+            ),
+            (
+                f"{self.runtime_artifacts_bucket_url}/"
+                f"{self.android_branch}_pin_version"
+            ),
+        ]
+        for _, pin_path in enumerate(pin_paths):
+            self.gs_mock.AddCmdResult(
+                ["stat", "--", pin_path], side_effect=_RaiseGSNoSuchKey
+            )
 
     def testFindAndroidCandidates(self):
         """Test creation of stable ebuilds from mock dir."""
@@ -168,23 +186,15 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
         self.setupMockRuntimeDataBuild(android_version)
 
         # Override few as existing.
-        path1 = (
-            f"{self.runtime_artifacts_bucket_url}/ureadahead_pack_host_x86_64_"
-            f"user_{android_version}.tar"
-        )
+        path1 = "gs://r/ureadahead_pack_host_x86_64_user_100.tar"
+        path2 = "gs://r/gms_core_cache_arm_userdebug_100.tar"
+        path3 = "gs://r/tts_cache_arm64_user_100.tar"
+
         self.gs_mock.AddCmdResult(
             ["stat", "--", path1], stdout=(self.STAT_OUTPUT) % path1
         )
-        path2 = (
-            f"{self.runtime_artifacts_bucket_url}/gms_core_cache_arm_"
-            f"userdebug_{android_version}.tar"
-        )
         self.gs_mock.AddCmdResult(
             ["stat", "--", path2], stdout=(self.STAT_OUTPUT) % path2
-        )
-        path3 = (
-            f"{self.runtime_artifacts_bucket_url}/tts_cache_arm64_"
-            f"user_{android_version}.tar"
         )
         self.gs_mock.AddCmdResult(
             ["stat", "--", path3], stdout=(self.STAT_OUTPUT) % path3
@@ -193,22 +203,13 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
         variables = cros_mark_android_as_stable.UpdateDataCollectorArtifacts(
             android_version,
             self.runtime_artifacts_bucket_url,
-            constants.ANDROID_PI_BUILD_BRANCH,
+            self.android_package,
         )
 
-        version_reference = "${PV}"
-        expectation1 = (
-            f"{self.runtime_artifacts_bucket_url}/"
-            f"ureadahead_pack_host_x86_64_user_{version_reference}.tar"
-        )
-        expectation2 = (
-            f"{self.runtime_artifacts_bucket_url}/"
-            f"gms_core_cache_arm_userdebug_{version_reference}.tar"
-        )
-        expectation3 = (
-            f"{self.runtime_artifacts_bucket_url}/"
-            f"tts_cache_arm64_user_{version_reference}.tar"
-        )
+        expectation1 = "gs://r/ureadahead_pack_host_x86_64_user_${PV}.tar"
+        expectation2 = "gs://r/gms_core_cache_arm_userdebug_${PV}.tar"
+        expectation3 = "gs://r/tts_cache_arm64_user_${PV}.tar"
+
         self.assertEqual(
             {
                 "X86_64_USER_UREADAHEAD_PACK_HOST": expectation1,
@@ -218,7 +219,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
             variables,
         )
 
-    def testUpdateDataCollectorArtifactsPin(self):
+    def testUpdateDataCollectorArtifactsPinBranch(self):
         android_version = 100
         android_pin_version = 50
         # Mock by default runtime artifacts are not found.
@@ -226,45 +227,47 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
         self.setupMockRuntimeDataBuild(android_pin_version)
 
         # Override few as existing.
-        path1 = (
-            f"{self.runtime_artifacts_bucket_url}/ureadahead_pack_host_x86_64_"
-            f"user_{android_pin_version}.tar"
-        )
+        path1 = "gs://r/android-package/ureadahead_pack_host_x86_64_user_50.tar"
+        path2 = "gs://r/android-package/gms_core_cache_arm_userdebug_50.tar"
+
         self.gs_mock.AddCmdResult(
             ["stat", "--", path1], stdout=(self.STAT_OUTPUT) % path1
-        )
-        path2 = (
-            f"{self.runtime_artifacts_bucket_url}/gms_core_cache_arm_"
-            f"userdebug_{android_pin_version}.tar"
         )
         self.gs_mock.AddCmdResult(
             ["stat", "--", path2], stdout=(self.STAT_OUTPUT) % path2
         )
-        pin_path = (
-            f"{self.runtime_artifacts_bucket_url}/"
-            f"{constants.ANDROID_PI_BUILD_BRANCH}_pin_version"
+        self.PatchObject(
+            packages, "determine_milestone_version", return_value="99"
         )
+
+        pin_path = "gs://r/git_pi-arc_pin_version"
+        pin_path2 = "gs://r/android-package/M99_pin_version"
+
+        # Both pins exist. With package name one has the higher priority.
         self.gs_mock.AddCmdResult(
             ["stat", "--", pin_path], stdout=(self.STAT_OUTPUT) % pin_path
         )
         self.gs_mock.AddCmdResult(
-            ["cat", pin_path], stdout=str(android_pin_version)
+            ["stat", "--", pin_path2], stdout=(self.STAT_OUTPUT) % pin_path2
+        )
+        self.gs_mock.AddCmdResult(
+            ["cat", pin_path], stdout=str(android_pin_version - 1)
+        )
+        self.gs_mock.AddCmdResult(
+            ["cat", pin_path2], stdout=str(android_pin_version)
         )
 
         variables = cros_mark_android_as_stable.UpdateDataCollectorArtifacts(
             android_version,
             self.runtime_artifacts_bucket_url,
-            constants.ANDROID_PI_BUILD_BRANCH,
+            self.android_package,
         )
 
-        version_reference = "50"
         expectation1 = (
-            f"{self.runtime_artifacts_bucket_url}/"
-            f"ureadahead_pack_host_x86_64_user_{version_reference}.tar"
+            "gs://r/android-package/ureadahead_pack_host_x86_64_user_50.tar"
         )
         expectation2 = (
-            f"{self.runtime_artifacts_bucket_url}/"
-            f"gms_core_cache_arm_userdebug_{version_reference}.tar"
+            "gs://r/android-package/gms_core_cache_arm_userdebug_50.tar"
         )
         self.assertEqual(
             {
