@@ -600,7 +600,7 @@ def copy_dlc_image(base_path: str, output_dir: str) -> List[str]:
         # Only archive DLC images, all other uncompressed files/data should not be
         # uploaded into archives.
         dlc_re = (
-            f"({dlc_lib.DLC_ID_RE})/{dlc_lib.DLC_PACKAGE}/{dlc_lib.DLC_IMAGE}"
+            f"({dlc_lib.DLC_ID_RE}/{dlc_lib.DLC_PACKAGE}/{dlc_lib.DLC_IMAGE})"
         )
         pat = f"/{dlc_build_dir}/{dlc_re}$"
         for path in osutils.DirectoryIterator(dlc_source_path):
@@ -608,11 +608,12 @@ def copy_dlc_image(base_path: str, output_dir: str) -> List[str]:
                 continue
             m = re.search(pat, str(path))
             if m:
-                dlc_id = m.group(1)
-                shutil.copytree(
-                    os.path.join(dlc_source_path, dlc_id),
-                    os.path.join(dlc_dest_path, dlc_id),
+                img_path = os.path.join(
+                    dlc_dest_path,
+                    m.group(1),
                 )
+                os.makedirs(os.path.dirname(img_path))
+                shutil.copyfile(path, img_path)
 
     # Empty list returns `None`.
     return ret or None

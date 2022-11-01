@@ -767,6 +767,7 @@ class TestCopyDlcImages(cros_test_lib.MockTempDirTestCase):
         good_dlc_ids = ("dlc-a", "dlc-b")
         for dlc_id in good_dlc_ids:
             self.touchDlc(dlc_id)
+            self.touchDlc(dlc_id, dlc_artifact="foobar-file")
 
         dlc_bad_id = "dlc_bad_id"
         self.touchDlc(dlc_bad_id)
@@ -788,6 +789,51 @@ class TestCopyDlcImages(cros_test_lib.MockTempDirTestCase):
         path = dst_paths[0]
         self.assertEqual(sorted(os.listdir(path)), list(good_dlc_ids))
         self.assertEqual(os.path.basename(path), dlc_lib.DLC_DIR)
+
+        for dlc_id in good_dlc_ids:
+            self.assertTrue(
+                os.path.exists(
+                    os.path.join(
+                        path, dlc_id, dlc_lib.DLC_PACKAGE, dlc_lib.DLC_IMAGE
+                    )
+                )
+            )
+            self.assertFalse(
+                os.path.exists(
+                    os.path.join(
+                        path, dlc_id, dlc_lib.DLC_PACKAGE, "foobar-file"
+                    )
+                )
+            )
+        self.assertFalse(
+            os.path.exists(
+                os.path.join(
+                    path, dlc_bad_id, dlc_lib.DLC_PACKAGE, dlc_lib.DLC_IMAGE
+                )
+            )
+        )
+        self.assertFalse(
+            os.path.exists(
+                os.path.join(path, dlc_bad_package, "packit", dlc_lib.DLC_IMAGE)
+            )
+        )
+        self.assertFalse(
+            os.path.exists(
+                os.path.join(
+                    path, dlc_bad_artifact, dlc_lib.DLC_PACKAGE, "some-file"
+                )
+            )
+        )
+        self.assertFalse(
+            os.path.exists(
+                os.path.join(
+                    path,
+                    dlc_bad_artifact_with_dir,
+                    dlc_lib.DLC_PACKAGE,
+                    "some-dir/some-file",
+                )
+            )
+        )
 
     def testOnlyScaledDLCs(self):
         """Test copy of DLC artifacts for only scaled."""
@@ -825,6 +871,51 @@ class TestCopyDlcImages(cros_test_lib.MockTempDirTestCase):
         path = dst_paths[0]
         self.assertEqual(sorted(os.listdir(path)), list(good_dlc_ids))
         self.assertEqual(os.path.basename(path), dlc_lib.DLC_DIR_SCALED)
+
+        for dlc_id in good_dlc_ids:
+            self.assertTrue(
+                os.path.exists(
+                    os.path.join(
+                        path, dlc_id, dlc_lib.DLC_PACKAGE, dlc_lib.DLC_IMAGE
+                    )
+                )
+            )
+            self.assertFalse(
+                os.path.exists(
+                    os.path.join(
+                        path, dlc_id, dlc_lib.DLC_PACKAGE, "foobar-file"
+                    )
+                )
+            )
+        self.assertFalse(
+            os.path.exists(
+                os.path.join(
+                    path, dlc_bad_id, dlc_lib.DLC_PACKAGE, dlc_lib.DLC_IMAGE
+                )
+            )
+        )
+        self.assertFalse(
+            os.path.exists(
+                os.path.join(path, dlc_bad_package, "packit", dlc_lib.DLC_IMAGE)
+            )
+        )
+        self.assertFalse(
+            os.path.exists(
+                os.path.join(
+                    path, dlc_bad_artifact, dlc_lib.DLC_PACKAGE, "some-file"
+                )
+            )
+        )
+        self.assertFalse(
+            os.path.exists(
+                os.path.join(
+                    path,
+                    dlc_bad_artifact_with_dir,
+                    dlc_lib.DLC_PACKAGE,
+                    "some-dir/some-file",
+                )
+            )
+        )
 
     def testAllDLCs(self):
         """Test copy of DLC artifacts of all types."""
@@ -873,3 +964,51 @@ class TestCopyDlcImages(cros_test_lib.MockTempDirTestCase):
         path1 = dst_paths[1]
         self.assertEqual(sorted(os.listdir(path1)), list(good_dlc_ids))
         self.assertEqual(os.path.basename(path1), dlc_lib.DLC_DIR_SCALED)
+
+        for path in (path0, path1):
+            for dlc_id in good_dlc_ids:
+                self.assertTrue(
+                    os.path.exists(
+                        os.path.join(
+                            path, dlc_id, dlc_lib.DLC_PACKAGE, dlc_lib.DLC_IMAGE
+                        )
+                    )
+                )
+                self.assertFalse(
+                    os.path.exists(
+                        os.path.join(
+                            path, dlc_id, dlc_lib.DLC_PACKAGE, "foobar-file"
+                        )
+                    )
+                )
+            self.assertFalse(
+                os.path.exists(
+                    os.path.join(
+                        path, dlc_bad_id, dlc_lib.DLC_PACKAGE, dlc_lib.DLC_IMAGE
+                    )
+                )
+            )
+            self.assertFalse(
+                os.path.exists(
+                    os.path.join(
+                        path, dlc_bad_package, "packit", dlc_lib.DLC_IMAGE
+                    )
+                )
+            )
+            self.assertFalse(
+                os.path.exists(
+                    os.path.join(
+                        path, dlc_bad_artifact, dlc_lib.DLC_PACKAGE, "some-file"
+                    )
+                )
+            )
+            self.assertFalse(
+                os.path.exists(
+                    os.path.join(
+                        path,
+                        dlc_bad_artifact_with_dir,
+                        dlc_lib.DLC_PACKAGE,
+                        "some-dir/some-file",
+                    )
+                )
+            )
