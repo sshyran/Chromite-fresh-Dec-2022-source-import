@@ -4,7 +4,6 @@
 
 """This module contains constants used by cbuildbot and related code."""
 
-import itertools
 import os
 
 
@@ -282,87 +281,23 @@ DEFAULT_CTS_TEST_XML_MAP = {
 DEFAULT_CTS_RESULTS_GSURI = "gs://chromeos-cts-results/"
 DEFAULT_CTS_APFE_GSURI = "gs://chromeos-cts-apfe/"
 
-# List of Android Portage packages. When adding/removing packages make sure the
-# ANDROID_PACKAGE_TO_BUILD_TARGETS map is also updated.
-ANDROID_PI_PACKAGE = "android-container-pi"
-ANDROID_VMRVC_PACKAGE = "android-vm-rvc"
-ANDROID_VMSC_PACKAGE = "android-vm-sc"
-ANDROID_VMTM_PACKAGE = "android-vm-tm"
-# U uses master until the U branch is cut.
-ANDROID_VMUDC_PACKAGE = "android-vm-master"
-
-ANDROID_ALL_PACKAGES = frozenset(
-    [
-        ANDROID_PI_PACKAGE,
-        ANDROID_VMRVC_PACKAGE,
-        ANDROID_VMSC_PACKAGE,
-        ANDROID_VMTM_PACKAGE,
-        ANDROID_VMUDC_PACKAGE,
-    ]
-)
-
 # List of supported Android branches.
+# TODO(b/187795616): Maybe move this to service/android.py and ask release TPgM
+# to update that file on release branches.
 ANDROID_PI_BUILD_BRANCH = "git_pi-arc"
+ANDROID_RVC_BUILD_BRANCH = "git_rvc-arc"
 ANDROID_VMRVC_BUILD_BRANCH = "git_rvc-arc"
 ANDROID_VMSC_BUILD_BRANCH = "git_sc-arc-dev"
 ANDROID_VMTM_BUILD_BRANCH = "git_tm-arc"
 ANDROID_VMUDC_BUILD_BRANCH = "git_master-arc-dev"
 
-# Supported Android build targets for each branch. Maps from *_TARGET variables
-# in Android ebuilds to Android build targets. Used during Android uprev to fill
-# in corresponding variables.
-# TODO(crbug/1192431): Move this next to uprev code once
-# ANDROID_ALL_BUILD_TARGETS is removed.
-ANDROID_PACKAGE_TO_BUILD_TARGETS = {
-    ANDROID_PI_PACKAGE: {
-        "APPS_TARGET": "apps",
-        "ARM_TARGET": "cheets_arm-user",
-        "ARM64_TARGET": "cheets_arm64-user",
-        "X86_TARGET": "cheets_x86-user",
-        "X86_64_TARGET": "cheets_x86_64-user",
-        "ARM_USERDEBUG_TARGET": "cheets_arm-userdebug",
-        "ARM64_USERDEBUG_TARGET": "cheets_arm64-userdebug",
-        "X86_USERDEBUG_TARGET": "cheets_x86-userdebug",
-        "X86_64_USERDEBUG_TARGET": "cheets_x86_64-userdebug",
-        "SDK_GOOGLE_X86_USERDEBUG_TARGET": "sdk_cheets_x86-userdebug",
-        "SDK_GOOGLE_X86_64_USERDEBUG_TARGET": "sdk_cheets_x86_64-userdebug",
-    },
-    ANDROID_VMRVC_PACKAGE: {
-        "APPS_TARGET": "apps",
-        "ARM64_TARGET": "bertha_arm64-user",
-        "X86_64_TARGET": "bertha_x86_64-user",
-        "ARM64_USERDEBUG_TARGET": "bertha_arm64-userdebug",
-        "X86_64_USERDEBUG_TARGET": "bertha_x86_64-userdebug",
-    },
-    ANDROID_VMSC_PACKAGE: {
-        "ARM64_USERDEBUG_TARGET": "bertha_arm64-userdebug",
-        "X86_64_USERDEBUG_TARGET": "bertha_x86_64-userdebug",
-    },
-    ANDROID_VMTM_PACKAGE: {
-        "ARM64_TARGET": "bertha_arm64-user",
-        "X86_64_TARGET": "bertha_x86_64-user",
-        "ARM64_USERDEBUG_TARGET": "bertha_arm64-userdebug",
-        "X86_64_USERDEBUG_TARGET": "bertha_x86_64-userdebug",
-    },
-    ANDROID_VMUDC_PACKAGE: {
-        "ARM64_USERDEBUG_TARGET": "bertha_arm64-userdebug",
-        "X86_64_USERDEBUG_TARGET": "bertha_x86_64-userdebug",
-    },
-}
-
-# All possible *_TARGET variables in Android ebuild files, used when parsing
-# ebuilds to determine the corresponding Android branch.
-# TODO(crbug/1193413): Remove this.
-ANDROID_ALL_BUILD_TARGETS = frozenset(
-    itertools.chain.from_iterable(ANDROID_PACKAGE_TO_BUILD_TARGETS.values())
-)
-
 # The bucket where we save Android artifacts indefinitely, to ensure any old
 # Android versions in the commit history can be built.
-# TODO(crbug/1192431): Move to service.android.
+# TODO(b/187795616): Move somewhere else once the following is gone.
 ARC_BUCKET_URL = "gs://chromeos-arc-images/builds"
 
 # URL template to Android symbols, used by release builders.
+# TODO(b/230013833): Remove once cbuildbot is gone.
 ANDROID_SYMBOLS_URL_TEMPLATE = (
     ARC_BUCKET_URL
     + "/%(branch)s-linux-%(target)s_%(arch)s-%(variant)s/%(version)s"
@@ -472,7 +407,7 @@ VALID_CHROME_REVISIONS = [
 # Constants for uprevving Android.
 
 # Builds and validates the latest Android release.
-# TODO(b/187788131): cleanup this
+# TODO(b/230013833): Remove once cbuildbot is gone.
 ANDROID_REV_LATEST = "latest_release"
 VALID_ANDROID_REVISIONS = [ANDROID_REV_LATEST]
 

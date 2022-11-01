@@ -4,20 +4,72 @@
 
 """Provides utility for performing Android uprev."""
 
+import itertools
 import json
 import logging
 import os
 import re
 import time
-from typing import Dict, Optional, Tuple, Union
+from typing import Dict, Iterable, Optional, Tuple, Union
 
 from chromite.lib import constants
 from chromite.lib import gs
 
 
+# List of Android Portage packages. When adding/removing packages make sure the
+# ANDROID_PACKAGE_TO_BUILD_TARGETS / ARTIFACTS_TO_COPY maps are also updated.
+ANDROID_PI_PACKAGE = "android-container-pi"
+ANDROID_VMRVC_PACKAGE = "android-vm-rvc"
+ANDROID_VMSC_PACKAGE = "android-vm-sc"
+ANDROID_VMTM_PACKAGE = "android-vm-tm"
+# U uses master until the U branch is cut.
+ANDROID_VMUDC_PACKAGE = "android-vm-master"
+
+
+# Supported Android build targets for each package. Maps from *_TARGET variables
+# in Android ebuilds to Android build targets. Used during Android uprev to fill
+# in corresponding variables.
+ANDROID_PACKAGE_TO_BUILD_TARGETS = {
+    ANDROID_PI_PACKAGE: {
+        "APPS_TARGET": "apps",
+        "ARM_TARGET": "cheets_arm-user",
+        "ARM64_TARGET": "cheets_arm64-user",
+        "X86_TARGET": "cheets_x86-user",
+        "X86_64_TARGET": "cheets_x86_64-user",
+        "ARM_USERDEBUG_TARGET": "cheets_arm-userdebug",
+        "ARM64_USERDEBUG_TARGET": "cheets_arm64-userdebug",
+        "X86_USERDEBUG_TARGET": "cheets_x86-userdebug",
+        "X86_64_USERDEBUG_TARGET": "cheets_x86_64-userdebug",
+        "SDK_GOOGLE_X86_USERDEBUG_TARGET": "sdk_cheets_x86-userdebug",
+        "SDK_GOOGLE_X86_64_USERDEBUG_TARGET": "sdk_cheets_x86_64-userdebug",
+    },
+    ANDROID_VMRVC_PACKAGE: {
+        "APPS_TARGET": "apps",
+        "ARM64_TARGET": "bertha_arm64-user",
+        "X86_64_TARGET": "bertha_x86_64-user",
+        "ARM64_USERDEBUG_TARGET": "bertha_arm64-userdebug",
+        "X86_64_USERDEBUG_TARGET": "bertha_x86_64-userdebug",
+    },
+    ANDROID_VMSC_PACKAGE: {
+        "ARM64_USERDEBUG_TARGET": "bertha_arm64-userdebug",
+        "X86_64_USERDEBUG_TARGET": "bertha_x86_64-userdebug",
+    },
+    ANDROID_VMTM_PACKAGE: {
+        "ARM64_TARGET": "bertha_arm64-user",
+        "X86_64_TARGET": "bertha_x86_64-user",
+        "ARM64_USERDEBUG_TARGET": "bertha_arm64-userdebug",
+        "X86_64_USERDEBUG_TARGET": "bertha_x86_64-userdebug",
+    },
+    ANDROID_VMUDC_PACKAGE: {
+        "ARM64_USERDEBUG_TARGET": "bertha_arm64-userdebug",
+        "X86_64_USERDEBUG_TARGET": "bertha_x86_64-userdebug",
+    },
+}
+
+
 # Regex patterns of artifacts to copy for each branch and build target.
 ARTIFACTS_TO_COPY = {
-    constants.ANDROID_PI_PACKAGE: {
+    ANDROID_PI_PACKAGE: {
         # Roll XkbToKcmConverter with system image. It's a host executable and
         # doesn't depend on the target as long as it's pi-arc branch. The
         # converter is ARC specific and not a part of Android SDK. Having a
@@ -37,7 +89,7 @@ ARTIFACTS_TO_COPY = {
         "sdk_cheets_x86-userdebug": r"\.zip$",
         "sdk_cheets_x86_64-userdebug": r"\.zip$",
     },
-    constants.ANDROID_VMRVC_PACKAGE: {
+    ANDROID_VMRVC_PACKAGE: {
         # For XkbToKcmConverter, see the comment in pi-arc targets.
         # org.chromium.cts.helpers.apk contains helpers needed for CTS.  It is
         # installed on the board, but not into the VM.
@@ -55,7 +107,7 @@ ARTIFACTS_TO_COPY = {
             r"(\.zip|/XkbToKcmConverter" r"|/org.chromium.arc.cts.helpers.apk)$"
         ),
     },
-    constants.ANDROID_VMSC_PACKAGE: {
+    ANDROID_VMSC_PACKAGE: {
         # For XkbToKcmConverter, see the comment in pi-arc targets.
         # org.chromium.cts.helpers.apk contains helpers needed for CTS.  It is
         # installed on the board, but not into the VM.
@@ -66,7 +118,7 @@ ARTIFACTS_TO_COPY = {
             r"(\.zip|/XkbToKcmConverter" r"|/org.chromium.arc.cts.helpers.apk)$"
         ),
     },
-    constants.ANDROID_VMTM_PACKAGE: {
+    ANDROID_VMTM_PACKAGE: {
         # For XkbToKcmConverter, see the comment in pi-arc targets.
         # org.chromium.cts.helpers.apk contains helpers needed for CTS.  It is
         # installed on the board, but not into the VM.
@@ -83,7 +135,7 @@ ARTIFACTS_TO_COPY = {
             r"(\.zip|/XkbToKcmConverter" r"|/org.chromium.arc.cts.helpers.apk)$"
         ),
     },
-    constants.ANDROID_VMUDC_PACKAGE: {
+    ANDROID_VMUDC_PACKAGE: {
         # For XkbToKcmConverter, see the comment in pi-arc targets.
         # org.chromium.cts.helpers.apk contains helpers needed for CTS.  It is
         # installed on the board, but not into the VM.
@@ -114,6 +166,11 @@ OVERLAY_DIR = os.path.join(
 )
 
 
+def GetAllAndroidPackages() -> Iterable[str]:
+    """Returns a list of all supported Android packages."""
+    return list(ANDROID_PACKAGE_TO_BUILD_TARGETS)
+
+
 def GetAndroidPackageDir(
     android_package: str, overlay_dir: str = OVERLAY_DIR
 ) -> str:
@@ -139,16 +196,39 @@ def GetAndroidBranchForPackage(android_package: str) -> str:
         The corresponding Android branch e.g. 'git_rvc-arc'
     """
     mapping = {
-        constants.ANDROID_PI_PACKAGE: constants.ANDROID_PI_BUILD_BRANCH,
-        constants.ANDROID_VMRVC_PACKAGE: constants.ANDROID_VMRVC_BUILD_BRANCH,
-        constants.ANDROID_VMSC_PACKAGE: constants.ANDROID_VMSC_BUILD_BRANCH,
-        constants.ANDROID_VMTM_PACKAGE: constants.ANDROID_VMTM_BUILD_BRANCH,
-        constants.ANDROID_VMUDC_PACKAGE: constants.ANDROID_VMUDC_BUILD_BRANCH,
+        ANDROID_PI_PACKAGE: constants.ANDROID_PI_BUILD_BRANCH,
+        ANDROID_VMRVC_PACKAGE: constants.ANDROID_VMRVC_BUILD_BRANCH,
+        ANDROID_VMSC_PACKAGE: constants.ANDROID_VMSC_BUILD_BRANCH,
+        ANDROID_VMTM_PACKAGE: constants.ANDROID_VMTM_BUILD_BRANCH,
+        ANDROID_VMUDC_PACKAGE: constants.ANDROID_VMUDC_BUILD_BRANCH,
     }
     try:
         return mapping[android_package]
     except KeyError:
         raise ValueError(f'Unknown Android package "{android_package}"')
+
+
+def GetAndroidEbuildTargetsForPackage(android_package: str) -> Dict[str, str]:
+    """Returns the ebuild targets map for given Android package.
+
+    This is the mapping between Android ebuild variables and Android build
+    targets. Required when generating new stable ebuilds.
+    """
+    try:
+        return ANDROID_PACKAGE_TO_BUILD_TARGETS[android_package]
+    except KeyError:
+        raise ValueError(f'Unknown Android package "{android_package}"')
+
+
+def GetAllAndroidEbuildTargets() -> Iterable[str]:
+    """Returns all possible Android ebuild target variables.
+
+    This is required by packages.determine_android_branch() to parse Android
+    branch info from stable ebuilds.
+    """
+    return frozenset(
+        itertools.chain.from_iterable(ANDROID_PACKAGE_TO_BUILD_TARGETS.values())
+    )
 
 
 def IsBuildIdValid(

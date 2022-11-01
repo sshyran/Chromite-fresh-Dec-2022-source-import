@@ -38,6 +38,7 @@ from chromite.lib import path_util
 from chromite.lib import portage_util
 from chromite.lib import uri_lib
 from chromite.lib.parser import package_info
+from chromite.service import android
 
 
 class RunAttributesError(Exception):
@@ -822,7 +823,7 @@ class _BuilderRunBase(object):
         host_ebuild_path = path_util.FromChrootPath(ebuild_path)
         # We assume all targets pull from the same branch and that we always
         # have at least one of the following targets.
-        targets = constants.ANDROID_ALL_BUILD_TARGETS
+        targets = android.GetAllAndroidEbuildTargets()
         ebuild_content = osutils.SourceEnvironment(host_ebuild_path, targets)
         for target in targets:
             if target in ebuild_content:

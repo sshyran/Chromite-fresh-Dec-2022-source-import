@@ -43,6 +43,7 @@ from chromite.lib import portage_util
 from chromite.lib import request_build
 from chromite.lib import timeout_util
 from chromite.lib.parser import package_info
+from chromite.service import android
 
 
 BUILD_PACKAGES_PREBUILTS = "10774.0.0"
@@ -838,7 +839,7 @@ class WorkspaceDebugSymbolsStage(
         )
         # We assume all targets pull from the same branch and that we always
         # have at least one of the following targets.
-        targets = constants.ANDROID_ALL_BUILD_TARGETS
+        targets = android.GetAllAndroidEbuildTargets()
         ebuild_content = osutils.SourceEnvironment(host_ebuild_path, targets)
         logging.info("Got ebuild env: %s", ebuild_content)
         for target in targets:
