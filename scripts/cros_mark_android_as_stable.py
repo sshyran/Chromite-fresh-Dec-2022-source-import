@@ -289,7 +289,7 @@ def MarkAndroidEBuildAsStable(
     # TODO(b/255705023): Remove build_branch once the following no longer relies
     # on it.
     build_branch = android.GetAndroidBranchForPackage(android_package)
-    build_targets = android.GetAndroidEbuildTargetsForPackage(android_package)
+    build_targets = constants.ANDROID_PACKAGE_TO_BUILD_TARGETS[android_package]
     variables = {"BASE_URL": arc_bucket_url}
     for var, target in build_targets.items():
         # TODO(b/255705023): Have MirrorArtifacts generate the mapping for us.
@@ -387,7 +387,7 @@ def GetParser():
     parser.add_argument(
         "--android_package",
         required=True,
-        choices=android.GetAllAndroidPackages(),
+        choices=constants.ANDROID_ALL_PACKAGES,
         help="Android package to uprev",
     )
     parser.add_argument(
