@@ -116,7 +116,7 @@ class Upgrader(object):
   HOST_BOARD = 'amd64-host'
   OPT_SLOTS = ('amend', 'csv_file', 'force', 'no_upstream_cache', 'rdeps',
                'upgrade', 'upgrade_deep', 'upstream', 'unstable_ok', 'verbose',
-               'local_only')
+               'local_only', 'disable_emerge')
 
   EQUERY_CMD = 'equery'
   EMERGE_CMD = 'emerge'
@@ -154,6 +154,7 @@ class Upgrader(object):
       '_upstream',     # Path to upstream portage repo
       '_unstable_ok',  # Boolean to allow unstable upstream also
       '_verbose',      # Boolean
+      '_disable_emerge', # Boolean to skip emerge check for package update
   )
 
   def __init__(self, options):
@@ -1139,7 +1140,7 @@ class Upgrader(object):
 
         self._PackageReport(pinfo)
 
-      if upgrades_this_run:
+      if upgrades_this_run and not self._disable_emerge:
         self._GiveEmergeResults(pinfolist)
 
       if self._IsInUpgradeMode():
@@ -1803,6 +1804,8 @@ def _CreateParser():
                       help='Use latest upstream ebuild, stable or not')
   parser.add_argument('-l', '--local-only', action='store_true', default=False,
                       help='Do not attempt to update local portage cache')
+  parser.add_argument('--disable-emerge', action='store_true', default=False,
+                      help='Skip the emerge check for package update')
   return parser
 
 
