@@ -9841,6 +9841,30 @@
     ],
     "workspace_branch": "factory-trogdor-13443.B"
   },
+  "factory-trogdor-15210.B-buildspec": {
+    "_template": "buildspec",
+    "build_timeout": 43200,
+    "display_label": "factory",
+    "schedule": "with 24h interval",
+    "slave_configs": [
+      "strongbad-factory-trogdor-15210.B-factorybranch",
+      "trogdor-factory-trogdor-15210.B-factorybranch"
+    ],
+    "workspace_branch": "factory-trogdor-15210.B"
+  },
+  "factory-trogdor-15210.B-buildspec-tryjob": {
+    "_template": "buildspec",
+    "build_timeout": 43200,
+    "debug": true,
+    "debug_cidb": true,
+    "display_label": "tryjob",
+    "luci_builder": "Try",
+    "slave_configs": [
+      "strongbad-factory-trogdor-15210.B-factorybranch-tryjob",
+      "trogdor-factory-trogdor-15210.B-factorybranch-tryjob"
+    ],
+    "workspace_branch": "factory-trogdor-15210.B"
+  },
   "factory-volteer-13600.B-buildspec": {
     "_template": "buildspec",
     "build_timeout": 43200,
@@ -22772,6 +22796,26 @@
     "suite_scheduling": false,
     "workspace_branch": "factory-trogdor-13443.B"
   },
+  "strongbad-factory-trogdor-15210.B-factorybranch": {
+    "_template": "factorybranch",
+    "boards": [
+      "strongbad"
+    ],
+    "workspace_branch": "factory-trogdor-15210.B"
+  },
+  "strongbad-factory-trogdor-15210.B-factorybranch-tryjob": {
+    "_template": "factorybranch",
+    "boards": [
+      "strongbad"
+    ],
+    "debug": true,
+    "display_label": "tryjob",
+    "hw_tests_override": null,
+    "luci_builder": "Try",
+    "push_image": false,
+    "suite_scheduling": false,
+    "workspace_branch": "factory-trogdor-15210.B"
+  },
   "strongbad-full": {
     "_template": "full",
     "boards": [
@@ -24109,6 +24153,26 @@
     "push_image": false,
     "suite_scheduling": false,
     "workspace_branch": "factory-trogdor-13443.B"
+  },
+  "trogdor-factory-trogdor-15210.B-factorybranch": {
+    "_template": "factorybranch",
+    "boards": [
+      "trogdor"
+    ],
+    "workspace_branch": "factory-trogdor-15210.B"
+  },
+  "trogdor-factory-trogdor-15210.B-factorybranch-tryjob": {
+    "_template": "factorybranch",
+    "boards": [
+      "trogdor"
+    ],
+    "debug": true,
+    "display_label": "tryjob",
+    "hw_tests_override": null,
+    "luci_builder": "Try",
+    "push_image": false,
+    "suite_scheduling": false,
+    "workspace_branch": "factory-trogdor-15210.B"
   },
   "trogdor-full": {
     "_template": "full",

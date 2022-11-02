@@ -103,6 +103,9 @@
   factory-trogdor-13443.B-buildspec
     strongbad-factory-trogdor-13443.B-factorybranch
     trogdor-factory-trogdor-13443.B-factorybranch
+  factory-trogdor-15210.B-buildspec
+    strongbad-factory-trogdor-15210.B-factorybranch
+    trogdor-factory-trogdor-15210.B-factorybranch
   factory-volteer-13600.B-buildspec
     volteer-factory-volteer-13600.B-factorybranch
   factory-zork-13427.B-buildspec
@@ -681,6 +684,9 @@
   factory-trogdor-13443.B-buildspec-tryjob
     strongbad-factory-trogdor-13443.B-factorybranch-tryjob
     trogdor-factory-trogdor-13443.B-factorybranch-tryjob
+  factory-trogdor-15210.B-buildspec-tryjob
+    strongbad-factory-trogdor-15210.B-factorybranch-tryjob
+    trogdor-factory-trogdor-15210.B-factorybranch-tryjob
   factory-volteer-13600.B-buildspec-tryjob
     volteer-factory-volteer-13600.B-factorybranch-tryjob
   factory-zork-13427.B-buildspec-tryjob
@@ -1316,6 +1322,7 @@
   soraka-release-tryjob
   strongbad-factory-strongbad-13963.B-factorybranch-tryjob
   strongbad-factory-trogdor-13443.B-factorybranch-tryjob
+  strongbad-factory-trogdor-15210.B-factorybranch-tryjob
   strongbad-full-tryjob
   strongbad-kernelnext-full-tryjob
   strongbad-kernelnext-llvm-next-toolchain-tryjob
@@ -1354,6 +1361,7 @@
   trogdor-connectivitynext-release-tryjob
   trogdor-factory-strongbad-13963.B-factorybranch-tryjob
   trogdor-factory-trogdor-13443.B-factorybranch-tryjob
+  trogdor-factory-trogdor-15210.B-factorybranch-tryjob
   trogdor-full-tryjob
   trogdor-kernelnext-full-tryjob
   trogdor-kernelnext-llvm-next-toolchain-tryjob
