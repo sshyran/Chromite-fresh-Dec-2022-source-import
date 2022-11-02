@@ -131,6 +131,8 @@ def PrepareBinhostUploads(
     if not gs.PathIsGs(uri):
         raise ValueError("Upload URI %s must be Google Storage." % uri)
 
+    package_index_paths = [f.path.path for f in input_proto.package_index_files]
+
     if config.validate_only:
         return controller.RETURN_CODE_VALID_INPUT
 
@@ -144,7 +146,9 @@ def PrepareBinhostUploads(
     index_path = binhost.UpdatePackageIndex(
         uploads_dir, upload_uri, upload_path, sudo=True
     )
-    upload_targets = binhost.GetPrebuiltsFiles(uploads_dir)
+    upload_targets = binhost.GetPrebuiltsFiles(
+        uploads_dir, package_index_paths=package_index_paths, sudo=True
+    )
     assert index_path.startswith(
         uploads_dir
     ), "expected index_path to start with uploads_dir"
