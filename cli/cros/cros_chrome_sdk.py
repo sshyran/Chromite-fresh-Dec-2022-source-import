@@ -15,6 +15,7 @@ import os
 from pathlib import Path
 import queue
 import re
+import stat
 import textwrap
 import threading
 
@@ -496,6 +497,24 @@ class SDKFetcher(object):
             if ref.Exists():
                 return ref.path
         return None
+
+    @classmethod
+    def FixCachePermissions(cls, cache_dir):
+        """Fixes directories in the cache that are read-only.
+
+        crrev.com/c/3905759 added read-only directories into the sysroot that
+        Simple Chrome downloads. This leads to errors when the cache gets
+        automatically cleaned up. So we forcibly make every dir in the cache
+        writable here to avoid that.
+
+        Args:
+            cache_dir: Location of the cache to be cleaned up.
+        """
+        for root, dirs, _ in os.walk(cache_dir):
+            for dir_name in dirs:
+                dir_path = os.path.join(root, dir_name)
+                if not os.access(dir_path, os.W_OK):
+                    os.chmod(dir_path, os.stat(dir_path).st_mode | stat.S_IWUSR)
 
     @classmethod
     def ClearOldItems(cls, cache_dir, max_age_days=14):
@@ -1996,6 +2015,9 @@ class ChromeSDKCommand(command.CliCommand):
 
         if self.options.cfi and not self.options.thinlto:
             cros_build_lib.Die("CFI requires ThinLTO.")
+
+        # Fix read-only dirs in the cache.
+        SDKFetcher.FixCachePermissions(self.options.cache_dir)
 
         # Remove old SDKs from the cache to avoid wasting disk space.
         SDKFetcher.ClearOldItems(self.options.cache_dir)
