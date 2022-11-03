@@ -38,9 +38,6 @@ if TYPE_CHECKING:
     from chromite.lib import sysroot_lib
     from chromite.lib.parser import package_info
 
-CHROMITE_UTILS_PATH = "chromite/utils/data"
-COVERAGE_BOARD_OWNERSHIP_JSON = "code_coverage_board_ownership.json"
-
 
 class Error(Exception):
     """The module's base error class."""
@@ -463,45 +460,6 @@ def _VMTestChrome(board: str, sdk_cmd: commands.ChromeSDK) -> None:
         sdk_cmd.VMTest(image_path)
 
 
-def _GetZeroCoverageDirectories(
-    build_target: "build_target_lib.BuildTarget",
-) -> List[str]:
-    """Get the list of directories to generate zero coverage for.
-
-    Args:
-        build_target: The build target we want to choose directories for.
-
-    Returns:
-        List of directories that we should generate zero coverage for.
-    """
-    # TODO(b/244365763): Get this mapping dynamically instead of the static json.
-    owners_path = os.path.join(
-        constants.SOURCE_ROOT,
-        CHROMITE_UTILS_PATH,
-        COVERAGE_BOARD_OWNERSHIP_JSON,
-    )
-    if not os.path.exists(owners_path):
-        raise ValueError(
-            "Coverage boards ownership json does not" f"exists {owners_path}"
-        )
-
-    content = osutils.ReadFile(owners_path)
-    owners_json = json.loads(content)
-    if not owners_json:
-        raise ValueError(f"Could not read board ownership json {owners_path}")
-
-    if owners_json[build_target] is None:
-        raise ValueError(
-            f"No ownership data found for {build_target}" f"at {owners_path}"
-        )
-
-    dirs = [
-        os.path.join(constants.SOURCE_ROOT, d)
-        for d in owners_json[build_target]
-    ]
-    return dirs
-
-
 def BundleCodeCoverageGolang(
     chroot: "chroot_lib.Chroot",
     output_dir: str,
@@ -655,6 +613,7 @@ def _BundleCodeCoverageLlvmJson(
             coverage_json=llvm_generated_cov_json,
             source_root=constants.SOURCE_ROOT,
             path_mapping_list=path_mapping,
+            exclude_dirs=constants.CODE_COVERAGE_EXCLUDE_DIRS,
         )
 
         code_coverage_util.LogLlvmCoverageJsonInformation(
@@ -667,8 +626,10 @@ def _BundleCodeCoverageLlvmJson(
         zero_coverage_json = code_coverage_util.GenerateZeroCoverageLlvm(
             # TODO(b/227649725): Input path_to_src_directories and language specific
             # src_file_extensions and exclude_line_prefixes from GetArtifact API
-            path_to_src_directories=_GetZeroCoverageDirectories(
-                build_target=build_target
+            path_to_src_directories=code_coverage_util.GetZeroCoverageDirectories(
+                build_target=build_target,
+                src_prefix_path=constants.SOURCE_ROOT,
+                exclude_dirs=constants.CODE_COVERAGE_EXCLUDE_DIRS,
             ),
             src_file_extensions=constants.ZERO_COVERAGE_FILE_EXTENSIONS_TO_PROCESS[
                 lang
@@ -690,6 +651,7 @@ def _BundleCodeCoverageLlvmJson(
         merged_coverage_json = code_coverage_util.MergeLLVMCoverageJson(
             cleaned_cov_json, zero_coverage_json
         )
+
         code_coverage_util.LogLlvmCoverageJsonInformation(
             merged_coverage_json, "merged_coverage_json:"
         )

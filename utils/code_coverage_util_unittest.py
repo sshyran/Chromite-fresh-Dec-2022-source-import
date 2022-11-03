@@ -477,7 +477,10 @@ class CleanLlvmFileNamesTest(cros_test_lib.TempDirTestCase):
         ]
 
         cleaned_json = code_coverage_util.CleanLlvmFileNames(
-            coverage_json, source_root, path_mapping_list
+            coverage_json,
+            source_root,
+            path_mapping_list,
+            constants.CODE_COVERAGE_EXCLUDE_DIRS,
         )
 
         coverage_data = cleaned_json["data"][0]["files"]

@@ -18,6 +18,8 @@ ZERO_COVERAGE_EXEC_COUNT = 0
 ZERO_COVERAGE_START_COL = 1
 LLVM_COVERAGE_JSON_TYPE = "llvm.coverage.json.export"
 LLVM_COVERAGE_VERSION = "2.0.1"
+CHROMITE_UTILS_PATH = "chromite/utils/data"
+COVERAGE_BOARD_OWNERSHIP_JSON = "code_coverage_board_ownership.json"
 
 
 def _IsInstrumented(line: str, exclude_line_prefixes: Tuple[str]) -> bool:
@@ -228,7 +230,10 @@ def _ValidatePathMappingEntryList(data: Dict) -> None:
 
 
 def _CleanLlvmFileName(
-    filename: str, path_mapping_list: List, source_root: str
+    filename: str,
+    path_mapping_list: List,
+    source_root: str,
+    exclude_dirs: Tuple[str],
 ) -> Optional[str]:
     """Clean LLVM generated file name.
 
@@ -246,11 +251,11 @@ def _CleanLlvmFileName(
         filename: file name that needs to be cleaned.
         path_mapping_list: Path mapping list.
         source_root: source root path.
+        exclude_dirs: list of directory to be excluded from code coverage
 
     Returns:
         Cleaned filename, None if the unable to clean file.
     """
-
     if not filename:
         return None
 
@@ -261,14 +266,21 @@ def _CleanLlvmFileName(
         if filename.startswith(build_dest_path):
             relative_src_path = filename.replace(build_dest_path, src_path)
             absolute_src_path = os.path.join(source_root, relative_src_path)
+            if relative_src_path.startswith(exclude_dirs):
+                logging.info("Directory based exclusion %s.", filename)
+                return None
             if os.path.exists(absolute_src_path):
                 return relative_src_path
     logging.info("Not able to clean filename %s.", filename)
+
     return None
 
 
 def CleanLlvmFileNames(
-    coverage_json: Dict, source_root: str, path_mapping_list: List
+    coverage_json: Dict,
+    source_root: str,
+    path_mapping_list: Dict,
+    exclude_dirs: Tuple[str],
 ) -> Optional[Dict]:
     """Clean LLVM generated file names.
 
@@ -285,6 +297,7 @@ def CleanLlvmFileNames(
         coverage_json: llvm coverage json.
         source_root: source root path.
         path_mapping_list: List of src and work destination dir tuple.
+        exclude_dirs: list of directory to be excluded from code coverage
 
     Returns:
         llvm coverage json after required cleaning up the file names.
@@ -298,7 +311,7 @@ def CleanLlvmFileNames(
 
     for entry in coverage_data:
         cleaned_file_name = _CleanLlvmFileName(
-            entry["filename"], path_mapping_list, source_root
+            entry["filename"], path_mapping_list, source_root, exclude_dirs
         )
         if cleaned_file_name:
             entry["filename"] = cleaned_file_name
@@ -551,3 +564,49 @@ def GetLlvmJsonCoverageDataIfValid(path_to_file: str):
     except Exception as e:
         logging.warning("GetLlvmJsonCoverageDataIfValid failed %s", e)
         return None
+
+
+def GetZeroCoverageDirectories(
+    build_target: "build_target_lib.BuildTarget",
+    src_prefix_path: str,
+    exclude_dirs: Tuple[str],
+) -> List[str]:
+    """Get the list of directories to generate zero coverage for.
+
+    Args:
+        build_target: The build target we want to choose directories for.
+        src_prefix_path: prefix path for source code
+        exclude_dirs: list of directory to be excluded from code coverage.
+
+    Returns:
+        List of directories that we should generate zero coverage for.
+    """
+    # TODO(b/244365763): Get this mapping dynamically instead of the static json.
+    owners_path = (
+        Path(src_prefix_path)
+        / CHROMITE_UTILS_PATH
+        / COVERAGE_BOARD_OWNERSHIP_JSON
+    )
+
+    if not owners_path.exists():
+        raise ValueError(
+            f"Coverage boards ownership json does not exists {owners_path}"
+        )
+
+    content = osutils.ReadFile(owners_path)
+    owners_json = json.loads(content)
+    if not owners_json:
+        raise ValueError(f"Could not read board ownership json {owners_path}")
+
+    if owners_json[build_target] is None:
+        raise ValueError(
+            f"No ownership data found for {build_target} at {owners_path}"
+        )
+
+    dirs = []
+    for d in owners_json[build_target]:
+        if str(d).startswith(exclude_dirs):
+            logging.info("Directory excluded from zero code coverage : %s", d)
+        else:
+            dirs.append(os.path.join(src_prefix_path, d))
+    return dirs
