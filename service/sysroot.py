@@ -657,33 +657,33 @@ def _create_sysroot(
     Returns:
       Path to the sysroot tar file.
     """
-    cmd = [
-        "cros_generate_sysroot",
-        "--out-dir",
-        "/tmp",
-        "--board",
-        build_target.name,
-        "--package",
-        " ".join(package_list),
-    ]
-    if deps_only:
-        cmd.append("--deps-only")
-    if output_file:
-        cmd.extend(["--out-file", output_file])
-    cros_build_lib.run(
-        cmd,
-        cwd=constants.SOURCE_ROOT,
-        enter_chroot=True,
-        chroot_args=chroot.get_enter_args(),
-        extra_env=chroot.env,
-    )
+    with chroot.tempdir() as tempdir:
+        outdir = chroot.chroot_path(tempdir)
+        cmd = [
+            "cros_generate_sysroot",
+            "--out-dir",
+            outdir,
+            "--board",
+            build_target.name,
+            "--package",
+            " ".join(package_list),
+        ]
+        if deps_only:
+            cmd.append("--deps-only")
+        if output_file:
+            cmd.extend(["--out-file", output_file])
+        cros_build_lib.run(
+            cmd,
+            cwd=constants.SOURCE_ROOT,
+            enter_chroot=True,
+            chroot_args=chroot.get_enter_args(),
+            extra_env=chroot.env,
+        )
 
-    # Move the artifact out of the chroot.
-    sysroot_tar_path = os.path.join(
-        chroot.path, os.path.join("tmp", output_file)
-    )
-    shutil.copy(sysroot_tar_path, output_dir)
-    return os.path.join(output_dir, output_file)
+        # Move the artifact out of the chroot.
+        sysroot_tar_path = os.path.join(tempdir, output_file)
+        shutil.copy(sysroot_tar_path, output_dir)
+        return os.path.join(output_dir, output_file)
 
 
 def CreateSimpleChromeSysroot(
