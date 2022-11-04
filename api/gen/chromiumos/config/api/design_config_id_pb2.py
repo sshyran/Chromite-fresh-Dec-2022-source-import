@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z(go.chromium.org/chromiumos/config/go/api',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n,chromiumos/config/api/design_config_id.proto\x12\x15\x63hromiumos.config.api\"\xb0\x01\n\x0e\x44\x65signConfigId\x12\r\n\x05value\x18\x01 \x01(\t\x1a\x8e\x01\n\nScanConfig\x12\x1b\n\x11smbios_name_match\x18\x01 \x01(\tH\x00\x12&\n\x1c\x64\x65vice_tree_compatible_match\x18\x02 \x01(\tH\x00\x12\x0e\n\x04\x66rid\x18\x04 \x01(\tH\x00\x12\x14\n\x0c\x66irmware_sku\x18\x03 \x01(\rB\x15\n\x13\x66irmware_name_matchB*Z(go.chromium.org/chromiumos/config/go/apib\x06proto3'
+  serialized_pb=b'\n,chromiumos/config/api/design_config_id.proto\x12\x15\x63hromiumos.config.api\"\x9f\x01\n\x0e\x44\x65signConfigId\x12\r\n\x05value\x18\x01 \x01(\t\x1a~\n\nScanConfig\x12\x1b\n\x11smbios_name_match\x18\x01 \x01(\tH\x00\x12&\n\x1c\x64\x65vice_tree_compatible_match\x18\x02 \x01(\tH\x00\x12\x14\n\x0c\x66irmware_sku\x18\x03 \x01(\rB\x15\n\x13\x66irmware_name_matchB*Z(go.chromium.org/chromiumos/config/go/apib\x06proto3'
 )
 
 
@@ -48,14 +48,7 @@ _DESIGNCONFIGID_SCANCONFIG = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='frid', full_name='chromiumos.config.api.DesignConfigId.ScanConfig.frid', index=2,
-      number=4, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='firmware_sku', full_name='chromiumos.config.api.DesignConfigId.ScanConfig.firmware_sku', index=3,
+      name='firmware_sku', full_name='chromiumos.config.api.DesignConfigId.ScanConfig.firmware_sku', index=2,
       number=3, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -78,8 +71,8 @@ _DESIGNCONFIGID_SCANCONFIG = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=106,
-  serialized_end=248,
+  serialized_start=105,
+  serialized_end=231,
 )
 
 _DESIGNCONFIGID = _descriptor.Descriptor(
@@ -110,7 +103,7 @@ _DESIGNCONFIGID = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=72,
-  serialized_end=248,
+  serialized_end=231,
 )
 
 _DESIGNCONFIGID_SCANCONFIG.containing_type = _DESIGNCONFIGID
@@ -120,9 +113,6 @@ _DESIGNCONFIGID_SCANCONFIG.fields_by_name['smbios_name_match'].containing_oneof 
 _DESIGNCONFIGID_SCANCONFIG.oneofs_by_name['firmware_name_match'].fields.append(
   _DESIGNCONFIGID_SCANCONFIG.fields_by_name['device_tree_compatible_match'])
 _DESIGNCONFIGID_SCANCONFIG.fields_by_name['device_tree_compatible_match'].containing_oneof = _DESIGNCONFIGID_SCANCONFIG.oneofs_by_name['firmware_name_match']
-_DESIGNCONFIGID_SCANCONFIG.oneofs_by_name['firmware_name_match'].fields.append(
-  _DESIGNCONFIGID_SCANCONFIG.fields_by_name['frid'])
-_DESIGNCONFIGID_SCANCONFIG.fields_by_name['frid'].containing_oneof = _DESIGNCONFIGID_SCANCONFIG.oneofs_by_name['firmware_name_match']
 DESCRIPTOR.message_types_by_name['DesignConfigId'] = _DESIGNCONFIGID
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
