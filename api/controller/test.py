@@ -73,8 +73,6 @@ def _BuildTargetUnitTestFailedResponse(_input_proto, output_proto, _config):
     packages = ["foo/bar", "cat/pkg"]
     for pkg in packages:
         pkg_info = package_info.parse(pkg)
-        pkg_info_msg = output_proto.failed_packages.add()
-        controller_util.serialize_package_info(pkg_info, pkg_info_msg)
         failed_pkg_data_msg = output_proto.failed_package_data.add()
         controller_util.serialize_package_info(
             pkg_info, failed_pkg_data_msg.name
