@@ -93,7 +93,11 @@ def CreateVMImage(image=None, board=None, updatable=True, dest_dir=None):
             cmd.append("--from=%s" % path_util.ToChrootPath(image_dir))
 
         if updatable:
-            cmd.extend(["--disk_layout", "2gb-rootfs-updatable"])
+            # image_to_vm.sh default, for clarity.
+            cmd.extend(["--disk_layout", "usb_updatable"])
+        else:
+            # build_image default.
+            cmd.extend(["--disk_layout", "usb"])
 
         if board:
             cmd.extend(["--board", board])
