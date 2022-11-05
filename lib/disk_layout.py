@@ -754,7 +754,6 @@ class DiskLayout(object):
             An object for the metadata partition.
         """
         for partition in partitions:
-            print(partition)
             if partition.get("num") == "metadata":
                 return partition
 
