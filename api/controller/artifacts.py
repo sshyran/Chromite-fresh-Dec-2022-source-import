@@ -29,13 +29,13 @@ if TYPE_CHECKING:
 
 
 class RegisteredGet(NamedTuple):
-    """An registered function for calling Get on an artifact type."""
+    """A registered function for calling Get on an artifact type."""
 
     output_proto: artifacts_pb2.GetResponse
     artifact_dict: Any
 
 
-def ExampleGetResponse(_input_proto, _output_proto, _config):
+def ExampleGetResponse(_input_proto, _output_proto, _config) -> Optional[int]:
     """Give an example GetResponse with a minimal coverage set."""
     _output_proto = artifacts_pb2.GetResponse(
         artifacts=common_pb2.UploadedArtifactsByService(
@@ -54,18 +54,13 @@ def Get(
     input_proto: artifacts_pb2.GetRequest,
     output_proto: artifacts_pb2.GetResponse,
     _config: "api_config.ApiConfig",
-):
+) -> Optional[int]:
     """Get all artifacts.
 
     Get all artifacts for the build.
 
     Note: As the individual artifact_type bundlers are added here, they *must*
     stop uploading it via the individual bundler function.
-
-    Args:
-        input_proto: The input proto.
-        output_proto: The output proto.
-        _config: The API call config.
     """
     output_dir = input_proto.result_path.path.path
 
@@ -135,9 +130,9 @@ def Get(
     return controller.RETURN_CODE_SUCCESS
 
 
-def _BuildSetupResponse(_input_proto, output_proto, _config):
+def _BuildSetupResponse(_input_proto, output_proto, _config) -> None:
     """Just return POINTLESS for now."""
-    # All of the artifact types we support claim that the build is POINTLESS.
+    # All the artifact types we support claim that the build is POINTLESS.
     output_proto.build_relevance = artifacts_pb2.BuildSetupResponse.POINTLESS
 
 
@@ -148,8 +143,7 @@ def BuildSetup(
     _input_proto: artifacts_pb2.GetRequest,
     output_proto: artifacts_pb2.GetResponse,
     _config: "api_config.ApiConfig",
-):
-
+) -> Optional[int]:
     """Setup anything needed for building artifacts
 
     If any artifact types require steps prior to building the package, they go
@@ -158,11 +152,6 @@ def BuildSetup(
     Note: crbug/1034529 introduces this method as a noop.  As the individual
     artifact_type bundlers are added here, they *must* stop uploading it via the
     individual bundler function.
-
-    Args:
-        _input_proto: The input proto.
-        output_proto: The output proto.
-        _config: The API call config.
     """
     # If any artifact_type says "NEEDED", the return is NEEDED.
     # Otherwise, if any artifact_type says "UNKNOWN", the return is UNKNOWN.
@@ -196,7 +185,7 @@ def _GetImageDir(build_root: str, target: str) -> Optional[str]:
     return image_dir
 
 
-def _BundleImageArchivesResponse(input_proto, output_proto, _config):
+def _BundleImageArchivesResponse(input_proto, output_proto, _config) -> None:
     """Add artifact paths to a successful response."""
     output_proto.artifacts.add().path = os.path.join(
         input_proto.output_dir, "path0.tar.xz"
@@ -211,7 +200,11 @@ def _BundleImageArchivesResponse(input_proto, output_proto, _config):
 @validate.require("build_target.name")
 @validate.exists("output_dir")
 @validate.validation_complete
-def BundleImageArchives(input_proto, output_proto, _config):
+def BundleImageArchives(
+    input_proto: artifacts_pb2.BundleRequest,
+    output_proto: artifacts_pb2.BundleResponse,
+    _config: "api_config.ApiConfig",
+) -> Optional[int]:
     """Create a .tar.xz archive for each image that has been created."""
     build_target = controller_util.ParseBuildTarget(input_proto.build_target)
     output_dir = input_proto.output_dir
@@ -225,7 +218,7 @@ def BundleImageArchives(input_proto, output_proto, _config):
         output_proto.artifacts.add().path = os.path.join(output_dir, archive)
 
 
-def _BundleImageZipResponse(input_proto, output_proto, _config):
+def _BundleImageZipResponse(input_proto, output_proto, _config) -> None:
     """Add artifact zip files to a successful response."""
     output_proto.artifacts.add().path = os.path.join(
         input_proto.output_dir, "image.zip"
@@ -241,25 +234,22 @@ def BundleImageZip(
     input_proto: artifacts_pb2.BundleRequest,
     output_proto: artifacts_pb2.BundleResponse,
     _config: "api_config.ApiConfig",
-):
-    """Bundle image.zip.
-
-    Args:
-        input_proto: The input proto.
-        output_proto: The output proto.
-        _config: The API call config.
-    """
+) -> Optional[int]:
+    """Bundle image.zip."""
     target = input_proto.build_target.name
     output_dir = input_proto.output_dir
     image_dir = _GetImageDir(constants.SOURCE_ROOT, target)
     if image_dir is None:
+        logging.warning("Image build directory not found.")
         return None
 
     archive = artifacts.BundleImageZip(output_dir, image_dir)
     output_proto.artifacts.add().path = os.path.join(output_dir, archive)
 
 
-def _BundleTestUpdatePayloadsResponse(input_proto, output_proto, _config):
+def _BundleTestUpdatePayloadsResponse(
+    input_proto, output_proto, _config
+) -> None:
     """Add test payload files to a successful response."""
     output_proto.artifacts.add().path = os.path.join(
         input_proto.output_dir, "payload1.bin"
@@ -281,14 +271,8 @@ def BundleTestUpdatePayloads(
     input_proto: artifacts_pb2.BundleRequest,
     output_proto: artifacts_pb2.BundleResponse,
     _config: "api_config.ApiConfig",
-):
-    """Generate minimal update payloads for the build target for testing.
-
-    Args:
-        input_proto: The input proto.
-        output_proto: The output proto.
-        _config: The API call config.
-    """
+) -> Optional[int]:
+    """Generate minimal update payloads for the build target for testing."""
     target = input_proto.build_target.name
     output_dir = input_proto.output_dir
     build_root = constants.SOURCE_ROOT
@@ -322,7 +306,7 @@ def BundleTestUpdatePayloads(
         output_proto.artifacts.add().path = payload
 
 
-def _BundleAutotestFilesResponse(input_proto, output_proto, _config):
+def _BundleAutotestFilesResponse(input_proto, output_proto, _config) -> None:
     """Add test autotest files to a successful response."""
     output_proto.artifacts.add().path = os.path.join(
         input_proto.output_dir, "autotest-a.tar.gz"
@@ -338,7 +322,7 @@ def BundleAutotestFiles(
     input_proto: artifacts_pb2.BundleRequest,
     output_proto: artifacts_pb2.BundleResponse,
     _config: "api_config.ApiConfig",
-) -> None:
+) -> Optional[int]:
     """Tar the autotest files for a build target."""
     output_dir = input_proto.output_dir
     chroot = controller_util.ParseChroot(input_proto.chroot)
@@ -359,7 +343,7 @@ def BundleAutotestFiles(
         output_proto.artifacts.add().path = archive
 
 
-def _BundleTastFilesResponse(input_proto, output_proto, _config):
+def _BundleTastFilesResponse(input_proto, output_proto, _config) -> None:
     """Add test tast files to a successful response."""
     output_proto.artifacts.add().path = os.path.join(
         input_proto.output_dir, "tast_bundles.tar.gz"
@@ -375,7 +359,7 @@ def BundleTastFiles(
     input_proto: artifacts_pb2.BundleRequest,
     output_proto: artifacts_pb2.BundleResponse,
     _config: "api_config.ApiConfig",
-) -> None:
+) -> Optional[int]:
     """Tar the tast files for a build target."""
     output_dir = input_proto.output_dir
     chroot = controller_util.ParseChroot(input_proto.chroot)
@@ -404,7 +388,9 @@ def FetchPinnedGuestImageUris(_input_proto, _output_proto, _config):
     pass
 
 
-def _FetchMetadataResponse(_input_proto, output_proto, _config):
+def _FetchMetadataResponse(
+    _input_proto, output_proto, _config
+) -> Optional[int]:
     """Populate the output_proto with sample data."""
     for fp in ("/metadata/foo.txt", "/metadata/bar.jsonproto"):
         output_proto.filepaths.add(
@@ -422,15 +408,10 @@ def FetchMetadata(
     input_proto: artifacts_pb2.FetchMetadataRequest,
     output_proto: artifacts_pb2.FetchMetadataResponse,
     _config: "api_config.ApiConfig",
-):
+) -> Optional[int]:
     """FetchMetadata returns the paths to all build/test metadata files.
 
     This implements ArtifactsService.FetchMetadata.
-
-    Args:
-        input_proto: The input proto.
-        output_proto: The output proto.
-        config: The API call config.
     """
     chroot = controller_util.ParseChroot(input_proto.chroot)
     sysroot = controller_util.ParseSysroot(input_proto.sysroot)
@@ -457,7 +438,7 @@ def BundleFirmware(
     input_proto: artifacts_pb2.BundleRequest,
     output_proto: artifacts_pb2.BundleResponse,
     _config: "api_config.ApiConfig",
-) -> None:
+) -> Optional[int]:
     """Tar the firmware images for a build target."""
     output_dir = input_proto.output_dir
     chroot = controller_util.ParseChroot(input_proto.chroot)
@@ -482,7 +463,7 @@ def BundleFirmware(
     output_proto.artifacts.add().path = archive
 
 
-def _BundleFpmcuUnittestsResponse(input_proto, output_proto, _config):
+def _BundleFpmcuUnittestsResponse(input_proto, output_proto, _config) -> None:
     """Add fingerprint MCU unittest binaries to a successful response."""
     output_proto.artifacts.add().path = os.path.join(
         input_proto.output_dir, "fpmcu_unittests.tar.gz"
@@ -498,14 +479,8 @@ def BundleFpmcuUnittests(
     input_proto: artifacts_pb2.BundleRequest,
     output_proto: artifacts_pb2.BundleResponse,
     _config: "api_config.ApiConfig",
-) -> None:
-    """Tar the fingerprint MCU unittest binaries for a build target.
-
-    Args:
-        input_proto: The input proto.
-        output_proto: The output proto.
-        _config: The API call config.
-    """
+) -> Optional[int]:
+    """Tar the fingerprint MCU unittest binaries for a build target."""
     output_dir = input_proto.output_dir
     chroot = controller_util.ParseChroot(input_proto.chroot)
     sysroot = controller_util.ParseSysroot(input_proto.sysroot)
@@ -526,7 +501,7 @@ def BundleFpmcuUnittests(
     output_proto.artifacts.add().path = archive
 
 
-def _BundleEbuildLogsResponse(input_proto, output_proto, _config):
+def _BundleEbuildLogsResponse(input_proto, output_proto, _config) -> None:
     """Add test log files to a successful response."""
     output_proto.artifacts.add().path = os.path.join(
         input_proto.output_dir, "ebuild-logs.tar.gz"
@@ -542,7 +517,7 @@ def BundleEbuildLogs(
     input_proto: artifacts_pb2.BundleRequest,
     output_proto: artifacts_pb2.BundleResponse,
     _config: "api_config.ApiConfig",
-) -> None:
+) -> Optional[int]:
     """Tar the ebuild logs for a build target."""
     output_dir = input_proto.output_dir
     chroot = controller_util.ParseChroot(input_proto.chroot)
@@ -564,7 +539,7 @@ def BundleEbuildLogs(
     output_proto.artifacts.add().path = os.path.join(output_dir, archive)
 
 
-def _BundleChromeOSConfigResponse(input_proto, output_proto, _config):
+def _BundleChromeOSConfigResponse(input_proto, output_proto, _config) -> None:
     """Add test config files to a successful response."""
     output_proto.artifacts.add().path = os.path.join(
         input_proto.output_dir, "config.yaml"
@@ -580,7 +555,7 @@ def BundleChromeOSConfig(
     input_proto: artifacts_pb2.BundleRequest,
     output_proto: artifacts_pb2.BundleResponse,
     _config: "api_config.ApiConfig",
-) -> None:
+) -> Optional[int]:
     """Output the ChromeOS Config payload for a build target."""
     output_dir = input_proto.output_dir
     chroot = controller_util.ParseChroot(input_proto.chroot)
@@ -601,7 +576,9 @@ def BundleChromeOSConfig(
     )
 
 
-def _BundleSimpleChromeArtifactsResponse(input_proto, output_proto, _config):
+def _BundleSimpleChromeArtifactsResponse(
+    input_proto, output_proto, _config
+) -> None:
     """Add test simple chrome files to a successful response."""
     output_proto.artifacts.add().path = os.path.join(
         input_proto.output_dir, "simple_chrome.txt"
@@ -613,7 +590,9 @@ def _BundleSimpleChromeArtifactsResponse(input_proto, output_proto, _config):
 @validate.require("output_dir", "sysroot.build_target.name", "sysroot.path")
 @validate.exists("output_dir")
 @validate.validation_complete
-def BundleSimpleChromeArtifacts(input_proto, output_proto, _config):
+def BundleSimpleChromeArtifacts(
+    input_proto, output_proto, _config
+) -> Optional[int]:
     """Create the simple chrome artifacts."""
     sysroot_path = input_proto.sysroot.path
     output_dir = input_proto.output_dir
@@ -629,22 +608,24 @@ def BundleSimpleChromeArtifacts(input_proto, output_proto, _config):
 
     # Check that the sysroot exists before we go on.
     if not sysroot.Exists():
-        cros_build_lib.Die("The sysroot does not exist.")
+        logging.warning("The sysroot does not exist.")
+        return
 
     try:
         results = artifacts.BundleSimpleChromeArtifacts(
             chroot, sysroot, build_target, output_dir
         )
     except artifacts.Error as e:
-        cros_build_lib.Die(
+        logging.warning(
             "Error %s raised in BundleSimpleChromeArtifacts: %s", type(e), e
         )
+        return
 
     for file_name in results:
         output_proto.artifacts.add().path = file_name
 
 
-def _BundleVmFilesResponse(input_proto, output_proto, _config):
+def _BundleVmFilesResponse(input_proto, output_proto, _config) -> None:
     """Add test vm files to a successful response."""
     output_proto.artifacts.add().path = os.path.join(
         input_proto.output_dir, "f1.tar"
@@ -660,14 +641,8 @@ def BundleVmFiles(
     input_proto: artifacts_pb2.BundleVmFilesRequest,
     output_proto: artifacts_pb2.BundleResponse,
     _config: "api_config.ApiConfig",
-):
-    """Tar VM disk and memory files.
-
-    Args:
-        input_proto: The input proto.
-        output_proto: The output proto.
-        _config: The API call config.
-    """
+) -> None:
+    """Tar VM disk and memory files."""
     chroot = controller_util.ParseChroot(input_proto.chroot)
     test_results_dir = input_proto.test_results_dir
     output_dir = input_proto.output_dir
@@ -696,7 +671,7 @@ def ExportCpeReport(
     input_proto: artifacts_pb2.BundleRequest,
     output_proto: artifacts_pb2.BundleResponse,
     _config: "api_config.ApiConfig",
-) -> None:
+) -> Optional[int]:
     """Export a CPE report."""
     chroot = controller_util.ParseChroot(input_proto.chroot)
     sysroot = controller_util.ParseSysroot(input_proto.sysroot)
@@ -712,7 +687,7 @@ def ExportCpeReport(
     output_proto.artifacts.add().path = cpe_result.warnings
 
 
-def _BundleGceTarballResponse(input_proto, output_proto, _config):
+def _BundleGceTarballResponse(input_proto, output_proto, _config) -> None:
     """Add artifact tarball to a successful response."""
     output_proto.artifacts.add().path = os.path.join(
         input_proto.output_dir, constants.TEST_IMAGE_GCE_TAR
@@ -728,14 +703,8 @@ def BundleGceTarball(
     input_proto: artifacts_pb2.BundleRequest,
     output_proto: artifacts_pb2.BundleResponse,
     _config: "api_config.ApiConfig",
-):
-    """Bundle the test image into a tarball suitable for importing into GCE.
-
-    Args:
-        input_proto: The input proto.
-        output_proto: The output proto.
-        _config: The API call config.
-    """
+) -> Optional[int]:
+    """Bundle the test image into a tarball suitable for importing into GCE."""
     target = input_proto.build_target.name
     output_dir = input_proto.output_dir
     image_dir = _GetImageDir(constants.SOURCE_ROOT, target)

@@ -787,10 +787,10 @@ class BundleSimpleChromeArtifactsTest(
             sysroot=self.does_not_exist,
         )
         response = self.response
-        with self.assertRaises(cros_build_lib.DieSystemExit):
-            artifacts.BundleSimpleChromeArtifacts(
-                request, response, self.api_config
-            )
+        artifacts.BundleSimpleChromeArtifacts(
+            request, response, self.api_config
+        )
+        self.assertFalse(self.response.artifacts)
 
     def testNoOutputDir(self):
         """Test no output dir fails."""
