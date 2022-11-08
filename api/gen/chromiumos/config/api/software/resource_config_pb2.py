@@ -19,11 +19,35 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z1go.chromium.org/chromiumos/config/go/api/software',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n4chromiumos/config/api/software/resource_config.proto\x12\x1e\x63hromiumos.config.api.software\"\xe0\x07\n\x0eResourceConfig\x12Q\n\x02\x61\x63\x18\x05 \x01(\x0b\x32\x45.chromiumos.config.api.software.ResourceConfig.PowerSourcePreferences\x12Q\n\x02\x64\x63\x18\x06 \x01(\x0b\x32\x45.chromiumos.config.api.software.ResourceConfig.PowerSourcePreferences\x1a:\n\x10OndemandGovernor\x12&\n\x0epowersave_bias\x18\x01 \x01(\rR\x0epowersave-bias\x1ak\n\x08Governor\x12S\n\x08ondemand\x18\x01 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.OndemandGovernorH\x00\x42\n\n\x08governor\x1a]\n\x10PowerPreferences\x12I\n\x08governor\x18\x01 \x01(\x0b\x32\x37.chromiumos.config.api.software.ResourceConfig.Governor\x1a\x9f\x04\n\x16PowerSourcePreferences\x12}\n\x19\x64\x65\x66\x61ult_power_preferences\x18\x01 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x19\x64\x65\x66\x61ult-power-preferences\x12}\n\x19web_rtc_power_preferences\x18\x02 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x19web-rtc-power-preferences\x12\x89\x01\n\"fullscreen_video_power_preferences\x18\x03 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x1c\x66ullscreen-power-preferences\x12{\n\x18gaming_power_preferences\x18\x04 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x18gaming-power-preferencesB3Z1go.chromium.org/chromiumos/config/go/api/softwareb\x06proto3'
+  serialized_pb=b'\n4chromiumos/config/api/software/resource_config.proto\x12\x1e\x63hromiumos.config.api.software\"\xd5\r\n\x0eResourceConfig\x12Q\n\x02\x61\x63\x18\x05 \x01(\x0b\x32\x45.chromiumos.config.api.software.ResourceConfig.PowerSourcePreferences\x12Q\n\x02\x64\x63\x18\x06 \x01(\x0b\x32\x45.chromiumos.config.api.software.ResourceConfig.PowerSourcePreferences\x1a\x16\n\x14\x43onservativeGovernor\x1a\x66\n\x10OndemandGovernor\x12&\n\x0epowersave_bias\x18\x01 \x01(\rR\x0epowersave-bias\x12*\n\x10sampling_rate_ms\x18\x02 \x01(\rR\x10sampling-rate-ms\x1a\x15\n\x13PerformanceGovernor\x1a\x13\n\x11PowersaveGovernor\x1a\x13\n\x11SchedutilGovernor\x1a\x13\n\x11UserspaceGovernor\x1a\xa8\x04\n\x08Governor\x12[\n\x0c\x63onservative\x18\x02 \x01(\x0b\x32\x43.chromiumos.config.api.software.ResourceConfig.ConservativeGovernorH\x00\x12S\n\x08ondemand\x18\x01 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.OndemandGovernorH\x00\x12Y\n\x0bperformance\x18\x03 \x01(\x0b\x32\x42.chromiumos.config.api.software.ResourceConfig.PerformanceGovernorH\x00\x12U\n\tpowersave\x18\x04 \x01(\x0b\x32@.chromiumos.config.api.software.ResourceConfig.PowersaveGovernorH\x00\x12U\n\tschedutil\x18\x05 \x01(\x0b\x32@.chromiumos.config.api.software.ResourceConfig.SchedutilGovernorH\x00\x12U\n\tuserspace\x18\x06 \x01(\x0b\x32@.chromiumos.config.api.software.ResourceConfig.UserspaceGovernorH\x00\x42\n\n\x08governor\x1a]\n\x10PowerPreferences\x12I\n\x08governor\x18\x01 \x01(\x0b\x32\x37.chromiumos.config.api.software.ResourceConfig.Governor\x1a\xbc\x05\n\x16PowerSourcePreferences\x12}\n\x19\x64\x65\x66\x61ult_power_preferences\x18\x01 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x19\x64\x65\x66\x61ult-power-preferences\x12}\n\x19web_rtc_power_preferences\x18\x02 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x19web-rtc-power-preferences\x12\x89\x01\n\"fullscreen_video_power_preferences\x18\x03 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x1c\x66ullscreen-power-preferences\x12\x8d\x01\n!borealis_gaming_power_preferences\x18\x05 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR!borealis-gaming-power-preferences\x12\x87\x01\n\x1e\x61rcvm_gaming_power_preferences\x18\x06 \x01(\x0b\x32?.chromiumos.config.api.software.ResourceConfig.PowerPreferencesR\x1e\x61rcvm-gaming-power-preferencesB3Z1go.chromium.org/chromiumos/config/go/api/softwareb\x06proto3'
 )
 
 
 
+
+_RESOURCECONFIG_CONSERVATIVEGOVERNOR = _descriptor.Descriptor(
+  name='ConservativeGovernor',
+  full_name='chromiumos.config.api.software.ResourceConfig.ConservativeGovernor',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=273,
+  serialized_end=295,
+)
 
 _RESOURCECONFIG_ONDEMANDGOVERNOR = _descriptor.Descriptor(
   name='OndemandGovernor',
@@ -40,6 +64,13 @@ _RESOURCECONFIG_ONDEMANDGOVERNOR = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, json_name='powersave-bias', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='sampling_rate_ms', full_name='chromiumos.config.api.software.ResourceConfig.OndemandGovernor.sampling_rate_ms', index=1,
+      number=2, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, json_name='sampling-rate-ms', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -52,8 +83,104 @@ _RESOURCECONFIG_ONDEMANDGOVERNOR = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=273,
-  serialized_end=331,
+  serialized_start=297,
+  serialized_end=399,
+)
+
+_RESOURCECONFIG_PERFORMANCEGOVERNOR = _descriptor.Descriptor(
+  name='PerformanceGovernor',
+  full_name='chromiumos.config.api.software.ResourceConfig.PerformanceGovernor',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=401,
+  serialized_end=422,
+)
+
+_RESOURCECONFIG_POWERSAVEGOVERNOR = _descriptor.Descriptor(
+  name='PowersaveGovernor',
+  full_name='chromiumos.config.api.software.ResourceConfig.PowersaveGovernor',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=424,
+  serialized_end=443,
+)
+
+_RESOURCECONFIG_SCHEDUTILGOVERNOR = _descriptor.Descriptor(
+  name='SchedutilGovernor',
+  full_name='chromiumos.config.api.software.ResourceConfig.SchedutilGovernor',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=445,
+  serialized_end=464,
+)
+
+_RESOURCECONFIG_USERSPACEGOVERNOR = _descriptor.Descriptor(
+  name='UserspaceGovernor',
+  full_name='chromiumos.config.api.software.ResourceConfig.UserspaceGovernor',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=466,
+  serialized_end=485,
 )
 
 _RESOURCECONFIG_GOVERNOR = _descriptor.Descriptor(
@@ -65,8 +192,43 @@ _RESOURCECONFIG_GOVERNOR = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='ondemand', full_name='chromiumos.config.api.software.ResourceConfig.Governor.ondemand', index=0,
+      name='conservative', full_name='chromiumos.config.api.software.ResourceConfig.Governor.conservative', index=0,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='ondemand', full_name='chromiumos.config.api.software.ResourceConfig.Governor.ondemand', index=1,
       number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='performance', full_name='chromiumos.config.api.software.ResourceConfig.Governor.performance', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='powersave', full_name='chromiumos.config.api.software.ResourceConfig.Governor.powersave', index=3,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='schedutil', full_name='chromiumos.config.api.software.ResourceConfig.Governor.schedutil', index=4,
+      number=5, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='userspace', full_name='chromiumos.config.api.software.ResourceConfig.Governor.userspace', index=5,
+      number=6, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -88,8 +250,8 @@ _RESOURCECONFIG_GOVERNOR = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=333,
-  serialized_end=440,
+  serialized_start=488,
+  serialized_end=1040,
 )
 
 _RESOURCECONFIG_POWERPREFERENCES = _descriptor.Descriptor(
@@ -119,8 +281,8 @@ _RESOURCECONFIG_POWERPREFERENCES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=442,
-  serialized_end=535,
+  serialized_start=1042,
+  serialized_end=1135,
 )
 
 _RESOURCECONFIG_POWERSOURCEPREFERENCES = _descriptor.Descriptor(
@@ -153,12 +315,19 @@ _RESOURCECONFIG_POWERSOURCEPREFERENCES = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, json_name='fullscreen-power-preferences', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='gaming_power_preferences', full_name='chromiumos.config.api.software.ResourceConfig.PowerSourcePreferences.gaming_power_preferences', index=3,
-      number=4, type=11, cpp_type=10, label=1,
+      name='borealis_gaming_power_preferences', full_name='chromiumos.config.api.software.ResourceConfig.PowerSourcePreferences.borealis_gaming_power_preferences', index=3,
+      number=5, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, json_name='gaming-power-preferences', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, json_name='borealis-gaming-power-preferences', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='arcvm_gaming_power_preferences', full_name='chromiumos.config.api.software.ResourceConfig.PowerSourcePreferences.arcvm_gaming_power_preferences', index=4,
+      number=6, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, json_name='arcvm-gaming-power-preferences', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -171,8 +340,8 @@ _RESOURCECONFIG_POWERSOURCEPREFERENCES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=538,
-  serialized_end=1081,
+  serialized_start=1138,
+  serialized_end=1838,
 )
 
 _RESOURCECONFIG = _descriptor.Descriptor(
@@ -200,7 +369,7 @@ _RESOURCECONFIG = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_RESOURCECONFIG_ONDEMANDGOVERNOR, _RESOURCECONFIG_GOVERNOR, _RESOURCECONFIG_POWERPREFERENCES, _RESOURCECONFIG_POWERSOURCEPREFERENCES, ],
+  nested_types=[_RESOURCECONFIG_CONSERVATIVEGOVERNOR, _RESOURCECONFIG_ONDEMANDGOVERNOR, _RESOURCECONFIG_PERFORMANCEGOVERNOR, _RESOURCECONFIG_POWERSAVEGOVERNOR, _RESOURCECONFIG_SCHEDUTILGOVERNOR, _RESOURCECONFIG_USERSPACEGOVERNOR, _RESOURCECONFIG_GOVERNOR, _RESOURCECONFIG_POWERPREFERENCES, _RESOURCECONFIG_POWERSOURCEPREFERENCES, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -210,21 +379,47 @@ _RESOURCECONFIG = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=89,
-  serialized_end=1081,
+  serialized_end=1838,
 )
 
+_RESOURCECONFIG_CONSERVATIVEGOVERNOR.containing_type = _RESOURCECONFIG
 _RESOURCECONFIG_ONDEMANDGOVERNOR.containing_type = _RESOURCECONFIG
+_RESOURCECONFIG_PERFORMANCEGOVERNOR.containing_type = _RESOURCECONFIG
+_RESOURCECONFIG_POWERSAVEGOVERNOR.containing_type = _RESOURCECONFIG
+_RESOURCECONFIG_SCHEDUTILGOVERNOR.containing_type = _RESOURCECONFIG
+_RESOURCECONFIG_USERSPACEGOVERNOR.containing_type = _RESOURCECONFIG
+_RESOURCECONFIG_GOVERNOR.fields_by_name['conservative'].message_type = _RESOURCECONFIG_CONSERVATIVEGOVERNOR
 _RESOURCECONFIG_GOVERNOR.fields_by_name['ondemand'].message_type = _RESOURCECONFIG_ONDEMANDGOVERNOR
+_RESOURCECONFIG_GOVERNOR.fields_by_name['performance'].message_type = _RESOURCECONFIG_PERFORMANCEGOVERNOR
+_RESOURCECONFIG_GOVERNOR.fields_by_name['powersave'].message_type = _RESOURCECONFIG_POWERSAVEGOVERNOR
+_RESOURCECONFIG_GOVERNOR.fields_by_name['schedutil'].message_type = _RESOURCECONFIG_SCHEDUTILGOVERNOR
+_RESOURCECONFIG_GOVERNOR.fields_by_name['userspace'].message_type = _RESOURCECONFIG_USERSPACEGOVERNOR
 _RESOURCECONFIG_GOVERNOR.containing_type = _RESOURCECONFIG
+_RESOURCECONFIG_GOVERNOR.oneofs_by_name['governor'].fields.append(
+  _RESOURCECONFIG_GOVERNOR.fields_by_name['conservative'])
+_RESOURCECONFIG_GOVERNOR.fields_by_name['conservative'].containing_oneof = _RESOURCECONFIG_GOVERNOR.oneofs_by_name['governor']
 _RESOURCECONFIG_GOVERNOR.oneofs_by_name['governor'].fields.append(
   _RESOURCECONFIG_GOVERNOR.fields_by_name['ondemand'])
 _RESOURCECONFIG_GOVERNOR.fields_by_name['ondemand'].containing_oneof = _RESOURCECONFIG_GOVERNOR.oneofs_by_name['governor']
+_RESOURCECONFIG_GOVERNOR.oneofs_by_name['governor'].fields.append(
+  _RESOURCECONFIG_GOVERNOR.fields_by_name['performance'])
+_RESOURCECONFIG_GOVERNOR.fields_by_name['performance'].containing_oneof = _RESOURCECONFIG_GOVERNOR.oneofs_by_name['governor']
+_RESOURCECONFIG_GOVERNOR.oneofs_by_name['governor'].fields.append(
+  _RESOURCECONFIG_GOVERNOR.fields_by_name['powersave'])
+_RESOURCECONFIG_GOVERNOR.fields_by_name['powersave'].containing_oneof = _RESOURCECONFIG_GOVERNOR.oneofs_by_name['governor']
+_RESOURCECONFIG_GOVERNOR.oneofs_by_name['governor'].fields.append(
+  _RESOURCECONFIG_GOVERNOR.fields_by_name['schedutil'])
+_RESOURCECONFIG_GOVERNOR.fields_by_name['schedutil'].containing_oneof = _RESOURCECONFIG_GOVERNOR.oneofs_by_name['governor']
+_RESOURCECONFIG_GOVERNOR.oneofs_by_name['governor'].fields.append(
+  _RESOURCECONFIG_GOVERNOR.fields_by_name['userspace'])
+_RESOURCECONFIG_GOVERNOR.fields_by_name['userspace'].containing_oneof = _RESOURCECONFIG_GOVERNOR.oneofs_by_name['governor']
 _RESOURCECONFIG_POWERPREFERENCES.fields_by_name['governor'].message_type = _RESOURCECONFIG_GOVERNOR
 _RESOURCECONFIG_POWERPREFERENCES.containing_type = _RESOURCECONFIG
 _RESOURCECONFIG_POWERSOURCEPREFERENCES.fields_by_name['default_power_preferences'].message_type = _RESOURCECONFIG_POWERPREFERENCES
 _RESOURCECONFIG_POWERSOURCEPREFERENCES.fields_by_name['web_rtc_power_preferences'].message_type = _RESOURCECONFIG_POWERPREFERENCES
 _RESOURCECONFIG_POWERSOURCEPREFERENCES.fields_by_name['fullscreen_video_power_preferences'].message_type = _RESOURCECONFIG_POWERPREFERENCES
-_RESOURCECONFIG_POWERSOURCEPREFERENCES.fields_by_name['gaming_power_preferences'].message_type = _RESOURCECONFIG_POWERPREFERENCES
+_RESOURCECONFIG_POWERSOURCEPREFERENCES.fields_by_name['borealis_gaming_power_preferences'].message_type = _RESOURCECONFIG_POWERPREFERENCES
+_RESOURCECONFIG_POWERSOURCEPREFERENCES.fields_by_name['arcvm_gaming_power_preferences'].message_type = _RESOURCECONFIG_POWERPREFERENCES
 _RESOURCECONFIG_POWERSOURCEPREFERENCES.containing_type = _RESOURCECONFIG
 _RESOURCECONFIG.fields_by_name['ac'].message_type = _RESOURCECONFIG_POWERSOURCEPREFERENCES
 _RESOURCECONFIG.fields_by_name['dc'].message_type = _RESOURCECONFIG_POWERSOURCEPREFERENCES
@@ -233,10 +428,45 @@ _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 ResourceConfig = _reflection.GeneratedProtocolMessageType('ResourceConfig', (_message.Message,), {
 
+  'ConservativeGovernor' : _reflection.GeneratedProtocolMessageType('ConservativeGovernor', (_message.Message,), {
+    'DESCRIPTOR' : _RESOURCECONFIG_CONSERVATIVEGOVERNOR,
+    '__module__' : 'chromiumos.config.api.software.resource_config_pb2'
+    # @@protoc_insertion_point(class_scope:chromiumos.config.api.software.ResourceConfig.ConservativeGovernor)
+    })
+  ,
+
   'OndemandGovernor' : _reflection.GeneratedProtocolMessageType('OndemandGovernor', (_message.Message,), {
     'DESCRIPTOR' : _RESOURCECONFIG_ONDEMANDGOVERNOR,
     '__module__' : 'chromiumos.config.api.software.resource_config_pb2'
     # @@protoc_insertion_point(class_scope:chromiumos.config.api.software.ResourceConfig.OndemandGovernor)
+    })
+  ,
+
+  'PerformanceGovernor' : _reflection.GeneratedProtocolMessageType('PerformanceGovernor', (_message.Message,), {
+    'DESCRIPTOR' : _RESOURCECONFIG_PERFORMANCEGOVERNOR,
+    '__module__' : 'chromiumos.config.api.software.resource_config_pb2'
+    # @@protoc_insertion_point(class_scope:chromiumos.config.api.software.ResourceConfig.PerformanceGovernor)
+    })
+  ,
+
+  'PowersaveGovernor' : _reflection.GeneratedProtocolMessageType('PowersaveGovernor', (_message.Message,), {
+    'DESCRIPTOR' : _RESOURCECONFIG_POWERSAVEGOVERNOR,
+    '__module__' : 'chromiumos.config.api.software.resource_config_pb2'
+    # @@protoc_insertion_point(class_scope:chromiumos.config.api.software.ResourceConfig.PowersaveGovernor)
+    })
+  ,
+
+  'SchedutilGovernor' : _reflection.GeneratedProtocolMessageType('SchedutilGovernor', (_message.Message,), {
+    'DESCRIPTOR' : _RESOURCECONFIG_SCHEDUTILGOVERNOR,
+    '__module__' : 'chromiumos.config.api.software.resource_config_pb2'
+    # @@protoc_insertion_point(class_scope:chromiumos.config.api.software.ResourceConfig.SchedutilGovernor)
+    })
+  ,
+
+  'UserspaceGovernor' : _reflection.GeneratedProtocolMessageType('UserspaceGovernor', (_message.Message,), {
+    'DESCRIPTOR' : _RESOURCECONFIG_USERSPACEGOVERNOR,
+    '__module__' : 'chromiumos.config.api.software.resource_config_pb2'
+    # @@protoc_insertion_point(class_scope:chromiumos.config.api.software.ResourceConfig.UserspaceGovernor)
     })
   ,
 
@@ -265,7 +495,12 @@ ResourceConfig = _reflection.GeneratedProtocolMessageType('ResourceConfig', (_me
   # @@protoc_insertion_point(class_scope:chromiumos.config.api.software.ResourceConfig)
   })
 _sym_db.RegisterMessage(ResourceConfig)
+_sym_db.RegisterMessage(ResourceConfig.ConservativeGovernor)
 _sym_db.RegisterMessage(ResourceConfig.OndemandGovernor)
+_sym_db.RegisterMessage(ResourceConfig.PerformanceGovernor)
+_sym_db.RegisterMessage(ResourceConfig.PowersaveGovernor)
+_sym_db.RegisterMessage(ResourceConfig.SchedutilGovernor)
+_sym_db.RegisterMessage(ResourceConfig.UserspaceGovernor)
 _sym_db.RegisterMessage(ResourceConfig.Governor)
 _sym_db.RegisterMessage(ResourceConfig.PowerPreferences)
 _sym_db.RegisterMessage(ResourceConfig.PowerSourcePreferences)

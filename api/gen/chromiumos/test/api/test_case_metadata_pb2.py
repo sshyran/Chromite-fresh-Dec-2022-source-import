@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z-go.chromium.org/chromiumos/config/go/test/api',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n,chromiumos/test/api/test_case_metadata.proto\x12\x13\x63hromiumos.test.api\x1a#chromiumos/test/api/test_case.proto\x1a&chromiumos/test/api/test_harness.proto\"\xba\x01\n\x10TestCaseMetadata\x12\x30\n\ttest_case\x18\x01 \x01(\x0b\x32\x1d.chromiumos.test.api.TestCase\x12\x39\n\x0etest_case_exec\x18\x02 \x01(\x0b\x32!.chromiumos.test.api.TestCaseExec\x12\x39\n\x0etest_case_info\x18\x03 \x01(\x0b\x32!.chromiumos.test.api.TestCaseInfo\"F\n\x0cTestCaseExec\x12\x36\n\x0ctest_harness\x18\x01 \x01(\x0b\x32 .chromiumos.test.api.TestHarness\"<\n\x0cTestCaseInfo\x12,\n\x06owners\x18\x01 \x03(\x0b\x32\x1c.chromiumos.test.api.Contact\"\x18\n\x07\x43ontact\x12\r\n\x05\x65mail\x18\x01 \x01(\t\"M\n\x14TestCaseMetadataList\x12\x35\n\x06values\x18\x01 \x03(\x0b\x32%.chromiumos.test.api.TestCaseMetadataB/Z-go.chromium.org/chromiumos/config/go/test/apib\x06proto3'
+  serialized_pb=b'\n,chromiumos/test/api/test_case_metadata.proto\x12\x13\x63hromiumos.test.api\x1a#chromiumos/test/api/test_case.proto\x1a&chromiumos/test/api/test_harness.proto\"\xba\x01\n\x10TestCaseMetadata\x12\x30\n\ttest_case\x18\x01 \x01(\x0b\x32\x1d.chromiumos.test.api.TestCase\x12\x39\n\x0etest_case_exec\x18\x02 \x01(\x0b\x32!.chromiumos.test.api.TestCaseExec\x12\x39\n\x0etest_case_info\x18\x03 \x01(\x0b\x32!.chromiumos.test.api.TestCaseInfo\"F\n\x0cTestCaseExec\x12\x36\n\x0ctest_harness\x18\x01 \x01(\x0b\x32 .chromiumos.test.api.TestHarness\"\x95\x02\n\x0cTestCaseInfo\x12,\n\x06owners\x18\x01 \x03(\x0b\x32\x1c.chromiumos.test.api.Contact\x12\x36\n\x0crequirements\x18\x02 \x03(\x0b\x32 .chromiumos.test.api.Requirement\x12\x38\n\rbug_component\x18\x03 \x01(\x0b\x32!.chromiumos.test.api.BugComponent\x12/\n\x08\x63riteria\x18\x04 \x01(\x0b\x32\x1d.chromiumos.test.api.Criteria\x12\x34\n\x0bhw_agnostic\x18\x05 \x01(\x0b\x32\x1f.chromiumos.test.api.HwAgnostic\"\x18\n\x07\x43ontact\x12\r\n\x05\x65mail\x18\x01 \x01(\t\"\x1c\n\x0bRequirement\x12\r\n\x05value\x18\x01 \x01(\t\"\x1d\n\x0c\x42ugComponent\x12\r\n\x05value\x18\x01 \x01(\t\"\x19\n\x08\x43riteria\x12\r\n\x05value\x18\x01 \x01(\t\"\x1b\n\nHwAgnostic\x12\r\n\x05value\x18\x01 \x01(\x08\"M\n\x14TestCaseMetadataList\x12\x35\n\x06values\x18\x01 \x03(\x0b\x32%.chromiumos.test.api.TestCaseMetadataB/Z-go.chromium.org/chromiumos/config/go/test/apib\x06proto3'
   ,
   dependencies=[chromiumos_dot_test_dot_api_dot_test__case__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_test__harness__pb2.DESCRIPTOR,])
 
@@ -121,6 +121,34 @@ _TESTCASEINFO = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='requirements', full_name='chromiumos.test.api.TestCaseInfo.requirements', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='bug_component', full_name='chromiumos.test.api.TestCaseInfo.bug_component', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='criteria', full_name='chromiumos.test.api.TestCaseInfo.criteria', index=3,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='hw_agnostic', full_name='chromiumos.test.api.TestCaseInfo.hw_agnostic', index=4,
+      number=5, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -133,8 +161,8 @@ _TESTCASEINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=407,
-  serialized_end=467,
+  serialized_start=408,
+  serialized_end=685,
 )
 
 
@@ -165,8 +193,136 @@ _CONTACT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=469,
-  serialized_end=493,
+  serialized_start=687,
+  serialized_end=711,
+)
+
+
+_REQUIREMENT = _descriptor.Descriptor(
+  name='Requirement',
+  full_name='chromiumos.test.api.Requirement',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='value', full_name='chromiumos.test.api.Requirement.value', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=713,
+  serialized_end=741,
+)
+
+
+_BUGCOMPONENT = _descriptor.Descriptor(
+  name='BugComponent',
+  full_name='chromiumos.test.api.BugComponent',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='value', full_name='chromiumos.test.api.BugComponent.value', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=743,
+  serialized_end=772,
+)
+
+
+_CRITERIA = _descriptor.Descriptor(
+  name='Criteria',
+  full_name='chromiumos.test.api.Criteria',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='value', full_name='chromiumos.test.api.Criteria.value', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=774,
+  serialized_end=799,
+)
+
+
+_HWAGNOSTIC = _descriptor.Descriptor(
+  name='HwAgnostic',
+  full_name='chromiumos.test.api.HwAgnostic',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='value', full_name='chromiumos.test.api.HwAgnostic.value', index=0,
+      number=1, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=801,
+  serialized_end=828,
 )
 
 
@@ -197,8 +353,8 @@ _TESTCASEMETADATALIST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=495,
-  serialized_end=572,
+  serialized_start=830,
+  serialized_end=907,
 )
 
 _TESTCASEMETADATA.fields_by_name['test_case'].message_type = chromiumos_dot_test_dot_api_dot_test__case__pb2._TESTCASE
@@ -206,11 +362,19 @@ _TESTCASEMETADATA.fields_by_name['test_case_exec'].message_type = _TESTCASEEXEC
 _TESTCASEMETADATA.fields_by_name['test_case_info'].message_type = _TESTCASEINFO
 _TESTCASEEXEC.fields_by_name['test_harness'].message_type = chromiumos_dot_test_dot_api_dot_test__harness__pb2._TESTHARNESS
 _TESTCASEINFO.fields_by_name['owners'].message_type = _CONTACT
+_TESTCASEINFO.fields_by_name['requirements'].message_type = _REQUIREMENT
+_TESTCASEINFO.fields_by_name['bug_component'].message_type = _BUGCOMPONENT
+_TESTCASEINFO.fields_by_name['criteria'].message_type = _CRITERIA
+_TESTCASEINFO.fields_by_name['hw_agnostic'].message_type = _HWAGNOSTIC
 _TESTCASEMETADATALIST.fields_by_name['values'].message_type = _TESTCASEMETADATA
 DESCRIPTOR.message_types_by_name['TestCaseMetadata'] = _TESTCASEMETADATA
 DESCRIPTOR.message_types_by_name['TestCaseExec'] = _TESTCASEEXEC
 DESCRIPTOR.message_types_by_name['TestCaseInfo'] = _TESTCASEINFO
 DESCRIPTOR.message_types_by_name['Contact'] = _CONTACT
+DESCRIPTOR.message_types_by_name['Requirement'] = _REQUIREMENT
+DESCRIPTOR.message_types_by_name['BugComponent'] = _BUGCOMPONENT
+DESCRIPTOR.message_types_by_name['Criteria'] = _CRITERIA
+DESCRIPTOR.message_types_by_name['HwAgnostic'] = _HWAGNOSTIC
 DESCRIPTOR.message_types_by_name['TestCaseMetadataList'] = _TESTCASEMETADATALIST
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -241,6 +405,34 @@ Contact = _reflection.GeneratedProtocolMessageType('Contact', (_message.Message,
   # @@protoc_insertion_point(class_scope:chromiumos.test.api.Contact)
   })
 _sym_db.RegisterMessage(Contact)
+
+Requirement = _reflection.GeneratedProtocolMessageType('Requirement', (_message.Message,), {
+  'DESCRIPTOR' : _REQUIREMENT,
+  '__module__' : 'chromiumos.test.api.test_case_metadata_pb2'
+  # @@protoc_insertion_point(class_scope:chromiumos.test.api.Requirement)
+  })
+_sym_db.RegisterMessage(Requirement)
+
+BugComponent = _reflection.GeneratedProtocolMessageType('BugComponent', (_message.Message,), {
+  'DESCRIPTOR' : _BUGCOMPONENT,
+  '__module__' : 'chromiumos.test.api.test_case_metadata_pb2'
+  # @@protoc_insertion_point(class_scope:chromiumos.test.api.BugComponent)
+  })
+_sym_db.RegisterMessage(BugComponent)
+
+Criteria = _reflection.GeneratedProtocolMessageType('Criteria', (_message.Message,), {
+  'DESCRIPTOR' : _CRITERIA,
+  '__module__' : 'chromiumos.test.api.test_case_metadata_pb2'
+  # @@protoc_insertion_point(class_scope:chromiumos.test.api.Criteria)
+  })
+_sym_db.RegisterMessage(Criteria)
+
+HwAgnostic = _reflection.GeneratedProtocolMessageType('HwAgnostic', (_message.Message,), {
+  'DESCRIPTOR' : _HWAGNOSTIC,
+  '__module__' : 'chromiumos.test.api.test_case_metadata_pb2'
+  # @@protoc_insertion_point(class_scope:chromiumos.test.api.HwAgnostic)
+  })
+_sym_db.RegisterMessage(HwAgnostic)
 
 TestCaseMetadataList = _reflection.GeneratedProtocolMessageType('TestCaseMetadataList', (_message.Message,), {
   'DESCRIPTOR' : _TESTCASEMETADATALIST,

@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z1go.chromium.org/chromiumos/config/go/api/software',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n2chromiumos/config/api/software/camera_config.proto\x12\x1e\x63hromiumos.config.api.software\"+\n\nResolution\x12\r\n\x05width\x18\x01 \x01(\r\x12\x0e\n\x06height\x18\x02 \x01(\r\"z\n\x0c\x43\x61meraConfig\x12\x1f\n\x17generate_media_profiles\x18\x01 \x01(\x08\x12I\n\x15\x63\x61mcorder_resolutions\x18\x02 \x03(\x0b\x32*.chromiumos.config.api.software.ResolutionB3Z1go.chromium.org/chromiumos/config/go/api/softwareb\x06proto3'
+  serialized_pb=b'\n2chromiumos/config/api/software/camera_config.proto\x12\x1e\x63hromiumos.config.api.software\"+\n\nResolution\x12\r\n\x05width\x18\x01 \x01(\r\x12\x0e\n\x06height\x18\x02 \x01(\r\"\x97\x01\n\x0c\x43\x61meraConfig\x12\x1f\n\x17generate_media_profiles\x18\x01 \x01(\x08\x12I\n\x15\x63\x61mcorder_resolutions\x18\x02 \x03(\x0b\x32*.chromiumos.config.api.software.Resolution\x12\x1b\n\x13has_external_camera\x18\x03 \x01(\x08\x42\x33Z1go.chromium.org/chromiumos/config/go/api/softwareb\x06proto3'
 )
 
 
@@ -86,6 +86,13 @@ _CAMERACONFIG = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='has_external_camera', full_name='chromiumos.config.api.software.CameraConfig.has_external_camera', index=2,
+      number=3, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -98,8 +105,8 @@ _CAMERACONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=131,
-  serialized_end=253,
+  serialized_start=132,
+  serialized_end=283,
 )
 
 _CAMERACONFIG.fields_by_name['camcorder_resolutions'].message_type = _RESOLUTION
