@@ -428,6 +428,16 @@ GROUP_BASELINE = dict(
             gid=20777,
             users={"root", "dlcservice", "imageloaderd"},
         ),
+        GroupEntry(
+            group="shadercached",
+            gid=333,
+            users={"shadercached", "crosvm"},
+        ),
+        GroupEntry(
+            group="crosvm",
+            gid=299,
+            users={"crosvm", "shadercached"},
+        ),
     )
 )
 
