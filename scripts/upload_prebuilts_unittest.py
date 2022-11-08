@@ -585,7 +585,19 @@ class TestMain(cros_test_lib.MockTestCase):
 
     def testMain(self):
         """Test that the main function works."""
-        options = mock.MagicMock()
+        # Use a real object as returned from ParseOptions as a spec for
+        # the mock options object, so that we don't have any properties
+        # that the real object doesn't have.
+        options_spec, _ = prebuilt.ParseOptions(
+            [
+                "--dry-run",
+                "--build-path",
+                "/trunk",
+                "-u",
+                "gs://upload",
+            ]
+        )
+        options = mock.MagicMock(spec=options_spec)
         old_binhost = "http://prebuilt/1"
         options.previous_binhost_url = [old_binhost]
         options.board = "x86-foo"
