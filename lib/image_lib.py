@@ -112,10 +112,17 @@ class LoopbackPartitions(object):
                 encoding="utf-8",
             )
             self.dev = ret.stdout.strip()
+
+            # Delete existing partitions.
             cmd = ["partx", "-d", self.dev]
             cros_build_lib.sudo_run(
                 cmd, debug_level=logging.DEBUG, check=False, capture_output=True
             )
+
+            # Sync before we start to add partitions.
+            cros_build_lib.run(["sync"])
+
+            # Add missing partitions.
             cmd = ["partx", "-a", self.dev]
             ret = cros_build_lib.sudo_run(
                 cmd, debug_level=logging.DEBUG, check=False
