@@ -113,14 +113,6 @@
   factory-zork-13700.B-buildspec
     zork-factory-zork-13700.B-factorybranch
 
-== informational ==
-  amd64-generic-asan
-  amd64-generic-fuzzer
-  amd64-generic-fwupd-upstream
-  amd64-generic-msan-fuzzer
-  amd64-generic-ubsan
-  amd64-generic-ubsan-fuzzer
-
 == release ==
   master-release
     adlnrvp-release

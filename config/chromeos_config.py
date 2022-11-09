@@ -962,8 +962,6 @@ def InformationalBuilders(site_config, boards_dict, ge_build_config):
         site_config.templates.informational,
         boards=["amd64-generic"],
         description="Build with Address Sanitizer (Clang)",
-        # Every 3 hours.
-        schedule="0 */3 * * *",
         board_replace=True,
     )
 
@@ -991,8 +989,6 @@ def InformationalBuilders(site_config, boards_dict, ge_build_config):
         # THESE IMAGES CAN DAMAGE THE LAB and cannot be used for hardware testing.
         disk_layout="4gb-rootfs",
         image_test=None,
-        # Every 3 hours.
-        schedule="0 */3 * * *",
         board_replace=True,
     )
 
@@ -1005,9 +1001,6 @@ def InformationalBuilders(site_config, boards_dict, ge_build_config):
         gs_path="gs://chromeos-fuzzing-artifacts/libfuzzer-coverage-buganizer",
         disk_layout="4gb-rootfs",
         image_test=None,
-        # Every 3 hours.
-        # Currently disabled, to schedule uncomment the next line.
-        # schedule='0 */3 * * *',
         board_replace=True,
     )
 
@@ -1020,8 +1013,6 @@ def InformationalBuilders(site_config, boards_dict, ge_build_config):
         gs_path="gs://chromeos-fuzzing-artifacts/libfuzzer-msan-buganizer",
         disk_layout="4gb-rootfs",
         image_test=None,
-        # Every 3 hours.
-        schedule="0 */3 * * *",
         board_replace=True,
     )
 
@@ -1035,8 +1026,6 @@ def InformationalBuilders(site_config, boards_dict, ge_build_config):
         description="Build with Undefined Behavior Sanitizer (Clang)",
         # THESE IMAGES CAN DAMAGE THE LAB and cannot be used for hardware testing.
         disk_layout="16gb-rootfs",
-        # Every 3 hours.
-        schedule="0 */3 * * *",
         board_replace=True,
         vm_tests=[],
     )
@@ -1050,8 +1039,6 @@ def InformationalBuilders(site_config, boards_dict, ge_build_config):
         gs_path="gs://chromeos-fuzzing-artifacts/libfuzzer-ubsan-buganizer",
         disk_layout="4gb-rootfs",
         image_test=None,
-        # Every 3 hours.
-        schedule="0 */3 * * *",
         board_replace=True,
     )
 
@@ -1064,8 +1051,6 @@ def InformationalBuilders(site_config, boards_dict, ge_build_config):
         chrome_sdk=False,
         description="Build with Upstream fwupd",
         disk_layout="4gb-rootfs",
-        # Every 3 hours.
-        schedule="0 */3 * * *",
         board_replace=True,
         images=["base", "test"],
         vm_tests=[],

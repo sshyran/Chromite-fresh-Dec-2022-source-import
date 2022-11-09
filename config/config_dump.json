@@ -1058,7 +1058,6 @@
     "doc": "https://dev.chromium.org/chromium-os/build/builder-overview#TOC-Continuous",
     "hw_tests_override": [],
     "luci_builder": "Informational",
-    "schedule": "0 */3 * * *",
     "uprev": false,
     "useflags": [
       "-chrome_internal"
@@ -1160,8 +1159,7 @@
     ],
     "description": "Build for fuzzing testing",
     "disk_layout": "4gb-rootfs",
-    "image_test": null,
-    "schedule": "0 */3 * * *"
+    "image_test": null
   },
   "amd64-generic-fuzzer-tryjob": {
     "_template": "fuzzer",
@@ -1197,7 +1195,6 @@
       "{\n  \"email\": \"chromeos-fwupd@google.com\",\n  \"template\": \"legacy_informational\",\n  \"threshold\": 1\n}"
     ],
     "profile": "fwupd-upstream",
-    "schedule": "0 */3 * * *",
     "tast_vm_tests": [
       "{\n  \"suite_name\": \"tast_vm_fwupd\",\n  \"test_exprs\": [\n    \"(\\\"group:mainline\\\" && !informational && \\\"dep:fwupd\\\")\"\n  ],\n  \"timeout\": 3600\n}"
     ],
@@ -1277,8 +1274,7 @@
     "disk_layout": "4gb-rootfs",
     "gs_path": "gs://chromeos-fuzzing-artifacts/libfuzzer-msan-buganizer",
     "image_test": null,
-    "profile": "msan-fuzzer",
-    "schedule": "0 */3 * * *"
+    "profile": "msan-fuzzer"
   },
   "amd64-generic-msan-fuzzer-tryjob": {
     "_template": "fuzzer",
@@ -1309,7 +1305,6 @@
     "doc": "https://dev.chromium.org/chromium-os/build/builder-overview#TOC-Continuous",
     "hw_tests_override": [],
     "luci_builder": "Informational",
-    "schedule": "0 */3 * * *",
     "uprev": false
   },
   "amd64-generic-ubsan-fuzzer": {
@@ -1322,8 +1317,7 @@
     "disk_layout": "4gb-rootfs",
     "gs_path": "gs://chromeos-fuzzing-artifacts/libfuzzer-ubsan-buganizer",
     "image_test": null,
-    "profile": "ubsan-fuzzer",
-    "schedule": "0 */3 * * *"
+    "profile": "ubsan-fuzzer"
   },
   "amd64-generic-ubsan-fuzzer-tryjob": {
     "_template": "fuzzer",
