@@ -6845,7 +6845,7 @@
           "release_builder_test_pool": "bvt",
           "board_id": 7166,
           "is_active": true,
-          "stable_target_milestone": 109,
+          "stable_target_milestone": 110,
           "is_experimental": true
         },
         {
@@ -6866,7 +6866,7 @@
           "release_builder_test_pool": "bvt",
           "board_id": 7166,
           "is_active": true,
-          "stable_target_milestone": 109,
+          "stable_target_milestone": 110,
           "is_experimental": false
         },
         {
@@ -6876,7 +6876,7 @@
           "release_builder_test_pool": "bvt",
           "board_id": 7166,
           "is_active": true,
-          "stable_target_milestone": 109,
+          "stable_target_milestone": 110,
           "is_experimental": true
         },
         {
@@ -6890,7 +6890,7 @@
         }
       ],
       "rubik_target_milestone": 106,
-      "stable_target_milestone": 109
+      "stable_target_milestone": 110
     },
     {
       "name": "herobrine-angle",
