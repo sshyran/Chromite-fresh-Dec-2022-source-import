@@ -24,6 +24,7 @@ from chromite.lib import parallel
 
 # Map file extensions to a formatter function.
 _EXT_TOOL_MAP = {
+    frozenset({".bzl"}): (formatters.star.BzlData,),
     frozenset({".c", ".cc", ".cpp", ".cxx", ".h"}): (formatters.cpp.Data,),
     frozenset({".gn", ".gni"}): (formatters.gn.Data,),
     frozenset({".go"}): (formatters.go.Data,),
@@ -37,6 +38,7 @@ _EXT_TOOL_MAP = {
     frozenset({".proto"}): (formatters.proto.Data,),
     frozenset({".py"}): (formatters.python.Data,),
     frozenset({".rs"}): (formatters.rust.Data,),
+    frozenset({".star"}): (formatters.star.Data,),
     # TODO(build): Add a formatter for this (SELinux policies).
     frozenset({".te"}): (formatters.whitespace.Data,),
     frozenset({".xml"}): (formatters.xml.Data,),
@@ -51,6 +53,8 @@ _EXT_TOOL_MAP = {
 # Map known filenames to a tool function.
 _FILENAME_PATTERNS_TOOL_MAP = {
     frozenset({".gn"}): (formatters.gn.Data,),
+    frozenset({"BUILD", "BUILD.bazel"}): (formatters.star.BuildData,),
+    frozenset({"WORKSPACE"}): (formatters.star.WorkspaceData,),
     # These are plain text files.
     frozenset(
         {

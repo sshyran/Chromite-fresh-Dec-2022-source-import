@@ -12,5 +12,6 @@ from chromite.format.formatters import proto
 from chromite.format.formatters import python
 from chromite.format.formatters import repo_manifest
 from chromite.format.formatters import rust
+from chromite.format.formatters import star
 from chromite.format.formatters import whitespace
 from chromite.format.formatters import xml
