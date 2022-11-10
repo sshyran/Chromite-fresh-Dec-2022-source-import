@@ -32,6 +32,7 @@ SYSTEM_PACKAGES = {
     "app-misc/ca-certificates",
     "app-misc/pax-utils",
     "app-shells/",
+    "dev-libs/",
     "dev-vcs/",
     "net-misc/",
     "sys-apps/",
