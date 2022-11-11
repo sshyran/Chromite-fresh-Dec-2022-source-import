@@ -15,6 +15,7 @@ import shutil
 import sys
 import threading
 import time
+from typing import NamedTuple, Optional
 
 from chromite.lib import constants
 from chromite.lib import gs
@@ -121,6 +122,15 @@ DEFAULT_STATIC_DIR = os.path.join(constants.SOURCE_ROOT, "devserver", "static")
 
 _TIMESTAMP_DELIMITER = "SLASH"
 _XBUDDY_TIMESTAMP_DIR = "xbuddy_UpdateTimestamps"
+
+
+class XBuddyComponents(NamedTuple):
+    """Container for XBuddy URI components."""
+
+    image_type: str
+    board: Optional[str]
+    version: str
+    is_local: bool
 
 
 class XBuddyException(Exception):
@@ -903,20 +913,23 @@ class XBuddy(object):
             path, board=default_board, version=default_version
         )
         # Parse the path.
-        image_type, board, version, is_local = InterpretPath(
-            path, default_board, default_version
-        )
+        xbuddy_components = InterpretPath(path, default_board, default_version)
         file_name = None
-        if is_local:
+        if xbuddy_components.is_local:
             # Get a local image.
-            if version == LATEST:
-                # Get the latest local image for the given board.
-                version = self._GetLatestLocalVersion(board)
+            version = (
+                self._GetLatestLocalVersion(xbuddy_components.board)
+                if xbuddy_components.version == LATEST
+                else xbuddy_components.version
+            )
 
-            build_id = os.path.join(board, version)
+            build_id = os.path.join(xbuddy_components.board, version)
             artifact_dir = os.path.join(self.static_dir, build_id)
-            if image_type == ANY:
-                image_type = self._FindAny(artifact_dir)
+            image_type = (
+                self._FindAny(artifact_dir)
+                if xbuddy_components.image_type == ANY
+                else xbuddy_components.image_type
+            )
 
             # If there was an image type discovered, get the file name otherwise, just
             # return with no file name.
@@ -931,19 +944,25 @@ class XBuddy(object):
                     )
         else:
             # Get a remote image.
-            if image_type not in GS_ALIASES:
+            if xbuddy_components.image_type not in GS_ALIASES:
                 raise XBuddyException(
                     "Bad remote image type: %s. Use one of: %s"
-                    % (image_type, GS_ALIASES)
+                    % (xbuddy_components.image_type, GS_ALIASES)
                 )
             build_id, channel = self._ResolveVersionToBuildIdAndChannel(
-                board, suffix, version, image_dir=image_dir
+                xbuddy_components.board,
+                suffix,
+                xbuddy_components.version,
+                image_dir=image_dir,
             )
             logging.debug("Resolved version %s to %s.", version, build_id)
 
             if not lookup_only:
                 file_name = self._GetFromGS(
-                    build_id, image_type, image_dir=image_dir, channel=channel
+                    build_id,
+                    xbuddy_components.image_type,
+                    image_dir=image_dir,
+                    channel=channel,
                 )[0]
 
         return build_id, file_name
@@ -1027,7 +1046,7 @@ class XBuddy(object):
 
 def InterpretPath(
     path: str, default_board: str = None, default_version: str = None
-):
+) -> XBuddyComponents:
     """Split and return the pieces of an xBuddy path name
 
     Args:
@@ -1096,4 +1115,4 @@ def InterpretPath(
         is_local,
     )
 
-    return image_type, board, version, is_local
+    return XBuddyComponents(image_type, board, version, is_local)
