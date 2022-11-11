@@ -542,7 +542,11 @@ def uprev_perfetto(_build_targets, refs, chroot):
     if not uprev_result:
         return result
 
-    result.add_result(perfetto_version, uprev_result.changed_files)
+    # Include short git sha hash in the uprev commit message.
+    # Use 9 digits to match the short hash length in `perfetto --version`.
+    short_revision = refs[-1].revision[0:9]
+    version_and_rev = f"{perfetto_version}-{short_revision}"
+    result.add_result(version_and_rev, uprev_result.changed_files)
 
     return result
 
