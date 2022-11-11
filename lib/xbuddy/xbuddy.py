@@ -667,79 +667,6 @@ class XBuddy(object):
 
         return None
 
-    @staticmethod
-    def InterpretPath(path, default_board=None, default_version=None):
-        """Split and return the pieces of an xBuddy path name
-
-        Args:
-          path: the path xBuddy Get was called with.
-          default_board: board to use in case board isn't in path.
-          default_version: Version to use in case version isn't in path.
-
-        Returns:
-          tuple of (image_type, board, version, whether the path is local)
-
-        Raises:
-          XBuddyException: if the path can't be resolved into valid components
-        """
-        if path.lower().startswith("xbuddy://"):
-            path = path[9:]
-        path_list = [p for p in path.split("/") if p]
-
-        # Do the stuff that is well known first. We know that if paths have a
-        # image_type, it must be one of the GS/LOCAL aliases and it must be at the
-        # end. Similarly, local/remote are well-known and must start the path list.
-        # Default to remote for chrome checkout.
-        is_local = (
-            path_util.DetermineCheckout().type
-            != path_util.CHECKOUT_TYPE_GCLIENT
-        )
-        if path_list and path_list[0] in (REMOTE, LOCAL):
-            is_local = path_list.pop(0) == LOCAL
-
-        # Default image type is determined by remote vs. local.
-        image_type = ANY if is_local else TEST
-
-        if path_list and path_list[-1] in GS_ALIASES + LOCAL_ALIASES:
-            image_type = path_list.pop(-1)
-
-        # Now for the tricky part. We don't actually know at this point if the rest
-        # of the path is just a board | version (like R33-2341.0.0) or just a board
-        # or just a version. So we do our best to do the right thing.
-        board = default_board
-        version = default_version or LATEST
-        if len(path_list) == 1:
-            path = path_list.pop(0)
-            if board == path or version == path:
-                pass
-            # Treat this as a version if it's one we know (contains default or
-            # latest), or we were given an actual default board.
-            elif default_version in path or LATEST in path or board is not None:
-                version = path
-            else:
-                board = path
-
-        elif len(path_list) == 2:
-            # Assumes board/version.
-            board = path_list.pop(0)
-            version = path_list.pop(0)
-
-        if path_list:
-            raise XBuddyException(
-                "Path is not valid. Could not figure out how to "
-                "parse remaining components: %s." % path_list
-            )
-
-        logging.debug(
-            "Get artifact '%s' with board %s and version %s'. " "Locally? %s",
-            image_type,
-            board,
-            version,
-            is_local,
-        )
-
-        return image_type, board, version, is_local
-
     def _SyncRegistryWithBuildImages(self):
         """Crawl images_dir for build_ids of images generated from build_image.
 
@@ -976,7 +903,7 @@ class XBuddy(object):
             path, board=default_board, version=default_version
         )
         # Parse the path.
-        image_type, board, version, is_local = self.InterpretPath(
+        image_type, board, version, is_local = InterpretPath(
             path, default_board, default_version
         )
         file_name = None
@@ -1096,3 +1023,77 @@ class XBuddy(object):
             file_name,
         )
         return build_id, file_name
+
+
+def InterpretPath(
+    path: str, default_board: str = None, default_version: str = None
+):
+    """Split and return the pieces of an xBuddy path name
+
+    Args:
+      path: the path xBuddy Get was called with.
+      default_board: board to use in case board isn't in path.
+      default_version: Version to use in case version isn't in path.
+
+    Returns:
+      tuple of (image_type, board, version, whether the path is local)
+
+    Raises:
+      XBuddyException: if the path can't be resolved into valid components
+    """
+    if path.lower().startswith("xbuddy://"):
+        path = path[9:]
+    path_list = [p for p in path.split("/") if p]
+
+    # Do the stuff that is well known first. We know that if paths have a
+    # image_type, it must be one of the GS/LOCAL aliases and it must be at the
+    # end. Similarly, local/remote are well-known and must start the path list.
+    # Default to remote for chrome checkout.
+    is_local = (
+        path_util.DetermineCheckout().type != path_util.CHECKOUT_TYPE_GCLIENT
+    )
+    if path_list and path_list[0] in (REMOTE, LOCAL):
+        is_local = path_list.pop(0) == LOCAL
+
+    # Default image type is determined by remote vs. local.
+    image_type = ANY if is_local else TEST
+
+    if path_list and path_list[-1] in GS_ALIASES + LOCAL_ALIASES:
+        image_type = path_list.pop(-1)
+
+    # Now for the tricky part. We don't actually know at this point if the rest
+    # of the path is just a board | version (like R33-2341.0.0) or just a board
+    # or just a version. So we do our best to do the right thing.
+    board = default_board
+    version = default_version or LATEST
+    if len(path_list) == 1:
+        path = path_list.pop(0)
+        if board == path or version == path:
+            pass
+        # Treat this as a version if it's one we know (contains default or
+        # latest), or we were given an actual default board.
+        elif default_version in path or LATEST in path or board is not None:
+            version = path
+        else:
+            board = path
+
+    elif len(path_list) == 2:
+        # Assumes board/version.
+        board = path_list.pop(0)
+        version = path_list.pop(0)
+
+    if path_list:
+        raise XBuddyException(
+            "Path is not valid. Could not figure out how to "
+            "parse remaining components: %s." % path_list
+        )
+
+    logging.debug(
+        "Get artifact '%s' with board %s and version %s'. " "Locally? %s",
+        image_type,
+        board,
+        version,
+        is_local,
+    )
+
+    return image_type, board, version, is_local
