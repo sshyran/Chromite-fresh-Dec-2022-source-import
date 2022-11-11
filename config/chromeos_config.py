@@ -1130,6 +1130,7 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
         (WEEKLY, "factory-brya-14909.124.B", ["brya"]),
         (WEEKLY, "factory-corsola-15196.B", ["corsola"]),
         (DAILY, "factory-nissa-15199.B", ["nissa"]),
+        (DAILY, "factory-brya-15231.B", ["brya"]),
         # This is intended to create master branch tryjobs, NOT for production
         # builds. Update the associated list of boards as needed.
         (
