@@ -351,15 +351,15 @@ class xBuddyTest(cros_test_lib.TestCase):
         b_id11 = "b1/v1"
         b_id12 = "b1/v2"
         b_id23 = "b2/v3"
-        xbuddy.Timestamp.UpdateTimestamp(self.mock_xb._timestamp_folder, b_id11)
+        xbuddy.update_timestamp(self.mock_xb._timestamp_folder, b_id11)
         time.sleep(0.05)
-        xbuddy.Timestamp.UpdateTimestamp(self.mock_xb._timestamp_folder, b_id12)
+        xbuddy.update_timestamp(self.mock_xb._timestamp_folder, b_id12)
         time.sleep(0.05)
-        xbuddy.Timestamp.UpdateTimestamp(self.mock_xb._timestamp_folder, b_id23)
+        xbuddy.update_timestamp(self.mock_xb._timestamp_folder, b_id23)
 
         # reference second one again
         time.sleep(0.05)
-        xbuddy.Timestamp.UpdateTimestamp(self.mock_xb._timestamp_folder, b_id12)
+        xbuddy.update_timestamp(self.mock_xb._timestamp_folder, b_id12)
 
         # check that list returns the same 3 things, in last referenced order
         result = self.mock_xb._ListBuildTimes()

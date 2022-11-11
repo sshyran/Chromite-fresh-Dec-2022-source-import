@@ -119,35 +119,29 @@ RELEASE = "-release"
 
 DEFAULT_STATIC_DIR = os.path.join(constants.SOURCE_ROOT, "devserver", "static")
 
+_TIMESTAMP_DELIMITER = "SLASH"
+_XBUDDY_TIMESTAMP_DIR = "xbuddy_UpdateTimestamps"
+
 
 class XBuddyException(Exception):
     """Exception classes used by this module."""
 
 
-class Timestamp(object):
-    """Class to translate build path strings and timestamp filenames."""
+def update_timestamp(timestamp_dir, build_id):
+    """Update timestamp file of build with build_id."""
+    common_util.MkDirP(timestamp_dir)
+    logging.debug("Updating timestamp for %s", build_id)
+    time_file = os.path.join(timestamp_dir, build_to_timestamp(build_id))
+    with open(time_file, "a"):
+        os.utime(time_file, None)
 
-    _TIMESTAMP_DELIMITER = "SLASH"
-    XBUDDY_TIMESTAMP_DIR = "xbuddy_UpdateTimestamps"
 
-    @staticmethod
-    def TimestampToBuild(timestamp_filename):
-        return timestamp_filename.replace(Timestamp._TIMESTAMP_DELIMITER, "/")
+def timestamp_to_build(timestamp_filename):
+    return timestamp_filename.replace(_TIMESTAMP_DELIMITER, "/")
 
-    @staticmethod
-    def BuildToTimestamp(build_path):
-        return build_path.replace("/", Timestamp._TIMESTAMP_DELIMITER)
 
-    @staticmethod
-    def UpdateTimestamp(timestamp_dir, build_id):
-        """Update timestamp file of build with build_id."""
-        common_util.MkDirP(timestamp_dir)
-        logging.debug("Updating timestamp for %s", build_id)
-        time_file = os.path.join(
-            timestamp_dir, Timestamp.BuildToTimestamp(build_id)
-        )
-        with open(time_file, "a"):
-            os.utime(time_file, None)
+def build_to_timestamp(build_path):
+    return build_path.replace("/", _TIMESTAMP_DELIMITER)
 
 
 class XBuddy(object):
@@ -196,7 +190,7 @@ class XBuddy(object):
         self._version = version
         self.static_dir = static_dir
         self._timestamp_folder = os.path.join(
-            self.static_dir, Timestamp.XBUDDY_TIMESTAMP_DIR
+            self.static_dir, _XBUDDY_TIMESTAMP_DIR
         )
         self.images_dir = images_dir or os.path.join(
             constants.SOURCE_ROOT, "src/build/images"
@@ -785,7 +779,7 @@ class XBuddy(object):
             target = os.path.join(self.images_dir, build_id)
             XBuddy._Symlink(link, target)
             if self._manage_builds:
-                Timestamp.UpdateTimestamp(self._timestamp_folder, build_id)
+                update_timestamp(self._timestamp_folder, build_id)
 
     def _ListBuildTimes(self):
         """Returns the currently cached builds and their last access timestamp.
@@ -800,7 +794,7 @@ class XBuddy(object):
             last_accessed = os.path.getmtime(
                 os.path.join(self._timestamp_folder, f)
             )
-            build_id = Timestamp.TimestampToBuild(f)
+            build_id = timestamp_to_build(f)
             stale_time = datetime.timedelta(
                 seconds=(time.time() - last_accessed)
             )
@@ -848,7 +842,7 @@ class XBuddy(object):
             logging.debug("Clearing '%s' from cache", b_path)
 
             time_file = os.path.join(
-                self._timestamp_folder, Timestamp.BuildToTimestamp(b_path)
+                self._timestamp_folder, build_to_timestamp(b_path)
             )
             os.unlink(time_file)
             clear_dir = os.path.join(self.static_dir, b_path)
@@ -1092,7 +1086,7 @@ class XBuddy(object):
         """
         self._SyncRegistryWithBuildImages()
         build_id, file_name = self._GetArtifact(path_list, image_dir=image_dir)
-        Timestamp.UpdateTimestamp(self._timestamp_folder, build_id)
+        update_timestamp(self._timestamp_folder, build_id)
         # TODO(joyc): Run in separate thread.
         self.CleanCache()
 
