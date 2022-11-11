@@ -264,6 +264,28 @@ def SetBinhost(
     )
 
 
+def _GetBinhostConfPathResponse(_input_proto, output_proto, _config):
+    """Add fake binhost file to a successful response."""
+    output_proto.conf_path = "/path/to/BINHOST.conf"
+
+
+@faux.success(_GetBinhostConfPathResponse)
+@faux.empty_error
+@validate.require("build_target.name", "key")
+@validate.validation_complete
+def GetBinhostConfPath(
+    input_proto: binhost_pb2.GetBinhostConfPathRequest,
+    output_proto: binhost_pb2.GetBinhostConfPathResponse,
+    _config: "api_config.ApiConfig",
+):
+    target = input_proto.build_target.name
+    key = binhost_pb2.BinhostKey.Name(input_proto.key)
+    private = input_proto.private
+    output_proto.conf_path = str(
+        binhost.GetBinhostConfPath(target, key, private)
+    )
+
+
 def _RegenBuildCacheResponse(_input_proto, output_proto, _config):
     """Add fake binhosts cache path to a successful response."""
     output_proto.modified_overlays.add().path = "/path/to/BuildCache"

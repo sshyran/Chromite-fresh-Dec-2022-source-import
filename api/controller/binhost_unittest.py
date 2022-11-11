@@ -250,6 +250,60 @@ class SetBinhostTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         )
 
 
+class GetBinhostConfPathTest(
+    cros_test_lib.MockTestCase, api_config.ApiConfigMixin
+):
+    """Unittests for GetBinhostConfPath."""
+
+    def setUp(self):
+        self.response = binhost_pb2.GetBinhostConfPathResponse()
+
+    def testValidateOnly(self):
+        """Check that a validate only call does not execute any logic."""
+        patch = self.PatchObject(binhost_service, "GetBinhostConfPath")
+
+        request = binhost_pb2.GetBinhostConfPathRequest()
+        request.build_target.name = "target"
+        request.key = binhost_pb2.POSTSUBMIT_BINHOST
+        binhost.GetBinhostConfPath(
+            request, self.response, self.validate_only_config
+        )
+        patch.assert_not_called()
+
+    def testMockCall(self):
+        """Test that a mock call does not execute logic, returns mocked value."""
+        patch = self.PatchObject(binhost_service, "GetBinhostConfPath")
+
+        request = binhost_pb2.GetBinhostConfPathRequest()
+        request.build_target.name = "target"
+        request.key = binhost_pb2.POSTSUBMIT_BINHOST
+        binhost.GetBinhostConfPath(
+            request, self.response, self.mock_call_config
+        )
+        patch.assert_not_called()
+        self.assertEqual(self.response.conf_path, "/path/to/BINHOST.conf")
+
+    def testGetBinhostConfPath(self):
+        """GetBinhostConfPath calls service with correct args."""
+        get_binhost_conf_path = self.PatchObject(
+            binhost_service,
+            "GetBinhostConfPath",
+            return_value="/path/to/BINHOST.conf",
+        )
+        input_proto = binhost_pb2.GetBinhostConfPathRequest()
+        input_proto.build_target.name = "target"
+        input_proto.private = True
+        input_proto.key = binhost_pb2.POSTSUBMIT_BINHOST
+        binhost.GetBinhostConfPath(input_proto, self.response, self.api_config)
+
+        self.assertEqual(self.response.conf_path, "/path/to/BINHOST.conf")
+        get_binhost_conf_path.assert_called_once_with(
+            "target",
+            "POSTSUBMIT_BINHOST",
+            True,
+        )
+
+
 class RegenBuildCacheTest(
     cros_test_lib.MockTestCase, api_config.ApiConfigMixin
 ):

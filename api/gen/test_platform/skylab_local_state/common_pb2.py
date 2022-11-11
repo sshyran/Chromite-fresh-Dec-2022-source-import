@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'ZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_local_state',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n-test_platform/skylab_local_state/common.proto\x12 test_platform.skylab_local_state\"o\n\x06\x43onfig\x12\x15\n\radmin_service\x18\x01 \x01(\t\x12\x14\n\x0c\x61utotest_dir\x18\x02 \x01(\t\x12\x1e\n\x16\x63ros_inventory_service\x18\x03 \x01(\t\x12\x18\n\x10\x63ros_ufs_service\x18\x04 \x01(\tBLZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_local_stateb\x06proto3'
+  serialized_pb=b'\n-test_platform/skylab_local_state/common.proto\x12 test_platform.skylab_local_state\"\x83\x01\n\x06\x43onfig\x12\x15\n\radmin_service\x18\x01 \x01(\t\x12\x14\n\x0c\x61utotest_dir\x18\x02 \x01(\t\x12\x1e\n\x16\x63ros_inventory_service\x18\x03 \x01(\t\x12\x18\n\x10\x63ros_ufs_service\x18\x04 \x01(\t\x12\x12\n\nbot_prefix\x18\x05 \x01(\tBLZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_local_stateb\x06proto3'
 )
 
 
@@ -61,6 +61,13 @@ _CONFIG = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='bot_prefix', full_name='test_platform.skylab_local_state.Config.bot_prefix', index=4,
+      number=5, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -73,8 +80,8 @@ _CONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=83,
-  serialized_end=194,
+  serialized_start=84,
+  serialized_end=215,
 )
 
 DESCRIPTOR.message_types_by_name['Config'] = _CONFIG

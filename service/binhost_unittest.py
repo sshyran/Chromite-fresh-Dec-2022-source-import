@@ -5,6 +5,7 @@
 """Unittests for the binhost.py service."""
 
 import os
+from pathlib import Path
 import time
 
 from chromite.lib import binpkg
@@ -186,6 +187,32 @@ class SetBinhostTest(cros_test_lib.MockTempDirTestCase):
             binhost.SetBinhost(
                 "coral", "BINHOST_KEY", "gs://prebuilts", max_uris=None
             )
+
+
+class GetBinhostConfPathTest(cros_test_lib.MockTempDirTestCase):
+    """Unittests for GetBinhostConfPath."""
+
+    def setUp(self):
+        self.PatchObject(constants, "SOURCE_ROOT", new=self.tempdir)
+
+        self.public_conf_dir = (
+            Path(self.tempdir) / constants.PUBLIC_BINHOST_CONF_DIR / "target"
+        )
+        self.private_conf_dir = (
+            Path(self.tempdir) / constants.PRIVATE_BINHOST_CONF_DIR / "target"
+        )
+
+    def testGetBinhostConfPathPublic(self):
+        """GetBinhostConfPath returns correct public conf path."""
+        expected = self.public_conf_dir / "coral-BINHOST_KEY.conf"
+        actual = binhost.GetBinhostConfPath("coral", "BINHOST_KEY", False)
+        self.assertEqual(actual, expected)
+
+    def testGetBinhostConfPathPrivate(self):
+        """GetBinhostConfPath returns correct private conf path."""
+        expected = self.private_conf_dir / "coral-BINHOST_KEY.conf"
+        actual = binhost.GetBinhostConfPath("coral", "BINHOST_KEY", True)
+        self.assertEqual(actual, expected)
 
 
 class GetPrebuiltsRootTest(cros_test_lib.MockTempDirTestCase):

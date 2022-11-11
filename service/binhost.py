@@ -49,7 +49,7 @@ class InvalidMaxUris(Error):
     """When maximum number of uris to store is less than or equal to 0."""
 
 
-def _ValidateBinhostConf(path: str, key: str) -> None:
+def _ValidateBinhostConf(path: Path, key: str) -> None:
     """Validates the binhost conf file defines only one environment variable.
 
     This function checks to ensure unexpected configuration is not clobbered by
@@ -62,7 +62,7 @@ def _ValidateBinhostConf(path: str, key: str) -> None:
     Raises:
         ValueError: If file defines != 1 environment variable.
     """
-    if not os.path.exists(path):
+    if not path.exists():
         # If the conf file does not exist, e.g. with new targets, then whatever.
         return
 
@@ -271,18 +271,35 @@ def SetBinhost(
         Path to the updated .conf file.
     """
     _ValidateBinhostMaxURIs(max_uris)
-    conf_root = os.path.join(
-        constants.SOURCE_ROOT,
-        constants.PRIVATE_BINHOST_CONF_DIR
-        if private
-        else constants.PUBLIC_BINHOST_CONF_DIR,
-        "target",
-    )
-    conf_file = "%s-%s.conf" % (target, key)
-    conf_path = os.path.join(conf_root, conf_file)
-    _ValidateBinhostConf(conf_path, key)
+    conf_path = GetBinhostConfPath(target, key, private)
     uris = _get_current_uris(conf_path, key) + [uri]
     osutils.WriteFile(conf_path, '%s="%s"' % (key, " ".join(uris[-max_uris:])))
+    return str(conf_path)
+
+
+def GetBinhostConfPath(target: str, key: str, private: bool = True) -> Path:
+    """Returns binhost conf file path.
+
+    Args:
+        target: The build target to get configuration file path for.
+        key: The binhost key to get, e.g. POSTSUBMIT_BINHOST.
+        private: Whether or not the build target is private.
+
+    Returns:
+        Path to the .conf file.
+    """
+    conf_dir_name = (
+        constants.PRIVATE_BINHOST_CONF_DIR
+        if private
+        else constants.PUBLIC_BINHOST_CONF_DIR
+    )
+    conf_path = (
+        Path(constants.SOURCE_ROOT)
+        / conf_dir_name
+        / "target"
+        / f"{target}-{key}.conf"
+    )
+    _ValidateBinhostConf(conf_path, key)
     return conf_path
 
 
