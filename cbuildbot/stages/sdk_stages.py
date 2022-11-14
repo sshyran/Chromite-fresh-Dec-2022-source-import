@@ -19,7 +19,6 @@ from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib import perf_uploader
 from chromite.lib import portage_util
-from chromite.lib import toolchain
 from chromite.scripts import upload_prebuilts
 
 
@@ -39,9 +38,6 @@ PACKAGE_EXCLUDED_PATHS = (
 
 # Names of various packaged artifacts.
 SDK_TARBALL_NAME = "built-sdk.tar.xz"
-TOOLCHAINS_OVERLAY_TARBALL_TEMPLATE = (
-    "built-sdk-overlay-toolchains-%(toolchains)s.tar.xz"
-)
 
 
 def SdkPerfPath(buildroot):
@@ -269,97 +265,6 @@ class SDKPackageStage(
             logging.error("%s content:\n%s", board_setup, data)
             raise ValueError("/build/ paths must be cleaned from make.conf")
         osutils.WriteFile(board_setup, data, sudo=True)
-
-
-class SDKPackageToolchainOverlaysStage(generic_stages.BuilderStage):
-    """Stage that creates and packages per-board toolchain overlays."""
-
-    category = constants.PRODUCT_TOOLCHAIN_STAGE
-
-    def __init__(self, builder_run, buildstore, version=None, **kwargs):
-        self.sdk_version = version
-        super().__init__(builder_run, buildstore, **kwargs)
-
-    def PerformStage(self):
-        chroot_dir = os.path.join(
-            self._build_root, constants.DEFAULT_CHROOT_DIR
-        )
-        sdk_dir = os.path.join(chroot_dir, "build/amd64-host")
-        tmp_dir = os.path.join(chroot_dir, "tmp")
-        osutils.SafeMakedirs(tmp_dir, mode=0o777, sudo=True)
-        overlay_output_dir = os.path.join(
-            chroot_dir, constants.SDK_OVERLAYS_OUTPUT
-        )
-        osutils.RmDir(overlay_output_dir, ignore_missing=True, sudo=True)
-        osutils.SafeMakedirs(overlay_output_dir, mode=0o777, sudo=True)
-        overlay_tarball_template = os.path.join(
-            overlay_output_dir, TOOLCHAINS_OVERLAY_TARBALL_TEMPLATE
-        )
-
-        # Generate an overlay tarball for each unique toolchain combination. We
-        # restrict ourselves to (a) board configs that are available to the builder
-        # (naturally), and (b) toolchains that are part of the 'sdk' set.
-        sdk_toolchains = set(toolchain.GetToolchainsForBoard("sdk"))
-        generated = set()
-        for board in self._run.site_config.GetBoards():
-            try:
-                toolchains = set(toolchain.GetToolchainsForBoard(board).keys())
-            except portage_util.MissingOverlayError:
-                # The board overlay may not exist, e.g. on external builders.
-                continue
-
-            toolchains_str = "-".join(sorted(toolchains))
-            if (
-                not toolchains.issubset(sdk_toolchains)
-                or toolchains_str in generated
-            ):
-                continue
-
-            with osutils.TempDir(
-                prefix="toolchains-overlay-%s." % toolchains_str,
-                base_dir=tmp_dir,
-                sudo_rm=True,
-            ) as overlay_dir:
-                # NOTE: We let MountOverlayContext remove the mount point created by
-                # the TempDir context below, because it has built-in retries for rmdir
-                # EBUSY errors that are due to unmount lag.
-                with osutils.TempDir(
-                    prefix="amd64-host-%s." % toolchains_str,
-                    base_dir=tmp_dir,
-                    delete=False,
-                ) as merged_dir:
-                    with osutils.MountOverlayContext(
-                        sdk_dir, overlay_dir, merged_dir, cleanup=True
-                    ):
-                        # Pylint-2.2 is unable to see self.tempdir is a string.
-                        # pylint: disable=unsubscriptable-object
-                        sysroot = merged_dir[len(chroot_dir) :]
-                        cmd = [
-                            "cros_setup_toolchains",
-                            "--targets=boards",
-                            "--include-boards=%s" % board,
-                            "--sysroot=%s" % sysroot,
-                        ]
-                        commands.RunBuildScript(
-                            self._build_root,
-                            cmd,
-                            chromite_cmd=True,
-                            enter_chroot=True,
-                            sudo=True,
-                            extra_env=self._portage_extra_env,
-                        )
-
-                # NOTE: Make sure that the overlay directory is owned root:root and has
-                # 0o755 perms; apparently, these things are preserved through
-                # tarring/untarring and might cause havoc if overlooked.
-                os.chmod(overlay_dir, 0o755)
-                cros_build_lib.sudo_run(["chown", "root:root", overlay_dir])
-                CreateTarball(
-                    overlay_dir,
-                    overlay_tarball_template % {"toolchains": toolchains_str},
-                )
-
-            generated.add(toolchains_str)
 
 
 class SDKTestStage(generic_stages.BuilderStage):
