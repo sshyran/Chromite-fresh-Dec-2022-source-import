@@ -6,12 +6,13 @@
 
 import contextlib
 import errno
+from pathlib import Path
 
 
 @contextlib.contextmanager
 def _Open(obj, mode="r"):
     """Convenience ctx that accepts a file path or an already open file object."""
-    if isinstance(obj, str):
+    if isinstance(obj, (str, Path)):
         with open(obj, mode=mode) as f:
             yield f
     else:

@@ -5,6 +5,7 @@
 """Test the key_value_store module."""
 
 import os
+from pathlib import Path
 
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
@@ -73,6 +74,7 @@ ttt"
         }
 
         self.conf_file = os.path.join(self.tempdir, "file.conf")
+        self.conf_path = Path(self.conf_file)
         osutils.WriteFile(self.conf_file, self.contents)
 
     def _RunAndCompare(self, test_input, multiline):
@@ -80,8 +82,12 @@ ttt"
         self.assertEqual(self.expected, result)
 
     def testLoadFilePath(self):
-        """Verify reading a simple file works"""
+        """Verify reading a simple file works."""
         self._RunAndCompare(self.conf_file, True)
+
+    def testLoadPath(self):
+        """Verify reading a simple file Path works."""
+        self._RunAndCompare(self.conf_path, True)
 
     def testLoadData(self):
         """Verify passing in a string works."""
