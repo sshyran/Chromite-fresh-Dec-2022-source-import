@@ -104,6 +104,11 @@ class LoopbackPartitions(object):
         This is a separate function for test mocking purposes.
         """
         try:
+            # Sync the image file before we mount it as loop device.
+            cmd = ["sync", "-f", self.path]
+            cros_build_lib.run(cmd, debug_level=logging.DEBUG, check=False)
+
+            # Mount the image in the first available loop device.
             cmd = ["losetup", "--show", "-f", self.path]
             ret = cros_build_lib.sudo_run(
                 cmd,
