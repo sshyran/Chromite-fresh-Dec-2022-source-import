@@ -105,7 +105,6 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
         osutils.WriteFile(self.public_acl, self.public_acl_data, makedirs=True)
 
         self.bucket_url = "gs://u"
-        self.build_branch = "android-branch"
         self.gs_mock = self.StartPatcher(gs_unittest.GSContextMock())
         self.arc_bucket_url = "gs://a"
         self.targets = {
@@ -117,13 +116,10 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
         self.PatchDict(
             android.ARTIFACTS_TO_COPY, {self.android_package: self.targets}
         )
-        self.PatchObject(
-            android,
-            "GetAndroidBranchForPackage",
-            return_value=self.build_branch,
-        )
 
-    def setupMockTarget(self, target: str, versions: Dict[str, bool]):
+    def setupMockTarget(
+        self, branch: str, target: str, versions: Dict[str, bool]
+    ):
         """Mocks GS responses for one build target.
 
         Mocks GS responses for the following paths:
@@ -139,27 +135,26 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
         file not found error), specified via the `versions` dict.
 
         Args:
+            branch: The branch.
             target: The build target.
             versions: A mapping between versions to mock for this target and
                 whether each version is valid.
         """
         # `gsutil ls gs://<bucket>/<target>` shows all available versions.
-        url = f"{self.bucket_url}/{self.build_branch}-linux-{target}"
+        url = f"{self.bucket_url}/{branch}-linux-{target}"
         stdout = "\n".join(f"{url}/{version}" for version in versions)
         self.gs_mock.AddCmdResult(["ls", "--", url], stdout=stdout)
 
         for version, valid in versions.items():
-            self.mockOneTargetVersion(target, version, valid)
+            self.mockOneTargetVersion(branch, target, version, valid)
 
-    def mockOneTargetVersion(self, target, version, valid):
+    def mockOneTargetVersion(self, branch, target, version, valid):
         """Mock GS responses for one (target, version). See setupMockTarget."""
 
         def _RaiseGSNoSuchKey(*_args, **_kwargs):
             raise gs.GSNoSuchKey("file does not exist")
 
-        src_url = (
-            f"{self.bucket_url}/{self.build_branch}-linux-{target}/{version}"
-        )
+        src_url = f"{self.bucket_url}/{branch}-linux-{target}/{version}"
         if not valid:
             self.gs_mock.AddCmdResult(
                 ["ls", "--", src_url], side_effect=_RaiseGSNoSuchKey
@@ -201,7 +196,7 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
             )
 
         # Show nothing in destination.
-        dst_url = f"{self.arc_bucket_url}/{self.build_branch}-linux-{target}/{version}"
+        dst_url = f"{self.arc_bucket_url}/{branch}-linux-{target}/{version}"
         filelist = [
             template % {"version": version}
             for template in mock_file_template_list[target]
@@ -241,12 +236,12 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
 
     def testIsBuildIdValid_success(self):
         """Test IsBuildIdValid with a valid build."""
-        self.setupMockTarget("apps", {"1000": True})
-        self.setupMockTarget("target_arm", {"1000": True})
-        self.setupMockTarget("target_x86", {"1000": True})
+        self.setupMockTarget("android-branch", "apps", {"1000": True})
+        self.setupMockTarget("android-branch", "target_arm", {"1000": True})
+        self.setupMockTarget("android-branch", "target_x86", {"1000": True})
 
         subpaths = android.IsBuildIdValid(
-            self.android_package, "1000", self.bucket_url
+            self.android_package, "android-branch", "1000", self.bucket_url
         )
         self.assertDictEqual(
             subpaths,
@@ -259,12 +254,13 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
 
     def testIsBuildIdValid_partialExist(self):
         """Test IsBuildIdValid with a partially populated build."""
-        self.setupMockTarget("apps", {"1000": False})
-        self.setupMockTarget("target_arm", {"1000": True})
-        self.setupMockTarget("target_x86", {"1000": True})
+        self.setupMockTarget("android-branch", "apps", {"1000": False})
+        self.setupMockTarget("android-branch", "target_arm", {"1000": True})
+        self.setupMockTarget("android-branch", "target_x86", {"1000": True})
 
         subpaths = android.IsBuildIdValid(
             self.android_package,
+            "android-branch",
             "1000",
             self.bucket_url,
         )
@@ -272,32 +268,66 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
 
     def testIsBuildIdValid_notExist(self):
         """Test IsBuildIdValid with a nonexistent build."""
-        self.setupMockTarget("apps", {"1000": False})
-        self.setupMockTarget("target_arm", {"1000": False})
-        self.setupMockTarget("target_x86", {"1000": False})
+        self.setupMockTarget("android-branch", "apps", {"1000": False})
+        self.setupMockTarget("android-branch", "target_arm", {"1000": False})
+        self.setupMockTarget("android-branch", "target_x86", {"1000": False})
 
         subpaths = android.IsBuildIdValid(
             self.android_package,
+            "android-branch",
             "1000",
             self.bucket_url,
         )
         self.assertIsNone(subpaths)
 
-    def testGetLatestBuild(self):
+    def testGetLatestBuild_basic(self):
         """Test determination of latest build from gs bucket."""
         # - build 900 is valid (all targets are populated)
         # - build 1000 is valid
         # - build 1100 is invalid (partially populated)
-        self.setupMockTarget("apps", {"900": True, "1000": True, "1100": False})
         self.setupMockTarget(
-            "target_arm", {"900": True, "1000": True, "1100": True}
+            "android-branch", "apps", {"900": True, "1000": True, "1100": False}
         )
         self.setupMockTarget(
-            "target_x86", {"900": True, "1000": True, "1100": True}
+            "android-branch",
+            "target_arm",
+            {"900": True, "1000": True, "1100": True},
+        )
+        self.setupMockTarget(
+            "android-branch",
+            "target_x86",
+            {"900": True, "1000": True, "1100": True},
         )
 
         version, subpaths = android.GetLatestBuild(
-            self.android_package, self.bucket_url
+            self.android_package,
+            build_branch="android-branch",
+            bucket_url=self.bucket_url,
+        )
+        self.assertEqual(version, "1000")
+        self.assertDictEqual(
+            subpaths,
+            {
+                "apps": "apps1000",
+                "target_arm": "target_arm1000",
+                "target_x86": "target_x861000",
+            },
+        )
+
+    def testGetLatestBuild_defaultBranch(self):
+        """Test if default branch is used when no branch is specified."""
+        self.setupMockTarget("default-branch", "apps", {"1000": True})
+        self.setupMockTarget("default-branch", "target_arm", {"1000": True})
+        self.setupMockTarget("default-branch", "target_x86", {"1000": True})
+        self.PatchObject(
+            android,
+            "GetAndroidBranchForPackage",
+            return_value="default-branch",
+        )
+
+        version, subpaths = android.GetLatestBuild(
+            self.android_package,
+            bucket_url=self.bucket_url,
         )
         self.assertEqual(version, "1000")
         self.assertDictEqual(
@@ -311,13 +341,14 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
 
     def testCopyToArcBucket(self):
         """Test copying of images to ARC bucket."""
-        self.setupMockTarget("apps", {"1000": True})
-        self.setupMockTarget("target_arm", {"1000": True})
-        self.setupMockTarget("target_x86", {"1000": True})
+        self.setupMockTarget("android-branch", "apps", {"1000": True})
+        self.setupMockTarget("android-branch", "target_arm", {"1000": True})
+        self.setupMockTarget("android-branch", "target_x86", {"1000": True})
 
         android.CopyToArcBucket(
             self.bucket_url,
             self.android_package,
+            "android-branch",
             "1000",
             {
                 "apps": "apps1000",

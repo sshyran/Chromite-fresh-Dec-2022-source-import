@@ -205,7 +205,7 @@ def GetAndroidPackageDir(
 
 
 def GetAndroidBranchForPackage(android_package: str) -> str:
-    """Returns the corresponding Android branch of given Android package.
+    """Returns the default Android branch of given Android package.
 
     Args:
         android_package: the Android package name e.g. 'android-vm-rvc'
@@ -252,6 +252,7 @@ def GetAllAndroidEbuildTargets() -> Iterable[str]:
 
 def IsBuildIdValid(
     android_package: str,
+    build_branch: str,
     build_id: str,
     bucket_url: str = ANDROID_BUCKET_URL,
 ) -> Optional[dict]:
@@ -262,6 +263,7 @@ def IsBuildIdValid(
 
     Args:
         android_package: The Android package to check for.
+        build_branch: The Android build branch.
         build_id: A string. The Android build id number to check.
         bucket_url: URL of Android build gs bucket
 
@@ -269,7 +271,6 @@ def IsBuildIdValid(
         Returns subpaths dictionary if build_id is valid.
         None if the build_id is not valid.
     """
-    build_branch = GetAndroidBranchForPackage(android_package)
     targets = ARTIFACTS_TO_COPY[android_package]
     gs_context = gs.GSContext()
     subpaths_dict = {}
@@ -317,19 +318,21 @@ def IsBuildIdValid(
 
 def GetLatestBuild(
     android_package: str,
+    build_branch: Optional[str] = None,
     bucket_url: str = ANDROID_BUCKET_URL,
 ) -> Union[Tuple[None, None], Tuple[str, dict]]:
     """Searches the gs bucket for the latest green build.
 
     Args:
         android_package: The Android package to find latest build for.
+        build_branch: The Android build branch.
         bucket_url: URL of Android build gs bucket
 
     Returns:
         Tuple of (latest version string, subpaths dictionary)
         If no latest build can be found, returns None, None
     """
-    build_branch = GetAndroidBranchForPackage(android_package)
+    build_branch = build_branch or GetAndroidBranchForPackage(android_package)
     targets = ARTIFACTS_TO_COPY[android_package]
     gs_context = gs.GSContext()
     common_build_ids = None
@@ -363,7 +366,9 @@ def GetLatestBuild(
 
     # Otherwise, find the most recent one that is valid.
     for build_id in sorted(common_build_ids, key=int, reverse=True):
-        subpaths = IsBuildIdValid(android_package, build_id, bucket_url)
+        subpaths = IsBuildIdValid(
+            android_package, build_branch, build_id, bucket_url
+        )
         if subpaths:
             return build_id, subpaths
 
@@ -394,6 +399,7 @@ def _GetAcl(target: str, package_dir: str) -> str:
 def CopyToArcBucket(
     android_bucket_url: str,
     android_package: str,
+    build_branch: str,
     build_id: str,
     subpaths: Dict[str, str],
     arc_bucket_url: str,
@@ -407,12 +413,12 @@ def CopyToArcBucket(
     Args:
         android_bucket_url: URL of Android build gs bucket
         android_package: The Android package to copy artifacts for.
+        build_branch: The Android build branch.
         build_id: A string. The Android build id number to check.
         subpaths: Subpath dictionary for each build to copy.
         arc_bucket_url: URL of the target ARC build gs bucket
         package_dir: Path to the Android portage package.
     """
-    build_branch = GetAndroidBranchForPackage(android_package)
     targets = ARTIFACTS_TO_COPY[android_package]
     gs_context = gs.GSContext()
     for target, pattern in targets.items():
@@ -510,16 +516,23 @@ def MirrorArtifacts(
     Returns:
         Mirrored version.
     """
+    android_build_branch = GetAndroidBranchForPackage(android_package)
+
     if version:
-        subpaths = IsBuildIdValid(android_package, version, android_bucket_url)
+        subpaths = IsBuildIdValid(
+            android_package, android_build_branch, version, android_bucket_url
+        )
         if not subpaths:
             logging.error("Requested build %s is not valid", version)
     else:
-        version, subpaths = GetLatestBuild(android_package, android_bucket_url)
+        version, subpaths = GetLatestBuild(
+            android_package, android_build_branch, android_bucket_url
+        )
 
     CopyToArcBucket(
         android_bucket_url,
         android_package,
+        android_build_branch,
         version,
         subpaths,
         arc_bucket_url,
