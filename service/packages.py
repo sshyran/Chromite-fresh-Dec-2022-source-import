@@ -1128,6 +1128,38 @@ def uprev_crosvm(_build_targets, refs, _chroot):
     return result
 
 
+@uprevs_versioned_package("chromeos-base/ti50-emulator")
+def uprev_ti50_emulator(_build_targets, refs, _chroot):
+    """Updates ti50-emulator ebuilds to latest revision
+
+    ti50-emulator is not versioned. We are updating to the latest commit on the
+    main branch.
+
+    See: uprev_versioned_package.
+
+    Returns:
+        UprevVersionedPackageResult: The result of updating ti50-emulator
+            ebuild.
+    """
+    overlay = os.path.join(
+        constants.SOURCE_ROOT, constants.CHROMEOS_OVERLAY_DIR
+    )
+
+    # The ti50-emulator will touch multiple repos.
+    manifest = git.ManifestCheckout.Cached(constants.SOURCE_ROOT)
+
+    uprev_manager = uprev_lib.UprevOverlayManager([overlay], manifest)
+    uprev_manager.uprev(
+        package_list=["chromeos-base/ti50-emulator"],
+        force=True,
+    )
+
+    updated_files = uprev_manager.modified_ebuilds
+    result = uprev_lib.UprevVersionedPackageResult()
+    result.add_result(refs[-1].revision, updated_files)
+    return result
+
+
 def get_best_visible(
     atom: str, build_target: Optional["build_target_lib.BuildTarget"] = None
 ) -> package_info.PackageInfo:
