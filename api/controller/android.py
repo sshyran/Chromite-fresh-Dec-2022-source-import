@@ -44,7 +44,10 @@ def _GetLatestBuildResponse(_input_proto, output_proto, _config):
 @validate.require("android_package")
 @validate.validation_complete
 def GetLatestBuild(input_proto, output_proto, _config):
-    build_id, _ = android.GetLatestBuild(input_proto.android_package)
+    build_id, _ = android.GetLatestBuild(
+        input_proto.android_package,
+        build_branch=input_proto.android_build_branch,
+    )
     output_proto.android_version = build_id
 
 
