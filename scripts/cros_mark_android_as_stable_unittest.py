@@ -165,6 +165,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
             self.android_package,
             android_version,
             package_dir,
+            self.android_branch,
             self.arc_bucket_url,
             self.runtime_artifacts_bucket_url,
         )
@@ -295,6 +296,8 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
             [
                 "--android_bucket_url",
                 android_bucket_url,
+                "--android_build_branch",
+                self.android_branch,
                 "--android_package",
                 self.android_package,
                 "--arc_bucket_url",
@@ -312,6 +315,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
         mock_mirror_artifacts.assert_called_once_with(
             self.android_package,
             android_bucket_url,
+            self.android_branch,
             self.arc_bucket_url,
             self.mock_android_dir,
             android_version,
@@ -345,6 +349,8 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
             [
                 "--android_bucket_url",
                 android_bucket_url,
+                "--android_build_branch",
+                self.android_branch,
                 "--android_package",
                 self.android_package,
                 "--arc_bucket_url",
@@ -362,6 +368,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
         mock_mirror_artifacts.assert_called_once_with(
             self.android_package,
             android_bucket_url,
+            self.android_branch,
             self.arc_bucket_url,
             self.mock_android_dir,
             android_version,

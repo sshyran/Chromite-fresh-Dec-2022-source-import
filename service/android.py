@@ -493,6 +493,7 @@ def CopyToArcBucket(
 def MirrorArtifacts(
     android_package: str,
     android_bucket_url: str,
+    android_build_branch: str,
     arc_bucket_url: str,
     package_dir: str,
     version: Optional[str] = None,
@@ -508,6 +509,7 @@ def MirrorArtifacts(
     Args:
         android_package: The Android package to mirror artifacts for.
         android_bucket_url: URL of Android build gs bucket
+        android_build_branch: The Android build branch.
         arc_bucket_url: URL of the target ARC build gs bucket
         package_dir: Path to the Android portage package.
         version: A string. The Android build id number to check.
@@ -516,8 +518,6 @@ def MirrorArtifacts(
     Returns:
         Mirrored version.
     """
-    android_build_branch = GetAndroidBranchForPackage(android_package)
-
     if version:
         subpaths = IsBuildIdValid(
             android_package, android_build_branch, version, android_bucket_url
