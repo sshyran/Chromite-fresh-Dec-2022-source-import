@@ -203,9 +203,15 @@ def main():
     data = json.loads(text)
     external_trunk_path = sys.argv[1]
     if not os.path.exists(external_trunk_path):
-        raise Exception(f"{external_trunk_path} should be trunk path")
+        # The external_trunk_path points to the chromiumos trunk path *outside* chroot,
+        # and it may not exist inside chroot, where the script is run (b:259342928).
+        # We still show a warning here for debuggability because the path usually exists.
+        print(
+            f"{external_trunk_path} does not exist inside chroot",
+            file=sys.stderr,
+        )
     indent = detect_indent.detect_indentation(text)
-    json.dump(generate(data, sys.argv[1]), sys.stdout, indent=indent)
+    json.dump(generate(data, external_trunk_path), sys.stdout, indent=indent)
 
 
 if __name__ == "__main__":
