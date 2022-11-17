@@ -923,8 +923,8 @@ def _CreateParser(sdk_latest_version, bootstrap_latest_version):
         "--create",
         action="store_true",
         default=False,
-        help="Create the chroot only if it does not already exist.  "
-        "Implies --download.",
+        help="Create the chroot only if it does not already exist. Downloads "
+        "the SDK only if needed, even if --download explicitly passed.",
     )
     group.add_argument(
         "--bootstrap",
@@ -1418,6 +1418,7 @@ snapshots will be unavailable)."""
         cbuildbot_alerts.PrintBuildbotStepText(sdk_version)
 
     # Based on selections, determine the tarball to fetch.
+    urls = []
     if options.download:
         if options.sdk_url:
             urls = [options.sdk_url]
@@ -1458,10 +1459,6 @@ snapshots will be unavailable)."""
                 # Wipe and continue.
                 osutils.RmDir(src)
 
-        if options.download:
-            lock.write_lock()
-            sdk_tarball = FetchRemoteTarballs(sdk_cache, urls)
-
         mounted = False
         if options.create:
             lock.write_lock()
@@ -1471,6 +1468,7 @@ snapshots will be unavailable)."""
             if cros_sdk_lib.IsChrootReady(options.chroot):
                 logging.debug("Chroot already exists.  Skipping creation.")
             else:
+                sdk_tarball = FetchRemoteTarballs(sdk_cache, urls)
                 cros_sdk_lib.CreateChroot(
                     Path(options.chroot),
                     Path(sdk_tarball),
@@ -1479,6 +1477,10 @@ snapshots will be unavailable)."""
                     chroot_upgrade=options.chroot_upgrade,
                 )
                 mounted = True
+        elif options.download:
+            # Allow downloading only.
+            lock.write_lock()
+            FetchRemoteTarballs(sdk_cache, urls)
 
         if options.enter:
             lock.read_lock()
