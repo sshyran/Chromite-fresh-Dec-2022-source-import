@@ -2406,13 +2406,8 @@ def BranchScheduleConfig():
             "release-R102-14695.B",
             [],
             "chell-chrome-no-afdo-uprev-pre-flight-branch",
-            ["orderfile-generate-toolchain", "orderfile-verify-toolchain"],
-            [
-                "benchmark-afdo-generate",
-                "chrome-silvermont-release-afdo-verify",
-                "chrome-airmont-release-afdo-verify",
-                "chrome-broadwell-release-afdo-verify",
-            ],
+            [],
+            [],
             config_lib.LUCI_BUILDER_LTS_RELEASE,
         ),
     ]
