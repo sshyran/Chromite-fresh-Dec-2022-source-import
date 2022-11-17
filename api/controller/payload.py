@@ -143,6 +143,5 @@ def _SetGeneratePayloadOutputProto(
         local_path: set output_proto with the local path, or ''.
         remote_uri: set output_proto with the remote uri, or ''.
     """
-    output_proto.success = True
     output_proto.local_path = local_path or ""
     output_proto.remote_uri = remote_uri or ""
