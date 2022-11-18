@@ -228,16 +228,15 @@ class ChromeLKGMCommitter(object):
 
     def UpdateLKGM(self):
         """Updates the LKGM file with the new version."""
+        if self._dryrun:
+            self._lkgm = "9999999.99.99"
+            logging.info("dry run, using version %s", self._lkgm)
+
         if chromeos_version.VersionInfo(self._lkgm) <= self.GetCurrentLKGM():
-            error_text = (
+            raise LKGMNotValid(
                 f"LKGM version ({self._lkgm}) is not newer than current version"
                 f" ({self.GetCurrentLKGM().VersionString()})."
             )
-            if self._dryrun:
-                logging.warning(error_text)
-                logging.warning("dry run, so continuing anyways...")
-            else:
-                raise LKGMNotValid(error_text)
 
         logging.info(
             "Updating LKGM version: %s (was %s),",
