@@ -11609,6 +11609,15 @@
       "models": [
         {
           "board_name": "skyrim",
+          "name": "frostflow",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7218,
+          "is_active": true,
+          "is_experimental": false
+        },
+        {
+          "board_name": "skyrim",
           "name": "skyrim15w",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -11665,6 +11674,15 @@
       "builder": "RELEASE",
       "experimental": true,
       "models": [
+        {
+          "board_name": "skyrim-chausie",
+          "name": "frostflow",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7219,
+          "is_active": true,
+          "is_experimental": false
+        },
         {
           "board_name": "skyrim-chausie",
           "name": "skyrim15w",
