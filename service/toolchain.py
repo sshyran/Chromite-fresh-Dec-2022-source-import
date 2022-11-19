@@ -158,7 +158,6 @@ class BuildLinter:
                     preserve_env=True,
                     extra_env=extra_env,
                 )
-
         if platform2_packages:
             if use_clippy:
                 extra_env["ENABLE_RUST_CLIPPY"] = "1"
@@ -422,53 +421,32 @@ class BuildLinter:
         cros_build_lib.AssertInsideChroot()
 
         findings = []
-        base_dir = Path(self.sysroot) / BuildLinter.BASE_DIR
-        for dirpath, _, files in os.walk(base_dir):
-            # Golang lint files for a specific package are stored in:
-            # <base_dir>/category/package/linting_output/go_lint.
-            # We only fetch lints for the packages that were emerged.
-            if self.packages:
-                for pkg_atom in self.package_atoms:
-                    if Path(dirpath).match(
-                        f"{base_dir}/{pkg_atom}-*/linting_output/go_lint"
-                    ):
-                        findings.extend(
-                            list(self._parse_golint_files(dirpath, files))
-                        )
-            else:
-                if Path(dirpath).match(
-                    f"{base_dir}/*/*/linting_output/go_lint"
-                ):
-                    findings.extend(
-                        list(self._parse_golint_files(dirpath, files))
-                    )
+        for files in self._fetch_from_linting_artifacts("go_lint").values():
+            findings.extend(list(self._parse_golint_files(files)))
 
         return findings
 
-    def _parse_golint_files(
-        self, dirpath: Text, files: List[Text]
-    ) -> Iterable[LinterFinding]:
+    def _parse_golint_files(self, files: List[Text]) -> Iterable[LinterFinding]:
         """Parse files in the given directory for Golint lints."""
         packages_seen = set()
 
         # Sort files based on the timestamp appended to the file name
         files.sort(reverse=True, key=self._get_sorting_key)
 
-        for file_name in files:
-            package_match = BuildLinter.GOLINT_PKG_PATTERN.search(file_name)
+        for file_path in files:
+            package_match = BuildLinter.GOLINT_PKG_PATTERN.search(file_path)
             if not package_match:
                 # File names are created using the package name,
                 # so package_match should not be None
                 raise ParsingError(
-                    f"Could not parse package name from {file_name}"
+                    f"Could not parse package name from {file_path}"
                 )
 
             package_name = package_match.group(1)
             if package_name in packages_seen:
                 continue
 
-            file_path = Path(dirpath) / file_name
-            with file_path.open(encoding="utf-8") as diagnostics:
+            with Path(file_path).open(encoding="utf-8") as diagnostics:
                 file_contents = diagnostics.readlines()
 
             # Lines should be formatted as <file>:<line>:<column>: <message>
@@ -502,6 +480,24 @@ class BuildLinter:
                 )
 
             packages_seen.add(package_name)
+
+    def _fetch_from_linting_artifacts(self, subdir) -> Dict[Text, List[Text]]:
+        """Get file from emerge artifact directory."""
+        cros_build_lib.AssertInsideChroot()
+        findings = {}
+        base_dir = Path(self.sysroot) / BuildLinter.BASE_DIR
+        for dirpath, _, files in os.walk(base_dir):
+            path = Path(dirpath)
+            if path.match(f"{base_dir}/*/*/linting_output/{subdir}"):
+                package_path = path.parent.parent
+                category = path.parent.name
+                package = package_path.name.rsplit("-", 1)[0]
+                package_atom = f"{category}/{package}"
+
+                if not self.packages or package_atom in self.package_atoms:
+                    findings[package_atom] = files
+
+        return findings
 
     def _get_sorting_key(self, file_name: Text) -> int:
         """Returns integer value of timestamp used to sort Golint files."""
