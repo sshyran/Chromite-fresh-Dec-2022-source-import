@@ -213,7 +213,11 @@ GROUP_BASELINE = dict(
             users={"root", "vpn", "chronos", "chaps", "wpa", "attestation"},
         ),
         GroupEntry(group="wpa", gid=219, users={"root"}),
-        GroupEntry(group="input", gid=222, users={"cras", "power", "chronos"}),
+        GroupEntry(
+            group="input",
+            gid=222,
+            users={"cras", "power", "chronos", "healthd_evdev"},
+        ),
         GroupEntry(group="dhcp", gid=224, users={"shill"}),
         GroupEntry(group="brltty", gid=240, users={"chronos"}),
         GroupEntry(group="modem", gid=241, users={"shill"}),
