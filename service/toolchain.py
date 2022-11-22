@@ -345,13 +345,17 @@ class BuildLinter:
                     logging.exception(invocation_result)
                     continue
                 meta, complaints = invocation_result
-                assert not meta.exit_code, (
-                    f"Invoking clang-tidy on {meta.lint_target} with flags "
-                    f"{meta.invocation} exited with code {meta.exit_code}; "
-                    f"output:\n{meta.stdstreams}"
-                )
+                if meta.exit_code:
+                    logging.warning(
+                        "Invoking clang-tidy on %s with flags %s exited with "
+                        "code %s; output:\n%s",
+                        meta.lint_target,
+                        meta.invocation,
+                        meta.exit_code,
+                        meta.stdstreams,
+                    )
+                    continue
                 diagnostics.update(complaints)
-
         diagnostics = tricium_clang_tidy.filter_tidy_lints(
             None, None, diagnostics
         )
