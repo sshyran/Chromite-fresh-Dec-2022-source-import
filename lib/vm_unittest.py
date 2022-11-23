@@ -303,7 +303,7 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
                 "-f",
                 "qcow2",
                 "-o",
-                "backing_file=%s" % initial_img_path,
+                "backing_file=%s,backing_fmt=raw" % initial_img_path,
                 os.path.join(self._vm.vm_dir, "qcow2.img"),
             ]
         )

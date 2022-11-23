@@ -245,7 +245,7 @@ class VM(device.Device):
             "-f",
             "qcow2",
             "-o",
-            "backing_file=%s" % self.image_path,
+            "backing_file=%s,backing_fmt=raw" % self.image_path,
             cow_image_path,
         ]
         cros_build_lib.run(qemu_img_args, dryrun=self.dryrun)
