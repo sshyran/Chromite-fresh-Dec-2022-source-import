@@ -9,6 +9,8 @@ with Clang Tidy and Rust with Cargo Clippy for all packages within platform2.
 """
 
 import json
+import os
+from pathlib import Path
 import sys
 from typing import List, Text
 
@@ -130,14 +132,25 @@ def json_format_lint(lint: toolchain.LinterFinding) -> Text:
     return json.dumps(_dictify(lint))
 
 
+def get_all_sysroots() -> List[Text]:
+    """Gets all available sysroots for both host and boards."""
+    host_root = Path(build_target_lib.BuildTarget(None).root)
+    roots = [str(host_root)]
+    build_dir = host_root / "build"
+    for board in os.listdir(build_dir):
+        if board != "bin":
+            board_root = build_dir / board
+            if board_root.is_dir():
+                roots.append(str(board_root))
+    return roots
+
+
 def get_arg_parser() -> commandline.ArgumentParser:
     """Creates an argument parser for this script."""
     default_board = cros_build_lib.GetDefaultBoard()
     parser = commandline.ArgumentParser(description=__doc__)
 
-    board_group = parser.add_mutually_exclusive_group(
-        required=not default_board
-    )
+    board_group = parser.add_mutually_exclusive_group()
     board_group.add_argument(
         "-b",
         "--board",
@@ -149,12 +162,11 @@ def get_arg_parser() -> commandline.ArgumentParser:
     board_group.add_argument(
         "--host", action="store_true", help="emerge for host instead of board."
     )
-    board_group.add_argument(
+    parser.add_argument(
         "--fetch-only",
         action="store_true",
         help="Fetch lints from previous run without reseting or calling emerge.",
     )
-
     parser.add_argument(
         "--differential",
         action="store_true",
@@ -188,6 +200,11 @@ def get_arg_parser() -> commandline.ArgumentParser:
         help="Disable golint linter.",
     )
     parser.add_argument(
+        "--iwyu",
+        action="store_true",
+        help="Enable include-what-you-use linter.",
+    )
+    parser.add_argument(
         "packages",
         nargs="*",
         help="package(s) to emerge and retrieve lints for",
@@ -203,9 +220,13 @@ def parse_args(argv: List[str]):
 
     # A package must be specified unless we are in fetch-only mode
     if not (opts.fetch_only or opts.packages):
-        parser.error("Emerge requires specified package(s).")
+        parser.error("Emerge mode requires specified package(s).")
     if opts.fetch_only and opts.packages:
         parser.error("Cannot specify packages for fetch-only mode.")
+
+    # A board must be specified unless we are in fetch-only mode
+    if not (opts.fetch_only or opts.board or opts.host):
+        parser.error("Emerge mode requires either --board or --host.")
 
     return opts
 
@@ -227,16 +248,27 @@ def main(argv: List[str]) -> None:
             packages, build_target.root, opts.differential
         )
         if opts.fetch_only:
-            lints = build_linter.fetch_findings(
-                use_clippy=opts.clippy,
-                use_tidy=opts.tidy,
-                use_golint=opts.golint,
-            )
+            if opts.host or opts.board:
+                roots = [build_target.root]
+            else:
+                roots = get_all_sysroots()
+            lints = []
+            for root in roots:
+                build_linter.sysroot = root
+                lints.extend(
+                    build_linter.fetch_findings(
+                        use_clippy=opts.clippy,
+                        use_tidy=opts.tidy,
+                        use_golint=opts.golint,
+                        use_iwyu=opts.iwyu,
+                    )
+                )
         else:
             lints = build_linter.emerge_with_linting(
                 use_clippy=opts.clippy,
                 use_tidy=opts.tidy,
                 use_golint=opts.golint,
+                use_iwyu=opts.iwyu,
             )
 
     if opts.json:
