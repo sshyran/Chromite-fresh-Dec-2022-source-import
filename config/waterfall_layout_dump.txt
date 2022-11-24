@@ -229,7 +229,6 @@
     scarlet-release
     senor-release
     sentry-release
-    shotzo-release
     skyrim-chausie-release
     skyrim-kernelnext-release
     skyrim-release
@@ -1068,7 +1067,6 @@
     scarlet-release-tryjob
     senor-release-tryjob
     sentry-release-tryjob
-    shotzo-release-tryjob
     skyrim-chausie-release-tryjob
     skyrim-kernelnext-release-tryjob
     skyrim-release-tryjob
@@ -1271,11 +1269,6 @@
   sentry-payloads-tryjob
   sentry-release-tryjob
   shotzo-factory-dedede-13683.B-factorybranch-tryjob
-  shotzo-full-tryjob
-  shotzo-llvm-next-toolchain-tryjob
-  shotzo-llvm-toolchain-tryjob
-  shotzo-payloads-tryjob
-  shotzo-release-tryjob
   skyrim-chausie-full-tryjob
   skyrim-chausie-llvm-next-toolchain-tryjob
   skyrim-chausie-llvm-toolchain-tryjob
