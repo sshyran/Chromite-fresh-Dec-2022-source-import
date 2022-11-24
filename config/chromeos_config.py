@@ -1117,7 +1117,7 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
         (DAILY, "factory-trogdor-15210.B", ["trogdor", "strongbad"]),
         (DAILY, "factory-strongbad-13963.B", ["trogdor", "strongbad"]),
         (WEEKLY, "factory-volteer-13600.B", ["volteer"]),
-        (WEEKLY, "factory-dedede-13683.B", ["dedede", "shotzo"]),
+        (WEEKLY, "factory-dedede-13683.B", ["dedede"]),
         (TRIGGERED, "factory-keeby-14162.B", ["keeby"]),
         (WEEKLY, "factory-zork-13700.B", ["zork"]),
         (WEEKLY, "factory-puff-13813.B", ["puff"]),
@@ -1939,13 +1939,6 @@ def ApplyCustomOverrides(site_config):
         },
         "corsola-release": {
             "sign_types": ["recovery", "factory"],
-        },
-        "shotzo-release": {
-            "sign_types": ["recovery", "factory"],
-            # Shotzo has no DUTs in the lab (b/236920312).
-            "hw_tests": [],
-            "hw_tests_override": [],
-            "hw_tests_disabled_bug": "b/236920312",
         },
         "geralt-release": {
             "sign_types": ["recovery", "factory"],

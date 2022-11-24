@@ -20,7 +20,6 @@
     corsola-factory-corsola-15196.B-factorybranch
   factory-dedede-13683.B-buildspec
     dedede-factory-dedede-13683.B-factorybranch
-    shotzo-factory-dedede-13683.B-factorybranch
   factory-drallion-13080.B-buildspec
     drallion-factory-drallion-13080.B-factorybranch
   factory-endeavour-13295.B-buildspec
@@ -595,7 +594,6 @@
     corsola-factory-corsola-15196.B-factorybranch-tryjob
   factory-dedede-13683.B-buildspec-tryjob
     dedede-factory-dedede-13683.B-factorybranch-tryjob
-    shotzo-factory-dedede-13683.B-factorybranch-tryjob
   factory-drallion-13080.B-buildspec-tryjob
     drallion-factory-drallion-13080.B-factorybranch-tryjob
   factory-endeavour-13295.B-buildspec-tryjob
@@ -1268,7 +1266,6 @@
   sentry-llvm-toolchain-tryjob
   sentry-payloads-tryjob
   sentry-release-tryjob
-  shotzo-factory-dedede-13683.B-factorybranch-tryjob
   skyrim-chausie-full-tryjob
   skyrim-chausie-llvm-next-toolchain-tryjob
   skyrim-chausie-llvm-toolchain-tryjob
