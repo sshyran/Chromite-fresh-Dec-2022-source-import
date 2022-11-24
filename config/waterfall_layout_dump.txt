@@ -1397,6 +1397,11 @@
   veyron_speedy-llvm-toolchain-tryjob
   veyron_speedy-payloads-tryjob
   veyron_speedy-release-tryjob
+  viking-arm64-full-tryjob
+  viking-arm64-llvm-next-toolchain-tryjob
+  viking-arm64-llvm-toolchain-tryjob
+  viking-arm64-rapid
+  viking-arm64-release-tryjob
   viking-full-tryjob
   viking-llvm-next-toolchain-tryjob
   viking-llvm-toolchain-tryjob

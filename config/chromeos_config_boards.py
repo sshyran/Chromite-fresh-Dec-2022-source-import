@@ -33,6 +33,7 @@ arm_internal_release_boards = frozenset(
         "veyron_minnie",
         "veyron_speedy",
         "viking",
+        "viking-arm64",
         "viking-poc2",
         "whirlwind",
     ]
@@ -105,6 +106,7 @@ wshwos_boards = frozenset(
     [
         "littlejoe",
         "viking",
+        "viking-arm64",
         "viking-poc2",
     ]
 )

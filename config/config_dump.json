@@ -25232,6 +25232,223 @@
     "suite_scheduling": false,
     "vm_tests_override": null
   },
+  "viking-arm64-full": {
+    "_template": "full",
+    "boards": [
+      "viking-arm64"
+    ],
+    "chrome_sdk": false,
+    "factory": false,
+    "factory_install_netboot": false,
+    "factory_toolkit": false,
+    "hw_tests_override": [],
+    "image_test": false,
+    "images": [
+      "base",
+      "test"
+    ],
+    "prebuilts": "public",
+    "run_cpeexport": true,
+    "sync_chrome": false,
+    "upload_hw_test_artifacts": false,
+    "useflags": [
+      "-chrome_internal"
+    ],
+    "vm_tests": []
+  },
+  "viking-arm64-full-tryjob": {
+    "_template": "full",
+    "boards": [
+      "viking-arm64"
+    ],
+    "chrome_sdk": false,
+    "debug": true,
+    "display_label": "tryjob",
+    "factory": false,
+    "factory_install_netboot": false,
+    "factory_toolkit": false,
+    "hw_tests_override": null,
+    "image_test": false,
+    "images": [
+      "base",
+      "test"
+    ],
+    "luci_builder": "Try",
+    "prebuilts": "public",
+    "run_cpeexport": true,
+    "sync_chrome": false,
+    "upload_hw_test_artifacts": false,
+    "useflags": [
+      "-chrome_internal"
+    ],
+    "vm_tests": []
+  },
+  "viking-arm64-llvm-next-toolchain": {
+    "_template": "llvm_next_toolchain",
+    "boards": [
+      "viking-arm64"
+    ],
+    "chrome_sdk": false,
+    "factory": false,
+    "factory_install_netboot": false,
+    "factory_toolkit": false,
+    "hw_tests": [],
+    "hw_tests_override": [],
+    "image_test": false,
+    "images": [
+      "base",
+      "test"
+    ],
+    "sync_chrome": false,
+    "upload_hw_test_artifacts": false
+  },
+  "viking-arm64-llvm-next-toolchain-tryjob": {
+    "_template": "llvm_next_toolchain",
+    "boards": [
+      "viking-arm64"
+    ],
+    "chrome_sdk": false,
+    "debug": true,
+    "display_label": "tryjob",
+    "factory": false,
+    "factory_install_netboot": false,
+    "factory_toolkit": false,
+    "hw_tests": [],
+    "hw_tests_override": null,
+    "image_test": false,
+    "images": [
+      "base",
+      "test"
+    ],
+    "luci_builder": "Try",
+    "sync_chrome": false,
+    "upload_hw_test_artifacts": false
+  },
+  "viking-arm64-llvm-toolchain": {
+    "_template": "llvm_toolchain",
+    "boards": [
+      "viking-arm64"
+    ],
+    "chrome_sdk": false,
+    "factory": false,
+    "factory_install_netboot": false,
+    "factory_toolkit": false,
+    "hw_tests": [],
+    "hw_tests_override": [],
+    "image_test": false,
+    "images": [
+      "base",
+      "test"
+    ],
+    "sync_chrome": false,
+    "upload_hw_test_artifacts": false
+  },
+  "viking-arm64-llvm-toolchain-tryjob": {
+    "_template": "llvm_toolchain",
+    "boards": [
+      "viking-arm64"
+    ],
+    "chrome_sdk": false,
+    "debug": true,
+    "display_label": "tryjob",
+    "factory": false,
+    "factory_install_netboot": false,
+    "factory_toolkit": false,
+    "hw_tests": [],
+    "hw_tests_override": null,
+    "image_test": false,
+    "images": [
+      "base",
+      "test"
+    ],
+    "luci_builder": "Try",
+    "sync_chrome": false,
+    "upload_hw_test_artifacts": false
+  },
+  "viking-arm64-rapid": {
+    "_template": "release",
+    "boards": [
+      "viking-arm64"
+    ],
+    "chrome_sdk": false,
+    "debug": true,
+    "description": "Create unsigned release image for ingestion into build tool",
+    "dev_installer_prebuilts": false,
+    "display_label": "utility",
+    "factory": false,
+    "factory_install_netboot": false,
+    "factory_toolkit": false,
+    "hw_tests": [],
+    "hw_tests_override": null,
+    "hwqual": false,
+    "image_test": false,
+    "images": [
+      "base",
+      "test"
+    ],
+    "luci_builder": "Rapid",
+    "paygen": false,
+    "push_image": false,
+    "rootfs_verification": false,
+    "signer_tests": false,
+    "suite_scheduling": false,
+    "sync_chrome": false,
+    "upload_hw_test_artifacts": false,
+    "vm_tests_override": null
+  },
+  "viking-arm64-release": {
+    "_template": "release",
+    "boards": [
+      "viking-arm64"
+    ],
+    "chrome_sdk": false,
+    "dev_installer_prebuilts": false,
+    "factory": false,
+    "factory_install_netboot": false,
+    "factory_toolkit": false,
+    "hw_tests": [],
+    "hw_tests_override": [],
+    "hwqual": false,
+    "image_test": false,
+    "images": [
+      "base",
+      "test"
+    ],
+    "paygen": false,
+    "signer_tests": false,
+    "sync_chrome": false,
+    "upload_hw_test_artifacts": false,
+    "vm_tests_override": null
+  },
+  "viking-arm64-release-tryjob": {
+    "_template": "release",
+    "boards": [
+      "viking-arm64"
+    ],
+    "chrome_sdk": false,
+    "debug": true,
+    "dev_installer_prebuilts": false,
+    "display_label": "tryjob",
+    "factory": false,
+    "factory_install_netboot": false,
+    "factory_toolkit": false,
+    "hw_tests": [],
+    "hw_tests_override": null,
+    "hwqual": false,
+    "image_test": false,
+    "images": [
+      "base",
+      "test"
+    ],
+    "luci_builder": "Try",
+    "paygen": false,
+    "push_image": false,
+    "signer_tests": false,
+    "suite_scheduling": false,
+    "sync_chrome": false,
+    "upload_hw_test_artifacts": false,
+    "vm_tests_override": null
+  },
   "viking-full": {
     "_template": "full",
     "boards": [
