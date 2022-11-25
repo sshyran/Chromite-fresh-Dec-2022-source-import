@@ -4671,7 +4671,8 @@
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"tarlo\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"vell\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"volmar\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"zavala\",\n  \"test_suites\": []\n}"
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"zavala\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"zydron\",\n  \"test_suites\": []\n}"
     ],
     "sign_types": [
       "recovery",
@@ -4724,7 +4725,8 @@
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"tarlo\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"vell\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"volmar\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"zavala\",\n  \"test_suites\": []\n}"
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"zavala\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"zydron\",\n  \"test_suites\": []\n}"
     ],
     "paygen": false,
     "push_image": false,
