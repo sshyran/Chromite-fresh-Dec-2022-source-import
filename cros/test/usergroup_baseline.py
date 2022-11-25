@@ -181,6 +181,7 @@ GROUP_BASELINE = dict(
                 "cdm-oemcrypto",
                 "cros_healthd",
                 "nvpd",
+                "ml-core",
             },
         ),
         GroupEntry(group="cdrw", gid=80, users={"cros-disks"}),
@@ -350,6 +351,7 @@ GROUP_BASELINE = dict(
             gid=611,
             users={"kerberosd", "shill", "system-proxy"},
         ),
+        GroupEntry(group="ml-core", gid=612, users={"ml-core", "arc-camera"}),
         GroupEntry(group="chronos", gid=1000),
         GroupEntry(
             group="chronos-access",
