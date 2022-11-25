@@ -2080,6 +2080,15 @@
           "board_id": 7230,
           "is_active": true,
           "is_experimental": false
+        },
+        {
+          "board_name": "brya-kernelnext",
+          "name": "zydron",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7230,
+          "is_active": true,
+          "is_experimental": false
         }
       ],
       "rubik_target_milestone": 108
@@ -2839,6 +2848,15 @@
           "board_id": 7248,
           "is_active": true,
           "is_experimental": false
+        },
+        {
+          "board_name": "brya-pkvm",
+          "name": "zydron",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7248,
+          "is_active": true,
+          "is_experimental": false
         }
       ],
       "rubik_target_milestone": 108,
@@ -3580,6 +3598,7 @@
           "release_builder_test_pool": "bvt",
           "board_id": 7211,
           "is_active": true,
+          "stable_target_milestone": 108,
           "is_experimental": false
         },
         {
