@@ -621,7 +621,6 @@ class BuildLinter:
         base_dir = Path(self.sysroot) / BuildLinter.BASE_DIR
         for dirpath, _, files in os.walk(base_dir):
             subdir_path = Path(dirpath)
-            print(subdir_path)
             if subdir_path.match(f"{base_dir}/*/*/linting-output/{subdir}"):
                 package_path = subdir_path.parent.parent
                 category = subdir_path.parent.name
