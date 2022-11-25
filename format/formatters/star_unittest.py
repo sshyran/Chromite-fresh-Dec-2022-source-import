@@ -10,12 +10,12 @@ from chromite.format.formatters import star
 from chromite.lib import cros_test_lib
 
 
-# None means input is already formatted to avoid having to repeat.
 @pytest.mark.parametrize(
     "fmt",
     (star.Data, star.BuildData, star.WorkspaceData, star.BzlData),
 )
 @pytest.mark.parametrize(
+    # exp=None means input is already formatted to avoid having to repeat.
     "data,exp",
     (
         ("", None),
