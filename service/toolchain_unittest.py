@@ -7,9 +7,11 @@
 
 from collections import defaultdict
 import os
+from pathlib import Path
 from typing import Dict, List, NamedTuple, Text
 
 from chromite.lib import cros_test_lib
+from chromite.lib.parser import package_info
 from chromite.service import toolchain
 
 
@@ -126,6 +128,111 @@ class BuildLinterTests(cros_test_lib.MockTempDirTestCase):
         retrieved_artifact_paths = mbl._fetch_from_linting_artifacts("linter_1")
 
         self.checkArtifacts(relevant_artifacts, retrieved_artifact_paths)
+
+    def testFetchFromLintingArtifacts(self):
+        bl = toolchain.BuildLinter(
+            [
+                package_info.parse("category0/package0"),
+                package_info.parse("category1/package1"),
+                package_info.parse("category1/package2"),
+                package_info.parse("category2/package3"),
+            ],
+            self.tempdir,
+        )
+
+        bl_no_pkg = toolchain.BuildLinter([], self.tempdir)
+
+        relevant_cases = [
+            "category1/package1/linting-output/linter1/a.out",
+            "category1/package1/linting-output/linter1/b.json",
+            "category1/package1/linting-output/linter1/c",
+            "category1/package2/linting-output/linter1/a.out",
+            "category1/package2/linting-output/linter1/b.json",
+            "category1/package2/linting-output/linter1/c",
+            "category2/package3/linting-output/linter1/a.out",
+            "category2/package3/linting-output/linter1/b.json",
+            "category2/package3/linting-output/linter1/c",
+        ]
+
+        irrelevant_cases = [
+            "category3/package1/linting-output/linter1/a.out",
+            "category4/package2/linting-output/linter1/a.out",
+            "category2/package5/linting-output/linter1/a.out",
+            "category2/package6/linting-output/linter1/a.out",
+            "category1/package1/linting-output/linter2/a.out",
+            "category1/package2/linting-output/linter2/a.out",
+            "category2/package3/linting-output/linter3/a.out",
+            "category2/package4/linting-output/linter4/a.out",
+        ]
+
+        root = Path(self.tempdir) / "var/lib/chromeos/package-artifacts"
+
+        expected_results = {
+            "category1/package1": [
+                f"{str(root)}/category1/package1/linting-output/linter1/a.out",
+                f"{str(root)}/category1/package1/linting-output/linter1/b.json",
+                f"{str(root)}/category1/package1/linting-output/linter1/c",
+            ],
+            "category1/package2": [
+                f"{str(root)}/category1/package2/linting-output/linter1/a.out",
+                f"{str(root)}/category1/package2/linting-output/linter1/b.json",
+                f"{str(root)}/category1/package2/linting-output/linter1/c",
+            ],
+            "category2/package3": [
+                f"{str(root)}/category2/package3/linting-output/linter1/a.out",
+                f"{str(root)}/category2/package3/linting-output/linter1/b.json",
+                f"{str(root)}/category2/package3/linting-output/linter1/c",
+            ],
+        }
+
+        additional_no_pkg_results = {
+            "category3/package1": [
+                f"{str(root)}/category3/package1/linting-output/linter1/a.out"
+            ],
+            "category4/package2": [
+                f"{str(root)}/category4/package2/linting-output/linter1/a.out"
+            ],
+            "category2/package5": [
+                f"{str(root)}/category2/package5/linting-output/linter1/a.out"
+            ],
+            "category2/package6": [
+                f"{str(root)}/category2/package6/linting-output/linter1/a.out"
+            ],
+        }
+
+        expected_no_pkg_results = dict(
+            expected_results, **additional_no_pkg_results
+        )
+
+        for case in relevant_cases + irrelevant_cases:
+            test_path = root / case
+            test_path.parent.mkdir(parents=True, exist_ok=True)
+            test_path.touch()
+
+        # pylint: disable=protected-access
+        actual_results = bl._fetch_from_linting_artifacts("linter1")
+        self.assertDictEqual(expected_results, actual_results)
+
+        no_pkg_results = bl_no_pkg._fetch_from_linting_artifacts("linter1")
+        self.assertDictEqual(expected_no_pkg_results, no_pkg_results)
+
+    def testGetPackageForArtifactDir(self):
+        bl = toolchain.BuildLinter([], "")
+
+        test_cases = [
+            ("category1", "package1", "linter1", "category1/package1"),
+            ("category1", "package2", "linter2", "category1/package2"),
+            ("category2", "package1", "linter3", "category2/package1"),
+            ("category3", "package3", "linter4", "category3/package3"),
+        ]
+
+        root = Path(self.tempdir) / "var/lib/chromeos/package-artifacts"
+        for case in test_cases:
+            test_path = root / case[0] / case[1] / "linting-output" / case[2]
+            expected_result = case[3]
+            # pylint: disable=protected-access
+            actual_result = bl._get_package_for_artifact_dir(test_path)
+            self.assertEqual(expected_result, actual_result)
 
     def testParseIWYUFiles(self):
         mbl = MockBuildLinter(self.tempdir)

@@ -622,16 +622,20 @@ class BuildLinter:
         for dirpath, _, files in os.walk(base_dir):
             subdir_path = Path(dirpath)
             if subdir_path.match(f"{base_dir}/*/*/linting-output/{subdir}"):
-                package_path = subdir_path.parent.parent
-                category = subdir_path.parent.name
-                package = package_path.name.rsplit("-", 1)[0]
-                package_atom = f"{category}/{package}"
-
+                package_atom = self._get_package_for_artifact_dir(subdir_path)
                 if not self.packages or package_atom in self.package_atoms:
-                    full_paths = [(subdir_path / file) for file in files]
-                    findings[package_atom] = full_paths
+                    full_paths = [str(subdir_path / file) for file in files]
+                    findings[package_atom] = sorted(full_paths)
 
         return findings
+
+    def _get_package_for_artifact_dir(self, artifact_dir: Path) -> Text:
+        """Gets the package atom for an artifact subdirectory."""
+        package_path = artifact_dir.parent.parent
+        category = package_path.parent.name
+        package = package_path.name.rsplit("-", 1)[0]
+        package_atom = f"{category}/{package}"
+        return package_atom
 
     def _get_sorting_key(self, file_name: Text) -> int:
         """Returns integer value of timestamp used to sort Golint files."""
