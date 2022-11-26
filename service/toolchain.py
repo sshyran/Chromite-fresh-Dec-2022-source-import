@@ -62,9 +62,9 @@ class LinterFinding(NamedTuple):
 
     name: str
     message: str
-    locations: List[CodeLocation]
+    locations: Tuple[CodeLocation]
     linter: str
-    suggested_fixes: List[SuggestedFix]
+    suggested_fixes: Tuple[SuggestedFix]
 
 
 class BuildLinter:
@@ -327,9 +327,9 @@ class BuildLinter:
             findings_tuples.append(
                 LinterFinding(
                     message=finding.message,
-                    locations=locations,
+                    locations=tuple(locations),
                     linter="cargo_clippy",
-                    suggested_fixes=[],
+                    suggested_fixes=(),
                     # FIXME(b/244362509): Extend more details support to Rust
                     name="",
                 )
@@ -417,8 +417,8 @@ class BuildLinter:
             finding = LinterFinding(
                 name=diag.diag_name,
                 message=diag.message,
-                locations=locations,
-                suggested_fixes=suggested_fixes,
+                locations=tuple(locations),
+                suggested_fixes=tuple(suggested_fixes),
                 linter="clang_tidy",
             )
             findings.append(finding)
@@ -480,11 +480,11 @@ class BuildLinter:
                 )
                 yield LinterFinding(
                     message=message,
-                    locations=[location],
+                    locations=(location,),
                     linter="go_lint",
                     # FIXME(b/244362509): Extend more details support to Golang
                     name="",
-                    suggested_fixes=[],
+                    suggested_fixes=(),
                 )
 
             packages_seen.add(package_name)
@@ -522,6 +522,8 @@ class BuildLinter:
             r"\- (?P<include>#include \S*) +// lines (?P<start>.+)\-(?P<end>.+)"
         )
 
+        # IWYU can have duplicate results so we dedupe with a set.
+        findings_set = set()
         for file_path in files:
             with Path(file_path).open(encoding="utf-8") as diagnostics:
                 file_contents = diagnostics.readlines()
@@ -576,11 +578,11 @@ class BuildLinter:
                         )
                     include = match.group("include")
                     message = "Remove from include list:\n\t" f"{include}"
-                    line_start = match.group("start")
-                    line_end = match.group("end")
+                    line_start = int(match.group("start"))
+                    line_end = int(match.group("end"))
                 elif mode == "list":
                     include_list.append(line)
-                if mode != "list":
+                if mode == "add" or mode == "remove":
                     location = CodeLocation(
                         filepath=self._clean_file_path(current_file),
                         line_start=line_start,
@@ -592,10 +594,10 @@ class BuildLinter:
                     findings.append(
                         LinterFinding(
                             message=message,
-                            locations=[location],
+                            locations=(location,),
                             linter="iwyu",
                             name=mode,
-                            suggested_fixes=[],
+                            suggested_fixes=(),
                         )
                     )
 
@@ -607,7 +609,10 @@ class BuildLinter:
             )
             for finding in findings:
                 message = finding.message + findings_footer
-                yield finding._replace(message=message)
+                findings_set.add(finding._replace(message=message))
+
+        for finding in findings_set:
+            yield finding
 
     def _fetch_from_linting_artifacts(self, subdir) -> Dict[Text, List[Text]]:
         """Get file from emerge artifact directory."""

@@ -126,3 +126,168 @@ class BuildLinterTests(cros_test_lib.MockTempDirTestCase):
         retrieved_artifact_paths = mbl._fetch_from_linting_artifacts("linter_1")
 
         self.checkArtifacts(relevant_artifacts, retrieved_artifact_paths)
+
+    def testParseIWYUFiles(self):
+        mbl = MockBuildLinter(self.tempdir)
+
+        artifacts = [
+            MockArtifact(
+                "iwyu",
+                "pkg",
+                "iwyu.out",
+                (
+                    "\n".join(
+                        [
+                            "(/a/good/file.c has correct #includes/fwd-decls)",
+                            "",
+                            "/path/to/some/file.c should add these lines:",
+                            "#include <missing1.h>  // for func1, func2, func3",
+                            "#include <missing2.h>  // for func4, func5, func6",
+                            "",
+                            "/path/to/some/file.c should remove these lines:",
+                            "- #include <unwanted.h>  // lines 11-11",
+                            "",
+                            "The full include-list for /path/to/some/file.c:",
+                            "#include <missing1.h>  // for func1, func2, func3",
+                            "#include <missing2.h>  // for func4, func5, func6",
+                            "#include <stdint.h>",
+                            "#include <stdlib.h>",
+                            '#include "lib/foo.h"  // for func7, func8',
+                            "---",
+                        ]
+                    )
+                ),
+            ),
+            MockArtifact(
+                "iwyu",
+                "pkg",
+                "duplicate.out",
+                (
+                    "\n".join(
+                        [
+                            "/path/to/some/file.c should add these lines:",
+                            "#include <missing1.h>  // for func1, func2, func3",
+                            "#include <missing2.h>  // for func4, func5, func6",
+                            "",
+                            "/path/to/some/file.c should remove these lines:",
+                            "- #include <unwanted.h>  // lines 11-11",
+                            "",
+                            "The full include-list for /path/to/some/file.c:",
+                            "#include <missing1.h>  // for func1, func2, func3",
+                            "#include <missing2.h>  // for func4, func5, func6",
+                            "#include <stdint.h>",
+                            "#include <stdlib.h>",
+                            '#include "lib/foo.h"  // for func7, func8',
+                            "---",
+                        ]
+                    )
+                ),
+            ),
+            MockArtifact("IWYU", "pkg", "empty.out", ""),
+        ]
+
+        expected_findings = [
+            toolchain.LinterFinding(
+                name="add",
+                message="\n".join(
+                    [
+                        "Include list is missing:",
+                        "\t#include <missing1.h>",
+                        "Which is required for func1, func2, func3",
+                        "",
+                        "The full suggested include-list for this file:",
+                        "#include <missing1.h>  // for func1, func2, func3",
+                        "#include <missing2.h>  // for func4, func5, func6",
+                        "#include <stdint.h>",
+                        "#include <stdlib.h>",
+                        '#include "lib/foo.h"  // for func7, func8',
+                        "",
+                        "Note: Suggestions from IWYU are not always correct and"
+                        " thus require human supervision.",
+                    ]
+                ),
+                locations=(
+                    toolchain.CodeLocation(
+                        "/path/to/some/file.c",
+                        "",
+                        line_start=1,
+                        line_end=1,
+                        col_start=None,
+                        col_end=None,
+                    ),
+                ),
+                linter="iwyu",
+                suggested_fixes=tuple(),
+            ),
+            toolchain.LinterFinding(
+                name="add",
+                message="\n".join(
+                    [
+                        "Include list is missing:",
+                        "\t#include <missing2.h>",
+                        "Which is required for func4, func5, func6",
+                        "",
+                        "The full suggested include-list for this file:",
+                        "#include <missing1.h>  // for func1, func2, func3",
+                        "#include <missing2.h>  // for func4, func5, func6",
+                        "#include <stdint.h>",
+                        "#include <stdlib.h>",
+                        '#include "lib/foo.h"  // for func7, func8',
+                        "",
+                        "Note: Suggestions from IWYU are not always correct and"
+                        " thus require human supervision.",
+                    ]
+                ),
+                locations=(
+                    toolchain.CodeLocation(
+                        "/path/to/some/file.c",
+                        "",
+                        line_start=1,
+                        line_end=1,
+                        col_start=None,
+                        col_end=None,
+                    ),
+                ),
+                linter="iwyu",
+                suggested_fixes=tuple(),
+            ),
+            toolchain.LinterFinding(
+                name="remove",
+                message="\n".join(
+                    [
+                        "Remove from include list:",
+                        "\t#include <unwanted.h>",
+                        "",
+                        "The full suggested include-list for this file:",
+                        "#include <missing1.h>  // for func1, func2, func3",
+                        "#include <missing2.h>  // for func4, func5, func6",
+                        "#include <stdint.h>",
+                        "#include <stdlib.h>",
+                        '#include "lib/foo.h"  // for func7, func8',
+                        "",
+                        "Note: Suggestions from IWYU are not always correct and"
+                        " thus require human supervision.",
+                    ]
+                ),
+                locations=(
+                    toolchain.CodeLocation(
+                        "/path/to/some/file.c",
+                        "",
+                        line_start=11,
+                        line_end=11,
+                        col_start=None,
+                        col_end=None,
+                    ),
+                ),
+                linter="iwyu",
+                suggested_fixes=tuple(),
+            ),
+        ]
+
+        for artifact in artifacts:
+            mbl.add_artifact(artifact)
+
+        # pylint: disable=protected-access
+        parses = mbl._fetch_iwyu_lints()
+
+        self.assertCountEqual(parses, expected_findings)
