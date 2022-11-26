@@ -579,11 +579,6 @@ class BuildLinter:
                     line_start = match.group("start")
                     line_end = match.group("end")
                 elif mode == "list":
-                    match = add_line_pattern.match(line)
-                    if not match:
-                        raise ParsingError(
-                            "IWYU line does not follow expected format"
-                        )
                     include_list.append(line)
                 if mode != "list":
                     location = CodeLocation(
