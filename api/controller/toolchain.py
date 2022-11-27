@@ -419,9 +419,15 @@ def EmergeWithLinting(
     use_golint = (
         toolchain_pb2.LinterFinding.GO_LINT not in input_proto.disabled_linters
     )
+    use_iwyu = (
+        toolchain_pb2.LinterFinding.IWYU not in input_proto.disabled_linters
+    )
 
     findings = build_linter.emerge_with_linting(
-        use_clippy=use_clippy, use_tidy=use_tidy, use_golint=use_golint
+        use_clippy=use_clippy,
+        use_tidy=use_tidy,
+        use_golint=use_golint,
+        use_iwyu=use_iwyu,
     )
 
     for finding in findings:
