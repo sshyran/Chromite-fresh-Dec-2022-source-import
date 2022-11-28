@@ -155,6 +155,29 @@ def build_to_timestamp(build_path):
     return build_path.replace("/", _TIMESTAMP_DELIMITER)
 
 
+def find_any(local_dir: os.PathLike) -> Optional[str]:
+    """Returns the image_type for ANY given the local_dir."""
+    test_image = os.path.join(local_dir, devserver_constants.TEST_IMAGE_FILE)
+    dev_image = os.path.join(local_dir, devserver_constants.IMAGE_FILE)
+    base_image = os.path.join(local_dir, devserver_constants.BASE_IMAGE_FILE)
+    # Prioritize test images over dev images.
+    if os.path.exists(test_image):
+        return "test"
+
+    if os.path.exists(dev_image):
+        return "dev"
+
+    if os.path.exists(base_image):
+        logging.warning(
+            "Using base image as test and dev images were not found. "
+            "This will likely cause cros flash to fail leading to "
+            "needing to repair the device with a USB stick."
+        )
+        return "base"
+
+    return None
+
+
 class XBuddy(object):
     """Class that manages image retrieval and caching by the devserver.
 
@@ -628,33 +651,6 @@ class XBuddy(object):
         # Assume that the version number is the name of the directory.
         return os.path.basename(os.path.realpath(latest_local_dir))
 
-    @staticmethod
-    def _FindAny(local_dir):
-        """Returns the image_type for ANY given the local_dir."""
-        test_image = os.path.join(
-            local_dir, devserver_constants.TEST_IMAGE_FILE
-        )
-        dev_image = os.path.join(local_dir, devserver_constants.IMAGE_FILE)
-        base_image = os.path.join(
-            local_dir, devserver_constants.BASE_IMAGE_FILE
-        )
-        # Prioritize test images over dev images.
-        if os.path.exists(test_image):
-            return "test"
-
-        if os.path.exists(dev_image):
-            return "dev"
-
-        if os.path.exists(base_image):
-            logging.warning(
-                "Using base image as test and dev images were not found. "
-                "This will likely cause cros flash to fail leading to "
-                "needing to repair the device with a USB stick."
-            )
-            return "base"
-
-        return None
-
     def _SyncRegistryWithBuildImages(self):
         """Crawl images_dir for build_ids of images generated from build_image.
 
@@ -906,7 +902,7 @@ class XBuddy(object):
             build_id = os.path.join(xbuddy_components.board, version)
             artifact_dir = os.path.join(self.static_dir, build_id)
             image_type = (
-                self._FindAny(artifact_dir)
+                find_any(artifact_dir)
                 if xbuddy_components.image_type == ANY
                 else xbuddy_components.image_type
             )
