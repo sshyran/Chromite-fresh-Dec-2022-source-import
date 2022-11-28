@@ -327,25 +327,10 @@ class XBuddy(object):
 
         return val, suffix
 
-    @staticmethod
-    def _ResolveImageDir(image_dir):
-        """Clean up and return the image dir to use.
-
-        Args:
-          image_dir: directory in Google Storage to use.
-
-        Returns:
-          |image_dir| if |image_dir| is not None. Otherwise, returns
-            devserver_constants.GS_IMAGE_DIR
-        """
-        image_dir = image_dir or devserver_constants.GS_IMAGE_DIR
-        # Remove trailing slashes.
-        return image_dir.rstrip("/")
-
     def _LookupOfficial(self, board, suffix, image_dir=None):
         """Check LATEST-master for the version number of interest."""
         logging.debug("Checking gs for latest %s-%s image", board, suffix)
-        image_dir = XBuddy._ResolveImageDir(image_dir)
+        image_dir = (image_dir or devserver_constants.GS_IMAGE_DIR).rstrip("/")
 
         version = None
         for f in (
@@ -448,7 +433,7 @@ class XBuddy(object):
             "suffix": suffix,
             "version": "R*" + latest_version,
         }
-        image_dir = XBuddy._ResolveImageDir(image_dir)
+        image_dir = (image_dir or devserver_constants.GS_IMAGE_DIR).rstrip("/")
         gs_url = os.path.join(image_dir, image_url)
 
         # There should only be one match on cros-image-archive.
@@ -859,7 +844,9 @@ class XBuddy(object):
         if image_type == SIGNED:
             gs_url = self._TranslateSignedGSUrl(build_id, channel=channel)
         else:
-            image_dir = XBuddy._ResolveImageDir(image_dir)
+            image_dir = (image_dir or devserver_constants.GS_IMAGE_DIR).rstrip(
+                "/"
+            )
             gs_url = os.path.join(image_dir, build_id)
 
         return self._Download(gs_url, [artifact], build_id)[0]
