@@ -20,6 +20,7 @@ from typing import NamedTuple, Optional
 from chromite.lib import constants
 from chromite.lib import gs
 from chromite.lib import image_lib
+from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib.xbuddy import artifact_info
 from chromite.lib.xbuddy import build_artifact
@@ -617,14 +618,6 @@ class XBuddy(object):
                 "Version %s unknown. Can't find on GS." % version
             )
 
-    @staticmethod
-    def _Symlink(link, target):
-        """Symlinks link to target, and removes whatever link was there before."""
-        logging.debug("Linking to %s from %s", link, target)
-        if os.path.lexists(link):
-            os.unlink(link)
-        os.symlink(target, link)
-
     def _GetLatestLocalVersion(self, board):
         """Get the version of the latest image built for board by build_image
 
@@ -714,7 +707,7 @@ class XBuddy(object):
         for build_id in build_ids:
             link = os.path.join(self.static_dir, build_id)
             target = os.path.join(self.images_dir, build_id)
-            XBuddy._Symlink(link, target)
+            osutils.SafeSymlink(target, link)
             if self._manage_builds:
                 update_timestamp(self._timestamp_folder, build_id)
 
