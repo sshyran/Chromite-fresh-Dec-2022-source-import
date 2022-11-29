@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z-go.chromium.org/chromiumos/config/go/test/api',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n&chromiumos/test/api/test_harness.proto\x12\x13\x63hromiumos.test.api\"\xc7\x02\n\x0bTestHarness\x12\x39\n\x06manual\x18\x01 \x01(\x0b\x32\'.chromiumos.test.api.TestHarness.ManualH\x00\x12\x37\n\x05tauto\x18\x02 \x01(\x0b\x32&.chromiumos.test.api.TestHarness.TautoH\x00\x12\x35\n\x04tast\x18\x03 \x01(\x0b\x32%.chromiumos.test.api.TestHarness.TastH\x00\x12\x37\n\x05gtest\x18\x04 \x01(\x0b\x32&.chromiumos.test.api.TestHarness.GtestH\x00\x1a\x08\n\x06Manual\x1a\x06\n\x04Tast\x1a\x07\n\x05Tauto\x1a$\n\x05Gtest\x12\x1b\n\x13target_bin_location\x18\x01 \x01(\tB\x13\n\x11test_harness_typeB/Z-go.chromium.org/chromiumos/config/go/test/apib\x06proto3'
+  serialized_pb=b'\n&chromiumos/test/api/test_harness.proto\x12\x13\x63hromiumos.test.api\"\x89\x03\n\x0bTestHarness\x12\x39\n\x06manual\x18\x01 \x01(\x0b\x32\'.chromiumos.test.api.TestHarness.ManualH\x00\x12\x37\n\x05tauto\x18\x02 \x01(\x0b\x32&.chromiumos.test.api.TestHarness.TautoH\x00\x12\x35\n\x04tast\x18\x03 \x01(\x0b\x32%.chromiumos.test.api.TestHarness.TastH\x00\x12\x37\n\x05gtest\x18\x04 \x01(\x0b\x32&.chromiumos.test.api.TestHarness.GtestH\x00\x12\x37\n\x05mobly\x18\x05 \x01(\x0b\x32&.chromiumos.test.api.TestHarness.MoblyH\x00\x1a\x08\n\x06Manual\x1a\x06\n\x04Tast\x1a\x07\n\x05Tauto\x1a$\n\x05Gtest\x12\x1b\n\x13target_bin_location\x18\x01 \x01(\t\x1a\x07\n\x05MoblyB\x13\n\x11test_harness_typeB/Z-go.chromium.org/chromiumos/config/go/test/apib\x06proto3'
 )
 
 
@@ -45,8 +45,8 @@ _TESTHARNESS_MANUAL = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=307,
-  serialized_end=315,
+  serialized_start=364,
+  serialized_end=372,
 )
 
 _TESTHARNESS_TAST = _descriptor.Descriptor(
@@ -69,8 +69,8 @@ _TESTHARNESS_TAST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=317,
-  serialized_end=323,
+  serialized_start=374,
+  serialized_end=380,
 )
 
 _TESTHARNESS_TAUTO = _descriptor.Descriptor(
@@ -93,8 +93,8 @@ _TESTHARNESS_TAUTO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=325,
-  serialized_end=332,
+  serialized_start=382,
+  serialized_end=389,
 )
 
 _TESTHARNESS_GTEST = _descriptor.Descriptor(
@@ -124,8 +124,32 @@ _TESTHARNESS_GTEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=334,
-  serialized_end=370,
+  serialized_start=391,
+  serialized_end=427,
+)
+
+_TESTHARNESS_MOBLY = _descriptor.Descriptor(
+  name='Mobly',
+  full_name='chromiumos.test.api.TestHarness.Mobly',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=429,
+  serialized_end=436,
 )
 
 _TESTHARNESS = _descriptor.Descriptor(
@@ -164,10 +188,17 @@ _TESTHARNESS = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='mobly', full_name='chromiumos.test.api.TestHarness.mobly', index=4,
+      number=5, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
-  nested_types=[_TESTHARNESS_MANUAL, _TESTHARNESS_TAST, _TESTHARNESS_TAUTO, _TESTHARNESS_GTEST, ],
+  nested_types=[_TESTHARNESS_MANUAL, _TESTHARNESS_TAST, _TESTHARNESS_TAUTO, _TESTHARNESS_GTEST, _TESTHARNESS_MOBLY, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -182,17 +213,19 @@ _TESTHARNESS = _descriptor.Descriptor(
     fields=[]),
   ],
   serialized_start=64,
-  serialized_end=391,
+  serialized_end=457,
 )
 
 _TESTHARNESS_MANUAL.containing_type = _TESTHARNESS
 _TESTHARNESS_TAST.containing_type = _TESTHARNESS
 _TESTHARNESS_TAUTO.containing_type = _TESTHARNESS
 _TESTHARNESS_GTEST.containing_type = _TESTHARNESS
+_TESTHARNESS_MOBLY.containing_type = _TESTHARNESS
 _TESTHARNESS.fields_by_name['manual'].message_type = _TESTHARNESS_MANUAL
 _TESTHARNESS.fields_by_name['tauto'].message_type = _TESTHARNESS_TAUTO
 _TESTHARNESS.fields_by_name['tast'].message_type = _TESTHARNESS_TAST
 _TESTHARNESS.fields_by_name['gtest'].message_type = _TESTHARNESS_GTEST
+_TESTHARNESS.fields_by_name['mobly'].message_type = _TESTHARNESS_MOBLY
 _TESTHARNESS.oneofs_by_name['test_harness_type'].fields.append(
   _TESTHARNESS.fields_by_name['manual'])
 _TESTHARNESS.fields_by_name['manual'].containing_oneof = _TESTHARNESS.oneofs_by_name['test_harness_type']
@@ -205,6 +238,9 @@ _TESTHARNESS.fields_by_name['tast'].containing_oneof = _TESTHARNESS.oneofs_by_na
 _TESTHARNESS.oneofs_by_name['test_harness_type'].fields.append(
   _TESTHARNESS.fields_by_name['gtest'])
 _TESTHARNESS.fields_by_name['gtest'].containing_oneof = _TESTHARNESS.oneofs_by_name['test_harness_type']
+_TESTHARNESS.oneofs_by_name['test_harness_type'].fields.append(
+  _TESTHARNESS.fields_by_name['mobly'])
+_TESTHARNESS.fields_by_name['mobly'].containing_oneof = _TESTHARNESS.oneofs_by_name['test_harness_type']
 DESCRIPTOR.message_types_by_name['TestHarness'] = _TESTHARNESS
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -237,6 +273,13 @@ TestHarness = _reflection.GeneratedProtocolMessageType('TestHarness', (_message.
     # @@protoc_insertion_point(class_scope:chromiumos.test.api.TestHarness.Gtest)
     })
   ,
+
+  'Mobly' : _reflection.GeneratedProtocolMessageType('Mobly', (_message.Message,), {
+    'DESCRIPTOR' : _TESTHARNESS_MOBLY,
+    '__module__' : 'chromiumos.test.api.test_harness_pb2'
+    # @@protoc_insertion_point(class_scope:chromiumos.test.api.TestHarness.Mobly)
+    })
+  ,
   'DESCRIPTOR' : _TESTHARNESS,
   '__module__' : 'chromiumos.test.api.test_harness_pb2'
   # @@protoc_insertion_point(class_scope:chromiumos.test.api.TestHarness)
@@ -246,6 +289,7 @@ _sym_db.RegisterMessage(TestHarness.Manual)
 _sym_db.RegisterMessage(TestHarness.Tast)
 _sym_db.RegisterMessage(TestHarness.Tauto)
 _sym_db.RegisterMessage(TestHarness.Gtest)
+_sym_db.RegisterMessage(TestHarness.Mobly)
 
 
 DESCRIPTOR._options = None

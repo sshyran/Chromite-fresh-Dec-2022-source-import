@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n&chromiumos/test/api/test_harness.proto\x12\x13\x63hromiumos.test.api\"\xc7\x02\n\x0bTestHarness\x12\x39\n\x06manual\x18\x01 \x01(\x0b\x32\'.chromiumos.test.api.TestHarness.ManualH\x00\x12\x37\n\x05tauto\x18\x02 \x01(\x0b\x32&.chromiumos.test.api.TestHarness.TautoH\x00\x12\x35\n\x04tast\x18\x03 \x01(\x0b\x32%.chromiumos.test.api.TestHarness.TastH\x00\x12\x37\n\x05gtest\x18\x04 \x01(\x0b\x32&.chromiumos.test.api.TestHarness.GtestH\x00\x1a\x08\n\x06Manual\x1a\x06\n\x04Tast\x1a\x07\n\x05Tauto\x1a$\n\x05Gtest\x12\x1b\n\x13target_bin_location\x18\x01 \x01(\tB\x13\n\x11test_harness_typeB/Z-go.chromium.org/chromiumos/config/go/test/apib\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n&chromiumos/test/api/test_harness.proto\x12\x13\x63hromiumos.test.api\"\x89\x03\n\x0bTestHarness\x12\x39\n\x06manual\x18\x01 \x01(\x0b\x32\'.chromiumos.test.api.TestHarness.ManualH\x00\x12\x37\n\x05tauto\x18\x02 \x01(\x0b\x32&.chromiumos.test.api.TestHarness.TautoH\x00\x12\x35\n\x04tast\x18\x03 \x01(\x0b\x32%.chromiumos.test.api.TestHarness.TastH\x00\x12\x37\n\x05gtest\x18\x04 \x01(\x0b\x32&.chromiumos.test.api.TestHarness.GtestH\x00\x12\x37\n\x05mobly\x18\x05 \x01(\x0b\x32&.chromiumos.test.api.TestHarness.MoblyH\x00\x1a\x08\n\x06Manual\x1a\x06\n\x04Tast\x1a\x07\n\x05Tauto\x1a$\n\x05Gtest\x12\x1b\n\x13target_bin_location\x18\x01 \x01(\t\x1a\x07\n\x05MoblyB\x13\n\x11test_harness_typeB/Z-go.chromium.org/chromiumos/config/go/test/apib\x06proto3')
 
 
 
@@ -23,6 +23,7 @@ _TESTHARNESS_MANUAL = _TESTHARNESS.nested_types_by_name['Manual']
 _TESTHARNESS_TAST = _TESTHARNESS.nested_types_by_name['Tast']
 _TESTHARNESS_TAUTO = _TESTHARNESS.nested_types_by_name['Tauto']
 _TESTHARNESS_GTEST = _TESTHARNESS.nested_types_by_name['Gtest']
+_TESTHARNESS_MOBLY = _TESTHARNESS.nested_types_by_name['Mobly']
 TestHarness = _reflection.GeneratedProtocolMessageType('TestHarness', (_message.Message,), {
 
   'Manual' : _reflection.GeneratedProtocolMessageType('Manual', (_message.Message,), {
@@ -52,6 +53,13 @@ TestHarness = _reflection.GeneratedProtocolMessageType('TestHarness', (_message.
     # @@protoc_insertion_point(class_scope:chromiumos.test.api.TestHarness.Gtest)
     })
   ,
+
+  'Mobly' : _reflection.GeneratedProtocolMessageType('Mobly', (_message.Message,), {
+    'DESCRIPTOR' : _TESTHARNESS_MOBLY,
+    '__module__' : 'chromiumos.test.api.test_harness_pb2'
+    # @@protoc_insertion_point(class_scope:chromiumos.test.api.TestHarness.Mobly)
+    })
+  ,
   'DESCRIPTOR' : _TESTHARNESS,
   '__module__' : 'chromiumos.test.api.test_harness_pb2'
   # @@protoc_insertion_point(class_scope:chromiumos.test.api.TestHarness)
@@ -61,19 +69,22 @@ _sym_db.RegisterMessage(TestHarness.Manual)
 _sym_db.RegisterMessage(TestHarness.Tast)
 _sym_db.RegisterMessage(TestHarness.Tauto)
 _sym_db.RegisterMessage(TestHarness.Gtest)
+_sym_db.RegisterMessage(TestHarness.Mobly)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'Z-go.chromium.org/chromiumos/config/go/test/api'
   _TESTHARNESS._serialized_start=64
-  _TESTHARNESS._serialized_end=391
-  _TESTHARNESS_MANUAL._serialized_start=307
-  _TESTHARNESS_MANUAL._serialized_end=315
-  _TESTHARNESS_TAST._serialized_start=317
-  _TESTHARNESS_TAST._serialized_end=323
-  _TESTHARNESS_TAUTO._serialized_start=325
-  _TESTHARNESS_TAUTO._serialized_end=332
-  _TESTHARNESS_GTEST._serialized_start=334
-  _TESTHARNESS_GTEST._serialized_end=370
+  _TESTHARNESS._serialized_end=457
+  _TESTHARNESS_MANUAL._serialized_start=364
+  _TESTHARNESS_MANUAL._serialized_end=372
+  _TESTHARNESS_TAST._serialized_start=374
+  _TESTHARNESS_TAST._serialized_end=380
+  _TESTHARNESS_TAUTO._serialized_start=382
+  _TESTHARNESS_TAUTO._serialized_end=389
+  _TESTHARNESS_GTEST._serialized_start=391
+  _TESTHARNESS_GTEST._serialized_end=427
+  _TESTHARNESS_MOBLY._serialized_start=429
+  _TESTHARNESS_MOBLY._serialized_end=436
 # @@protoc_insertion_point(module_scope)

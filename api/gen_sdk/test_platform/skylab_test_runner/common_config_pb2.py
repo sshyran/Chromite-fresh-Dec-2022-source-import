@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n4test_platform/skylab_test_runner/common_config.proto\x12 test_platform.skylab_test_runner\"\xd0\x03\n\x0c\x43ommonConfig\x12l\n\x1b\x63ros_firmware_update_config\x18\x01 \x01(\x0b\x32G.test_platform.skylab_test_runner.CommonConfig.CrosFirmwareUpdateConfig\x1a\xd1\x02\n\x18\x43rosFirmwareUpdateConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12i\n\nallow_list\x18\x02 \x01(\x0b\x32S.test_platform.skylab_test_runner.CommonConfig.CrosFirmwareUpdateConfig.CrosSlectorH\x00\x12i\n\nblock_list\x18\x03 \x01(\x0b\x32S.test_platform.skylab_test_runner.CommonConfig.CrosFirmwareUpdateConfig.CrosSlectorH\x00\x1a-\n\x0b\x43rosSlector\x12\x0e\n\x06\x62oards\x18\x01 \x03(\t\x12\x0e\n\x06models\x18\x02 \x03(\tB\x1f\n\x1d\x63ros_firmware_update_selectorBLZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runnerb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n4test_platform/skylab_test_runner/common_config.proto\x12 test_platform.skylab_test_runner\"\xe9\x03\n\x0c\x43ommonConfig\x12l\n\x1b\x63ros_firmware_update_config\x18\x01 \x01(\x0b\x32G.test_platform.skylab_test_runner.CommonConfig.CrosFirmwareUpdateConfig\x12\x17\n\x0fpartner_private\x18\x02 \x01(\x08\x1a\xd1\x02\n\x18\x43rosFirmwareUpdateConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12i\n\nallow_list\x18\x02 \x01(\x0b\x32S.test_platform.skylab_test_runner.CommonConfig.CrosFirmwareUpdateConfig.CrosSlectorH\x00\x12i\n\nblock_list\x18\x03 \x01(\x0b\x32S.test_platform.skylab_test_runner.CommonConfig.CrosFirmwareUpdateConfig.CrosSlectorH\x00\x1a-\n\x0b\x43rosSlector\x12\x0e\n\x06\x62oards\x18\x01 \x03(\t\x12\x0e\n\x06models\x18\x02 \x03(\tB\x1f\n\x1d\x63ros_firmware_update_selectorBLZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runnerb\x06proto3')
 
 
 
@@ -49,9 +49,9 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'ZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runner'
   _COMMONCONFIG._serialized_start=91
-  _COMMONCONFIG._serialized_end=555
-  _COMMONCONFIG_CROSFIRMWAREUPDATECONFIG._serialized_start=218
-  _COMMONCONFIG_CROSFIRMWAREUPDATECONFIG._serialized_end=555
-  _COMMONCONFIG_CROSFIRMWAREUPDATECONFIG_CROSSLECTOR._serialized_start=477
-  _COMMONCONFIG_CROSFIRMWAREUPDATECONFIG_CROSSLECTOR._serialized_end=522
+  _COMMONCONFIG._serialized_end=580
+  _COMMONCONFIG_CROSFIRMWAREUPDATECONFIG._serialized_start=243
+  _COMMONCONFIG_CROSFIRMWAREUPDATECONFIG._serialized_end=580
+  _COMMONCONFIG_CROSFIRMWAREUPDATECONFIG_CROSSLECTOR._serialized_start=502
+  _COMMONCONFIG_CROSFIRMWAREUPDATECONFIG_CROSSLECTOR._serialized_end=547
 # @@protoc_insertion_point(module_scope)
