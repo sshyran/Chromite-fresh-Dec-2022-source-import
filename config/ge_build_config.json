@@ -1394,6 +1394,15 @@
         },
         {
           "board_name": "brya-arc-t",
+          "name": "marasov",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7243,
+          "is_active": true,
+          "is_experimental": false
+        },
+        {
+          "board_name": "brya-arc-t",
           "name": "mithrax",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -1926,6 +1935,15 @@
             "bvt-tast-informational"
           ],
           "cq_test_enabled": true,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7230,
+          "is_active": true,
+          "is_experimental": false
+        },
+        {
+          "board_name": "brya-kernelnext",
+          "name": "marasov",
+          "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7230,
           "is_active": true,
