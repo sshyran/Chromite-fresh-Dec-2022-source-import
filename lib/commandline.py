@@ -811,7 +811,7 @@ class BaseParser(object):
             )
         formatter = ColoredFormatter(
             fmt=log_format,
-            datefmt=constants.LOGGER_DATE_FMT,
+            datefmt=constants.LOGGER_TIME_FMT,
             enable_color=opts.color,
         )
 
@@ -1228,7 +1228,7 @@ def ScriptWrapperMain(
     logger.setLevel(log_level)
     logger_handler = ChromiteStreamHandler()
     logger_handler.setFormatter(
-        logging.Formatter(fmt=log_format, datefmt=constants.LOGGER_DATE_FMT)
+        logging.Formatter(fmt=log_format, datefmt=constants.LOGGER_TIME_FMT)
     )
     logger.addHandler(logger_handler)
     logging.captureWarnings(True)

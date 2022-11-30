@@ -648,7 +648,9 @@ VALID_OVERLAYS = [BOTH_OVERLAYS, PUBLIC_OVERLAYS, PRIVATE_OVERLAYS, None]
 
 # Common default logging settings for use with the logging module.
 LOGGER_FMT = "%(asctime)s: %(levelname)s: %(message)s"
-LOGGER_DATE_FMT = "%H:%M:%S"
+LOGGER_DATE_FMT = "%Y-%m-%d"
+LOGGER_TIME_FMT = "%H:%M:%S"
+LOGGER_DATETIME_FMT = f"{LOGGER_DATE_FMT} {LOGGER_TIME_FMT}"
 
 # Used by remote patch serialization/deserialzation.
 INTERNAL_PATCH_TAG = "i"
