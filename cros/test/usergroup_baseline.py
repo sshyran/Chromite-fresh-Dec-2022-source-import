@@ -82,24 +82,6 @@ USER_BASELINE = dict(
     )
 )
 
-USER_BASELINE_LAKITU = dict(
-    (e.user, e)
-    for e in (
-        # These are sorted by uid.
-        UserEntry(user="systemd-timesync", uid=271, gid=271),
-        UserEntry(user="systemd-network", uid=274, gid=274),
-        UserEntry(user="systemd-resolve", uid=275, gid=275),
-    )
-)
-
-USER_BASELINE_JETSTREAM = dict(
-    (e.user, e)
-    for e in (
-        # These are sorted by uid.
-        UserEntry(user="ap-monitor", uid=1103, gid=1103),
-    )
-)
-
 USER_BASELINE_TERMINA = dict(
     (e.user, e)
     for e in (
@@ -109,12 +91,6 @@ USER_BASELINE_TERMINA = dict(
 )
 
 USER_BOARD_BASELINES = {
-    "arkham": USER_BASELINE_JETSTREAM,
-    "cyclone": USER_BASELINE_JETSTREAM,
-    "gale": USER_BASELINE_JETSTREAM,
-    "mistral": USER_BASELINE_JETSTREAM,
-    "storm": USER_BASELINE_JETSTREAM,
-    "whirlwind": USER_BASELINE_JETSTREAM,
     "tael": USER_BASELINE_TERMINA,
     "tatl": USER_BASELINE_TERMINA,
 }
@@ -447,125 +423,6 @@ GROUP_BASELINE = dict(
     )
 )
 
-GROUP_BASELINE_LAKITU = dict(
-    (e.group, e)
-    for e in (
-        # These are sorted by gid.
-        GroupEntry(group="systemd-journal", gid=270),
-        GroupEntry(group="systemd-timesync", gid=271),
-        GroupEntry(group="systemd-network", gid=274),
-        GroupEntry(group="systemd-resolve", gid=275),
-        GroupEntry(group="docker", gid=412),
-        GroupEntry(group="google-sudoers", encpasswd="x", gid=1002),
-    )
-)
-
-GROUP_BASELINE_JETSTREAM = dict(
-    (e.group, e)
-    for e in (
-        # These are sorted by gid.
-        GroupEntry(group="leds", gid=1102, users={"ap-controller"}),
-        GroupEntry(
-            group="hostapd",
-            gid=1106,
-            users={
-                "hostapd",
-                "ap-wireless-optimizer",
-                "ap-monitor",
-                "ap-wifi-manager",
-                "ap-wifi-diagnostics",
-                "ap-hal",
-            },
-        ),
-        GroupEntry(
-            group="wpa_supplicant",
-            gid=1114,
-            users={
-                "ap-wifi-diagnostics",
-                "wpa_supplicant",
-                "ap-wifi-manager",
-                "ap-hal",
-                "ap-wireless-optimizer",
-            },
-        ),
-        # Add gwifi users to a common gwifi group to allow access of some shared
-        # resources by multiple users.
-        GroupEntry(
-            group="gwifi",
-            gid=2028,
-            users={
-                "gwifi",
-                "ap-api-server",
-                "ap-av",
-                "ap-backhaul-manager",
-                "ap-bridge-client",
-                "ap-certificate",
-                "ap-coex",
-                "ap-controller",
-                "ap-csi-collector",
-                "ap-csi-inference",
-                "ap-csi-preproc",
-                "ap-diagnostics",
-                "ap-dns",
-                "ap-fresh-dns",
-                "ap-gpn-client",
-                "ap-gpn-manager",
-                "ap-group-manager",
-                "ap-group-monitor",
-                "ap-hal",
-                "ap-health-monitor",
-                "ap-https-server",
-                "ap-ipv6",
-                "ap-lb-ip-filter",
-                "ap-lb-update-manager",
-                "ap-monitor",
-                "ap-monlog",
-                "ap-net-acc-manager",
-                "ap-net-controller",
-                "ap-net-monitor",
-                "ap-pal",
-                "ap-pcap-manager",
-                "ap-pfd",
-                "ap-pipe-reader",
-                "ap-process-manager",
-                "ap-qos-monitor",
-                "ap-rodizio",
-                "ap-speed-test",
-                "ap-taxonomy",
-                "ap-ui-server",
-                "ap-update-manager",
-                "ap-vorlon-client",
-                "ap-wifi-diagnostics",
-                "ap-wifi-manager",
-                "ap-wifiblaster",
-                "ap-wireless-optimizer",
-                "gdisp",
-            },
-        ),
-        # Add users to gdisp group in order to allow those processes to access
-        # the unix domain socket file to communicate with gdisp-broker daemon
-        GroupEntry(
-            group="gdisp",
-            gid=2700,
-            users={
-                "gdisp",
-                "ap-csi-collector",
-                "ap-csi-preproc",
-                "ap-csi-inference",
-            },
-        ),
-    )
-)
-
-# rialtod:!:400:rialto
-GROUP_BASELINE_RIALTO = dict(
-    (e.group, e)
-    for e in (
-        # These are sorted by gid.
-        GroupEntry(group="rialtod", gid=400, users={"rialto"}),
-    )
-)
-
 GROUP_BASELINE_TERMINA = dict(
     (e.group, e)
     for e in (
@@ -575,13 +432,6 @@ GROUP_BASELINE_TERMINA = dict(
 )
 
 GROUP_BOARD_BASELINES = {
-    "arkham": GROUP_BASELINE_JETSTREAM,
-    "cyclone": GROUP_BASELINE_JETSTREAM,
-    "gale": GROUP_BASELINE_JETSTREAM,
-    "mistral": GROUP_BASELINE_JETSTREAM,
-    "storm": GROUP_BASELINE_JETSTREAM,
-    "whirlwind": GROUP_BASELINE_JETSTREAM,
-    "veyron_rialto": GROUP_BASELINE_RIALTO,
     "tael": GROUP_BASELINE_TERMINA,
     "tatl": GROUP_BASELINE_TERMINA,
 }
