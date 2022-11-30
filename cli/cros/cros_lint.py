@@ -10,7 +10,6 @@ import itertools
 import logging
 import os
 from pathlib import Path
-import re
 from typing import Union
 
 from chromite.cli import command
@@ -25,10 +24,7 @@ from chromite.lint.linters import owners
 from chromite.lint.linters import upstart
 from chromite.lint.linters import whitespace
 from chromite.utils import timer
-
-
-# Extract a script's shebang.
-SHEBANG_RE = re.compile(rb"^#!\s*([^\s]+)(\s+([^\s]+))?")
+from chromite.utils.parser import shebang
 
 
 def _GetProjectPath(path: Path) -> Path:
@@ -410,24 +406,22 @@ def _BreakoutDataByTool(map_to_return, path):
             # Look for BINPRM_BUF_SIZE in fs/binfmt_script.c.
             data = fp.read(128)
 
-            if not data.startswith(b"#!"):
+            try:
+                result = shebang.parse(data)
+            except ValueError:
                 # If the file doesn't have a shebang, nothing to do.
                 return
 
-            m = SHEBANG_RE.match(data)
-            if m:
-                prog = m.group(1)
-                if prog == b"/usr/bin/env":
-                    prog = m.group(3)
-                basename = os.path.basename(prog)
-                if basename.startswith(b"python") or basename.startswith(
-                    b"vpython"
-                ):
-                    for tool in _EXT_TOOL_MAP[frozenset({".py"})]:
-                        map_to_return.setdefault(tool, []).append(path)
-                elif basename in (b"sh", b"dash", b"bash"):
-                    for tool in _EXT_TOOL_MAP[frozenset({".sh"})]:
-                        map_to_return.setdefault(tool, []).append(path)
+            prog = result.command
+            if prog == "/usr/bin/env":
+                prog = result.args
+            basename = os.path.basename(prog)
+            if basename.startswith("python") or basename.startswith("vpython"):
+                for tool in _EXT_TOOL_MAP[frozenset({".py"})]:
+                    map_to_return.setdefault(tool, []).append(path)
+            elif basename in ("sh", "dash", "bash"):
+                for tool in _EXT_TOOL_MAP[frozenset({".sh"})]:
+                    map_to_return.setdefault(tool, []).append(path)
     except IOError as e:
         logging.debug("%s: reading initial data failed: %s", path, e)
 

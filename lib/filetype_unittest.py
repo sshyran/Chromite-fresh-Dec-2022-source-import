@@ -13,47 +13,6 @@ from chromite.lib import osutils
 from chromite.lib import unittest_lib
 
 
-class SplitShebangTest(cros_test_lib.TestCase):
-    """Test the SplitShebang function."""
-
-    def testSimpleCase(self):
-        """Test a simple case."""
-        self.assertEqual(("/bin/sh", ""), filetype.SplitShebang("#!/bin/sh"))
-
-    def testCaseWithArguments(self):
-        """Test a case with arguments."""
-        self.assertEqual(
-            ("/bin/sh", '-i -c "ls"'),
-            filetype.SplitShebang('#!/bin/sh  -i -c "ls"'),
-        )
-
-    def testCaseWithEndline(self):
-        """Test a case finished with a newline char."""
-        self.assertEqual(
-            ("/bin/sh", "-i"), filetype.SplitShebang("#!/bin/sh  -i\n")
-        )
-
-    def testCaseWithSpaces(self):
-        """Test a case with several spaces in the line."""
-        self.assertEqual(
-            ("/bin/sh", "-i"), filetype.SplitShebang("#!  /bin/sh  -i   \n")
-        )
-
-    def testValidBytes(self):
-        """Test bytes inputs."""
-        self.assertEqual(("/foo", "-v"), filetype.SplitShebang(b"#!/foo -v"))
-
-    def testInvalidBytes(self):
-        """Test bytes input but not valid UTF-8."""
-        self.assertRaises(ValueError, filetype.SplitShebang, b"#!/fo\xff")
-
-    def testInvalidCases(self):
-        """Thes invalid cases."""
-        self.assertRaises(ValueError, filetype.SplitShebang, "/bin/sh -i")
-        self.assertRaises(ValueError, filetype.SplitShebang, "#!")
-        self.assertRaises(ValueError, filetype.SplitShebang, "#!env python")
-
-
 class FileTypeDecoderTest(cros_test_lib.TempDirTestCase):
     """Test the FileTypeDecoder class."""
 

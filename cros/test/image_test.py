@@ -32,11 +32,11 @@ import magic  # pylint: disable=import-error
 # pylint: disable=ungrouped-imports
 from chromite.cros.test import usergroup_baseline
 from chromite.lib import cros_build_lib
-from chromite.lib import filetype
 from chromite.lib import image_test_lib
 from chromite.lib import osutils
 from chromite.lib import parseelf
 from chromite.lib import portage_util
+from chromite.utils.parser import shebang
 
 
 class LocaltimeTest(image_test_lib.ImageTestCase):
@@ -207,7 +207,7 @@ class BlockedTest(image_test_lib.ImageTestCase):
 
                 try:
                     # Ignore arguments to the interpreter.
-                    interp, _ = filetype.SplitShebang(line)
+                    interp = shebang.parse(line).command
                 except ValueError:
                     failures.append(
                         'File %s has an invalid interpreter path: "%s".'

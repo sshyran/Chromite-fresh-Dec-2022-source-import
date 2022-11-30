@@ -29,42 +29,11 @@ import stat
 import magic  # pylint: disable=import-error
 
 from chromite.lib import parseelf
+from chromite.utils.parser import shebang
 
 
 # The buffer size we would use to read files from the disk.
 FILE_BUFFER_SIZE = 32 * 1024
-
-
-def SplitShebang(header):
-    r"""Splits a shebang (#!) into command and arguments.
-
-    Args:
-      header: The first line of a shebang file, for example
-          "#!/usr/bin/env -uPWD python foo.py\n". The referenced command must be
-          an absolute path with optionally some arguments.
-
-    Returns:
-      A tuple of strings (command, args) where the first string is the called
-      and the second is the list of arguments as passed in the header.
-
-    Raises:
-      ValueError if the passed header is not a valid shebang line.
-    """
-    # We convert strings to bytes and then scan the bytes so we don't have to
-    # worry about being given non-UTF-8 binary data.  If we're unable to decode
-    # back into UTF-8, we'll just ignore the shebang.  There's no situation that
-    # we care to support that would matter here.
-    if isinstance(header, str):
-        header = header.encode("utf-8")
-    m = re.match(rb"#!\s*(/[^\s]+)\s*(.*)$", header)
-    if m:
-        try:
-            return m.group(1).decode("utf-8"), m.group(2).strip().decode(
-                "utf-8"
-            )
-        except UnicodeDecodeError:
-            raise ValueError("shebang (#!) line is not valid UTF-8")
-    raise ValueError("shebang (#!) line expected")
 
 
 class FileTypeDecoder(object):
@@ -228,7 +197,7 @@ class FileTypeDecoder(object):
         # shebangs. Some files start with "#!" but are other kind of files, such
         # as python or bash scripts.
         try:
-            prog_name, args = SplitShebang(head_line)
+            prog_name, args = shebang.parse(head_line)
             if len(first_lines) == 1:
                 return "text/shebang"
 
