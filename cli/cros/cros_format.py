@@ -20,6 +20,7 @@ from chromite.cli import command
 from chromite.format import formatters
 from chromite.lib import osutils
 from chromite.lib import parallel
+from chromite.utils.parser import shebang
 
 
 # Map file extensions to a formatter function.
@@ -92,6 +93,35 @@ _EXCLUDED_FILE_REGEX = (
 )
 
 
+def _BreakoutDataByTool(map_to_return, path):
+    """Maps a tool method to the content of the |path|."""
+    # Detect by content of the file itself.
+    try:
+        with open(path, "rb") as fp:
+            # We read 128 bytes because that's the Linux kernel's current limit.
+            # Look for BINPRM_BUF_SIZE in fs/binfmt_script.c.
+            data = fp.read(128)
+
+            try:
+                result = shebang.parse(data)
+            except ValueError:
+                # If the file doesn't have a shebang, nothing to do.
+                return
+
+            prog = result.command
+            if prog == "/usr/bin/env":
+                prog = result.args
+            basename = os.path.basename(prog)
+            if basename.startswith("python") or basename.startswith("vpython"):
+                for tool in _EXT_TOOL_MAP[frozenset({".py"})]:
+                    map_to_return.setdefault(tool, []).append(path)
+            elif basename in ("sh", "dash", "bash"):
+                for tool in _EXT_TOOL_MAP[frozenset({".sh"})]:
+                    map_to_return.setdefault(tool, []).append(path)
+    except IOError as e:
+        logging.debug("%s: reading initial data failed: %s", path, e)
+
+
 def _BreakoutFilesByTool(files):
     """Maps a tool method to the list of files to process."""
     map_to_return = {}
@@ -114,6 +144,9 @@ def _BreakoutFilesByTool(files):
                     for tool in tools:
                         map_to_return.setdefault(tool, []).append(f)
                     break
+            else:
+                if os.path.isfile(f):
+                    _BreakoutDataByTool(map_to_return, f)
 
     return map_to_return
 
