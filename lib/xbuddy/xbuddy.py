@@ -15,7 +15,7 @@ import shutil
 import sys
 import threading
 import time
-from typing import NamedTuple, Optional
+from typing import List, NamedTuple, Optional, Tuple
 
 from chromite.lib import constants
 from chromite.lib import gs
@@ -138,7 +138,7 @@ class XBuddyException(Exception):
     """Exception classes used by this module."""
 
 
-def update_timestamp(timestamp_dir, build_id):
+def update_timestamp(timestamp_dir: os.PathLike, build_id: os.PathLike) -> None:
     """Update timestamp file of build with build_id."""
     common_util.MkDirP(timestamp_dir)
     logging.debug("Updating timestamp for %s", build_id)
@@ -147,11 +147,13 @@ def update_timestamp(timestamp_dir, build_id):
         os.utime(time_file, None)
 
 
-def timestamp_to_build(timestamp_filename):
+def timestamp_to_build(timestamp_filename: os.PathLike) -> os.PathLike:
+    """Perform delimiter conversion on a timestamp file to get an image path."""
     return timestamp_filename.replace(_TIMESTAMP_DELIMITER, "/")
 
 
-def build_to_timestamp(build_path):
+def build_to_timestamp(build_path: os.PathLike) -> os.PathLike:
+    """Perform delimiter conversion on an image path to get a timestamp file."""
     return build_path.replace("/", _TIMESTAMP_DELIMITER)
 
 
@@ -178,7 +180,7 @@ def find_any(local_dir: os.PathLike) -> Optional[str]:
     return None
 
 
-class XBuddy(object):
+class XBuddy:
     """Class that manages image retrieval and caching by the devserver.
 
     Image retrieval by xBuddy path:
@@ -210,14 +212,26 @@ class XBuddy(object):
 
     def __init__(
         self,
-        manage_builds=False,
-        board=None,
-        version=None,
-        images_dir=None,
-        static_dir=DEFAULT_STATIC_DIR,
-        gsutil_bin=None,
+        manage_builds: bool = False,
+        board: str = "",
+        version: str = "",
+        images_dir: os.PathLike = "",
+        static_dir: os.PathLike = DEFAULT_STATIC_DIR,
+        gsutil_bin: Optional[os.PathLike] = None,
     ):
+        """Initialize an XBuddy image file manager.
 
+        Args:
+            manage_builds: Indicates whether XBuddy is managing local builds.
+            board: The name of the board of interest.
+            version: The version to fill in when rewriting paths; usually either
+                a specific version number or an alias like LATEST.
+            images_dir: The (local) directory where images will be cached.
+            static_dir: A utility folder used for caching operations; of
+                particular interest is the timestamp folder located in a subdir,
+                which is the tracking mechanism for LRU caching and retrieval.
+            gsutil_bin: The absolute path to the `gsutil` binary.
+        """
         self.config = self._ReadConfig()
         self._manage_builds = manage_builds or self._ManageBuilds()
         self._board = board
@@ -236,14 +250,14 @@ class XBuddy(object):
         common_util.MkDirP(self._timestamp_folder)
 
     @classmethod
-    def ParseBoolean(cls, boolean_string):
+    def ParseBoolean(cls, boolean_string: Optional[str]) -> bool:
         """Evaluate a string to a boolean value"""
         if boolean_string:
             return boolean_string.lower() in cls._true_values
         else:
             return False
 
-    def _ReadConfig(self):
+    def _ReadConfig(self) -> configparser.ConfigParser:
         """Read xbuddy config from ini files.
 
         Reads the base config from xbuddy_config.ini, and then merges in the
@@ -293,21 +307,26 @@ class XBuddy(object):
 
         return xbuddy_config
 
-    def _ManageBuilds(self):
+    def _ManageBuilds(self) -> bool:
         """Checks if xBuddy is managing local builds using the current config."""
         try:
             return self.ParseBoolean(self.config.get(GENERAL, "manage_builds"))
         except configparser.Error:
             return False
 
-    def _Capacity(self):
+    def _Capacity(self) -> int:
         """Gets the xbuddy capacity from the current config."""
         try:
             return int(self.config.get(GENERAL, "capacity"))
         except configparser.Error:
             return 5
 
-    def LookupAlias(self, alias, board=None, version=None):
+    def LookupAlias(
+        self,
+        alias: str,
+        board: Optional[str] = None,
+        version: Optional[str] = None,
+    ) -> Tuple[os.PathLike, str]:
         """Given the full xbuddy config, look up an alias for path rewrite.
 
         Args:
@@ -350,7 +369,9 @@ class XBuddy(object):
 
         return val, suffix
 
-    def _LookupOfficial(self, board, suffix, image_dir=None):
+    def _LookupOfficial(
+        self, board: str, suffix: str, image_dir: Optional[os.PathLike] = None
+    ) -> os.PathLike:
         """Check LATEST-master for the version number of interest."""
         logging.debug("Checking gs for latest %s-%s image", board, suffix)
         image_dir = (image_dir or devserver_constants.GS_IMAGE_DIR).rstrip("/")
@@ -383,7 +404,9 @@ class XBuddy(object):
             "Cannot look up the official image version."
         )
 
-    def _LS(self, path, list_subdirectory=False):
+    def _LS(
+        self, path: os.PathLike, list_subdirectory: bool = False
+    ) -> List[os.PathLike]:
         """Does a directory listing of the given gs path.
 
         Args:
@@ -401,8 +424,11 @@ class XBuddy(object):
             return self._ctx.LS(path)
 
     def _GetLatestVersionFromGsDir(
-        self, path, list_subdirectory=False, with_release=True
-    ):
+        self,
+        path: os.PathLike,
+        list_subdirectory: bool = False,
+        with_release: bool = True,
+    ) -> str:
         """Returns most recent version number found in a google storage directory.
 
         This lists out the contents of the given GS bucket or regex to GS buckets,
@@ -433,7 +459,13 @@ class XBuddy(object):
 
         return latest_version
 
-    def _LookupChannel(self, board, suffix, channel="stable", image_dir=None):
+    def _LookupChannel(
+        self,
+        board: str,
+        suffix: str,
+        channel: str = "stable",
+        image_dir: Optional[os.PathLike] = None,
+    ) -> str:
         """Check the channel folder for the version number of interest."""
         # Get all names in channel dir. Get 10 highest directories by version.
         logging.debug(
@@ -470,7 +502,7 @@ class XBuddy(object):
             "version": full_version,
         }
 
-    def _LookupVersion(self, board, suffix, version):
+    def _LookupVersion(self, board: str, suffix: str, version: str) -> str:
         """Search GS image releases for the highest match to a version prefix."""
         # Build the pattern for GS to match.
         logging.debug(
@@ -493,7 +525,9 @@ class XBuddy(object):
             "version": full_version,
         }
 
-    def _RemoteBuildId(self, board, suffix, version):
+    def _RemoteBuildId(
+        self, board: str, suffix: str, version: str
+    ) -> os.PathLike:
         """Returns the remote build_id for the given board and version.
 
         Raises:
@@ -530,7 +564,9 @@ class XBuddy(object):
             "Could not find remote build_id for %s %s" % (board, version)
         )
 
-    def _ResolveBuildVersion(self, board, suffix, base_version):
+    def _ResolveBuildVersion(
+        self, board: str, suffix: str, base_version: str
+    ) -> str:
         """Check LATEST-<base_version> and returns a full build version."""
         logging.debug(
             "Checking gs for full version for %s of %s", base_version, board
@@ -547,8 +583,12 @@ class XBuddy(object):
         return self._ctx.Cat(latest_addr)
 
     def _ResolveVersionToBuildIdAndChannel(
-        self, board, suffix, version, image_dir=None
-    ):
+        self,
+        board: str,
+        suffix: str,
+        version: str,
+        image_dir: Optional[os.PathLike] = None,
+    ) -> Tuple[os.PathLike, str]:
         """Handle version aliases for remote payloads in GS.
 
         Args:
@@ -626,7 +666,7 @@ class XBuddy(object):
                 "Version %s unknown. Can't find on GS." % version
             )
 
-    def _GetLatestLocalVersion(self, board):
+    def _GetLatestLocalVersion(self, board: str) -> str:
         """Get the version of the latest image built for board by build_image
 
         Updates the symlink reference within the xBuddy static dir to point to
@@ -651,7 +691,7 @@ class XBuddy(object):
         # Assume that the version number is the name of the directory.
         return os.path.basename(os.path.realpath(latest_local_dir))
 
-    def _SyncRegistryWithBuildImages(self):
+    def _SyncRegistryWithBuildImages(self) -> None:
         """Crawl images_dir for build_ids of images generated from build_image.
 
         This will find images and symlink them in xBuddy's static dir so that
@@ -692,7 +732,7 @@ class XBuddy(object):
             if self._manage_builds:
                 update_timestamp(self._timestamp_folder, build_id)
 
-    def _ListBuildTimes(self):
+    def _ListBuildTimes(self) -> List[Tuple[os.PathLike, datetime.timedelta]]:
         """Returns the currently cached builds and their last access timestamp.
 
         Returns:
@@ -713,7 +753,9 @@ class XBuddy(object):
         return_tup = sorted(build_dict.items(), key=operator.itemgetter(1))
         return return_tup
 
-    def _Download(self, gs_url, artifacts, build_id):
+    def _Download(
+        self, gs_url: str, artifacts: List[str], build_id: os.PathLike
+    ) -> List[List[str]]:
         """Download the artifacts from the given gs_url.
 
         Returns:
@@ -741,7 +783,7 @@ class XBuddy(object):
             with XBuddy._staging_thread_count_lock:
                 XBuddy._staging_thread_count -= 1
 
-    def CleanCache(self):
+    def CleanCache(self) -> None:
         """Delete all builds besides the newest N builds"""
         if not self._manage_builds:
             return
@@ -775,7 +817,9 @@ class XBuddy(object):
                     "Failed to clear %s: %s" % (clear_dir, err)
                 )
 
-    def _TranslateSignedGSUrl(self, build_id, channel=None):
+    def _TranslateSignedGSUrl(
+        self, build_id: os.PathLike, channel: str = None
+    ) -> os.PathLike:
         """Translate the GS URL to be able to find signed images.
 
         Args:
@@ -816,7 +860,13 @@ class XBuddy(object):
             % build_id
         )
 
-    def _GetFromGS(self, build_id, image_type, image_dir=None, channel=None):
+    def _GetFromGS(
+        self,
+        build_id: os.PathLike,
+        image_type: str,
+        image_dir: Optional[os.PathLike] = None,
+        channel: Optional[str] = None,
+    ) -> List[os.PathLike]:
         """Check if the artifact is available locally. Download from GS if not.
 
         Args:
@@ -849,12 +899,12 @@ class XBuddy(object):
 
     def _GetArtifact(
         self,
-        path_list,
-        board=None,
-        version=None,
-        lookup_only=False,
-        image_dir=None,
-    ):
+        path_list: List[str],
+        board: Optional[str] = None,
+        version: Optional[str] = None,
+        lookup_only: bool = False,
+        image_dir: Optional[os.PathLike] = None,
+    ) -> Tuple[os.PathLike, os.PathLike]:
         """Interpret an xBuddy path and return directory/file_name to resource.
 
         Note board can be passed that in but by default if self._board is set,
@@ -945,7 +995,13 @@ class XBuddy(object):
 
     ############################ BEGIN PUBLIC METHODS
 
-    def Translate(self, path_list, board=None, version=None, image_dir=None):
+    def Translate(
+        self,
+        path_list: List[str],
+        board: Optional[str] = None,
+        version: Optional[str] = None,
+        image_dir: Optional[os.PathLike] = None,
+    ) -> Tuple[os.PathLike, os.PathLike]:
         """Translates an xBuddy path to a real path to artifact if it exists.
 
         Equivalent to the Get call, minus downloading and updating timestamps,
@@ -981,7 +1037,9 @@ class XBuddy(object):
             image_dir=image_dir,
         )
 
-    def Get(self, path_list, image_dir=None):
+    def Get(
+        self, path_list: List[str], image_dir: Optional[os.PathLike] = None
+    ) -> Tuple[os.PathLike, os.PathLike]:
         """The full xBuddy call, returns resource specified by path_list.
 
         Please see devserver.py:xbuddy for full documentation.
