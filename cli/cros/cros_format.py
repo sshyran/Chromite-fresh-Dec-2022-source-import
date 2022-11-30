@@ -38,6 +38,8 @@ _EXT_TOOL_MAP = {
     frozenset({".proto"}): (formatters.proto.Data,),
     frozenset({".py"}): (formatters.python.Data,),
     frozenset({".rs"}): (formatters.rust.Data,),
+    # TODO(build): Add a formatter for this.
+    frozenset({".sh"}): (formatters.whitespace.Data,),
     frozenset({".star"}): (formatters.star.Data,),
     # TODO(build): Add a formatter for this (SELinux policies).
     frozenset({".te"}): (formatters.whitespace.Data,),
