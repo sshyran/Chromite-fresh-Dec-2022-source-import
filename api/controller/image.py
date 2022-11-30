@@ -13,6 +13,7 @@ import logging
 import os
 from pathlib import Path
 import time
+import traceback
 from typing import List, NamedTuple, Set, TYPE_CHECKING, Union
 
 from chromite.api import controller
@@ -213,7 +214,28 @@ def GetArtifacts(
     for output_artifact in in_proto.output_artifacts:
         for artifact_type, func in artifact_types.items():
             if artifact_type in output_artifact.artifact_types:
-                result = func(output_dir)
+                try:
+                    result = func(output_dir)
+                except Exception as e:
+                    generated.append(
+                        {
+                            "type": artifact_type,
+                            "failed": True,
+                            "failure_reason": str(e),
+                        }
+                    )
+                    artifact_name = (
+                        common_pb2.ArtifactsByService.Image.ArtifactType.Name(
+                            artifact_type
+                        )
+                    )
+                    logging.warning(
+                        "%s artifact generation failed with exception %s",
+                        artifact_name,
+                        e,
+                    )
+                    logging.warning("traceback:\n%s", traceback.format_exc())
+                    continue
                 if result:
                     generated.append(
                         {

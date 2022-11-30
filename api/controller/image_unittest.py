@@ -15,11 +15,14 @@ from chromite.api.controller import image as image_controller
 from chromite.api.gen.chromite.api import image_pb2
 from chromite.api.gen.chromite.api import sysroot_pb2
 from chromite.api.gen.chromiumos import common_pb2
+from chromite.lib import build_target_lib
+from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
+from chromite.lib import sysroot_lib
 from chromite.scripts import pushimage
 from chromite.service import image as image_service
 
@@ -222,6 +225,99 @@ class CreateTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
             "board", [constants.IMAGE_TYPE_FACTORY_SHIM], config=mock.ANY
         )
         netboot_patch.assert_any_call("board", os.path.dirname(factory_path))
+
+
+class GetArtifactsTest(
+    cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin
+):
+    """GetArtifacts function tests."""
+
+    _artifact_funcs = {
+        common_pb2.ArtifactsByService.Image.ArtifactType.DLC_IMAGE: image_service.copy_dlc_image,
+        common_pb2.ArtifactsByService.Image.ArtifactType.LICENSE_CREDITS: image_service.copy_license_credits,
+        common_pb2.ArtifactsByService.Image.ArtifactType.FACTORY_IMAGE: image_service.create_factory_image_zip,
+        common_pb2.ArtifactsByService.Image.ArtifactType.STRIPPED_PACKAGES: image_service.create_stripped_packages_tar,
+    }
+
+    def setUp(self):
+        self._mocks = {}
+        for artifact, func in self._artifact_funcs.items():
+            self._mocks[artifact] = self.PatchObject(
+                image_service, func.__name__
+            )
+        self.chroot = chroot_lib.Chroot(
+            path=self.tempdir, chrome_root=self.tempdir
+        )
+        board = "chell"
+        sysroot_path = "/build/%s" % board
+        self.sysroot_class = sysroot_lib.Sysroot(sysroot_path)
+        self.build_target = build_target_lib.BuildTarget(board)
+
+    def _InputProto(
+        self,
+        artifact_types=_artifact_funcs.keys(),
+    ):
+        """Helper to build an input proto instance."""
+        return common_pb2.ArtifactsByService.Image(
+            output_artifacts=[
+                common_pb2.ArtifactsByService.Image.ArtifactInfo(
+                    artifact_types=artifact_types
+                )
+            ]
+        )
+
+    def testNoArtifacts(self):
+        """Test GetArtifacts with no artifact types."""
+        in_proto = self._InputProto(artifact_types=[])
+        image_controller.GetArtifacts(
+            in_proto, self.chroot, self.sysroot_class, self.build_target, ""
+        )
+
+        for _, patch in self._mocks.items():
+            patch.assert_not_called()
+
+    def testArtifactsSuccess(self):
+        """Test GetArtifacts with all artifact types."""
+        image_controller.GetArtifacts(
+            self._InputProto(),
+            self.chroot,
+            self.sysroot_class,
+            self.build_target,
+            "",
+        )
+
+        for _, patch in self._mocks.items():
+            patch.assert_called_once()
+
+    def testArtifactsException(self):
+        """Test GetArtifacts with all artifact types when one type throws an exception."""
+
+        self._mocks[
+            common_pb2.ArtifactsByService.Image.ArtifactType.STRIPPED_PACKAGES
+        ].side_effect = Exception("foo bar")
+        generated = image_controller.GetArtifacts(
+            self._InputProto(),
+            self.chroot,
+            self.sysroot_class,
+            self.build_target,
+            "",
+        )
+
+        for _, patch in self._mocks.items():
+            patch.assert_called_once()
+
+        found_artifact = False
+        for data in generated:
+            artifact_type = (
+                common_pb2.ArtifactsByService.Image.ArtifactType.Name(
+                    data["type"]
+                )
+            )
+            if artifact_type == "STRIPPED_PACKAGES":
+                found_artifact = True
+                self.assertTrue(data["failed"])
+                self.assertEqual(data["failure_reason"], "foo bar")
+        self.assertTrue(found_artifact)
 
 
 class RecoveryImageTest(

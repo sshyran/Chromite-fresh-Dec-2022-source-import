@@ -813,6 +813,13 @@ class GetArtifactsTest(cros_test_lib.MockTempDirTestCase):
         common_pb2.ArtifactsByService.Test.ArtifactType.CODE_COVERAGE_LLVM_JSON
     )
 
+    _artifact_funcs = {
+        common_pb2.ArtifactsByService.Test.ArtifactType.CODE_COVERAGE_LLVM_JSON: test_service.BundleCodeCoverageLlvmJson,
+        common_pb2.ArtifactsByService.Test.ArtifactType.CODE_COVERAGE_RUST_LLVM_JSON: test_service.BundleCodeCoverageRustLlvmJson,
+        common_pb2.ArtifactsByService.Test.ArtifactType.HWQUAL: test_service.BundleHwqualTarball,
+        common_pb2.ArtifactsByService.Test.ArtifactType.CODE_COVERAGE_GOLANG: test_service.BundleCodeCoverageGolang,
+    }
+
     def setUp(self):
         """Set up the class for tests."""
         chroot_dir = os.path.join(self.tempdir, "chroot")
@@ -825,6 +832,25 @@ class GetArtifactsTest(cros_test_lib.MockTempDirTestCase):
         self.sysroot = sysroot_lib.Sysroot(sysroot_path)
 
         self.build_target = build_target_lib.BuildTarget("board")
+
+        self._mocks = {}
+        for artifact, func in self._artifact_funcs.items():
+            self._mocks[artifact] = self.PatchObject(
+                test_service, func.__name__
+            )
+
+    def _InputProto(
+        self,
+        artifact_types=_artifact_funcs.keys(),
+    ):
+        """Helper to build an input proto instance."""
+        return common_pb2.ArtifactsByService.Test(
+            output_artifacts=[
+                common_pb2.ArtifactsByService.Test.ArtifactInfo(
+                    artifact_types=artifact_types
+                )
+            ]
+        )
 
     def testReturnsEmptyListWhenNoOutputArtifactsProvided(self):
         """Test empty list is returned when there are no output_artifacts."""
@@ -892,3 +918,48 @@ class GetArtifactsTest(cros_test_lib.MockTempDirTestCase):
         self.assertEqual(
             result[0]["type"], self.CODE_COVERAGE_LLVM_ARTIFACT_TYPE
         )
+
+    def testNoArtifacts(self):
+        """Test GetArtifacts with no artifact types."""
+        in_proto = self._InputProto(artifact_types=[])
+        test_controller.GetArtifacts(
+            in_proto, None, None, self.build_target, ""
+        )
+
+        for _, patch in self._mocks.items():
+            patch.assert_not_called()
+
+    def testArtifactsSuccess(self):
+        """Test GetArtifacts with all artifact types."""
+        test_controller.GetArtifacts(
+            self._InputProto(), None, None, self.build_target, ""
+        )
+
+        for _, patch in self._mocks.items():
+            patch.assert_called_once()
+
+    def testArtifactsException(self):
+        """Test GetArtifacts with all artifact types when one type throws an exception."""
+
+        self._mocks[
+            common_pb2.ArtifactsByService.Test.ArtifactType.CODE_COVERAGE_GOLANG
+        ].side_effect = Exception("foo bar")
+        generated = test_controller.GetArtifacts(
+            self._InputProto(), None, None, self.build_target, ""
+        )
+
+        for _, patch in self._mocks.items():
+            patch.assert_called_once()
+
+        found_artifact = False
+        for data in generated:
+            artifact_type = (
+                common_pb2.ArtifactsByService.Test.ArtifactType.Name(
+                    data["type"]
+                )
+            )
+            if artifact_type == "CODE_COVERAGE_GOLANG":
+                found_artifact = True
+                self.assertTrue(data["failed"])
+                self.assertEqual(data["failure_reason"], "foo bar")
+        self.assertTrue(found_artifact)

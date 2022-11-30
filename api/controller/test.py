@@ -12,6 +12,7 @@ import logging
 import os
 import string
 import subprocess
+import traceback
 
 from chromite.third_party.google.protobuf import json_format
 
@@ -463,10 +464,34 @@ def GetArtifacts(
     for output_artifact in in_proto.output_artifacts:
         for artifact_type, func in artifact_types.items():
             if artifact_type in output_artifact.artifact_types:
-                if artifact_type == in_proto.ArtifactType.CODE_COVERAGE_GOLANG:
-                    paths = func(chroot, output_dir)
-                else:
-                    paths = func(chroot, sysroot_class, output_dir)
+                try:
+                    if (
+                        artifact_type
+                        == in_proto.ArtifactType.CODE_COVERAGE_GOLANG
+                    ):
+                        paths = func(chroot, output_dir)
+                    else:
+                        paths = func(chroot, sysroot_class, output_dir)
+                except Exception as e:
+                    generated.append(
+                        {
+                            "type": artifact_type,
+                            "failed": True,
+                            "failure_reason": str(e),
+                        }
+                    )
+                    artifact_name = (
+                        common_pb2.ArtifactsByService.Test.ArtifactType.Name(
+                            artifact_type
+                        )
+                    )
+                    logging.warning(
+                        "%s artifact generation failed with exception %s",
+                        artifact_name,
+                        e,
+                    )
+                    logging.warning("traceback:\n%s", traceback.format_exc())
+                    continue
                 if paths:
                     generated.append(
                         {
