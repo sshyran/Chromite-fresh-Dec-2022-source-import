@@ -138,6 +138,7 @@
     brya-kernelnext-release
     brya-lvm-stateful-release
     brya-manatee-release
+    brya-nopkvm-release
     brya-pkvm-release
     brya-release
     brya-zephyr-release
@@ -422,6 +423,11 @@
   brya-manatee-llvm-toolchain-tryjob
   brya-manatee-payloads-tryjob
   brya-manatee-release-tryjob
+  brya-nopkvm-full-tryjob
+  brya-nopkvm-llvm-next-toolchain-tryjob
+  brya-nopkvm-llvm-toolchain-tryjob
+  brya-nopkvm-payloads-tryjob
+  brya-nopkvm-release-tryjob
   brya-payloads-tryjob
   brya-pkvm-full-tryjob
   brya-pkvm-llvm-next-toolchain-tryjob
@@ -973,6 +979,7 @@
     brya-kernelnext-release-tryjob
     brya-lvm-stateful-release-tryjob
     brya-manatee-release-tryjob
+    brya-nopkvm-release-tryjob
     brya-pkvm-release-tryjob
     brya-release-tryjob
     brya-zephyr-release-tryjob
