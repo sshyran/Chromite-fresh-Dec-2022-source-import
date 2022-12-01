@@ -237,6 +237,7 @@ class GetArtifactsTest(
         common_pb2.ArtifactsByService.Image.ArtifactType.LICENSE_CREDITS: image_service.copy_license_credits,
         common_pb2.ArtifactsByService.Image.ArtifactType.FACTORY_IMAGE: image_service.create_factory_image_zip,
         common_pb2.ArtifactsByService.Image.ArtifactType.STRIPPED_PACKAGES: image_service.create_stripped_packages_tar,
+        common_pb2.ArtifactsByService.Image.ArtifactType.IMAGE_SCRIPTS: image_service.create_image_scripts_archive,
     }
 
     def setUp(self):

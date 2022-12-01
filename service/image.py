@@ -842,3 +842,29 @@ def create_netboot_kernel(
     """
     cmd = ["./make_netboot.sh", f"--board={board}", f"--image_dir={output_dir}"]
     cros_build_lib.run(cmd, enter_chroot=True)
+
+
+def create_image_scripts_archive(
+    build_target: build_target_lib.BuildTarget,
+    output_dir: str,
+) -> Union[str, None]:
+    """Create image_scripts.tar.xz.
+
+    Args:
+        chroot: The chroot class used for these artifacts.
+        build_target: The build target.
+        output_dir: Directory to image_scripts.tar.xz.
+
+    Returns:
+        The path to the archive, or None if it couldn't be created.
+    """
+    image_dir = image_lib.GetLatestImageLink(build_target.name)
+    if not image_dir.exists():
+        logging.warning("Image build directory not found.")
+        return None
+
+    tarball_path = os.path.join(output_dir, constants.IMAGE_SCRIPTS_TAR)
+    files = glob.glob(os.path.join(image_dir, "*.sh"))
+    files = [os.path.basename(f) for f in files]
+    cros_build_lib.CreateTarball(tarball_path, image_dir, inputs=files)
+    return tarball_path

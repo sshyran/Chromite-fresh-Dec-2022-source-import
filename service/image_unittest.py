@@ -5,6 +5,7 @@
 """Image API unittests."""
 
 import errno
+import glob
 import os
 from pathlib import Path
 
@@ -735,6 +736,40 @@ class TestCreateNetbootKernel(cros_test_lib.MockTempDirTestCase):
                 f"--board={board}",
                 f"--image_dir={image_dir}",
             ]
+        )
+
+
+class TestCreateImageScriptsArchive(cros_test_lib.MockTempDirTestCase):
+    """Unittests for create_image_scripts_archive."""
+
+    def test(self):
+        """Test image scripts archive creation."""
+        build_target = build_target_lib.BuildTarget(
+            "target",
+        )
+        output_dir = "/path/to/output/dir/"
+        image_dir = self.tempdir
+
+        self.PatchObject(
+            image_lib, "GetLatestImageLink", return_value=image_dir
+        )
+
+        glob_mock = self.PatchObject(
+            glob,
+            "glob",
+            return_value=[
+                os.path.join(image_dir, "bar.sh"),
+                os.path.join(image_dir, "baz.sh"),
+            ],
+        )
+
+        tar_mock = self.PatchObject(cros_build_lib, "CreateTarball")
+        image.create_image_scripts_archive(build_target, output_dir)
+        glob_mock.assert_called_once()
+        tar_mock.assert_called_once_with(
+            os.path.join(output_dir, "image_scripts.tar.xz"),
+            image_dir,
+            inputs=["bar.sh", "baz.sh"],
         )
 
 

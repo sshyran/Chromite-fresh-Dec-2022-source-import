@@ -204,11 +204,16 @@ def GetArtifacts(
         chroot,
         build_target,
     )
+    image_scripts_func = functools.partial(
+        image.create_image_scripts_archive, build_target
+    )
+
     artifact_types = {
         in_proto.ArtifactType.DLC_IMAGE: dlc_func,
         in_proto.ArtifactType.LICENSE_CREDITS: license_func,
         in_proto.ArtifactType.FACTORY_IMAGE: factory_image_func,
         in_proto.ArtifactType.STRIPPED_PACKAGES: stripped_packags_func,
+        in_proto.ArtifactType.IMAGE_SCRIPTS: image_scripts_func,
     }
 
     for output_artifact in in_proto.output_artifacts:
