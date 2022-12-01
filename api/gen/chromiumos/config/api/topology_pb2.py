@@ -12,7 +12,6 @@ _sym_db = _symbol_database.Default()
 
 
 from chromite.api.gen.chromiumos.config.api import component_pb2 as chromiumos_dot_config_dot_api_dot_component__pb2
-from chromite.api.gen.chromiumos.config.api import proximity_config_pb2 as chromiumos_dot_config_dot_api_dot_proximity__config__pb2
 from chromite.api.gen.chromiumos.config.api import wifi_config_pb2 as chromiumos_dot_config_dot_api_dot_wifi__config__pb2
 from chromite.third_party.google.protobuf import wrappers_pb2 as google_dot_protobuf_dot_wrappers__pb2
 
@@ -23,9 +22,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z(go.chromium.org/chromiumos/config/go/api',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n$chromiumos/config/api/topology.proto\x12\x15\x63hromiumos.config.api\x1a%chromiumos/config/api/component.proto\x1a,chromiumos/config/api/proximity_config.proto\x1a\'chromiumos/config/api/wifi_config.proto\x1a\x1egoogle/protobuf/wrappers.proto\"\xc2\x06\n\x08Topology\x12\n\n\x02id\x18\x01 \x01(\t\x12\x32\n\x04type\x18\x02 \x01(\x0e\x32$.chromiumos.config.api.Topology.Type\x12\x45\n\x0b\x64\x65scription\x18\x03 \x03(\x0b\x32\x30.chromiumos.config.api.Topology.DescriptionEntry\x12\x41\n\x10hardware_feature\x18\x04 \x01(\x0b\x32\'.chromiumos.config.api.HardwareFeatures\x1a\x32\n\x10\x44\x65scriptionEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xb7\x04\n\x04Type\x12\x10\n\x0cTYPE_UNKNOWN\x10\x00\x12\n\n\x06SCREEN\x10\x01\x12\x0f\n\x0b\x46ORM_FACTOR\x10\x02\x12\t\n\x05\x41UDIO\x10\x03\x12\n\n\x06STYLUS\x10\x04\x12\x0c\n\x08KEYBOARD\x10\x05\x12\x0b\n\x07THERMAL\x10\x06\x12\n\n\x06\x43\x41MERA\x10\x07\x12(\n$ACCELEROMETER_GYROSCOPE_MAGNETOMETER\x10\x08\x12\x0f\n\x0b\x46INGERPRINT\x10\t\x12\x14\n\x10PROXIMITY_SENSOR\x10\n\x12\x12\n\x0e\x44\x41UGHTER_BOARD\x10\x0b\x12\x18\n\x14NON_VOLATILE_STORAGE\x10\x0c\x12\x07\n\x03RAM\x10\r\x12\x08\n\x04WIFI\x10\x0e\x12\x12\n\x0e\x43\x45LLULAR_BOARD\x10\x0f\x12\r\n\tSD_READER\x10\x10\x12\x13\n\x0fMOTHERBOARD_USB\x10\x11\x12\r\n\tBLUETOOTH\x10\x12\x12\x0e\n\nBARRELJACK\x10\x13\x12\x10\n\x0cPOWER_BUTTON\x10\x14\x12\x11\n\rVOLUME_BUTTON\x10\x15\x12\x06\n\x02\x45\x43\x10\x16\x12\t\n\x05TOUCH\x10\x17\x12\x07\n\x03TPM\x10\x18\x12\x1a\n\x16MICROPHONE_MUTE_SWITCH\x10\x19\x12\x0b\n\x07\x42\x41TTERY\x10\x1a\x12\x08\n\x04HDMI\x10\x1b\x12\x07\n\x03SOC\x10\x1c\x12\x07\n\x03HPS\x10\x1d\x12\x10\n\x0c\x44P_CONVERTER\x10\x1e\x12\x07\n\x03POE\x10\x1f\x12\x10\n\x0cPOWER_SUPPLY\x10 \x12\x12\n\x0eRECOVERY_INPUT\x10!\x12\x12\n\x0ePRIVACY_SCREEN\x10\"\"\xa8\x01\n\x08\x44uration\x12\x32\n\x04type\x18\x01 \x01(\x0e\x32$.chromiumos.config.api.Duration.Type\x12\r\n\x05value\x18\x02 \x01(\x05\"Y\n\x04Type\x12\x10\n\x0cTYPE_UNKNOWN\x10\x00\x12\x10\n\x0cMILLISECONDS\x10\x01\x12\x0b\n\x07SECONDS\x10\x02\x12\x0b\n\x07MINUTES\x10\x03\x12\t\n\x05HOURS\x10\x04\x12\x08\n\x04\x44\x41YS\x10\x05\"\xfeh\n\x10HardwareFeatures\x12;\n\x05usb_c\x18\x01 \x01(\x0b\x32,.chromiumos.config.api.HardwareFeatures.UsbC\x12;\n\x05usb_a\x18\x02 \x01(\x0b\x32,.chromiumos.config.api.HardwareFeatures.UsbA\x12\x42\n\x08\x63\x65llular\x18\x03 \x01(\x0b\x32\x30.chromiumos.config.api.HardwareFeatures.Cellular\x12:\n\x04hdmi\x18\x04 \x01(\x0b\x32,.chromiumos.config.api.HardwareFeatures.Hdmi\x12P\n\tfw_config\x18\x05 \x01(\x0b\x32=.chromiumos.config.api.HardwareFeatures.FirmwareConfiguration\x12<\n\x05\x61udio\x18\x06 \x01(\x0b\x32-.chromiumos.config.api.HardwareFeatures.Audio\x12>\n\x06\x63\x61mera\x18\x07 \x01(\x0b\x32..chromiumos.config.api.HardwareFeatures.Camera\x12L\n\raccelerometer\x18\x08 \x01(\x0b\x32\x35.chromiumos.config.api.HardwareFeatures.Accelerometer\x12\x44\n\tgyroscope\x18\t \x01(\x0b\x32\x31.chromiumos.config.api.HardwareFeatures.Gyroscope\x12J\n\x0cmagnetometer\x18\n \x01(\x0b\x32\x34.chromiumos.config.api.HardwareFeatures.Magnetometer\x12I\n\x0clight_sensor\x18\x0b \x01(\x0b\x32\x33.chromiumos.config.api.HardwareFeatures.LightSensor\x12>\n\x06screen\x18\x0c \x01(\x0b\x32..chromiumos.config.api.HardwareFeatures.Screen\x12G\n\x0b\x66orm_factor\x18\r \x01(\x0b\x32\x32.chromiumos.config.api.HardwareFeatures.FormFactor\x12>\n\x06stylus\x18\x0e \x01(\x0b\x32..chromiumos.config.api.HardwareFeatures.Stylus\x12\x42\n\x08keyboard\x18\x0f \x01(\x0b\x32\x30.chromiumos.config.api.HardwareFeatures.Keyboard\x12>\n\x06memory\x18\x10 \x01(\x0b\x32..chromiumos.config.api.HardwareFeatures.Memory\x12H\n\x0b\x66ingerprint\x18\x11 \x01(\x0b\x32\x33.chromiumos.config.api.HardwareFeatures.Fingerprint\x12@\n\x07storage\x18\x12 \x01(\x0b\x32/.chromiumos.config.api.HardwareFeatures.Storage\x12\x44\n\tbluetooth\x18\x13 \x01(\x0b\x32\x31.chromiumos.config.api.HardwareFeatures.Bluetooth\x12\x46\n\nbarreljack\x18\x14 \x01(\x0b\x32\x32.chromiumos.config.api.HardwareFeatures.BarrelJack\x12:\n\x04wifi\x18\x17 \x01(\x0b\x32,.chromiumos.config.api.HardwareFeatures.Wifi\x12\x44\n\x0cpower_button\x18\x15 \x01(\x0b\x32..chromiumos.config.api.HardwareFeatures.Button\x12\x45\n\rvolume_button\x18\x16 \x01(\x0b\x32..chromiumos.config.api.HardwareFeatures.Button\x12W\n\x13\x65mbedded_controller\x18\x18 \x01(\x0b\x32:.chromiumos.config.api.HardwareFeatures.EmbeddedController\x12^\n\x17trusted_platform_module\x18\x19 \x01(\x0b\x32=.chromiumos.config.api.HardwareFeatures.TrustedPlatformModule\x12\x46\n\nhotwording\x18\x1a \x01(\x0b\x32\x32.chromiumos.config.api.HardwareFeatures.Hotwording\x12@\n\x07\x64isplay\x18\x1b \x01(\x0b\x32/.chromiumos.config.api.HardwareFeatures.Display\x12\x42\n\x08touchpad\x18\x1c \x01(\x0b\x32\x30.chromiumos.config.api.HardwareFeatures.Touchpad\x12\\\n\x16microphone_mute_switch\x18\x1d \x01(\x0b\x32<.chromiumos.config.api.HardwareFeatures.MicrophoneMuteSwitch\x12@\n\x07\x62\x61ttery\x18\x1e \x01(\x0b\x32/.chromiumos.config.api.HardwareFeatures.Battery\x12M\n\x0eprivacy_screen\x18\x1f \x01(\x0b\x32\x35.chromiumos.config.api.HardwareFeatures.PrivacyScreen\x12\x38\n\x03soc\x18  \x01(\x0b\x32+.chromiumos.config.api.HardwareFeatures.Soc\x12R\n\x0c\x64p_converter\x18! \x01(\x0b\x32<.chromiumos.config.api.HardwareFeatures.DisplayPortConverter\x12\x38\n\x03hps\x18\" \x01(\x0b\x32+.chromiumos.config.api.HardwareFeatures.Hps\x12\x38\n\x03poe\x18# \x01(\x0b\x32+.chromiumos.config.api.HardwareFeatures.PoE\x12I\n\x0cpower_supply\x18$ \x01(\x0b\x32\x33.chromiumos.config.api.HardwareFeatures.PowerSupply\x12\x44\n\tproximity\x18% \x01(\x0b\x32\x31.chromiumos.config.api.HardwareFeatures.Proximity\x12<\n\x05touch\x18& \x01(\x0b\x32-.chromiumos.config.api.HardwareFeatures.Touch\x1a\x16\n\x05\x43ount\x12\r\n\x05value\x18\x01 \x01(\r\x1a\xc3\x02\n\x04UsbC\x12<\n\x05\x63ount\x18\x01 \x01(\x0b\x32-.chromiumos.config.api.HardwareFeatures.Count\x12@\n\x05ports\x18\x02 \x03(\x0b\x32\x31.chromiumos.config.api.HardwareFeatures.UsbC.Port\x12\x0c\n\x04usb4\x18\x03 \x01(\x08\x12&\n\x1e\x64\x65\x66\x65r_external_display_timeout\x18\x04 \x01(\r\x1a\x84\x01\n\x04Port\x12\x46\n\x08position\x18\x01 \x01(\x0e\x32\x34.chromiumos.config.api.HardwareFeatures.PortPosition\x12\x34\n\x0eindex_override\x18\x02 \x01(\x0b\x32\x1c.google.protobuf.UInt32Value\x1a\x44\n\x04UsbA\x12<\n\x05\x63ount\x18\x01 \x01(\x0b\x32-.chromiumos.config.api.HardwareFeatures.Count\x1a\x9b\x04\n\x08\x43\x65llular\x12@\n\x07present\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12\r\n\x05model\x18\x02 \x01(\t\x12K\n\x04type\x18\x03 \x01(\x0e\x32=.chromiumos.config.api.HardwareFeatures.Cellular.CellularType\x12\x1b\n\x13\x61ttach_apn_required\x18\x04 \x01(\x08\x12t\n\x1e\x64ynamic_power_reduction_config\x18\x05 \x01(\x0b\x32L.chromiumos.config.api.HardwareFeatures.Cellular.DynamicPowerReductionConfig\x1a\x99\x01\n\x1b\x44ynamicPowerReductionConfig\x12\x0e\n\x04gpio\x18\x01 \x01(\rH\x00\x12\x17\n\rmodem_manager\x18\x02 \x01(\x08H\x00\x12/\n\x0btablet_mode\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.BoolValueB \n\x1e\x64ynamic_power_reduction_config\"B\n\x0c\x43\x65llularType\x12\x0f\n\x0bNOT_PRESENT\x10\x00\x12\x10\n\x0c\x43\x45LLULAR_LTE\x10\x01\x12\x0f\n\x0b\x43\x45LLULAR_5G\x10\x02\x1aH\n\x04Hdmi\x12@\n\x07present\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1aU\n\x15\x46irmwareConfiguration\x12\r\n\x05value\x18\x01 \x01(\r\x12\x0c\n\x04mask\x18\x02 \x01(\r\x12\x1f\n\x17\x63oreboot_customizations\x18\x03 \x03(\t\x1a\xba\x0b\n\x05\x41udio\x12M\n\x0b\x61udio_codec\x18\x01 \x01(\x0e\x32\x38.chromiumos.config.api.HardwareFeatures.Audio.AudioCodec\x12L\n\x0bspeaker_amp\x18\x02 \x01(\x0e\x32\x37.chromiumos.config.api.HardwareFeatures.Audio.Amplifier\x12Q\n\x0fheadphone_codec\x18\x03 \x01(\x0e\x32\x38.chromiumos.config.api.HardwareFeatures.Audio.AudioCodec\x12\x45\n\x0elid_microphone\x18\x04 \x01(\x0b\x32-.chromiumos.config.api.HardwareFeatures.Count\x12\x46\n\x0f\x62\x61se_microphone\x18\x05 \x01(\x0b\x32-.chromiumos.config.api.HardwareFeatures.Count\x12\x45\n\x11speaker_amplifier\x18\x06 \x01(\x0b\x32*.chromiumos.config.api.Component.Amplifier\x12N\n\x0c\x63\x61rd_configs\x18\x07 \x03(\x0b\x32\x38.chromiumos.config.api.HardwareFeatures.Audio.CardConfig\x12W\n\x0b\x63ras_config\x18\x08 \x01(\x0e\x32\x42.chromiumos.config.api.HardwareFeatures.Audio.AudioConfigStructure\x1a\x99\x03\n\nCardConfig\x12\x11\n\tcard_name\x18\x01 \x01(\t\x12\x30\n\nucm_suffix\x18\x02 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12V\n\nucm_config\x18\x03 \x01(\x0e\x32\x42.chromiumos.config.api.HardwareFeatures.Audio.AudioConfigStructure\x12W\n\x0b\x63ras_config\x18\x04 \x01(\x0e\x32\x42.chromiumos.config.api.HardwareFeatures.Audio.AudioConfigStructure\x12\x62\n\x16sound_card_init_config\x18\x05 \x01(\x0e\x32\x42.chromiumos.config.api.HardwareFeatures.Audio.AudioConfigStructure\x12\x31\n\x0b\x63ras_suffix\x18\x06 \x01(\x0b\x32\x1c.google.protobuf.StringValue\"\x9d\x01\n\nAudioCodec\x12\x17\n\x13\x41UDIO_CODEC_UNKNOWN\x10\x00\x12\n\n\x06RT5682\x10\x01\x12\x0c\n\x08\x41LC5682I\x10\x02\x12\x0b\n\x07\x41LC5682\x10\x03\x12\n\n\x06\x44\x41\x37\x32\x31\x39\x10\x08\x12\r\n\tNAU88L25B\x10\n\x12\x0b\n\x07\x43S42L42\x10\x0b\x12\x0e\n\nALC5682IVS\x10\x0c\x12\x0b\n\x07WCD9385\x10\r\"\x04\x08\x04\x10\x07\"\x04\x08\t\x10\t\"\xb4\x01\n\tAmplifier\x12\x15\n\x11\x41MPLIFIER_UNKNOWN\x10\x00\x12\x0c\n\x08MAX98357\x10\x04\x12\x0c\n\x08MAX98373\x10\x05\x12\x0c\n\x08MAX98360\x10\x06\x12\n\n\x06RT1015\x10\x07\x12\x0b\n\x07\x41LC1011\x10\t\x12\x0b\n\x07RT1015P\x10\n\x12\x0b\n\x07\x41LC1019\x10\x0b\x12\x0c\n\x08MAX98390\x10\x0c\x12\x0c\n\x08MAX98396\x10\r\x12\x0b\n\x07\x43S35L41\x10\x0e\"\x04\x08\x01\x10\x03\"\x04\x08\x08\x10\x08\"O\n\x14\x41udioConfigStructure\x12\x1f\n\x1b\x41UDIO_CONFIG_STRUCTURE_NONE\x10\x00\x12\n\n\x06\x44\x45SIGN\x10\x01\x12\n\n\x06\x43OMMON\x10\x02\x1a\xd6\x06\n\x06\x43\x61mera\x12\x46\n\x07\x64\x65vices\x18\x04 \x03(\x0b\x32\x35.chromiumos.config.api.HardwareFeatures.Camera.Device\x1a\xaf\x03\n\x06\x44\x65vice\x12K\n\tinterface\x18\x02 \x01(\x0e\x32\x38.chromiumos.config.api.HardwareFeatures.Camera.Interface\x12\x45\n\x06\x66\x61\x63ing\x18\x03 \x01(\x0e\x32\x35.chromiumos.config.api.HardwareFeatures.Camera.Facing\x12O\n\x0borientation\x18\x04 \x01(\x0e\x32:.chromiumos.config.api.HardwareFeatures.Camera.Orientation\x12\r\n\x05\x66lags\x18\x05 \x01(\r\x12\x0b\n\x03ids\x18\x06 \x03(\t\x12G\n\x0eprivacy_switch\x18\x07 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12G\n\x10microphone_count\x18\x08 \x01(\x0b\x32-.chromiumos.config.api.HardwareFeatures.Count\x12\x12\n\ndetachable\x18\t \x01(\x08\"I\n\tInterface\x12\x15\n\x11INTERFACE_UNKNOWN\x10\x00\x12\x11\n\rINTERFACE_USB\x10\x01\x12\x12\n\x0eINTERFACE_MIPI\x10\x02\"?\n\x06\x46\x61\x63ing\x12\x12\n\x0e\x46\x41\x43ING_UNKNOWN\x10\x00\x12\x10\n\x0c\x46\x41\x43ING_FRONT\x10\x01\x12\x0f\n\x0b\x46\x41\x43ING_BACK\x10\x02\"w\n\x0bOrientation\x12\x17\n\x13ORIENTATION_UNKNOWN\x10\x00\x12\x11\n\rORIENTATION_0\x10\x01\x12\x12\n\x0eORIENTATION_90\x10\x02\x12\x13\n\x0fORIENTATION_180\x10\x03\x12\x13\n\x0fORIENTATION_270\x10\x04\"M\n\x05\x46lags\x12\x0e\n\nFLAGS_NONE\x10\x00\x12\x17\n\x13\x46LAGS_SUPPORT_1080P\x10\x01\x12\x1b\n\x17\x46LAGS_SUPPORT_AUTOFOCUS\x10\x02\x1a\xa8\x01\n\rAccelerometer\x12J\n\x11lid_accelerometer\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12K\n\x12\x62\x61se_accelerometer\x18\x02 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1a\x9c\x01\n\tGyroscope\x12\x46\n\rlid_gyroscope\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12G\n\x0e\x62\x61se_gyroscope\x18\x02 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1a\xa5\x01\n\x0cMagnetometer\x12I\n\x10lid_magnetometer\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12J\n\x11\x62\x61se_magnetometer\x18\x02 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1a\xa2\x01\n\x0bLightSensor\x12H\n\x0flid_lightsensor\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12I\n\x10\x62\x61se_lightsensor\x18\x02 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1a\xaa\x01\n\x06Screen\x12R\n\x10panel_properties\x18\x03 \x01(\x0b\x32\x38.chromiumos.config.api.Component.DisplayPanel.Properties\x12\x46\n\rtouch_support\x18\x02 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.PresentJ\x04\x08\x01\x10\x02\x1a\xf6\x03\n\nFormFactor\x12V\n\x0b\x66orm_factor\x18\x01 \x01(\x0e\x32\x41.chromiumos.config.api.HardwareFeatures.FormFactor.FormFactorType\x12\\\n\x0erecovery_input\x18\x02 \x01(\x0e\x32\x44.chromiumos.config.api.HardwareFeatures.FormFactor.RecoveryInputType\x12\x31\n\rdetachable_ui\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.BoolValue\"\x98\x01\n\x0e\x46ormFactorType\x12\x17\n\x13\x46ORM_FACTOR_UNKNOWN\x10\x00\x12\r\n\tCLAMSHELL\x10\x01\x12\x0f\n\x0b\x43ONVERTIBLE\x10\x02\x12\x0e\n\nDETACHABLE\x10\x03\x12\x0e\n\nCHROMEBASE\x10\x04\x12\r\n\tCHROMEBOX\x10\x05\x12\r\n\tCHROMEBIT\x10\x06\x12\x0f\n\x0b\x43HROMESLATE\x10\x07\"d\n\x11RecoveryInputType\x12\x1a\n\x16RECOVERY_INPUT_UNKNOWN\x10\x00\x12\x0c\n\x08KEYBOARD\x10\x01\x12\x10\n\x0cPOWER_BUTTON\x10\x02\x12\x13\n\x0fRECOVERY_BUTTON\x10\x03\x1a\x9b\x01\n\x06Stylus\x12I\n\x06stylus\x18\x01 \x01(\x0e\x32\x39.chromiumos.config.api.HardwareFeatures.Stylus.StylusType\"F\n\nStylusType\x12\x12\n\x0eSTYLUS_UNKNOWN\x10\x00\x12\x08\n\x04NONE\x10\x01\x12\x0c\n\x08INTERNAL\x10\x02\x12\x0c\n\x08\x45XTERNAL\x10\x03\x1a\xbf\x04\n\x08Keyboard\x12T\n\rkeyboard_type\x18\x01 \x01(\x0e\x32=.chromiumos.config.api.HardwareFeatures.Keyboard.KeyboardType\x12\x42\n\tbacklight\x18\x02 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12\x45\n\x0cpower_button\x18\x03 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12\x44\n\x0bnumeric_pad\x18\x04 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12R\n\x08mcu_type\x18\x06 \x01(\x0e\x32@.chromiumos.config.api.HardwareFeatures.Keyboard.KeyboardMcuType\x12\x1c\n\x14\x62\x61\x63klight_user_steps\x18\x05 \x03(\x01\"Q\n\x0cKeyboardType\x12\x19\n\x15KEYBOARD_TYPE_UNKNOWN\x10\x00\x12\x0c\n\x08INTERNAL\x10\x01\x12\x08\n\x04NONE\x10\x02\x12\x0e\n\nDETACHABLE\x10\x03\"G\n\x0fKeyboardMcuType\x12\x1c\n\x18KEYBOARD_MCU_NOT_PRESENT\x10\x00\x12\x16\n\x12KEYBOARD_MCU_PRISM\x10\x01\x1aJ\n\x06Memory\x12@\n\x07profile\x18\x01 \x01(\x0b\x32/.chromiumos.config.api.Component.Memory.Profile\x1a\x84\t\n\x0b\x46ingerprint\x12N\n\x08location\x18\x01 \x01(\x0e\x32<.chromiumos.config.api.HardwareFeatures.Fingerprint.Location\x12\r\n\x05\x62oard\x18\x02 \x01(\t\x12\x12\n\nro_version\x18\x03 \x01(\t\x12]\n\x10\x66ingerprint_diag\x18\x04 \x01(\x0b\x32\x43.chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag\x1a\xb6\x05\n\x0f\x46ingerprintDiag\x12\x16\n\x0eroutine_enable\x18\x01 \x01(\x08\x12\x15\n\rmax_pixel_dev\x18\x02 \x01(\r\x12\x17\n\x0fmax_dead_pixels\x18\x03 \x01(\r\x12\x65\n\x0cpixel_median\x18\x04 \x01(\x0b\x32O.chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.PixelMedian\x12\x17\n\x0fnum_detect_zone\x18\x05 \x01(\r\x12\x64\n\x0c\x64\x65tect_zones\x18\x06 \x03(\x0b\x32N.chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.DetectZone\x12&\n\x1emax_dead_pixels_in_detect_zone\x18\x07 \x01(\r\x12\x1b\n\x13max_reset_pixel_dev\x18\x08 \x01(\r\x12\x1e\n\x16max_error_reset_pixels\x18\t \x01(\r\x1a\xd1\x01\n\x0bPixelMedian\x12\x16\n\x0e\x63\x62_type1_lower\x18\x01 \x01(\r\x12\x16\n\x0e\x63\x62_type1_upper\x18\x02 \x01(\r\x12\x16\n\x0e\x63\x62_type2_lower\x18\x03 \x01(\r\x12\x16\n\x0e\x63\x62_type2_upper\x18\x04 \x01(\r\x12\x17\n\x0ficb_type1_lower\x18\x05 \x01(\r\x12\x17\n\x0ficb_type1_upper\x18\x06 \x01(\r\x12\x17\n\x0ficb_type2_lower\x18\x07 \x01(\r\x12\x17\n\x0ficb_type2_upper\x18\x08 \x01(\r\x1a<\n\nDetectZone\x12\n\n\x02x1\x18\x01 \x01(\r\x12\n\n\x02y1\x18\x02 \x01(\r\x12\n\n\x02x2\x18\x03 \x01(\r\x12\n\n\x02y2\x18\x04 \x01(\r\"\xe9\x01\n\x08Location\x12\x14\n\x10LOCATION_UNKNOWN\x10\x00\x12\x19\n\x15POWER_BUTTON_TOP_LEFT\x10\x01\x12\x18\n\x14KEYBOARD_BOTTOM_LEFT\x10\x02\x12\x19\n\x15KEYBOARD_BOTTOM_RIGHT\x10\x03\x12\x16\n\x12KEYBOARD_TOP_RIGHT\x10\x04\x12\x0f\n\x0bNOT_PRESENT\x10\x05\x12\x0e\n\nRIGHT_SIDE\x10\x06\x12\r\n\tLEFT_SIDE\x10\x07\x12\x0b\n\x07PRESENT\x10\x08\x12\"\n\x1eLEFT_OF_POWER_BUTTON_TOP_RIGHT\x10\t\x1a\x66\n\x07Storage\x12J\n\x0cstorage_type\x18\x01 \x01(\x0e\x32\x34.chromiumos.config.api.Component.Storage.StorageType\x12\x0f\n\x07size_gb\x18\x02 \x01(\r\x1a\x8c\x01\n\tBluetooth\x12=\n\tcomponent\x18\x01 \x01(\x0b\x32*.chromiumos.config.api.Component.Bluetooth\x12@\n\x07present\x18\x02 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1aN\n\nBarrelJack\x12@\n\x07present\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1a\xc5\x02\n\x04Wifi\x12T\n\x18supported_wlan_protocols\x18\x01 \x03(\x0e\x32\x32.chromiumos.config.api.Component.Wifi.WLANProtocol\x12I\n\nwifi_chips\x18\x02 \x03(\x0e\x32\x35.chromiumos.config.api.HardwareFeatures.Wifi.WifiChip\x12\x36\n\x0bwifi_config\x18\x03 \x01(\x0b\x32!.chromiumos.config.api.WifiConfig\x12\x14\n\x0cwifi_vpd_sar\x18\x04 \x01(\x08\"N\n\x08WifiChip\x12\x15\n\x11WIFI_CHIP_UNKNOWN\x10\x00\x12\x15\n\x11WIRELESS_86ED801D\x10\x01\x12\x14\n\x10WIRELESS_REALTEK\x10\x02\x1a\xa0\x02\n\x06\x42utton\x12\x45\n\x06region\x18\x01 \x01(\x0e\x32\x35.chromiumos.config.api.HardwareFeatures.Button.Region\x12\x41\n\x04\x65\x64ge\x18\x02 \x01(\x0e\x32\x33.chromiumos.config.api.HardwareFeatures.Button.Edge\x12\x10\n\x08position\x18\x03 \x01(\x02\"6\n\x06Region\x12\x12\n\x0eREGION_UNKNOWN\x10\x00\x12\n\n\x06SCREEN\x10\x01\x12\x0c\n\x08KEYBOARD\x10\x02\"B\n\x04\x45\x64ge\x12\x10\n\x0c\x45\x44GE_UNKNOWN\x10\x00\x12\x08\n\x04LEFT\x10\x01\x12\t\n\x05RIGHT\x10\x02\x12\x07\n\x03TOP\x10\x03\x12\n\n\x06\x42OTTOM\x10\x04\x1a\xc5\x05\n\x12\x45mbeddedController\x12@\n\x07present\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12\x62\n\x07\x65\x63_type\x18\x02 \x01(\x0e\x32Q.chromiumos.config.api.HardwareFeatures.EmbeddedController.EmbeddedControllerType\x12\x41\n\x04part\x18\x03 \x01(\x0b\x32\x33.chromiumos.config.api.Component.EmbeddedController\x12J\n\x11\x66\x65\x61ture_typec_cmd\x18\x04 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12<\n\x03\x63\x62i\x18\x05 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12H\n\x0f\x64\x65tachable_base\x18\x06 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12R\n\x19\x66\x65\x61ture_charge_control_v2\x18\x07 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12R\n\x19\x66\x65\x61ture_tablet_mode_angle\x18\x08 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\"J\n\x16\x45mbeddedControllerType\x12\x13\n\x0f\x45\x43_TYPE_UNKNOWN\x10\x00\x12\r\n\tEC_CHROME\x10\x01\x12\x0c\n\x08\x45\x43_WILCO\x10\x02\x1a\xe0\x01\n\x15TrustedPlatformModule\x12i\n\x08tpm_type\x18\x01 \x01(\x0e\x32W.chromiumos.config.api.HardwareFeatures.TrustedPlatformModule.TrustedPlatformModuleType\"\\\n\x19TrustedPlatformModuleType\x12\x14\n\x10TPM_TYPE_UNKNOWN\x10\x00\x12\x0f\n\x0bTHIRD_PARTY\x10\x01\x12\x0b\n\x07GSC_H1B\x10\x02\x12\x0b\n\x07GSC_H1D\x10\x03\x1aN\n\nHotwording\x12@\n\x07present\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1a\xa9\x01\n\x07\x44isplay\x12\x42\n\x04type\x18\x01 \x01(\x0e\x32\x34.chromiumos.config.api.HardwareFeatures.Display.Type\"Z\n\x04Type\x12\x10\n\x0cTYPE_UNKNOWN\x10\x00\x12\x11\n\rTYPE_INTERNAL\x10\x01\x12\x11\n\rTYPE_EXTERNAL\x10\x02\x12\x1a\n\x16TYPE_INTERNAL_EXTERNAL\x10\x03\x1aL\n\x08Touchpad\x12@\n\x07present\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1aX\n\x14MicrophoneMuteSwitch\x12@\n\x07present\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1a\xd9\x05\n\x07\x42\x61ttery\x12@\n\x07present\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12J\n\x08lifetime\x18\x02 \x01(\x0b\x32\x38.chromiumos.config.api.HardwareFeatures.Battery.Lifetime\x12J\n\x08\x63harging\x18\x03 \x01(\x0b\x32\x38.chromiumos.config.api.HardwareFeatures.Battery.Charging\x12!\n\x19no_battery_boot_supported\x18\x04 \x01(\x08\x1a\x9f\x02\n\x08Lifetime\x12\x35\n\x0cshipping_min\x18\x01 \x01(\x0b\x32\x1f.chromiumos.config.api.Duration\x12\x37\n\x0e\x64\x65\x65p_sleep_min\x18\x02 \x01(\x0b\x32\x1f.chromiumos.config.api.Duration\x12\x34\n\x0bsuspend_min\x18\x03 \x01(\x0b\x32\x1f.chromiumos.config.api.Duration\x12\x38\n\x0flucid_sleep_min\x18\x04 \x01(\x0b\x32\x1f.chromiumos.config.api.Duration\x12\x33\n\nactive_min\x18\x05 \x01(\x0b\x32\x1f.chromiumos.config.api.Duration\x1a\xae\x01\n\x08\x43harging\x12\x33\n\nactive_max\x18\x01 \x01(\x0b\x32\x1f.chromiumos.config.api.Duration\x12\x34\n\x0bsuspend_max\x18\x02 \x01(\x0b\x32\x1f.chromiumos.config.api.Duration\x12\x37\n\x0e\x64\x65\x65p_sleep_max\x18\x03 \x01(\x0b\x32\x1f.chromiumos.config.api.Duration\x1aQ\n\rPrivacyScreen\x12@\n\x07present\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1a\x92\x01\n\x03Soc\x12>\n\x08\x66\x65\x61tures\x18\x01 \x03(\x0e\x32,.chromiumos.config.api.Component.Soc.Feature\x12K\n\x0fvulnerabilities\x18\x02 \x03(\x0e\x32\x32.chromiumos.config.api.Component.Soc.Vulnerability\x1a\x61\n\x14\x44isplayPortConverter\x12I\n\nconverters\x18\x01 \x03(\x0b\x32\x35.chromiumos.config.api.Component.DisplayPortConverter\x1aG\n\x03Hps\x12@\n\x07present\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1aG\n\x03PoE\x12@\n\x07present\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1al\n\x0bPowerSupply\x12\x43\n\nbarreljack\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12\x18\n\x10usb_min_ac_watts\x18\x02 \x01(\x05\x1a\x44\n\tProximity\x12\x37\n\x07\x63onfigs\x18\x01 \x03(\x0b\x32&.chromiumos.config.api.ProximityConfig\x1a\x42\n\x05Touch\x12\x39\n\x13touch_slop_distance\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.UInt32Value\"<\n\x07Present\x12\x13\n\x0fPRESENT_UNKNOWN\x10\x00\x12\x0b\n\x07PRESENT\x10\x01\x12\x0f\n\x0bNOT_PRESENT\x10\x02\"\xa4\x01\n\x0cPortPosition\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x08\n\x04LEFT\x10\x01\x12\t\n\x05RIGHT\x10\x02\x12\x08\n\x04\x42\x41\x43K\x10\x03\x12\t\n\x05\x46RONT\x10\x04\x12\x0e\n\nLEFT_FRONT\x10\x05\x12\r\n\tLEFT_BACK\x10\x06\x12\x0f\n\x0bRIGHT_FRONT\x10\x07\x12\x0e\n\nRIGHT_BACK\x10\x08\x12\r\n\tBACK_LEFT\x10\t\x12\x0e\n\nBACK_RIGHT\x10\nB*Z(go.chromium.org/chromiumos/config/go/apib\x06proto3'
+  serialized_pb=b'\n$chromiumos/config/api/topology.proto\x12\x15\x63hromiumos.config.api\x1a%chromiumos/config/api/component.proto\x1a\'chromiumos/config/api/wifi_config.proto\x1a\x1egoogle/protobuf/wrappers.proto\"\xae\x06\n\x08Topology\x12\n\n\x02id\x18\x01 \x01(\t\x12\x32\n\x04type\x18\x02 \x01(\x0e\x32$.chromiumos.config.api.Topology.Type\x12\x45\n\x0b\x64\x65scription\x18\x03 \x03(\x0b\x32\x30.chromiumos.config.api.Topology.DescriptionEntry\x12\x41\n\x10hardware_feature\x18\x04 \x01(\x0b\x32\'.chromiumos.config.api.HardwareFeatures\x1a\x32\n\x10\x44\x65scriptionEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xa3\x04\n\x04Type\x12\x10\n\x0cTYPE_UNKNOWN\x10\x00\x12\n\n\x06SCREEN\x10\x01\x12\x0f\n\x0b\x46ORM_FACTOR\x10\x02\x12\t\n\x05\x41UDIO\x10\x03\x12\n\n\x06STYLUS\x10\x04\x12\x0c\n\x08KEYBOARD\x10\x05\x12\x0b\n\x07THERMAL\x10\x06\x12\n\n\x06\x43\x41MERA\x10\x07\x12(\n$ACCELEROMETER_GYROSCOPE_MAGNETOMETER\x10\x08\x12\x0f\n\x0b\x46INGERPRINT\x10\t\x12\x14\n\x10PROXIMITY_SENSOR\x10\n\x12\x12\n\x0e\x44\x41UGHTER_BOARD\x10\x0b\x12\x18\n\x14NON_VOLATILE_STORAGE\x10\x0c\x12\x07\n\x03RAM\x10\r\x12\x08\n\x04WIFI\x10\x0e\x12\x12\n\x0e\x43\x45LLULAR_BOARD\x10\x0f\x12\r\n\tSD_READER\x10\x10\x12\x13\n\x0fMOTHERBOARD_USB\x10\x11\x12\r\n\tBLUETOOTH\x10\x12\x12\x0e\n\nBARRELJACK\x10\x13\x12\x10\n\x0cPOWER_BUTTON\x10\x14\x12\x11\n\rVOLUME_BUTTON\x10\x15\x12\x06\n\x02\x45\x43\x10\x16\x12\t\n\x05TOUCH\x10\x17\x12\x07\n\x03TPM\x10\x18\x12\x1a\n\x16MICROPHONE_MUTE_SWITCH\x10\x19\x12\x0b\n\x07\x42\x41TTERY\x10\x1a\x12\x08\n\x04HDMI\x10\x1b\x12\x07\n\x03SOC\x10\x1c\x12\x07\n\x03HPS\x10\x1d\x12\x10\n\x0c\x44P_CONVERTER\x10\x1e\x12\x07\n\x03POE\x10\x1f\x12\x10\n\x0cPOWER_SUPPLY\x10 \x12\x12\n\x0eRECOVERY_INPUT\x10!\"\xa8\x01\n\x08\x44uration\x12\x32\n\x04type\x18\x01 \x01(\x0e\x32$.chromiumos.config.api.Duration.Type\x12\r\n\x05value\x18\x02 \x01(\x05\"Y\n\x04Type\x12\x10\n\x0cTYPE_UNKNOWN\x10\x00\x12\x10\n\x0cMILLISECONDS\x10\x01\x12\x0b\n\x07SECONDS\x10\x02\x12\x0b\n\x07MINUTES\x10\x03\x12\t\n\x05HOURS\x10\x04\x12\x08\n\x04\x44\x41YS\x10\x05\"\x95\\\n\x10HardwareFeatures\x12;\n\x05usb_c\x18\x01 \x01(\x0b\x32,.chromiumos.config.api.HardwareFeatures.UsbC\x12;\n\x05usb_a\x18\x02 \x01(\x0b\x32,.chromiumos.config.api.HardwareFeatures.UsbA\x12\x42\n\x08\x63\x65llular\x18\x03 \x01(\x0b\x32\x30.chromiumos.config.api.HardwareFeatures.Cellular\x12:\n\x04hdmi\x18\x04 \x01(\x0b\x32,.chromiumos.config.api.HardwareFeatures.Hdmi\x12P\n\tfw_config\x18\x05 \x01(\x0b\x32=.chromiumos.config.api.HardwareFeatures.FirmwareConfiguration\x12<\n\x05\x61udio\x18\x06 \x01(\x0b\x32-.chromiumos.config.api.HardwareFeatures.Audio\x12>\n\x06\x63\x61mera\x18\x07 \x01(\x0b\x32..chromiumos.config.api.HardwareFeatures.Camera\x12L\n\raccelerometer\x18\x08 \x01(\x0b\x32\x35.chromiumos.config.api.HardwareFeatures.Accelerometer\x12\x44\n\tgyroscope\x18\t \x01(\x0b\x32\x31.chromiumos.config.api.HardwareFeatures.Gyroscope\x12J\n\x0cmagnetometer\x18\n \x01(\x0b\x32\x34.chromiumos.config.api.HardwareFeatures.Magnetometer\x12I\n\x0clight_sensor\x18\x0b \x01(\x0b\x32\x33.chromiumos.config.api.HardwareFeatures.LightSensor\x12>\n\x06screen\x18\x0c \x01(\x0b\x32..chromiumos.config.api.HardwareFeatures.Screen\x12G\n\x0b\x66orm_factor\x18\r \x01(\x0b\x32\x32.chromiumos.config.api.HardwareFeatures.FormFactor\x12>\n\x06stylus\x18\x0e \x01(\x0b\x32..chromiumos.config.api.HardwareFeatures.Stylus\x12\x42\n\x08keyboard\x18\x0f \x01(\x0b\x32\x30.chromiumos.config.api.HardwareFeatures.Keyboard\x12>\n\x06memory\x18\x10 \x01(\x0b\x32..chromiumos.config.api.HardwareFeatures.Memory\x12H\n\x0b\x66ingerprint\x18\x11 \x01(\x0b\x32\x33.chromiumos.config.api.HardwareFeatures.Fingerprint\x12@\n\x07storage\x18\x12 \x01(\x0b\x32/.chromiumos.config.api.HardwareFeatures.Storage\x12\x44\n\tbluetooth\x18\x13 \x01(\x0b\x32\x31.chromiumos.config.api.HardwareFeatures.Bluetooth\x12\x46\n\nbarreljack\x18\x14 \x01(\x0b\x32\x32.chromiumos.config.api.HardwareFeatures.BarrelJack\x12:\n\x04wifi\x18\x17 \x01(\x0b\x32,.chromiumos.config.api.HardwareFeatures.Wifi\x12\x44\n\x0cpower_button\x18\x15 \x01(\x0b\x32..chromiumos.config.api.HardwareFeatures.Button\x12\x45\n\rvolume_button\x18\x16 \x01(\x0b\x32..chromiumos.config.api.HardwareFeatures.Button\x12W\n\x13\x65mbedded_controller\x18\x18 \x01(\x0b\x32:.chromiumos.config.api.HardwareFeatures.EmbeddedController\x12^\n\x17trusted_platform_module\x18\x19 \x01(\x0b\x32=.chromiumos.config.api.HardwareFeatures.TrustedPlatformModule\x12\x46\n\nhotwording\x18\x1a \x01(\x0b\x32\x32.chromiumos.config.api.HardwareFeatures.Hotwording\x12@\n\x07\x64isplay\x18\x1b \x01(\x0b\x32/.chromiumos.config.api.HardwareFeatures.Display\x12\x42\n\x08touchpad\x18\x1c \x01(\x0b\x32\x30.chromiumos.config.api.HardwareFeatures.Touchpad\x12\\\n\x16microphone_mute_switch\x18\x1d \x01(\x0b\x32<.chromiumos.config.api.HardwareFeatures.MicrophoneMuteSwitch\x12@\n\x07\x62\x61ttery\x18\x1e \x01(\x0b\x32/.chromiumos.config.api.HardwareFeatures.Battery\x12M\n\x0eprivacy_screen\x18\x1f \x01(\x0b\x32\x35.chromiumos.config.api.HardwareFeatures.PrivacyScreen\x12\x38\n\x03soc\x18  \x01(\x0b\x32+.chromiumos.config.api.HardwareFeatures.Soc\x12R\n\x0c\x64p_converter\x18! \x01(\x0b\x32<.chromiumos.config.api.HardwareFeatures.DisplayPortConverter\x12\x38\n\x03hps\x18\" \x01(\x0b\x32+.chromiumos.config.api.HardwareFeatures.Hps\x12\x38\n\x03poe\x18# \x01(\x0b\x32+.chromiumos.config.api.HardwareFeatures.PoE\x12I\n\x0cpower_supply\x18$ \x01(\x0b\x32\x33.chromiumos.config.api.HardwareFeatures.PowerSupply\x12\x44\n\tproximity\x18% \x01(\x0b\x32\x31.chromiumos.config.api.HardwareFeatures.Proximity\x12<\n\x05touch\x18& \x01(\x0b\x32-.chromiumos.config.api.HardwareFeatures.Touch\x1a\x16\n\x05\x43ount\x12\r\n\x05value\x18\x01 \x01(\r\x1a\x8d\x02\n\x04UsbC\x12<\n\x05\x63ount\x18\x01 \x01(\x0b\x32-.chromiumos.config.api.HardwareFeatures.Count\x12@\n\x05ports\x18\x02 \x03(\x0b\x32\x31.chromiumos.config.api.HardwareFeatures.UsbC.Port\x1a\x84\x01\n\x04Port\x12\x46\n\x08position\x18\x01 \x01(\x0e\x32\x34.chromiumos.config.api.HardwareFeatures.PortPosition\x12\x34\n\x0eindex_override\x18\x02 \x01(\x0b\x32\x1c.google.protobuf.UInt32Value\x1a\x44\n\x04UsbA\x12<\n\x05\x63ount\x18\x01 \x01(\x0b\x32-.chromiumos.config.api.HardwareFeatures.Count\x1a\x9b\x04\n\x08\x43\x65llular\x12@\n\x07present\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12\r\n\x05model\x18\x02 \x01(\t\x12K\n\x04type\x18\x03 \x01(\x0e\x32=.chromiumos.config.api.HardwareFeatures.Cellular.CellularType\x12\x1b\n\x13\x61ttach_apn_required\x18\x04 \x01(\x08\x12t\n\x1e\x64ynamic_power_reduction_config\x18\x05 \x01(\x0b\x32L.chromiumos.config.api.HardwareFeatures.Cellular.DynamicPowerReductionConfig\x1a\x99\x01\n\x1b\x44ynamicPowerReductionConfig\x12\x0e\n\x04gpio\x18\x01 \x01(\rH\x00\x12\x17\n\rmodem_manager\x18\x02 \x01(\x08H\x00\x12/\n\x0btablet_mode\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.BoolValueB \n\x1e\x64ynamic_power_reduction_config\"B\n\x0c\x43\x65llularType\x12\x0f\n\x0bNOT_PRESENT\x10\x00\x12\x10\n\x0c\x43\x45LLULAR_LTE\x10\x01\x12\x0f\n\x0b\x43\x45LLULAR_5G\x10\x02\x1aH\n\x04Hdmi\x12@\n\x07present\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1a\x34\n\x15\x46irmwareConfiguration\x12\r\n\x05value\x18\x01 \x01(\r\x12\x0c\n\x04mask\x18\x02 \x01(\r\x1a\xfa\n\n\x05\x41udio\x12M\n\x0b\x61udio_codec\x18\x01 \x01(\x0e\x32\x38.chromiumos.config.api.HardwareFeatures.Audio.AudioCodec\x12L\n\x0bspeaker_amp\x18\x02 \x01(\x0e\x32\x37.chromiumos.config.api.HardwareFeatures.Audio.Amplifier\x12Q\n\x0fheadphone_codec\x18\x03 \x01(\x0e\x32\x38.chromiumos.config.api.HardwareFeatures.Audio.AudioCodec\x12\x45\n\x0elid_microphone\x18\x04 \x01(\x0b\x32-.chromiumos.config.api.HardwareFeatures.Count\x12\x46\n\x0f\x62\x61se_microphone\x18\x05 \x01(\x0b\x32-.chromiumos.config.api.HardwareFeatures.Count\x12\x45\n\x11speaker_amplifier\x18\x06 \x01(\x0b\x32*.chromiumos.config.api.Component.Amplifier\x12N\n\x0c\x63\x61rd_configs\x18\x07 \x03(\x0b\x32\x38.chromiumos.config.api.HardwareFeatures.Audio.CardConfig\x12W\n\x0b\x63ras_config\x18\x08 \x01(\x0e\x32\x42.chromiumos.config.api.HardwareFeatures.Audio.AudioConfigStructure\x1a\xe6\x02\n\nCardConfig\x12\x11\n\tcard_name\x18\x01 \x01(\t\x12\x30\n\nucm_suffix\x18\x02 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12V\n\nucm_config\x18\x03 \x01(\x0e\x32\x42.chromiumos.config.api.HardwareFeatures.Audio.AudioConfigStructure\x12W\n\x0b\x63ras_config\x18\x04 \x01(\x0e\x32\x42.chromiumos.config.api.HardwareFeatures.Audio.AudioConfigStructure\x12\x62\n\x16sound_card_init_config\x18\x05 \x01(\x0e\x32\x42.chromiumos.config.api.HardwareFeatures.Audio.AudioConfigStructure\"\x9d\x01\n\nAudioCodec\x12\x17\n\x13\x41UDIO_CODEC_UNKNOWN\x10\x00\x12\n\n\x06RT5682\x10\x01\x12\x0c\n\x08\x41LC5682I\x10\x02\x12\x0b\n\x07\x41LC5682\x10\x03\x12\n\n\x06\x44\x41\x37\x32\x31\x39\x10\x08\x12\r\n\tNAU88L25B\x10\n\x12\x0b\n\x07\x43S42L42\x10\x0b\x12\x0e\n\nALC5682IVS\x10\x0c\x12\x0b\n\x07WCD9385\x10\r\"\x04\x08\x04\x10\x07\"\x04\x08\t\x10\t\"\xa7\x01\n\tAmplifier\x12\x15\n\x11\x41MPLIFIER_UNKNOWN\x10\x00\x12\x0c\n\x08MAX98357\x10\x04\x12\x0c\n\x08MAX98373\x10\x05\x12\x0c\n\x08MAX98360\x10\x06\x12\n\n\x06RT1015\x10\x07\x12\x0b\n\x07\x41LC1011\x10\t\x12\x0b\n\x07RT1015P\x10\n\x12\x0b\n\x07\x41LC1019\x10\x0b\x12\x0c\n\x08MAX98390\x10\x0c\x12\x0c\n\x08MAX98396\x10\r\"\x04\x08\x01\x10\x03\"\x04\x08\x08\x10\x08\"O\n\x14\x41udioConfigStructure\x12\x1f\n\x1b\x41UDIO_CONFIG_STRUCTURE_NONE\x10\x00\x12\n\n\x06\x44\x45SIGN\x10\x01\x12\n\n\x06\x43OMMON\x10\x02\x1a\xc2\x06\n\x06\x43\x61mera\x12\x46\n\x07\x64\x65vices\x18\x04 \x03(\x0b\x32\x35.chromiumos.config.api.HardwareFeatures.Camera.Device\x1a\x9b\x03\n\x06\x44\x65vice\x12K\n\tinterface\x18\x02 \x01(\x0e\x32\x38.chromiumos.config.api.HardwareFeatures.Camera.Interface\x12\x45\n\x06\x66\x61\x63ing\x18\x03 \x01(\x0e\x32\x35.chromiumos.config.api.HardwareFeatures.Camera.Facing\x12O\n\x0borientation\x18\x04 \x01(\x0e\x32:.chromiumos.config.api.HardwareFeatures.Camera.Orientation\x12\r\n\x05\x66lags\x18\x05 \x01(\r\x12\x0b\n\x03ids\x18\x06 \x03(\t\x12G\n\x0eprivacy_switch\x18\x07 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12G\n\x10microphone_count\x18\x08 \x01(\x0b\x32-.chromiumos.config.api.HardwareFeatures.Count\"I\n\tInterface\x12\x15\n\x11INTERFACE_UNKNOWN\x10\x00\x12\x11\n\rINTERFACE_USB\x10\x01\x12\x12\n\x0eINTERFACE_MIPI\x10\x02\"?\n\x06\x46\x61\x63ing\x12\x12\n\x0e\x46\x41\x43ING_UNKNOWN\x10\x00\x12\x10\n\x0c\x46\x41\x43ING_FRONT\x10\x01\x12\x0f\n\x0b\x46\x41\x43ING_BACK\x10\x02\"w\n\x0bOrientation\x12\x17\n\x13ORIENTATION_UNKNOWN\x10\x00\x12\x11\n\rORIENTATION_0\x10\x01\x12\x12\n\x0eORIENTATION_90\x10\x02\x12\x13\n\x0fORIENTATION_180\x10\x03\x12\x13\n\x0fORIENTATION_270\x10\x04\"M\n\x05\x46lags\x12\x0e\n\nFLAGS_NONE\x10\x00\x12\x17\n\x13\x46LAGS_SUPPORT_1080P\x10\x01\x12\x1b\n\x17\x46LAGS_SUPPORT_AUTOFOCUS\x10\x02\x1a\xa8\x01\n\rAccelerometer\x12J\n\x11lid_accelerometer\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12K\n\x12\x62\x61se_accelerometer\x18\x02 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1a\x9c\x01\n\tGyroscope\x12\x46\n\rlid_gyroscope\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12G\n\x0e\x62\x61se_gyroscope\x18\x02 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1a\xa5\x01\n\x0cMagnetometer\x12I\n\x10lid_magnetometer\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12J\n\x11\x62\x61se_magnetometer\x18\x02 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1a\xa2\x01\n\x0bLightSensor\x12H\n\x0flid_lightsensor\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12I\n\x10\x62\x61se_lightsensor\x18\x02 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1a\xaa\x01\n\x06Screen\x12R\n\x10panel_properties\x18\x03 \x01(\x0b\x32\x38.chromiumos.config.api.Component.DisplayPanel.Properties\x12\x46\n\rtouch_support\x18\x02 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.PresentJ\x04\x08\x01\x10\x02\x1a\xc3\x03\n\nFormFactor\x12V\n\x0b\x66orm_factor\x18\x01 \x01(\x0e\x32\x41.chromiumos.config.api.HardwareFeatures.FormFactor.FormFactorType\x12\\\n\x0erecovery_input\x18\x02 \x01(\x0e\x32\x44.chromiumos.config.api.HardwareFeatures.FormFactor.RecoveryInputType\"\x98\x01\n\x0e\x46ormFactorType\x12\x17\n\x13\x46ORM_FACTOR_UNKNOWN\x10\x00\x12\r\n\tCLAMSHELL\x10\x01\x12\x0f\n\x0b\x43ONVERTIBLE\x10\x02\x12\x0e\n\nDETACHABLE\x10\x03\x12\x0e\n\nCHROMEBASE\x10\x04\x12\r\n\tCHROMEBOX\x10\x05\x12\r\n\tCHROMEBIT\x10\x06\x12\x0f\n\x0b\x43HROMESLATE\x10\x07\"d\n\x11RecoveryInputType\x12\x1a\n\x16RECOVERY_INPUT_UNKNOWN\x10\x00\x12\x0c\n\x08KEYBOARD\x10\x01\x12\x10\n\x0cPOWER_BUTTON\x10\x02\x12\x13\n\x0fRECOVERY_BUTTON\x10\x03\x1a\x9b\x01\n\x06Stylus\x12I\n\x06stylus\x18\x01 \x01(\x0e\x32\x39.chromiumos.config.api.HardwareFeatures.Stylus.StylusType\"F\n\nStylusType\x12\x12\n\x0eSTYLUS_UNKNOWN\x10\x00\x12\x08\n\x04NONE\x10\x01\x12\x0c\n\x08INTERNAL\x10\x02\x12\x0c\n\x08\x45XTERNAL\x10\x03\x1a\xa2\x03\n\x08Keyboard\x12T\n\rkeyboard_type\x18\x01 \x01(\x0e\x32=.chromiumos.config.api.HardwareFeatures.Keyboard.KeyboardType\x12\x42\n\tbacklight\x18\x02 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12\x45\n\x0cpower_button\x18\x03 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12\x44\n\x0bnumeric_pad\x18\x04 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12\x1c\n\x14\x62\x61\x63klight_user_steps\x18\x05 \x03(\x01\"Q\n\x0cKeyboardType\x12\x19\n\x15KEYBOARD_TYPE_UNKNOWN\x10\x00\x12\x0c\n\x08INTERNAL\x10\x01\x12\x08\n\x04NONE\x10\x02\x12\x0e\n\nDETACHABLE\x10\x03\x1aJ\n\x06Memory\x12@\n\x07profile\x18\x01 \x01(\x0b\x32/.chromiumos.config.api.Component.Memory.Profile\x1a\xc8\x02\n\x0b\x46ingerprint\x12N\n\x08location\x18\x01 \x01(\x0e\x32<.chromiumos.config.api.HardwareFeatures.Fingerprint.Location\x12\r\n\x05\x62oard\x18\x02 \x01(\t\x12\x12\n\nro_version\x18\x03 \x01(\t\"\xc5\x01\n\x08Location\x12\x14\n\x10LOCATION_UNKNOWN\x10\x00\x12\x19\n\x15POWER_BUTTON_TOP_LEFT\x10\x01\x12\x18\n\x14KEYBOARD_BOTTOM_LEFT\x10\x02\x12\x19\n\x15KEYBOARD_BOTTOM_RIGHT\x10\x03\x12\x16\n\x12KEYBOARD_TOP_RIGHT\x10\x04\x12\x0f\n\x0bNOT_PRESENT\x10\x05\x12\x0e\n\nRIGHT_SIDE\x10\x06\x12\r\n\tLEFT_SIDE\x10\x07\x12\x0b\n\x07PRESENT\x10\x08\x1a\x66\n\x07Storage\x12J\n\x0cstorage_type\x18\x01 \x01(\x0e\x32\x34.chromiumos.config.api.Component.Storage.StorageType\x12\x0f\n\x07size_gb\x18\x02 \x01(\r\x1a\x8c\x01\n\tBluetooth\x12=\n\tcomponent\x18\x01 \x01(\x0b\x32*.chromiumos.config.api.Component.Bluetooth\x12@\n\x07present\x18\x02 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1aN\n\nBarrelJack\x12@\n\x07present\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1a\xaf\x02\n\x04Wifi\x12T\n\x18supported_wlan_protocols\x18\x01 \x03(\x0e\x32\x32.chromiumos.config.api.Component.Wifi.WLANProtocol\x12I\n\nwifi_chips\x18\x02 \x03(\x0e\x32\x35.chromiumos.config.api.HardwareFeatures.Wifi.WifiChip\x12\x36\n\x0bwifi_config\x18\x03 \x01(\x0b\x32!.chromiumos.config.api.WifiConfig\"N\n\x08WifiChip\x12\x15\n\x11WIFI_CHIP_UNKNOWN\x10\x00\x12\x15\n\x11WIRELESS_86ED801D\x10\x01\x12\x14\n\x10WIRELESS_REALTEK\x10\x02\x1a\xa0\x02\n\x06\x42utton\x12\x45\n\x06region\x18\x01 \x01(\x0e\x32\x35.chromiumos.config.api.HardwareFeatures.Button.Region\x12\x41\n\x04\x65\x64ge\x18\x02 \x01(\x0e\x32\x33.chromiumos.config.api.HardwareFeatures.Button.Edge\x12\x10\n\x08position\x18\x03 \x01(\x02\"6\n\x06Region\x12\x12\n\x0eREGION_UNKNOWN\x10\x00\x12\n\n\x06SCREEN\x10\x01\x12\x0c\n\x08KEYBOARD\x10\x02\"B\n\x04\x45\x64ge\x12\x10\n\x0c\x45\x44GE_UNKNOWN\x10\x00\x12\x08\n\x04LEFT\x10\x01\x12\t\n\x05RIGHT\x10\x02\x12\x07\n\x03TOP\x10\x03\x12\n\n\x06\x42OTTOM\x10\x04\x1a\xd3\x03\n\x12\x45mbeddedController\x12@\n\x07present\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12\x62\n\x07\x65\x63_type\x18\x02 \x01(\x0e\x32Q.chromiumos.config.api.HardwareFeatures.EmbeddedController.EmbeddedControllerType\x12\x41\n\x04part\x18\x03 \x01(\x0b\x32\x33.chromiumos.config.api.Component.EmbeddedController\x12J\n\x11\x66\x65\x61ture_typec_cmd\x18\x04 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12<\n\x03\x63\x62i\x18\x05 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\"J\n\x16\x45mbeddedControllerType\x12\x13\n\x0f\x45\x43_TYPE_UNKNOWN\x10\x00\x12\r\n\tEC_CHROME\x10\x01\x12\x0c\n\x08\x45\x43_WILCO\x10\x02\x1a\xe0\x01\n\x15TrustedPlatformModule\x12i\n\x08tpm_type\x18\x01 \x01(\x0e\x32W.chromiumos.config.api.HardwareFeatures.TrustedPlatformModule.TrustedPlatformModuleType\"\\\n\x19TrustedPlatformModuleType\x12\x14\n\x10TPM_TYPE_UNKNOWN\x10\x00\x12\x0f\n\x0bTHIRD_PARTY\x10\x01\x12\x0b\n\x07GSC_H1B\x10\x02\x12\x0b\n\x07GSC_H1D\x10\x03\x1aN\n\nHotwording\x12@\n\x07present\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1a\xa9\x01\n\x07\x44isplay\x12\x42\n\x04type\x18\x01 \x01(\x0e\x32\x34.chromiumos.config.api.HardwareFeatures.Display.Type\"Z\n\x04Type\x12\x10\n\x0cTYPE_UNKNOWN\x10\x00\x12\x11\n\rTYPE_INTERNAL\x10\x01\x12\x11\n\rTYPE_EXTERNAL\x10\x02\x12\x1a\n\x16TYPE_INTERNAL_EXTERNAL\x10\x03\x1aL\n\x08Touchpad\x12@\n\x07present\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1aX\n\x14MicrophoneMuteSwitch\x12@\n\x07present\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1a\xb6\x05\n\x07\x42\x61ttery\x12@\n\x07present\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12J\n\x08lifetime\x18\x02 \x01(\x0b\x32\x38.chromiumos.config.api.HardwareFeatures.Battery.Lifetime\x12J\n\x08\x63harging\x18\x03 \x01(\x0b\x32\x38.chromiumos.config.api.HardwareFeatures.Battery.Charging\x1a\x9f\x02\n\x08Lifetime\x12\x35\n\x0cshipping_min\x18\x01 \x01(\x0b\x32\x1f.chromiumos.config.api.Duration\x12\x37\n\x0e\x64\x65\x65p_sleep_min\x18\x02 \x01(\x0b\x32\x1f.chromiumos.config.api.Duration\x12\x34\n\x0bsuspend_min\x18\x03 \x01(\x0b\x32\x1f.chromiumos.config.api.Duration\x12\x38\n\x0flucid_sleep_min\x18\x04 \x01(\x0b\x32\x1f.chromiumos.config.api.Duration\x12\x33\n\nactive_min\x18\x05 \x01(\x0b\x32\x1f.chromiumos.config.api.Duration\x1a\xae\x01\n\x08\x43harging\x12\x33\n\nactive_max\x18\x01 \x01(\x0b\x32\x1f.chromiumos.config.api.Duration\x12\x34\n\x0bsuspend_max\x18\x02 \x01(\x0b\x32\x1f.chromiumos.config.api.Duration\x12\x37\n\x0e\x64\x65\x65p_sleep_max\x18\x03 \x01(\x0b\x32\x1f.chromiumos.config.api.Duration\x1aQ\n\rPrivacyScreen\x12@\n\x07present\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1a\x45\n\x03Soc\x12>\n\x08\x66\x65\x61tures\x18\x01 \x03(\x0e\x32,.chromiumos.config.api.Component.Soc.Feature\x1a\x61\n\x14\x44isplayPortConverter\x12I\n\nconverters\x18\x01 \x03(\x0b\x32\x35.chromiumos.config.api.Component.DisplayPortConverter\x1aG\n\x03Hps\x12@\n\x07present\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1aG\n\x03PoE\x12@\n\x07present\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x1al\n\x0bPowerSupply\x12\x43\n\nbarreljack\x18\x01 \x01(\x0e\x32/.chromiumos.config.api.HardwareFeatures.Present\x12\x18\n\x10usb_min_ac_watts\x18\x02 \x01(\x05\x1a\x0b\n\tProximity\x1a\x42\n\x05Touch\x12\x39\n\x13touch_slop_distance\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.UInt32Value\"<\n\x07Present\x12\x13\n\x0fPRESENT_UNKNOWN\x10\x00\x12\x0b\n\x07PRESENT\x10\x01\x12\x0f\n\x0bNOT_PRESENT\x10\x02\"\xa4\x01\n\x0cPortPosition\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x08\n\x04LEFT\x10\x01\x12\t\n\x05RIGHT\x10\x02\x12\x08\n\x04\x42\x41\x43K\x10\x03\x12\t\n\x05\x46RONT\x10\x04\x12\x0e\n\nLEFT_FRONT\x10\x05\x12\r\n\tLEFT_BACK\x10\x06\x12\x0f\n\x0bRIGHT_FRONT\x10\x07\x12\x0e\n\nRIGHT_BACK\x10\x08\x12\r\n\tBACK_LEFT\x10\t\x12\x0e\n\nBACK_RIGHT\x10\nB*Z(go.chromium.org/chromiumos/config/go/apib\x06proto3'
   ,
-  dependencies=[chromiumos_dot_config_dot_api_dot_component__pb2.DESCRIPTOR,chromiumos_dot_config_dot_api_dot_proximity__config__pb2.DESCRIPTOR,chromiumos_dot_config_dot_api_dot_wifi__config__pb2.DESCRIPTOR,google_dot_protobuf_dot_wrappers__pb2.DESCRIPTOR,])
+  dependencies=[chromiumos_dot_config_dot_api_dot_component__pb2.DESCRIPTOR,chromiumos_dot_config_dot_api_dot_wifi__config__pb2.DESCRIPTOR,google_dot_protobuf_dot_wrappers__pb2.DESCRIPTOR,])
 
 
 
@@ -206,16 +205,11 @@ _TOPOLOGY_TYPE = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None,
       create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='PRIVACY_SCREEN', index=34, number=34,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=489,
-  serialized_end=1056,
+  serialized_start=443,
+  serialized_end=990,
 )
 _sym_db.RegisterEnumDescriptor(_TOPOLOGY_TYPE)
 
@@ -259,8 +253,8 @@ _DURATION_TYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1138,
-  serialized_end=1227,
+  serialized_start=1072,
+  serialized_end=1161,
 )
 _sym_db.RegisterEnumDescriptor(_DURATION_TYPE)
 
@@ -289,8 +283,8 @@ _HARDWAREFEATURES_CELLULAR_CELLULARTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=4812,
-  serialized_end=4878,
+  serialized_start=4692,
+  serialized_end=4758,
 )
 _sym_db.RegisterEnumDescriptor(_HARDWAREFEATURES_CELLULAR_CELLULARTYPE)
 
@@ -349,8 +343,8 @@ _HARDWAREFEATURES_AUDIO_AUDIOCODEC = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=6087,
-  serialized_end=6244,
+  serialized_start=5883,
+  serialized_end=6040,
 )
 _sym_db.RegisterEnumDescriptor(_HARDWAREFEATURES_AUDIO_AUDIOCODEC)
 
@@ -411,16 +405,11 @@ _HARDWAREFEATURES_AUDIO_AMPLIFIER = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None,
       create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='CS35L41', index=10, number=14,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=6247,
-  serialized_end=6427,
+  serialized_start=6043,
+  serialized_end=6210,
 )
 _sym_db.RegisterEnumDescriptor(_HARDWAREFEATURES_AUDIO_AMPLIFIER)
 
@@ -449,8 +438,8 @@ _HARDWAREFEATURES_AUDIO_AUDIOCONFIGSTRUCTURE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=6429,
-  serialized_end=6508,
+  serialized_start=6212,
+  serialized_end=6291,
 )
 _sym_db.RegisterEnumDescriptor(_HARDWAREFEATURES_AUDIO_AUDIOCONFIGSTRUCTURE)
 
@@ -479,8 +468,8 @@ _HARDWAREFEATURES_CAMERA_INTERFACE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=7027,
-  serialized_end=7100,
+  serialized_start=6790,
+  serialized_end=6863,
 )
 _sym_db.RegisterEnumDescriptor(_HARDWAREFEATURES_CAMERA_INTERFACE)
 
@@ -509,8 +498,8 @@ _HARDWAREFEATURES_CAMERA_FACING = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=7102,
-  serialized_end=7165,
+  serialized_start=6865,
+  serialized_end=6928,
 )
 _sym_db.RegisterEnumDescriptor(_HARDWAREFEATURES_CAMERA_FACING)
 
@@ -549,8 +538,8 @@ _HARDWAREFEATURES_CAMERA_ORIENTATION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=7167,
-  serialized_end=7286,
+  serialized_start=6930,
+  serialized_end=7049,
 )
 _sym_db.RegisterEnumDescriptor(_HARDWAREFEATURES_CAMERA_ORIENTATION)
 
@@ -579,8 +568,8 @@ _HARDWAREFEATURES_CAMERA_FLAGS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=7288,
-  serialized_end=7365,
+  serialized_start=7051,
+  serialized_end=7128,
 )
 _sym_db.RegisterEnumDescriptor(_HARDWAREFEATURES_CAMERA_FLAGS)
 
@@ -634,8 +623,8 @@ _HARDWAREFEATURES_FORMFACTOR_FORMFACTORTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=8452,
-  serialized_end=8604,
+  serialized_start=8164,
+  serialized_end=8316,
 )
 _sym_db.RegisterEnumDescriptor(_HARDWAREFEATURES_FORMFACTOR_FORMFACTORTYPE)
 
@@ -669,8 +658,8 @@ _HARDWAREFEATURES_FORMFACTOR_RECOVERYINPUTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=8606,
-  serialized_end=8706,
+  serialized_start=8318,
+  serialized_end=8418,
 )
 _sym_db.RegisterEnumDescriptor(_HARDWAREFEATURES_FORMFACTOR_RECOVERYINPUTTYPE)
 
@@ -704,8 +693,8 @@ _HARDWAREFEATURES_STYLUS_STYLUSTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=8794,
-  serialized_end=8864,
+  serialized_start=8506,
+  serialized_end=8576,
 )
 _sym_db.RegisterEnumDescriptor(_HARDWAREFEATURES_STYLUS_STYLUSTYPE)
 
@@ -739,35 +728,10 @@ _HARDWAREFEATURES_KEYBOARD_KEYBOARDTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=9288,
-  serialized_end=9369,
+  serialized_start=8916,
+  serialized_end=8997,
 )
 _sym_db.RegisterEnumDescriptor(_HARDWAREFEATURES_KEYBOARD_KEYBOARDTYPE)
-
-_HARDWAREFEATURES_KEYBOARD_KEYBOARDMCUTYPE = _descriptor.EnumDescriptor(
-  name='KeyboardMcuType',
-  full_name='chromiumos.config.api.HardwareFeatures.Keyboard.KeyboardMcuType',
-  filename=None,
-  file=DESCRIPTOR,
-  create_key=_descriptor._internal_create_key,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='KEYBOARD_MCU_NOT_PRESENT', index=0, number=0,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='KEYBOARD_MCU_PRISM', index=1, number=1,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=9371,
-  serialized_end=9442,
-)
-_sym_db.RegisterEnumDescriptor(_HARDWAREFEATURES_KEYBOARD_KEYBOARDMCUTYPE)
 
 _HARDWAREFEATURES_FINGERPRINT_LOCATION = _descriptor.EnumDescriptor(
   name='Location',
@@ -821,16 +785,11 @@ _HARDWAREFEATURES_FINGERPRINT_LOCATION = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None,
       create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='LEFT_OF_POWER_BUTTON_TOP_RIGHT', index=9, number=9,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=10444,
-  serialized_end=10677,
+  serialized_start=9207,
+  serialized_end=9404,
 )
 _sym_db.RegisterEnumDescriptor(_HARDWAREFEATURES_FINGERPRINT_LOCATION)
 
@@ -859,8 +818,8 @@ _HARDWAREFEATURES_WIFI_WIFICHIP = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=11254,
-  serialized_end=11332,
+  serialized_start=9959,
+  serialized_end=10037,
 )
 _sym_db.RegisterEnumDescriptor(_HARDWAREFEATURES_WIFI_WIFICHIP)
 
@@ -889,8 +848,8 @@ _HARDWAREFEATURES_BUTTON_REGION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=11501,
-  serialized_end=11555,
+  serialized_start=10206,
+  serialized_end=10260,
 )
 _sym_db.RegisterEnumDescriptor(_HARDWAREFEATURES_BUTTON_REGION)
 
@@ -929,8 +888,8 @@ _HARDWAREFEATURES_BUTTON_EDGE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=11557,
-  serialized_end=11623,
+  serialized_start=10262,
+  serialized_end=10328,
 )
 _sym_db.RegisterEnumDescriptor(_HARDWAREFEATURES_BUTTON_EDGE)
 
@@ -959,8 +918,8 @@ _HARDWAREFEATURES_EMBEDDEDCONTROLLER_EMBEDDEDCONTROLLERTYPE = _descriptor.EnumDe
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=12261,
-  serialized_end=12335,
+  serialized_start=10724,
+  serialized_end=10798,
 )
 _sym_db.RegisterEnumDescriptor(_HARDWAREFEATURES_EMBEDDEDCONTROLLER_EMBEDDEDCONTROLLERTYPE)
 
@@ -994,8 +953,8 @@ _HARDWAREFEATURES_TRUSTEDPLATFORMMODULE_TRUSTEDPLATFORMMODULETYPE = _descriptor.
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=12470,
-  serialized_end=12562,
+  serialized_start=10933,
+  serialized_end=11025,
 )
 _sym_db.RegisterEnumDescriptor(_HARDWAREFEATURES_TRUSTEDPLATFORMMODULE_TRUSTEDPLATFORMMODULETYPE)
 
@@ -1029,8 +988,8 @@ _HARDWAREFEATURES_DISPLAY_TYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=12724,
-  serialized_end=12814,
+  serialized_start=11187,
+  serialized_end=11277,
 )
 _sym_db.RegisterEnumDescriptor(_HARDWAREFEATURES_DISPLAY_TYPE)
 
@@ -1059,8 +1018,8 @@ _HARDWAREFEATURES_PRESENT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=14441,
-  serialized_end=14501,
+  serialized_start=12734,
+  serialized_end=12794,
 )
 _sym_db.RegisterEnumDescriptor(_HARDWAREFEATURES_PRESENT)
 
@@ -1129,8 +1088,8 @@ _HARDWAREFEATURES_PORTPOSITION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=14504,
-  serialized_end=14668,
+  serialized_start=12797,
+  serialized_end=12961,
 )
 _sym_db.RegisterEnumDescriptor(_HARDWAREFEATURES_PORTPOSITION)
 
@@ -1169,8 +1128,8 @@ _TOPOLOGY_DESCRIPTIONENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=436,
-  serialized_end=486,
+  serialized_start=390,
+  serialized_end=440,
 )
 
 _TOPOLOGY = _descriptor.Descriptor(
@@ -1222,8 +1181,8 @@ _TOPOLOGY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=222,
-  serialized_end=1056,
+  serialized_start=176,
+  serialized_end=990,
 )
 
 
@@ -1262,8 +1221,8 @@ _DURATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1059,
-  serialized_end=1227,
+  serialized_start=993,
+  serialized_end=1161,
 )
 
 
@@ -1294,8 +1253,8 @@ _HARDWAREFEATURES_COUNT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3918,
-  serialized_end=3940,
+  serialized_start=3852,
+  serialized_end=3874,
 )
 
 _HARDWAREFEATURES_USBC_PORT = _descriptor.Descriptor(
@@ -1332,8 +1291,8 @@ _HARDWAREFEATURES_USBC_PORT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4134,
-  serialized_end=4266,
+  serialized_start=4014,
+  serialized_end=4146,
 )
 
 _HARDWAREFEATURES_USBC = _descriptor.Descriptor(
@@ -1358,20 +1317,6 @@ _HARDWAREFEATURES_USBC = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='usb4', full_name='chromiumos.config.api.HardwareFeatures.UsbC.usb4', index=2,
-      number=3, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='defer_external_display_timeout', full_name='chromiumos.config.api.HardwareFeatures.UsbC.defer_external_display_timeout', index=3,
-      number=4, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -1384,8 +1329,8 @@ _HARDWAREFEATURES_USBC = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3943,
-  serialized_end=4266,
+  serialized_start=3877,
+  serialized_end=4146,
 )
 
 _HARDWAREFEATURES_USBA = _descriptor.Descriptor(
@@ -1415,8 +1360,8 @@ _HARDWAREFEATURES_USBA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4268,
-  serialized_end=4336,
+  serialized_start=4148,
+  serialized_end=4216,
 )
 
 _HARDWAREFEATURES_CELLULAR_DYNAMICPOWERREDUCTIONCONFIG = _descriptor.Descriptor(
@@ -1465,8 +1410,8 @@ _HARDWAREFEATURES_CELLULAR_DYNAMICPOWERREDUCTIONCONFIG = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=4657,
-  serialized_end=4810,
+  serialized_start=4537,
+  serialized_end=4690,
 )
 
 _HARDWAREFEATURES_CELLULAR = _descriptor.Descriptor(
@@ -1525,8 +1470,8 @@ _HARDWAREFEATURES_CELLULAR = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4339,
-  serialized_end=4878,
+  serialized_start=4219,
+  serialized_end=4758,
 )
 
 _HARDWAREFEATURES_HDMI = _descriptor.Descriptor(
@@ -1556,8 +1501,8 @@ _HARDWAREFEATURES_HDMI = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4880,
-  serialized_end=4952,
+  serialized_start=4760,
+  serialized_end=4832,
 )
 
 _HARDWAREFEATURES_FIRMWARECONFIGURATION = _descriptor.Descriptor(
@@ -1582,13 +1527,6 @@ _HARDWAREFEATURES_FIRMWARECONFIGURATION = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='coreboot_customizations', full_name='chromiumos.config.api.HardwareFeatures.FirmwareConfiguration.coreboot_customizations', index=2,
-      number=3, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -1601,8 +1539,8 @@ _HARDWAREFEATURES_FIRMWARECONFIGURATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4954,
-  serialized_end=5039,
+  serialized_start=4834,
+  serialized_end=4886,
 )
 
 _HARDWAREFEATURES_AUDIO_CARDCONFIG = _descriptor.Descriptor(
@@ -1648,13 +1586,6 @@ _HARDWAREFEATURES_AUDIO_CARDCONFIG = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='cras_suffix', full_name='chromiumos.config.api.HardwareFeatures.Audio.CardConfig.cras_suffix', index=5,
-      number=6, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -1667,8 +1598,8 @@ _HARDWAREFEATURES_AUDIO_CARDCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5675,
-  serialized_end=6084,
+  serialized_start=5522,
+  serialized_end=5880,
 )
 
 _HARDWAREFEATURES_AUDIO = _descriptor.Descriptor(
@@ -1750,8 +1681,8 @@ _HARDWAREFEATURES_AUDIO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5042,
-  serialized_end=6508,
+  serialized_start=4889,
+  serialized_end=6291,
 )
 
 _HARDWAREFEATURES_CAMERA_DEVICE = _descriptor.Descriptor(
@@ -1811,13 +1742,6 @@ _HARDWAREFEATURES_CAMERA_DEVICE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='detachable', full_name='chromiumos.config.api.HardwareFeatures.Camera.Device.detachable', index=7,
-      number=9, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -1830,8 +1754,8 @@ _HARDWAREFEATURES_CAMERA_DEVICE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6594,
-  serialized_end=7025,
+  serialized_start=6377,
+  serialized_end=6788,
 )
 
 _HARDWAREFEATURES_CAMERA = _descriptor.Descriptor(
@@ -1865,8 +1789,8 @@ _HARDWAREFEATURES_CAMERA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6511,
-  serialized_end=7365,
+  serialized_start=6294,
+  serialized_end=7128,
 )
 
 _HARDWAREFEATURES_ACCELEROMETER = _descriptor.Descriptor(
@@ -1903,8 +1827,8 @@ _HARDWAREFEATURES_ACCELEROMETER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7368,
-  serialized_end=7536,
+  serialized_start=7131,
+  serialized_end=7299,
 )
 
 _HARDWAREFEATURES_GYROSCOPE = _descriptor.Descriptor(
@@ -1941,8 +1865,8 @@ _HARDWAREFEATURES_GYROSCOPE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7539,
-  serialized_end=7695,
+  serialized_start=7302,
+  serialized_end=7458,
 )
 
 _HARDWAREFEATURES_MAGNETOMETER = _descriptor.Descriptor(
@@ -1979,8 +1903,8 @@ _HARDWAREFEATURES_MAGNETOMETER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7698,
-  serialized_end=7863,
+  serialized_start=7461,
+  serialized_end=7626,
 )
 
 _HARDWAREFEATURES_LIGHTSENSOR = _descriptor.Descriptor(
@@ -2017,8 +1941,8 @@ _HARDWAREFEATURES_LIGHTSENSOR = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7866,
-  serialized_end=8028,
+  serialized_start=7629,
+  serialized_end=7791,
 )
 
 _HARDWAREFEATURES_SCREEN = _descriptor.Descriptor(
@@ -2055,8 +1979,8 @@ _HARDWAREFEATURES_SCREEN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8031,
-  serialized_end=8201,
+  serialized_start=7794,
+  serialized_end=7964,
 )
 
 _HARDWAREFEATURES_FORMFACTOR = _descriptor.Descriptor(
@@ -2081,13 +2005,6 @@ _HARDWAREFEATURES_FORMFACTOR = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='detachable_ui', full_name='chromiumos.config.api.HardwareFeatures.FormFactor.detachable_ui', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -2102,8 +2019,8 @@ _HARDWAREFEATURES_FORMFACTOR = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8204,
-  serialized_end=8706,
+  serialized_start=7967,
+  serialized_end=8418,
 )
 
 _HARDWAREFEATURES_STYLUS = _descriptor.Descriptor(
@@ -2134,8 +2051,8 @@ _HARDWAREFEATURES_STYLUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8709,
-  serialized_end=8864,
+  serialized_start=8421,
+  serialized_end=8576,
 )
 
 _HARDWAREFEATURES_KEYBOARD = _descriptor.Descriptor(
@@ -2175,14 +2092,7 @@ _HARDWAREFEATURES_KEYBOARD = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='mcu_type', full_name='chromiumos.config.api.HardwareFeatures.Keyboard.mcu_type', index=4,
-      number=6, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='backlight_user_steps', full_name='chromiumos.config.api.HardwareFeatures.Keyboard.backlight_user_steps', index=5,
+      name='backlight_user_steps', full_name='chromiumos.config.api.HardwareFeatures.Keyboard.backlight_user_steps', index=4,
       number=5, type=1, cpp_type=5, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -2194,7 +2104,6 @@ _HARDWAREFEATURES_KEYBOARD = _descriptor.Descriptor(
   nested_types=[],
   enum_types=[
     _HARDWAREFEATURES_KEYBOARD_KEYBOARDTYPE,
-    _HARDWAREFEATURES_KEYBOARD_KEYBOARDMCUTYPE,
   ],
   serialized_options=None,
   is_extendable=False,
@@ -2202,8 +2111,8 @@ _HARDWAREFEATURES_KEYBOARD = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8867,
-  serialized_end=9442,
+  serialized_start=8579,
+  serialized_end=8997,
 )
 
 _HARDWAREFEATURES_MEMORY = _descriptor.Descriptor(
@@ -2233,227 +2142,8 @@ _HARDWAREFEATURES_MEMORY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9444,
-  serialized_end=9518,
-)
-
-_HARDWAREFEATURES_FINGERPRINT_FINGERPRINTDIAG_PIXELMEDIAN = _descriptor.Descriptor(
-  name='PixelMedian',
-  full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.PixelMedian',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='cb_type1_lower', full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.PixelMedian.cb_type1_lower', index=0,
-      number=1, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='cb_type1_upper', full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.PixelMedian.cb_type1_upper', index=1,
-      number=2, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='cb_type2_lower', full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.PixelMedian.cb_type2_lower', index=2,
-      number=3, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='cb_type2_upper', full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.PixelMedian.cb_type2_upper', index=3,
-      number=4, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='icb_type1_lower', full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.PixelMedian.icb_type1_lower', index=4,
-      number=5, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='icb_type1_upper', full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.PixelMedian.icb_type1_upper', index=5,
-      number=6, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='icb_type2_lower', full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.PixelMedian.icb_type2_lower', index=6,
-      number=7, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='icb_type2_upper', full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.PixelMedian.icb_type2_upper', index=7,
-      number=8, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=10170,
-  serialized_end=10379,
-)
-
-_HARDWAREFEATURES_FINGERPRINT_FINGERPRINTDIAG_DETECTZONE = _descriptor.Descriptor(
-  name='DetectZone',
-  full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.DetectZone',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='x1', full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.DetectZone.x1', index=0,
-      number=1, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='y1', full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.DetectZone.y1', index=1,
-      number=2, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='x2', full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.DetectZone.x2', index=2,
-      number=3, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='y2', full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.DetectZone.y2', index=3,
-      number=4, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=10381,
-  serialized_end=10441,
-)
-
-_HARDWAREFEATURES_FINGERPRINT_FINGERPRINTDIAG = _descriptor.Descriptor(
-  name='FingerprintDiag',
-  full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='routine_enable', full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.routine_enable', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='max_pixel_dev', full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.max_pixel_dev', index=1,
-      number=2, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='max_dead_pixels', full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.max_dead_pixels', index=2,
-      number=3, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='pixel_median', full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.pixel_median', index=3,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='num_detect_zone', full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.num_detect_zone', index=4,
-      number=5, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='detect_zones', full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.detect_zones', index=5,
-      number=6, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='max_dead_pixels_in_detect_zone', full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.max_dead_pixels_in_detect_zone', index=6,
-      number=7, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='max_reset_pixel_dev', full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.max_reset_pixel_dev', index=7,
-      number=8, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='max_error_reset_pixels', full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.max_error_reset_pixels', index=8,
-      number=9, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[_HARDWAREFEATURES_FINGERPRINT_FINGERPRINTDIAG_PIXELMEDIAN, _HARDWAREFEATURES_FINGERPRINT_FINGERPRINTDIAG_DETECTZONE, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=9747,
-  serialized_end=10441,
+  serialized_start=8999,
+  serialized_end=9073,
 )
 
 _HARDWAREFEATURES_FINGERPRINT = _descriptor.Descriptor(
@@ -2485,17 +2175,10 @@ _HARDWAREFEATURES_FINGERPRINT = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='fingerprint_diag', full_name='chromiumos.config.api.HardwareFeatures.Fingerprint.fingerprint_diag', index=3,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
-  nested_types=[_HARDWAREFEATURES_FINGERPRINT_FINGERPRINTDIAG, ],
+  nested_types=[],
   enum_types=[
     _HARDWAREFEATURES_FINGERPRINT_LOCATION,
   ],
@@ -2505,8 +2188,8 @@ _HARDWAREFEATURES_FINGERPRINT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9521,
-  serialized_end=10677,
+  serialized_start=9076,
+  serialized_end=9404,
 )
 
 _HARDWAREFEATURES_STORAGE = _descriptor.Descriptor(
@@ -2543,8 +2226,8 @@ _HARDWAREFEATURES_STORAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10679,
-  serialized_end=10781,
+  serialized_start=9406,
+  serialized_end=9508,
 )
 
 _HARDWAREFEATURES_BLUETOOTH = _descriptor.Descriptor(
@@ -2581,8 +2264,8 @@ _HARDWAREFEATURES_BLUETOOTH = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10784,
-  serialized_end=10924,
+  serialized_start=9511,
+  serialized_end=9651,
 )
 
 _HARDWAREFEATURES_BARRELJACK = _descriptor.Descriptor(
@@ -2612,8 +2295,8 @@ _HARDWAREFEATURES_BARRELJACK = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10926,
-  serialized_end=11004,
+  serialized_start=9653,
+  serialized_end=9731,
 )
 
 _HARDWAREFEATURES_WIFI = _descriptor.Descriptor(
@@ -2645,13 +2328,6 @@ _HARDWAREFEATURES_WIFI = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='wifi_vpd_sar', full_name='chromiumos.config.api.HardwareFeatures.Wifi.wifi_vpd_sar', index=3,
-      number=4, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -2665,8 +2341,8 @@ _HARDWAREFEATURES_WIFI = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11007,
-  serialized_end=11332,
+  serialized_start=9734,
+  serialized_end=10037,
 )
 
 _HARDWAREFEATURES_BUTTON = _descriptor.Descriptor(
@@ -2712,8 +2388,8 @@ _HARDWAREFEATURES_BUTTON = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11335,
-  serialized_end=11623,
+  serialized_start=10040,
+  serialized_end=10328,
 )
 
 _HARDWAREFEATURES_EMBEDDEDCONTROLLER = _descriptor.Descriptor(
@@ -2759,27 +2435,6 @@ _HARDWAREFEATURES_EMBEDDEDCONTROLLER = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='detachable_base', full_name='chromiumos.config.api.HardwareFeatures.EmbeddedController.detachable_base', index=5,
-      number=6, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='feature_charge_control_v2', full_name='chromiumos.config.api.HardwareFeatures.EmbeddedController.feature_charge_control_v2', index=6,
-      number=7, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='feature_tablet_mode_angle', full_name='chromiumos.config.api.HardwareFeatures.EmbeddedController.feature_tablet_mode_angle', index=7,
-      number=8, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -2793,8 +2448,8 @@ _HARDWAREFEATURES_EMBEDDEDCONTROLLER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11626,
-  serialized_end=12335,
+  serialized_start=10331,
+  serialized_end=10798,
 )
 
 _HARDWAREFEATURES_TRUSTEDPLATFORMMODULE = _descriptor.Descriptor(
@@ -2825,8 +2480,8 @@ _HARDWAREFEATURES_TRUSTEDPLATFORMMODULE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12338,
-  serialized_end=12562,
+  serialized_start=10801,
+  serialized_end=11025,
 )
 
 _HARDWAREFEATURES_HOTWORDING = _descriptor.Descriptor(
@@ -2856,8 +2511,8 @@ _HARDWAREFEATURES_HOTWORDING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12564,
-  serialized_end=12642,
+  serialized_start=11027,
+  serialized_end=11105,
 )
 
 _HARDWAREFEATURES_DISPLAY = _descriptor.Descriptor(
@@ -2888,8 +2543,8 @@ _HARDWAREFEATURES_DISPLAY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12645,
-  serialized_end=12814,
+  serialized_start=11108,
+  serialized_end=11277,
 )
 
 _HARDWAREFEATURES_TOUCHPAD = _descriptor.Descriptor(
@@ -2919,8 +2574,8 @@ _HARDWAREFEATURES_TOUCHPAD = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12816,
-  serialized_end=12892,
+  serialized_start=11279,
+  serialized_end=11355,
 )
 
 _HARDWAREFEATURES_MICROPHONEMUTESWITCH = _descriptor.Descriptor(
@@ -2950,8 +2605,8 @@ _HARDWAREFEATURES_MICROPHONEMUTESWITCH = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12894,
-  serialized_end=12982,
+  serialized_start=11357,
+  serialized_end=11445,
 )
 
 _HARDWAREFEATURES_BATTERY_LIFETIME = _descriptor.Descriptor(
@@ -3009,8 +2664,8 @@ _HARDWAREFEATURES_BATTERY_LIFETIME = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13250,
-  serialized_end=13537,
+  serialized_start=11678,
+  serialized_end=11965,
 )
 
 _HARDWAREFEATURES_BATTERY_CHARGING = _descriptor.Descriptor(
@@ -3054,8 +2709,8 @@ _HARDWAREFEATURES_BATTERY_CHARGING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13540,
-  serialized_end=13714,
+  serialized_start=11968,
+  serialized_end=12142,
 )
 
 _HARDWAREFEATURES_BATTERY = _descriptor.Descriptor(
@@ -3087,13 +2742,6 @@ _HARDWAREFEATURES_BATTERY = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='no_battery_boot_supported', full_name='chromiumos.config.api.HardwareFeatures.Battery.no_battery_boot_supported', index=3,
-      number=4, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -3106,8 +2754,8 @@ _HARDWAREFEATURES_BATTERY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12985,
-  serialized_end=13714,
+  serialized_start=11448,
+  serialized_end=12142,
 )
 
 _HARDWAREFEATURES_PRIVACYSCREEN = _descriptor.Descriptor(
@@ -3137,8 +2785,8 @@ _HARDWAREFEATURES_PRIVACYSCREEN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13716,
-  serialized_end=13797,
+  serialized_start=12144,
+  serialized_end=12225,
 )
 
 _HARDWAREFEATURES_SOC = _descriptor.Descriptor(
@@ -3156,13 +2804,6 @@ _HARDWAREFEATURES_SOC = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='vulnerabilities', full_name='chromiumos.config.api.HardwareFeatures.Soc.vulnerabilities', index=1,
-      number=2, type=14, cpp_type=8, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -3175,8 +2816,8 @@ _HARDWAREFEATURES_SOC = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13800,
-  serialized_end=13946,
+  serialized_start=12227,
+  serialized_end=12296,
 )
 
 _HARDWAREFEATURES_DISPLAYPORTCONVERTER = _descriptor.Descriptor(
@@ -3206,8 +2847,8 @@ _HARDWAREFEATURES_DISPLAYPORTCONVERTER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13948,
-  serialized_end=14045,
+  serialized_start=12298,
+  serialized_end=12395,
 )
 
 _HARDWAREFEATURES_HPS = _descriptor.Descriptor(
@@ -3237,8 +2878,8 @@ _HARDWAREFEATURES_HPS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14047,
-  serialized_end=14118,
+  serialized_start=12397,
+  serialized_end=12468,
 )
 
 _HARDWAREFEATURES_POE = _descriptor.Descriptor(
@@ -3268,8 +2909,8 @@ _HARDWAREFEATURES_POE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14120,
-  serialized_end=14191,
+  serialized_start=12470,
+  serialized_end=12541,
 )
 
 _HARDWAREFEATURES_POWERSUPPLY = _descriptor.Descriptor(
@@ -3306,8 +2947,8 @@ _HARDWAREFEATURES_POWERSUPPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14193,
-  serialized_end=14301,
+  serialized_start=12543,
+  serialized_end=12651,
 )
 
 _HARDWAREFEATURES_PROXIMITY = _descriptor.Descriptor(
@@ -3318,13 +2959,6 @@ _HARDWAREFEATURES_PROXIMITY = _descriptor.Descriptor(
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
-    _descriptor.FieldDescriptor(
-      name='configs', full_name='chromiumos.config.api.HardwareFeatures.Proximity.configs', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -3337,8 +2971,8 @@ _HARDWAREFEATURES_PROXIMITY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14303,
-  serialized_end=14371,
+  serialized_start=12653,
+  serialized_end=12664,
 )
 
 _HARDWAREFEATURES_TOUCH = _descriptor.Descriptor(
@@ -3368,8 +3002,8 @@ _HARDWAREFEATURES_TOUCH = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14373,
-  serialized_end=14439,
+  serialized_start=12666,
+  serialized_end=12732,
 )
 
 _HARDWAREFEATURES = _descriptor.Descriptor(
@@ -3660,8 +3294,8 @@ _HARDWAREFEATURES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1230,
-  serialized_end=14668,
+  serialized_start=1164,
+  serialized_end=12961,
 )
 
 _TOPOLOGY_DESCRIPTIONENTRY.containing_type = _TOPOLOGY
@@ -3700,7 +3334,6 @@ _HARDWAREFEATURES_AUDIO_CARDCONFIG.fields_by_name['ucm_suffix'].message_type = g
 _HARDWAREFEATURES_AUDIO_CARDCONFIG.fields_by_name['ucm_config'].enum_type = _HARDWAREFEATURES_AUDIO_AUDIOCONFIGSTRUCTURE
 _HARDWAREFEATURES_AUDIO_CARDCONFIG.fields_by_name['cras_config'].enum_type = _HARDWAREFEATURES_AUDIO_AUDIOCONFIGSTRUCTURE
 _HARDWAREFEATURES_AUDIO_CARDCONFIG.fields_by_name['sound_card_init_config'].enum_type = _HARDWAREFEATURES_AUDIO_AUDIOCONFIGSTRUCTURE
-_HARDWAREFEATURES_AUDIO_CARDCONFIG.fields_by_name['cras_suffix'].message_type = google_dot_protobuf_dot_wrappers__pb2._STRINGVALUE
 _HARDWAREFEATURES_AUDIO_CARDCONFIG.containing_type = _HARDWAREFEATURES_AUDIO
 _HARDWAREFEATURES_AUDIO.fields_by_name['audio_codec'].enum_type = _HARDWAREFEATURES_AUDIO_AUDIOCODEC
 _HARDWAREFEATURES_AUDIO.fields_by_name['speaker_amp'].enum_type = _HARDWAREFEATURES_AUDIO_AMPLIFIER
@@ -3743,7 +3376,6 @@ _HARDWAREFEATURES_SCREEN.fields_by_name['touch_support'].enum_type = _HARDWAREFE
 _HARDWAREFEATURES_SCREEN.containing_type = _HARDWAREFEATURES
 _HARDWAREFEATURES_FORMFACTOR.fields_by_name['form_factor'].enum_type = _HARDWAREFEATURES_FORMFACTOR_FORMFACTORTYPE
 _HARDWAREFEATURES_FORMFACTOR.fields_by_name['recovery_input'].enum_type = _HARDWAREFEATURES_FORMFACTOR_RECOVERYINPUTTYPE
-_HARDWAREFEATURES_FORMFACTOR.fields_by_name['detachable_ui'].message_type = google_dot_protobuf_dot_wrappers__pb2._BOOLVALUE
 _HARDWAREFEATURES_FORMFACTOR.containing_type = _HARDWAREFEATURES
 _HARDWAREFEATURES_FORMFACTOR_FORMFACTORTYPE.containing_type = _HARDWAREFEATURES_FORMFACTOR
 _HARDWAREFEATURES_FORMFACTOR_RECOVERYINPUTTYPE.containing_type = _HARDWAREFEATURES_FORMFACTOR
@@ -3754,19 +3386,11 @@ _HARDWAREFEATURES_KEYBOARD.fields_by_name['keyboard_type'].enum_type = _HARDWARE
 _HARDWAREFEATURES_KEYBOARD.fields_by_name['backlight'].enum_type = _HARDWAREFEATURES_PRESENT
 _HARDWAREFEATURES_KEYBOARD.fields_by_name['power_button'].enum_type = _HARDWAREFEATURES_PRESENT
 _HARDWAREFEATURES_KEYBOARD.fields_by_name['numeric_pad'].enum_type = _HARDWAREFEATURES_PRESENT
-_HARDWAREFEATURES_KEYBOARD.fields_by_name['mcu_type'].enum_type = _HARDWAREFEATURES_KEYBOARD_KEYBOARDMCUTYPE
 _HARDWAREFEATURES_KEYBOARD.containing_type = _HARDWAREFEATURES
 _HARDWAREFEATURES_KEYBOARD_KEYBOARDTYPE.containing_type = _HARDWAREFEATURES_KEYBOARD
-_HARDWAREFEATURES_KEYBOARD_KEYBOARDMCUTYPE.containing_type = _HARDWAREFEATURES_KEYBOARD
 _HARDWAREFEATURES_MEMORY.fields_by_name['profile'].message_type = chromiumos_dot_config_dot_api_dot_component__pb2._COMPONENT_MEMORY_PROFILE
 _HARDWAREFEATURES_MEMORY.containing_type = _HARDWAREFEATURES
-_HARDWAREFEATURES_FINGERPRINT_FINGERPRINTDIAG_PIXELMEDIAN.containing_type = _HARDWAREFEATURES_FINGERPRINT_FINGERPRINTDIAG
-_HARDWAREFEATURES_FINGERPRINT_FINGERPRINTDIAG_DETECTZONE.containing_type = _HARDWAREFEATURES_FINGERPRINT_FINGERPRINTDIAG
-_HARDWAREFEATURES_FINGERPRINT_FINGERPRINTDIAG.fields_by_name['pixel_median'].message_type = _HARDWAREFEATURES_FINGERPRINT_FINGERPRINTDIAG_PIXELMEDIAN
-_HARDWAREFEATURES_FINGERPRINT_FINGERPRINTDIAG.fields_by_name['detect_zones'].message_type = _HARDWAREFEATURES_FINGERPRINT_FINGERPRINTDIAG_DETECTZONE
-_HARDWAREFEATURES_FINGERPRINT_FINGERPRINTDIAG.containing_type = _HARDWAREFEATURES_FINGERPRINT
 _HARDWAREFEATURES_FINGERPRINT.fields_by_name['location'].enum_type = _HARDWAREFEATURES_FINGERPRINT_LOCATION
-_HARDWAREFEATURES_FINGERPRINT.fields_by_name['fingerprint_diag'].message_type = _HARDWAREFEATURES_FINGERPRINT_FINGERPRINTDIAG
 _HARDWAREFEATURES_FINGERPRINT.containing_type = _HARDWAREFEATURES
 _HARDWAREFEATURES_FINGERPRINT_LOCATION.containing_type = _HARDWAREFEATURES_FINGERPRINT
 _HARDWAREFEATURES_STORAGE.fields_by_name['storage_type'].enum_type = chromiumos_dot_config_dot_api_dot_component__pb2._COMPONENT_STORAGE_STORAGETYPE
@@ -3791,9 +3415,6 @@ _HARDWAREFEATURES_EMBEDDEDCONTROLLER.fields_by_name['ec_type'].enum_type = _HARD
 _HARDWAREFEATURES_EMBEDDEDCONTROLLER.fields_by_name['part'].message_type = chromiumos_dot_config_dot_api_dot_component__pb2._COMPONENT_EMBEDDEDCONTROLLER
 _HARDWAREFEATURES_EMBEDDEDCONTROLLER.fields_by_name['feature_typec_cmd'].enum_type = _HARDWAREFEATURES_PRESENT
 _HARDWAREFEATURES_EMBEDDEDCONTROLLER.fields_by_name['cbi'].enum_type = _HARDWAREFEATURES_PRESENT
-_HARDWAREFEATURES_EMBEDDEDCONTROLLER.fields_by_name['detachable_base'].enum_type = _HARDWAREFEATURES_PRESENT
-_HARDWAREFEATURES_EMBEDDEDCONTROLLER.fields_by_name['feature_charge_control_v2'].enum_type = _HARDWAREFEATURES_PRESENT
-_HARDWAREFEATURES_EMBEDDEDCONTROLLER.fields_by_name['feature_tablet_mode_angle'].enum_type = _HARDWAREFEATURES_PRESENT
 _HARDWAREFEATURES_EMBEDDEDCONTROLLER.containing_type = _HARDWAREFEATURES
 _HARDWAREFEATURES_EMBEDDEDCONTROLLER_EMBEDDEDCONTROLLERTYPE.containing_type = _HARDWAREFEATURES_EMBEDDEDCONTROLLER
 _HARDWAREFEATURES_TRUSTEDPLATFORMMODULE.fields_by_name['tpm_type'].enum_type = _HARDWAREFEATURES_TRUSTEDPLATFORMMODULE_TRUSTEDPLATFORMMODULETYPE
@@ -3825,7 +3446,6 @@ _HARDWAREFEATURES_BATTERY.containing_type = _HARDWAREFEATURES
 _HARDWAREFEATURES_PRIVACYSCREEN.fields_by_name['present'].enum_type = _HARDWAREFEATURES_PRESENT
 _HARDWAREFEATURES_PRIVACYSCREEN.containing_type = _HARDWAREFEATURES
 _HARDWAREFEATURES_SOC.fields_by_name['features'].enum_type = chromiumos_dot_config_dot_api_dot_component__pb2._COMPONENT_SOC_FEATURE
-_HARDWAREFEATURES_SOC.fields_by_name['vulnerabilities'].enum_type = chromiumos_dot_config_dot_api_dot_component__pb2._COMPONENT_SOC_VULNERABILITY
 _HARDWAREFEATURES_SOC.containing_type = _HARDWAREFEATURES
 _HARDWAREFEATURES_DISPLAYPORTCONVERTER.fields_by_name['converters'].message_type = chromiumos_dot_config_dot_api_dot_component__pb2._COMPONENT_DISPLAYPORTCONVERTER
 _HARDWAREFEATURES_DISPLAYPORTCONVERTER.containing_type = _HARDWAREFEATURES
@@ -3835,7 +3455,6 @@ _HARDWAREFEATURES_POE.fields_by_name['present'].enum_type = _HARDWAREFEATURES_PR
 _HARDWAREFEATURES_POE.containing_type = _HARDWAREFEATURES
 _HARDWAREFEATURES_POWERSUPPLY.fields_by_name['barreljack'].enum_type = _HARDWAREFEATURES_PRESENT
 _HARDWAREFEATURES_POWERSUPPLY.containing_type = _HARDWAREFEATURES
-_HARDWAREFEATURES_PROXIMITY.fields_by_name['configs'].message_type = chromiumos_dot_config_dot_api_dot_proximity__config__pb2._PROXIMITYCONFIG
 _HARDWAREFEATURES_PROXIMITY.containing_type = _HARDWAREFEATURES
 _HARDWAREFEATURES_TOUCH.fields_by_name['touch_slop_distance'].message_type = google_dot_protobuf_dot_wrappers__pb2._UINT32VALUE
 _HARDWAREFEATURES_TOUCH.containing_type = _HARDWAREFEATURES
@@ -4056,27 +3675,6 @@ HardwareFeatures = _reflection.GeneratedProtocolMessageType('HardwareFeatures', 
   ,
 
   'Fingerprint' : _reflection.GeneratedProtocolMessageType('Fingerprint', (_message.Message,), {
-
-    'FingerprintDiag' : _reflection.GeneratedProtocolMessageType('FingerprintDiag', (_message.Message,), {
-
-      'PixelMedian' : _reflection.GeneratedProtocolMessageType('PixelMedian', (_message.Message,), {
-        'DESCRIPTOR' : _HARDWAREFEATURES_FINGERPRINT_FINGERPRINTDIAG_PIXELMEDIAN,
-        '__module__' : 'chromiumos.config.api.topology_pb2'
-        # @@protoc_insertion_point(class_scope:chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.PixelMedian)
-        })
-      ,
-
-      'DetectZone' : _reflection.GeneratedProtocolMessageType('DetectZone', (_message.Message,), {
-        'DESCRIPTOR' : _HARDWAREFEATURES_FINGERPRINT_FINGERPRINTDIAG_DETECTZONE,
-        '__module__' : 'chromiumos.config.api.topology_pb2'
-        # @@protoc_insertion_point(class_scope:chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag.DetectZone)
-        })
-      ,
-      'DESCRIPTOR' : _HARDWAREFEATURES_FINGERPRINT_FINGERPRINTDIAG,
-      '__module__' : 'chromiumos.config.api.topology_pb2'
-      # @@protoc_insertion_point(class_scope:chromiumos.config.api.HardwareFeatures.Fingerprint.FingerprintDiag)
-      })
-    ,
     'DESCRIPTOR' : _HARDWAREFEATURES_FINGERPRINT,
     '__module__' : 'chromiumos.config.api.topology_pb2'
     # @@protoc_insertion_point(class_scope:chromiumos.config.api.HardwareFeatures.Fingerprint)
@@ -4263,9 +3861,6 @@ _sym_db.RegisterMessage(HardwareFeatures.Stylus)
 _sym_db.RegisterMessage(HardwareFeatures.Keyboard)
 _sym_db.RegisterMessage(HardwareFeatures.Memory)
 _sym_db.RegisterMessage(HardwareFeatures.Fingerprint)
-_sym_db.RegisterMessage(HardwareFeatures.Fingerprint.FingerprintDiag)
-_sym_db.RegisterMessage(HardwareFeatures.Fingerprint.FingerprintDiag.PixelMedian)
-_sym_db.RegisterMessage(HardwareFeatures.Fingerprint.FingerprintDiag.DetectZone)
 _sym_db.RegisterMessage(HardwareFeatures.Storage)
 _sym_db.RegisterMessage(HardwareFeatures.Bluetooth)
 _sym_db.RegisterMessage(HardwareFeatures.BarrelJack)
