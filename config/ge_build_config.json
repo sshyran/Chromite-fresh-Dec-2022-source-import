@@ -2844,10 +2844,21 @@
         {
           "board_name": "brya-nopkvm",
           "name": "redrix",
-          "cq_test_enabled": false,
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
+          "cq_test_enabled": true,
           "release_builder_test_pool": "bvt",
           "board_id": 7251,
           "is_active": true,
+          "stable_target_milestone": 158,
           "is_experimental": false
         },
         {
