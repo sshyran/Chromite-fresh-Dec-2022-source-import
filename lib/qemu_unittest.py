@@ -4,8 +4,10 @@
 
 """Test for chromite qemu logic"""
 
+import filecmp
 import glob
 import os
+import tempfile
 
 from chromite.lib import cros_test_lib
 from chromite.lib import qemu
@@ -72,7 +74,16 @@ class QemuTests(cros_test_lib.TestCase):
         """Sanity check for the interp helper."""
         self.assertNotEqual("", qemu.Qemu.GetFullInterpPath("foo"))
 
-    def testInode(self):
-        """Sanity check for the inode helper."""
-        self.assertEqual(-1, qemu.Qemu.inode("/....."))
-        self.assertLess(0, qemu.Qemu.inode("/"))
+    def testInstall(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            src = "/usr/bin/qemu-arm"
+            dst_dir = os.path.join(tmpdir, "build", "bin")
+            dst = os.path.join(dst_dir, "qemu-arm")
+
+            os.makedirs(dst_dir)
+            qemu.Qemu(sysroot=tmpdir, arch="arm").Install()
+            self.assertTrue(filecmp.cmp(src, dst, shallow=False))
+
+            # Second time shouldn't update anything, but it should still work.
+            qemu.Qemu(sysroot=tmpdir, arch="arm").Install()
+            self.assertTrue(filecmp.cmp(src, dst, shallow=False))

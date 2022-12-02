@@ -6,9 +6,11 @@
 
 import array
 import errno
+import filecmp
 import logging
 import os
 import re
+import shutil
 import tempfile
 
 from chromite.lib import osutils
@@ -215,38 +217,25 @@ class Qemu(object):
                 return matched_arch
 
     @staticmethod
-    def inode(path):
-        """Return the inode for |path| (or -1 if it doesn't exist)"""
-        try:
-            return os.stat(path).st_ino
-        except OSError as e:
-            if e.errno == errno.ENOENT:
-                return -1
-            raise
-
-    @staticmethod
-    def _AttemptHardLink(src, dst):
-        """Try to hardlink |src| to |dst|."""
+    def _AttemptCopy(src: str, dst: str) -> bool:
+        """Try to copy |src| to |dst|."""
         temp_dir, temp_name = os.path.split(dst)
         with tempfile.NamedTemporaryFile(
             dir=temp_dir, prefix=temp_name, delete=False
         ) as temp:
-            # Use hardlinks so that the update process is atomic.
-            os.unlink(temp.name)
-
-            # Maybe another process created the same unique name (after we
-            # unlinked it above).  Or the target exists because another qemu
-            # process created it in parallel).  Ignore that failure & retry.
+            shutil.copy2(src, temp.name)
+            # The target may exist because another qemu process created it in
+            # parallel. Ignore that failure and potentially retry.
             try:
-                os.link(src, temp.name)
+                # Rename, so we get an atomic update or else a failure.
                 os.rename(temp.name, dst)
-                # If we made it all the way here, we won!
                 return True
             except OSError as e:
                 if e.errno != errno.EEXIST:
                     raise
 
-            # We only reach here when the rename above failed, so this cleans up.
+            # We only reach here when the rename above failed, so this cleans
+            # up the tempfile.NamedTemporaryFile(..., delete=False).
             osutils.SafeUnlink(temp.name)
             return False
 
@@ -256,10 +245,11 @@ class Qemu(object):
             sysroot = self.sysroot
 
         # Copying strategy:
-        # Compare /usr/bin/qemu inode to /build/$board/build/bin/qemu; if
-        # different, hard link to a temporary file, then rename temp to target.
-        # This should ensure that once $QEMU_SYSROOT_PATH exists it will always
-        # exist, regardless of simultaneous test setups.
+        # Compare /usr/bin/foo (metadata, then contents if needed) to
+        # /build/$board/build/bin/foo; if different, copy (preserving metadata)
+        # to a temporary file, then rename temp to target. This should ensure
+        # that once $QEMU_SYSROOT_PATH exists it will always exist, regardless
+        # of simultaneous test setups.
         paths = (
             ("/usr/bin/%s" % self.name, sysroot + self.build_path),
             (
@@ -273,8 +263,10 @@ class Qemu(object):
             sysroot_path = os.path.normpath(sysroot_path)
             # We use a loop here, but in practice, this should only ever execute once
             # or twice at most.
-            while self.inode(sysroot_path) != self.inode(src_path):
-                if self._AttemptHardLink(src_path, sysroot_path):
+            while not os.path.exists(sysroot_path) or not filecmp.cmp(
+                sysroot_path, src_path, shallow=True
+            ):
+                if self._AttemptCopy(src_path, sysroot_path):
                     break
 
     @staticmethod
