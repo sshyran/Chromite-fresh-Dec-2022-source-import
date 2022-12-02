@@ -16,6 +16,7 @@ import sys
 import threading
 import time
 from typing import List, NamedTuple, Optional, Tuple
+import urllib
 
 from chromite.lib import constants
 from chromite.lib import gs
@@ -136,6 +137,10 @@ class XBuddyComponents(NamedTuple):
 
 class XBuddyException(Exception):
     """Exception classes used by this module."""
+
+
+class XBuddyInvalidSchemeException(XBuddyException):
+    """Exception raised for invalid URI scheme in XBuddy URI."""
 
 
 def update_timestamp(timestamp_dir: os.PathLike, build_id: os.PathLike) -> None:
@@ -1150,3 +1155,72 @@ def InterpretPath(
     )
 
     return XBuddyComponents(image_type, board, version, is_local)
+
+
+def parse(path: str, strict: bool = False) -> XBuddyComponents:
+    """Given a fully formed URI, parse and return the XBuddy URI components.
+
+    Based on observations, here's how the URI may be arranged, and what defaults
+    are used if URI components aren't provided:
+
+    Full URI: xbuddy://${LOCATION}/${BOARD}/${VERSION}/${IMAGE_TYPE}
+        - ${LOCATION} specifies whether to check image folder locally or to
+          retrieve an image from a remote host (i.e. a Google Storage bucket.)
+          - DEFAULT: local
+        - ${BOARD} specifies a particular build target; useful for testing
+          hardware and/or overlay-specific software.
+          - DEFAULT: None
+        - ${VERSION} specifies a milestone-version identifier to target a
+          specific ChromeOS release build.
+          - DEFAULT: latest (an alias which gets resolved to the most recent
+            milestone-version pair available).
+        - ${IMAGE_TYPE} specifies the image type used to build an image in
+          question. Different image types include useful tools for developers
+          (e.g. extra packages used for testing software and hardware
+          functionality). The most common targeted types are dev, test, and
+          base.
+            - DEFAULT:
+                - If ${LOCATION} == 'local': ANY (an alias which resolves to any
+                  usable image type.
+                - If ${LOCATION} == 'remote': 'test'
+
+    Any or all of these URI components may be omitted from the URI, but when
+    any components are present, this hierarchical ordering should be respected.
+    If reordered, the URI will not be parsed correctly.
+
+    Args:
+        path: The XBuddy URI. This method will perform URI validation and
+            parsing, and the client is not expected perform any validation.
+        strict: A client-specified option that enforces a requirement that the
+            XBuddy URI begin with a well-formed scheme (e.g. 'xbuddy://').
+
+    Returns:
+        A Components tuple containing the parsed elements of the URI.
+
+    Raises:
+        XBuddyInvalidSchemeException if the scheme is not xbuddy, or is missing
+            when strict checking is enforced.
+    """
+    parsed = urllib.parse.urlparse(path)
+
+    if parsed.scheme == "":
+        if strict:
+            # Client has requested the scheme checking to be strict and require
+            # the URI to start with 'xbuddy://'. Enforce this and raise an
+            # exception.
+            raise XBuddyInvalidSchemeException(
+                "A URI scheme starting with 'xbuddy://' was expected but none "
+                "was found."
+            )
+        else:
+            logging.debug(
+                'Assuming "%s" is an xbuddy path; scheme enforcement was not '
+                "requested",
+                path,
+            )
+    elif parsed.scheme != "xbuddy":
+        raise XBuddyInvalidSchemeException(
+            "Scheme of XBuddy URI was invalid. Provided path: %s" % path
+        )
+
+    return InterpretPath(parsed.netloc + parsed.path)

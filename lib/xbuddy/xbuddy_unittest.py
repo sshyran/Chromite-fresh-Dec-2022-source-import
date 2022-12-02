@@ -11,6 +11,8 @@ import tempfile
 import time
 from unittest import mock
 
+import pytest
+
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
 from chromite.lib import path_util
@@ -460,3 +462,83 @@ class xBuddyTest(cros_test_lib.TestCase):
             self.mock_xb.Get(["remote", "reef", "R1-1.2.3"]),
             ("reef/R1-1.2.3", "/path/to/image.bin"),
         )
+
+
+valid_full_uris = [
+    (
+        "xbuddy://strongbad/R109-14893.0.0/test",
+        xbuddy.XBuddyComponents("test", "strongbad", "R109-14893.0.0", True),
+    ),
+    (
+        "xbuddy://betty/R106-14212.0.0/full_payload",
+        xbuddy.XBuddyComponents(
+            "full_payload", "betty", "R106-14212.0.0", True
+        ),
+    ),
+    (
+        "xbuddy://boardname/R100-14000.0.0",
+        xbuddy.XBuddyComponents("ANY", "boardname", "R100-14000.0.0", True),
+    ),
+    (
+        "xbuddy://remote/strongbad/R109-14893.0.0",
+        xbuddy.XBuddyComponents("test", "strongbad", "R109-14893.0.0", False),
+    ),
+    (
+        "xbuddy://local/betty/R106-14212.0.0",
+        xbuddy.XBuddyComponents("ANY", "betty", "R106-14212.0.0", True),
+    ),
+    ("xbuddy://", xbuddy.XBuddyComponents("ANY", None, "latest", True)),
+    (
+        "xbuddy://local",
+        xbuddy.XBuddyComponents("ANY", None, "latest", True),
+    ),
+    (
+        "xbuddy://remote",
+        xbuddy.XBuddyComponents("test", None, "latest", False),
+    ),
+    (
+        "xbuddy://local/boardname/latest/ANY",
+        xbuddy.XBuddyComponents("ANY", "boardname", "latest", True),
+    ),
+    (
+        "xbuddy://remote/boardname/latest/ANY",
+        xbuddy.XBuddyComponents("ANY", "boardname", "latest", False),
+    ),
+]
+
+
+@pytest.mark.parametrize("uri,expected", valid_full_uris)
+def test_parse_valid_uri(uri, expected):
+    """Basic checks for parsing an XBuddy URI."""
+    assert xbuddy.parse(uri) == expected
+
+
+valid_uris_without_schema = [
+    (
+        "strongbad/R109-14893.0.0/test",
+        xbuddy.XBuddyComponents("test", "strongbad", "R109-14893.0.0", True),
+    ),
+    ("", xbuddy.XBuddyComponents("ANY", None, "latest", True)),
+]
+
+
+@pytest.mark.parametrize("uri,expected", valid_uris_without_schema)
+def test_parse_uri_with_empty_scheme_not_strict(uri, expected):
+    """Basic checks for parsing an XBuddy URI without a scheme."""
+    assert xbuddy.parse(uri) == expected
+
+
+@pytest.mark.parametrize("uri", [tc[0] for tc in valid_uris_without_schema])
+def test_parse_uri_with_empty_scheme_strict(uri):
+    """Fail strict scheme checking for URIs without scheme provided."""
+    with pytest.raises(xbuddy.XBuddyInvalidSchemeException):
+        xbuddy.parse(uri, strict=True)
+
+
+@pytest.mark.parametrize(
+    "uri", ["gs://test/bucket", "usb://", "ftp://path/to/image"]
+)
+def test_parse_invalid_uri(uri):
+    """Test exception is raised when the scheme is specified and not xbuddy."""
+    with pytest.raises(xbuddy.XBuddyInvalidSchemeException):
+        xbuddy.parse(uri)
