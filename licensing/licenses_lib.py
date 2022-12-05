@@ -184,6 +184,7 @@ OVERLAYS_METAPACKAGES_MUST_USE_VIRTUAL = [
 # even though they have an empty installation size.
 SIZE_EXEMPT_PACKAGES = [
     "net-print/fuji-xerox-printing-license",
+    "net-print/fujifilm-printing-license",
     "net-print/konica-minolta-printing-license",
     "net-print/nec-printing-license",
     "net-print/xerox-printing-license",
