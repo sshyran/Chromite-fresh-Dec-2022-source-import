@@ -59,8 +59,8 @@ class TryCommandTest(cros_test_lib.RunCommandTestCase):
             actual_out = cros_try._ModifyFlagsToDoubleDashes(in_str)
             self.assertEqual(actual_out, expected_out)
 
-    def testCIPDVersion(self):
-        """Test the default/overridden CIPD version."""
+    def testTryVersion(self):
+        """Test the default/overridden try version."""
         self.runCrosTry(["release"])
         self._cipd_install_patch.assert_called_with(
             cipd.GetCIPDFromCache(),
@@ -68,7 +68,7 @@ class TryCommandTest(cros_test_lib.RunCommandTestCase):
             cros_try.PINNED_TRY_VERSION,
         )
         self.runCrosTry(
-            ["--cipd-version", "my-cool-version", "release", "--staging"]
+            ["--try-version", "my-cool-version", "release", "--staging"]
         )
         self._cipd_install_patch.assert_called_with(
             cipd.GetCIPDFromCache(),

@@ -37,9 +37,10 @@ For help, run `cros try help` (with no hyphens).
         """Capture all CLI args to forward to the go bin."""
         super().AddParser(parser)
         parser.add_argument(
-            "--cipd-version",
+            "--try-version",
             default=PINNED_TRY_VERSION,
-            help="CIPD version of the try CLI. Can be instance ID or ref. Must be provided before other try subcommands/flags.",
+            help="CIPD version of the try CLI. Can be instance ID or ref. "
+            "Must be provided before other try subcommands/flags.",
         )
         parser.add_argument("input", action="append", nargs=argparse.REMAINDER)
 
@@ -49,7 +50,7 @@ For help, run `cros try help` (with no hyphens).
         Returns:
             The return code of the completed try process.
         """
-        try_bin = _InstallTryPackage(self.options.cipd_version)
+        try_bin = _InstallTryPackage(self.options.try_version)
         return self._RunTry(try_bin, self.options.input[0])
 
     def _RunTry(self, try_bin: Path, args: List[str]) -> int:
