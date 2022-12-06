@@ -1,4 +1,4 @@
-# Copyright 2022 The ChromiumOS Authors.
+# Copyright 2022 The ChromiumOS Authors
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -9,6 +9,23 @@ from unittest import mock
 
 from chromite.lib import cros_test_lib
 from chromite.lib import on_device_fuzz
+from chromite.lib import partial_mock
+
+
+class RemoteDeviceMock(partial_mock.PartialMock):
+    """Mocks the RemoteDevice function."""
+
+    TARGET = "chromite.lib.remote_access.RemoteDevice"
+    ATTRS = ("Pingable", "IfFileExists", "run")
+
+    def Pingable(self, _):
+        return True
+
+    def IfFileExists(self, _):
+        return True
+
+    def run(self, *_, **__):
+        return None
 
 
 class OnDeviceFuzzTest(cros_test_lib.RunCommandTestCase):
@@ -36,7 +53,7 @@ class OnDeviceFuzzTest(cros_test_lib.RunCommandTestCase):
 
     def test_run_fuzzer_executable(self):
         """Test that we can call fuzzer executables on mock devices."""
-        mock_device = mock.MagicMock()
+        mock_device = RemoteDeviceMock()
         on_device_fuzz.run_fuzzer_executable(
             mock_device,
             Path("/path/to/chroot"),

@@ -1,4 +1,4 @@
-# Copyright 2022 The ChromiumOS Authors.
+# Copyright 2022 The ChromiumOS Authors
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -9,6 +9,7 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
+from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import portage_util
@@ -25,7 +26,11 @@ _MAX_TOTAL_TIME_OPTION_NAME = "max_total_time"
 _MAX_TOTAL_TIME_DEFAULT_VALUE = 30
 
 
-class SetupError(Exception):
+class Error(Exception):
+    """Base on_device_fuzz error class."""
+
+
+class SetupError(Error):
     """Error for when setup commands fail."""
 
 
@@ -54,7 +59,7 @@ def create_sysroot_tarball(
         SetupError if the setup fails.
     """
     if not board_build_dir:
-        board_build_dir = Path("/build") / board
+        board_build_dir = build_target_lib.get_default_sysroot_path(board)
     sysroot_tarball_setup_checks(packages, board_build_dir)
     package_str = " ".join(packages)
     sdk_cmd = [
@@ -67,7 +72,7 @@ def create_sysroot_tarball(
     try:
         cros_build_lib.run(sdk_cmd, check=True, env={"USE": "asan fuzzer"})
     except cros_build_lib.RunCommandError as e:
-        raise SetupError(e)
+        raise SetupError from e
     return output_path
 
 
@@ -99,12 +104,11 @@ def _check_necessary_installed(
     atoms: Iterable[str], board_build_dir: Path
 ) -> List[Tuple[str, str]]:
     """Helper for checking the packages are installed."""
-    build_dir_str = str(board_build_dir)
     match_gen = (
-        (atom, portage_util.PortageqMatch(atom, sysroot=build_dir_str))
-        for atom in atoms
+        (x, portage_util.PortageqMatch(x, sysroot=board_build_dir))
+        for x in atoms
     )
-    db = portage_util.PortageDB(build_dir_str)
+    db = portage_util.PortageDB(board_build_dir)
     not_installed = []
     for atom, package_info in match_gen:
         if not package_info:
@@ -130,8 +134,7 @@ def create_dut_sysroot(
             Should be on an executable partition, like in /usr/local.
             Will be created if it does not exist. Should be absolute.
     """
-    mkdir_cmd = ["mkdir", "-p", str(sysroot_device_path)]
-    device.run(mkdir_cmd)
+    device.run(["mkdir", "-p", str(sysroot_device_path)])
     dest = sysroot_device_path.parent
     device.CopyToDevice(src=str(sysroot_tarball), dest=str(dest), mode="scp")
     untar_cmd = [
@@ -145,7 +148,7 @@ def create_dut_sysroot(
 
 
 def add_default_fuzz_time(libfuzzer_options: Dict[str, Any]) -> Dict[str, Any]:
-    """Add the default maximum fuzz time to the libfuzzer options, if not set."""
+    """Add default maximum fuzz time to the libfuzzer options if not set."""
     return {
         _MAX_TOTAL_TIME_OPTION_NAME: _MAX_TOTAL_TIME_DEFAULT_VALUE,
         **libfuzzer_options,
@@ -230,9 +233,8 @@ def run_fuzzer_executable(
     libfuzzer_cmd = _setup_envs(libfuzzer_cmd)
     libfuzzer_cmd.append(str(sysroot_fuzzer_path))
     libfuzzer_cmd += (f"-{k}={v}" for k, v in libfuzzer_options_timed.items())
-    libfuzzer_cmd_str = " ".join(libfuzzer_cmd)
 
-    chroot_run_cmd = ["chroot", str(sysroot_device_path), libfuzzer_cmd_str]
+    chroot_run_cmd = ["chroot", str(sysroot_device_path)] + libfuzzer_cmd
     outside_dut_sysroot_fuzzer = (
         sysroot_device_path / sysroot_fuzzer_path.relative_to("/")
     )
