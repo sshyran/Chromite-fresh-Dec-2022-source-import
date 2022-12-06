@@ -4,6 +4,7 @@
 """CPU Power related helpers."""
 
 import contextlib
+import errno
 import logging
 from pathlib import Path
 from typing import Iterator, Optional
@@ -30,13 +31,23 @@ def _FetchActiveCpuGovernor() -> Optional[str]:
       The active governor or None if there is no single active governor.
     """
     cpufreq = _CPU_PATH / "cpufreq"
-    governors = {
-        x.read_text(encoding="utf-8")
-        for x in cpufreq.glob("policy*/scaling_governor")
-    }
+
+    governors = set()
+    offline_cpus = False
+    for x in cpufreq.glob("policy*/scaling_governor"):
+        try:
+            governors.add(x.read_text(encoding="utf-8"))
+        except OSError as e:
+            if e.errno == errno.EBUSY:
+                offline_cpus = True
+                continue
+    if offline_cpus:
+        logging.warning(
+            "Some CPUs are offline. Rebooting should bring them online."
+        )
     if len(governors) != 1:
         logging.warning(
-            "Too many active CPU governors; refusing to use " "'performance'."
+            "Too many active CPU governors; refusing to use 'performance'."
         )
         return None
     return next(iter(governors))
