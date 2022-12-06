@@ -859,7 +859,7 @@ def create_image_scripts_archive(
         The path to the archive, or None if it couldn't be created.
     """
     image_dir = image_lib.GetLatestImageLink(build_target.name)
-    if not image_dir.exists():
+    if not os.path.exists(image_dir):
         logging.warning("Image build directory not found.")
         return None
 

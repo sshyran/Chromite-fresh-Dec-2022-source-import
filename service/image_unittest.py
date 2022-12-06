@@ -751,7 +751,7 @@ class TestCreateImageScriptsArchive(cros_test_lib.MockTempDirTestCase):
         image_dir = self.tempdir
 
         self.PatchObject(
-            image_lib, "GetLatestImageLink", return_value=image_dir
+            image_lib, "GetLatestImageLink", return_value=str(image_dir)
         )
 
         glob_mock = self.PatchObject(
@@ -768,7 +768,7 @@ class TestCreateImageScriptsArchive(cros_test_lib.MockTempDirTestCase):
         glob_mock.assert_called_once()
         tar_mock.assert_called_once_with(
             os.path.join(output_dir, "image_scripts.tar.xz"),
-            image_dir,
+            str(image_dir),
             inputs=["bar.sh", "baz.sh"],
         )
 
