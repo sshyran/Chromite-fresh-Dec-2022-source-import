@@ -276,6 +276,9 @@ class DeployTest(cros_test_lib.MockTempDirTestCase):
             remote_access.RemoteAccess, "RemoteReboot", return_value=True
         )
 
+    def tearDown(self):
+        self.deploy.Cleanup()
+
 
 class TestCheckIfBoardMatches(DeployTest):
     """Testing checking whether the DUT board matches the target board."""
