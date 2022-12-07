@@ -12006,6 +12006,15 @@
           "board_id": 7218,
           "is_active": true,
           "is_experimental": false
+        },
+        {
+          "board_name": "skyrim",
+          "name": "whiterun",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7218,
+          "is_active": true,
+          "is_experimental": false
         }
       ],
       "rubik_target_milestone": 103,
@@ -12057,15 +12066,6 @@
         {
           "board_name": "skyrim-chausie",
           "name": "skyrim6w360",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 7219,
-          "is_active": true,
-          "is_experimental": false
-        },
-        {
-          "board_name": "skyrim-chausie",
-          "name": "whiterun",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7219,
