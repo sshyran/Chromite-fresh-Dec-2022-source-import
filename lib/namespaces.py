@@ -26,14 +26,15 @@ from chromite.lib import process_util
 from chromite.lib import proctitle
 
 
-CLONE_FS = 0x00000200
 CLONE_FILES = 0x00000400
-CLONE_NEWNS = 0x00020000
-CLONE_NEWUTS = 0x04000000
+CLONE_FS = 0x00000200
+CLONE_NEWCGROUP = 0x02000000
 CLONE_NEWIPC = 0x08000000
-CLONE_NEWUSER = 0x10000000
-CLONE_NEWPID = 0x20000000
 CLONE_NEWNET = 0x40000000
+CLONE_NEWNS = 0x00020000
+CLONE_NEWPID = 0x20000000
+CLONE_NEWUSER = 0x10000000
+CLONE_NEWUTS = 0x04000000
 
 
 def SetNS(fd, nstype):
@@ -298,7 +299,9 @@ def CreateNetNs():
             raise
 
 
-def SimpleUnshare(mount=True, uts=True, ipc=True, net=False, pid=False):
+def SimpleUnshare(
+    mount=True, uts=True, ipc=True, net=False, pid=False, cgroup=False
+):
     """Simpler helper for setting up namespaces quickly.
 
     If support for any namespace type is not available, we'll silently skip it.
@@ -309,6 +312,7 @@ def SimpleUnshare(mount=True, uts=True, ipc=True, net=False, pid=False):
       ipc: Create an IPC namespace.
       net: Create a net namespace.
       pid: Create a pid namespace.
+      cgroup: Create a cgroup namespace.
     """
     # The mount namespace is the only one really guaranteed to exist --
     # it's been supported forever and it cannot be turned off.
@@ -336,6 +340,23 @@ def SimpleUnshare(mount=True, uts=True, ipc=True, net=False, pid=False):
 
     if pid:
         CreatePidNs()
+
+    # The cgroup namespace was added in 4.6 and may be disabled in the kernel.
+    if cgroup:
+        try:
+            Unshare(CLONE_NEWCGROUP)
+        except OSError as e:
+            if e.errno != errno.EINVAL:
+                pass
+
+    # We considered unsharing the time namespace as well.  Unfortunately,
+    # the usefulness of time namespaces is limited:
+    # - they only isolate the CLOCK_BOOTTIME and CLOCK_MONOTONIC clocks
+    # - there's no way to set these clocks apart from updating the offset in the
+    #   /proc/self/timens_offset file, which cannot be edited after a process
+    #   has been created in the new time namespace
+    # - CLOCK_REALTIME is not isolated
+    # Hence we've left them out.
 
 
 def ReExecuteWithNamespace(

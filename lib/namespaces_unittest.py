@@ -46,6 +46,42 @@ class UnshareTests(cros_test_lib.TestCase):
                 raise
 
 
+class UnshareCGroupsTests(cros_test_lib.TestCase):
+    """Tests for Unshare() of CGroups"""
+
+    def testBasic(self):
+        """Simple functionality test."""
+        try:
+            namespaces.Unshare(namespaces.CLONE_NEWCGROUP)
+            # After we have unshared cgroups, every cgroups entry in
+            # /proc/self/cgroups should have a path that's root (ie "/").
+            with open("/proc/self/cgroup") as cgroups:
+                for cgroup in cgroups:
+                    self.assertRegex(cgroup, ":/\n$")
+        except OSError as e:
+            if e.errno != errno.EPERM:
+                # Running as non-root will fail, so ignore it.  We ran most
+                # of the code in the process which is all we really wanted.
+                raise
+
+
+class SimpleUnshareCgroupsTests(cros_test_lib.MockTestCase):
+    """Tests for SimpleUnshare with cgroups."""
+
+    def testSimpleUnshare(self):
+        """Simple functionality test."""
+        unshare_mock = self.PatchObject(namespaces, "Unshare")
+        namespaces.SimpleUnshare(
+            mount=False,
+            uts=False,
+            ipc=False,
+            net=False,
+            pid=False,
+            cgroup=True,
+        )
+        unshare_mock.assert_called_once_with(namespaces.CLONE_NEWCGROUP)
+
+
 class ReExecuteWithNamespaceTests(cros_test_lib.MockTestCase):
     """Tests for ReExecuteWithNamespace()."""
 
