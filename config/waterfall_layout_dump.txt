@@ -236,6 +236,7 @@
     snappy-release
     soraka-libcamera-release
     soraka-release
+    strongbad-kernelnext-release
     strongbad-release
     strongbad-userdebug-release
     strongbad64-release
@@ -243,6 +244,7 @@
     tatl-release
     trogdor-arc-r-release
     trogdor-connectivitynext-release
+    trogdor-kernelnext-release
     trogdor-release
     trogdor-userdebug-release
     trogdor-zephyr-release
@@ -1077,6 +1079,7 @@
     snappy-release-tryjob
     soraka-libcamera-release-tryjob
     soraka-release-tryjob
+    strongbad-kernelnext-release-tryjob
     strongbad-release-tryjob
     strongbad-userdebug-release-tryjob
     strongbad64-release-tryjob
@@ -1084,6 +1087,7 @@
     tatl-release-tryjob
     trogdor-arc-r-release-tryjob
     trogdor-connectivitynext-release-tryjob
+    trogdor-kernelnext-release-tryjob
     trogdor-release-tryjob
     trogdor-userdebug-release-tryjob
     trogdor-zephyr-release-tryjob
@@ -1314,6 +1318,11 @@
   strongbad-factory-trogdor-13443.B-factorybranch-tryjob
   strongbad-factory-trogdor-15210.B-factorybranch-tryjob
   strongbad-full-tryjob
+  strongbad-kernelnext-full-tryjob
+  strongbad-kernelnext-llvm-next-toolchain-tryjob
+  strongbad-kernelnext-llvm-toolchain-tryjob
+  strongbad-kernelnext-payloads-tryjob
+  strongbad-kernelnext-release-tryjob
   strongbad-llvm-next-toolchain-tryjob
   strongbad-llvm-toolchain-tryjob
   strongbad-payloads-tryjob
@@ -1353,6 +1362,11 @@
   trogdor-factory-trogdor-13443.B-factorybranch-tryjob
   trogdor-factory-trogdor-15210.B-factorybranch-tryjob
   trogdor-full-tryjob
+  trogdor-kernelnext-full-tryjob
+  trogdor-kernelnext-llvm-next-toolchain-tryjob
+  trogdor-kernelnext-llvm-toolchain-tryjob
+  trogdor-kernelnext-payloads-tryjob
+  trogdor-kernelnext-release-tryjob
   trogdor-llvm-next-toolchain-tryjob
   trogdor-llvm-toolchain-tryjob
   trogdor-payloads-tryjob
