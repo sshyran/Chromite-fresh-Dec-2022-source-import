@@ -4283,6 +4283,7 @@
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"gimble\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"gimble4es\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"kano\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"marasov\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"mithrax\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"osiris\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"primus\",\n  \"test_suites\": []\n}",
@@ -4297,7 +4298,8 @@
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"tarlo\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"vell\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"volmar\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"zavala\",\n  \"test_suites\": []\n}"
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"zavala\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"zydron\",\n  \"test_suites\": []\n}"
     ],
     "vm_tests_override": null
   },
@@ -4332,6 +4334,7 @@
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"gimble\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"gimble4es\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"kano\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"marasov\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"mithrax\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"osiris\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"primus\",\n  \"test_suites\": []\n}",
@@ -4346,7 +4349,8 @@
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"tarlo\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"vell\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"volmar\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"zavala\",\n  \"test_suites\": []\n}"
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"zavala\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-hibernate\",\n  \"name\": \"zydron\",\n  \"test_suites\": []\n}"
     ],
     "paygen": false,
     "push_image": false,
@@ -4866,7 +4870,8 @@
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya\",\n  \"name\": \"tarlo\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya\",\n  \"name\": \"vell\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya\",\n  \"name\": \"volmar\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya\",\n  \"name\": \"zavala\",\n  \"test_suites\": []\n}"
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya\",\n  \"name\": \"zavala\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya\",\n  \"name\": \"zydron\",\n  \"test_suites\": []\n}"
     ],
     "vm_tests_override": null
   },
@@ -4917,7 +4922,8 @@
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya\",\n  \"name\": \"tarlo\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya\",\n  \"name\": \"vell\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya\",\n  \"name\": \"volmar\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya\",\n  \"name\": \"zavala\",\n  \"test_suites\": []\n}"
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya\",\n  \"name\": \"zavala\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya\",\n  \"name\": \"zydron\",\n  \"test_suites\": []\n}"
     ],
     "paygen": false,
     "push_image": false,

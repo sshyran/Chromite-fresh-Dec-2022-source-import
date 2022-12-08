@@ -1650,6 +1650,15 @@
         },
         {
           "board_name": "brya-hibernate",
+          "name": "marasov",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true,
+          "is_experimental": false
+        },
+        {
+          "board_name": "brya-hibernate",
           "name": "mithrax",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -1778,6 +1787,15 @@
         {
           "board_name": "brya-hibernate",
           "name": "zavala",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true,
+          "is_experimental": false
+        },
+        {
+          "board_name": "brya-hibernate",
+          "name": "zydron",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7229,
@@ -2702,6 +2720,15 @@
         {
           "board_name": "brya-manatee",
           "name": "zavala",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7187,
+          "is_active": true,
+          "is_experimental": false
+        },
+        {
+          "board_name": "brya-manatee",
+          "name": "zydron",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7187,
