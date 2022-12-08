@@ -12,6 +12,7 @@ from typing import Dict, List, NamedTuple, Text
 
 from chromite.lib import cros_test_lib
 from chromite.lib.parser import package_info
+from chromite.scripts import tricium_clang_tidy
 from chromite.service import toolchain
 
 
@@ -233,6 +234,108 @@ class BuildLinterTests(cros_test_lib.MockTempDirTestCase):
             # pylint: disable=protected-access
             actual_result = bl._get_package_for_artifact_dir(test_path)
             self.assertEqual(expected_result, actual_result)
+
+    def testFetchTidyLints(self):
+        mock_calls = 0
+        diagnostics = [
+            tricium_clang_tidy.TidyDiagnostic("", 0, "lint1", "body1", [], []),
+            tricium_clang_tidy.TidyDiagnostic("", 0, "lint2", "body2", [], []),
+            tricium_clang_tidy.TidyDiagnostic("", 0, "lint3", "body3", [], []),
+            tricium_clang_tidy.TidyDiagnostic("", 0, "lint4", "body4", [], []),
+        ]
+        expected_findings = [
+            toolchain.LinterFinding(
+                name="lint1",
+                message="body1",
+                locations=tuple(
+                    [toolchain.CodeLocation("", "", 0, 0, None, None)]
+                ),
+                linter="clang_tidy",
+                suggested_fixes=tuple(),
+            ),
+            toolchain.LinterFinding(
+                name="lint2",
+                message="body2",
+                locations=tuple(
+                    [toolchain.CodeLocation("", "", 0, 0, None, None)]
+                ),
+                linter="clang_tidy",
+                suggested_fixes=tuple(),
+            ),
+            toolchain.LinterFinding(
+                name="lint3",
+                message="body3",
+                locations=tuple(
+                    [toolchain.CodeLocation("", "", 0, 0, None, None)]
+                ),
+                linter="clang_tidy",
+                suggested_fixes=tuple(),
+            ),
+            toolchain.LinterFinding(
+                name="lint4",
+                message="body4",
+                locations=tuple(
+                    [toolchain.CodeLocation("", "", 0, 0, None, None)]
+                ),
+                linter="clang_tidy",
+                suggested_fixes=tuple(),
+            ),
+        ]
+
+        def mock_parse_tidy_invocation(_):
+            nonlocal mock_calls
+            mock_calls += 1
+            if mock_calls == 1:
+                meta = tricium_clang_tidy.InvocationMetadata(0, [], "", "", "")
+                return meta, diagnostics[:2]
+            if mock_calls == 2:
+                meta = tricium_clang_tidy.InvocationMetadata(0, [], "", "", "")
+                return meta, diagnostics[2:]
+            if mock_calls == 3:
+                meta = tricium_clang_tidy.InvocationMetadata(0, [], "", "", "")
+                return meta, []
+            elif mock_calls == 4:
+                return tricium_clang_tidy.ExceptionData()
+            elif mock_calls == 5:
+                meta = tricium_clang_tidy.InvocationMetadata(1, [], "", "", "")
+                return meta, diagnostics
+            else:
+                self.fail("Too many calls to parse_tidy_invocation")
+
+        def mock_filter_findings(_, __, findings):
+            if mock_calls == 1:
+                self.assertCountEqual(findings, diagnostics[:2])
+            elif mock_calls == 2:
+                self.assertCountEqual(findings, diagnostics[2:])
+            elif mock_calls == 3:
+                self.assertEqual(findings, [])
+            return findings
+
+        mbl = MockBuildLinter(self.tempdir)
+
+        artifacts = [
+            MockArtifact("clang-tidy", "pkg", "a.json", "content"),
+            MockArtifact("clang-tidy", "pkg", "b.json", "content"),
+            MockArtifact("clang-tidy", "pkg", "c.json", "content"),
+            MockArtifact("clang-tidy", "pkg", "d.json", "content"),
+            MockArtifact("clang-tidy", "pkg", "e.out", "content"),
+        ]
+
+        for artifact in artifacts:
+            mbl.add_artifact(artifact)
+
+        tmp_parse_tidy_invocation = tricium_clang_tidy.parse_tidy_invocation
+        tricium_clang_tidy.parse_tidy_invocation = mock_parse_tidy_invocation
+        tmp_filter_tidy_lints = tricium_clang_tidy.filter_tidy_lints
+        tricium_clang_tidy.filter_tidy_lints = mock_filter_findings
+
+        # pylint: disable=protected-access
+        lints = mbl._fetch_tidy_lints()
+
+        tricium_clang_tidy.parse_tidy_invocation = tmp_parse_tidy_invocation
+        tricium_clang_tidy.filter_tidy_lints = tmp_filter_tidy_lints
+
+        self.assertCountEqual(lints, expected_findings)
 
     def testParseIWYUFiles(self):
         mbl = MockBuildLinter(self.tempdir)

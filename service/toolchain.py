@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 import re
 import subprocess
-from typing import Dict, Iterable, List, NamedTuple, Text, Tuple
+from typing import Dict, Iterable, List, NamedTuple, Set, Text, Tuple
 
 from chromite.lib import chroot_util
 from chromite.lib import cros_build_lib
@@ -341,44 +341,60 @@ class BuildLinter:
         cros_build_lib.AssertInsideChroot()
 
         diagnostics = set()
-        for filename in os.listdir(BuildLinter.TIDY_BASE_DIR):
-            if filename.endswith(".json"):
-                invocation_result = tricium_clang_tidy.parse_tidy_invocation(
-                    BuildLinter.TIDY_BASE_DIR / filename
-                )
-                if isinstance(
-                    invocation_result, tricium_clang_tidy.ExceptionData
-                ):
-                    logging.exception(invocation_result)
-                    continue
-                meta, complaints = invocation_result
-                if meta.exit_code:
-                    logging.warning(
-                        "Invoking clang-tidy on %s with flags %s exited with "
-                        "code %s; output:\n%s",
-                        meta.lint_target,
-                        meta.invocation,
-                        meta.exit_code,
-                        meta.stdstreams,
+        for files in self._fetch_from_linting_artifacts("clang-tidy").values():
+            for filepath in files:
+                if filepath.endswith(".json"):
+                    new_diagnostics = self._fetch_tidy_lints_from_json(
+                        Path(filepath)
                     )
-                    continue
-                diagnostics.update(complaints)
-        diagnostics = tricium_clang_tidy.filter_tidy_lints(
-            None, None, diagnostics
-        )
+                    diagnostics.update(new_diagnostics)
 
-        return self._parse_tidy_diagnostics(diagnostics)
+        # FIXME(b:229769929): We temporarily support tidy lints in the proper
+        # artifacts directory as well as in /tmp until we are done migrating
+        # everything out of /tmp. Once we finish we can delete the block below:
+        try:
+            for filename in os.listdir(BuildLinter.TIDY_BASE_DIR):
+                if filename.endswith(".json"):
+                    new_diagnostics = self._fetch_tidy_lints_from_json(
+                        BuildLinter.TIDY_BASE_DIR / filename
+                    )
+                    diagnostics.update(new_diagnostics)
+        except (FileNotFoundError, IsADirectoryError):
+            pass
+
+        return diagnostics
+
+    def _fetch_tidy_lints_from_json(
+        self, json_path: Path
+    ) -> Set[LinterFinding]:
+        """Fetches Tidy findings for the invocation described by the json."""
+        invocation_result = tricium_clang_tidy.parse_tidy_invocation(json_path)
+        if isinstance(invocation_result, tricium_clang_tidy.ExceptionData):
+            logging.exception(invocation_result)
+            return set()
+        meta, findings = invocation_result
+        if meta.exit_code:
+            logging.warning(
+                "Invoking clang-tidy on %s with flags %s exited with "
+                "code %s; output:\n%s",
+                meta.lint_target,
+                meta.invocation,
+                meta.exit_code,
+                meta.stdstreams,
+            )
+        findings = tricium_clang_tidy.filter_tidy_lints(None, None, findings)
+        return self._parse_tidy_diagnostics(findings)
 
     def _parse_tidy_diagnostics(
         self, diagnostics: List["tricium_clang_tidy.TidyDiagnostic"]
-    ) -> List[LinterFinding]:
+    ) -> Set[LinterFinding]:
         """Parse diagnostics created by Clang Tidy into LinterFindings objects."""
-        findings = []
+        findings = set()
         for diag in diagnostics:
             filepath = self._clean_file_path(diag.file_path)
             suggested_fixes = []
             for replacement in diag.replacements:
-                contents_to_replace = self._get_file_contents(
+                contents_to_replace = self._try_to_get_file_contents(
                     diag.file_path,
                     replacement.start_line,
                     replacement.end_line,
@@ -397,7 +413,7 @@ class BuildLinter:
                     replacement=replacement.new_text, location=fix_location
                 )
                 suggested_fixes.append(suggested_fix)
-            original_contents = self._get_file_contents(
+            original_contents = self._try_to_get_file_contents(
                 diag.file_path,
                 diag.line_number,
                 diag.line_number,
@@ -421,7 +437,7 @@ class BuildLinter:
                 suggested_fixes=tuple(suggested_fixes),
                 linter="clang_tidy",
             )
-            findings.append(finding)
+            findings.add(finding)
         return findings
 
     def _fetch_golint_lints(self) -> List[LinterFinding]:
@@ -706,7 +722,7 @@ class BuildLinter:
                 return True
         return False
 
-    def _get_file_contents(
+    def _try_to_get_file_contents(
         self,
         path: Text,
         line_start: int,
@@ -714,12 +730,15 @@ class BuildLinter:
         col_start: int = None,
         col_end: int = None,
     ):
-        """Attempt to get the contents of a file."""
+        """Attempt to get the contents of a file.
+
+        If we fail because the file does not exist, we return the empty string.
+        """
         try:
             with Path(path).open(encoding="utf-8") as file_reader:
                 file_contents = file_reader.readlines()
-        except FileNotFoundError:
-            return []
+        except (FileNotFoundError, IsADirectoryError):
+            return ""
         # Note: line numbers are 1 indexed
         lines = file_contents[line_start - 1 : line_end]
         if lines and col_start is not None and col_end is not None:
