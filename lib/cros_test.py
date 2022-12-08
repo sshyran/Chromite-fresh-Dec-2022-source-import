@@ -65,6 +65,7 @@ class CrOSTest(object):
         self.tast_vars = opts.tast_vars
         self.tast_total_shards = opts.tast_total_shards
         self.tast_shard_index = opts.tast_shard_index
+        self.tast_retries = opts.tast_retries
         self.tast_extra_use_flags = []
         if opts.tast_extra_use_flags:
             self.tast_extra_use_flags = opts.tast_extra_use_flags.split(",")
@@ -519,6 +520,8 @@ class CrOSTest(object):
                 "-totalshards=%d" % self.tast_total_shards,
                 "-shardindex=%d" % self.tast_shard_index,
             ]
+        if self.tast_retries:
+            cmd += ["-retries=%d" % self.tast_retries]
         if self._device.ssh_port:
             cmd += ["%s:%d" % (self._device.device, self._device.ssh_port)]
         else:
@@ -647,7 +650,9 @@ class CrOSTest(object):
             # This authorizes the test ssh keys with chronos.
             # With "nosymfollow" mount option present in /home/chronos/user/,
             # "-L" is required and it will copy symbolic links as real files.
-            self._device.run(["cp", "-L", "-r", "/root/.ssh/", "/home/chronos/user/"])
+            self._device.run(
+                ["cp", "-L", "-r", "/root/.ssh/", "/home/chronos/user/"]
+            )
             if files:
                 # The trailing ':' after the user also changes the group to the user's
                 # primary group.
@@ -756,6 +761,12 @@ def ParseCommandLine(argv):
         type=int,
         default=0,
         help="Total number of shards when running Tast tests.",
+    )
+    parser.add_argument(
+        "--tast-retries",
+        type=int,
+        default=0,
+        help="Number of retries for failed Tast tests.",
     )
     parser.add_argument(
         "--tast-extra-use-flags",
@@ -932,6 +943,9 @@ def ParseCommandLine(argv):
 
     if opts.tast_vars and not opts.tast:
         parser.error("--tast-var is only applicable to Tast tests.")
+
+    if opts.tast_retries and not opts.tast:
+        parser.error("--tast-retries is only applicable to Tast tests.")
 
     if opts.deploy_lacros and opts.deploy:
         additional_lacros_build_dir = os.path.join(

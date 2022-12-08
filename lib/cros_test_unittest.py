@@ -664,6 +664,7 @@ class CrOSTesterTast(CrOSTesterBase):
         self._tester.results_dir = "/tmp/results"
         self._tester.tast_total_shards = 2
         self._tester.tast_shard_index = 1
+        self._tester.tast_retries = 1
         self._tester.tast_extra_use_flags = ["some_flag1", "some_flag2"]
         self._tester.Run()
         check_inside_chroot_mock.assert_called()
@@ -680,6 +681,7 @@ class CrOSTesterTast(CrOSTesterBase):
                 "/tmp/results",
                 "-totalshards=2",
                 "-shardindex=1",
+                "-retries=1",
                 "100.90.29.199",
                 "ui.ChromeLogin",
             ]
@@ -1046,6 +1048,17 @@ class CrOSTesterParser(CrOSTesterBase):
                 "--tast-shard-index=10",
             ],
             "index must be < total",
+        )
+
+        # Parser error when specifying retries with non-tast tests.
+        self.CheckParserError(
+            [
+                "--tast-retries=1",
+                "--remote-cmd",
+                "--",
+                "/run/test",
+            ],
+            "--tast-retries is only applicable to Tast tests.",
         )
 
     def testParserErrorLacros(self):
