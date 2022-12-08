@@ -21724,7 +21724,8 @@
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"skyrim-chausie\",\n  \"name\": \"skyrim15w\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"skyrim-chausie\",\n  \"name\": \"skyrim15w360\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"skyrim-chausie\",\n  \"name\": \"skyrim6w\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"skyrim-chausie\",\n  \"name\": \"skyrim6w360\",\n  \"test_suites\": []\n}"
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"skyrim-chausie\",\n  \"name\": \"skyrim6w360\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"skyrim-chausie\",\n  \"name\": \"whiterun\",\n  \"test_suites\": []\n}"
     ],
     "unittests": false,
     "vm_tests_override": null
@@ -21752,7 +21753,8 @@
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"skyrim-chausie\",\n  \"name\": \"skyrim15w\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"skyrim-chausie\",\n  \"name\": \"skyrim15w360\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"skyrim-chausie\",\n  \"name\": \"skyrim6w\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"skyrim-chausie\",\n  \"name\": \"skyrim6w360\",\n  \"test_suites\": []\n}"
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"skyrim-chausie\",\n  \"name\": \"skyrim6w360\",\n  \"test_suites\": []\n}",
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"skyrim-chausie\",\n  \"name\": \"whiterun\",\n  \"test_suites\": []\n}"
     ],
     "paygen": false,
     "push_image": false,
@@ -22003,7 +22005,6 @@
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"skyrim\",\n  \"name\": \"skyrim15w360\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"skyrim\",\n  \"name\": \"skyrim6w\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"skyrim\",\n  \"name\": \"skyrim6w360\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"skyrim\",\n  \"name\": \"whiterun\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"skyrim\",\n  \"name\": \"whiterun\",\n  \"test_suites\": []\n}"
     ],
     "sign_types": [
@@ -22030,7 +22031,6 @@
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"skyrim\",\n  \"name\": \"skyrim15w360\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"skyrim\",\n  \"name\": \"skyrim6w\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"skyrim\",\n  \"name\": \"skyrim6w360\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"skyrim\",\n  \"name\": \"whiterun\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"skyrim\",\n  \"name\": \"whiterun\",\n  \"test_suites\": []\n}"
     ],
     "paygen": false,
