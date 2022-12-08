@@ -20738,6 +20738,9 @@
     "hw_tests": [],
     "hw_tests_disabled_bug": "b/243985220",
     "hw_tests_override": [],
+    "models": [
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"rex\",\n  \"name\": \"rex\",\n  \"test_suites\": []\n}"
+    ],
     "sign_types": [
       "recovery",
       "factory"
@@ -20755,6 +20758,9 @@
     "hw_tests_disabled_bug": "b/243985220",
     "hw_tests_override": null,
     "luci_builder": "Try",
+    "models": [
+      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"rex\",\n  \"name\": \"rex\",\n  \"test_suites\": []\n}"
+    ],
     "paygen": false,
     "push_image": false,
     "sign_types": [

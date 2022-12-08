@@ -295,20 +295,6 @@
       "stable_target_milestone": 101
     },
     {
-      "name": "rex",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": true,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ],
-      "rubik_target_milestone": 103,
-      "stable_target_milestone": 115
-    },
-    {
       "name": "senor",
       "configs": [
         {
@@ -11680,6 +11666,26 @@
         }
       ],
       "rubik_target_milestone": 105
+    },
+    {
+      "name": "rex",
+      "reference_board_name": "rex",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": false,
+      "models": [
+        {
+          "board_name": "rex",
+          "name": "rex",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7205,
+          "is_active": true,
+          "is_experimental": false
+        }
+      ],
+      "rubik_target_milestone": 103,
+      "stable_target_milestone": 115
     },
     {
       "name": "sand",
