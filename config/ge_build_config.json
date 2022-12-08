@@ -2909,6 +2909,15 @@
           "board_id": 7251,
           "is_active": true,
           "is_experimental": false
+        },
+        {
+          "board_name": "brya-nopkvm",
+          "name": "zydron",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7251,
+          "is_active": true,
+          "is_experimental": false
         }
       ],
       "rubik_target_milestone": 108,
