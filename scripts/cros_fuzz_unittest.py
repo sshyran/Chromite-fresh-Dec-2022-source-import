@@ -190,9 +190,12 @@ class RunFuzzerTest(RunSysrootCommandMockTestCase):
             cros_fuzz.GetFuzzerSysrootPath(FUZZ_TARGET).sysroot,
         ]
         self.expected_extra_env = {
-            "ASAN_OPTIONS": "log_path=stderr:detect_odr_violation=0",
-            "MSAN_OPTIONS": "log_path=stderr:detect_odr_violation=0",
-            "UBSAN_OPTIONS": "log_path=stderr:detect_odr_violation=0",
+            "ASAN_OPTIONS": "log_path=stderr:detect_odr_violation=0:"
+            "handle_sigtrap=1",
+            "MSAN_OPTIONS": "log_path=stderr:detect_odr_violation=0:"
+            "handle_sigtrap=1",
+            "UBSAN_OPTIONS": "log_path=stderr:detect_odr_violation=0:"
+            "handle_sigtrap=1",
         }
 
     def _Helper(self):

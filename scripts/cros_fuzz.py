@@ -415,7 +415,13 @@ def GetFuzzExtraEnv(extra_options=None):
     # log_path must be set because Chrome OS's patched compiler changes it.
     # disable odr violation since many fuzzers hit it and it is also disabled on
     # clusterfuzz.
-    options_dict = {"log_path": "stderr", "detect_odr_violation": "0"}
+    # handle_sigtrap is useful for catching int3 in assertion checks in ChromeOS
+    # code.
+    options_dict = {
+        "log_path": "stderr",
+        "detect_odr_violation": "0",
+        "handle_sigtrap": "1",
+    }
     options_dict.update(extra_options)
     sanitizer_options = ":".join("%s=%s" % x for x in options_dict.items())
     sanitizers = ("ASAN", "MSAN", "UBSAN")
