@@ -138,7 +138,6 @@ def deploy_into_remote_dlc(
                     mode="rsync",
                     files_from=files_file,
                     inplace=True,
-                    sudo=True,
                 )
 
         logging.notice("Repacking DLC")
