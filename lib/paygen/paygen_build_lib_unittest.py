@@ -2302,10 +2302,6 @@ from autotest_lib.client.common_lib import utils
 
 AUTHOR = "dhaddock@, ahassani@"
 NAME = "autoupdate_EndToEndTest_paygen_au_foo_delta_1.0.0_omaha"
-TIME = "MEDIUM"
-TEST_CATEGORY = "Functional"
-TEST_CLASS = "platform"
-TEST_TYPE = "server"
 """
             )
         )
@@ -2331,10 +2327,6 @@ from autotest_lib.client.common_lib import utils
 
 AUTHOR = "dhaddock@, ahassani@"
 NAME = "autoupdate_EndToEndTest_paygen_au_foo_full_1.2.3_n2n"
-TIME = "MEDIUM"
-TEST_CATEGORY = "Functional"
-TEST_CLASS = "platform"
-TEST_TYPE = "server"
 """
             )
         )
