@@ -10,7 +10,7 @@ from chromite.lib.firmware import servo_lib
 
 
 BUILD_PACKAGES = (
-    # TODO: enable after ec ready: "chromeos-zephyr",
+    "chromeos-zephyr",
     "coreboot",
     "depthcharge",
     "libpayload",
