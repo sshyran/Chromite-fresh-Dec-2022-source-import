@@ -24,6 +24,7 @@ from chromite.lib import path_util
 from chromite.lib import remote_access
 from chromite.lib import timeout_util
 from chromite.lib.xbuddy import build_artifact
+from chromite.lib.xbuddy import devserver_constants
 from chromite.lib.xbuddy import xbuddy
 
 
@@ -43,6 +44,39 @@ class ImagePathError(Exception):
 
 class ArtifactDownloadError(Exception):
     """Raised when the artifact could not be downloaded."""
+
+
+def GetXbuddyPath(path):
+    """A helper function to parse an xbuddy path.
+
+    Args:
+      path: Either an xbuddy path, gs path, or a path with no scheme.
+
+    Returns:
+      path/for/xbuddy if |path| is xbuddy://path/for/xbuddy;
+      path/for/gs if |path| is gs://chromeos-image-archive/path/for/gs/;
+      otherwise, |path|.
+
+    Raises:
+      ValueError if |path| is an unrecognized scheme, or is a gs path with
+      an unrecognized bucket.
+    """
+    parsed = urllib.parse.urlparse(path)
+
+    if parsed.scheme == "xbuddy":
+        return "%s%s" % (parsed.netloc, parsed.path)
+    elif parsed.scheme == "":
+        logging.debug('Assuming "%s" is an xbuddy path.', path)
+        return path
+    elif parsed.scheme == "gs":
+        if parsed.netloc != devserver_constants.GS_IMAGE_BUCKET:
+            raise ValueError(
+                'Unsupported gs bucket "%s". Only bucket "%s" is supported.'
+                % (parsed.netloc, devserver_constants.GS_IMAGE_BUCKET)
+            )
+        return "%s%s" % (xbuddy.REMOTE, parsed.path)
+    else:
+        raise ValueError('Unsupported scheme "%s".' % (parsed.scheme,))
 
 
 def GetImagePathWithXbuddy(
@@ -71,12 +105,10 @@ def GetImagePathWithXbuddy(
     upath.insert(0, constants.CHROMITE_SCRIPTS_DIR)
     os.environ["PATH"] = os.pathsep.join(upath)
 
-    parsed_uri = xbuddy.parse(path)
     xb = xbuddy.XBuddy(board=board, version=version, static_dir=static_dir)
+    path_list = GetXbuddyPath(path).rsplit(os.path.sep)
     try:
-        return xb.Get(
-            [parsed_uri.board, parsed_uri.version, parsed_uri.image_type]
-        )
+        return xb.Get(path_list)
     except xbuddy.XBuddyException as e:
         if not silent:
             logging.error(
