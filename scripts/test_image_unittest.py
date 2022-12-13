@@ -77,7 +77,7 @@ class MainTest(TestImageTest):
     """Verify the CWD is in a temp directory."""
 
     class CwdTest(image_test_lib.ImageTestCase):
-      """A dummy test class to verify current working directory."""
+      """A stub test class to verify current working directory."""
 
       _expected_dir = None
 
@@ -103,7 +103,7 @@ class MainTest(TestImageTest):
     self.PatchObject(tempfile, 'mkdtemp', autospec=True,
                      return_value=expected_dir)
 
-    argv = [self.tempdir]
+    argv = [str(self.tempdir)]
     self.assertEqual(0, test_image.main(argv))
     self.assertEqual('/tmp', os.getcwd())
 
@@ -111,7 +111,7 @@ class MainTest(TestImageTest):
     """Verify that "--board", "--test_results_root" are passed to the tests."""
 
     class AttributeTest(image_test_lib.ImageTestCase):
-      """Dummy test class to hold board and directory."""
+      """Stub test class to hold board and directory."""
 
       def testOkay(self):
         pass
@@ -126,7 +126,7 @@ class MainTest(TestImageTest):
         'my-board',
         '--test_results_root',
         'your-root',
-        self.tempdir
+        str(self.tempdir),
     ]
     test_image.main(argv)
     # pylint: disable=protected-access

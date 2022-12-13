@@ -8,33 +8,32 @@ Handles all testing related functionality, it is not itself a test.
 """
 
 import functools
+import logging
 import os
 import string
 import subprocess
 
+from chromite.third_party.google.protobuf import json_format
+
 from chromite.api import controller
 from chromite.api import faux
 from chromite.api import validate
-from chromite.api.metrics import deserialize_metrics_log
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import test_pb2
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromiumos.build.api import container_metadata_pb2
-from chromite.cbuildbot import goma_util
+from chromite.api.metrics import deserialize_metrics_log
 from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import image_lib
+from chromite.lib import goma_lib
+from chromite.lib import metrics_lib
 from chromite.lib import osutils
 from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
-from chromite.scripts import cros_set_lsb_release
 from chromite.service import packages as packages_service
 from chromite.service import test
-from chromite.third_party.google.protobuf import json_format
-from chromite.utils import key_value_store
-from chromite.utils import metrics
 
 
 @faux.empty_success
@@ -65,12 +64,6 @@ def DebugInfoTest(input_proto, _output_proto, config):
     return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
 
 
-def _BuildTargetUnitTestResponse(input_proto, output_proto, _config):
-  """Add tarball path to a successful response."""
-  output_proto.tarball_path = os.path.join(input_proto.result_path,
-                                           'unit_tests.tar')
-
-
 def _BuildTargetUnitTestFailedResponse(_input_proto, output_proto, _config):
   """Add failed packages to a failed response."""
   packages = ['foo/bar', 'cat/pkg']
@@ -83,11 +76,11 @@ def _BuildTargetUnitTestFailedResponse(_input_proto, output_proto, _config):
     failed_pkg_data_msg.log_path.path = '/path/to/%s/log' % pkg
 
 
-@faux.success(_BuildTargetUnitTestResponse)
+@faux.empty_success
 @faux.error(_BuildTargetUnitTestFailedResponse)
 @validate.require_each('packages', ['category', 'package_name'])
 @validate.validation_complete
-@metrics.collect_metrics
+@metrics_lib.collect_metrics
 def BuildTargetUnitTest(input_proto, output_proto, _config):
   """Run a build target's ebuild unit tests."""
   # Method flags.
@@ -115,7 +108,6 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
   testable_packages_optional = input_proto.flags.testable_packages_optional
 
   build_target = controller_util.ParseBuildTarget(input_proto.build_target)
-  chroot = controller_util.ParseChroot(input_proto.chroot)
 
   code_coverage = input_proto.flags.code_coverage
 
@@ -123,7 +115,6 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
 
   result = test.BuildTargetUnitTest(
       build_target,
-      chroot,
       packages=packages,
       blocklist=blocklist,
       was_built=was_built,
@@ -133,11 +124,8 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
 
   if not result.success:
     # Record all failed packages and retrieve log locations.
-    controller_util.retrieve_package_log_paths(
-        sysroot_lib.PackageInstallError('error installing packages',
-                                        cros_build_lib.CommandResult(),
-                                        packages=result.failed_pkgs),
-        output_proto, sysroot)
+    controller_util.retrieve_package_log_paths(result.failed_pkgs,
+                                               output_proto, sysroot)
     if result.failed_pkgs:
       return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
     else:
@@ -149,27 +137,6 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
 SRC_DIR = os.path.join(constants.SOURCE_ROOT, 'src')
 PLATFORM_DEV_DIR = os.path.join(SRC_DIR, 'platform/dev')
 TEST_SERVICE_DIR = os.path.join(PLATFORM_DEV_DIR, 'src/chromiumos/test')
-TEST_CONTAINER_BUILD_SCRIPTS = {
-    'cros-provision':
-        os.path.join(TEST_SERVICE_DIR, 'provision/docker/build-dockerimage.sh'),
-    'cros-dut':
-        os.path.join(TEST_SERVICE_DIR, 'dut/docker/build-dockerimage.sh'),
-    'cros-test':
-        os.path.join(
-            PLATFORM_DEV_DIR,
-            'test/container/utils/build-dockerimage.sh'
-        ),
-    'cros-test-finder':
-        os.path.join(
-            TEST_SERVICE_DIR,
-            'test_finder/docker/build-dockerimage.sh',
-        ),
-    'cros-testplan':
-        os.path.join(
-            TEST_SERVICE_DIR,
-            'plan/docker/build-dockerimage.sh',
-        ),
-}
 
 
 def _BuildTestServiceContainersResponse(input_proto, output_proto, _config):
@@ -251,47 +218,72 @@ def BuildTestServiceContainers(
       f'{key}={value}' for key, value in input_proto.labels.items()
   )
 
-  for human_name, build_script in TEST_CONTAINER_BUILD_SCRIPTS.items():
-    with osutils.TempDir(prefix='test_container') as tempdir:
-      output_path = os.path.join(tempdir, 'metadata.jsonpb')
+  build_script = os.path.join(
+      TEST_SERVICE_DIR, 'python/src/docker_libs/cli/build-dockerimages.py')
+  human_name = 'Service Builder'
 
-      # Note that we use an output file instead of stdout to avoid any issues
-      # with maintaining stdout hygiene.  Stdout and stderr are combined to
-      # form the error log in response to any errors.
-      cmd = [build_script, chroot.path, sysroot.path]
+  with osutils.TempDir(prefix='test_container') as tempdir:
+    result_file = 'metadata.jsonpb'
+    output_path = os.path.join(tempdir, result_file)
+    # Note that we use an output file instead of stdout to avoid any issues
+    # with maintaining stdout hygiene.  Stdout and stderr are combined to
+    # form the error log in response to any errors.
+    cmd = [build_script, chroot.path, sysroot.path]
 
-      if input_proto.HasField('repository'):
-        cmd += ['--host', input_proto.repository.hostname]
-        cmd += ['--project', input_proto.repository.project]
+    if input_proto.HasField('repository'):
+      cmd += ['--host', input_proto.repository.hostname]
+      cmd += ['--project', input_proto.repository.project]
 
-      cmd += ['--tags', tags]
-      cmd += ['--output', output_path]
-      cmd += labels
+    cmd += ['--tags', tags]
+    cmd += ['--output', output_path]
 
+    # Translate generator to comma separated string.
+    ct_labels = ','.join(labels)
+    cmd += ['--labels', ct_labels]
+    cmd += ['--build_all']
+    cmd += ['--upload']
+
+    cmd_result = cros_build_lib.run(cmd, check=False,
+                                    stderr=subprocess.STDOUT,
+                                    stdout=True)
+
+    if cmd_result.returncode != 0:
+      # When failing, just record a fail response with the builder name.
+      logging.debug('%s build failed.\nStdout:\n%s\nStderr:\n%s',
+                    human_name, cmd_result.stdout, cmd_result.stderr)
       result = test_pb2.TestServiceContainerBuildResult()
       result.name = human_name
-
-      cmd_result = cros_build_lib.run(cmd, check=False,
-                                      stderr=subprocess.STDOUT,
-                                      stdout=True)
-      if cmd_result.returncode == 0:
-        # Read the ContainerImageInfo message produced by the container build.
-        image_info = container_metadata_pb2.ContainerImageInfo()
-        json_format.Parse(osutils.ReadFile(output_path), image_info)
-
-        result.success.CopyFrom(
-            test_pb2.TestServiceContainerBuildResult.Success(
-                image_info=image_info
-            )
-        )
-      else:
-        result.failure.CopyFrom(
-            test_pb2.TestServiceContainerBuildResult.Failure(
-                error_message=cmd_result.stdout
-            )
-        )
-
+      image_info = container_metadata_pb2.ContainerImageInfo()
+      result.failure.CopyFrom(
+          test_pb2.TestServiceContainerBuildResult.Failure(
+              error_message=cmd_result.stdout
+          )
+      )
       output_proto.results.append(result)
+
+    else:
+      logging.debug('%s build succeeded.\nStdout:\n%s\nStderr:\n%s',
+                    human_name, cmd_result.stdout, cmd_result.stderr)
+      files = os.listdir(tempdir)
+      # Iterate through the tempdir to output metadata files.
+      for file in files:
+        if result_file in file:
+          output_path = os.path.join(tempdir, file)
+
+          # build-dockerimages.py will append the service name to outputfile
+          # with an underscore.
+          human_name = file.split('_')[-1]
+
+          result = test_pb2.TestServiceContainerBuildResult()
+          result.name = human_name
+          image_info = container_metadata_pb2.ContainerImageInfo()
+          json_format.Parse(osutils.ReadFile(output_path), image_info)
+          result.success.CopyFrom(
+              test_pb2.TestServiceContainerBuildResult.Success(
+                  image_info=image_info
+              )
+          )
+          output_proto.results.append(result)
 
 
 @faux.empty_success
@@ -314,6 +306,17 @@ def ChromitePytest(_input_proto, _output_proto, _config):
   return controller.RETURN_CODE_SUCCESS
 
 
+@faux.empty_success
+@faux.empty_completed_unsuccessfully_error
+@validate.validation_complete
+def RulesCrosUnitTest(_input_proto, _output_proto, _config):
+  """Run the rules_cros unit tests."""
+  if test.RulesCrosUnitTest():
+    return controller.RETURN_CODE_SUCCESS
+  else:
+    return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
+
+
 @faux.all_empty
 @validate.require('sysroot.path', 'sysroot.build_target.name', 'chrome_root')
 @validate.validation_complete
@@ -321,7 +324,7 @@ def SimpleChromeWorkflowTest(input_proto, _output_proto, _config):
   """Run SimpleChromeWorkflow tests."""
   if input_proto.goma_config.goma_dir:
     chromeos_goma_dir = input_proto.goma_config.chromeos_goma_dir or None
-    goma = goma_util.Goma(
+    goma = goma_lib.Goma(
         input_proto.goma_config.goma_dir,
         input_proto.goma_config.goma_client_json,
         stage_name='BuildApiTestSimpleChrome',
@@ -369,47 +372,6 @@ def VmTest(input_proto, _output_proto, _config):
 
 
 @faux.all_empty
-@validate.require('image_payload.path.path', 'cache_payloads')
-@validate.require_each('cache_payloads', ['path.path'])
-@validate.validation_complete
-def MoblabVmTest(input_proto, _output_proto, _config):
-  """Run Moblab VM tests."""
-  chroot = controller_util.ParseChroot(input_proto.chroot)
-  image_payload_dir = input_proto.image_payload.path.path
-  cache_payload_dirs = [cp.path.path for cp in input_proto.cache_payloads]
-
-  # Autotest and Moblab depend on the builder path, so we must read it from
-  # the image.
-  image_file = os.path.join(image_payload_dir, constants.TEST_IMAGE_BIN)
-  with osutils.TempDir() as mount_dir:
-    with image_lib.LoopbackPartitions(image_file, destination=mount_dir) as lp:
-      # The file we want is /etc/lsb-release, which lives in the ROOT-A
-      # disk partition.
-      partition_paths = lp.Mount([constants.PART_ROOT_A])
-      assert len(partition_paths) == 1, (
-          'expected one partition path, got: %r' % partition_paths)
-      partition_path = partition_paths[0]
-      lsb_release_file = os.path.join(partition_path,
-                                      constants.LSB_RELEASE_PATH.strip('/'))
-      lsb_release_kvs = key_value_store.LoadFile(lsb_release_file)
-      builder = lsb_release_kvs.get(cros_set_lsb_release.LSB_KEY_BUILDER_PATH)
-
-  if not builder:
-    cros_build_lib.Die('Image did not contain key %s in %s',
-                       cros_set_lsb_release.LSB_KEY_BUILDER_PATH,
-                       constants.LSB_RELEASE_PATH)
-
-  # Now we can run the tests.
-  with chroot.tempdir() as workspace_dir, chroot.tempdir() as results_dir:
-    # Convert the results directory to an absolute chroot directory.
-    chroot_results_dir = '/%s' % os.path.relpath(results_dir, chroot.path)
-    vms = test.CreateMoblabVm(workspace_dir, chroot.path, image_payload_dir)
-    cache_dir = test.PrepareMoblabVmImageCache(vms, builder, cache_payload_dirs)
-    test.RunMoblabVmTest(chroot, vms, builder, cache_dir, chroot_results_dir)
-    test.ValidateMoblabVmTest(results_dir)
-
-
-@faux.all_empty
 @validate.validation_complete
 def CrosSigningTest(_input_proto, _output_proto, _config):
   """Run the cros-signing unit tests."""
@@ -442,7 +404,6 @@ def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Test,
   generated = []
 
   artifact_types = {
-      in_proto.ArtifactType.UNIT_TESTS: test.BuildTargetUnitTestTarball,
       in_proto.ArtifactType.CODE_COVERAGE_LLVM_JSON:
           test.BundleCodeCoverageLlvmJson,
       in_proto.ArtifactType.HWQUAL: functools.partial(

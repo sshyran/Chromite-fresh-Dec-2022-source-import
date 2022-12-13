@@ -17,6 +17,7 @@ from chromite.lib import portage_util
 from chromite.scripts import cros_mark_android_as_stable
 from chromite.service import android
 
+
 pytestmark = cros_test_lib.pytestmark_inside_only
 
 
@@ -73,7 +74,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
 
     archs = ['arm', 'arm64', 'x86', 'x86_64']
     build_types = ['user', 'userdebug']
-    runtime_datas = ['gms_core_cache', 'ureadahead_pack']
+    runtime_datas = ['gms_core_cache', 'ureadahead_pack', 'tts_cache']
 
     for arch in archs:
       for build_type in build_types:
@@ -137,6 +138,10 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
              f'userdebug_{android_version}.tar')
     self.gs_mock.AddCmdResult(['stat', '--', path2],
                               stdout=(self.STAT_OUTPUT) % path2)
+    path3 = (f'{self.runtime_artifacts_bucket_url}/tts_cache_arm64_'
+             f'user_{android_version}.tar')
+    self.gs_mock.AddCmdResult(['stat', '--', path3],
+                              stdout=(self.STAT_OUTPUT) % path3)
 
     variables = cros_mark_android_as_stable.UpdateDataCollectorArtifacts(
         android_version,
@@ -148,9 +153,12 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
                     f'ureadahead_pack_x86_64_user_{version_reference}.tar')
     expectation2 = (f'{self.runtime_artifacts_bucket_url}/'
                     f'gms_core_cache_arm_userdebug_{version_reference}.tar')
+    expectation3 = (f'{self.runtime_artifacts_bucket_url}/'
+                    f'tts_cache_arm64_user_{version_reference}.tar')
     self.assertEqual({
         'X86_64_USER_UREADAHEAD_PACK': expectation1,
         'ARM_USERDEBUG_GMS_CORE_CACHE': expectation2,
+        'ARM64_USER_TTS_CACHE': expectation3
     }, variables)
 
   def testUpdateDataCollectorArtifactsPin(self):
@@ -209,7 +217,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
         '--android_package', self.android_package,
         '--arc_bucket_url', self.arc_bucket_url,
         '--force_version', android_version,
-        '--srcroot', self.tempdir,
+        '--srcroot', str(self.tempdir),
         '--runtime_artifacts_bucket_url', self.runtime_artifacts_bucket_url,
         '--skip_commit',
     ])
@@ -245,7 +253,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
         '--android_package', self.android_package,
         '--arc_bucket_url', self.arc_bucket_url,
         '--force_version', android_version,
-        '--srcroot', self.tempdir,
+        '--srcroot', str(self.tempdir),
         '--runtime_artifacts_bucket_url', self.runtime_artifacts_bucket_url,
         '--skip_commit',
     ])
@@ -272,7 +280,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
     cros_mark_android_as_stable.main([
         '--android_package', self.android_package,
         '--force_version', android_version,
-        '--srcroot', self.tempdir,
+        '--srcroot', str(self.tempdir),
         '--update_lkgb',
     ])
 
@@ -295,7 +303,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
     cros_mark_android_as_stable.main([
         '--android_package', self.android_package,
         '--force_version', android_version,
-        '--srcroot', self.tempdir,
+        '--srcroot', str(self.tempdir),
         '--update_lkgb',
     ])
 
@@ -316,7 +324,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
     cros_mark_android_as_stable.main([
         '--android_package', self.android_package,
         '--force_version', android_version,
-        '--srcroot', self.tempdir,
+        '--srcroot', str(self.tempdir),
         '--update_lkgb',
     ])
 
@@ -337,7 +345,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
     cros_mark_android_as_stable.main([
         '--android_package', self.android_package,
         '--force_version', android_version,
-        '--srcroot', self.tempdir,
+        '--srcroot', str(self.tempdir),
         '--update_lkgb',
     ])
 
@@ -351,7 +359,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
     with self.assertRaises(Exception):
       cros_mark_android_as_stable.main([
           '--android_package', self.android_package,
-          '--srcroot', self.tempdir,
+          '--srcroot', str(self.tempdir),
           '--update_lkgb',
       ])
 
@@ -367,7 +375,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
     cros_mark_android_as_stable.main([
         '--android_package', self.android_package,
         '--force_version', android_version,
-        '--srcroot', self.tempdir,
+        '--srcroot', str(self.tempdir),
         '--skip_commit',
         '--update_lkgb',
     ])

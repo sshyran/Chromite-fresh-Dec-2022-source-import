@@ -4,25 +4,35 @@
 
 """Module to use remoteexec from builders."""
 
-import getpass
 import os
+from pathlib import Path
+from typing import Union
 
 from chromite.lib import constants
+from chromite.lib import cros_build_lib
 
 
 class Remoteexec(object):
   """Interface to use remoteexec on bots."""
 
-  def __init__(self, reclient_dir, reproxy_cfg_file):
+  def __init__(self,
+               reclient_dir: Union[str, os.PathLike],
+               reproxy_cfg_file: Union[str, os.PathLike]):
     """Initializes a Remoteexec instance.
 
     Args:
-      reclient_dir: Path to the re-client directory that contains
-        the reproxy, bootstrap, rewrapper binaries.
+      reclient_dir: Path to the re-client directory that contains the reproxy,
+        bootstrap, rewrapper binaries.
       reproxy_cfg_file: Path to the config file for starting reproxy.
+
+    Raises:
+      ValueError
     """
 
-    if not os.path.isdir(reclient_dir):
+    reclient_dir = Path(reclient_dir)
+    reproxy_cfg_file = Path(reproxy_cfg_file)
+
+    if not reclient_dir.is_dir():
       raise ValueError(
           f'reclient_dir does not point to a directory: {reclient_dir}')
 
@@ -33,12 +43,11 @@ class Remoteexec(object):
     # in `chromite/sdk/reclient_cfgs. When other builders, other than the
     # initial informational builder, are added, they should all be generated
     # by recipes rather than committed.
-    if not os.path.exists(reproxy_cfg_file):
-      reproxy_cfg_file = os.path.join(
-          constants.CHROMITE_DIR, 'sdk', 'reclient_cfgs', reproxy_cfg_file)
-      if not os.path.exists(reproxy_cfg_file):
-        raise ValueError(
-            f'reproxy_cfg_file does not exist: {reproxy_cfg_file}')
+    if not reproxy_cfg_file.exists():
+      reproxy_cfg_file = Path(
+          constants.CHROMITE_DIR) / 'sdk' / 'reclient_cfgs' / reproxy_cfg_file
+      if not reproxy_cfg_file.exists():
+        raise ValueError(f'reproxy_cfg_file does not exist: {reproxy_cfg_file}')
     self.reproxy_cfg_file = reproxy_cfg_file
 
   def __eq__(self, other):
@@ -52,10 +61,50 @@ class Remoteexec(object):
     # These paths should match the paths in chroot that the
     # reclient directory and reproxy config file get mapped to
     # in sdk_lib/enter_chroot.sh
-    reclient_dir = os.path.join('/home', getpass.getuser(), 'reclient')
-    reproxy_cfg_file = os.path.join('/home', getpass.getuser(),
-                                    'reclient_cfgs', 'reproxy_chroot.cfg')
-    result = {'RECLIENT_DIR': reclient_dir,
-              'REPROXY_CFG': reproxy_cfg_file}
+    reclient_dir = Path.home() / 'reclient'
+    reproxy_cfg_file = Path.home() / 'reclient_cfgs' / 'reproxy_chroot.cfg'
+    return {
+        'RECLIENT_DIR': str(reclient_dir),
+        'REPROXY_CFG': str(reproxy_cfg_file),
+    }
 
-    return result
+  def _RunRemoteExec(self, shutdown: bool = False) -> None:
+    """Run RemoteExec command.
+
+    Run the start or shutdown command for the remoteexec.
+
+    Args:
+      shutdown: If true, add shutdown command.
+
+    Raises:
+      cros_build_lib.RunCommandError
+    """
+    bootstrap_path = self.reclient_dir / 'bootstrap'
+    reproxy_path = self.reclient_dir / 'reproxy'
+    remoteexec_cmd = [
+        bootstrap_path, '--cfg', self.reproxy_cfg_file, '--re_proxy',
+        reproxy_path,
+    ]
+    if shutdown:
+      remoteexec_cmd.append('--shutdown')
+    cros_build_lib.run(remoteexec_cmd)
+
+  def Start(self):
+    """Start RemoteExec.
+
+    Run the command to start the remoteexec.
+
+    Raises:
+      cros_build_lib.RunCommandError
+    """
+    self._RunRemoteExec()
+
+  def Stop(self):
+    """Shutdown RemoteExec.
+
+    Run the command to shutdown the remoteexec.
+
+    Raises:
+      cros_build_lib.RunCommandError
+    """
+    self._RunRemoteExec(shutdown=True)

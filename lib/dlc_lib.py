@@ -40,7 +40,13 @@ UPDATE_ENGINE_CONF = 'etc/update_engine.conf'
 _EXTRA_RESOURCES = (UPDATE_ENGINE_CONF,)
 # The following boards don't have AppIds, but we allow DLCs to be generated for
 # those boards for testing purposes.
-_TEST_BOARDS_ALLOWLIST = ('amd64-generic', 'arm-generic', 'galaxy')
+_TEST_BOARDS_ALLOWLIST = (
+    'amd64-generic',
+    'amd64-generic-koosh',
+    'arm64-generic',
+    'arm-generic',
+    'galaxy',
+)
 
 DLC_ID_KEY = 'DLC_ID'
 DLC_PACKAGE_KEY = 'DLC_PACKAGE'
@@ -273,11 +279,9 @@ class DlcGenerator(object):
     """Create an ext4 image."""
     with osutils.TempDir(prefix='dlc_') as temp_dir:
       mount_point = os.path.join(temp_dir, 'mount_point')
-      # Create the directory where the image is located if it doesn't exist.
-      osutils.SafeMakedirs(os.path.split(self.dest_image)[0])
       # Create a raw image file.
-      with open(self.dest_image, 'w') as f:
-        f.truncate(self._BLOCKS * self._BLOCK_SIZE)
+      osutils.AllocateFile(self.dest_image, self._BLOCKS * self._BLOCK_SIZE,
+                           makedirs=True)
       # Create an ext4 file system on the raw image.
       cros_build_lib.run([
           '/sbin/mkfs.ext4', '-b',
@@ -507,7 +511,7 @@ class DlcGenerator(object):
           'salt=random'
       ],
                                   capture_output=True)
-      table = result.output
+      table = result.stdout
 
       # Append the merkle tree to the image.
       osutils.WriteFile(

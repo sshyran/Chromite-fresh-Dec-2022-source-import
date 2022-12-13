@@ -12,6 +12,7 @@ from chromite.lib import cros_test_lib
 from chromite.lib.xbuddy import common_util
 from chromite.lib.xbuddy import devserver_constants
 
+
 pytestmark = cros_test_lib.pytestmark_inside_only
 
 

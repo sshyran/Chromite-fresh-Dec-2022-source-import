@@ -5,13 +5,14 @@
 """Command to visualize dependency tree for a given package."""
 
 import sys
-from typing import List, Dict
+from typing import Dict, List
 
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import depgraph
 
 from . import visualize
+
 
 _DEFAULT_PACKAGES = ['virtual/target-os', 'virtual/target-os-dev',
                      'virtual/target-os-test', 'virtual/target-os-factory']

@@ -9,6 +9,7 @@ Documentation on this script is also available here:
 """
 
 import codecs
+import fnmatch
 import html
 import logging
 import os
@@ -27,7 +28,6 @@ from chromite.lib.parser import package_info
 # where yaml may not be there, so we don't error on that since it's not needed
 # in that case.
 try:
-  # pylint: disable=wrong-import-order
   import yaml
 
   class SaferLoader(yaml.SafeLoader):
@@ -168,7 +168,6 @@ COPYRIGHT_ATTRIBUTION_LICENSES = {
 # found (there is no good way to know that a license we found on disk is the
 # better version of the stock version, so we show both).
 LOOK_IN_SOURCE_LICENSES = [
-    'as-is',  # The stock license is very vague, source always has more details.
     'PSF-2',  # The custom license in python is more complete than the template.
 
     # As far as I know, we have no requirement to do copyright attribution for
@@ -180,6 +179,26 @@ LOOK_IN_SOURCE_LICENSES = [
     'UoI-NCSA',  # Only used by NSCA, might as well show their custom copyright.
 ]
 
+# These are licenses we don't want to allow anyone to use.  Globs allowed.
+#
+# Gentoo normally uses a naming convention of <name> or <name>-<ver>.  We don't
+# block AGPL* in the pathological case that an unrelated license comes up with
+# the same first few letters.  Not likely, but not impossible.  But we do block
+# AGPL-* as it's much more likely we'll get a newer version using the same base
+# name which we want to be future proof against.
+BAD_LICENSE_PATTERNS = {
+    # Google policy to avoid these licenses (and all versions of them).
+    # https://opensource.org/licenses/AGPL-3.0
+    'AGPL',
+    'AGPL-*',
+    # Catch all versions & variants of CC-BY-NC, CC-BY-NC-ND, and CC-BY-NC-SA.
+    # https://creativecommons.org/licenses/by-nc/3.0/
+    'CC-BY-NC*',
+
+    # These aren't actual licenses :).
+    'as-is',
+}
+
 # This used to provide overrides. I can't find a valid reason to add any more
 # here, though.
 PACKAGE_HOMEPAGES = {
@@ -189,7 +208,7 @@ PACKAGE_HOMEPAGES = {
 
 # These are tokens found in LICENSE= in an ebuild that aren't licenses we
 # can actually read from disk.
-# You should not use this to blacklist real licenses.
+# You should not use this to ban real licenses.
 LICENCES_IGNORE = [
     ')',              # Ignore OR tokens from LICENSE="|| ( LGPL-2.1 MPL-1.1 )"
     '(',
@@ -209,6 +228,7 @@ OVERLAYS_METAPACKAGES_MUST_USE_VIRTUAL = [
 SIZE_EXEMPT_PACKAGES = [
     'net-print/fuji-xerox-printing-license',
     'net-print/konica-minolta-printing-license',
+    'net-print/nec-printing-license',
     'net-print/xerox-printing-license',
 ]
 
@@ -470,7 +490,7 @@ class PackageInfo(object):
       self.ebuild_path = self._FindEbuildPath()
       self._RunEbuildPhases(self.ebuild_path, ['clean', 'fetch'])
       raw_output = self._RunEbuildPhases(self.ebuild_path, ['unpack'])
-      output = raw_output.output.splitlines()
+      output = raw_output.stdout.splitlines()
       # Output is spammy, it looks like this:
       #  * gc-7.2d.tar.gz RMD160 SHA1 SHA256 size ;-) ...                 [ ok ]
       #  * checking gc-7.2d.tar.gz ;-) ...                                [ ok ]
@@ -616,7 +636,7 @@ to assign.  Once you've found it, copy the entire license file to:
     args = [equery_cmd, '-q', '-C', 'which', self.fullnamerev]
     try:
       path = cros_build_lib.run(args, print_cmd=True, encoding='utf-8',
-                                stdout=True).output.strip()
+                                stdout=True).stdout.strip()
     except cros_build_lib.RunCommandError:
       path = None
 
@@ -657,7 +677,7 @@ to assign.  Once you've found it, copy the entire license file to:
     """
     # If the total size installed is zero, we installed no content to license.
     if _BuildInfo(build_info_dir, 'SIZE').strip() == '0':
-      # Allow for license generation for the whitelisted empty packages.
+      # Allow for license generation for the exempt empty packages.
       if self.fullname not in SIZE_EXEMPT_PACKAGES:
         logging.debug('Build directory is empty')
         self.skip = True
@@ -691,22 +711,6 @@ to assign.  Once you've found it, copy the entire license file to:
     else:
       logging.info('Read licenses for %s: %s', self.fullnamerev,
                    ','.join(ebuild_license_names))
-
-    # Lots of packages in chromeos-base have their license set to BSD instead
-    # of BSD-Google:
-    new_license_names = []
-    for license_name in ebuild_license_names:
-      # TODO: temp workaround for http;//crbug.com/348750 , remove when the bug
-      # is fixed.
-      if (license_name == 'BSD' and
-          self.fullnamerev.startswith('chromeos-base/') and
-          'BSD-Google' not in ebuild_license_names):
-        license_name = 'BSD-Google'
-        logging.warning(
-            "Fixed BSD->BSD-Google for %s because it's in chromeos-base. "
-            'Please fix the LICENSE field in the ebuild', self.fullnamerev)
-      new_license_names.append(license_name)
-    ebuild_license_names = new_license_names
 
     # The ebuild license field can look like:
     # LICENSE="GPL-3 LGPL-3 Apache-2.0" (this means AND, as in all 3)
@@ -798,7 +802,7 @@ to assign.  Once you've found it, copy the entire license file to:
     if scan_source_for_licenses:
       self._ExtractLicenses(src_dir, need_copyright_attribution)
 
-    # This shouldn't run, but leaving as sanity check.
+    # This shouldn't run, but leaving as basic smoke check.
     if not self.license_names and not self.license_text_scanned:
       raise AssertionError("Didn't find usable licenses for %s" %
                            self.fullnamerev)
@@ -895,7 +899,7 @@ def _GetLicenseDirectories(board: Optional[str] = None,
   if board is not None:
     custom_paths = portage_util.FindOverlays(
         constants.BOTH_OVERLAYS, board, buildroot)
-  elif sysroot is not None:
+  elif sysroot is not None and sysroot != '/':
     portdir_overlay = sysroot_lib.Sysroot(sysroot).GetStandardField(
         sysroot_lib.STANDARD_FIELD_PORTDIR_OVERLAY) or ''
     custom_paths = portdir_overlay.split() if portdir_overlay else []
@@ -912,13 +916,24 @@ def _GetLicenseDirectories(board: Optional[str] = None,
     return stock + custom
 
 
-def _CheckForDeprecatedLicense(cpf, licenses):
-  """See if |cpf| is a known package using a deprecated license.
+def _CheckForKnownBadLicenses(cpf, licenses):
+  """Make sure all the |licenses| are ones we allow.
 
   We have a bunch of licenses we don't want people to use, but some packages
   were using them by the time we noticed.  Still allow those existing ones,
   but prevent new users from showing up.
   """
+  bad_licenses = set()
+  for pattern in BAD_LICENSE_PATTERNS:
+    bad_licenses |= {x for x in licenses if fnmatch.fnmatch(x, pattern)}
+
+  # We allow ghostscript for public builds to use AGPL but nothing else.
+  if cpf.startswith('app-text/ghostscript-gpl'):
+    bad_licenses -= {'AGPL-3'}
+
+  if bad_licenses:
+    raise PackageLicenseError(f'Licenses {bad_licenses} are not allowed')
+
   # TODO(crbug.com/401332): Remove this entirely.
   # We allow a few packages for now so new packages will stop showing up.
   if 'Proprietary-Binary' in licenses:
@@ -1001,6 +1016,7 @@ def _CheckForDeprecatedLicense(cpf, licenses):
         'chromeos-base/monotype-fonts',
         'chromeos-base/qc7180-modem-firmware',
         'chromeos-base/sc7280-modem-firmware',
+        'chromeos-base/modem-fw-dlc-villager',
         'chromeos-base/rialto-cellular-autoconnect',
         'chromeos-base/rialto-modem-watchdog',
         'chromeos-base/rialto-override-apn',
@@ -1216,7 +1232,7 @@ class Licensing(object):
     pkg.license_text_scanned = license_texts
     self.packages[fullnamerev] = pkg
 
-    _CheckForDeprecatedLicense(fullnamerev, pkg.license_names)
+    _CheckForKnownBadLicenses(fullnamerev, pkg.license_names)
 
   # Called directly by src/repohooks/pre-upload.py
   @staticmethod
@@ -1491,7 +1507,7 @@ def ListInstalledPackages(sysroot, all_packages=False):
     equery_cmd = cros_build_lib.GetSysrootToolPath(sysroot, 'equery')
     args = [equery_cmd, 'list', '*']
     packages = cros_build_lib.run(args, encoding='utf-8',
-                                  stdout=True).output.splitlines()
+                                  stdout=True).stdout.splitlines()
   else:
     # The following returns all packages that were part of the build tree
     # (many get built or used during the build, but do not get shipped).
@@ -1501,7 +1517,7 @@ def ListInstalledPackages(sysroot, all_packages=False):
     args = [emerge_cmd, '--with-bdeps=y', '--usepkgonly',
             '--emptytree', '--pretend', '--color=n', 'virtual/target-os']
     emerge = cros_build_lib.run(args, encoding='utf-8',
-                                stdout=True).output.splitlines()
+                                stdout=True).stdout.splitlines()
     # Another option which we've decided not to use, is bdeps=n.  This outputs
     # just the packages we ship, but does not packages that were used to build
     # them, including a package like flex which generates a .a that is included
@@ -1542,11 +1558,6 @@ def ReadUnknownEncodedFile(file_path, logging_text=None):
 
   Returns:
     File content, possibly converted from latin1 to UTF-8.
-
-  Raises:
-    Assertion error: if non-whitelisted illegal XML characters
-      are found in the file.
-    ValueError: returned if we get invalid XML.
   """
   try:
     with codecs.open(file_path, encoding='utf-8') as c:
@@ -1606,13 +1617,14 @@ def _BuildInfo(build_info_path, filename):
   return bi
 
 
-def HookPackageProcess(pkg_build_path):
+def HookPackageProcess(pkg_build_path: str, sysroot: Optional[str] = '/'):
   """Different entry point to populate a packageinfo.
 
   This is called instead of LoadPackageInfo when called by a package build.
 
   Args:
     pkg_build_path: unpacked being built by emerge.
+    sysroot: The sysroot we're building for.
   """
   build_info_dir = os.path.join(pkg_build_path, 'build-info')
   if not os.path.isdir(build_info_dir):
@@ -1630,5 +1642,9 @@ def HookPackageProcess(pkg_build_path):
   pkg.GetLicenses(build_info_dir, src_dir)
 
   pkg.AssertCorrectness(build_info_dir, None)
-  _CheckForDeprecatedLicense(fullnamerev, pkg.license_names)
+  # Make sure the licenses are valid at build time even if we don't load them.
+  _CheckForKnownBadLicenses(fullnamerev, pkg.license_names)
+  for license_name in pkg.license_names:
+    Licensing.FindLicenseType(license_name, sysroot=sysroot)
+
   pkg.SaveLicenseDump(os.path.join(build_info_dir, 'license.yaml'))

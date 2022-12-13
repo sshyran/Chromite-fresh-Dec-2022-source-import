@@ -22,6 +22,7 @@ import logging
 import multiprocessing
 import os
 import stat
+from typing import Union
 
 from chromite.third_party import lddtree
 
@@ -68,7 +69,12 @@ class DepTracker(object):
   in the root image.
   """
 
-  def __init__(self, root, jobs=1):
+  def __init__(
+      self,
+      root: Union[str, os.PathLike],
+      jobs: int = 1):
+    # TODO(vapier): Convert this to Path.
+    root = str(root)
     root_st = os.lstat(root)
     if not stat.S_ISDIR(root_st.st_mode):
       raise Exception('root (%s) must be a directory' % root)
@@ -79,6 +85,8 @@ class DepTracker(object):
     # of processes when jobs is 1 so python exceptions kill the main process,
     # useful for debugging.
     if jobs > 1:
+      # Pool is close()d in DepTracker's destructor.
+      # pylint: disable=consider-using-with
       self._pool = multiprocessing.Pool(jobs)
       self._imap = self._pool.map
     else:
@@ -91,6 +99,10 @@ class DepTracker(object):
     # to point to the lowest lexicographically file with the same inode.
     self._symlinks = {}
     self._hardlinks = {}
+
+  def __del__(self):
+    """Destructor method to free up self._pool resource."""
+    self._pool.close()
 
   def Init(self):
     """Generates the initial list of files."""

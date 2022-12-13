@@ -87,7 +87,7 @@ class RepoInitTests(cros_test_lib.TempDirTestCase, cros_test_lib.MockTestCase):
     self.PatchObject(repository.RepoRepository, '_RepoSelfupdate')
     mock_cleanup = self.PatchObject(repository.RepoRepository,
                                     '_CleanUpRepoManifest')
-    error_result = cros_build_lib.CommandResult(cmd=['cmd'], returncode=1)
+    error_result = cros_build_lib.CompletedProcess(['cmd'], returncode=1)
     ex = cros_build_lib.RunCommandError('error_msg', error_result)
     mock_init = self.PatchObject(cros_build_lib, 'run', side_effect=ex)
 
@@ -138,8 +138,8 @@ class RepoSyncTests(cros_test_lib.TempDirTestCase, cros_test_lib.MockTestCase):
   def testSyncWithException(self):
     """Test Sync retry on repo network sync failure"""
     # Return value here isn't super important.
-    result = cros_build_lib.CommandResult(
-        cmd=['cmd'], returncode=0, error='error')
+    result = cros_build_lib.CompletedProcess(
+        ['cmd'], returncode=0, stderr='error')
     ex = cros_build_lib.RunCommandError('msg', result)
 
     run_cmd_mock = self.PatchObject(cros_build_lib, 'run', side_effect=ex)
@@ -175,7 +175,7 @@ gpg: Can't check signature: public key not found
 
 warning: Skipped upgrade to unverified version
 """
-    cmd_result = cros_build_lib.CommandResult(error=warnning_stderr)
+    cmd_result = cros_build_lib.CompletedProcess(stderr=warnning_stderr)
     self.PatchObject(cros_build_lib, 'run', return_value=cmd_result)
     with mock.patch.object(osutils, 'RmDir') as mock_rm:
       self.repo._RepoSelfupdate()
@@ -190,7 +190,7 @@ warning: Skipped upgrade to unverified version
     mock_rm.assert_called_once_with(mock.ANY, ignore_missing=True)
 
   def test_RepoSelfupdateSucceeds(self):
-    cmd_result = cros_build_lib.CommandResult()
+    cmd_result = cros_build_lib.CompletedProcess()
     self.PatchObject(cros_build_lib, 'run', return_value=cmd_result)
     with mock.patch.object(osutils, 'RmDir') as mock_rm:
       self.repo._RepoSelfupdate()

@@ -4,12 +4,14 @@
 
 """Tests for utils.py."""
 
-from datetime import datetime, date
+from datetime import date
+from datetime import datetime
 
 from chromite.third_party.google.protobuf.timestamp_pb2 import Timestamp
 
 from chromite.lib import cros_test_lib
 from chromite.lib.luci import utils
+
 
 class TestTimeParsingFunctions(cros_test_lib.MockTestCase):
   """Test time parsing functions in luci/utils.py."""

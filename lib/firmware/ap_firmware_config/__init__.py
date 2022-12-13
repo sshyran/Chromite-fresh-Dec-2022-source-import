@@ -9,6 +9,7 @@ import pkgutil
 from types import ModuleType
 from typing import Iterator, Tuple
 
+
 _CONFIG_MODULE_FULL_NAME = 'chromite.lib.firmware.ap_firmware_config.%s'
 _GENERIC_CONFIG_NAME = 'generic'
 

@@ -6,8 +6,8 @@
 
 import argparse
 
-from chromite.lib import constants
 from chromite.cli import command
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 
 

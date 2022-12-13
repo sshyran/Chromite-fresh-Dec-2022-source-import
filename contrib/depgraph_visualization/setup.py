@@ -6,6 +6,7 @@
 
 from setuptools import setup
 
+
 setup(
     name='depgraph_visualization',
     version='0.0.1',

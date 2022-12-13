@@ -9,12 +9,12 @@ import os
 import re
 from typing import Optional, Tuple, Union
 
+from chromite.api.gen.chromite.api import payload_pb2
+from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import chroot_util
 from chromite.lib.paygen import gspaths
+from chromite.lib.paygen import paygen_build_lib
 from chromite.lib.paygen import paygen_payload_lib
-
-from chromite.api.gen.chromiumos import common_pb2
-from chromite.api.gen.chromite.api import payload_pb2
 
 
 class Error(Exception):
@@ -70,39 +70,36 @@ class PayloadConfig(object):
 
     # This block ensures that we have paths to the correct perm of images.
     src_image_path = None
-    tgt_key = None
     if isinstance(self.tgt_image, payload_pb2.UnsignedImage):
-      tgt_image_path = _GenUnsignedGSPath(self.tgt_image, self.image_type)
+      tgt_image_path = _GenUnsignedGSPath(self.tgt_image, self.image_type,
+                                          self.minios)
     elif isinstance(self.tgt_image, payload_pb2.SignedImage):
-      tgt_image_path = _GenSignedGSPath(self.tgt_image, self.image_type)
-      tgt_key = self.tgt_image.key
+      tgt_image_path = _GenSignedGSPath(self.tgt_image, self.image_type,
+                                        self.minios)
     elif isinstance(self.tgt_image, payload_pb2.DLCImage):
       tgt_image_path = _GenDLCImageGSPath(self.tgt_image)
     if self.delta_type == 'delta':
       if isinstance(self.tgt_image, payload_pb2.UnsignedImage):
-        src_image_path = _GenUnsignedGSPath(self.src_image, self.image_type)
+        src_image_path = _GenUnsignedGSPath(self.src_image, self.image_type,
+                                            self.minios)
       if isinstance(self.tgt_image, payload_pb2.SignedImage):
-        src_image_path = _GenSignedGSPath(self.src_image, self.image_type)
+        src_image_path = _GenSignedGSPath(self.src_image, self.image_type,
+                                          self.minios)
       elif isinstance(self.tgt_image, payload_pb2.DLCImage):
         src_image_path = _GenDLCImageGSPath(self.src_image)
 
-    # Set your output location.
-    if self.upload:
-      payload_build = deepcopy(tgt_image_path.build)
-      payload_build.bucket = dest_bucket
-      payload_output_uri = gspaths.ChromeosReleases.PayloadUri(
-          build=payload_build,
-          random_str=None,
-          key=tgt_key,
-          src_version=src_image_path.build.version if src_image else None,
-      )
-    else:
-      payload_output_uri = None
+    payload_build = deepcopy(tgt_image_path.build)
+    payload_build.bucket = dest_bucket
 
     self.payload = gspaths.Payload(
-        tgt_image=tgt_image_path, src_image=src_image_path, minios=self.minios,
-        uri=payload_output_uri)
+        build=payload_build,
+        tgt_image=tgt_image_path,
+        src_image=src_image_path,
+        minios=self.minios,
+        uri=None)
 
+    if self.upload:
+      self.payload.uri = paygen_build_lib.DefaultPayloadUri(self.payload)
 
   def GeneratePayload(self) -> Tuple[str, str]:
     """Do payload generation (& maybe sign) on Google Storage CrOS images.
@@ -123,10 +120,12 @@ class PayloadConfig(object):
     # single shot bots in the context of an overlayfs and will get cleaned up
     # anyway.
     with chroot_util.TempDirInChroot(delete=False) as temp_dir:
+      signer = paygen_payload_lib.PaygenSigner(
+          work_dir=temp_dir, payload_build=self.payload.build)
       self.paygen = paygen_payload_lib.PaygenPayload(
           self.payload,
           temp_dir,
-          sign=True,
+          signer=signer,
           verify=self.verify,
           upload=self.upload,
           cache_dir=self.cache_dir)
@@ -145,12 +144,14 @@ def _ImageTypeToStr(image_type_n: int) -> str:
 
 
 def _GenSignedGSPath(image: payload_pb2.SignedImage,
-                     image_type: str) -> gspaths.Image:
+                     image_type: str,
+                     minios: bool) -> gspaths.Image:
   """Take a SignedImage_pb2 and return a gspaths.Image.
 
   Args:
     image: The build to create the gspath from.
     image_type: The image type, either "recovery" or "base".
+    minios: Whether or not it's a miniOS image.
 
   Returns:
     A gspaths.Image instance.
@@ -165,18 +166,27 @@ def _GenSignedGSPath(image: payload_pb2.SignedImage,
 
   build.uri = build_uri
 
-  return gspaths.Image(build=build,
-                       image_type=image_type,
-                       uri=build_uri)
+  if minios:
+    return gspaths.MiniOSImage(build=build,
+                               image_type=image_type,
+                               key=image.key,
+                               uri=build_uri)
+  else:
+    return gspaths.Image(build=build,
+                         image_type=image_type,
+                         key=image.key,
+                         uri=build_uri)
 
 
 def _GenUnsignedGSPath(image: payload_pb2.UnsignedImage,
-                       image_type: str) -> gspaths.UnsignedImageArchive:
+                       image_type: str,
+                       minios: bool) -> gspaths.UnsignedImageArchive:
   """Take an UnsignedImage_pb2 and return a gspaths.UnsignedImageArchive.
 
   Args:
     image: The build to create the gspath from.
     image_type: The image type, either "recovery" or "test".
+    minios: Whether or not it's a miniOS image.
 
   Returns:
     A gspaths.UnsignedImageArchive instance.
@@ -191,10 +201,16 @@ def _GenUnsignedGSPath(image: payload_pb2.UnsignedImage,
 
   build.uri = build_uri
 
-  return gspaths.UnsignedImageArchive(build=build,
-                                      milestone=image.milestone,
-                                      image_type=image_type,
-                                      uri=build_uri)
+  if minios:
+    return gspaths.UnsignedMiniOSImageArchive(build=build,
+                                              milestone=image.milestone,
+                                              image_type=image_type,
+                                              uri=build_uri)
+  else:
+    return gspaths.UnsignedImageArchive(build=build,
+                                        milestone=image.milestone,
+                                        image_type=image_type,
+                                        uri=build_uri)
 
 
 def _GenDLCImageGSPath(image: payload_pb2.DLCImage) -> gspaths.DLCImage:

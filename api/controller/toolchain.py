@@ -6,9 +6,8 @@
 
 import collections
 import logging
-import os
 from pathlib import Path
-import re
+from typing import TYPE_CHECKING
 
 from chromite.api import controller
 from chromite.api import faux
@@ -17,15 +16,17 @@ from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import toolchain_pb2
 from chromite.api.gen.chromite.api.artifacts_pb2 import PrepareForBuildResponse
 from chromite.api.gen.chromiumos.builder_config_pb2 import BuilderConfig
-from chromite.lib import chroot_util
-from chromite.lib import cros_build_lib
-from chromite.lib import osutils
+from chromite.lib import toolchain as toolchain_lib
 from chromite.lib import toolchain_util
+from chromite.service import toolchain
 
-if cros_build_lib.IsInsideChroot():
-  # Only used for linting in chroot and requires yaml which is only in chroot
-  from chromite.scripts import tricium_cargo_clippy, tricium_clang_tidy
 
+if TYPE_CHECKING:
+  from chromite.api import api_config
+
+# TODO(b/229665884): Move the implementation details for most/all endpoints to:
+#   chromite/services/toolchain.py
+# This migration has been done for linting endpoints but not yet for others.
 
 _Handlers = collections.namedtuple('_Handlers', ['name', 'prepare', 'bundle'])
 _TOOLCHAIN_ARTIFACT_HANDLERS = {
@@ -92,31 +93,6 @@ _TOOLCHAIN_COMMIT_HANDLERS = {
         'VerifiedKernelCwpAfdoFile'
 }
 
-TIDY_BASE_DIR = Path('/tmp/linting_output/clang-tidy')
-
-
-def _GetProfileInfoDict(profile_info):
-  """Convert profile_info to a dict.
-
-  Args:
-    profile_info (ArtifactProfileInfo): The artifact profile_info.
-
-  Returns:
-    A dictionary containing profile info.
-  """
-  ret = {}
-  which = profile_info.WhichOneof('artifact_profile_info')
-  if which:
-    value = getattr(profile_info, which)
-    # If it is a message, then use the contents of the message.  This works as
-    # long as simple types do not have a 'DESCRIPTOR' attribute. (And protobuf
-    # messages do.)
-    if getattr(value, 'DESCRIPTOR', None):
-      ret.update({k.name: v for k, v in value.ListFields()})
-    else:
-      ret[which] = value
-  return ret
-
 
 # TODO(crbug/1031213): When @faux is expanded to have more than success/failure,
 # this should be changed.
@@ -126,7 +102,10 @@ def _GetProfileInfoDict(profile_info):
 # recipe calls PrepareForBuild.  The second time, they are specified.  No
 # validation check because "all" values are valid.
 @validate.validation_complete
-def PrepareForBuild(input_proto, output_proto, _config):
+def PrepareForBuild(
+    input_proto: 'toolchain_pb2.PrepareForToolchainBuildRequest',
+    output_proto: 'toolchain_pb2.PrepareForToolchainBuildResponse',
+    _config: 'api_config.ApiConfig'):
   """Prepare to build toolchain artifacts.
 
   The handlers (from _TOOLCHAIN_ARTIFACT_HANDLERS above) are called with:
@@ -149,9 +128,9 @@ def PrepareForBuild(input_proto, output_proto, _config):
   This function sets output_proto.build_relevance to the result.
 
   Args:
-    input_proto (PrepareForToolchainBuildRequest): The input proto
-    output_proto (PrepareForToolchainBuildResponse): The output proto
-    _config (api_config.ApiConfig): The API call config.
+    input_proto: The input proto
+    output_proto: The output proto
+    _config): The API call config.
   """
   if input_proto.chroot.path:
     chroot = controller_util.ParseChroot(input_proto.chroot)
@@ -200,7 +179,9 @@ def PrepareForBuild(input_proto, output_proto, _config):
 @validate.require('chroot.path', 'output_dir', 'artifact_types')
 @validate.exists('output_dir')
 @validate.validation_complete
-def BundleArtifacts(input_proto, output_proto, _config):
+def BundleArtifacts(input_proto: 'toolchain_pb2.BundleToolchainRequest',
+                    output_proto: 'toolchain_pb2.BundleToolchainResponse',
+                    _config: 'api_config.ApiConfig'):
   """Bundle valid toolchain artifacts.
 
   The handlers (from _TOOLCHAIN_ARTIFACT_HANDLERS above) are called with:
@@ -218,9 +199,9 @@ def BundleArtifacts(input_proto, output_proto, _config):
   Note: the actual upload to GS is done by CI, not here.
 
   Args:
-    input_proto (BundleToolchainRequest): The input proto
-    output_proto (BundleToolchainResponse): The output proto
-    _config (api_config.ApiConfig): The API call config.
+    input_proto: The input proto
+    output_proto: The output proto
+    _config: The API call config.
   """
   chroot = controller_util.ParseChroot(input_proto.chroot)
 
@@ -278,7 +259,9 @@ def _GetUpdatedFilesResponse(_input_proto, output_proto, _config):
 @faux.success(_GetUpdatedFilesResponse)
 @validate.require('uploaded_artifacts')
 @validate.validation_complete
-def GetUpdatedFiles(input_proto, output_proto, _config):
+def GetUpdatedFiles(input_proto: 'toolchain_pb2.GetUpdatedFilesRequest',
+                    output_proto: 'toolchain_pb2.GetUpdatedFilesResponse',
+                    _config: 'api_config.ApiConfig'):
   """Use uploaded artifacts to update some updates in a chromeos checkout.
 
   The function will call toolchain_util.GetUpdatedFiles using the type of
@@ -289,9 +272,9 @@ def GetUpdatedFiles(input_proto, output_proto, _config):
   Note: the actual creation of the commit is done by CI, not here.
 
   Args:
-    input_proto (GetUpdatedFilesRequest): The input proto
-    output_proto (GetUpdatedFilesResponse): The output proto
-    _config (api_config.ApiConfig): The API call config.
+    input_proto: The input proto
+    output_proto: The output proto
+    _config: The API call config.
   """
   commit_message = ''
   for artifact in input_proto.uploaded_artifacts:
@@ -315,161 +298,104 @@ def GetUpdatedFiles(input_proto, output_proto, _config):
     # No commit footer is added for now. Can add more here if needed
 
 
-@faux.all_empty
-@validate.exists('sysroot.path')
-@validate.require('packages')
-@validate.validation_complete
-def EmergeWithLinting(input_proto, output_proto, _config):
-  """Emerge packages with linter features enabled and retrieves all findings.
+def _GetProfileInfoDict(profile_info: 'toolchain_pb2.ArtifactProfileInfo'):
+  """Convert profile_info to a dict.
 
   Args:
-    input_proto (LinterRequest): The nput proto with package and sysroot info.
-    output_proto (LinterResponse): The output proto where findings are stored.
-    _config (api_config.ApiConfig): The API call config (unused).
+    profile_info: The artifact profile_info.
+
+  Returns:
+    A dictionary containing profile info.
   """
-  packages = [
-      f'{package.category}/{package.package_name}'
-      for package in input_proto.packages]
-
-  # rm any existing lints from clang tidy
-  osutils.RmDir(TIDY_BASE_DIR, ignore_missing=True, sudo=True)
-  osutils.SafeMakedirs(TIDY_BASE_DIR, 0o777, sudo=True)
-
-  emerge_cmd = chroot_util.GetEmergeCommand(input_proto.sysroot.path)
-  cros_build_lib.sudo_run(
-      emerge_cmd + packages,
-      preserve_env=True,
-      extra_env={
-          'ENABLE_RUST_CLIPPY': 1,
-          'WITH_TIDY': 'tricium',
-          'FEATURES': 'noclean'
-      }
-  )
-
-  # FIXME(b/195056381): default git-repo should be replaced with logic in
-  # build_linters recipe to detect the repo path for applied patches.
-  # As of 01-05-21 only platform2 is supported so this value works temporarily.
-  git_repo_path = '/mnt/host/source/src/platform2/'
-
-  linter_findings = _fetch_clippy_lints(git_repo_path)
-  linter_findings.extend(_fetch_tidy_lints(git_repo_path))
-  linter_findings = _filter_linter_findings(linter_findings, git_repo_path)
-  output_proto.findings.extend(linter_findings)
+  ret = {}
+  which = profile_info.WhichOneof('artifact_profile_info')
+  if which:
+    value = getattr(profile_info, which)
+    # If it is a message, then use the contents of the message.  This works as
+    # long as simple types do not have a 'DESCRIPTOR' attribute. (And protobuf
+    # messages do.)
+    if getattr(value, 'DESCRIPTOR', None):
+      ret.update({k.name: v for k, v in value.ListFields()})
+    else:
+      ret[which] = value
+  return ret
 
 
 LINTER_CODES = {
     'clang_tidy': toolchain_pb2.LinterFinding.CLANG_TIDY,
-    'cargo_clippy': toolchain_pb2.LinterFinding.CARGO_CLIPPY
+    'cargo_clippy': toolchain_pb2.LinterFinding.CARGO_CLIPPY,
+    'go_lint': toolchain_pb2.LinterFinding.GO_LINT
 }
 
 
-def _filter_linter_findings(findings, git_repo_path):
-  """Filters a findings to keep only those concerning modified lines."""
-  new_findings = []
-  new_lines = _get_added_lines({git_repo_path: 'HEAD'})
-  for finding in findings:
-    for loc in finding.locations:
-      for (addition_start, addition_end) in new_lines.get(loc.filepath, set()):
-        if addition_start <= loc.line_start < addition_end:
-          new_findings.append(finding)
-  return new_findings
-
-
-def _get_added_lines(git_repos):
-  """Parses the lines with additions from fit diff for the provided repos.
+@faux.all_empty
+@validate.exists('sysroot.path')
+@validate.require('packages')
+@validate.validation_complete
+def EmergeWithLinting(input_proto: 'toolchain_pb2.LinterRequest',
+                      output_proto: 'toolchain_pb2.LinterResponse',
+                      _config: 'api_config.ApiConfig'):
+  """Emerge packages with linter features enabled and retrieves all findings.
 
   Args:
-    git_repos: a dictionary mapping repo paths to hashes for `git diff`
-
-  Returns:
-    A dictionary mapping modified filepaths to sets of tuples where each
-    tuple is a (start_line, end_line) pair noting which lines were modified.
-    Note that start_line is inclusive, and end_line is exclusive.
+    input_proto: The nput proto with package and sysroot info.
+    output_proto: The output proto where findings are stored.
+    _config: The API call config (unused).
   """
-  new_lines = {}
-  file_path_pattern = re.compile(r'^\+\+\+ b/(?P<file_path>.*)$')
-  position_pattern = re.compile(
-      r'^@@ -\d+(?:,\d+)? \+(?P<line_num>\d+)(?:,(?P<lines_added>\d+))? @@')
-  for git_repo, git_hash in git_repos.items():
-    cmd = f'git -C {git_repo} diff -U0 {git_hash}^...{git_hash}'
-    diff = cros_build_lib.run(cmd, capture_output=True, shell=True,
-                              encoding='utf-8').output
-    current_file = ''
-    for line in diff.splitlines():
-      file_path_match = re.match(file_path_pattern, str(line))
-      if file_path_match:
-        current_file = file_path_match.group('file_path')
-        continue
-      position_match = re.match(position_pattern, str(line))
-      if position_match:
-        if current_file not in new_lines:
-          new_lines[current_file] = set()
-        line_num = int(position_match.group('line_num'))
-        line_count = position_match.group('lines_added')
-        line_count = int(line_count) if line_count is not None else 1
-        new_lines[current_file].add((line_num, line_num + line_count))
-  return new_lines
+  packages = [
+      controller_util.deserialize_package_info(package)
+      for package in input_proto.packages
+  ]
 
+  build_linter = toolchain.BuildLinter(
+      packages,
+      input_proto.sysroot.path,
+      differential=input_proto.filter_modified)
 
-def _fetch_clippy_lints(git_repo_path):
-  """Get lints created by Cargo Clippy during emerge."""
-  lints_dir = '/tmp/cargo_clippy'
-  findings = tricium_cargo_clippy.parse_files(lints_dir, git_repo_path)
-  findings = tricium_cargo_clippy.filter_diagnostics(findings)
-  findings_protos = []
+  use_clippy = (
+      toolchain_pb2.LinterFinding.CARGO_CLIPPY
+      not in input_proto.disabled_linters)
+  use_tidy = (
+      toolchain_pb2.LinterFinding.CLANG_TIDY
+      not in input_proto.disabled_linters)
+  use_golint = (
+      toolchain_pb2.LinterFinding.GO_LINT
+      not in input_proto.disabled_linters)
+
+  findings = build_linter.emerge_with_linting(use_clippy=use_clippy,
+                                              use_tidy=use_tidy,
+                                              use_golint=use_golint)
+
   for finding in findings:
-    location_protos = []
+    locations = []
     for location in finding.locations:
-      location_protos.append(
+      locations.append(
           toolchain_pb2.LinterFindingLocation(
-              filepath=location.file_path,
+              filepath=location.filepath,
               line_start=location.line_start,
-              line_end=location.line_end
-          )
-      )
-    findings_protos.append(
+              line_end=location.line_end))
+    output_proto.findings.append(
         toolchain_pb2.LinterFinding(
             message=finding.message,
-            locations=location_protos,
-            linter=LINTER_CODES['cargo_clippy']
-        )
-    )
-  return findings_protos
+            locations=locations,
+            linter=LINTER_CODES[finding.linter]))
 
 
-def _fetch_tidy_lints(git_repo_path):
-  """Get lints created by Clang Tidy during emerge."""
+@faux.all_empty
+@validate.require('board')
+@validate.validation_complete
+def GetToolchainsForBoard(input_proto: 'toolchain_pb2.ToolchainsRequest',
+                          output_proto: 'toolchain_pb2.ToolchainsReponse',
+                          _config: 'api_config.ApiConfig'):
+  """Gets the default and non-default toolchains for a board.
 
-  def resolve_file_path(file_path):
-    # Remove git repo from prefix
-    file_path = re.sub('^' + git_repo_path, '/', str(file_path))
-    # Remove ebuild work directories from prefix
-    # Such as: "**/<package>-9999/work/<package>-9999/"
-    #      or: "**/<package>-0.24.52-r9/work/<package>-0.24.52/"
-    return re.sub(r'(.*/)?([^/]+)-[^/]+/work/[^/]+/+', '', file_path)
-
-  lints = set()
-  for filename in os.listdir(TIDY_BASE_DIR):
-    if filename.endswith('.json'):
-      invocation_result = tricium_clang_tidy.parse_tidy_invocation(
-          TIDY_BASE_DIR / filename)
-      meta, complaints = invocation_result
-      assert not meta.exit_code, (
-          f'Invoking clang-tidy on {meta.lint_target} with flags '
-          f'{meta.invocation} exited with code {meta.exit_code}; '
-          f'output:\n{meta.stdstreams}')
-      lints.update(complaints)
-  return [
-      toolchain_pb2.LinterFinding(
-          message=lint.message,
-          locations=[
-              toolchain_pb2.LinterFindingLocation(
-                  filepath=resolve_file_path(lint.file_path),
-                  line_start=lint.line_number,
-                  line_end=lint.line_number
-              )
-          ],
-          linter=LINTER_CODES['clang_tidy']
-      )
-      for lint in tricium_clang_tidy.filter_tidy_lints(None, None, lints)
-  ]
+  Args:
+    input_proto: The input proto with board and sysroot info.
+    output_proto: The output proto where findings are stored.
+    _config: The API call config (unused).
+  """
+  toolchains = toolchain_lib.GetToolchainsForBoard(input_proto.board)
+  output_proto.default_toolchains.extend(
+      list(toolchain_lib.FilterToolchains(toolchains, 'default', True)))
+  output_proto.nondefault_toolchains.extend(
+      list(toolchain_lib.FilterToolchains(toolchains, 'default', False)))

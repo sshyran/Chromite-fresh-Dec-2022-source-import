@@ -16,14 +16,12 @@ from pathlib import Path
 import signal
 import socket
 import subprocess
-import sys
 from unittest import mock
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
-from chromite.lib import signals as cros_signals
 
 
 class RunCommandErrorStrTest(cros_test_lib.TestCase):
@@ -114,13 +112,9 @@ class CmdToStrTest(cros_test_lib.TestCase):
     def aux(s):
       return cros_build_lib.ShellUnquote(cros_build_lib.ShellQuote(s))
 
-    if sys.version_info.major < 3:
-      # In Python 2, these roundtrip.
-      tests_quote += bytes_quote
-    else:
-      # In Python 3, we can only go one way bytes->string.
-      self._testData(cros_build_lib.ShellQuote, bytes_quote)
-      self._testData(aux, [(x, x) for x, _ in bytes_quote], False)
+    # We can only go one way bytes->string.
+    self._testData(cros_build_lib.ShellQuote, bytes_quote)
+    self._testData(aux, [(x, x) for x, _ in bytes_quote], False)
 
     self._testData(cros_build_lib.ShellQuote, tests_quote)
     self._testData(cros_build_lib.ShellUnquote, tests_unquote)
@@ -131,6 +125,7 @@ class CmdToStrTest(cros_test_lib.TestCase):
 
   def testShellQuoteOjbects(self):
     """Test objects passed to ShellQuote."""
+    self.assertEqual('/', cros_build_lib.ShellQuote(Path('/')))
     self.assertEqual('None', cros_build_lib.ShellQuote(None))
     self.assertNotEqual('', cros_build_lib.ShellQuote(object))
 
@@ -225,7 +220,7 @@ class TestRunCommandNoMock(cros_test_lib.TestCase):
     """Verify input argument when it is a file object."""
     result = cros_build_lib.run(['cat'], input=open('/dev/null'),
                                 capture_output=True)
-    self.assertEqual(result.output, b'')
+    self.assertEqual(result.stdout, b'')
 
     with open(__file__) as f:
       result = cros_build_lib.run(['cat'], input=f, capture_output=True)
@@ -237,7 +232,7 @@ class TestRunCommandNoMock(cros_test_lib.TestCase):
     with open('/dev/null') as f:
       result = cros_build_lib.run(['cat'], input=f.fileno(),
                                   capture_output=True)
-      self.assertEqual(result.output, b'')
+      self.assertEqual(result.stdout, b'')
 
     with open(__file__) as f:
       result = cros_build_lib.run(['cat'], input=f.fileno(),
@@ -279,6 +274,18 @@ class TestRunCommandNoMock(cros_test_lib.TestCase):
                                 encoding='utf-8', errors='replace')
     self.assertEqual(result.stdout, u'S\ufffdE\n')
 
+  def testCommandArgsValidTypes(self):
+    """Verify command args can be of known types."""
+    # Support bytes, strings, and Path objects.
+    result = cros_build_lib.run(['echo', b'bytes', Path('path')],
+                                capture_output=True)
+    self.assertEqual(result.stdout, b'bytes path\n')
+
+  def testCommandArgsInvalidTypes(self):
+    """Verify command args with invalid types are rejected."""
+    with self.assertRaises(TypeError):
+      cros_build_lib.run(['echo', 1234], capture_output=True)
+
 
 def _ForceLoggingLevel(functor):
   def inner(*args, **kwargs):
@@ -297,8 +304,9 @@ class TestRunCommand(cros_test_lib.MockTestCase):
 
   def setUp(self):
     # These ENV variables affect run behavior, hide them.
-    self._old_envs = {e: os.environ.pop(e) for e in constants.ENV_PASSTHRU
-                      if e in os.environ}
+    self._old_envs = {
+        e: os.environ.pop(e) for e in constants.ENV_PASSTHRU if e in os.environ
+    }
 
     # Get the original value for SIGINT so our signal() mock can return the
     # correct thing.
@@ -306,8 +314,8 @@ class TestRunCommand(cros_test_lib.MockTestCase):
 
     # Mock the return value of Popen().
     self.stdin = None
-    self.error = b'test error'
-    self.output = b'test output'
+    self.stderr = b'test error'
+    self.stdout = b'test output'
     self.proc_mock = mock.MagicMock(
         returncode=0,
         communicate=self._Communicate)
@@ -316,7 +324,6 @@ class TestRunCommand(cros_test_lib.MockTestCase):
 
     self.signal_mock = self.PatchObject(signal, 'signal')
     self.getsignal_mock = self.PatchObject(signal, 'getsignal')
-    self.PatchObject(cros_signals, 'SignalModuleUsable', return_value=True)
 
   def tearDown(self):
     # Restore hidden ENVs.
@@ -328,7 +335,7 @@ class TestRunCommand(cros_test_lib.MockTestCase):
     This allows us to capture what was passed on input.
     """
     self.stdin = stdin
-    return self.output, self.error
+    return self.stdout, self.stderr
 
   @contextlib.contextmanager
   def _MockChecker(self, cmd, **kwargs):
@@ -360,8 +367,7 @@ class TestRunCommand(cros_test_lib.MockTestCase):
     def _GetsignalChecker(sig):
       """Return the right signal values so we can check the calls."""
       if sig == signal.SIGINT:
-        self.assertFalse(ignore_sigint)
-        return normal_sigint
+        return sigint_suppress if ignore_sigint else normal_sigint
       elif sig == signal.SIGTERM:
         return normal_sigterm
       else:
@@ -386,7 +392,6 @@ class TestRunCommand(cros_test_lib.MockTestCase):
           mock.call(signal.SIGINT, sigint_suppress),
           mock.call(signal.SIGTERM, normal_sigterm),
       ])
-      self.assertEqual(self.getsignal_mock.call_count, 1)
     else:
       self.signal_mock.assert_has_calls([
           mock.call(signal.SIGINT, RejectSigIgn()),
@@ -394,7 +399,7 @@ class TestRunCommand(cros_test_lib.MockTestCase):
           mock.call(signal.SIGINT, normal_sigint),
           mock.call(signal.SIGTERM, normal_sigterm),
       ])
-      self.assertEqual(self.getsignal_mock.call_count, 2)
+    self.assertEqual(self.getsignal_mock.call_count, 2)
 
     # Verify various args are passed down to the real command.
     pargs = self.popen_mock.call_args[0][0]
@@ -413,14 +418,14 @@ class TestRunCommand(cros_test_lib.MockTestCase):
                        msg='kwargs[%s] mismatch' % key)
 
   def _AssertCrEqual(self, expected, actual):
-    """Helper method to compare two CommandResult objects.
+    """Helper method to compare two CompletedProcess objects.
 
     This is needed since assertEqual does not know how to compare two
-    CommandResult objects.
+    CompletedProcess objects.
 
     Args:
-      expected: a CommandResult object, expected result.
-      actual: a CommandResult object, actual result.
+      expected: a CompletedProcess object, expected result.
+      actual: a CompletedProcess object, actual result.
     """
     self.assertEqual(expected.args, actual.args)
     self.assertEqual(expected.stderr, actual.stderr)
@@ -447,11 +452,11 @@ class TestRunCommand(cros_test_lib.MockTestCase):
     stdout = None
     stderr = None
     if rc_kv.get('stdout') or rc_kv.get('capture_output'):
-      stdout = self.output
+      stdout = self.stdout
     if rc_kv.get('stderr') or rc_kv.get('capture_output'):
-      stderr = self.error
+      stderr = self.stderr
 
-    expected_result = cros_build_lib.CommandResult(
+    expected_result = cros_build_lib.CompletedProcess(
         args=real_cmd, stdout=stdout, stderr=stderr,
         returncode=self.proc_mock.returncode)
 
@@ -642,9 +647,9 @@ class TestRunCommand(cros_test_lib.MockTestCase):
   def testExceptionEquality(self):
     """Verify equality methods for RunCommandError"""
 
-    c1 = cros_build_lib.CommandResult(cmd=['ls', 'arg'], returncode=1)
-    c2 = cros_build_lib.CommandResult(cmd=['ls', 'arg1'], returncode=1)
-    c3 = cros_build_lib.CommandResult(cmd=['ls', 'arg'], returncode=2)
+    c1 = cros_build_lib.CompletedProcess(['ls', 'arg'], returncode=1)
+    c2 = cros_build_lib.CompletedProcess(['ls', 'arg1'], returncode=1)
+    c3 = cros_build_lib.CompletedProcess(['ls', 'arg'], returncode=2)
     e1 = cros_build_lib.RunCommandError('Message 1', c1)
     e2 = cros_build_lib.RunCommandError('Message 1', c1)
     e_diff_msg = cros_build_lib.RunCommandError('Message 2', c1)
@@ -738,14 +743,14 @@ class TestRunCommandOutput(cros_test_lib.TempDirTestCase,
     log = os.path.join(self.tempdir, 'output')
     ret = cros_build_lib.run(['echo', 'monkeys'], stdout=log)
     self.assertEqual(osutils.ReadFile(log), 'monkeys\n')
-    self.assertIs(ret.output, None)
-    self.assertIs(ret.error, None)
+    self.assertIs(ret.stdout, None)
+    self.assertIs(ret.stderr, None)
 
     os.unlink(log)
     ret = cros_build_lib.run(
         ['sh', '-c', 'echo monkeys3 >&2'],
         stdout=log, stderr=True)
-    self.assertEqual(ret.error, b'monkeys3\n')
+    self.assertEqual(ret.stderr, b'monkeys3\n')
     self.assertExists(log)
     self.assertEqual(os.path.getsize(log), 0)
 
@@ -753,31 +758,38 @@ class TestRunCommandOutput(cros_test_lib.TempDirTestCase,
     ret = cros_build_lib.run(
         ['sh', '-c', 'echo monkeys4; echo monkeys5 >&2'],
         stdout=log, stderr=subprocess.STDOUT)
-    self.assertIs(ret.output, None)
-    self.assertIs(ret.error, None)
+    self.assertIs(ret.stdout, None)
+    self.assertIs(ret.stderr, None)
     self.assertEqual(osutils.ReadFile(log), 'monkeys4\nmonkeys5\n')
 
+  @_ForceLoggingLevel
+  def testLogStderrToFile(self):
+    log = os.path.join(self.tempdir, 'output')
+    ret = cros_build_lib.run(['sh', '-c', 'echo monkeys >&2'], stderr=log)
+    self.assertEqual(osutils.ReadFile(log), 'monkeys\n')
+    self.assertIs(ret.stdout, None)
+    self.assertIs(ret.stderr, None)
 
   @_ForceLoggingLevel
   def testLogStdoutToFileWithOrWithoutAppend(self):
     log = os.path.join(self.tempdir, 'output')
     ret = cros_build_lib.run(['echo', 'monkeys'], stdout=log)
     self.assertEqual(osutils.ReadFile(log), 'monkeys\n')
-    self.assertIs(ret.output, None)
-    self.assertIs(ret.error, None)
+    self.assertIs(ret.stdout, None)
+    self.assertIs(ret.stderr, None)
 
     # Without append
     ret = cros_build_lib.run(['echo', 'monkeys2'], stdout=log)
     self.assertEqual(osutils.ReadFile(log), 'monkeys2\n')
-    self.assertIs(ret.output, None)
-    self.assertIs(ret.error, None)
+    self.assertIs(ret.stdout, None)
+    self.assertIs(ret.stderr, None)
 
     # With append
     ret = cros_build_lib.run(
         ['echo', 'monkeys3'], append_to_file=True, stdout=log)
     self.assertEqual(osutils.ReadFile(log), 'monkeys2\nmonkeys3\n')
-    self.assertIs(ret.output, None)
-    self.assertIs(ret.error, None)
+    self.assertIs(ret.stdout, None)
+    self.assertIs(ret.stderr, None)
 
   def testOutputFileHandle(self):
     """Verify writing to existing file handles."""
@@ -805,8 +817,8 @@ class TestRunCommandOutput(cros_test_lib.TempDirTestCase,
     """Tests that stderr is captured when run raises."""
     with self.assertRaises(cros_build_lib.RunCommandError) as cm:
       cros_build_lib.run(['cat', '/'], stderr=True)
-    self.assertIsNotNone(cm.exception.result.error)
-    self.assertNotEqual('', cm.exception.result.error)
+    self.assertIsNotNone(cm.exception.result.stderr)
+    self.assertNotEqual('', cm.exception.result.stderr)
 
   def _CaptureLogOutput(self, cmd, **kwargs):
     """Capture logging output of run."""
@@ -830,23 +842,6 @@ class TestRunCommandOutput(cros_test_lib.TempDirTestCase,
     output = self._CaptureLogOutput(cmd, shell=True, log_output=True,
                                     encoding='utf-8')
     self.assertEqual(output, log_output)
-
-
-class TestTimedSection(cros_test_lib.TestCase):
-  """Tests for TimedSection context manager."""
-
-  def testTimerValues(self):
-    """Make sure simple stuff works."""
-    with cros_build_lib.TimedSection() as timer:
-      # While running, we have access to the start time.
-      self.assertIsInstance(timer.start, datetime.datetime)
-      self.assertIsNone(timer.finish)
-      self.assertIsNone(timer.delta)
-
-    # After finishing, all values should be set.
-    self.assertIsInstance(timer.start, datetime.datetime)
-    self.assertIsInstance(timer.finish, datetime.datetime)
-    self.assertIsInstance(timer.delta, datetime.timedelta)
 
 
 class HelperMethodSimpleTests(cros_test_lib.OutputTestCase):
@@ -894,7 +889,7 @@ class HelperMethodSimpleTests(cros_test_lib.OutputTestCase):
                      100000.0)
 
   def testGetRandomString(self):
-    """Verify it looks sane."""
+    """Verify it looks valid."""
     data = cros_build_lib.GetRandomString()
     self.assertRegex(data, r'^[a-z0-9]+$')
     self.assertEqual(32, len(data))
@@ -1073,6 +1068,38 @@ class SafeRunTest(cros_test_lib.TestCase):
                       combine_exceptions=True)
 
 
+class TestAssertRootUserCheck(cros_test_lib.MockTestCase):
+  """Tests root/Non-root user functionality for a root user."""
+
+  def setUp(self):
+    self.geteuid_mock = self.PatchObject(os, 'geteuid', return_value=0)
+
+  def testAssertNonRootUserforRoot(self):
+    """Verify AssertNonRootUser raises an exception"""
+    self.assertRaises(cros_build_lib.DieSystemExit,
+                      cros_build_lib.AssertNonRootUser)
+
+  def testAssertRootUserforRoot(self):
+    """Verify AssertRootUser doesn't raise an exception"""
+    cros_build_lib.AssertRootUser()
+
+
+class TestAssertNonRootUserCheck(cros_test_lib.MockTestCase):
+  """Tests root/Non-root user functionality for a non-root user."""
+
+  def setUp(self):
+    self.geteuid_mock = self.PatchObject(os, 'geteuid', return_value=20)
+
+  def testAssertNonRootUserforNonRoot(self):
+    """Verify AssertNonRootUser doesn't raise an exception"""
+    cros_build_lib.AssertNonRootUser()
+
+  def testAssertRootUserforNonRoot(self):
+    """Verify AssertRootUser raises an exception"""
+    self.assertRaises(cros_build_lib.DieSystemExit,
+                      cros_build_lib.AssertRootUser)
+
+
 class TestGetHostname(cros_test_lib.MockTestCase):
   """Tests GetHostName & GetHostDomain functionality."""
 
@@ -1175,7 +1202,7 @@ class TarballTests(cros_test_lib.TempDirTestCase):
     path = Path(path)
     cros_build_lib.CreateTarball(
         path, Path(self.inputDir), inputs=self.inputs)
-    cros_build_lib.ExtractTarball(path, Path(self.tempdir))
+    cros_build_lib.ExtractTarball(path, self.tempdir)
 
   def testExtractFailureWithMissingFile(self):
     """Verify that stderr from tar is printed if in encounters an error."""
@@ -1185,9 +1212,7 @@ class TarballTests(cros_test_lib.TempDirTestCase):
       cros_build_lib.ExtractTarball(tarball, self.tempdir)
     except cros_build_lib.TarballError as e:
       # Check to see that tar's error message is printed in the exception.
-      self.assertTrue('Cannot open: No such file or directory' in e.args[0],
-                      ("tar's stderr is missing from the exception.\n%s" %
-                       e.args[0]))
+      self.assertIn('No such file or directory', e.args[0])
 
   def test_IsTarball(self):
     """Test IsTarball helper function."""
@@ -1250,12 +1275,12 @@ class FailedCreateTarballTests(cros_test_lib.MockTestCase):
   def setUp(self):
     """Mock run mock."""
     # Each test can change this value as needed.  Each element is the return
-    # code in the CommandResult for subsequent calls to run().
+    # code in the CompletedProcess for subsequent calls to run().
     self.tarResults = []
 
     def Result(*_args, **_kwargs):
-      """Creates CommandResult objects for each tarResults value in turn."""
-      return cros_build_lib.CommandResult(returncode=self.tarResults.pop(0))
+      """Creates CompletedProcess objects for each tarResults value in turn."""
+      return cros_build_lib.CompletedProcess(returncode=self.tarResults.pop(0))
 
     self.mockRun = self.PatchObject(cros_build_lib, 'run',
                                     autospec=True,
@@ -1292,3 +1317,39 @@ class FailedCreateTarballTests(cros_test_lib.MockTestCase):
 
     self.assertEqual(self.mockRun.call_count, 3)
     self.assertEqual(cm.exception.args[1].returncode, 1)
+
+
+class ClearShadowLocksTests(cros_test_lib.TempDirTestCase,
+                            cros_test_lib.LoggingTestCase):
+  """Tests shadowlock files are removed from the given sysroot."""
+
+  def setUp(self):
+    D = cros_test_lib.Directory
+    file_layout = (D('etc', (
+        'test.lock',
+        'testfile.txt',
+        'passwd.lock',
+        'group.lock',
+        'shadow.lock',
+        'shadow.lockfile',
+        'gshadow.lock',
+    )),)
+    cros_test_lib.CreateOnDiskHierarchy(self.tempdir, file_layout)
+
+  def testClearShadowLocksSuccess(self):
+    cros_build_lib.ClearShadowLocks(self.tempdir)
+
+    self.assertTrue(os.path.exists(f'{self.tempdir}/etc/test.lock'))
+    self.assertTrue(os.path.exists(f'{self.tempdir}/etc/testfile.txt'))
+    self.assertFalse(os.path.exists(f'{self.tempdir}/etc/passwd.lock'))
+    self.assertFalse(os.path.exists(f'{self.tempdir}/etc/group.lock'))
+    self.assertFalse(os.path.exists(f'{self.tempdir}/etc/shadow.lock'))
+    self.assertFalse(os.path.exists(f'{self.tempdir}/etc/shadow.lockfile'))
+    self.assertFalse(os.path.exists(f'{self.tempdir}/etc/gshadow.lock'))
+
+  def testClearShadowLocksPathDoesNotExist(self):
+    with cros_test_lib.LoggingCapturer() as logs:
+      cros_build_lib.ClearShadowLocks(Path('fake/path/does/not/exist'))
+
+      self.AssertLogsContain(
+          logs, 'Unable to clear shadow-utils lockfiles, path does not exist')

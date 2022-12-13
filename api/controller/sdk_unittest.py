@@ -24,7 +24,8 @@ class SdkCreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     self.response = sdk_pb2.CreateResponse()
 
   def _GetRequest(self, no_replace=False, bootstrap=False, no_use_image=False,
-                  cache_path=None, chroot_path=None, sdk_version=None):
+                  cache_path=None, chroot_path=None, sdk_version=None,
+                  skip_chroot_upgrade=False):
     """Helper to build a create request message."""
     request = sdk_pb2.CreateRequest()
     request.flags.no_replace = no_replace
@@ -37,6 +38,8 @@ class SdkCreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
       request.chroot.path = chroot_path
     if sdk_version:
       request.sdk_version = sdk_version
+    if skip_chroot_upgrade:
+      request.skip_chroot_upgrade = skip_chroot_upgrade
 
     return request
 
@@ -85,7 +88,8 @@ class SdkCreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         use_image=True,
         chroot_path=mock.ANY,
         cache_dir=mock.ANY,
-        sdk_version=mock.ANY)
+        sdk_version=mock.ANY,
+        skip_chroot_upgrade=mock.ANY)
 
   def testTrueArguments(self):
     """Test True arguments handling."""
@@ -95,7 +99,8 @@ class SdkCreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
 
     # Test all True values in the message.
     request = self._GetRequest(no_replace=True, bootstrap=True,
-                               no_use_image=True, sdk_version='foo')
+                               no_use_image=True, sdk_version='foo',
+                               skip_chroot_upgrade=True)
     sdk_controller.Create(request, self.response, self.api_config)
     args_patch.assert_called_with(
         replace=False,
@@ -103,7 +108,8 @@ class SdkCreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         use_image=False,
         chroot_path=mock.ANY,
         cache_dir=mock.ANY,
-        sdk_version='foo')
+        sdk_version='foo',
+        skip_chroot_upgrade=True)
 
 
 class SdkDeleteTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):

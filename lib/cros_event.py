@@ -4,11 +4,10 @@
 
 """Cros Eventing library, for tracking tasks using a shared eventing system"""
 
-from time import time
-
 import atexit
 import json
 import multiprocessing
+from time import time
 
 from chromite.lib import parallel
 
@@ -202,7 +201,7 @@ class EventFileLogger(EventLogger):
     self.file_out.close()
 
 
-class EventDummyLogger(EventLogger):
+class EventStubLogger(EventLogger):
   """Event Logger that does not write event to anything"""
 
   def __init__(self):
@@ -213,7 +212,7 @@ class EventDummyLogger(EventLogger):
 
 
 # Default logger to use
-root = EventDummyLogger()
+root = EventStubLogger()
 
 
 def setEventLogger(logger):

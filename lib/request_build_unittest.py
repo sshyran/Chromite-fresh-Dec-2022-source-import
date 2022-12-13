@@ -5,13 +5,17 @@
 """Unittests for request_build.py."""
 
 from chromite.third_party.google.protobuf.struct_pb2 import Struct
+from chromite.third_party.infra_libs.buildbucket.proto import (
+    build_pb2,
+    builder_common_pb2,
+    common_pb2,
+)
 
 from chromite.lib import buildbucket_v2
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
 from chromite.lib import request_build
-from chromite.third_party.infra_libs.buildbucket.proto import build_pb2, builder_pb2, common_pb2
 
 
 # Tests need internal access.
@@ -85,7 +89,7 @@ class RequestBuildHelperTestsMock(RequestBuildHelperTestsBase):
 
     body = job.CreateBuildRequest()
 
-    self.assertEqual(builder_pb2.BuilderID(
+    self.assertEqual(builder_common_pb2.BuilderID(
         project='chromeos',
         bucket=constants.INTERNAL_SWARMING_BUILDBUCKET_BUCKET,
         builder=config_lib.LUCI_BUILDER_TRY),
@@ -112,7 +116,7 @@ class RequestBuildHelperTestsMock(RequestBuildHelperTestsBase):
 
     body = job.CreateBuildRequest()
 
-    self.assertEqual(builder_pb2.BuilderID(
+    self.assertEqual(builder_common_pb2.BuilderID(
         project='chromeos',
         bucket=self.TEST_BUCKET,
         builder=self.LUCI_BUILDER),
@@ -178,7 +182,7 @@ class RequestBuildHelperTestsMock(RequestBuildHelperTestsBase):
     job = self._CreateJobUnknown()
     body = job.CreateBuildRequest()
 
-    self.assertEqual(builder_pb2.BuilderID(
+    self.assertEqual(builder_common_pb2.BuilderID(
         project='chromeos',
         bucket=constants.INTERNAL_SWARMING_BUILDBUCKET_BUCKET,
         builder=config_lib.LUCI_BUILDER_TRY),

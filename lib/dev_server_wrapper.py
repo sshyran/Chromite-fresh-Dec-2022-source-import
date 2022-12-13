@@ -65,15 +65,16 @@ def GetXbuddyPath(path):
   if parsed.scheme == 'xbuddy':
     return '%s%s' % (parsed.netloc, parsed.path)
   elif parsed.scheme == '':
-    logging.debug('Assuming %s is an xbuddy path.', path)
+    logging.debug('Assuming "%s" is an xbuddy path.', path)
     return path
   elif parsed.scheme == 'gs':
     if parsed.netloc != devserver_constants.GS_IMAGE_BUCKET:
-      raise ValueError('Do not support bucket %s. Only bucket %s is supported.'
-                       % (parsed.netloc, devserver_constants.GS_IMAGE_BUCKET))
+      raise ValueError(
+          'Unsupported gs bucket "%s". Only bucket "%s" is supported.'
+          % (parsed.netloc, devserver_constants.GS_IMAGE_BUCKET))
     return '%s%s' % (xbuddy.REMOTE, parsed.path)
   else:
-    raise ValueError('Do not support scheme %s.' % (parsed.scheme,))
+    raise ValueError('Unsupported scheme "%s".' % (parsed.scheme,))
 
 
 def GetImagePathWithXbuddy(path, board, version, static_dir=DEFAULT_STATIC_DIR,
@@ -135,10 +136,10 @@ def GetIPv4Address(dev=None, global_ip=True):
 
   result = cros_build_lib.run(cmd, print_cmd=False, capture_output=True,
                               encoding='utf-8')
-  matches = re.findall(r'\binet (\d+\.\d+\.\d+\.\d+).*', result.output)
+  matches = re.findall(r'\binet (\d+\.\d+\.\d+\.\d+).*', result.stdout)
   if matches:
     return matches[0]
-  logging.warning('Failed to find ip address in %r', result.output)
+  logging.warning('Failed to find ip address in %r', result.stdout)
   return None
 
 
@@ -242,7 +243,8 @@ class DevServerWrapper(multiprocessing.Process):
     """Returns the HTTP response of a URL."""
     logging.debug('Retrieving %s', url)
     try:
-      res = urllib.request.urlopen(url, timeout=timeout)
+      with urllib.request.urlopen(url, timeout=timeout) as res:
+        return res.read()
     except (urllib.error.HTTPError, http.client.HTTPException) as e:
       logging.error('Devserver responded with HTTP error (%s)', e)
       raise DevServerResponseError(e)
@@ -250,8 +252,6 @@ class DevServerWrapper(multiprocessing.Process):
       if not ignore_url_error:
         logging.error('Cannot connect to devserver (%s)', e)
         raise DevServerConnectionError(e)
-    else:
-      return res.read()
 
   @classmethod
   def CreateStaticDirectory(cls, static_dir=DEFAULT_STATIC_DIR):
@@ -363,7 +363,7 @@ class DevServerWrapper(multiprocessing.Process):
              '--- Start output from the devserver startup command ---\n'
              '%s'
              '--- End output from the devserver startup command ---' %
-             result.output)
+             result.stdout)
       logging.error(msg)
 
   def Start(self):
@@ -410,7 +410,7 @@ class DevServerWrapper(multiprocessing.Process):
       result = self._RunCommand(['tail', '-n', str(num_lines), fname],
                                 capture_output=True, encoding='utf-8')
       output = '--- Start output from %s ---' % fname
-      output += result.output
+      output += result.stdout
       output += '--- End output from %s ---' % fname
       return output
 

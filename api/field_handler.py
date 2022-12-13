@@ -13,12 +13,17 @@ import functools
 import logging
 import os
 import shutil
+from typing import Iterator, List, Optional, TYPE_CHECKING
 
 from chromite.third_party.google.protobuf import message as protobuf_message
 
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import osutils
+
+
+if TYPE_CHECKING:
+  from chromite.lib import chroot_lib
 
 
 class Error(Exception):
@@ -35,7 +40,7 @@ class ChrootHandler(object):
   def __init__(self, clear_field):
     self.clear_field = clear_field
 
-  def handle(self, message, recurse=True):
+  def handle(self, message, recurse=True) -> Optional['chroot_lib.Chroot']:
     """Parse a message for a chroot field."""
     # Find the Chroot field. Search for the field by type to prevent it being
     # tied to a naming convention.
@@ -60,17 +65,15 @@ class ChrootHandler(object):
 
     return None
 
-  def parse_chroot(self, chroot_message):
+  def parse_chroot(self,
+                   chroot_message: common_pb2.Chroot) -> 'chroot_lib.Chroot':
     """Parse a Chroot message instance."""
     return controller_util.ParseChroot(chroot_message)
 
 
-def handle_chroot(message, clear_field=True):
-  """Find and parse the chroot field, returning the Chroot instance.
-
-  Returns:
-    chroot_lib.Chroot
-  """
+def handle_chroot(message: protobuf_message.Message,
+                  clear_field: Optional[bool] = True) -> 'chroot_lib.Chroot':
+  """Find and parse the chroot field, returning the Chroot instance."""
   handler = ChrootHandler(clear_field)
   chroot = handler.handle(message)
   if chroot:
@@ -108,17 +111,22 @@ class PathHandler(object):
   INSIDE = common_pb2.Path.INSIDE
   OUTSIDE = common_pb2.Path.OUTSIDE
 
-  def __init__(self, field, destination, delete, prefix=None, reset=True):
+  def __init__(self,
+               field: common_pb2.Path,
+               destination: str,
+               delete: bool,
+               prefix: Optional[str] = None,
+               reset: Optional[bool] = True) -> None:
     """Path handler initialization.
 
     Args:
-      field (common_pb2.Path): The Path message.
-      destination (str): The destination base path.
-      delete (bool): Whether the copied file(s) should be deleted on cleanup.
-      prefix (str|None): A path prefix to remove from the destination path
-        when moving files inside the chroot, or to add to the source paths when
-        moving files out of the chroot.
-      reset (bool): Whether to reset the state on cleanup.
+      field: The Path message.
+      destination: The destination base path.
+      delete: Whether the copied file(s) should be deleted on cleanup.
+      prefix: A path prefix to remove from the destination path when moving
+        files inside the chroot, or to add to the source paths when moving files
+        out of the chroot.
+      reset: Whether to reset the state on cleanup.
     """
     assert isinstance(field, common_pb2.Path)
     assert field.path
@@ -126,7 +134,7 @@ class PathHandler(object):
 
     self.field = field
     self.destination = destination
-    self.prefix = prefix or ''
+    self.prefix = '' if prefix is None else str(prefix)
     self.delete = delete
     self.tempdir = None
     self.reset = reset
@@ -136,13 +144,13 @@ class PathHandler(object):
     self._original_message = common_pb2.Path()
     self._original_message.CopyFrom(self.field)
 
-  def transfer(self, direction):
+  def transfer(self, direction: int) -> None:
     """Copy the file or directory to its destination.
 
     Args:
-      direction (int): The direction files are being copied (into or out of
-        the chroot). Specifying the direction allows avoiding performing
-        unnecessary copies.
+      direction: The direction files are being copied (into or out of the
+        chroot). Specifying the direction allows avoiding performing unnecessary
+        copies.
     """
     if self._transferred:
       return
@@ -233,17 +241,20 @@ class SyncedDirHandler(object):
 
 
 @contextlib.contextmanager
-def copy_paths_in(message, destination, delete=True, prefix=None):
+def copy_paths_in(message: protobuf_message.Message,
+                  destination: str,
+                  delete: Optional[bool] = True,
+                  prefix: Optional[str] = None) -> Iterator[List[PathHandler]]:
   """Context manager function to transfer and cleanup all Path messages.
 
   Args:
-    message (Message): A message whose Path messages should be transferred.
-    destination (str): The base destination path.
-    delete (bool): Whether the file(s) should be deleted.
-    prefix (str|None): A prefix path to remove from the final destination path
-      in the Path message (i.e. remove the chroot path).
+    message: A message whose Path messages should be transferred.
+    destination: The base destination path.
+    delete: Whether the file(s) should be deleted.
+    prefix: A prefix path to remove from the final destination path in the Path
+      message (i.e. remove the chroot path).
 
-  Returns:
+  Yields:
     list[PathHandler]: The path handlers.
   """
   assert destination
@@ -262,7 +273,9 @@ def copy_paths_in(message, destination, delete=True, prefix=None):
 
 
 @contextlib.contextmanager
-def sync_dirs(message, destination, prefix):
+def sync_dirs(message: protobuf_message.Message,
+              destination: str,
+              prefix: str) -> Iterator[SyncedDirHandler]:
   """Context manager function to handle SyncedDir messages.
 
   The sync semantics are effectively:
@@ -271,13 +284,13 @@ def sync_dirs(message, destination, prefix):
     rsync -r --del destination/ source/
 
   Args:
-    message (Message): A message whose SyncedPath messages should be synced.
-    destination (str): The destination path.
-    prefix (str): A prefix path to remove from the final destination path
-      in the Path message (i.e. remove the chroot path).
+    message: A message whose SyncedPath messages should be synced.
+    destination: The destination path.
+    prefix: A prefix path to remove from the final destination path in the Path
+      message (i.e. remove the chroot path).
 
-  Returns:
-    list[SyncedDirHandler]: The handlers.
+  Yields:
+    The handlers.
   """
   assert destination
 
@@ -295,15 +308,16 @@ def sync_dirs(message, destination, prefix):
       handler.sync_out()
 
 
-def extract_results(request_message, response_message, chroot):
+def extract_results(request_message: protobuf_message.Message,
+                    response_message: protobuf_message.Message,
+                    chroot: 'chroot_lib.Chroot') -> None:
   """Transfer all response Path messages to the request's ResultPath.
 
   Args:
-    request_message (Message): The request message containing a ResultPath
-      message.
-    response_message (Message): The response message whose Path message(s)
-      are to be transferred.
-    chroot (chroot_lib.Chroot): The chroot the files are being copied out of.
+    request_message: The request message containing a ResultPath message.
+    response_message: The response message whose Path message(s) are to be
+      transferred.
+    chroot: The chroot the files are being copied out of.
   """
   # Find the ResultPath.
   for descriptor in request_message.DESCRIPTOR.fields:

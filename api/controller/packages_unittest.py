@@ -9,9 +9,9 @@ from unittest import mock
 from chromite.api.api_config import ApiConfigMixin
 from chromite.api.controller import controller_util
 from chromite.api.controller import packages as packages_controller
-from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromite.api import binhost_pb2
 from chromite.api.gen.chromite.api import packages_pb2
+from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -800,7 +800,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTempDirTestCase, ApiConfigMixin):
     """Helper to build a request."""
     request = packages_pb2.NeedsChromeSourceRequest()
 
-    request.install_request.sysroot.path = self.sysroot
+    request.install_request.sysroot.path = str(self.sysroot)
     request.install_request.sysroot.build_target.name = self.board
     request.install_request.flags.compile_source = compile_source
 

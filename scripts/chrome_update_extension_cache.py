@@ -41,13 +41,13 @@ def DownloadCrx(ext, extension, crxdir):
 
   update_url = ('%s?prodversion=90.1.1.1&acceptformat=crx3&x=id%%3D%s%%26uc' %
                 (extension['external_update_url'], ext))
-  response = urllib.request.urlopen(update_url)
-  if response.getcode() != 200:
-    logging.error('Cannot get update response, URL: %s, error: %d', update_url,
-                  response.getcode())
-    return False
+  with urllib.request.urlopen(update_url) as response:
+    if response.getcode() != 200:
+      logging.error('Cannot get update response, URL: %s, error: %d',
+                    update_url, response.getcode())
+      return False
 
-  dom = xml.dom.minidom.parse(response)
+    dom = xml.dom.minidom.parse(response)
   status = dom.getElementsByTagName('app')[0].getAttribute('status')
   if status != 'ok':
     logging.error('Cannot fetch extension, status: %s', status)
@@ -55,20 +55,20 @@ def DownloadCrx(ext, extension, crxdir):
 
   node = dom.getElementsByTagName('updatecheck')[0]
   if node.getAttribute('status') == 'noupdate':
-    logging.info('No CRX available (may have been removed from the webstore).')
+    logging.info('No CRX available (may have been removed from the webstore)')
     return True
 
   url = node.getAttribute('codebase')
   version = node.getAttribute('version')
   filename = '%s-%s.crx' % (ext, version)
-  response = urllib.request.urlopen(url)
-  if response.getcode() != 200:
-    logging.error('Cannot download extension, URL: %s, error: %d', url,
-                  response.getcode())
-    return False
+  with urllib.request.urlopen(url) as response:
+    if response.getcode() != 200:
+      logging.error('Cannot download extension, URL: %s, error: %d', url,
+                    response.getcode())
+      return False
 
-  osutils.WriteFile(os.path.join(crxdir, 'extensions', filename),
-                    response.read(), mode='wb')
+    osutils.WriteFile(os.path.join(crxdir, 'extensions', filename),
+                      response.read(), mode='wb')
 
   # Keep external_update_url in json file, ExternalCache will take care about
   # replacing it with proper external_crx path and version.

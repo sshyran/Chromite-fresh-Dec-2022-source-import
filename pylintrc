@@ -14,12 +14,8 @@
 # Profiled execution.
 #profile=no
 
-# Add <file or directory> to the black list. It should be a base name, not a
-# path. You may set this option multiple times.
-#ignore=CVS
-
-# Add files or directories matching the regex patterns to the blacklist. The
-# regex matches against base names, not paths.
+# Do not lint files or directories matching the regex patterns.
+# It matches against base names, not paths.
 ignore-patterns=
     .*_pb2\.py$,
     .*third_party\/.*.py$
@@ -139,6 +135,8 @@ enable=
 # TODO: Re-enable consider-using-in.
 # TODO: Re-enable try-except-raise.
 # TODO: Re-enable chained-comparison.
+# ungrouped-imports: We let isort handle this.
+# wrong-import-order: We let isort handle this.
 disable=
     broad-except,
     chained-comparison,
@@ -177,8 +175,10 @@ disable=
     too-many-return-statements,
     too-many-statements,
     try-except-raise,
+    ungrouped-imports,
     unnecessary-comprehension,
     useless-object-inheritance,
+    wrong-import-order,
 
 
 [REPORTS]

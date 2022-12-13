@@ -62,9 +62,9 @@ class ChrootPathResolver(object):
     self._source_path = (constants.SOURCE_ROOT if source_path is None
                          else source_path)
     if chroot_path and self._TranslatePath(chroot_path, self._source_path, ''):
-      raise AssertionError(
-          f'chroot_path {chroot_path} must not be in'
-          f'the source path {self._source_path}')
+      # chroot_path is inside of source_path, so assume a non-custom
+      # chroot_path.
+      self._custom_chroot_path = None
 
     # The following are only needed if outside the chroot.
     if self._inside_chroot:
@@ -145,12 +145,12 @@ class ChrootPathResolver(object):
       ValueError: If |src_root| is a prefix but |dst_root_input| yields None,
         which means we don't have sufficient information to do the translation.
     """
-    if not path.startswith(os.path.join(src_root, '')) and path != src_root:
+    if src_root and not osutils.IsSubPath(path, src_root):
       return None
     dst_root = dst_root_input() if callable(dst_root_input) else dst_root_input
     if dst_root is None:
       raise ValueError('No target root to translate path to')
-    return os.path.join(dst_root, path[len(src_root):].lstrip(os.path.sep))
+    return os.path.join(dst_root, path[len(str(src_root)):].lstrip(os.path.sep))
 
   def _GetChrootPath(self, path):
     """Translates a fully-expanded host |path| into a chroot equivalent.
@@ -319,7 +319,8 @@ def DetermineCheckout(cwd=None):
       break
 
   if checkout_type != CHECKOUT_TYPE_UNKNOWN:
-    root = path
+    # TODO(vapier): Change this function to pathlib Path.
+    root = str(path)
 
   # Determine the chrome src directory.
   chrome_src_dir = None

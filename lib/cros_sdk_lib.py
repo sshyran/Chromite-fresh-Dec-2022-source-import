@@ -17,6 +17,7 @@ from typing import List, Optional, Union
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
+from chromite.lib import metrics_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import timeout_util
@@ -28,22 +29,19 @@ CHROOT_VERSION_FILE = '/etc/cros_chroot_version'
 _CHROOT_VERSION_HOOKS_DIR = os.path.join(constants.CROSUTILS_DIR,
                                          'chroot_version_hooks.d')
 
-
 # Name of the LV that contains the active chroot inside the chroot.img file.
 CHROOT_LV_NAME = 'chroot'
-
 
 # Name of the thin pool used for the chroot and snapshots inside chroot.img.
 CHROOT_THINPOOL_NAME = 'thinpool'
 
-
 # Max times to recheck the result of an lvm command that doesn't finish quickly.
 _MAX_LVM_RETRIES = 3
-
 
 # Bash completion directory.
 _BASH_COMPLETION_DIR = (
     f'{constants.CHROOT_SOURCE_ROOT}/chromite/sdk/etc/bash_completion.d')
+
 
 class Error(Exception):
   """Base cros sdk error class."""
@@ -52,13 +50,13 @@ class Error(Exception):
 class ChrootDeprecatedError(Error):
   """Raised when the chroot is too old to update."""
 
-  def __init__(self, *args, **kwargs):
+  def __init__(self, version):
     # Message defined here because it's long and gives specific instructions.
-    msg = ('Upgrade hook missing for your chroot version.\n'
-           'Your chroot is so old that some updates have been deprecated and'
-           'it will need to be recreated. A fresh chroot can be built with:\n'
-           '    cros_sdk --replace\n')
-    super().__init__(msg, *args, **kwargs)
+    super().__init__(
+        f'Upgrade hook missing for your chroot version {version}.\n'
+        'Your chroot is so old that some updates have been deprecated and it '
+        'will need to be recreated. A fresh chroot can be built with:\n'
+        '    cros_sdk --replace')
 
 
 class ChrootUpdateError(Error):
@@ -197,12 +195,12 @@ def MountChrootPaths(path: Union[Path, str]):
   # The source checkout must be mounted first.  We'll be mounting paths into the
   # chroot, and that chroot lives inside SOURCE_ROOT, so if we did the recursive
   # bind at the end, we'd double bind things.
-  osutils.Mount(
-      constants.SOURCE_ROOT, path / constants.CHROOT_SOURCE_ROOT[1:],
-      '~/chromiumos', osutils.MS_BIND | osutils.MS_REC)
+  osutils.Mount(constants.SOURCE_ROOT, path / constants.CHROOT_SOURCE_ROOT[1:],
+                '~/chromiumos', osutils.MS_BIND | osutils.MS_REC)
 
-  defflags = (osutils.MS_NOSUID | osutils.MS_NODEV | osutils.MS_NOEXEC |
-              osutils.MS_RELATIME)
+  defflags = (
+      osutils.MS_NOSUID | osutils.MS_NODEV | osutils.MS_NOEXEC |
+      osutils.MS_RELATIME)
   osutils.Mount('proc', path / 'proc', 'proc', defflags)
   osutils.Mount('sysfs', path / 'sys', 'sysfs', defflags)
 
@@ -248,12 +246,14 @@ def FindVolumeGroupForDevice(chroot_path, chroot_dev):
   safe_path = re.sub(r'[^A-Za-z0-9_+.-]', '+', chroot_path.strip('/'))[-90:]
   vg_prefix = 'cros_%s_' % safe_path
 
-  cmd = ['pvs', '-q', '--noheadings', '-o', 'vg_name,pv_name', '--unbuffered',
-         '--separator', '\t']
+  cmd = [
+      'pvs', '-q', '--noheadings', '-o', 'vg_name,pv_name', '--unbuffered',
+      '--separator', '\t'
+  ]
   result = cros_build_lib.sudo_run(
       cmd, capture_output=True, print_cmd=False, encoding='utf-8')
   existing_vgs = set()
-  for line in result.output.strip().splitlines():
+  for line in result.stdout.strip().splitlines():
     # Typical lines are '  vg_name\tpv_name\n'.  Match with a regex
     # instead of split because the first field can be empty or missing when
     # a VG isn't completely set up.
@@ -285,10 +285,9 @@ def _DeviceFromFile(chroot_image):
   chroot_dev = None
   cmd = ['losetup', '-j', chroot_image]
   result = cros_build_lib.sudo_run(
-      cmd, capture_output=True, check=False, print_cmd=False,
-      encoding='utf-8')
+      cmd, capture_output=True, check=False, print_cmd=False, encoding='utf-8')
   if result.returncode == 0:
-    match = re.match(r'/dev/loop\d+', result.output)
+    match = re.match(r'/dev/loop\d+', result.stdout)
     if match:
       chroot_dev = match.group(0)
   return chroot_dev
@@ -307,14 +306,16 @@ def _AttachDeviceToFile(chroot_image):
   # Result should be '/dev/loopN\n' for whatever loop device is chosen.
   result = cros_build_lib.sudo_run(
       cmd, capture_output=True, print_cmd=False, encoding='utf-8')
-  chroot_dev = result.output.strip()
+  chroot_dev = result.stdout.strip()
 
   # Force rescanning the new device in case lvmetad doesn't pick it up.
   _RescanDeviceLvmMetadata(chroot_dev)
   return chroot_dev
 
 
-def MountChroot(chroot=None, buildroot=None, create=True,
+def MountChroot(chroot=None,
+                buildroot=None,
+                create=True,
                 proc_mounts='/proc/mounts'):
   """Mount a chroot image on |chroot| if it doesn't already contain a chroot.
 
@@ -357,9 +358,11 @@ def MountChroot(chroot=None, buildroot=None, create=True,
 
   # Make sure nothing else is mounted on the chroot.  We could mount over the
   # top, but this seems likely to be an error, so we'll bail out instead.
-  chroot_mounts = [m.source
-                   for m in osutils.IterateMountPoints(proc_file=proc_mounts)
-                   if m.destination == chroot]
+  chroot_mounts = [
+      m.source
+      for m in osutils.IterateMountPoints(proc_file=proc_mounts)
+      if m.destination == chroot
+  ]
   if chroot_mounts:
     logging.error('Found %s mounted on %s.  Not mounting a chroot over the top',
                   ','.join(chroot_mounts), chroot)
@@ -396,8 +399,7 @@ def MountChroot(chroot=None, buildroot=None, create=True,
     return False
   cmd = ['vgs', chroot_vg]
   result = cros_build_lib.sudo_run(
-      cmd, capture_output=True, check=False, print_cmd=False,
-      encoding='utf-8')
+      cmd, capture_output=True, check=False, print_cmd=False, encoding='utf-8')
   if result.returncode == 0:
     logging.debug('Activating existing VG %s', chroot_vg)
     cmd = ['vgchange', '-q', '-ay', chroot_vg]
@@ -423,12 +425,13 @@ def MountChroot(chroot=None, buildroot=None, create=True,
   chroot_dev_path = '/dev/%s' % chroot_lv
   cmd = ['lvs', chroot_lv]
   result = cros_build_lib.sudo_run(
-      cmd, capture_output=True, check=False, print_cmd=False,
-      encoding='utf-8')
+      cmd, capture_output=True, check=False, print_cmd=False, encoding='utf-8')
   if result.returncode != 0:
-    cmd = ['lvcreate', '-q', '-L499G', '-T',
-           '%s/%s' % (chroot_vg, CHROOT_THINPOOL_NAME), '-V500G',
-           '-n', CHROOT_LV_NAME]
+    cmd = [
+        'lvcreate', '-q', '-L499G', '-T',
+        '%s/%s' % (chroot_vg, CHROOT_THINPOOL_NAME), '-V500G', '-n',
+        CHROOT_LV_NAME
+    ]
     cros_build_lib.sudo_run(cmd, capture_output=True, print_cmd=False)
 
     cmd = ['mke2fs', '-q', '-m', '0', '-t', 'ext4', chroot_dev_path]
@@ -441,8 +444,9 @@ def MountChroot(chroot=None, buildroot=None, create=True,
   count = 0
   while not os.path.exists(chroot_dev_path):
     if count > _MAX_LVM_RETRIES:
-      logging.error('Device %s still does not exist.  Expect mounting the '
-                    'filesystem to fail.', chroot_dev_path)
+      logging.error(
+          'Device %s still does not exist.  Expect mounting the '
+          'filesystem to fail.', chroot_dev_path)
       break
 
     count += 1
@@ -467,10 +471,12 @@ def FindChrootMountSource(chroot_path, proc_mounts='/proc/mounts'):
     A tuple containing the VG and LV names, or (None, None) if an appropriately
     named device mounted on |chroot_path| isn't found.
   """
-  mount = [m for m in osutils.IterateMountPoints(proc_file=proc_mounts)
-           if m.destination == chroot_path]
+  mount = [
+      m for m in osutils.IterateMountPoints(proc_file=proc_mounts)
+      if m.destination == chroot_path
+  ]
   if not mount:
-    return (None, None)
+    return None, None
 
   # Take the last mount entry because it's the one currently visible.
   # Expected VG/LV source path is /dev/mapper/cros_XX_NNN-LV.
@@ -478,13 +484,14 @@ def FindChrootMountSource(chroot_path, proc_mounts='/proc/mounts'):
   mount_source = mount[-1].source
   match = re.match(r'/dev.*/(cros[^-]+)-(.+)', mount_source)
   if not match:
-    return (None, None)
+    return None, None
 
-  return (match.group(1), match.group(2))
+  return match.group(1), match.group(2)
 
 
 FileSystemDebugInfo = collections.namedtuple('FileSystemDebugInfo',
                                              ('fuser', 'lsof', 'ps'))
+
 
 def GetFileSystemDebug(path: str, run_ps: bool = True) -> FileSystemDebugInfo:
   """Collect filesystem debugging information.
@@ -518,7 +525,9 @@ def GetFileSystemDebug(path: str, run_ps: bool = True) -> FileSystemDebugInfo:
 
 # Raise an exception if cleanup takes more than 10 minutes.
 @timeout_util.TimeoutDecorator(600)
-def CleanupChrootMount(chroot=None, buildroot=None, delete=False,
+def CleanupChrootMount(chroot=None,
+                       buildroot=None,
+                       delete=False,
                        proc_mounts='/proc/mounts'):
   """Unmounts a chroot and cleans up attached devices.
 
@@ -556,18 +565,22 @@ def CleanupChrootMount(chroot=None, buildroot=None, delete=False,
     fs_debug = GetFileSystemDebug(chroot, run_ps=True)
     raise Error(
         'Umount failed: %s.\nfuser output=%s\nlsof output=%s\nps output=%s\n' %
-        (e.result.error, fs_debug.fuser, fs_debug.lsof, fs_debug.ps))
+        (e.result.stderr, fs_debug.fuser, fs_debug.lsof, fs_debug.ps))
 
   # Find the loopback device by either matching the VG or the image.
   chroot_dev = None
   if vg_name:
-    cmd = ['vgs', '-q', '--noheadings', '-o', 'pv_name', '--unbuffered',
-           vg_name]
+    cmd = [
+        'vgs', '-q', '--noheadings', '-o', 'pv_name', '--unbuffered', vg_name
+    ]
     result = cros_build_lib.sudo_run(
-        cmd, capture_output=True, check=False, print_cmd=False,
+        cmd,
+        capture_output=True,
+        check=False,
+        print_cmd=False,
         encoding='utf-8')
     if result.returncode == 0:
-      chroot_dev = result.output.strip()
+      chroot_dev = result.stdout.strip()
     else:
       vg_name = None
   if not chroot_dev:
@@ -580,7 +593,10 @@ def CleanupChrootMount(chroot=None, buildroot=None, delete=False,
     if vg_name:
       cmd = ['vgs', vg_name]
       result = cros_build_lib.sudo_run(
-          cmd, capture_output=True, check=False, print_cmd=False,
+          cmd,
+          capture_output=True,
+          check=False,
+          print_cmd=False,
           encoding='utf-8')
       if result.returncode != 0:
         vg_name = None
@@ -690,16 +706,16 @@ class ChrootUpdater(object):
       # Check for existence so IOErrors from osutils.ReadFile are limited to
       # permissions problems.
       if not os.path.exists(self._version_file):
-        raise UninitializedChrootError(
-            'Version file does not exist: %s' % self._version_file)
+        raise UninitializedChrootError('Version file does not exist: %s' %
+                                       self._version_file)
 
       version = osutils.ReadFile(self._version_file)
 
       try:
         self._version = int(version)
       except ValueError:
-        raise InvalidChrootVersionError(
-            'Invalid chroot version in %s: %s' % (self._version_file, version))
+        raise InvalidChrootVersionError('Invalid chroot version in %s: %s' %
+                                        (self._version_file, version))
       else:
         logging.debug('Found chroot version %s', self._version)
 
@@ -709,9 +725,6 @@ class ChrootUpdater(object):
     """Set and store the chroot version."""
     self._version = version
     osutils.WriteFile(self._version_file, str(version), sudo=True)
-    # TODO(saklein) Verify if this chown is necessary. The version file
-    # is in /etc, so it's reasonable to expect root would own it, but the bash
-    # version had the chown for many years before the conversion.
     osutils.Chown(self._version_file)
 
   def IsInitialized(self):
@@ -724,14 +737,15 @@ class ChrootUpdater(object):
   def ApplyUpdates(self):
     """Apply all necessary updates to the chroot."""
     if self.GetVersion() > self.latest_version:
-      raise InvalidChrootVersionError(
-          'Missing upgrade hook for version %s.\n'
-          'Chroot is too new. Consider running:\n'
-          '    cros_sdk --replace' %  self.GetVersion())
+      raise InvalidChrootVersionError('Missing upgrade hook for version %s.\n'
+                                      'Chroot is too new. Consider running:\n'
+                                      '    cros_sdk --replace' %
+                                      self.GetVersion())
 
     for hook, version in self.GetChrootUpdates():
       result = cros_build_lib.run(['bash', hook],
-                                  enter_chroot=True, check=False)
+                                  enter_chroot=True,
+                                  check=False)
       if not result.returncode:
         self.SetVersion(version)
       else:
@@ -759,7 +773,7 @@ class ChrootUpdater(object):
       # chroot's current version and the most recent, then the chroot must be
       # recreated.
       if version not in hooks:
-        raise ChrootDeprecatedError()
+        raise ChrootDeprecatedError(self.GetVersion())
 
       updates.append((hooks[version], version))
 
@@ -784,8 +798,8 @@ class ChrootUpdater(object):
       # Sanity check: Each version may only have a single script. Multiple CLs
       # landed at the same time and no one noticed the version overlap.
       if version in hook_files:
-        raise VersionHasMultipleHooksError(
-            'Version %s has multiple hooks.' % version)
+        raise VersionHasMultipleHooksError('Version %s has multiple hooks.' %
+                                           version)
 
       hook_files[version] = os.path.join(self._hooks_dir, hook)
 
@@ -796,8 +810,8 @@ class ChrootUpdater(object):
 class ChrootCreator:
   """Creates a new chroot from a given SDK."""
 
-  MAKE_CHROOT = os.path.join(
-      constants.SOURCE_ROOT, 'src/scripts/sdk_lib/make_chroot.sh')
+  MAKE_CHROOT = os.path.join(constants.SOURCE_ROOT,
+                             'src/scripts/sdk_lib/make_chroot.sh')
 
   # If the host timezone isn't set, we'll use this inside the SDK.
   DEFAULT_TZ = 'usr/share/zoneinfo/PST8PDT'
@@ -813,8 +827,12 @@ class ChrootCreator:
   # "video" group, so we wouldn't get access to /dev/dri/ nodes directly.
   DEFGROUPS = {'adm', 'cdrom', 'floppy', 'audio', 'video', 'portage'}
 
-  def __init__(self, chroot_path: Path, sdk_tarball: Path, cache_dir: Path,
-               usepkg: bool = True):
+  def __init__(self,
+               chroot_path: Path,
+               sdk_tarball: Path,
+               cache_dir: Path,
+               usepkg: bool = True,
+               chroot_upgrade: bool = True):
     """Initialize.
 
     Args:
@@ -823,22 +841,32 @@ class ChrootCreator:
       cache_dir: Path to a directory that will be used for caching files.
       usepkg: If False, pass --nousepkg to cros_setup_toolchains inside the
           chroot.
+      chroot_upgrade: If True, upgrade toolchain/SDK when entering the chroot.
     """
     self.chroot_path = chroot_path
     self.sdk_tarball = sdk_tarball
     self.cache_dir = cache_dir
     self.usepkg = usepkg
+    self.chroot_upgrade = chroot_upgrade
 
+  @metrics_lib.timed('cros_sdk_lib.ChrootCreator._make_chroot')
   def _make_chroot(self):
     """Create the chroot."""
     cmd = [
         self.MAKE_CHROOT,
-        '--chroot', str(self.chroot_path),
-        '--cache_dir', str(self.cache_dir),
+        '--chroot',
+        str(self.chroot_path),
+        '--cache_dir',
+        str(self.cache_dir),
     ]
 
     if not self.usepkg:
       cmd.append('--nousepkg')
+
+    if not self.chroot_upgrade:
+      logging.warning('Skipping SDK and toolchain update. '
+                      'Chroot is not guaranteed to work.')
+      cmd.append('--skip_chroot_upgrade')
 
     try:
       cros_build_lib.dbg_run(cmd)
@@ -972,9 +1000,7 @@ class ChrootCreator:
     if data:
       data += '\n\n'
     # Automatically change to scripts directory.
-    data += (
-        'cd "${CHROOT_CWD:-${HOME}/chromiumos/src/scripts}"\n\n'
-    )
+    data += 'cd "${CHROOT_CWD:-${HOME}/chromiumos/src/scripts}"\n\n'
     bash_profile.write_text(data)
 
     osutils.Chown(home, user=uid, group=gid, recursive=True)
@@ -1051,7 +1077,8 @@ PORTAGE_USERNAME="{user}"
     chroot_opt = ''
     if default_chroot != self.chroot_path:
       chroot_opt = f' --chroot={self.chroot_path}'
-    logging.info("""
+    logging.info(
+        """
 All set up.  To enter the chroot, run:
 $ cros_sdk --enter%s
 
@@ -1060,9 +1087,12 @@ you may end up deleting your source tree too.  To unmount & delete cleanly, use:
 $ cros_sdk --delete%s
 """, chroot_opt, chroot_opt)
 
+  @metrics_lib.timed('cros_sdk_lib.ChrootCreator.run')
   def run(self,
-          user: str = None, uid: int = None,
-          group: str = None, gid: int = None):
+          user: str = None,
+          uid: int = None,
+          group: str = None,
+          gid: int = None):
     """Create the chroot.
 
     Args:
@@ -1073,17 +1103,18 @@ $ cros_sdk --delete%s
     """
     logging.notice('Creating chroot. This may take a few minutes...')
 
-    # Unpack the chroot & reset the version.
-    self.chroot_path.mkdir(mode=0o755, parents=True, exist_ok=True)
-    cros_build_lib.ExtractTarball(self.sdk_tarball, self.chroot_path)
-    updater = ChrootUpdater(self.chroot_path / CHROOT_VERSION_FILE[1:])
-    updater.SetVersion(0)
+    metrics_prefix = 'cros_sdk_lib.ChrootCreator.run'
+    with metrics_lib.timer(f'{metrics_prefix}.ExtractSdkTarball'):
+      # Unpack the chroot.
+      self.chroot_path.mkdir(mode=0o755, parents=True, exist_ok=True)
+      cros_build_lib.ExtractTarball(self.sdk_tarball, self.chroot_path)
 
-    self.init_timezone()
-    self.init_user(user=user, uid=uid, gid=gid)
-    self.init_group(user=user, group=group, gid=gid)
-    self.init_filesystem_basic()
-    self.init_etc(user=user)
+    with metrics_lib.timer(f'{metrics_prefix}.init'):
+      self.init_timezone()
+      self.init_user(user=user, uid=uid, gid=gid)
+      self.init_group(user=user, group=group, gid=gid)
+      self.init_filesystem_basic()
+      self.init_etc(user=user)
 
     MountChrootPaths(self.chroot_path)
 
@@ -1095,6 +1126,7 @@ $ cros_sdk --delete%s
     self.print_success_summary()
 
 
+@metrics_lib.timed('cros_sdk_lib.CreateChroot')
 def CreateChroot(*args, **kwargs):
   """Convenience method."""
   ChrootCreator(*args, **kwargs).run()

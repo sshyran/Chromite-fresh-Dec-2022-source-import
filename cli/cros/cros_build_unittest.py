@@ -110,7 +110,7 @@ class BuildCommandTest(cros_test_lib.MockTempDirTestCase):
                      return_value=FakeWorkonHelper())
     with MockBuildCommand(args) as build:
       cmd = partial_mock.In('--backtrack=0')
-      build.rc_mock.AddCmdResult(cmd=cmd, returncode=1, error='error\n')
+      build.rc_mock.AddCmdResult(cmd=cmd, returncode=1, stderr='error\n')
       try:
         build.inst.Run()
       except Exception as e:

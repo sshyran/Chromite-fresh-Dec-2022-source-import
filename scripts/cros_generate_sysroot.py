@@ -10,13 +10,14 @@ Meant for use after setup_board and build_packages have been run.
 import os
 
 from chromite.lib import build_target_lib
+from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import commandline
 from chromite.lib import osutils
 from chromite.lib import sudo
 from chromite.lib import sysroot_lib
 from chromite.lib import toolchain
+
 
 DEFAULT_NAME = 'sysroot_%(package)s.tar.xz'
 PACKAGE_SEPARATOR = '/'

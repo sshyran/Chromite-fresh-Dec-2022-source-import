@@ -7,8 +7,8 @@
 import os
 import shutil
 
-from chromite.lib import cros_build_lib
 from chromite.lib import commandline
+from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib import sudo
 

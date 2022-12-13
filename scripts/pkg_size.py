@@ -4,27 +4,37 @@
 
 """The Package Size Reporting CLI entry point."""
 
-import json
-
 from chromite.lib import commandline
+from chromite.lib import metrics_lib
 from chromite.lib import portage_util
-from chromite.utils import metrics
+from chromite.utils import pformat
+
+
+_PARTITION_NAMES = ['rootfs', 'stateful']
 
 
 def _get_parser():
   """Create an argument parser for this script."""
   parser = commandline.ArgumentParser(description=__doc__)
-  parser.add_argument('--root', required=True, type='path',
-                      help='Specify the rootfs to investigate.')
-  parser.add_argument('--image-type',
-                      help='Specify the type of image being investigated. '
-                           'e.g. [base, dev, test]')
-  parser.add_argument('--partition-name',
-                      help='Specify the partition name. '
-                           'e.g. [rootfs, stateful]')
-  parser.add_argument('packages', nargs='*',
-                      help='Names of packages to investigate. Must be '
-                           'specified as category/package-version.')
+  parser.add_argument(
+      '--root',
+      required=True,
+      type='path',
+      help='Specify the rootfs to investigate.')
+  parser.add_argument(
+      '--image-type',
+      help='Specify the type of image being investigated. '
+      'e.g. [base, dev, test]')
+  parser.add_argument(
+      '--partition-name',
+      choices=_PARTITION_NAMES,
+      help='Specify the partition name. '
+      'e.g. [rootfs, stateful]')
+  parser.add_argument(
+      'packages',
+      nargs='*',
+      help='Names of packages to investigate. Must be '
+      'specified as category/package-version.')
   return parser
 
 
@@ -35,22 +45,26 @@ def generate_package_size_report(db, root, image_type, partition_name,
   total_size = 0
   package_sizes = portage_util.GeneratePackageSizes(db, root,
                                                     installed_packages)
-  timestamp = metrics.current_milli_time()
+  timestamp = metrics_lib.current_milli_time()
   for package_cpv, size in package_sizes:
     results[package_cpv] = size
-    metrics.append_metrics_log(timestamp,
-                               'package_size.%s.%s.%s' % (image_type,
-                                                          partition_name,
-                                                          package_cpv),
-                               metrics.OP_GAUGE,
-                               arg=size)
+    metrics_lib.append_metrics_log(
+        timestamp,
+        'package_size.%s.%s.%s' % (image_type, partition_name, package_cpv),
+        metrics_lib.OP_GAUGE,
+        arg=size)
     total_size += size
 
-  metrics.append_metrics_log(timestamp,
-                             'total_size.%s.%s' % (image_type, partition_name),
-                             metrics.OP_GAUGE,
-                             arg=total_size)
-  return {'root': root, 'package_sizes': results, 'total_size': total_size}
+  metrics_lib.append_metrics_log(
+      timestamp,
+      'total_size.%s.%s' % (image_type, partition_name),
+      metrics_lib.OP_GAUGE,
+      arg=total_size)
+  return {'root': root,
+          'package_sizes': results,
+          'total_size': total_size,
+          'package_database_path': db.db_path,
+          'package_install_path': db.package_install_path}
 
 
 def main(argv):
@@ -61,15 +75,21 @@ def main(argv):
   opts = parser.parse_args(argv)
   opts.Freeze()
 
-  db = portage_util.PortageDB(root=opts.root)
+  vdb = package_install_path = ''
+  if opts.partition_name == 'stateful':
+    vdb = 'var_overlay/db/pkg'
+    package_install_path = 'dev_image'
+  db = portage_util.PortageDB(root=opts.root,
+                              vdb=vdb,
+                              package_install_path=package_install_path)
 
   if opts.packages:
-    installed_packages = portage_util.GenerateInstalledPackages(db, opts.root,
-                                                                opts.packages)
+    installed_packages = portage_util.GenerateInstalledPackages(
+        db, opts.root, opts.packages)
   else:
     installed_packages = db.InstalledPackages()
 
   results = generate_package_size_report(db, opts.root, opts.image_type,
                                          opts.partition_name,
                                          installed_packages)
-  print(json.dumps(results))
+  print(pformat.json(results))

@@ -13,6 +13,7 @@ import collections
 import datetime
 import logging
 import os
+from typing import List, Optional
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
@@ -33,16 +34,19 @@ SECONDS_PER_DAY = 60 * 60 * 24
 Commit = collections.namedtuple('Commit', ['id', 'timestamp', 'subject'])
 
 
-def get_directory_commits(directory, start_date=None, end_date=None):
+def get_directory_commits(
+        directory: str,
+        start_date: Optional[datetime.datetime] = None,
+        end_date: Optional[datetime.datetime] = None) -> List[Commit]:
   """Get all commits in the given directory.
 
   Args:
-    directory (str): The directory in question. Must be in a git project.
-    start_date (datetime.datetime): The earliest datetime to consider, if any.
-    end_date (datetime.datetime): The latest datetime to consider, if any.
+    directory: The directory in question. Must be in a git project.
+    start_date: The earliest datetime to consider, if any.
+    end_date: The latest datetime to consider, if any.
 
   Returns:
-    list[Commits]: The commits relating to that directory.
+    The commits relating to that directory.
   """
   # TODO(evanhernandez): I am not sure how --after/--until consider timezones.
   # For a script like this, the differences are probably negligible, but I
@@ -60,16 +64,16 @@ def get_directory_commits(directory, start_date=None, end_date=None):
   return [Commit(*cl.split('|', 2)) for cl in commit_lines]
 
 
-def get_uprev_commits(commits):
-  """Find all uprev commits amongs the given git commits.
+def get_uprev_commits(commits: List[Commit]) -> List[Commit]:
+  """Find all uprev commits among the given git commits.
 
   Preserves order.
 
   Args:
-    commits (list[Commit]): The git commits in question.
+    commits: The git commits in question.
 
   Returns:
-    list[Commit]: Only commits that were uprevs of some ebuild.
+    list: Only commits that were uprevs of some ebuild.
   """
   uprev_commits = []
   for commit in commits:
@@ -81,26 +85,26 @@ def get_uprev_commits(commits):
   return uprev_commits
 
 
-def get_commit_timestamps(commits):
+def get_commit_timestamps(commits: List[Commit]) -> List[int]:
   """Get all commit timestamps for the given ebuild.
 
   Args:
-    commits (list[Commit]): The commits in question.
+    commits: The commits in question.
 
   Returns:
-    list[int]: The uprev commit unix timestamps, in order.
+    list: The uprev commit unix timestamps, in order.
   """
   return [int(commit.timestamp) for commit in commits]
 
 
-def get_average_timestamp_delta_days(timestamps):
+def get_average_timestamp_delta_days(timestamps: List[int]) -> List[int]:
   """Return the delta in seconds between each consecutive timestamp.
 
   Args:
-    timestamps (list[int]): The unix timestamps.
+    timestamps: The unix timestamps.
 
   Returns:
-    list[int]: The deltas (in seconds) between consecutive timestamps.
+    The deltas (in seconds) between consecutive timestamps.
   """
   if not len(timestamps) > 2:
     raise ValueError(

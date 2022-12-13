@@ -8,8 +8,8 @@ import os
 import stat
 
 from chromite.lib import cros_test_lib
-from chromite.lib import osutils
 from chromite.lib import filetype
+from chromite.lib import osutils
 from chromite.lib import unittest_lib
 
 

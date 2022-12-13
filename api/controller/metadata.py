@@ -9,9 +9,8 @@ from chromite.api import validate
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromiumos.build.api import portage_pb2
 from chromite.api.gen.chromiumos.build.api import system_image_pb2
-from chromite.lib.parser import package_info
-
 from chromite.lib import portage_util
+from chromite.lib.parser import package_info
 from chromite.service import packages
 
 

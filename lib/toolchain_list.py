@@ -4,8 +4,8 @@
 
 """A type used to represent a toolchain and its setting overrides."""
 
-import copy
 import collections
+import copy
 import json
 import os
 
@@ -95,8 +95,8 @@ class ToolchainList(object):
     if not toolchains:
       return targets
 
-    have_default = any([setting_overrides.get(_DEFAULT_TOOLCHAIN_KEY, False)
-                        for target, setting_overrides in toolchains])
+    have_default = any(setting_overrides.get(_DEFAULT_TOOLCHAIN_KEY, False)
+                       for target, setting_overrides in toolchains)
     if not have_default:
       assert self._auto_default_toolchain, 'No toolchains!?'
       default_toolchain = _ToolchainTuple(self._auto_default_toolchain,

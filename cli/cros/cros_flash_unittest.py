@@ -11,6 +11,7 @@ from chromite.lib import commandline
 from chromite.lib import cros_test_lib
 from chromite.lib import remote_access
 
+
 pytestmark = cros_test_lib.pytestmark_inside_only
 
 
@@ -36,7 +37,7 @@ class CrosFlashTest(cros_test_lib.MockTempDirTestCase,
   def SetupCommandMock(self, cmd_args):
     """Setup comand mock."""
     self.cmd_mock = MockFlashCommand(
-        cmd_args, base_args=['--cache-dir', self.tempdir])
+        cmd_args, base_args=['--cache-dir', str(self.tempdir)])
     self.StartPatcher(self.cmd_mock)
 
   def setUp(self):
@@ -78,6 +79,7 @@ class CrosFlashTest(cros_test_lib.MockTempDirTestCase,
         'yes': False,
         'force': False,
         'debug': False,
+        'delta': False,
     }
     # Overwrite defaults with any variations in this test.
     expected_kwargs.update(kwargs)

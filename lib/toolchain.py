@@ -40,7 +40,7 @@ class UnknownToolchainError(Error):
 class ToolchainInstallError(Error, cros_build_lib.RunCommandError):
   """An error when installing a toolchain."""
 
-  def __init__(self, msg: str, result: cros_build_lib.CommandResult,
+  def __init__(self, msg: str, result: cros_build_lib.CompletedProcess,
                exception: Optional[Exception] = None,
                tc_info: Optional[List['package_info.PackageInfo']] = None):
     """ToolchainInstallError init.
@@ -284,9 +284,12 @@ class ToolchainInstaller(object):
       board_chost: str - The board's CHOST value.
       libc_path: str - The location of the libc archive.
     """
-    compressor = cros_build_lib.FindCompressor(cros_build_lib.COMP_BZIP2)
+    compression = cros_build_lib.CompressionDetectType(libc_path)
+    compressor = cros_build_lib.FindCompressor(compression)
     if compressor.endswith('pbzip2'):
       compressor = '%s --ignore-trailing-garbage=1' % compressor
+    elif compressor.endswith('zstd'):
+      compressor += ' -f'
 
     with osutils.TempDir(sudo_rm=True) as tempdir:
       # Extract to the temporary directory.
@@ -294,17 +297,20 @@ class ToolchainInstaller(object):
       result = cros_build_lib.sudo_run(cmd, check=False, capture_output=True,
                                        stderr=subprocess.STDOUT)
       if result.returncode:
-        raise ToolchainInstallError('Error extracting libc: %s' % result.stdout,
+        logging.error('failed to extract libc:\n%s', result.stdout)
+        raise ToolchainInstallError(f'Error extracting libc: {result.stdout}',
                                     result)
 
       # Sync the files to the sysroot to install.
       # Trailing / on source to sync contents instead of the directory itself.
       source = os.path.join(tempdir, 'usr', board_chost)
-      cmd = ['rsync', '--archive', '%s/' % source, '%s/' % sysroot.path]
+      cmd = ['rsync', '--archive', '--hard-links', f'{source}/',
+             f'{sysroot.path}/']
       result = cros_build_lib.sudo_run(cmd, check=False, capture_output=True,
                                        stderr=subprocess.STDOUT)
       if result.returncode:
-        raise ToolchainInstallError('Error installing libc: %s' % result.stdout,
+        logging.error('failed to install libc:\n%s', result.stdout)
+        raise ToolchainInstallError(f'Error installing libc: {result.stdout}',
                                     result)
 
       # Make the debug directory.
@@ -312,11 +318,14 @@ class ToolchainInstaller(object):
       osutils.SafeMakedirs(debug_dir, sudo=True)
       # Sync the debug files to the debug directory.
       source = os.path.join(tempdir, 'usr/lib/debug/usr', board_chost)
-      cmd = ['rsync', '--archive', '%s/' % source, '%s/' % debug_dir]
+      cmd = ['rsync', '--archive', '--hard-links', f'{source}/',
+             f'{debug_dir}/']
       result = cros_build_lib.sudo_run(cmd, check=False, capture_output=True,
                                        stderr=subprocess.STDOUT)
       if result.returncode:
-        logging.warning('libc debug info not copied: %s', result.stdout)
+        logging.error('failed to copy lib debug info:\n%s', result.stdout)
+        raise ToolchainInstallError(
+            f'Error copying libc debug info: {result.stdout}', result)
 
   def _NeedsInstalled(self, sysroot, tc_info):
     """Check if the toolchain installation needs to be run."""
@@ -326,6 +335,8 @@ class ToolchainInstaller(object):
     """Write out config updates."""
     if self.configure:
       sysroot.SetCachedField('LIBC_VERSION', tc_info.libc_version)
+      sysroot.SetCachedField('LIBCXX_VERSION', tc_info.libcxx_version)
+      sysroot.SetCachedField('LIBGCC_VERSION', tc_info.libgcc_version)
 
   def _UpdateProvided(self, sysroot, tc_info):
     """Write the package.provided file."""
@@ -341,6 +352,9 @@ class ToolchainInfo(object):
   # Package reference names.
   _PKG_GCC = 'gcc'
   _PKG_LIBC = 'glibc'
+  _PKG_LIBCXX = 'libcxx'
+  _PKG_LIBGCC = 'llvm-libunwind'
+  _PKG_LIBXCRYPT = 'libxcrypt'
   _PKG_GO = 'go'
   _PKG_RPCSVC = 'rpcsvc'
 
@@ -348,6 +362,9 @@ class ToolchainInfo(object):
   _PACKAGES = {
       _PKG_GCC: 'sys-devel/gcc',
       _PKG_LIBC: 'sys-libs/glibc',
+      _PKG_LIBCXX: 'sys-libs/libcxx',
+      _PKG_LIBGCC: 'sys-libs/llvm-libunwind',
+      _PKG_LIBXCRYPT: 'sys-libs/libxcrypt',
       _PKG_GO: 'dev-lang/go',
       _PKG_RPCSVC: 'net-libs/rpcsvc-proto',
   }
@@ -374,6 +391,30 @@ class ToolchainInfo(object):
   @property
   def libc_pkg_info(self) -> 'package_info.PackageInfo':
     return self._get_pkg(self._PKG_LIBC)
+
+  @property
+  def libcxx_version(self) -> str:
+    return self._GetVersion(self._PKG_LIBCXX)
+
+  @property
+  def libcxx_cpf(self) -> str:
+    return self._GetCPF(self._PKG_LIBCXX)
+
+  @property
+  def libcxx_pkg_info(self) -> 'package_info.PackageInfo':
+    return self._get_pkg(self._PKG_LIBCXX)
+
+  @property
+  def libgcc_version(self) -> str:
+    return self._GetVersion(self._PKG_LIBGCC)
+
+  @property
+  def libgcc_cpf(self) -> str:
+    return self._GetCPF(self._PKG_LIBGCC)
+
+  @property
+  def libgcc_pkg_info(self) -> 'package_info.PackageInfo':
+    return self._get_pkg(self._PKG_LIBGCC)
 
   @property
   def gcc_version(self) -> str:

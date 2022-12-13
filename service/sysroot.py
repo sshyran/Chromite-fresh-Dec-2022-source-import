@@ -4,29 +4,67 @@
 
 """Sysroot service."""
 
-import logging
+import contextlib
 import glob
+import logging
 import multiprocessing
 import os
+from pathlib import Path
+import re
 import shutil
 import tempfile
-from typing import Dict, Generator, List, NamedTuple, Optional, TYPE_CHECKING
+from typing import (
+    Dict,
+    Generator,
+    Iterator,
+    List,
+    NamedTuple,
+    Optional,
+    TYPE_CHECKING,
+    Union,
+)
 import urllib
 
 from chromite.lib import cache
 from chromite.lib import constants
+from chromite.lib import cpupower_helper
 from chromite.lib import cros_build_lib
+from chromite.lib import goma_lib
+from chromite.lib import metrics_lib
 from chromite.lib import osutils
 from chromite.lib import portage_util
+from chromite.lib import remoteexec_util
 from chromite.lib import sysroot_lib
 from chromite.lib import workon_helper
-from chromite.utils import metrics
+
 
 if TYPE_CHECKING:
   from chromite.lib import binpkg
   from chromite.lib import build_target_lib
   from chromite.lib import chroot_lib
 
+# TODO(xcl): Revisit/remove this after the Lacros launch if no longer needed
+_CHROME_PACKAGES = ('chromeos-base/chromeos-chrome', 'chromeos-base/chrome-icu')
+
+# A list of critical system packages that should never be incidentally
+# reinstalled as a side effect of build_packages. All packages in this list
+# are special cased to prefer matching installed versions, overriding the
+# typical logic of upgrading to the newest available version.
+#
+# This list can't include any package that gets installed to a board!
+# Packages such as LLVM or binutils must not be in this list as the normal
+# rebuild logic must still apply to them for board targets.
+#
+# TODO(crbug/1050752): Remove this list once we figure out how to exclude
+# toolchain packages from being upgraded transitively via BDEPEND relations.
+_CRITICAL_SDK_PACKAGES = ('dev-embedded/hps-sdk', 'dev-lang/rust',
+                          'dev-lang/go', 'sys-libs/glibc', 'sys-devel/gcc')
+
+_PACKAGE_LIST = List[Optional[str]]
+
+# The default to use for --backtrack everywhere. Must be manually changed in
+# update_chroot.
+BACKTRACK_DEFAULT = 10
 
 class Error(Exception):
   """Base error class for the module."""
@@ -65,7 +103,9 @@ class SetupBoardRunConfig(object):
       local_build: bool = False,
       toolchain_changed: bool = False,
       package_indexes: Optional[List['binpkg.PackageIndexInfo']] = None,
-      expanded_binhost_inheritance: bool = False):
+      expanded_binhost_inheritance: bool = False,
+      backtrack: int = BACKTRACK_DEFAULT,
+  ):
     """Initialize method.
 
     Args:
@@ -83,6 +123,7 @@ class SetupBoardRunConfig(object):
       package_indexes: List of information about available prebuilts, youngest
           first, or None.
       expanded_binhost_inheritance: Allow expanded binhost inheritance.
+      backtrack: emerge --backtrack value.
     """
     self.set_default = set_default
     self.force = force or toolchain_changed
@@ -96,6 +137,7 @@ class SetupBoardRunConfig(object):
     self.local_build = local_build
     self.package_indexes = package_indexes or []
     self.expanded_binhost_inheritance = expanded_binhost_inheritance
+    self.backtrack = backtrack
 
   def GetUpdateChrootArgs(self) -> List[str]:
     """Create a list containing the relevant update_chroot arguments.
@@ -103,7 +145,7 @@ class SetupBoardRunConfig(object):
     Returns:
       The list of arguments
     """
-    args = []
+    args = [f'--backtrack={self.backtrack}']
     if self.usepkg:
       args += ['--usepkg']
     else:
@@ -131,9 +173,25 @@ class BuildPackagesRunConfig(object):
       use_remoteexec: bool = False,
       incremental_build: bool = True,
       package_indexes: Optional[List['binpkg.PackageIndexInfo']] = None,
-      expanded_binhosts: bool = False,
-      setup_board: bool = True,
-      dryrun: bool = False):
+      dryrun: bool = False,
+      usepkgonly: bool = False,
+      workon: bool = True,
+      install_auto_test: bool = True,
+      autosetgov: bool = False,
+      autosetgov_sticky: bool = False,
+      use_any_chrome: bool = True,
+      internal_chrome: bool = False,
+      clean_build: bool = False,
+      eclean: bool = True,
+      rebuild_dep: bool = True,
+      jobs: Optional[int] = None,
+      local_pkg: bool = False,
+      dev_image: bool = True,
+      factory_image: bool = True,
+      test_image: bool = True,
+      debug_version: bool = True,
+      backtrack: int = BACKTRACK_DEFAULT,
+  ):
     """Init method.
 
     Args:
@@ -152,10 +210,27 @@ class BuildPackagesRunConfig(object):
         build.
       package_indexes: List of information about available prebuilts, youngest
         first, or None.
-      expanded_binhosts: Whether to enable/disable the expanded binhost
-        inheritance feature for the sysroot.
-      setup_board: Whether to run setup_board in build_packages.
       dryrun: Whether to do a dryrun and not actually build any packages.
+      usepkgonly: Only use binary packages to bootstrap; abort if any are
+        missing.
+      workon: Force-build workon packages.
+      install_auto_test: Build autotest client code.
+      autosetgov: Automatically set cpu governor to 'performance'.
+      autosetgov_sticky: Remember --autosetgov setting for future runs.
+      use_any_chrome: Use any Chrome prebuilt available, even if the prebuilt
+        doesn't match exactly.
+      internal_chrome: Build the internal version of chrome.
+      clean_build: Perform a clean build; delete sysroot if it exists before
+        building.
+      eclean: Run eclean to delete old binpkgs.
+      rebuild_dep: Rebuild dependencies.
+      jobs: How many packages to build in parallel at maximum.
+      local_pkg: Bootstrap from local packages instead of remote packages.
+      dev_image: Build useful developer friendly utilities.
+      factory_image: Build factory installer.
+      test_image: Build packages required for testing.
+      debug_version: Build debug versions of Chromium-OS-specific packages.
+      backtrack: emerge --backtrack value.
     """
     self.usepkg = usepkg
     self.install_debug_symbols = install_debug_symbols
@@ -165,77 +240,47 @@ class BuildPackagesRunConfig(object):
     self.use_remoteexec = use_remoteexec
     self.is_incremental = incremental_build
     self.package_indexes = package_indexes or []
-    self.expanded_binhosts = expanded_binhosts
-    self.setup_board = setup_board
     self.dryrun = dryrun
-
-  def GetBuildPackagesArgs(self) -> List[str]:
-    """Get the build_packages script arguments."""
-    # Defaults for the builder.
-    # TODO(saklein): Parametrize/rework the defaults when build_packages is
-    #   ported to chromite.
-    args = [
-        '--accept_licenses',
-        '@CHROMEOS',
-        '--skip_chroot_upgrade',
-        '--nouse_any_chrome',
-    ]
-
-    if not self.usepkg:
-      args.append('--nousepkg')
-
-    if self.install_debug_symbols:
-      args.append('--withdebugsymbols')
-
-    if self.use_goma:
-      args.append('--run_goma')
-
-    if self.use_remoteexec:
-      args.append('--run_remoteexec')
-
-    if not self.is_incremental:
-      args.append('--nowithrevdeps')
-
-    if self.expanded_binhosts:
-      args.append('--expandedbinhosts')
-    else:
-      args.append('--noexpandedbinhosts')
-
-    if not self.setup_board:
-      args.append('--skip_setup_board')
-
-    if self.packages:
-      args.extend(self.packages)
-
-    if self.dryrun:
-      args.append('--pretend')
-
-    return args
-
-  def HasUseFlags(self) -> bool:
-    """Check if we have use flags."""
-    return bool(self.use_flags)
+    self.usepkgonly = usepkgonly
+    self.workon = workon
+    self.install_auto_test = install_auto_test
+    self.autosetgov = autosetgov
+    self.autosetgov_sticky = autosetgov_sticky
+    self.use_any_chrome = use_any_chrome
+    self.internal_chrome = internal_chrome
+    self.clean_build = clean_build
+    self.eclean = eclean
+    self.rebuild_dep = rebuild_dep
+    self.jobs = jobs
+    self.local_pkg = local_pkg
+    self.dev_image = dev_image
+    self.factory_image = factory_image
+    self.test_image = test_image
+    self.debug_version = debug_version
+    self.backtrack = backtrack
 
   def GetUseFlags(self) -> Optional[str]:
     """Get the use flags as a single string."""
-    use_flags = self.use_flags
-    if use_flags:
-      # We have use flags to set, but we need to append them to any existing
-      # use flags rather than overwrite them completely.
-      # TODO(saklein) Add config for whether to extend or overwrite?
-      existing_flags = os.environ.get('USE', '').split()
-      existing_flags.extend(use_flags)
-      use_flags = existing_flags
+    use_flags = os.environ.get('USE', '').split()
 
-      return ' '.join(use_flags)
+    if self.use_flags:
+      use_flags.extend(self.use_flags)
 
-    return None
+    if self.internal_chrome:
+      use_flags.append('chrome_internal')
 
-  def GetEnv(self) -> Dict[str, str]:
-    """Get the env from this config."""
+    if not self.debug_version:
+      use_flags.append('-cros-debug')
+
+    return ' '.join(use_flags) if use_flags else None
+
+  def GetExtraEnv(self) -> Dict[str, str]:
+    """Get the extra env for this config."""
     env = {}
-    if self.HasUseFlags():
-      env['USE'] = self.GetUseFlags()
+
+    use_flags = self.GetUseFlags()
+    if use_flags:
+      env['USE'] = use_flags
 
     if self.use_goma:
       env['USE_GOMA'] = 'true'
@@ -248,6 +293,168 @@ class BuildPackagesRunConfig(object):
           x.location for x in reversed(self.package_indexes))
 
     return env
+
+  def GetPackages(self) -> List[str]:
+    """Get the set of packages to build for this config."""
+    if self.packages:
+      return self.packages
+
+    packages = ['virtual/target-os']
+
+    if self.dev_image:
+      packages.append('virtual/target-os-dev')
+
+    if self.factory_image:
+      packages.extend(
+          ['virtual/target-os-factory', 'virtual/target-os-factory-shim'])
+
+    if self.test_image:
+      packages.append('virtual/target-os-test')
+
+    if self.install_auto_test:
+      packages.append('chromeos-base/autotest-all')
+
+    return packages
+
+  @metrics_lib.timed('service.sysroot.GetForceLocalBuildPackages')
+  def GetForceLocalBuildPackages(self,
+                                 sysroot: sysroot_lib.Sysroot) -> _PACKAGE_LIST:
+    """Get the set of force local build packages for this config.
+
+    This includes:
+      1. Getting packages for a test image.
+      2. Getting packages and reverse dependencies for cros workon packages.
+      3. Getting packages and reverse dependencies for base install packages.
+
+    Args:
+      sysroot: The sysroot to get packages for.
+
+    Returns:
+      A list of packages to build from source.
+
+    Raises:
+      cros_build_lib.RunCommandError
+    """
+    sysroot_path = Path(sysroot.path)
+    force_local_build_packages = set()
+    packages = self.GetPackages()
+    metrics_prefix = 'service.sysroot.GetForceLocalBuildPackages'
+
+    if 'virtual/target-os-test' in packages:
+      # chromeos-ssh-testkeys may generate ssh keys if the right USE flag is
+      # set. We force rebuilding this package from source every time, so that
+      # consecutive builds don't share ssh keys.
+      force_local_build_packages.add('chromeos-base/chromeos-ssh-testkeys')
+
+    cros_workon_packages = None
+    if self.workon:
+      cros_workon_packages = _GetCrosWorkonPackages(sysroot_path)
+
+      # Any package that directly depends on an active cros_workon package also
+      # needs to be rebuilt in order to be correctly built against the current
+      # set of changes a user may have made to the cros_workon package.
+      if cros_workon_packages:
+        force_local_build_packages.update(cros_workon_packages)
+
+        with metrics_lib.timer(
+            f'{metrics_prefix}.CrosWorkonReverseDependencies'):
+          reverse_dependencies = [
+              x.atom for x in portage_util.GetReverseDependencies(
+                  cros_workon_packages, sysroot_path)
+          ]
+        logging.info(
+            'The following packages depend directly on an active cros_workon '
+            'package and will be rebuilt: %s', ' '.join(reverse_dependencies))
+        force_local_build_packages.update(reverse_dependencies)
+
+    # Determine base install packages and reverse dependencies if incremental
+    # build (--withdevdeps) and clean build (--cleanbuild) is not specified or
+    # the sysroot path exists.
+    if self.is_incremental and (not self.clean_build or sysroot_path.exists()):
+      logging.info('Starting reverse dependency calculations...')
+
+      # Temporarily modify the emerge flags so we can calculate the revdeps on
+      # the modified packages.
+      sim_emerge_flags = self.GetEmergeFlags()
+      sim_emerge_flags.extend([
+          '--pretend',
+          '--columns',
+          f'--reinstall-atoms={" ".join(packages)}',
+          f'--usepkg-exclude={" ".join(packages)}',
+      ])
+
+      # cros-workon packages are always going to be force reinstalled, so we
+      # add the forced reinstall behavior to the modified package calculation.
+      # This is necessary to include when a user has already installed a 9999
+      # ebuild and is now reinstalling that package with additional local
+      # changes, because otherwise the modified package calculation would not
+      # see that a 'new' package is being installed.
+      if cros_workon_packages:
+        sim_emerge_flags.extend([
+            f'--reinstall-atoms={" ".join(cros_workon_packages)}',
+            f'--usepkg-exclude={" ".join(cros_workon_packages)}',
+        ])
+
+      revdeps_packages = _GetBaseInstallPackages(sysroot_path, sim_emerge_flags,
+                                                 packages)
+      if revdeps_packages:
+        force_local_build_packages.update(revdeps_packages)
+        logging.info('Calculating reverse dependencies on packages: %s',
+                     ' '.join(revdeps_packages))
+        with metrics_lib.timer(f'{metrics_prefix}.ReverseDependencies'):
+          r_revdeps_packages = portage_util.GetReverseDependencies(
+              revdeps_packages, sysroot_path, indirect=True)
+
+        exclude_patterns = ['virtual/']
+        exclude_patterns.extend(_CHROME_PACKAGES)
+        reverse_dependencies = [
+            x.atom
+            for x in r_revdeps_packages
+            if not any(p in x.atom for p in exclude_patterns)
+        ]
+        logging.info('Final reverse dependencies that will be rebuilt: %s',
+                     ' '.join(reverse_dependencies))
+        force_local_build_packages.update(reverse_dependencies)
+
+    return list(force_local_build_packages)
+
+  def GetEmergeFlags(self) -> List[str]:
+    """Get the emerge flags for this config."""
+    flags = [
+        '-uDNv',
+        f'--backtrack={self.backtrack}',
+        '--newrepo',
+        '--with-test-deps',
+        'y',
+    ]
+
+    if self.use_any_chrome:
+      for pkg in _CHROME_PACKAGES:
+        flags.append(f'--force-remote-binary={pkg}')
+
+    extra_board_flags = os.environ.get('EXTRA_BOARD_FLAGS', '').split()
+    if extra_board_flags:
+      flags.extend(extra_board_flags)
+
+    if self.dryrun:
+      flags.append('--pretend')
+
+    if self.usepkg or self.local_pkg or self.usepkgonly:
+      # Use binary packages. Include all build-time dependencies, so as to
+      # avoid unnecessary differences between source and binary builds.
+      flags.extend(['--getbinpkg', '--with-bdeps', 'y'])
+      if self.usepkgonly:
+        flags.append('--usepkgonly')
+      else:
+        flags.append('--usepkg')
+
+    if self.jobs:
+      flags.append(f'--jobs={self.jobs}')
+
+    if self.rebuild_dep:
+      flags.append('--rebuild-if-new-rev')
+
+    return flags
 
 
 def SetupBoard(target: 'build_target_lib.BuildTarget',
@@ -266,7 +473,6 @@ def SetupBoard(target: 'build_target_lib.BuildTarget',
     sysroot_lib.ToolchainInstallError when the toolchain fails to install.
   """
   if not cros_build_lib.IsInsideChroot():
-    # TODO(saklein) switch to build out command and run inside chroot.
     raise NotInChrootError('SetupBoard must be run from inside the chroot')
 
   # Make sure we have valid run configs setup.
@@ -477,6 +683,7 @@ def InstallToolchain(target: 'build_target_lib.BuildTarget',
     _InstallToolchain(sysroot, target, local_init=local_init)
 
 
+@metrics_lib.timed('service.sysroot.BuildPackages')
 def BuildPackages(target: 'build_target_lib.BuildTarget',
                   sysroot: sysroot_lib.Sysroot,
                   run_configs: BuildPackagesRunConfig) -> None:
@@ -486,29 +693,187 @@ def BuildPackages(target: 'build_target_lib.BuildTarget',
     target: The target whose packages are being installed.
     sysroot: The sysroot where the packages are being installed.
     run_configs: The run configs.
+
+  Raises:
+    sysroot_lib.PackageInstallError when packages fail to install.
   """
   cros_build_lib.AssertInsideChroot()
+  cros_build_lib.AssertNonRootUser()
+  metrics_prefix = 'service.sysroot.BuildPackages'
 
-  cmd = [
-      os.path.join(constants.CROSUTILS_DIR, 'build_packages'), '--board',
-      target.name, '--board_root', sysroot.path
-  ]
-  cmd += run_configs.GetBuildPackagesArgs()
-
-  extra_env = run_configs.GetEnv()
-  extra_env['USE_NEW_PARALLEL_EMERGE'] = '1'
-  with osutils.TempDir() as tempdir:
+  extra_env = run_configs.GetExtraEnv()
+  extra_env['PKGDIR'] = f'{sysroot.path}/packages'
+  with osutils.TempDir() as tempdir, cpupower_helper.ModifyCpuGovernor(
+      run_configs.autosetgov, run_configs.autosetgov_sticky):
     extra_env[constants.CROS_METRICS_DIR_ENVVAR] = tempdir
 
-    try:
-      # REVIEW: discuss which dimensions to flatten into the metric
-      # name other than target.name...
-      with metrics.timer('service.sysroot.BuildPackages.RunCommand'):
-        cros_build_lib.run(cmd, extra_env=extra_env)
-    except cros_build_lib.RunCommandError as e:
-      failed_pkgs = portage_util.ParseDieHookStatusFile(tempdir)
-      raise sysroot_lib.PackageInstallError(
-          str(e), e.result, exception=e, packages=failed_pkgs)
+    cros_build_lib.ClearShadowLocks(sysroot.path)
+
+    portage_binhost = portage_util.PortageqEnvvar('PORTAGE_BINHOST',
+                                                  target.name)
+    logging.info('PORTAGE_BINHOST: %s', portage_binhost)
+
+    # Before running any emerge operations, regenerate the Portage dependency
+    # cache in parallel.
+    logging.info('Rebuilding Portage cache.')
+    with metrics_lib.timer(f'{metrics_prefix}.RegenPortageCache'):
+      portage_util.RegenDependencyCache(
+          sysroot=sysroot.path, jobs=run_configs.jobs)
+
+    # Clean out any stale binpkgs we've accumulated. This is done immediately
+    # after regenerating the cache in case ebuilds have been removed (e.g. from
+    # a revert).
+    if run_configs.eclean:
+      _CleanStaleBinpkgs(sysroot.path)
+
+    emerge_cmd = _GetEmergeCommand(sysroot.path)
+    emerge_flags = run_configs.GetEmergeFlags()
+    rebuild_pkgs = ' '.join(run_configs.GetForceLocalBuildPackages(sysroot))
+    if rebuild_pkgs:
+      emerge_flags.extend([
+          f'--reinstall-atoms={rebuild_pkgs}',
+          f'--usepkg-exclude={rebuild_pkgs}',
+      ])
+
+    sdk_pkgs = ' '.join(_CRITICAL_SDK_PACKAGES)
+    emerge_flags.extend([
+        f'--useoldpkg-atoms={sdk_pkgs}',
+        f'--rebuild-exclude={sdk_pkgs}',
+    ])
+    with RemoteExecution(run_configs.use_goma, run_configs.use_remoteexec):
+      logging.info('Merging board packages now.')
+      try:
+        with metrics_lib.timer(f'{metrics_prefix}.emerge'):
+          cros_build_lib.sudo_run(
+              emerge_cmd + emerge_flags + run_configs.GetPackages(),
+              preserve_env=True,
+              extra_env=extra_env)
+        logging.info('Builds complete.')
+      except cros_build_lib.RunCommandError as e:
+        failed_pkgs = portage_util.ParseDieHookStatusFile(tempdir)
+        raise sysroot_lib.PackageInstallError(
+            str(e), e.result, exception=e, packages=failed_pkgs)
+
+    if run_configs.install_debug_symbols:
+      logging.info('Fetching the debug symbols.')
+      try:
+        # TODO(xcl): Convert to directly importing and calling a Python lib
+        # instead of calling a binary.
+        cros_build_lib.run([
+            Path(constants.CHROMITE_BIN_DIR) / 'cros_install_debug_syms',
+            f'--board={sysroot.build_target_name}',
+            '--all',
+        ])
+      except cros_build_lib.RunCommandError as e:
+        logging.error('Unable to install debug symbols: %s', e)
+
+    # Remove any broken or outdated binpkgs.
+    if run_configs.eclean:
+      portage_util.CleanOutdatedBinaryPackages(sysroot.path, deep=True)
+
+
+def _CleanStaleBinpkgs(sysroot: Union[str, os.PathLike]) -> None:
+  """Clean any accumulated stale binpkgs.
+
+  Args:
+    sysroot: The sysroot to clean stale binpkgs for.
+
+  Raises:
+    cros_build_lib.RunCommandError
+  """
+  logging.info('Cleaning stale binpkgs.')
+  exclude_pkgs = [
+      x.package_info.atom
+      for x in portage_util.PortageDB().InstalledPackages()
+      if x.category.startswith('cross-')
+  ]
+  with tempfile.NamedTemporaryFile(mode='w') as f:
+    f.write('\n'.join(exclude_pkgs))
+    f.flush()
+    portage_util.CleanOutdatedBinaryPackages(
+        sysroot, deep=True, exclusion_file=f.name)
+
+
+def _GetCrosWorkonPackages(sysroot: Union[str, os.PathLike]) -> _PACKAGE_LIST:
+  """Get cros_workon packages.
+
+  Args:
+    sysroot: The sysroot to get cros_workon packages for.
+
+  Raises:
+    cros_build_lib.RunCommandError
+  """
+  # TODO(xcl): Migrate this to calling an imported Python lib
+  cmd = ['cros_list_modified_packages', '--sysroot', sysroot]
+  result = cros_build_lib.run(
+      cmd, print_cmd=False, capture_output=True, encoding='utf-8')
+  logging.info('Detected cros_workon modified packages: %s',
+               result.stdout.rstrip())
+  packages = result.stdout.split()
+
+  if os.environ.get('CHROME_ORIGIN'):
+    packages.extend(_CHROME_PACKAGES)
+
+  return packages
+
+
+def _GetBaseInstallPackages(sysroot: Union[str, os.PathLike], emerge_flags: str,
+                            packages: List[str]) -> List[Optional[str]]:
+  """Get packages to determine reverse dependencies for.
+
+  Args:
+    sysroot: The sysroot to get packages for.
+    emerge_flags: Emerge flags to run the command with.
+    packages: The packages to get dependencies for.
+
+  Raises:
+    cros_build_lib.RunCommandError
+  """
+  # Do a pretend `emerge` command to get a list of what would be built.
+  # Sample output:
+  # [binary N] dev-go/containerd ... to /build/eve/ USE="..."
+  # [ebuild r U] chromeos-base/tast-build-deps ... to /build/eve/ USE="..."
+  # [binary U] chromeos-base/chromeos-chrome ... to /build/eve/ USE="..."
+  cmd = _GetEmergeCommand(sysroot)
+  result = cros_build_lib.sudo_run(
+      cmd + emerge_flags + packages, capture_output=True, encoding='utf-8')
+
+  # Filter to a heuristic set of packages known to have incorrectly specified
+  # dependencies that will be installed to the board sysroot.
+  # Sample output is filtered to:
+  # [ebuild r U] chromeos-base/tast-build-deps ... to /build/eve/ USE="..."
+  include_patterns = ['coreboot-private-files', 'tast-build-deps']
+
+  # Pattern used to rewrite the line from Portage's full output to only
+  # $CATEGORY/$PACKAGE.
+  pattern = re.compile(r'\[ebuild(.*?)\]\s(.*?)\s')
+
+  # Filter and sort the output and remove any duplicate entries.
+  packages = set()
+  for line in result.stdout.splitlines():
+    if 'to /build/' in line and any(x in line for x in include_patterns):
+      # Use regex to get substrings that matches a
+      # '[ebuild ...] <some characters> ' pattern. The second matching group
+      # returns the $CATEGORY/$PACKAGE from a line of the emerge output.
+      m = pattern.search(line)
+      if m:
+        packages.add(m.group(2))
+  return sorted(packages)
+
+
+def _GetEmergeCommand(
+    sysroot: Optional[Union[str, os.PathLike]] = None
+) -> List[Union[str, os.PathLike]]:
+  """Get the emerge command to use with build_packages."""
+  # TODO(xcl): Convert to directly importing and calling a Python lib instead
+  # of calling a binary.
+  cmd = [Path(constants.CHROMITE_BIN_DIR) / 'parallel_emerge']
+  if sysroot:
+    cmd.extend([
+        f'--sysroot={sysroot}',
+        f'--root={sysroot}',
+    ])
+  return cmd
 
 
 def _CreateSysrootSkeleton(sysroot: sysroot_lib.Sysroot) -> None:
@@ -755,7 +1120,7 @@ class SymbolFileTuple(NamedTuple):
 
 def GenerateBreakpadSymbols(chroot: 'chroot_lib.Chroot',
                             build_target: 'build_target_lib.BuildTarget',
-                            debug: bool) -> cros_build_lib.CommandResult:
+                            debug: bool) -> cros_build_lib.CompletedProcess:
   """Generate breakpad (go/breakpad) symbols for debugging.
 
   This function generates .sym files to /build/<board>/usr/lib/debug/breakpad
@@ -879,3 +1244,57 @@ def GatherSymbolFiles(
             relative_path=os.path.basename(p), source_file_name=p)
     else:
       raise ValueError('Unexpected input to GatherSymbolFiles: ', p)
+
+
+@contextlib.contextmanager
+def RemoteExecution(use_goma: bool, use_remoteexec: bool) -> Iterator[None]:
+  """A context manager to start goma or remoteexec instance.
+
+  The context manager depending on the input argument will decide to start
+  either the goma or remote exec instance.
+
+  Args:
+    use_goma: If true, start the goma instance.
+    use_remoteexec: If true, start the remoteexec instance.
+
+  Yields:
+    Iterator.
+  """
+  goma_dir = Path(os.environ.get('GOMA_DIR', Path.home() / 'goma'))
+  goma_tmp_dir = os.environ.get('GOMA_TMP_DIR')
+  goma_service_json = os.environ.get('GOMA_SERVICE_ACCOUNT_JSON_FILE')
+  glog_log_dir = os.environ.get('GLOG_log_dir')
+  reclient_dir = os.environ.get('RECLIENT_DIR')
+  reproxy_cfg_file = os.environ.get('REPROXY_CFG')
+  remoteexec_instance = None
+  goma_instance = None
+
+  try:
+    if use_remoteexec and reclient_dir and reproxy_cfg_file:
+      logging.info('Starting RBE reproxy.')
+      remoteexec_instance = remoteexec_util.Remoteexec(reclient_dir,
+                                                       reproxy_cfg_file)
+    elif use_goma:
+      logging.info('Starting goma compiler_proxy.')
+      goma_instance = goma_lib.Goma(
+          goma_dir,
+          goma_service_json,
+          goma_tmp_dir,
+          stage_name='BuildPackages',
+          log_dir=glog_log_dir)
+  except ValueError:
+    logging.warning('Remote execution initialization error.')
+
+  try:
+    if remoteexec_instance:
+      remoteexec_instance.Start()
+    elif goma_instance:
+      goma_instance.Restart()
+    yield
+  finally:
+    if remoteexec_instance:
+      logging.info('Stopping RBE reproxy.')
+      remoteexec_instance.Stop()
+    elif goma_instance:
+      logging.info('Stopping goma compiler_proxy.')
+      goma_instance.Stop()

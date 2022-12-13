@@ -9,9 +9,16 @@ functionality that can eventually be centralized here.
 """
 
 import os
+from typing import Dict, List, Optional, TYPE_CHECKING, Union
 
 from chromite.lib import constants
 from chromite.lib import osutils
+from chromite.lib import path_util
+
+
+if TYPE_CHECKING:
+  from chromite.lib import goma_lib
+  from chromite.lib import remoteexec_util
 
 
 class Error(Exception):
@@ -26,14 +33,26 @@ class Chroot(object):
   """Chroot class."""
 
   def __init__(self,
-               path=None,
-               cache_dir=None,
-               chrome_root=None,
-               env=None,
-               goma=None,
-               remoteexec=None):
+               path: Optional[Union[str, os.PathLike]] = None,
+               cache_dir: Optional[str] = None,
+               chrome_root: Optional[str] = None,
+               env: Optional[Dict[str, str]] = None,
+               goma: Optional['goma_lib.Goma'] = None,
+               remoteexec: Optional['remoteexec_util.Remoteexec'] = None):
+    """Initialize.
+
+    Args:
+      path: Path to the chroot.
+      cache_dir: Path to a directory that will be used for caching files.
+      chrome_root: Root of the Chrome browser source checkout.
+      env: Extra environment settings to use.
+      goma: Interface for utilizing goma.
+      remoteexec: Interface for utilizing remoteexec client.
+    """
     # Strip trailing / if present for consistency.
-    self._path = (path or constants.DEFAULT_CHROOT_PATH).rstrip('/')
+    # TODO(vapier): Switch this to Path instead of str.
+    self._path = (
+        str(path) if path else constants.DEFAULT_CHROOT_PATH).rstrip('/')
     self._is_default_path = not bool(path)
     self._env = env
     self.goma = goma
@@ -51,41 +70,40 @@ class Chroot(object):
 
     return NotImplemented
 
-  def __hash__(self):
+  def __hash__(self) -> int:
     return hash(self.path)
 
   @property
-  def path(self):
+  def path(self) -> str:
     return self._path
 
-  def exists(self):
+  def exists(self) -> bool:
     """Checks if the chroot exists."""
     return os.path.exists(self.path)
 
   @property
-  def tmp(self):
+  def tmp(self) -> str:
     """Get the chroot's tmp dir."""
     return os.path.join(self.path, 'tmp')
 
-  def tempdir(self):
+  def tempdir(self) -> osutils.TempDir:
     """Get a TempDir in the chroot's tmp dir."""
     return osutils.TempDir(base_dir=self.tmp)
 
-  def chroot_path(self, path):
+  def chroot_path(self, path: str) -> str:
     """Turn an absolute path into a chroot relative path."""
-    if not path.startswith(self.path + os.path.sep):
-      raise ChrootError('Path not in chroot: %s' % path)
-    return path[len(self.path):]
+    return path_util.ToChrootPath(path=path, chroot_path=self._path)
 
-  def full_path(self, *args):
-    """Turn a chroot-relative path into an absolute path."""
-    return os.path.join(self.path, *[part.lstrip(os.sep) for part in args])
+  def full_path(self, *args: str) -> str:
+    """Turn a fully expanded chrootpath into an host-absolute path."""
+    path = os.path.join(os.path.sep, *args)
+    return path_util.FromChrootPath(path=path, chroot_path=self._path)
 
-  def has_path(self, *args):
+  def has_path(self, *args: str) -> bool:
     """Check if a chroot-relative path exists inside the chroot."""
     return os.path.exists(self.full_path(*args))
 
-  def get_enter_args(self):
+  def get_enter_args(self) -> List[str]:
     """Build the arguments to enter this chroot."""
     args = []
 
@@ -111,7 +129,7 @@ class Chroot(object):
     return args
 
   @property
-  def env(self):
+  def env(self) -> Dict[str, str]:
     env = self._env.copy() if self._env else {}
     if self.goma:
       env.update(self.goma.GetChrootExtraEnv())

@@ -118,8 +118,13 @@ TimeStamp() {
 }
 
 TrapClean() {
-  # If user ^C's at read then tty is hosed, so make it sane again.
-  stty sane
+  # If user ^C's at read then tty is hosed, so make it reasonable again.
+  # Options taken from https://man7.org/linux/man-pages/man1/stty.1.html
+  stty cread -ignbrk brkint -inlcr -igncr icrnl icanon \
+       iexten echo echoe echok -echonl -noflsh -ixoff -iutf8 \
+       -iuclc -ixany imaxbel -xcase -olcuc -ocrnl opost -ofill \
+       onlcr -onocr -onlret nl0 cr0 tab0 bs0 vt0 ff0 isig -tostop \
+       -ofdel -echoprt echoctl echoke -extproc -flusho
   echo
   echo
   echo "^C caught!"

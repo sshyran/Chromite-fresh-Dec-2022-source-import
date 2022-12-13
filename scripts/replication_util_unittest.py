@@ -10,8 +10,11 @@ import os
 from chromite.third_party.google.protobuf import json_format
 
 from chromite.api.gen.config.replication_config_pb2 import (
-    ReplicationConfig, FileReplicationRule, FILE_TYPE_OTHER,
-    REPLICATION_TYPE_COPY)
+    FILE_TYPE_OTHER,
+    FileReplicationRule,
+    REPLICATION_TYPE_COPY,
+    ReplicationConfig,
+)
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils

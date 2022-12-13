@@ -81,7 +81,7 @@ class Loas(object):
           self.email_notify,
           server=self.email_server,
           message='Please run:\n %s\n\n%s\n%s' % (
-              self.enroll_msg, result.output, result.error))
+              self.enroll_msg, result.stdout, result.stderr))
       self.last_notification = datetime.date.today()
     else:
       # We won't expire for a while, so stop the periodic polling.

@@ -96,7 +96,7 @@ def SetupTsMonGlobalState(service_name,
                           common_metric_fields=None,
                           debug_file=None,
                           task_num=0):
-  """Uses a dummy argument parser to get the default behavior from ts-mon.
+  """Uses a stub argument parser to get the default behavior from ts-mon.
 
   Args:
     service_name: The name of the task we are sending metrics from.

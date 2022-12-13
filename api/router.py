@@ -30,6 +30,7 @@ from chromite.api.gen.chromite.api import image_pb2
 from chromite.api.gen.chromite.api import metadata_pb2
 from chromite.api.gen.chromite.api import packages_pb2
 from chromite.api.gen.chromite.api import payload_pb2
+from chromite.api.gen.chromite.api import portage_explorer_pb2
 from chromite.api.gen.chromite.api import sdk_pb2
 from chromite.api.gen.chromite.api import sysroot_pb2
 from chromite.api.gen.chromite.api import test_pb2
@@ -38,10 +39,12 @@ from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.utils import memoize
 
+
 if TYPE_CHECKING:
+  from chromite.third_party import google
+
   from chromite.api import api_config
   from chromite.api import message_util
-  from chromite.third_party import google
 
 MethodData = collections.namedtuple(
     'MethodData', ('service_descriptor', 'module_name', 'method_descriptor'))
@@ -120,7 +123,7 @@ class Router(object):
         module_name=module_name,
         method_descriptor=method_desc)
 
-  def _get_input_message_instance(self, service_name, method_name):
+  def get_input_message_instance(self, service_name, method_name):
     """Get an empty input message instance for the specified method."""
     method_data = self._get_method_data(service_name, method_name)
     return self._sym_db.GetPrototype(method_data.method_descriptor.input_type)()
@@ -213,7 +216,7 @@ class Router(object):
       ServiceModuleNotFoundError when the service module cannot be imported.
       MethodNotFoundError when the method cannot be retrieved from the module.
     """
-    input_msg = self._get_input_message_instance(service_name, method_name)
+    input_msg = self.get_input_message_instance(service_name, method_name)
     input_handler.read_into(input_msg)
 
     # Get an empty output message instance.
@@ -434,6 +437,7 @@ def RegisterServices(router: Router):
   router.Register(metadata_pb2)
   router.Register(packages_pb2)
   router.Register(payload_pb2)
+  router.Register(portage_explorer_pb2)
   router.Register(sdk_pb2)
   router.Register(sysroot_pb2)
   router.Register(test_pb2)

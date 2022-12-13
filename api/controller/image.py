@@ -7,12 +7,11 @@
 The image related API endpoints should generally be found here.
 """
 
-import copy
 import functools
 import logging
 import os
 from pathlib import Path
-from typing import List, NamedTuple, Set, Union
+from typing import List, NamedTuple, Set, TYPE_CHECKING, Union
 
 from chromite.api import controller
 from chromite.api import faux
@@ -25,11 +24,16 @@ from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
+from chromite.lib import metrics_lib
 from chromite.lib import sysroot_lib
-from chromite.service import packages as packages_service
 from chromite.scripts import pushimage
 from chromite.service import image
-from chromite.utils import metrics
+from chromite.service import packages as packages_service
+
+
+if TYPE_CHECKING:
+  from chromite.api import api_config
+  from chromite.api.gen.chromite.api import image_pb2
 
 # The image.proto ImageType enum ids.
 _BASE_ID = common_pb2.IMAGE_TYPE_BASE
@@ -165,7 +169,7 @@ def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Image,
   base_path = chroot.full_path(sysroot_class.path)
   board = build_target.name
   factory_shim_location = Path(
-      image_lib.GetLatestImageLink(board, pointer=LOCATION_FACTORY)).resolve()
+      image_lib.GetLatestImageLink(board, pointer=LOCATION_FACTORY))
 
   generated = []
   dlc_func = functools.partial(image.copy_dlc_image, base_path)
@@ -206,14 +210,16 @@ def _CreateResponse(_input_proto, output_proto, _config):
 @faux.empty_completed_unsuccessfully_error
 @validate.require('build_target.name')
 @validate.validation_complete
-@metrics.collect_metrics
-def Create(input_proto, output_proto, _config):
+@metrics_lib.collect_metrics
+def Create(input_proto: 'image_pb2.CreateImageRequest',
+           output_proto: 'image_pb2.CreateImageResult',
+           _config: 'api_config.ApiConfig'):
   """Build images.
 
   Args:
-    input_proto (image_pb2.CreateImageRequest): The input message.
-    output_proto (image_pb2.CreateImageResult): The output message.
-    _config (api_config.ApiConfig): The API call config.
+    input_proto: The input message.
+    output_proto: The output message.
+    _config: The API call config.
   """
   board = input_proto.build_target.name
 
@@ -222,10 +228,8 @@ def Create(input_proto, output_proto, _config):
 
   image_types = _ParseImagesToCreate(to_build)
   build_config = _ParseCreateBuildConfig(input_proto)
-  factory_build_config = copy.copy(build_config)
-  build_config.symlink = LOCATION_CORE
-  factory_build_config.symlink = LOCATION_FACTORY
-  factory_build_config.output_dir_suffix = LOCATION_FACTORY
+  factory_build_config = build_config._replace(
+      symlink=LOCATION_FACTORY, output_dir_suffix=LOCATION_FACTORY)
 
   # Try building the core and factory images.
   # Sorted isn't really necessary here, but it's much easier to test.
@@ -276,8 +280,13 @@ def Create(input_proto, output_proto, _config):
     for mod_type in image_types.mod_images:
       if mod_type == _RECOVERY_ID:
         base_image_path = core_result.images[constants.IMAGE_TYPE_BASE]
-        result = image.BuildRecoveryImage(
-            board=board, image_path=base_image_path)
+        # For ChromeOS Flex special case.
+        if build_config.base_is_recovery:
+          result = image.CopyBaseToRecovery(
+              board=board, image_path=base_image_path)
+        else:
+          result = image.BuildRecoveryImage(
+              board=board, image_path=base_image_path)
         if result.all_built:
           _add_image_to_proto(output_proto,
                               result.images[_IMAGE_MAPPING[mod_type]], mod_type,
@@ -351,12 +360,15 @@ def _ParseCreateBuildConfig(input_proto):
   version = input_proto.version or None
   disk_layout = input_proto.disk_layout or None
   builder_path = input_proto.builder_path or None
+  base_is_recovery = input_proto.base_is_recovery or False
   return image.BuildConfig(
       enable_rootfs_verification=enable_rootfs_verification,
       replace=True,
       version=version,
       disk_layout=disk_layout,
       builder_path=builder_path,
+      symlink=LOCATION_CORE,
+      base_is_recovery=base_is_recovery,
   )
 
 
@@ -370,13 +382,15 @@ def _SignerTestResponse(_input_proto, output_proto, _config):
 @faux.empty_completed_unsuccessfully_error
 @validate.exists('image.path')
 @validate.validation_complete
-def SignerTest(input_proto, output_proto, _config):
+def SignerTest(input_proto: 'image_pb2.ImageTestRequest',
+               output_proto: 'image_pb2.ImageTestRequest',
+               _config: 'api_config.ApiConfig'):
   """Run image tests.
 
   Args:
-    input_proto (image_pb2.ImageTestRequest): The input message.
-    output_proto (image_pb2.ImageTestResult): The output message.
-    _config (api_config.ApiConfig): The API call config.
+    input_proto: The input message.
+    output_proto: The output message.
+    _config: The API call config.
   """
   image_path = input_proto.image.path
 
@@ -398,13 +412,15 @@ def _TestResponse(_input_proto, output_proto, _config):
 @faux.empty_completed_unsuccessfully_error
 @validate.require('build_target.name', 'result.directory')
 @validate.exists('image.path')
-def Test(input_proto, output_proto, config):
+def Test(input_proto: 'image_pb2.ImageTestRequest',
+         output_proto: 'image_pb2.ImageTestResult',
+         config: 'api_config.ApiConfig'):
   """Run image tests.
 
   Args:
-    input_proto (image_pb2.ImageTestRequest): The input message.
-    output_proto (image_pb2.ImageTestResult): The output message.
-    config (api_config.ApiConfig): The API call config.
+    input_proto: The input message.
+    output_proto: The output message.
+    config: The API call config.
   """
   image_path = input_proto.image.path
   board = input_proto.build_target.name
@@ -429,15 +445,17 @@ def Test(input_proto, output_proto, config):
 @faux.empty_success
 @faux.empty_completed_unsuccessfully_error
 @validate.require('gs_image_dir', 'sysroot.build_target.name')
-def PushImage(input_proto, _output_proto, config):
+def PushImage(input_proto: 'image_pb2.PushImageRequest',
+              _output_proto: 'image_pb2.PushImageResponse',
+              config: 'api.config.ApiConfig'):
   """Push artifacts from the archive bucket to the release bucket.
 
   Wraps chromite/scripts/pushimage.py.
 
   Args:
-    input_proto (PushImageRequest): Input proto.
-    _output_proto (PushImageResponse): Output proto.
-    config (api.config.ApiConfig): The API call config.
+    input_proto: Input proto.
+    _output_proto: Output proto.
+    config: The API call config.
 
   Returns:
     A controller return code (e.g. controller.RETURN_CODE_SUCCESS).
@@ -474,7 +492,8 @@ def PushImage(input_proto, _output_proto, config):
   except Exception:
     logging.error('PushImage failed: ', exc_info=True)
     return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
-  for uris in channel_to_uris.values():
-    for uri in uris:
-      _output_proto.instructions.add().instructions_file_path = uri
+  if channel_to_uris:
+    for uris in channel_to_uris.values():
+      for uri in uris:
+        _output_proto.instructions.add().instructions_file_path = uri
   return controller.RETURN_CODE_SUCCESS

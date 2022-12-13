@@ -35,7 +35,12 @@ def PathPrefixDecorator(f):
     if not prefix or not result:
       # Nothing to do.
       return result
-    elif not isinstance(result, str):
+
+    # Convert Path objects to str.
+    if isinstance(prefix, os.PathLike):
+      prefix = str(prefix)
+
+    if not isinstance(result, str):
       # Transform each path in the collection.
       new_result = []
       for path in result:

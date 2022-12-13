@@ -24,9 +24,9 @@ class SysrootLibTest(cros_test_lib.MockTempDirTestCase):
 
   def setUp(self):
     """Setup the test environment."""
+    self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=False)
     # Fake being root to avoid running all filesystem commands with sudo_run.
-    self.PatchObject(os, 'getuid', return_value=0)
-    self.PatchObject(os, 'geteuid', return_value=0)
+    self.PatchObject(osutils, 'IsRootUser', return_value=True)
     sysroot_path = os.path.join(self.tempdir, 'sysroot')
     osutils.SafeMakedirs(sysroot_path)
     self.sysroot = sysroot_lib.Sysroot(sysroot_path)
@@ -269,8 +269,7 @@ class SysrootLibInstallConfigTest(cros_test_lib.MockTempDirTestCase):
   def setUp(self):
     """Setup the test environment."""
     # Fake being root to avoid running all filesystem commands with sudo_run.
-    self.PatchObject(os, 'getuid', return_value=0)
-    self.PatchObject(os, 'geteuid', return_value=0)
+    self.PatchObject(osutils, 'IsRootUser', return_value=True)
     self.sysroot = sysroot_lib.Sysroot(self.tempdir)
     self.make_conf_generic_target = os.path.join(self.tempdir,
                                                  'make.conf.generic-target')
@@ -336,8 +335,7 @@ class SysrootLibToolchainUpdateTest(cros_test_lib.RunCommandTempDirTestCase):
   def setUp(self):
     """Setup the test environment."""
     # Fake being root to avoid running commands with sudo_run.
-    self.PatchObject(os, 'getuid', return_value=0)
-    self.PatchObject(os, 'geteuid', return_value=0)
+    self.PatchObject(osutils, 'IsRootUser', return_value=True)
 
     self.sysroot = sysroot_lib.Sysroot(self.tempdir)
     self.emerge = os.path.join(constants.CHROMITE_BIN_DIR, 'parallel_emerge')
@@ -370,7 +368,7 @@ class SysrootLibToolchainUpdateTest(cros_test_lib.RunCommandTempDirTestCase):
     """Test error handling from the libc install."""
     failed = ['cat/pkg', 'cat/pkg2']
     failed_pkgs = [package_info.parse(pkg) for pkg in failed]
-    result = cros_build_lib.CommandResult(returncode=1)
+    result = cros_build_lib.CompletedProcess(returncode=1)
     error = toolchain.ToolchainInstallError('Error', result=result,
                                             tc_info=failed_pkgs)
     self.PatchObject(toolchain, 'InstallToolchain', side_effect=error)
@@ -392,7 +390,7 @@ class SysrootLibToolchainUpdateTest(cros_test_lib.RunCommandTempDirTestCase):
     command = self.sysroot._UpdateToolchainCommand('board', True)
 
     err = cros_build_lib.RunCommandError(
-        'Error', cros_build_lib.CommandResult(returncode=1))
+        'Error', cros_build_lib.CompletedProcess(returncode=1))
     self.rc.AddCmdResult(command, side_effect=err)
 
     with self.assertRaises(sysroot_lib.ToolchainInstallError):

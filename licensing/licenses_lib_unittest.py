@@ -353,20 +353,20 @@ obj /file bd1b4ffa168f50b0d45571dae51eefc7 1611355468""",
   def testDeprecatedLicenses(self):
     """Verify deprecated license checks."""
     # These are known bad packages.
-    licenses_lib._CheckForDeprecatedLicense(
+    licenses_lib._CheckForKnownBadLicenses(
         'chromeos-base/google-sans-fonts-1-r13', {'Google-TOS'})
-    licenses_lib._CheckForDeprecatedLicense(
+    licenses_lib._CheckForKnownBadLicenses(
         'sys-firmware/dell-dock-0.1', {'no-source-code'})
 
     # These packages should not be allowed.
     with self.assertRaises(licenses_lib.PackageLicenseError):
-      licenses_lib._CheckForDeprecatedLicense(
+      licenses_lib._CheckForKnownBadLicenses(
           'sys-apps/portage-123', {'Proprietary-Binary'})
     with self.assertRaises(licenses_lib.PackageLicenseError):
-      licenses_lib._CheckForDeprecatedLicense(
+      licenses_lib._CheckForKnownBadLicenses(
           'sys-apps/portage-123', {'GPL-2', 'Google-TOS'})
     with self.assertRaises(licenses_lib.PackageLicenseError):
-      licenses_lib._CheckForDeprecatedLicense(
+      licenses_lib._CheckForKnownBadLicenses(
           'sys-apps/portage-123', {'no-source-code'})
 
   def testHookPackageProcess(self):
@@ -381,13 +381,32 @@ obj /file bd1b4ffa168f50b0d45571dae51eefc7 1611355468""",
   @mock.patch('chromite.lib.cros_build_lib.run')
   def testListInstalledPackages(self, run_mock):
     result = '[ U ] test to /build/test_dir\n[ U ] test2 to /build/test_dir'
-    run_mock.return_value = cros_build_lib.CommandResult(
+    run_mock.return_value = cros_build_lib.CompletedProcess(
         args=[], returncode=0, stdout=result)
     self.assertRaisesRegex(
         AssertionError, r'^.*\[ U \] test.*\[ U \] test2.*$',
         licenses_lib.ListInstalledPackages, '')
 
     result = '[ R ] test to /build/test_dir\n[ R ] test2 to /build/test_dir'
-    run_mock.return_value = cros_build_lib.CommandResult(
+    run_mock.return_value = cros_build_lib.CompletedProcess(
         args=[], returncode=0, stdout=result)
     self.assertEqual(licenses_lib.ListInstalledPackages(''), ['test', 'test2'])
+
+  def testBannedLicenses(self):
+    """Verify banned license checks."""
+    # These are somewhat redundant, but we want to be overly cautious.
+    # All of these have been used in Gentoo at some point.
+    BAD_LICENSES = {
+        'AGPL', 'AGPL-1', 'AGPL-2', 'AGPL-2+', 'AGPL-3', 'AGPL-3+',
+        'as-is',
+        'CC-BY-NC-4.0',
+        'CC-BY-NC-ND-2.0', 'CC-BY-NC-ND-2.5', 'CC-BY-NC-ND-3.0',
+        'CC-BY-NC-SA-2.5', 'CC-BY-NC-SA-3.0', 'CC-BY-NC-SA-4.0',
+    }
+    for lic in BAD_LICENSES:
+      with self.assertRaises(licenses_lib.PackageLicenseError):
+        licenses_lib._CheckForKnownBadLicenses(
+            'sys-libs/db-18', {lic})
+      with self.assertRaises(licenses_lib.PackageLicenseError):
+        licenses_lib._CheckForKnownBadLicenses(
+            'sys-libs/db-18', {'GPL-2', lic})

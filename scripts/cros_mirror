@@ -146,9 +146,17 @@ else
   # Allow people to change manifests on the fly (internal<->external).
   CURRENT_URL=$(git --git-dir=.repo/manifests.git config remote.origin.url)
   # Find the previously defined manifest name by following the symbolic link.
-  CURRENT_NAME=$(readlink .repo/manifest.xml)
-  # Strip off the "manifests/" prefix.
-  CURRENT_NAME=${CURRENT_NAME#manifests/}
+  # Old repo versions made a symlink.  Newer ones generate a file.
+  if [[ -L .repo/manifest.xml ]]; then
+    CURRENT_NAME=$(readlink .repo/manifest.xml)
+    # Strip off the "manifests/" prefix.
+    CURRENT_NAME=${CURRENT_NAME#manifests/}
+  else
+    # Look for the line:
+    # <include name="default.xml" />
+    CURRENT_NAME=$(
+      grep -o 'include name="[^"]*"' .repo/manifest.xml | cut -d'"' -f2)
+  fi
   # If no manifest was selected, default to the current one.
   : ${MANIFEST_URL:=${CURRENT_URL}}
   if [[ "${CURRENT_URL}" != "${MANIFEST_URL}" || \
@@ -214,8 +222,8 @@ update_manifests() {
 
   # Setup the fetch= field of the manifest to point to our local mirror.
   local b branches=(
-    $(git ls-remote | sed 's:.*refs/heads/::' | egrep -v '\<(HEAD|^master)$')
-    "master"
+    $(git ls-remote | sed 's:.*refs/heads/::' | egrep -v '\<(HEAD|^main)$')
+    "main"
   )
   info "rewriting ${checkout} branches to ${URL}"
   for b in "${branches[@]}"; do

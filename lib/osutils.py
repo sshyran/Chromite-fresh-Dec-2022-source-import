@@ -22,7 +22,7 @@ import shutil
 import stat
 import subprocess
 import tempfile
-from typing import Optional, Union
+from typing import Callable, Iterator, List, Optional, Union
 
 from chromite.lib import cros_build_lib
 from chromite.lib import retry_util
@@ -43,8 +43,7 @@ def GetNonRootUser():
   of the person who ran the sudo command. If no non-root user is
   found, returns None.
   """
-  uid = os.getuid()
-  if uid == 0:
+  if IsRootUser():
     user = os.environ.get('PORTAGE_USERNAME', os.environ.get('SUDO_USER'))
   else:
     try:
@@ -79,9 +78,10 @@ def IsChildProcess(pid, name=None):
   return match in pstree
 
 
-def ExpandPath(path):
+def ExpandPath(path: Union[str, os.PathLike]) -> Union[str, os.PathLike]:
   """Returns path after passing through realpath and expanduser."""
-  return os.path.realpath(os.path.expanduser(path))
+  ret = Path(path).expanduser().resolve()
+  return str(ret) if isinstance(path, str) else ret
 
 
 def IsSubPath(path, other):
@@ -93,18 +93,30 @@ def IsSubPath(path, other):
   return path.startswith(other + os.sep)
 
 
-def AllocateFile(path, size, makedirs=False):
+def AllocateFile(
+    path: Union[str, os.PathLike],
+    size: int,
+    makedirs: bool = False) -> None:
   """Allocates a file of a certain |size| in |path|.
+
+  This is intended to be used with new files as it will create the path (and
+  optionally, the parent dirs) for you.
+
+  If used on an existing file, existing content is automatically zeroed out.
+
+  If you want to truncate an existing file and preserve content, use the
+  os.truncate() API instead.
 
   Args:
     path: Path to allocate the file.
     size: The length, in bytes, of the desired file.
     makedirs: If True, create missing leading directories in the path.
   """
+  path = Path(path)
   if makedirs:
-    SafeMakedirs(os.path.dirname(path))
+    SafeMakedirs(path.parent)
 
-  with open(path, 'w') as out:
+  with path.open('wb') as out:
     out.truncate(size)
 
 
@@ -190,7 +202,7 @@ def WriteFile(path: Union[Path, str],
 
   # If the file needs to be written as root and we are not root, write to a temp
   # file, move it and change the permission.
-  if sudo and os.getuid() != 0:
+  if sudo and IsNonRootUser():
     if 'a' in mode or mode.startswith('r+'):
       # Use dd to run through sudo & append the output, and write the new data
       # to it through stdin.
@@ -243,22 +255,26 @@ def WriteFile(path: Union[Path, str],
       raise
 
 
-def Touch(path, makedirs=False, mode=None):
+def Touch(
+    path: Union[str, os.PathLike],
+    makedirs: bool = False,
+    mode: int = None) -> None:
   """Simulate unix touch. Create if doesn't exist and update its timestamp.
 
   Args:
-    path: a string, file name of the file to touch (creating if not present).
+    path: File name of the file to touch (creating if not present).
     makedirs: If True, create missing leading directories in the path.
     mode: The access permissions to set.  In the style of chmod.  Defaults to
           using the umask.
   """
+  path = Path(path)
   if makedirs:
-    SafeMakedirs(os.path.dirname(path))
+    SafeMakedirs(path.parent)
 
   # Create the file if nonexistant.
-  open(path, 'a').close()
+  path.open('ab').close()
   if mode is not None:
-    os.chmod(path, mode)
+    path.chmod(mode)
   # Update timestamp to right now.
   os.utime(path, None)
 
@@ -321,7 +337,10 @@ def Chown(path: Union[Path, str],
 def ReadFile(path: Union[Path, str],
              mode: str = 'r',
              encoding: Optional[str] = None,
-             errors: Optional[str] = None):
+             errors: Optional[str] = None,
+             size: Optional[int] = None,
+             seek: Optional[int] = None,
+             sudo: Optional[bool] = False) -> Union[bytes, str]:
   """Read a given file on disk.  Primarily useful for one off small files.
 
   The defaults are geared towards reading UTF-8 encoded text.
@@ -332,6 +351,13 @@ def ReadFile(path: Union[Path, str],
       following settings) and 'rb' is for binary files.
     encoding: The encoding of the file content.  Text files default to 'utf-8'.
     errors: How to handle encoding errors.  Text files default to 'strict'.
+    size: How many bytes to return.  Defaults to the entire file.  If this is
+      larger than the number of available bytes, an error is not thrown, you'll
+      just get back a short read.
+    seek: How many bytes to skip from the beginning.  By default, none.  If this
+      is larger than the file itself, an error is not thrown, you'll just get
+      back a short read.
+    sudo: If True, read the file as root.
 
   Returns:
     The content of the file, either as bytes or a string (with the specified
@@ -340,25 +366,37 @@ def ReadFile(path: Union[Path, str],
   if mode not in ('r', 'rb'):
     raise ValueError('mode may only be "r" or "rb", not %r' % (mode,))
 
-  if 'b' in mode:
-    if encoding is not None or errors is not None:
-      raise ValueError('binary mode does not use encoding/errors')
-  else:
+  if 'b' not in mode:
     if encoding is None:
       encoding = 'utf-8'
     if errors is None:
       errors = 'strict'
 
-  with open(path, 'rb') as f:
-    # TODO(vapier): We can merge encoding/errors into the open call once we are
-    # Python 3 only.  Until then, we have to handle it ourselves.
-    ret = f.read()
-    if 'b' not in mode:
-      ret = ret.decode(encoding, errors)
-    return ret
+  # Try to read w/out permission first.
+  try:
+    with open(path, mode=mode, encoding=encoding, errors=errors) as f:
+      if seek:
+        f.seek(seek)
+      return f.read(size)
+  except PermissionError:
+    if not sudo:
+      raise
+
+  # If in sudo mode, use dd to extract.  We'll read in chunks of 1MiB for better
+  # perf than the default of 512 bytes.
+  cmd = ['dd', 'status=none', 'iflag=count_bytes,skip_bytes',
+         f'bs={1024 * 1024}', f'if={path}']
+  if seek:
+    cmd += [f'skip={seek}']
+  if size:
+    cmd += [f'count={size}']
+  result = cros_build_lib.sudo_run(
+      cmd, capture_output=True, encoding=encoding, errors=errors,
+      debug_level=logging.DEBUG)
+  return result.stdout
 
 
-def MD5HashFile(path):
+def MD5HashFile(path: Union[str, os.PathLike]) -> str:
   """Calculate the md5 hash of a given file path.
 
   Args:
@@ -367,7 +405,7 @@ def MD5HashFile(path):
   Returns:
     The hex digest of the md5 hash of the file.
   """
-  contents = ReadFile(path, mode='rb')
+  contents = Path(path).read_bytes()
   return hashlib.md5(contents).hexdigest()
 
 
@@ -384,7 +422,7 @@ def SafeSymlink(source: Union[Path, str],
     dest: destination path.
     sudo: If True, create the link as root.
   """
-  if sudo and os.getuid() != 0:
+  if sudo and IsNonRootUser():
     cros_build_lib.sudo_run(['ln', '-sfT', str(source), str(dest)],
                             print_cmd=False, stderr=True)
   else:
@@ -440,7 +478,7 @@ def SafeMakedirs(path, mode=0o775, sudo=False, user='root'):
     EnvironmentError: If the makedir failed.
     RunCommandError: If using run and the command failed for any reason.
   """
-  if sudo and not (os.getuid() == 0 and user == 'root'):
+  if sudo and not (IsRootUser() and user == 'root'):
     if os.path.isdir(path):
       return False
     cros_build_lib.sudo_run(
@@ -514,8 +552,14 @@ class BadPathsException(Exception):
   """Raised by various osutils path manipulation functions on bad input."""
 
 
-def CopyDirContents(from_dir, to_dir, symlinks=False, allow_nonempty=False):
-  """Copy contents of from_dir to to_dir. Both should exist.
+def _CopyDirContents(from_dir: Union[str, os.PathLike],
+                     to_dir: Union[str, os.PathLike],
+                     symlinks: bool = False,
+                     allow_nonempty: bool = False,
+                     move: bool = False) -> None:
+  """Copy contents of from_dir to to_dir.
+
+  Both must exist.
 
   shutil.copytree allows one to copy a rooted directory tree along with the
   containing directory. OTOH, this function copies the contents of from_dir to
@@ -540,13 +584,83 @@ def CopyDirContents(from_dir, to_dir, symlinks=False, allow_nonempty=False):
     y.py
 
   Args:
-    from_dir: The directory whose contents should be copied. Must exist. Either
-      a |Path| or a |str|.
+    from_dir: The directory whose contents should be copied. Must exist.
     to_dir: The directory to which contents should be copied. Must exist.
-      Either a |Path| or a |str|.
     symlinks: Whether symlinks should be copied or dereferenced. When True, all
-        symlinks will be copied as symlinks into the destination. When False,
-        the symlinks will be dereferenced and the contents copied over.
+      symlinks will be copied as symlinks into the destination. When False, the
+      symlinks will be dereferenced and the contents copied over.
+    allow_nonempty: If True, do not die when to_dir is nonempty.
+    move: Move the contents instead of copying them.
+
+  Raises:
+    BadPathsException: if the source / target directories don't exist, or if
+        target directory is non-empty when allow_nonempty=False.
+    OSError: on esoteric permission errors.
+  """
+  from_dir = Path(from_dir).resolve()
+  to_dir = Path(to_dir).resolve()
+
+  if not from_dir.is_dir():
+    raise BadPathsException(f'Source directory {from_dir} does not exist.')
+  if not to_dir.is_dir():
+    raise BadPathsException(f'Destination directory {to_dir} does not exist.')
+  if os.listdir(to_dir) and not allow_nonempty:
+    raise BadPathsException(f'Destination directory {to_dir} is not empty.')
+
+  if from_dir == to_dir:
+    return
+
+  for from_path in from_dir.iterdir():
+    # Copy/Move the contents.
+    to_path = to_dir / from_path.name
+
+    if symlinks and from_path.is_symlink():
+      to_path.symlink_to(os.readlink(from_path))
+    elif from_path.is_dir():
+      if move:
+        if to_path.is_dir():
+          # if a destination directory already exists, recursively check for the
+          # individual files and directories in from path to be moved, so that
+          # we overwrite or copy the files to destination directory.
+          _CopyDirContents(
+              from_path,
+              to_path,
+              symlinks=symlinks,
+              allow_nonempty=allow_nonempty,
+              move=move)
+        else:
+          # If it is a file or symbolic link, remove the destination file and
+          # then move the content.
+          if to_path.is_file():
+            SafeUnlink(to_path)
+          # TODO(rchandrasekar): In python 3.9, shutil.move() accepts Path
+          # object. Remove the typecast to string, once python version moves
+          # to 3.9.
+          shutil.move(
+              str(from_path), str(to_path), copy_function=shutil.copytree)
+      else:
+        shutil.copytree(from_path, to_path, symlinks=symlinks)
+    elif from_path.is_file():
+      if move:
+        shutil.move(from_path, to_path)
+      else:
+        shutil.copy2(from_path, to_path)
+
+
+def CopyDirContents(from_dir: Union[str, os.PathLike],
+                    to_dir: Union[str, os.PathLike],
+                    symlinks: bool = False,
+                    allow_nonempty: bool = False) -> None:
+  """Copy contents of from_dir to to_dir.
+
+  Both should exist.
+
+  Args:
+    from_dir: The directory whose contents should be copied. Must exist.
+    to_dir: The directory to which contents should be copied. Must exist.
+    symlinks: Whether symlinks should be copied or dereferenced. When True, all
+      symlinks will be copied as symlinks into the destination. When False, the
+      symlinks will be dereferenced and the contents copied over.
     allow_nonempty: If True, do not die when to_dir is nonempty.
 
   Raises:
@@ -554,22 +668,39 @@ def CopyDirContents(from_dir, to_dir, symlinks=False, allow_nonempty=False):
         target directory is non-empty when allow_nonempty=False.
     OSError: on esoteric permission errors.
   """
-  if not os.path.isdir(from_dir):
-    raise BadPathsException('Source directory %s does not exist.' % from_dir)
-  if not os.path.isdir(to_dir):
-    raise BadPathsException('Destination directory %s does not exist.' % to_dir)
-  if os.listdir(to_dir) and not allow_nonempty:
-    raise BadPathsException('Destination directory %s is not empty.' % to_dir)
+  _CopyDirContents(
+      from_dir, to_dir, symlinks=symlinks, allow_nonempty=allow_nonempty)
 
-  for name in os.listdir(from_dir):
-    from_path = os.path.join(from_dir, name)
-    to_path = os.path.join(to_dir, name)
-    if symlinks and os.path.islink(from_path):
-      os.symlink(os.readlink(from_path), to_path)
-    elif os.path.isdir(from_path):
-      shutil.copytree(from_path, to_path, symlinks=symlinks)
-    elif os.path.isfile(from_path):
-      shutil.copy2(from_path, to_path)
+
+def MoveDirContents(from_dir: Union[str, os.PathLike],
+                    to_dir: Union[str, os.PathLike],
+                    remove_from_dir: bool = False,
+                    allow_nonempty: bool = False) -> None:
+  """Move contents of from_dir to to_dir.
+
+  Both should exist.
+
+  Args:
+    from_dir: The directory whose contents should be moved. Must exist.
+    to_dir: The directory to which contents should be moved. Must exist.
+    remove_from_dir: Remove the from directory after the contents are moved.
+    allow_nonempty: If True, do not die when to_dir is nonempty.
+
+  Raises:
+    BadPathsException: if the source / target directories don't exist, or if
+      target directory is non-empty when allow_nonempty is False.
+    OSError: on esoteric permission errors.
+  """
+  from_dir = Path(from_dir).resolve()
+  to_dir = Path(to_dir).resolve()
+
+  _CopyDirContents(
+      from_dir,
+      to_dir,
+      allow_nonempty=allow_nonempty,
+      move=True)
+  if remove_from_dir and from_dir != to_dir:
+    RmDir(from_dir)
 
 
 def RmDir(path, ignore_missing=False, sudo=False):
@@ -642,7 +773,11 @@ def EmptyDir(path, ignore_missing=False, sudo=False, exclude=()):
         SafeUnlink(subpath, sudo)
 
 
-def Which(binary, path=None, mode=os.X_OK, root=None):
+def Which(
+    binary: str,
+    path: Optional[Union[str, os.PathLike]] = None,
+    mode: int = os.X_OK,
+    root: Optional[Union[str, os.PathLike]] = None) -> Optional[str]:
   """Return the absolute path to the specified binary.
 
   Args:
@@ -656,6 +791,9 @@ def Which(binary, path=None, mode=os.X_OK, root=None):
   """
   if path is None:
     path = os.environ.get('PATH', '')
+  else:
+    path = str(path)
+
   for p in path.split(os.pathsep):
     if root and p.startswith('/'):
       # Don't prefix relative paths.  We might want to support this at some
@@ -664,10 +802,11 @@ def Which(binary, path=None, mode=os.X_OK, root=None):
     p = os.path.join(p, binary)
     if os.path.isfile(p) and os.access(p, mode):
       return p
+
   return None
 
 
-def FindMissingBinaries(needed_tools):
+def FindMissingBinaries(needed_tools: List[str]) -> List[str]:
   """Verifies that the required tools are present on the system.
 
   This is especially important for scripts that are intended to run
@@ -683,11 +822,12 @@ def FindMissingBinaries(needed_tools):
   return [binary for binary in needed_tools if Which(binary) is None]
 
 
-def DirectoryIterator(base_path):
+def DirectoryIterator(base_path: Path) -> Iterator[Path]:
   """Iterates through the files and subdirs of a directory."""
   for root, dirs, files in os.walk(base_path):
-    for e in [d + os.sep for d in dirs] + files:
-      yield os.path.join(root, e)
+    root = Path(root)
+    for e in dirs + files:
+      yield root / e
 
 
 def IteratePaths(end_path):
@@ -704,7 +844,7 @@ def IteratePaths(end_path):
   return reversed(list(IteratePathParents(end_path)))
 
 
-def IteratePathParents(start_path):
+def IteratePathParents(start_path: Union[str, os.PathLike]) -> Iterator[Path]:
   """Generator that iterates through a directory's parents.
 
   Args:
@@ -714,17 +854,17 @@ def IteratePathParents(start_path):
     The passed-in path, along with its parents.  i.e.,
     IteratePathParents('/usr/local') would yield '/usr/local', '/usr', and '/'.
   """
-  path = os.path.abspath(start_path)
-  # There's a bug that abspath('//') returns '//'. We need to renormalize it.
-  if path == '//':
-    path = '/'
+  path = Path(start_path).resolve()
   yield path
-  while path.strip('/'):
-    path = os.path.dirname(path)
-    yield path
+  yield from path.parents
 
 
-def FindInPathParents(path_to_find, start_path, test_func=None, end_path=None):
+def FindInPathParents(
+    path_to_find: str,
+    start_path: Union[str, os.PathLike],
+    test_func: Optional[Callable[[Union[str, os.PathLike]], bool]] = None,
+    end_path: Union[str, os.PathLike] = None,
+) -> Optional[Union[str, os.PathLike]]:
   """Look for a relative path, ascending through parent directories.
 
   Ascend through parent directories of current path looking for a relative
@@ -752,17 +892,20 @@ def FindInPathParents(path_to_find, start_path, test_func=None, end_path=None):
       path to test.  A True return value will cause AscendingLookup to return
       the target.
     end_path: The path to stop searching.
+
+  Returns:
+    The path, if found, with the same type as |start_path|.  Otherwise, None.
   """
   if end_path is not None:
-    end_path = os.path.abspath(end_path)
+    end_path = Path(end_path).resolve()
   if test_func is None:
     test_func = os.path.exists
-  for path in IteratePathParents(start_path):
+  for path in IteratePathParents(Path(start_path)):
     if path == end_path:
       return None
-    target = os.path.join(path, path_to_find)
+    target = path / path_to_find
     if test_func(target):
-      return target
+      return str(target) if isinstance(start_path, str) else target
   return None
 
 
@@ -923,7 +1066,7 @@ class TempDir(object):
               ['mount'], stdout=True, stderr=subprocess.STDOUT,
               check=False)
           logging.error('Mounts were:')
-          logging.error('  %s', mount_results.output)
+          logging.error('  %s', mount_results.stdout)
 
       else:
         # If there was not an exception from the context, raise ours.
@@ -1191,7 +1334,7 @@ def SourceEnvironment(script, allowlist, ifs=',', env=None, multiline=False):
     env = None
   output = cros_build_lib.run(['bash'], env=env, capture_output=True,
                               print_cmd=False, encoding='utf-8',
-                              input='\n'.join(dump_script)).output
+                              input='\n'.join(dump_script)).stdout
   return key_value_store.LoadData(output, multiline=multiline)
 
 
@@ -1204,9 +1347,9 @@ def ListBlockDevices(device_path=None, in_bytes=False):
 
   Returns:
     A list of BlockDevice items with attributes 'NAME', 'RM', 'TYPE',
-    'SIZE' (RM stands for removable).
+    'SIZE', 'HOTPLUG' (RM stands for removable).
   """
-  keys = ['NAME', 'RM', 'TYPE', 'SIZE']
+  keys = ['NAME', 'RM', 'TYPE', 'SIZE', 'HOTPLUG']
   BlockDevice = collections.namedtuple('BlockDevice', keys)
 
   cmd = ['lsblk', '--pairs']
@@ -1515,7 +1658,9 @@ def IsMounted(path):
   return False
 
 
-def ResolveSymlinkInRoot(file_name, root):
+def ResolveSymlinkInRoot(
+    file_name: Union[str, os.PathLike],
+    root: Optional[Union[str, os.PathLike]] = None) -> str:
   """Resolve a symlink |file_name| relative to |root|.
 
   This can be used to resolve absolute symlinks within an alternative root
@@ -1528,8 +1673,8 @@ def ResolveSymlinkInRoot(file_name, root):
     relative_symlink will be resolved to ROOT-A/a/relative/path
 
   Args:
-    file_name (str): A path to the file.
-    root (str|None): A path to the root directory.
+    file_name: A path to the file.
+    root: A path to the root directory.
 
   Returns:
     |file_name| if |file_name| is not a symlink. Otherwise, the ultimate path
@@ -1548,20 +1693,22 @@ def ResolveSymlinkInRoot(file_name, root):
   return file_name
 
 
-def ResolveSymlink(file_name):
+def ResolveSymlink(
+    file_name: Union[str, os.PathLike]) -> Union[str, os.PathLike]:
   """Resolve a symlink |file_name| to an absolute path.
 
   This is similar to ResolveSymlinkInRoot, but does not resolve absolute
   symlinks to an alternative root, and normalizes the path before returning.
 
   Args:
-    file_name (str): The symlink.
+    file_name: The symlink.
 
   Returns:
     str - |file_name| if |file_name| is not a symlink. Otherwise, the ultimate
     path that |file_name| points to.
   """
-  return os.path.realpath(ResolveSymlinkInRoot(file_name, None))
+  ret = os.path.realpath(ResolveSymlinkInRoot(file_name, None))
+  return ret if isinstance(file_name, str) else Path(ret)
 
 
 def IsInsideVm():
@@ -1594,3 +1741,28 @@ def UmaskContext(mask: int) -> int:
     yield old
   finally:
     os.umask(old)
+
+
+def IsRootUser() -> bool:
+  """Returns True if the user has root privileges.
+
+  For a given process there are two ID's, that we care about. The real user ID
+  and effective user ID. The real user ID or simply referred as uid, is the ID
+  assigned for the user on whose behalf the process is running. Effective user
+  ID is used for privilege checks.
+
+  For a given process the real user ID and effective user ID can be different
+  and the access to resources are determined based on the effective user ID.
+  For example, a regular user with uid 12345, may not have access to certain
+  resources. Running with sudo privileges will make the euid to be 0 (Root)
+  (while the uid remains the same 12345) and will gain certain resource access.
+
+  Hence to check if a user has root privileges, it is best to check the euid
+  of the process.
+  """
+  return os.geteuid() == 0
+
+
+def IsNonRootUser() -> bool:
+  """Returns True if user doesn't have root privileges."""
+  return not IsRootUser()

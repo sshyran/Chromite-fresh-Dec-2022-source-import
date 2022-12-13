@@ -130,7 +130,7 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
                                  ' port_file' % self.NEBRASKA_TIMEOUT)
 
     self._port = int(self._RemoteCommand(
-        ['cat', self._port_file], capture_output=True).output.strip())
+        ['cat', self._port_file], capture_output=True).stdout.strip())
 
   def IsReady(self):
     """Returns True if nebraska is ready to accept requests."""
@@ -158,7 +158,7 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
       raise NebraskaStartupError('Nebraska did not start.')
 
     self._pid = int(self._RemoteCommand(
-        ['cat', self._pid_file], capture_output=True).output.strip())
+        ['cat', self._pid_file], capture_output=True).stdout.strip())
     logging.info('Started nebraska with pid %s', self._pid)
 
   def run(self):
@@ -257,7 +257,7 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
 
     result = self._RemoteCommand(['cat', self._log_file], capture_output=True)
     output = '--- Start output from %s ---\n' % self._log_file
-    output += result.output
+    output += result.stdout
     output += '--- End output from %s ---' % self._log_file
     return output
 
@@ -297,7 +297,7 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
       self._RemoteCommand(cmd, **cmd_kwargs)
     except cros_build_lib.RunCommandError as e:
       logging.warning('Cannot start nebraska.')
-      logging.warning(e.result.error)
+      logging.warning(e.result.stderr)
       if ERROR_MSG_IN_LOADING_LIB in str(e):
         logging.info('Attempting to correct device library paths...')
         try:
@@ -307,8 +307,8 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
           return
         except cros_build_lib.RunCommandError as e2:
           logging.warning('Library path correction failed:')
-          logging.warning(e2.result.error)
-          raise NebraskaStartupError(e.result.error)
+          logging.warning(e2.result.stderr)
+          raise NebraskaStartupError(e.result.stderr)
 
       raise NebraskaStartupError(str(e))
 

@@ -1,13 +1,1 @@
-# Copyright 2019 The Chromium OS Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that can be
-# found in the LICENSE file.
-
-# Build Team
-cjmcdonald@chromium.org
-rchandrasekar@google.com
-saklein@chromium.org
-sfrolov@google.com
-sloanjohnson@google.com
-vapier@chromium.org
-xcl@google.com
-zland@google.com
+include chromiumos/owners:v1:/infra/OWNERS.build

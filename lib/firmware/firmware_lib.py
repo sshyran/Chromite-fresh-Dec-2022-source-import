@@ -17,8 +17,8 @@ from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import workon_helper
-from chromite.lib.firmware import firmware_config
 from chromite.lib.firmware import dut
+from chromite.lib.firmware import firmware_config
 from chromite.service import sysroot
 
 
@@ -38,25 +38,25 @@ class CleanError(Error):
   """Failure in the clean command."""
 
 
-def deploy(build_target,
-           image,
-           device=None,
-           flashrom=False,
-           port=None,
-           verbose=False,
-           dryrun=False,
+def deploy(build_target: build_target_lib.BuildTarget,
+           image: str,
+           device: commandline.Device = None,
+           flashrom: bool = False,
+           port: Optional[int] = None,
+           verbose: bool = False,
+           dryrun: bool = False,
            flash_contents: Optional[str] = None,
            passthrough_args: Iterable[str] = tuple()):
   """Deploy an AP FW image to a device.
 
   Args:
-    build_target (build_target_lib.BuildTarget): The DUT build target.
-    image (str): The image path.
-    device (commandline.Device): The device to be used. Temporarily optional.
-    flashrom (bool): Whether to use flashrom or futility.
-    port (int|None): The servo port.
-    verbose (bool): Whether to use verbose output for flash commands.
-    dryrun (bool): Whether to actually execute the deployment or just print the
+    build_target: The DUT build target.
+    image: The image path.
+    device: The device to be used. Temporarily optional.
+    flashrom: Whether to use flashrom or futility.
+    port: The servo port.
+    verbose: Whether to use verbose output for flash commands.
+    dryrun: Whether to actually execute the deployment or just print the
       operations that would have been performed.
     flash_contents: Path to the file that contains the existing contents.
     passthrough_args: List of additional options passed to flashrom or futility.
@@ -78,23 +78,23 @@ def deploy(build_target,
                   flash_contents, passthrough_args)
 
 
-def _deploy_servo(build_target,
-                  image,
-                  flashrom,
-                  verbose,
-                  port,
-                  dryrun,
+def _deploy_servo(build_target: build_target_lib.BuildTarget,
+                  image: str,
+                  flashrom: bool,
+                  verbose: bool,
+                  port: Optional[int],
+                  dryrun: bool,
                   flash_contents: Optional[str] = None,
                   passthrough_args: Iterable[str] = tuple()):
   """Deploy to a servo connection.
 
   Args:
-    build_target (build_target_lib.BuildTarget): The DUT build target.
-    image (str): Path to the image to flash.
-    flashrom (bool): Whether to use flashrom or futility.
-    verbose (bool): Whether to use verbose output for flash commands.
-    port (int|None): The servo port.
-    dryrun (bool): Whether to actually execute the deployment or just print the
+    build_target: The DUT build target.
+    image: Path to the image to flash.
+    flashrom: Whether to use flashrom or futility.
+    verbose: Whether to use verbose output for flash commands.
+    port: The servo port.
+    dryrun: Whether to actually execute the deployment or just print the
       operations that would have been performed.
     flash_contents: Path to the file that contains the existing contents.
     passthrough_args: Additional options passed to flashrom or futility.
@@ -153,25 +153,25 @@ def _deploy_servo(build_target,
                   'is correct and servod is running in the background.')
 
 
-def _deploy_ssh(build_target,
-                image,
-                flashrom,
-                verbose,
-                ip,
-                port,
-                dryrun,
+def _deploy_ssh(build_target: build_target_lib.BuildTarget,
+                image: str,
+                flashrom: bool,
+                verbose: bool,
+                ip: str,
+                port: int,
+                dryrun: bool,
                 passthrough_args: Iterable[str] = tuple()):
   """Deploy to a servo connection.
 
   Args:
-    build_target (build_target_lib.BuildTarget): The DUT build target.
-    image (str): Path to the image to flash.
-    flashrom (bool): Whether to use flashrom or futility.
-    verbose (bool): Whether to use verbose output for flash commands.
-    ip (str): The DUT ip address.
-    port (int): The port to ssh to.
-    dryrun (bool): Whether to execute the deployment or just print the
-      commands that would have been executed.
+    build_target: The DUT build target.
+    image: Path to the image to flash.
+    flashrom: Whether to use flashrom or futility.
+    verbose: Whether to use verbose output for flash commands.
+    ip: The DUT ip address.
+    port: The port to ssh to.
+    dryrun: Whether to execute the deployment or just print the commands that
+      would have been executed.
     passthrough_args: List of additional options passed to flashrom or futility.
   """
 
@@ -223,24 +223,24 @@ def _deploy_ssh(build_target,
   logging.notice('ssh flash successful. Exiting flash_ap')
 
 
-def _build_flash_ssh_cmds(futility,
-                          ip,
-                          port,
-                          path,
-                          tmp_file_name,
-                          verbose,
+def _build_flash_ssh_cmds(futility: bool,
+                          ip: str,
+                          port: int,
+                          path: str,
+                          tmp_file_name: str,
+                          verbose: bool,
                           passthrough_args: Iterable[str] = tuple()):
   """Helper function to build commands for flashing over ssh
 
   Args:
-    futility (bool): if True then flash with futility, otherwise flash
+    futility: if True then flash with futility, otherwise flash
       with flashrom.
-    ip (string): ip address of dut to flash.
-    port (int): The port to ssh to.
-    path (string): path to BIOS image to be flashed.
-    tmp_file_name (string): name of tempfile with copy of testing_rsa
+    ip: ip address of dut to flash.
+    port: The port to ssh to.
+    path: path to BIOS image to be flashed.
+    tmp_file_name: name of tempfile with copy of testing_rsa
       keys.
-    verbose (bool): if True set -v flag in flash command.
+    verbose: if True set -v flag in flash command.
     passthrough_args: List of additional options passed to flashrom or futility.
 
   Returns:
@@ -278,14 +278,16 @@ def _build_flash_ssh_cmds(futility,
   return scp_cmd, flash_cmd
 
 
-def build(build_target, fw_name=None, dry_run=False):
+def build(build_target: build_target_lib.BuildTarget,
+          fw_name: Optional[str] = None,
+          dry_run: bool = False):
   """Build the AP Firmware.
 
   Args:
-    build_target (BuildTarget): The build target (board) being built.
-    fw_name (str|None): Optionally set the FW_NAME envvar to allow building
+    build_target: The build target (board) being built.
+    fw_name: Optionally set the FW_NAME envvar to allow building
       the firmware for only a specific variant.
-    dry_run (bool): Whether to perform a dry run.
+    dry_run: Whether to perform a dry run.
   """
   logging.notice('Building AP Firmware.')
 
@@ -332,21 +334,22 @@ def build(build_target, fw_name=None, dry_run=False):
       build_target.full_path())
 
 
-def ssh_read(path, verbose, ip, port, dryrun, region):
+def ssh_read(path: str, verbose: bool, ip: str, port: int, dryrun: bool,
+             region: str):
   """This function reads AP firmware over ssh.
 
   Tries to ssh to ip address once. If the ssh connection is successful the
   image is read from the DUT using flashrom, and then is copied back via scp.
 
   Args:
-    path (str): path to the BIOS image to be flashed or read.
-    verbose (bool): if True to set -v flag in flash command and
+    path: path to the BIOS image to be flashed or read.
+    verbose: if True to set -v flag in flash command and
       print other debug info, if False do nothing.
-    ip (str): ip address of DUT.
-    port (int): The port to ssh to.
-    dryrun (bool): Whether to actually execute the commands or just print
+    ip: ip address of DUT.
+    port: The port to ssh to.
+    dryrun: Whether to actually execute the commands or just print
       the commands that would have been run.
-    region (str): Region to read.
+    region: Region to read.
 
   Returns:
     bool: True on success, False on failure.
@@ -375,17 +378,18 @@ def ssh_read(path, verbose, ip, port, dryrun, region):
   return True
 
 
-def _build_read_ssh_cmds(ip, port, path, tmp_file_name, verbose, region):
+def _build_read_ssh_cmds(ip: str, port: int, path: str, tmp_file_name: str,
+                         verbose: bool, region: str):
   """Helper function to build commands for reading images over ssh
 
   Args:
-    ip (string): ip address of DUT.
-    port (int): The port to ssh to.
-    path (string): path to store the read BIOS image.
-    tmp_file_name (string): name of tempfile with copy of testing_rsa
+    ip: ip address of DUT.
+    port: The port to ssh to.
+    path: path to store the read BIOS image.
+    tmp_file_name: name of tempfile with copy of testing_rsa
       keys.
-    verbose (bool): if True set -v flag in flash command.
-    region (str): Region to read.
+    verbose: if True set -v flag in flash command.
+    region: Region to read.
 
   Returns:
     scp_cmd ([string]):
@@ -410,7 +414,7 @@ def _build_read_ssh_cmds(ip, port, path, tmp_file_name, verbose, region):
   return scp_cmd, flash_cmd
 
 
-def clean(build_target: build_target_lib.BuildTarget, dry_run=False):
+def clean(build_target: build_target_lib.BuildTarget, dry_run: bool = False):
   """Cleans packages and dependencies related to a specified target.
 
   After running the command, the user's environment should be able to

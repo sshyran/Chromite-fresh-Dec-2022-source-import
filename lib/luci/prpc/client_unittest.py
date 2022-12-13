@@ -14,8 +14,10 @@ from chromite.third_party.google.protobuf import empty_pb2
 from chromite.lib.luci import net
 from chromite.lib.luci.prpc import client as prpc_client
 from chromite.lib.luci.prpc import codes
-from chromite.lib.luci.prpc.test import test_pb2, test_prpc_pb2
-from chromite.lib.luci.test_support import test_case, test_env
+from chromite.lib.luci.prpc.test import test_pb2
+from chromite.lib.luci.prpc.test import test_prpc_pb2
+from chromite.lib.luci.test_support import test_case
+from chromite.lib.luci.test_support import test_env
 
 
 test_env.setup_test_env()

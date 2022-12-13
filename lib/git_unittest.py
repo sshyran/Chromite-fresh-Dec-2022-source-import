@@ -109,13 +109,13 @@ Change-Id: %s
     test_hash = '5' * 40
     self.rc.AddCmdResult(partial_mock.In('symbolic-ref'), returncode=1)
     self.rc.AddCmdResult(
-        partial_mock.In('rev-parse'), output='%s\n' % test_hash)
+        partial_mock.In('rev-parse'), stdout='%s\n' % test_hash)
     self.assertEqual(git.GetCurrentBranchOrId(self.fake_path), test_hash)
     self.assertCommandContains(['rev-parse', 'HEAD'])
 
   def testGetCurrentBranchOrId_OnBranch(self):
     self.rc.AddCmdResult(
-        partial_mock.In('symbolic-ref'), output='refs/heads/branch\n')
+        partial_mock.In('symbolic-ref'), stdout='refs/heads/branch\n')
     self.assertEqual(git.GetCurrentBranchOrId(self.fake_path), 'branch')
     self.assertCommandContains(['symbolic-ref', '-q', 'HEAD'])
 
@@ -139,7 +139,7 @@ Change-Id: %s
     self.assertCommandContains([self.fake_file])
 
   def testCommit(self):
-    self.rc.AddCmdResult(partial_mock.In('log'), output=self.COMMIT_LOG)
+    self.rc.AddCmdResult(partial_mock.In('log'), stdout=self.COMMIT_LOG)
     git.Commit(self.fake_git_dir, 'bar')
     self.assertCommandContains(['--amend'], expected=False)
     cid = git.Commit(self.fake_git_dir, 'bar', amend=True)
@@ -216,7 +216,7 @@ Change-Id: %s
     os.makedirs(refs_heads)
     objects = os.path.join(self.fake_git_dir, '.git', 'objects')
     os.makedirs(objects)
-    fake_lock = os.path.join(refs_heads, 'master.lock')
+    fake_lock = os.path.join(refs_heads, 'main.lock')
     osutils.Touch(fake_lock)
     os.makedirs(self.fake_path)
     dot_lock_not_in_dot_git = os.path.join(self.fake_git_dir, 'some.lock')
@@ -238,7 +238,7 @@ Change-Id: %s
     os.makedirs(refs_heads)
     objects = os.path.join(self.fake_git_dir, 'objects')
     os.makedirs(objects)
-    fake_lock = os.path.join(refs_heads, 'master.lock')
+    fake_lock = os.path.join(refs_heads, 'main.lock')
     osutils.Touch(fake_lock)
     os.makedirs(self.fake_path)
     other_file = os.path.join(self.fake_path, 'other_file')
@@ -286,13 +286,13 @@ class LogTest(cros_test_lib.RunCommandTestCase):
             after='1996-01-01', until='1997-01-01', reverse=True,
             date='unix', max_count='1',
             grep='^Change-ID: I9f701664d849197cf183fc1fb46f7523095c359c$',
-            rev='m/master', paths=['my/path'])
+            rev='m/main', paths=['my/path'])
     self.assertCommandContains(
         [
             'git', 'log', '--format=format:"%cd"', '--after=1996-01-01',
             '--until=1997-01-01', '--reverse', '--date=unix', '--max-count=1',
             '--grep=^Change-ID: I9f701664d849197cf183fc1fb46f7523095c359c$',
-            'm/master',
+            'm/main',
             '--', 'my/path',
         ], cwd='git/repo/path')
 
@@ -322,7 +322,7 @@ Compare the Change-Id printed by the python code with that shown
 
 Change-Id: Ia7b712c42ff83c52c0fb5d88d1ef6c62f49da88d
 """
-    result = cros_build_lib.CommandResult(output=log_output)
+    result = cros_build_lib.CompletedProcess(stdout=log_output)
     self.PatchObject(git, 'RunGit', return_value=result)
 
     changeid = git.GetChangeId('git/repo/path')
@@ -347,7 +347,7 @@ Reviewed-by: Mike Frysinger <vapier@chromium.org>
 Commit-Queue: François Degros <fdegros@chromium.org>
 Tested-by: François Degros <fdegros@chromium.org>
 """
-    result = cros_build_lib.CommandResult(output=log_output)
+    result = cros_build_lib.CompletedProcess(stdout=log_output)
     self.PatchObject(git, 'RunGit', return_value=result)
 
     changeid = git.GetChangeId('git/repo/path', sha)
@@ -373,7 +373,7 @@ TEST=Start python3
 $ git show
 Compare the Change-Id printed by the python code with that shown
 """
-    result = cros_build_lib.CommandResult(output=log_output)
+    result = cros_build_lib.CompletedProcess(stdout=log_output)
     self.PatchObject(git, 'RunGit', return_value=result)
 
     changeid = git.GetChangeId('git/repo/path')
@@ -398,7 +398,7 @@ until I fix the code to handle the pathological cases.
 Cq-Depend: chromium:2041804
 Change-Id: Ib71696f76dc80f1a76b8e7a73493c6c2668e2c6f
 """
-    result = cros_build_lib.CommandResult(output=log_output)
+    result = cros_build_lib.CompletedProcess(stdout=log_output)
     self.PatchObject(git, 'RunGit', return_value=result)
 
     self.assertRaises(ValueError, git.GetChangeId, 'git/repo/path')
@@ -421,7 +421,7 @@ until I fix the code to handle the pathological cases.
 Cq-Depend: chromium:2041804
 Change-Id: Ib71696f76dc80f1a76b8e7a73493c6c2668e2c6f
 """
-    result = cros_build_lib.CommandResult(output=log_output)
+    result = cros_build_lib.CompletedProcess(stdout=log_output)
     self.PatchObject(git, 'RunGit', return_value=result)
 
     changeid = git.GetChangeId('git/repo/path')
@@ -435,7 +435,7 @@ class ProjectCheckoutTest(cros_test_lib.TestCase):
     self.fake_unversioned_patchable = git.ProjectCheckout(
         dict(name='chromite',
              path='src/chromite',
-             revision='remotes/for/master'))
+             revision='remotes/for/main'))
     self.fake_unversioned_unpatchable = git.ProjectCheckout(
         dict(name='chromite',
              path='src/platform/somethingsomething/chromite',
@@ -445,7 +445,7 @@ class ProjectCheckoutTest(cros_test_lib.TestCase):
         dict(name='chromite',
              path='src/chromite',
              revision='1deadbeeaf1deadbeeaf1deadbeeaf1deadbeeaf',
-             upstream='remotes/for/master'))
+             upstream='remotes/for/main'))
     self.fake_versioned_unpatchable = git.ProjectCheckout(
         dict(name='chromite',
              path='src/chromite',
@@ -465,7 +465,7 @@ class RawDiffTest(cros_test_lib.MockTestCase):
 :100644 100644 70d6e94... 821c642... M\tchromeos-base/chromeos-chrome/chromeos-chrome-9999.ebuild
 :100644 100644 be445f9... be445f9... R100\tchromeos-base/chromium-source/chromium-source-40.0.2197.0_rc-r1.ebuild\tchromeos-base/chromium-source/chromium-source-40.0.2197.2_rc-r1.ebuild
 """
-    result = cros_build_lib.CommandResult(output=diff_output)
+    result = cros_build_lib.CompletedProcess(stdout=diff_output)
     self.PatchObject(git, 'RunGit', return_value=result)
 
     entries = git.RawDiff('foo', 'bar')
@@ -488,7 +488,7 @@ class RawDiffTest(cros_test_lib.MockTestCase):
 
   def testEmptyDiff(self):
     """Verify an empty diff doesn't crash."""
-    result = cros_build_lib.CommandResult(output='\n')
+    result = cros_build_lib.CompletedProcess(stdout='\n')
     self.PatchObject(git, 'RunGit', return_value=result)
     entries = git.RawDiff('foo', 'bar')
     self.assertEqual([], entries)
@@ -500,7 +500,7 @@ class GitPushTest(cros_test_lib.RunCommandTestCase):
   # Non fast-forward push error message.
   NON_FF_PUSH_ERROR = (
       'To https://localhost/repo.git\n'
-      '! [remote rejected] master -> master (non-fast-forward)\n'
+      '! [remote rejected] main -> main (non-fast-forward)\n'
       "error: failed to push some refs to 'https://localhost/repo.git'\n")
 
   # List of possible GoB transient errors.
@@ -520,7 +520,7 @@ class GitPushTest(cros_test_lib.RunCommandTestCase):
       # Hook error when pushing branch.
       ('remote: Processing changes: (\\)To https://localhost/repo.git\n'
        '! [remote rejected] temp_auto_checkin_branch -> '
-       'master (error in hook)\n'
+       'main (error in hook)\n'
        "error: failed to push some refs to 'https://localhost/repo.git'\n"),
 
       # Another kind of error when pushing a branch.
@@ -548,16 +548,16 @@ class GitPushTest(cros_test_lib.RunCommandTestCase):
 
   def testGitPushSimple(self):
     """Test GitPush with minimal arguments."""
-    git.GitPush('git_path', 'HEAD', git.RemoteRef('origin', 'master'))
-    self.assertCommandCalled(['git', 'push', 'origin', 'HEAD:master'],
+    git.GitPush('git_path', 'HEAD', git.RemoteRef('origin', 'main'))
+    self.assertCommandCalled(['git', 'push', 'origin', 'HEAD:main'],
                              capture_output=True, print_cmd=False,
                              cwd='git_path', encoding='utf-8')
 
   def testGitPushComplix(self):
     """Test GitPush with some arguments."""
-    git.GitPush('git_path', 'HEAD', git.RemoteRef('origin', 'master'),
+    git.GitPush('git_path', 'HEAD', git.RemoteRef('origin', 'main'),
                 force=True, dry_run=True)
-    self.assertCommandCalled(['git', 'push', 'origin', 'HEAD:master',
+    self.assertCommandCalled(['git', 'push', 'origin', 'HEAD:main',
                               '--force', '--dry-run'],
                              capture_output=True, print_cmd=False,
                              cwd='git_path', encoding='utf-8')
@@ -565,14 +565,14 @@ class GitPushTest(cros_test_lib.RunCommandTestCase):
   def testNonFFPush(self):
     """Non fast-forward push error propagates to the caller."""
     self.rc.AddCmdResult(partial_mock.In('push'), returncode=128,
-                         error=self.NON_FF_PUSH_ERROR)
+                         stderr=self.NON_FF_PUSH_ERROR)
     self.assertRaises(cros_build_lib.RunCommandError, self._RunGitPush)
 
   def testPersistentTransientError(self):
     """GitPush fails if transient error occurs multiple times."""
     for error in self.TRANSIENT_ERRORS:
       self.rc.AddCmdResult(partial_mock.In('push'), returncode=128,
-                           error=error)
+                           stderr=error)
       self.assertRaises(cros_build_lib.RunCommandError, self._RunGitPush)
 
 
@@ -627,14 +627,14 @@ class ManifestCheckoutTest(cros_test_lib.TempDirTestCase):
         default_manifest,
         '<?xml version="1.0" encoding="UTF-8"?><manifest></manifest>')
     git.AddPath(default_manifest)
-    git.Commit(remote_manifests, 'dummy commit', allow_empty=True)
+    git.Commit(remote_manifests, 'stub commit', allow_empty=True)
     git.CreateBranch(remote_manifests, 'default')
     git.CreateBranch(remote_manifests, 'release-R23-2913.B')
     git.CreateBranch(remote_manifests, 'release-R23-2913.B-suffix')
     git.CreateBranch(remote_manifests, 'firmware-link-')
     # This must come last as it sets up HEAD for the default branch, and repo
     # uses that to figure out which branch to check out.
-    git.CreateBranch(remote_manifests, 'master')
+    git.CreateBranch(remote_manifests, 'main')
 
     # Create a copy of our existing manifests.git, but rewrite it so it
     # looks like a remote manifests.git.  This is to avoid hitting the
@@ -659,7 +659,7 @@ class ManifestCheckoutTest(cros_test_lib.TempDirTestCase):
         <manifest>
           <include name="include-target.xml" />
           <include name="empty.xml" />
-          <project name="monkeys" path="baz" remote="foon" revision="master" />
+          <project name="monkeys" path="baz" remote="foon" revision="main" />
         </manifest>""")
     # First, verify it properly explodes if the include can't be found.
     self.assertRaises(EnvironmentError,
@@ -692,7 +692,7 @@ class ManifestCheckoutTest(cros_test_lib.TempDirTestCase):
     repo_root = self.tempdir
 
     # pylint: disable=unused-argument
-    def reconfig(merge='master', origin='origin'):
+    def reconfig(merge='main', origin='origin'):
       if merge is not None:
         merge = 'refs/heads/%s' % merge
       for key in ('merge', 'origin'):
@@ -705,13 +705,13 @@ class ManifestCheckoutTest(cros_test_lib.TempDirTestCase):
 
     # First, verify our assumptions about a fresh repo init are correct.
     self.assertEqual('default', git.GetCurrentBranch(manifest))
-    self.assertEqual('master', func(repo_root))
+    self.assertEqual('main', func(repo_root))
 
     # Ensure we can handle a missing origin; this can occur jumping between
     # branches, and can be worked around.
     reconfig(origin=None)
     self.assertEqual('default', git.GetCurrentBranch(manifest))
-    self.assertEqual('master', func(repo_root))
+    self.assertEqual('main', func(repo_root))
 
     def assertExcept(message, **kwargs):
       reconfig(**kwargs)
@@ -724,7 +724,7 @@ class ManifestCheckoutTest(cros_test_lib.TempDirTestCase):
 
     # Ensure we detect if we're on the wrong branch, even if it has
     # tracking setup.
-    git.RunGit(manifest, ['checkout', '-t', 'origin/master', '-b', 'test'])
+    git.RunGit(manifest, ['checkout', '-t', 'origin/main', '-b', 'test'])
     assertExcept("It should be checked out to 'default'")
 
     # Ensure we handle detached HEAD w/ an appropriate exception.
@@ -764,3 +764,13 @@ class ManifestCheckoutTest(cros_test_lib.TempDirTestCase):
     branches = git.MatchBranchName(git_repo, 'release-R23-2913.B',
                                    namespace='refs/remotes/')
     self.assertEqual(branches, ['origin/release-R23-2913.B'])
+
+
+class ManifestHashTest(cros_test_lib.TestCase):
+  """Tests for _GetManifestHash functionality."""
+
+  def testGetManifestHashIgnoreMissing(self):
+    # pylint: disable=protected-access
+    hash_str = git.Manifest._GetManifestHash(
+        'absence_file', ignore_missing=True)
+    self.assertIsNone(hash_str)

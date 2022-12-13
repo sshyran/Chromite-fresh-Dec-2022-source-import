@@ -5,6 +5,7 @@
 """SDK chroot operations."""
 
 import os
+from typing import Union
 
 from chromite.api import controller
 from chromite.api import faux
@@ -21,13 +22,17 @@ def _ChrootVersionResponse(_input_proto, output_proto, _config):
 
 @faux.success(_ChrootVersionResponse)
 @faux.empty_error
-def Create(input_proto, output_proto, config):
+def Create(input_proto: 'CreateRequest', output_proto: 'CreateResponse',
+           config: 'api_config.ApiConfig') -> Union[int, None]:
   """Chroot creation, includes support for replacing an existing chroot.
 
   Args:
-    input_proto (CreateRequest): The input proto.
-    output_proto (CreateResponse): The output proto.
-    config (api_config.ApiConfig): The API call config.
+    input_proto: The input proto.
+    output_proto: The output proto.
+    config: The API call config.
+
+  Returns:
+    An error code, None otherwise.
   """
   replace = not input_proto.flags.no_replace
   bootstrap = input_proto.flags.bootstrap
@@ -36,6 +41,7 @@ def Create(input_proto, output_proto, config):
   chroot_path = input_proto.chroot.path
   cache_dir = input_proto.chroot.cache_dir
   sdk_version = input_proto.sdk_version
+  skip_chroot_upgrade = input_proto.skip_chroot_upgrade
 
   if chroot_path and not os.path.isabs(chroot_path):
     cros_build_lib.Die('The chroot path must be absolute.')
@@ -49,7 +55,8 @@ def Create(input_proto, output_proto, config):
       use_image=use_image,
       cache_dir=cache_dir,
       chroot_path=chroot_path,
-      sdk_version=sdk_version)
+      sdk_version=sdk_version,
+      skip_chroot_upgrade=skip_chroot_upgrade)
 
   version = sdk.Create(args)
 
@@ -65,13 +72,14 @@ def Create(input_proto, output_proto, config):
 @faux.empty_error
 @validate.require_each('toolchain_targets', ['name'])
 @validate.validation_complete
-def Update(input_proto, output_proto, _config):
+def Update(input_proto: 'UpdateRequest', output_proto: 'UpdateResponse',
+           _config: 'api_config.ApiConfig'):
   """Update the chroot.
 
   Args:
-    input_proto (UpdateRequest): The input proto.
-    output_proto (UpdateResponse): The output proto.
-    _config (api_config.ApiConfig): The API call config.
+    input_proto: The input proto.
+    output_proto: The output proto.
+    _config: The API call config.
   """
   build_source = input_proto.flags.build_source
   targets = [target.name for target in input_proto.toolchain_targets]
@@ -140,3 +148,32 @@ def RestoreSnapshot(input_proto, _output_proto, _config):
   chroot = controller_util.ParseChroot(input_proto.chroot)
   token = input_proto.snapshot_token.value
   sdk.RestoreSnapshot(token, chroot)
+
+
+@faux.all_empty
+@validate.validation_complete
+def BuildPrebuilts(input_proto, _output_proto, _config):
+  """Builds the binary packages that comprise the Chromium OS SDK."""
+  chroot = controller_util.ParseChroot(input_proto.chroot)
+  sdk.BuildPrebuilts(chroot)
+
+
+@faux.all_empty
+@validate.require('prepend_version', 'version', 'upload_location')
+@validate.validation_complete
+def CreateBinhostCLs(input_proto, _output_proto, _config):
+  """Create CLs to update the binhost to point at uploaded prebuilts."""
+  sdk.CreateBinhostCLs(input_proto.prepend_version,
+                       input_proto.version,
+                       input_proto.upload_location)
+
+
+@faux.all_empty
+@validate.require('prepend_version', 'version', 'upload_location')
+@validate.validation_complete
+def UploadPrebuiltPackages(input_proto, _output_proto, _config):
+  """Uploads prebuilt packages."""
+  sdk.UploadPrebuiltPackages(controller_util.ParseChroot(input_proto.chroot),
+                             input_proto.prepend_version,
+                             input_proto.version,
+                             input_proto.upload_location)

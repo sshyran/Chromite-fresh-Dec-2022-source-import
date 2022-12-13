@@ -37,32 +37,32 @@ def version_valid(v: str) -> bool:
 
 def version_ge(v1: str, v2: str) -> bool:
   """Boolean function for >= comparisons."""
-  return cmp_versions(v1, v2) in (0, 1)
+  return _cmp_versions(v1, v2) in (0, 1)
 
 
 def version_gt(v1: str, v2: str) -> bool:
   """Boolean function for > comparisons."""
-  return cmp_versions(v1, v2) == 1
+  return _cmp_versions(v1, v2) == 1
 
 
 def version_eq(v1: str, v2: str) -> bool:
   """Boolean function for > comparisons."""
-  return cmp_versions(v1, v2) == 0
+  return _cmp_versions(v1, v2) == 0
 
 
 def version_le(v1: str, v2: str) -> bool:
   """Boolean function for <= comparisons."""
-  return cmp_versions(v1, v2) in (-1, 0)
+  return _cmp_versions(v1, v2) in (-1, 0)
 
 
 def version_lt(v1: str, v2: str) -> bool:
   """Boolean function for < comparisons."""
-  return cmp_versions(v1, v2) == -1
+  return _cmp_versions(v1, v2) == -1
 
 
 # TODO(python3.9): Change to functools.cache.
 @functools.lru_cache(maxsize=None)
-def cmp_versions(v1: str, v2: str) -> int:
+def _cmp_versions(v1: str, v2: str) -> int:
   """Portage version comparisons.
 
   See: https://dev.gentoo.org/~ulm/pms/head/pms.html#x1-260003.3

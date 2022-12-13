@@ -18,7 +18,7 @@ from typing import Iterable, List, NamedTuple, Optional, TYPE_CHECKING, Union
 from chromite.third_party.google.protobuf import json_format
 
 from chromite.api.gen.config import replication_config_pb2
-from chromite.cbuildbot import manifest_version
+from chromite.lib import chromeos_version
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import git
@@ -29,6 +29,7 @@ from chromite.lib import replication_lib
 from chromite.lib import uprev_lib
 from chromite.lib.parser import package_info
 from chromite.service import android
+
 
 if TYPE_CHECKING:
   from chromite.lib import build_target_lib
@@ -114,12 +115,9 @@ def patch_ebuild_vars(ebuild_path, variables):
   """
   try:
     for line in fileinput.input(ebuild_path, inplace=1):
-      varname, eq, _ = line.partition('=')
-      if eq == '=' and varname.strip() in variables:
-        value = variables[varname]
-        sys.stdout.write('%s="%s"\n' % (varname, value))
-      else:
-        sys.stdout.write(line)
+      for var, value in variables.items():
+        line = re.sub(fr'\b{var}=\S+', f'{var}="{value}"', line)
+      sys.stdout.write(line)
   finally:
     fileinput.close()
 
@@ -394,7 +392,7 @@ def uprev_virglrenderer(_build_targets, refs, _chroot):
 
   updated_files = uprev_manager.modified_ebuilds
   result = uprev_lib.UprevVersionedPackageResult()
-  result.add_result(refs[0].revision, updated_files)
+  result.add_result(refs[-1].revision, updated_files)
   return result
 
 @uprevs_versioned_package('chromeos-base/drivefs')
@@ -1176,7 +1174,8 @@ def determine_android_package(board: str) -> Optional[str]:
     The android package string if there is one.
   """
   try:
-    packages = portage_util.GetPackageDependencies(board, 'virtual/target-os')
+    packages = portage_util.GetPackageDependencies(
+        'virtual/target-os', board=board)
   except cros_build_lib.RunCommandError as e:
     # Return None because a command (likely portage) failed when trying to
     # determine the package.
@@ -1257,14 +1256,14 @@ def determine_android_target(board, package=None):
 def determine_platform_version():
   """Returns the platform version from the source root."""
   # Platform version is something like '12575.0.0'.
-  version = manifest_version.VersionInfo.from_repo(constants.SOURCE_ROOT)
+  version = chromeos_version.VersionInfo.from_repo(constants.SOURCE_ROOT)
   return version.VersionString()
 
 
 def determine_milestone_version():
   """Returns the platform version from the source root."""
   # Milestone version is something like '79'.
-  version = manifest_version.VersionInfo.from_repo(constants.SOURCE_ROOT)
+  version = chromeos_version.VersionInfo.from_repo(constants.SOURCE_ROOT)
   return version.chrome_branch
 
 
@@ -1465,8 +1464,8 @@ def determine_kernel_version(
     The kernel versions, or None.
   """
   try:
-    packages = portage_util.GetPackageDependencies(build_target.name,
-                                                   'virtual/linux-sources')
+    packages = portage_util.GetPackageDependencies(
+        'virtual/linux-sources', board=build_target.name)
   except cros_build_lib.RunCommandError as e:
     logging.warning('Unable to get package list for metadata: %s', e)
     return None
@@ -1550,7 +1549,7 @@ def _run_cros_config_host(
       check=False)
   if result.returncode:
     # Show the output for debugging purposes.
-    if 'No such file or directory' not in result.error:
-      logging.error('cros_config_host failed: %s\n', result.error)
+    if 'No such file or directory' not in result.stderr:
+      logging.error('cros_config_host failed: %s\n', result.stderr)
     return None
-  return result.output.strip().splitlines()
+  return result.stdout.strip().splitlines()

@@ -57,7 +57,7 @@ class GetMethodsTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     self.response = api_pb2.MethodGetResponse()
 
   def testGetMethods(self):
-    """Simple GetMethods sanity check."""
+    """Simple GetMethods check."""
     methods = ['foo', 'bar']
     self.PatchObject(router.Router, 'ListMethods', return_value=methods)
 
@@ -66,7 +66,7 @@ class GetMethodsTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     self.assertCountEqual(methods, [m.method for m in self.response.methods])
 
   def testValidateOnly(self):
-    """Sanity check validate only calls only validate."""
+    """Check validate_only_config calls only validate."""
     patch = self.PatchObject(router.Router, 'ListMethods')
 
     api_controller.GetMethods(self.request, self.response,
@@ -87,7 +87,7 @@ class GetVersionTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     self.response = api_pb2.VersionGetResponse()
 
   def testGetVersion(self):
-    """Simple GetVersion sanity check."""
+    """Simple GetVersion check."""
     api_controller.GetVersion(self.request, self.response, self.api_config)
 
     self.assertEqual(self.response.version.major, 1)
@@ -95,7 +95,7 @@ class GetVersionTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     self.assertEqual(self.response.version.bug, 3)
 
   def testValidateOnly(self):
-    """Sanity check validate only calls only validate."""
+    """Check validate_only_config calls only validate."""
     api_controller.GetVersion(self.request, self.response,
                               self.validate_only_config)
 

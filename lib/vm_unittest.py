@@ -54,7 +54,7 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
     # Satisfy QEMU version check.
     version_str = ('QEMU emulator version 2.6.0, Copyright (c) '
                    '2003-2008 Fabrice Bellard')
-    self.rc.AddCmdResult(partial_mock.In('--version'), output=version_str)
+    self.rc.AddCmdResult(partial_mock.In('--version'), stdout=version_str)
 
     self.ssh_port = self._vm.ssh_port
 
@@ -305,14 +305,14 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
   def testQemuVersionError(self):
     """Verify that VMError is raised without an expected QEMU version number."""
     version_str = 'Fake Version String'
-    self.rc.AddCmdResult(partial_mock.In('--version'), output=version_str)
+    self.rc.AddCmdResult(partial_mock.In('--version'), stdout=version_str)
     self.assertRaises(vm.VMError, self._vm._SetQemuPath)
 
   def testQemuVersion(self):
     """Verify that the correct QEMU version is identified."""
     version_str = ('QEMU emulator version 2.8.0, Copyright (c) '
                    '2003-2008 Fabrice Bellard')
-    self.rc.AddCmdResult(partial_mock.In('--version'), output=version_str)
+    self.rc.AddCmdResult(partial_mock.In('--version'), stdout=version_str)
     self._vm._SetQemuPath()
     self.assertEqual('2.8.0', self._vm.QemuVersion())
     self.assertCommandContains([self._vm.qemu_path, '--version'])
@@ -321,7 +321,7 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
     """Verify that VMError is raised when the QEMU version is too old."""
     version_str = ('QEMU emulator version 2.5.0, Copyright (c) '
                    '2003-2008 Fabrice Bellard')
-    self.rc.AddCmdResult(partial_mock.In('--version'), output=version_str)
+    self.rc.AddCmdResult(partial_mock.In('--version'), stdout=version_str)
     self.assertRaises(vm.VMError, self._vm._SetQemuPath)
 
   def testRunError(self):
@@ -407,10 +407,12 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
 
     # Look for retry messages in output.
     with cros_test_lib.LoggingCapturer(log_level=logging.INFO) as logger:
-      self.assertRaises(vm.VMError, self._vm._WaitForSSHPort, sleep=0)
+      with self.assertRaises(vm.VMError) as ctx:
+        self._vm._WaitForSSHPort(sleep=0)
+      e = ctx.exception
     in_use_message = 'SSH port %d in use' % self._vm.ssh_port
-    self.assertTrue(logger.LogsMatch((in_use_message + '...\n') * 11 +
-                                     in_use_message + '\n'))
+    self.assertEqual(in_use_message, str(e))
+    self.assertTrue(logger.LogsMatch((in_use_message + '...\n') * 11))
 
     # Verify the VM works correctly when the port is not in use.
     # There should be no retries after the port is released.
@@ -427,13 +429,15 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
     """Verify an error is raised when no chrome processes are running."""
     # Look for retry messages in output.
     with cros_test_lib.LoggingCapturer(log_level=logging.INFO) as logger:
-      self.assertRaises(vm.VMError, self._vm._WaitForProcs, sleep=0)
+      with self.assertRaises(vm.VMError) as ctx:
+        self._vm._WaitForProcs(sleep=0)
+      e = ctx.exception
 
     pid_message = 'chrome pids: []\n'
     self.assertTrue(logger.LogsContain(pid_message * 6))
-    self.assertTrue(
-        logger.LogsContain('_WaitForProcs failed: timed out while waiting'
-                           ' for 8 chrome processes to start.\n'))
+    self.assertIn(
+        '_WaitForProcs failed: timed out while waiting for 8 chrome processes '
+        'to start.', str(e))
     pid_mocker.assert_called()
 
   @mock.patch('chromite.lib.remote_access.RemoteDevice.GetRunningPids',

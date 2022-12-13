@@ -108,7 +108,7 @@ def CreateVMImage(image=None, board=None, updatable=True, dest_dir=None):
       tempdir = cros_build_lib.run(
           ['mktemp', '-d'],
           capture_output=True,
-          enter_chroot=True).output.strip()
+          enter_chroot=True).stdout.strip()
       cmd.append('--to=%s' % tempdir)
 
     msg = 'Failed to create the VM image'

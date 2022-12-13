@@ -302,7 +302,7 @@ class xBuddyTest(cros_test_lib.TestCase):
     result = self.mock_xb._ListBuildTimes()
     self.assertEqual(len(result), 0)
 
-    # set up the dummy build/images directory with images
+    # set up the stub build/images directory with images
     boards = ['a', 'b']
     versions = ['v1', 'v2']
     for b in boards:

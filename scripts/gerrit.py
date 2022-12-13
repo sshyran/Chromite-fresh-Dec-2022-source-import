@@ -12,13 +12,17 @@ with the prefix "UserAct".
 import argparse
 import collections
 import configparser
+import enum
 import functools
 import inspect
 import json
 import logging
+import os
 from pathlib import Path
 import re
 import shlex
+import signal
+import subprocess
 import sys
 
 from chromite.lib import chromite_config
@@ -62,6 +66,9 @@ class UserAction(object):
   # The name of the command the user types in.
   COMMAND = None
 
+  # Should output be paged?
+  USE_PAGER = False
+
   @staticmethod
   def init_subparser(parser):
     """Add arguments to this action's subparser."""
@@ -100,6 +107,25 @@ GERRIT_SUMMARY_MAP = {
     'NEW': 'NEW',
     'WIP': 'WIP',
 }
+
+
+class OutputFormat(enum.Enum):
+  """Type for the requested output format.
+
+  AUTO: Automatically determine the format based on what the user
+    might want.  This is PRETTY if attached to a terminal, RAW
+    otherwise.
+  RAW: Output CLs one per line, suitable for mild scripting.
+  JSON: JSON-encoded output, suitable for spicy scripting.
+  MARKDOWN: Suitable for posting in a bug or CL comment.
+  PRETTY: Suitable for viewing in a color terminal.
+  """
+  AUTO = 0
+  AUTOMATIC = AUTO
+  RAW = 1
+  JSON = 2
+  MARKDOWN = 3
+  PRETTY = 4
 
 
 def red(s):
@@ -225,8 +251,11 @@ def PrettyPrintCl(opts, cl, lims=None, show_approvals=True):
         functor = green
       status += functor('%s:%2s ' % (cat, approvs[cat]))
 
-  print('%s %s%-*s %s' % (blue('%-*s' % (lims['url'], cl['url'])), status,
-                          lims['project'], cl['project'], cl['subject']))
+  if opts.format is OutputFormat.MARKDOWN:
+    print('* %s - %s' % (uri_lib.ShortenUri(cl['url']), cl['subject']))
+  else:
+    print('%s %s%-*s %s' % (blue('%-*s' % (lims['url'], cl['url'])), status,
+                            lims['project'], cl['project'], cl['subject']))
 
   if show_approvals and opts.verbose:
     for approver in cl['currentPatchSet'].get('approvals', []):
@@ -239,7 +268,7 @@ def PrettyPrintCl(opts, cl, lims=None, show_approvals=True):
 
 def PrintCls(opts, cls, lims=None, show_approvals=True):
   """Print all results based on the requested format."""
-  if opts.raw:
+  if opts.format is OutputFormat.RAW:
     site_params = config_lib.GetSiteParams()
     pfx = ''
     # Special case internal Chrome GoB as that is what most devs use.
@@ -249,7 +278,7 @@ def PrintCls(opts, cls, lims=None, show_approvals=True):
     for cl in cls:
       print('%s%s' % (pfx, cl['number']))
 
-  elif opts.json:
+  elif opts.format is OutputFormat.JSON:
     json.dump(cls, sys.stdout)
 
   else:
@@ -307,6 +336,8 @@ def FilteredQuery(opts, query, helper=None):
 
 class _ActionSearchQuery(UserAction):
   """Base class for actions that perform searches."""
+
+  USE_PAGER = True
 
   @staticmethod
   def init_subparser(parser):
@@ -427,7 +458,7 @@ class ActionDeps(_ActionSearchQuery):
     # This is a hack to avoid losing GoB host for each CL.  The PrintCls
     # function assumes the GoB host specified by the user is the only one
     # that is ever used, but the deps command walks across hosts.
-    if opts.raw:
+    if opts.format is OutputFormat.RAW:
       print('\n'.join(x.PatchLink() for x in transitives))
     else:
       transitives_raw = [cl.patch_dict for cl in transitives]
@@ -458,7 +489,7 @@ class ActionDeps(_ActionSearchQuery):
       # when CQ-DEPEND uses a Gerrit Change-Id, but that Change-Id shows up
       # across multiple repos/branches.  We blindly check all of them in the
       # hopes that all open ones are what the user wants, but then again the
-      # CQ-DEPEND syntax itself is unable to differeniate.  *shrug*
+      # CQ-DEPEND syntax itself is unable to differentiate.  *shrug*
       if len(changes) > 1:
         logging.warning('CL %s has an ambiguous CQ dependency %s',
                         cl, dep.ToGerritQueryText())
@@ -519,7 +550,7 @@ class _ActionLabeler(UserAction):
   @classmethod
   def __call__(cls, opts):
     """Implement the action."""
-    # Convert user friendly command line option into a gerrit parameter.
+    # Convert user-friendly command line option into a gerrit parameter.
     def task(arg):
       helper, cl = GetGerrit(opts, arg)
       helper.SetReview(cl, labels={cls.LABEL: opts.value[0]}, msg=opts.msg,
@@ -867,7 +898,7 @@ class ActionUnignore(_ActionSimpleParallelCLs):
 
 
 class ActionCherryPick(UserAction):
-  """Cherry pick CLs to branches."""
+  """Cherry-pick CLs to branches."""
 
   COMMAND = 'cherry-pick'
 
@@ -895,7 +926,7 @@ class ActionCherryPick(UserAction):
         ret = helper.CherryPick(cl, branch, rev=opts.rev, msg=opts.msg,
                                 dryrun=opts.dryrun, notify=opts.notify)
         logging.debug('Response: %s', ret)
-        if opts.raw:
+        if opts.format is OutputFormat.RAW:
           print(ret['_number'])
         else:
           uri = f'https://{helper.host}/c/{ret["_number"]}'
@@ -985,6 +1016,7 @@ class ActionAccount(_ActionSimpleParallelCLs):
   """Get user account information"""
 
   COMMAND = 'account'
+  USE_PAGER = True
 
   @staticmethod
   def init_subparser(parser):
@@ -999,7 +1031,8 @@ class ActionAccount(_ActionSimpleParallelCLs):
 
     def print_one(header, data):
       print(f'### {header}')
-      print(pformat.json(data, compact=opts.json).rstrip())
+      compact = opts.format is OutputFormat.JSON
+      print(pformat.json(data, compact=compact).rstrip())
 
     def task(arg):
       detail = gob_util.FetchUrlJson(helper.host, f'accounts/{arg}/detail')
@@ -1040,6 +1073,7 @@ class ActionHelp(UserAction):
   """An alias to --help for CLI symmetry"""
 
   COMMAND = 'help'
+  USE_PAGER = True
 
   @staticmethod
   def init_subparser(parser):
@@ -1062,6 +1096,7 @@ class ActionHelpAll(UserAction):
   """Show all actions help output at once."""
 
   COMMAND = 'help-all'
+  USE_PAGER = True
 
   @staticmethod
   def __call__(opts):
@@ -1172,7 +1207,8 @@ Actions:
 
   site_params = config_lib.GetSiteParams()
   parser = commandline.ArgumentParser(
-      description=description, default_log_level='notice')
+      description=description, default_log_level='notice',
+      epilog='For subcommand help, use `gerrit help <command>`.')
 
   group = parser.add_argument_group('Server options')
   group.add_argument('-i', '--internal', dest='gob', action='store_const',
@@ -1187,10 +1223,42 @@ Actions:
   group = parser.add_argument_group('CL options')
   _AddCommonOptions(parser, group)
 
-  parser.add_argument('--raw', default=False, action='store_true',
-                      help='Return raw results (suitable for scripting)')
-  parser.add_argument('--json', default=False, action='store_true',
-                      help='Return results in JSON (suitable for scripting)')
+  group = parser.add_mutually_exclusive_group()
+  parser.set_defaults(format=OutputFormat.AUTO)
+  group.add_argument(
+      '--format',
+      action='enum',
+      enum=OutputFormat,
+      help='Output format to use.',
+  )
+  group.add_argument(
+      '--raw',
+      action='store_const',
+      dest='format',
+      const=OutputFormat.RAW,
+      help='Alias for --format=raw.',
+  )
+  group.add_argument(
+      '--json',
+      action='store_const',
+      dest='format',
+      const=OutputFormat.JSON,
+      help='Alias for --format=json.',
+  )
+
+  group = parser.add_mutually_exclusive_group()
+  group.add_argument(
+      '--pager',
+      action='store_true',
+      default=sys.stdout.isatty(),
+      help='Enable pager.',
+  )
+  group.add_argument(
+      '--no-pager',
+      action='store_false',
+      dest='pager',
+      help='Disable pager.'
+  )
   return parser
 
 
@@ -1217,6 +1285,39 @@ def GetParser(parser: commandline.ArgumentParser = None) -> (
   return parser
 
 
+def start_pager():
+  """Re-spawn ourselves attached to a pager."""
+  pager = os.environ.get('PAGER', 'less')
+  os.environ.setdefault('LESS', 'FRX')
+  with subprocess.Popen(
+      # sys.argv can have some edge cases: we may not necessarily use
+      # sys.executable if the script is executed as "python path/to/script".
+      # If we upgrade to Python 3.10+, this should be changed to sys.orig_argv
+      # for full accuracy.
+      sys.argv,
+      stdout=subprocess.PIPE,
+      stderr=subprocess.STDOUT,
+      env={'GERRIT_RESPAWN_FOR_PAGER': '1', **os.environ},
+  ) as gerrit_proc:
+    with subprocess.Popen(
+        pager,
+        shell=True,
+        stdin=gerrit_proc.stdout,
+    ) as pager_proc:
+      # Send SIGINT to just the gerrit process, not the pager too.
+      def _sighandler(signum, _frame):
+        gerrit_proc.send_signal(signum)
+
+      signal.signal(signal.SIGINT, _sighandler)
+
+      pager_proc.communicate()
+      # If the pager exits, and the gerrit process is still running, we
+      # must terminate it.
+      if gerrit_proc.poll() is None:
+        gerrit_proc.terminate()
+      sys.exit(gerrit_proc.wait())
+
+
 def main(argv):
   base_parser = GetBaseParser()
   opts, subargs = base_parser.parse_known_args(argv)
@@ -1233,11 +1334,24 @@ def main(argv):
   parser = GetParser(parser=base_parser)
   opts = parser.parse_args(argv)
 
+  # If we're running as a re-spawn for the pager, from this point on
+  # we'll pretend we're attached to a TTY.  This will give us colored
+  # output when requested.
+  if os.environ.pop('GERRIT_RESPAWN_FOR_PAGER', None) is not None:
+    opts.pager = False
+    sys.stdout.isatty = lambda: True
+
   # In case the action wants to throw a parser error.
   opts.parser = parser
 
   # A cache of gerrit helpers we'll load on demand.
   opts.gerrit = {}
+
+  if opts.format is OutputFormat.AUTO:
+    if sys.stdout.isatty():
+      opts.format = OutputFormat.PRETTY
+    else:
+      opts.format = OutputFormat.RAW
 
   opts.Freeze()
 
@@ -1247,7 +1361,10 @@ def main(argv):
 
   # Now look up the requested user action and run it.
   actions = _GetActions()
-  obj = actions[opts.action]()
+  action_class = actions[opts.action]
+  if action_class.USE_PAGER and opts.pager:
+    start_pager()
+  obj = action_class()
   try:
     obj(opts)
   except (cros_build_lib.RunCommandError, gerrit.GerritException,

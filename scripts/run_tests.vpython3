@@ -141,7 +141,7 @@ wheel: <
 >
 
 # pylint deps.
-# NB: Keep in sync with cli/cros/pylint-2.
+# NB: Keep in sync with scripts/pylint.
 wheel: <
   name: "infra/python/wheels/pylint-quotes-py3"
   version: "version:0.2.1"

@@ -32,8 +32,8 @@ class DownloaderTest(cros_test_lib.TestCase):
         'chromeos-image-archive/%s/%s' % (self.board, self.build))
     self.archive_url = 'gs://' + self.archive_dir
     self.local_path = ('/local/path/%s/%s' % (self.board, self.build))
-    self.payload = 'chromeos_{build}_{board}_dev.bin'.format(
-        build=self.build, board=self.board.replace('-', '_'))
+    self.payload = (
+        f'chromeos_{self.build}_{self.board.replace("-", "_")}_dev.bin')
     self.downloaded = []
     self.dest_dir = os.path.join(self._work_dir, self.board, self.build) + '/'
 
@@ -165,8 +165,8 @@ class DownloaderTest(cros_test_lib.TestCase):
     """Test anonymous download of full payload."""
     err_msg = ('ServiceException: 401 Anonymous caller does not have '
                'storage.objects.get access to ' + self.archive_dir + '.')
-    gs_error = gs.GSCommandError(err_msg, cros_build_lib.CommandResult(
-        error=err_msg))
+    gs_error = gs.GSCommandError(err_msg, cros_build_lib.CompletedProcess(
+        stderr=err_msg))
 
     downloader_instance, factory = self._DownloadFullPayload()
     with mock.patch.object(downloader.GoogleStorageDownloader, 'Fetch',

@@ -5,11 +5,12 @@
 """Unittests for config."""
 
 import copy
-import pickle
 import json
+import pickle
 
 from chromite.lib import config_lib
 from chromite.lib import cros_test_lib
+
 
 # pylint: disable=protected-access
 
@@ -66,7 +67,7 @@ def AssertSiteIndependentParameters(site_config):
   ]
 
   site_params = site_config.params
-  return all([x in site_params for x in site_independent_params])
+  return all(x in site_params for x in site_independent_params)
 
 
 class _CustomObject(object):

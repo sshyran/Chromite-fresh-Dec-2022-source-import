@@ -4,11 +4,10 @@
 
 """Module containing release engineering related builders."""
 
-from chromite.lib import parallel
-
 from chromite.cbuildbot.builders import simple_builders
 from chromite.cbuildbot.stages import build_stages
 from chromite.cbuildbot.stages import release_stages
+from chromite.lib import parallel
 
 
 class GeneratePayloadsBuilder(simple_builders.SimpleBuilder):

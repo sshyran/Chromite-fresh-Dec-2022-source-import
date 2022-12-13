@@ -19,20 +19,25 @@ as many/few checkers as we want in this one module.
 
 import collections
 import itertools
-import tokenize
 import os
 import re
 import sys
+import tokenize
 
 import astroid
+from chromite.third_party.pylint import format_checkers
+
+# pylint: disable=unused-import
+# Can't use per-line suppression due to pylint bug:
+# https://github.com/PyCQA/pylint/issues/6484
+from chromite.third_party.pylint_quotes.checker import StringQuoteChecker
+
+# pylint: enable=unused-import
 import pylint.checkers
 from pylint.config import ConfigurationMixIn
 import pylint.interfaces
 
-from chromite.third_party.pylint import format_checkers
 from chromite.utils import memoize
-# pylint: disable=unused-import
-from chromite.third_party.pylint_quotes.checker import StringQuoteChecker
 
 
 # pylint: disable=too-few-public-methods
@@ -144,6 +149,7 @@ class DocStringChecker(pylint.checkers.BaseChecker):
   class _MessageCP016(object): pass
   class _MessageCP017(object): pass
   class _MessageCP018(object): pass
+  class _MessageCP019(object): pass
   # pylint: enable=class-missing-docstring,multiple-statements
 
   # All the sections we recognize (and in this order).
@@ -199,6 +205,8 @@ class DocStringChecker(pylint.checkers.BaseChecker):
                 ('docstring-duplicate-section'), _MessageCP017),
       'C9018': ('Docstrings must start with exactly three quotes',
                 ('docstring-extra-quotes'), _MessageCP018),
+      'C9019': ('Use typing module instead of docstring annotations',
+                ('docstring-deprecated-annotations'), _MessageCP019),
   }
 
   def __init__(self, *args, **kwargs):
@@ -286,7 +294,7 @@ class DocStringChecker(pylint.checkers.BaseChecker):
       self.add_message('C9014', node=node, line=node.fromlineno)
 
   def _check_whitespace(self, node, lines):
-    """Verify whitespace is sane"""
+    """Verify whitespace is correct"""
     # Make sure first line doesn't have leading whitespace.
     if lines[0].lstrip() != lines[0]:
       margs = {'offset': 0, 'line': lines[0]}
@@ -439,7 +447,7 @@ class DocStringChecker(pylint.checkers.BaseChecker):
     return sections
 
   def _check_section_lines(self, node, lines, sections, valid_sections):
-    """Verify each section (e.g. Args/Returns/etc...) is sane"""
+    """Verify each section (e.g. Args/Returns/etc...) is correct"""
     indent_len = self._docstring_indent(node)
 
     # Make sure the sections are in the right order.
@@ -452,12 +460,11 @@ class DocStringChecker(pylint.checkers.BaseChecker):
       # We're going to check the section line itself.
       lineno = section.lineno
       line = section.header
-      want_indent = indent_len + self._indent_len
       line_indent_len = len(line) - len(line.lstrip(' '))
       margs = {
           'offset': lineno,
           'line': line,
-          'want_indent': want_indent,
+          'want_indent': indent_len,
           'curr_indent': line_indent_len,
       }
 
@@ -481,25 +488,37 @@ class DocStringChecker(pylint.checkers.BaseChecker):
 
       # Now check the indentation of subtext in each section.
       saw_exact = False
+      want_indent = indent_len + self._indent_len
+      margs['want_indent'] = want_indent
+      first_item_margs = None
       for i, line in enumerate(section.lines, start=1):
         # Every line should be indented at least the minimum.
         # Always update margs so that if we drop through below, it has
         # reasonable values when generating the message.
         line_indent_len = len(line) - len(line.lstrip(' '))
-        margs.update({
-            'line': line,
-            'offset': lineno + i,
-            'curr_indent': line_indent_len,
-        })
+        if first_item_margs is None:
+          first_item_margs = {
+              **margs,
+              'line': line,
+              'offset': lineno + i,
+              'curr_indent': line_indent_len,
+          }
+
         if line_indent_len == want_indent:
           saw_exact = True
         elif line_indent_len < want_indent:
-          self.add_message('C9015', node=node, line=node.fromlineno, args=margs)
+          self.add_message('C9015', node=node, line=node.fromlineno, args={
+              **margs,
+              'line': line,
+              'offset': lineno + i,
+              'curr_indent': line_indent_len,
+          })
 
       # If none of the lines were indented at the exact level, then something
       # is amiss like they're all incorrectly offset.
-      if not saw_exact:
-        self.add_message('C9015', node=node, line=node.fromlineno, args=margs)
+      if first_item_margs and not saw_exact:
+        self.add_message(
+            'C9015', node=node, line=node.fromlineno, args=first_item_margs)
 
   def _check_all_args_in_doc(self, node, _lines, sections):
     """All function arguments are mentioned in doc"""
@@ -529,6 +548,11 @@ class DocStringChecker(pylint.checkers.BaseChecker):
         aline = l.lstrip()
         m = arg_re.match(aline)
         if m:
+          if m.group(1) is not None:
+            margs = {'arg': l}
+            self.add_message('C9019', node=node, line=node.fromlineno,
+                             args=margs)
+
           amsg = aline[m.end():]
           if amsg and len(amsg) - len(amsg.lstrip()) != 1:
             margs = {'arg': l}
@@ -656,7 +680,7 @@ class SourceChecker(pylint.checkers.BaseChecker):
         self.add_message('R9204')
 
   def _check_module_name(self, node):
-    """Make sure the module name is sane"""
+    """Make sure the module name is correct"""
     # Catch various typos.
     name = node.name.rsplit('.', 2)[-1]
     if name.rsplit('_', 2)[-1] in ('unittests',):

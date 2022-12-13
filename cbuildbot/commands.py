@@ -18,10 +18,16 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from typing import Dict
 
 from chromite.third_party.google.protobuf import json_format
 
 from chromite.api.gen.chromite.api import android_pb2
+from chromite.api.gen.chromite.api import test_pb2
+from chromite.api.gen.chromiumos.build.api import container_metadata_pb2
+from chromite.api.gen.chromiumos.build.api.container_metadata_pb2 import (
+    ContainerMetadata,
+)
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import swarming_lib
 from chromite.cbuildbot import topology
@@ -71,7 +77,6 @@ _SWARMING_ADDITIONAL_TIMEOUT = 60 * 60
 _DEFAULT_HWTEST_TIMEOUT_MINS = 1440
 _SWARMING_EXPIRATION = 20 * 60
 RUN_SUITE_PATH = '/usr/local/autotest/site_utils/run_suite.py'
-SKYLAB_RUN_SUITE_PATH = '/usr/local/autotest/bin/run_suite_skylab'
 _ABORT_SUITE_PATH = '/usr/local/autotest/site_utils/abort_suite.py'
 _SKYLAB_ABORT_SUITE_PATH = '/usr/local/autotest/bin/abort_suite_skylab'
 _MAX_HWTEST_CMD_RETRY = 10
@@ -243,7 +248,7 @@ def ListChrootSnapshots(buildroot):
 
   cmd_snapshots = RunBuildScript(
       buildroot, cmd, chromite_cmd=True, stdout=True)
-  return cmd_snapshots.output.splitlines()
+  return cmd_snapshots.stdout.splitlines()
 
 
 def RevertChrootToSnapshot(buildroot, snapshot_name):
@@ -409,19 +414,19 @@ def LegacySetupBoard(buildroot,
       chroot_args=chroot_args)
 
 
-def BuildSDKBoard(buildroot,
-                  board,
-                  force=False,
-                  extra_env=None,
-                  chroot_args=None):
+def BuildSDKBoard(buildroot: str,
+                  board: str,
+                  force: bool = False,
+                  extra_env: Dict[str, str] = None,
+                  chroot_args: Dict = None):
   """Wrapper around setup_host_board.
 
   Args:
-    board (str): The name of the board.
-    buildroot (str): The buildroot of the current build.
-    force (bool): Whether to remove existing sysroot if it exists.
-    extra_env (dict): A dictionary of environment variables to set.
-    chroot_args (dict): The args to the chroot.
+    board: The name of the board.
+    buildroot: The buildroot of the current build.
+    force: Whether to remove existing sysroot if it exists.
+    extra_env: A dictionary of environment variables to set.
+    chroot_args: The args to the chroot.
   """
   cmd = ['./build_sdk_board', '--board', board]
   if force:
@@ -510,9 +515,9 @@ def VerifyBinpkg(buildroot, board, pkg, packages, extra_env=None):
       enter_chroot=True,
       extra_env=extra_env)
   pattern = r'^\[(ebuild|binary).*%s' % re.escape(pkg)
-  m = re.search(pattern, result.output, re.MULTILINE)
+  m = re.search(pattern, result.stdout, re.MULTILINE)
   if m and m.group(1) == 'ebuild':
-    logging.info('(output):\n%s', result.output)
+    logging.info('(output):\n%s', result.stdout)
     msg = 'Cannot find prebuilts for %s on %s' % (pkg, board)
     raise MissingBinpkg(msg)
 
@@ -774,10 +779,10 @@ def RunCrosConfigHost(buildroot, board, args, log_output=True):
       check=False)
   if result.returncode:
     # Show the output for debugging purposes.
-    if 'No such file or directory' not in result.error:
-      print('cros_config_host failed: %s\n' % result.error, file=sys.stderr)
+    if 'No such file or directory' not in result.stderr:
+      print('cros_config_host failed: %s\n' % result.stderr, file=sys.stderr)
     return None
-  return result.output.strip().splitlines()
+  return result.stdout.strip().splitlines()
 
 
 def GetModels(buildroot, board, log_output=True):
@@ -886,14 +891,14 @@ def RunSignerTests(_buildroot, board):
 
 def RunUnitTests(buildroot,
                  board,
-                 blacklist=None,
+                 blocklist=None,
                  extra_env=None,
                  build_stage=True,
                  chroot_args=None):
   cmd = ['cros_run_unit_tests', '--board=%s' % board, '--jobs=10']
 
-  if blacklist:
-    cmd += ['--blacklist_packages=%s' % ' '.join(blacklist)]
+  if blocklist:
+    cmd += ['--skip-packages=%s' % ' '.join(blocklist)]
 
   if not build_stage:
     cmd += ['--assume-empty-sysroot']
@@ -1034,7 +1039,7 @@ def RunHWTestSuite(build,
     if not result.HasValidSummary():
       # swarming client has failed.
       logging.error('No valid task summary json generated, output:%s',
-                    result.output)
+                    result.stdout)
       if result.task_summary_json:
         logging.error('Invalid task summary json:\n%s',
                       pformat.json(result.task_summary_json))
@@ -1045,7 +1050,7 @@ def RunHWTestSuite(build,
       logging.error(
           'Encountered swarming internal error:\n'
           'stdout: \n%s\n'
-          'summary json content:\n%s', result.output,
+          'summary json content:\n%s', result.stdout,
           str(result.task_summary_json))
       to_raise = failures_lib.SwarmingProxyFailure(
           '** Failed to fullfill request with proxy server, code(%d) **' %
@@ -1211,11 +1216,9 @@ def _InstallSkylabTool():
   Returns:
     the path of installed skylab tool.
   """
-  cache_dir = os.path.join(path_util.GetCacheDir(), 'cipd/packages')
   path = cipd.InstallPackage(cipd.GetCIPDFromCache(),
                              constants.CIPD_SKYLAB_PACKAGE,
-                             constants.CIPD_SKYLAB_INSTANCE_ID,
-                             cache_dir)
+                             constants.CIPD_SKYLAB_INSTANCE_ID)
   return os.path.join(path, 'skylab')
 
 
@@ -1287,7 +1290,7 @@ def RunSkylabHWTestSuite(
 
   try:
     output = cros_build_lib.run(cmd, stdout=True)
-    report = json.loads(output.output)
+    report = json.loads(output.stdout)
     task_id = report['task_id']
     task_url = report['task_url']
 
@@ -1300,9 +1303,9 @@ def RunSkylabHWTestSuite(
         task_id, timeout_mins=timeout_mins)
     output = cros_build_lib.run(wait_cmd, stdout=True)
     try:
-      report = json.loads(output.output)
+      report = json.loads(output.stdout)
     except:
-      logging.error('Error when json parsing:\n%s', output.output)
+      logging.error('Error when json parsing:\n%s', output.stdout)
       raise
 
     logging.info(
@@ -1401,14 +1404,14 @@ def RunSkylabHWTestPlan(test_plan=None,
 
     task_url = ''
     try:
-      report = json.loads(result.output)
+      report = json.loads(result.stdout)
       task_url = report.get('task_url')
 
       logging.info('Launched test plan task %s', task_url)
       cbuildbot_alerts.PrintBuildbotLink('Test plan task', task_url)
 
     except ValueError:
-      logging.warning('Unable to parse output:\n%s', result.output)
+      logging.warning('Unable to parse output:\n%s', result.stdout)
 
     return HWTestSuiteResult(None, None)
   except cros_build_lib.RunCommandError as e:
@@ -1619,7 +1622,7 @@ def _HWTestCreate(cmd, debug=False, **kwargs):
     for output in result.GetValue('outputs', ''):
       sys.stdout.write(output)
     sys.stdout.flush()
-    m = re.search(r'Created task id: (?P<job_id>.*)', result.output)
+    m = re.search(r'Created task id: (?P<job_id>.*)', result.stdout)
     if m:
       return m.group('job_id')
   return None
@@ -1859,7 +1862,7 @@ def GenerateStackTraces(buildroot, board, test_results_dir, archive_dir,
             encoding='utf-8',
             extra_env={'LLVM_SYMBOLIZER_PATH': '/usr/bin/llvm-symbolizer'})
         cros_build_lib.run(['c++filt'],
-                           input=raw.output,
+                           input=raw.stdout,
                            debug_level=logging.DEBUG,
                            cwd=buildroot,
                            stderr=True,
@@ -2019,7 +2022,7 @@ def MarkChromeAsStable(buildroot,
       enter_chroot=True,
       chroot_args=chroot_args,
       extra_env=extra_env,
-      encoding='utf-8').output.rstrip()
+      encoding='utf-8').stdout.rstrip()
   chrome_atom = None
   if portage_atom_string:
     chrome_atom = portage_atom_string.splitlines()[-1].partition('=')[-1]
@@ -2146,11 +2149,11 @@ def ExtractDependencies(buildroot,
     useflags: A list of useflags for this build.
     cpe_format: Set output format to CPE-only JSON; otherwise,
       output traditional deps.
-    raw_cmd_result: If set True, returns the CommandResult object.
+    raw_cmd_result: If set True, returns the CompletedProcess object.
       Otherwise, returns the dependencies as a dictionary.
 
   Returns:
-    Returns the CommandResult object if |raw_cmd_result| is set; returns
+    Returns the CompletedProcess object if |raw_cmd_result| is set; returns
     the dependencies in a dictionary otherwise.
   """
   cmd = ['cros_extract_deps']
@@ -2253,7 +2256,7 @@ def GenerateCPEExport(buildroot, board, useflags=None):
     useflags: A list of useflags for this build.
 
   Returns:
-    A CommandResult object with the results of running the CPE
+    A CompletedProcess object with the results of running the CPE
     export command.
   """
   return ExtractDependencies(
@@ -3045,6 +3048,148 @@ def BuildTastBundleTarball(buildroot, cwd, tarball_dir):
   return artifacts_service.BundleTastFiles(chroot, sysroot, tarball_dir)
 
 
+def BuildCFTImages(chroot, sysroot, version):
+  """Tar up the Tast private test bundles.
+
+  Args:
+    chroot: Full path to chroot dir.
+    sysroot: Relative dir to sysroot from the chroot.
+    version: chromeos build version.
+
+  Returns:
+    Path of the generated metadata.
+
+  Notes:
+    Currently there is no plumbing for --host and --project flags,
+    thus they will not be supported in cbuildbot as its a temporary solution
+    until rubik migration is completed.
+    Additionally, there will be no bbid tags in legacybuilds, as there
+    does not appear to be a supported way to expose it.
+  """
+  SRC_DIR = os.path.join(constants.SOURCE_ROOT, 'src')
+  PLATFORM_DEV_DIR = os.path.join(SRC_DIR, 'platform/dev')
+  TEST_SERVICE_DIR = os.path.join(PLATFORM_DEV_DIR, 'src/chromiumos/test')
+
+  tags = ','.join([version])
+  # Intentionally empty as attempting to plumb in BBID didn't work.
+  labels = []
+  build_script = os.path.join(
+      TEST_SERVICE_DIR, 'python/src/docker_libs/cli/build-dockerimages.py')
+  human_name = 'Service Builder'
+  results = []
+
+  with osutils.TempDir(prefix='test_container') as tempdir:
+    result_file = 'metadata.jsonpb'
+    # Note that we use an output file instead of stdout to avoid any issues
+    # with maintaining stdout hygiene.  Stdout and stderr are combined to
+    # form the error log in response to any errors.
+    output_path = os.path.join(tempdir, result_file)
+
+    cmd = [build_script, chroot, sysroot]
+    cmd += ['--tags', tags]
+    cmd += ['--output', output_path]
+    # Translate generator to comma separated string.
+    ct_labels = ','.join(labels)
+    cmd += ['--labels', ct_labels]
+    cmd += ['--build_all']
+    cmd += ['--upload']
+
+    cmd_result = cros_build_lib.run(cmd, check=False,
+                                    stderr=subprocess.STDOUT,
+                                    stdout=True)
+
+    if cmd_result.returncode != 0:
+      # When failing, just record a fail response with the builder name.
+      logging.info('%s build failed.\nStdout:\n%s\nStderr:\n%s',
+                   human_name, cmd_result.stdout, cmd_result.stderr)
+      result = test_pb2.TestServiceContainerBuildResult()
+      result.name = human_name
+      image_info = container_metadata_pb2.ContainerImageInfo()
+      result.failure.CopyFrom(
+          test_pb2.TestServiceContainerBuildResult.Failure(
+              error_message=cmd_result.stdout
+          )
+      )
+
+      results.append(result)
+
+    else:
+      logging.info('%s build succeeded.\nStdout:\n%s\nStderr:\n%s',
+                   human_name, cmd_result.stdout, cmd_result.stderr)
+      files = os.listdir(tempdir)
+      # Iterate through the tempdir to output metadata files.
+      for file in files:
+        if result_file in file:
+          output_path = os.path.join(tempdir, file)
+          # build-dockerimages.py will append the service name to outputfile
+          # with an underscore.
+          human_name = file.split('_')[-1]
+
+          result = test_pb2.TestServiceContainerBuildResult()
+          result.name = human_name
+          image_info = container_metadata_pb2.ContainerImageInfo()
+          json_format.Parse(osutils.ReadFile(output_path), image_info)
+          result.success.CopyFrom(
+              test_pb2.TestServiceContainerBuildResult.Success(
+                  image_info=image_info
+              )
+          )
+          results.append(result)
+
+  return results
+
+
+def ConvertResultsProtoToJson(results, board_name):
+  """Convert [TestServiceContainerBuildResult] to ContainerMetadata json.
+
+  Args:
+    results: list of TestServiceContainerBuildResult
+    board_name: The board name the results were built for.
+
+  Returns:
+    json formatted ContainerMetadata.
+  """
+
+  # Set up links to built containers.
+  container_metadata = ContainerMetadata()
+
+  container_images = container_metadata.containers[
+      board_name].images
+
+  for result in results:
+    if result.HasField('success'):
+      image_info = result.success.image_info
+
+      # Make sure digest has the hash algorithm on it so links work
+      if not image_info.digest.startswith('sha256:'):
+        image_info.digest = 'sha256:' + image_info.digest
+
+      # Index the container info by container name and store in
+      # the overall metadata structure that we'll upload.
+      container_images[image_info.name].CopyFrom(image_info)
+
+  # Set error status if any builds failed.
+  failed = False
+  for result in results:
+    if result.HasField('failure'):
+      logging.error('Build %s failed with %s',
+                    result.name, result.failure.error_message)
+      failed = True
+
+  if failed:
+    raise Exception('CFT Build(s) Failed')
+
+  return py2_MessageToJson(container_metadata)
+
+
+def py2_MessageToJson(obj):
+  # TODO(b/217973414): Delete once we don't need to fix the separator spacing
+  # between py2 and py3 MessageToJson and replace usages with MessageToJson.
+  return json.dumps(
+      json_format.MessageToDict(obj), separators=(',', ': '), indent=2,
+      sort_keys=True)
+
+
 def BuildFullAutotestTarball(buildroot, board, tarball_dir):
   """Tar up the full autotest directory into image_dir.
 
@@ -3248,22 +3393,6 @@ def BuildEbuildLogsTarball(buildroot, board, archive_dir):
   return artifacts_service.BundleEBuildLogsTarball(chroot, sysroot, archive_dir)
 
 
-def BuildChromeOSConfig(buildroot, board, archive_dir):
-  """Builds the ChromeOS Config JSON payload.
-
-  Args:
-    buildroot: Root directory where the build occurs.
-    board: The board for which ChromeOS Configs payload should be built.
-    archive_dir: The directory to drop the payload in.
-
-  Returns:
-    The file name of the output payload.
-  """
-  sysroot = sysroot_lib.Sysroot(os.path.join('build', board))
-  chroot = chroot_lib.Chroot(path=os.path.join(buildroot, 'chroot'))
-  return artifacts_service.BundleChromeOSConfig(chroot, sysroot, archive_dir)
-
-
 def BuildGceTarball(archive_dir, image_dir, image):
   """Builds a tarball that can be converted into a GCE image.
 
@@ -3342,13 +3471,15 @@ def BuildFpmcuUnittestsArchive(buildroot,
   return artifacts_service.BundleFpmcuUnittests(
       chroot, sysroot, tarball_dir)
 
-def CallBuildApiWithInputProto(buildroot, build_api_command, input_proto):
+
+def CallBuildApiWithInputProto(buildroot: str, build_api_command: str,
+                               input_proto: Dict):
   """Call BuildApi with the input_proto and buildroot.
 
   Args:
     buildroot: Root directory where build occurs.
     build_api_command: Service (command) to execute.
-    input_proto (dict): The input proto as a dict.
+    input_proto: The input proto as a dict.
 
   Returns:
     The json-encoded output proto.
@@ -3585,7 +3716,7 @@ class ChromeSDK(object):
       run_args: If set (dict), pass to run as kwargs.
 
     Returns:
-      A CommandResult object.
+      A CompletedProcess object.
     """
     if run_args is None:
       run_args = {}
@@ -3610,7 +3741,7 @@ class ChromeSDK(object):
       run_args: If set (dict), pass to run as kwargs.
 
     Returns:
-      A CommandResult object.
+      A CompletedProcess object.
     """
     return self.Run(self.GetNinjaCommand(debug=debug), run_args=run_args)
 
@@ -3639,7 +3770,7 @@ class ChromeSDK(object):
       debug: True if this is a debug build.
 
     Returns:
-      A CommandResult object.
+      A CompletedProcess object.
     """
     return self.Run([
         'cros_run_test',
@@ -3777,7 +3908,7 @@ def GetTargetChromiteApiVersion(buildroot, validate_version=True):
   # option; assume 0:0 (ie, initial state).
   major = minor = 0
   if api.returncode == 0:
-    major, minor = (int(x) for x in api.output.strip().split('.', 1))
+    major, minor = (int(x) for x in api.stdout.strip().split('.', 1))
 
   if validate_version and major != constants.REEXEC_API_MAJOR:
     raise ApiMismatchError(

@@ -6,8 +6,8 @@
 
 import os
 import shutil
-import urllib.parse
 from typing import TYPE_CHECKING
+import urllib.parse
 
 from chromite.api import controller
 from chromite.api import faux
@@ -19,6 +19,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import gs
 from chromite.lib import sysroot_lib
 from chromite.service import binhost
+
 
 if TYPE_CHECKING:
   from chromite.api import api_config

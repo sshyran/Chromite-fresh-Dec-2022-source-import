@@ -12,7 +12,6 @@ import shutil
 
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import commands
-from chromite.cbuildbot import goma_util
 from chromite.cbuildbot import manifest_version
 from chromite.cbuildbot.stages import artifact_stages
 from chromite.cbuildbot.stages import generic_stages
@@ -21,6 +20,7 @@ from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import failures_lib
+from chromite.lib import goma_lib
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import path_util
@@ -320,14 +320,16 @@ class TestSimpleChromeWorkflowStage(generic_stages.BoardSpecificBuilderStage,
         # TODO(crbug.com/751010): Revisit to enable DepsCache for
         # non-chrome-pfq bots, too.
         use_goma_deps_cache = self._run.config.name.endswith('chrome-pfq')
-        goma = goma_util.Goma(
+        goma = goma_lib.Goma(
             self._run.options.goma_dir,
             self._run.options.goma_client_json,
             stage_name=self.StageNamePrefix() if use_goma_deps_cache else None,
             chromeos_goma_dir=self._run.options.chromeos_goma_dir)
-        extra_args.extend(['--nostart-goma', '--gomadir', goma.linux_goma_dir])
+        extra_args.extend(
+            ['--nostart-goma', '--gomadir',
+             str(goma.linux_goma_dir)])
         self._run.attrs.metadata.UpdateWithDict(
-            {'goma_tmp_dir_for_simple_chrome': goma.goma_tmp_dir})
+            {'goma_tmp_dir_for_simple_chrome': str(goma.goma_tmp_dir)})
       else:
         goma = None
 

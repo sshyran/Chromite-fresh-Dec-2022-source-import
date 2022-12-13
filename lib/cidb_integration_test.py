@@ -10,11 +10,11 @@ import os
 import random
 import shutil
 
-from chromite.lib import constants
-from chromite.lib import metadata_lib
 from chromite.lib import cidb
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import metadata_lib
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import remote_access
@@ -257,7 +257,7 @@ class SchemaDumpTest(CIDBIntegrationTest):
     result = cros_build_lib.run(cmd, capture_output=True, quiet=True)
 
     # Strip out comment lines, to avoid dumping a problematic timestamp.
-    lines = [l for l in result.output.splitlines() if not l.startswith('--')]
+    lines = [l for l in result.stdout.splitlines() if not l.startswith('--')]
     return '\n'.join(lines)
 
   def testDump(self):
@@ -412,7 +412,7 @@ class DataSeries0Test(CIDBIntegrationTest):
     self.assertEqual(len(metadatas), 630, 'Did not load expected amount of '
                                           'test data')
 
-    # Perform some sanity check queries against the database, connected
+    # Perform some smoke check queries against the database, connected
     # as the readonly user. Apply schema migrations first to ensure that we can
     # use the latest version or the readonly password.
     db.ApplySchemaMigrations()

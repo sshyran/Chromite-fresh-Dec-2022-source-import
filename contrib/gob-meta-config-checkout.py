@@ -32,7 +32,8 @@ assert sys.version_info >= (3, 7), 'Python 3.7+ required'
 # pylint: disable=bad-indentation
 
 
-CSI_ERASE_LINE = '\x1b[2K'
+# Terminal escape sequence to erase the current line after the cursor.
+CSI_ERASE_LINE_AFTER = '\x1b[K'
 
 
 class GitConfig:
@@ -93,9 +94,10 @@ def get_hook_commit_msg(opts: argparse.Namespace) -> Path:
     commit_msg = opts.output / '.commit-msg'
     if not commit_msg.exists():
         opts.output.mkdir(0o755, exist_ok=True)
-        response = urllib.request.urlopen(
-            'https://gerrit-review.googlesource.com/tools/hooks/commit-msg')
-        commit_msg.write_bytes(response.read())
+        with urllib.request.urlopen(
+            'https://gerrit-review.googlesource.com/tools/hooks/commit-msg'
+        ) as response:
+            commit_msg.write_bytes(response.read())
         commit_msg.chmod(0o755)
     return commit_msg
 
@@ -200,16 +202,14 @@ def main(argv):
     func = functools.partial(create_repo, opts)
     repos = sorted(get_repos(opts.gob))
     capture = functools.partial(capture_output, func)
-    pool = multiprocessing.Pool(opts.jobs)
-
-    finished = 0
-    num_repos = len(repos)
-    for (repo, output) in pool.imap_unordered(capture, repos):
-        finished += 1
-        print(CSI_ERASE_LINE + '\r', end='')
-        print(f'[{finished}/{num_repos}] {repo}', output,
-              end='\n' if output else '', flush=not output)
-    print()
+    with multiprocessing.Pool(opts.jobs) as pool:
+        finished = 0
+        num_repos = len(repos)
+        for (repo, output) in pool.imap_unordered(capture, repos):
+            finished += 1
+            print(f'\r[{finished}/{num_repos}] {repo}{CSI_ERASE_LINE_AFTER}',
+                  output, end='\n' if output else '', flush=not output)
+        print()
 
 
 if __name__ == '__main__':

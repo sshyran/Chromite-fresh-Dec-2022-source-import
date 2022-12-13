@@ -27,7 +27,8 @@ from chromite.lib import parallel
 from chromite.lib import partial_mock
 from chromite.lib import portage_util
 from chromite.lib import results_lib
-from chromite.lib.buildstore import FakeBuildStore, BuildIdentifier
+from chromite.lib.buildstore import BuildIdentifier
+from chromite.lib.buildstore import FakeBuildStore
 from chromite.scripts import cbuildbot
 
 

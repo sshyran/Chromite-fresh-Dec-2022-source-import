@@ -8,6 +8,7 @@ import pytest  # pylint: disable=import-error
 
 import chromite as cr
 
+
 # Pytest's method of declaring fixtures causes Pylint to complain about
 # redefined outer names.
 # pylint: disable=redefined-outer-name

@@ -114,7 +114,7 @@ def CompareLicenseSets(set1, set2):
 
 
 def main(args):
-  parser = commandline.ArgumentParser(usage=__doc__)
+  parser = commandline.ArgumentParser(description=__doc__)
   parser.add_argument('html1', metavar='license1.html', type='path',
                       help='old html file')
   parser.add_argument('html2', metavar='license2.html', type='path',

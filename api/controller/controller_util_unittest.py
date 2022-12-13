@@ -9,12 +9,10 @@ from chromite.api.gen.chromite.api import build_api_test_pb2
 from chromite.api.gen.chromite.api import sysroot_pb2
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import build_target_lib
-from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
-from chromite.lib.parser import package_info
 from chromite.lib.chroot_lib import Chroot
+from chromite.lib.parser import package_info
 from chromite.lib.sysroot_lib import Sysroot
-from chromite.lib.sysroot_lib import PackageInstallError
 
 
 class ParseChrootTest(cros_test_lib.MockTestCase):
@@ -123,7 +121,7 @@ class PackageInfoToCPVTest(cros_test_lib.TestCase):
   """PackageInfoToCPV tests."""
 
   def testAllFields(self):
-    """Quick sanity check it's working properly."""
+    """Quick check CPV fields."""
     pi = common_pb2.PackageInfo()
     pi.package_name = 'pkg'
     pi.category = 'cat'
@@ -233,14 +231,11 @@ def test_deserialize_package_info():
 
 
 def test_retrieve_package_log_paths():
-  error = PackageInstallError(
-      msg='Failed to install 3 packages',
-      result=cros_build_lib.CommandResult(),
-      packages=[package_info.parse('foo/bar%d-1.0-r1' % num)
-                for num in range(1, 4)])
+  packages = [package_info.parse('foo/bar%d-1.0-r1' % num)
+              for num in range(1, 4)]
   output_proto = sysroot_pb2.InstallPackagesResponse()
   target_sysroot = Sysroot(path='/path/to/sysroot')
-  controller_util.retrieve_package_log_paths(error,
+  controller_util.retrieve_package_log_paths(packages,
                                              output_proto,
                                              target_sysroot)
   assert len(output_proto.failed_package_data) == 3

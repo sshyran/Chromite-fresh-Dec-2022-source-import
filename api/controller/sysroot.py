@@ -18,14 +18,41 @@ from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import goma_lib
+from chromite.lib import metrics_lib
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 from chromite.service import sysroot
-from chromite.utils import metrics
 
 
 _ACCEPTED_LICENSES = '@CHROMEOS'
+
+DEFAULT_BACKTRACK = 30
+
+
+def _GetGomaLogDirectory():
+  """Get goma's log directory based on the env variables.
+
+  Returns:
+    a string of a directory name where goma's log may exist, or None if no
+    potential directories exist.
+  """
+  # TODO(crbug.com/1045001): Replace environment variable with query to
+  # goma object after goma refactoring allows this.
+  candidates = [
+      'GLOG_log_dir',
+      'GOOGLE_LOG_DIR',
+      'TEST_TMPDIR',
+      'TMPDIR',
+      'TMP',
+  ]
+  for candidate in candidates:
+    value = os.environ.get(candidate)
+    if value and os.path.isdir(value):
+      return value
+
+  # "/tmp" will always exist.
+  return '/tmp'
 
 
 def ExampleGetResponse():
@@ -60,8 +87,8 @@ def ExampleGetResponse():
 
 def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Sysroot,
                  chroot: chroot_lib.Chroot, sysroot_class: sysroot_lib.Sysroot,
-                 build_target: build_target_lib.BuildTarget, output_dir: str
-                 ) -> list:
+                 build_target: build_target_lib.BuildTarget,
+                 output_dir: str) -> list:
   """Builds and copies sysroot artifacts to specified output_dir.
 
   Copies sysroot artifacts to output_dir, returning a list of (output_dir: str)
@@ -81,10 +108,12 @@ def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Sysroot,
   artifact_types = {
       in_proto.ArtifactType.SIMPLE_CHROME_SYSROOT:
           sysroot.CreateSimpleChromeSysroot,
-      in_proto.ArtifactType.CHROME_EBUILD_ENV: sysroot.CreateChromeEbuildEnv,
+      in_proto.ArtifactType.CHROME_EBUILD_ENV:
+          sysroot.CreateChromeEbuildEnv,
       in_proto.ArtifactType.BREAKPAD_DEBUG_SYMBOLS:
           sysroot.BundleBreakpadSymbols,
-      in_proto.ArtifactType.DEBUG_SYMBOLS: sysroot.BundleDebugSymbols,
+      in_proto.ArtifactType.DEBUG_SYMBOLS:
+          sysroot.BundleDebugSymbols,
   }
 
   for output_artifact in in_proto.output_artifacts:
@@ -115,12 +144,15 @@ def Create(input_proto, output_proto, _config):
       for x in input_proto.package_indexes
   ]
   run_configs = sysroot.SetupBoardRunConfig(
-      force=replace_sysroot, upgrade_chroot=update_chroot,
-      package_indexes=package_indexes)
+      force=replace_sysroot,
+      upgrade_chroot=update_chroot,
+      package_indexes=package_indexes,
+      backtrack=DEFAULT_BACKTRACK,
+  )
 
   try:
-    created = sysroot.Create(build_target, run_configs,
-                             accept_licenses=_ACCEPTED_LICENSES)
+    created = sysroot.Create(
+        build_target, run_configs, accept_licenses=_ACCEPTED_LICENSES)
   except sysroot.Error as e:
     cros_build_lib.Die(e)
 
@@ -143,8 +175,7 @@ def GenerateArchive(input_proto, output_proto, _config):
 
   with osutils.TempDir(delete=False) as temp_output_dir:
     sysroot_tar_path = sysroot.GenerateArchive(temp_output_dir,
-                                               build_target_name,
-                                               pkg_list)
+                                               build_target_name, pkg_list)
 
   # By assigning this Path variable to the tar path, the tar file will be
   # copied out to the input_proto's ResultPath location.
@@ -154,16 +185,6 @@ def GenerateArchive(input_proto, output_proto, _config):
 
 def _MockFailedPackagesResponse(_input_proto, output_proto, _config):
   """Mock error response that populates failed packages."""
-  pkg = output_proto.failed_packages.add()
-  pkg.package_name = 'package'
-  pkg.category = 'category'
-  pkg.version = '1.0.0_rc-r1'
-
-  pkg2 = output_proto.failed_packages.add()
-  pkg2.package_name = 'bar'
-  pkg2.category = 'foo'
-  pkg2.version = '3.7-r99'
-
   fail = output_proto.failed_package_data.add()
   fail.name.package_name = 'package'
   fail.name.category = 'category'
@@ -201,7 +222,8 @@ def InstallToolchain(input_proto, output_proto, _config):
   try:
     sysroot.InstallToolchain(build_target, target_sysroot, run_configs)
   except sysroot_lib.ToolchainInstallError as e:
-    controller_util.retrieve_package_log_paths(e, output_proto, target_sysroot)
+    controller_util.retrieve_package_log_paths(e.failed_toolchain_info,
+                                               output_proto, target_sysroot)
 
     return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
 
@@ -215,7 +237,7 @@ def InstallToolchain(input_proto, output_proto, _config):
 @validate.require_each('packages', ['category', 'package_name'])
 @validate.require_each('use_flags', ['flag'])
 @validate.validation_complete
-@metrics.collect_metrics
+@metrics_lib.collect_metrics
 def InstallPackages(input_proto, output_proto, _config):
   """Install packages into a sysroot, building as necessary and permitted."""
   compile_source = (
@@ -233,8 +255,9 @@ def InstallPackages(input_proto, output_proto, _config):
 
   # Get the package atom for each specified package. The field is optional, so
   # error only when we cannot parse an atom for each of the given packages.
-  packages = [controller_util.PackageInfoToCPV(x).cp
-              for x in input_proto.packages]
+  packages = [
+      controller_util.PackageInfoToCPV(x).cp for x in input_proto.packages
+  ]
 
   package_indexes = [
       binpkg.PackageIndexInfo.from_protobuf(x)
@@ -251,6 +274,7 @@ def InstallPackages(input_proto, output_proto, _config):
 
   use_flags = [u.flag for u in input_proto.use_flags]
   build_packages_config = sysroot.BuildPackagesRunConfig(
+      use_any_chrome=False,
       usepkg=not compile_source,
       install_debug_symbols=True,
       packages=packages,
@@ -259,8 +283,9 @@ def InstallPackages(input_proto, output_proto, _config):
       use_goma=use_goma,
       use_remoteexec=use_remoteexec,
       incremental_build=False,
-      setup_board=False,
-      dryrun=dryrun)
+      dryrun=dryrun,
+      backtrack=DEFAULT_BACKTRACK,
+  )
 
   try:
     sysroot.BuildPackages(build_target, target_sysroot, build_packages_config)
@@ -269,19 +294,15 @@ def InstallPackages(input_proto, output_proto, _config):
       # No packages to report, so just exit with an error code.
       return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
 
-    controller_util.retrieve_package_log_paths(e, output_proto, target_sysroot)
+    controller_util.retrieve_package_log_paths(e.failed_packages, output_proto,
+                                               target_sysroot)
 
     return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
   finally:
     # Copy goma logs to specified directory if there is a goma_config and
     # it contains a log_dir to store artifacts.
     if input_proto.goma_config.log_dir.dir:
-      # Get the goma log directory based on the GLOG_log_dir env variable.
-      # TODO(crbug.com/1045001): Replace environment variable with query to
-      # goma object after goma refactoring allows this.
-      log_source_dir = os.getenv('GLOG_log_dir')
-      if not log_source_dir:
-        cros_build_lib.Die('GLOG_log_dir must be defined.')
+      log_source_dir = _GetGomaLogDirectory()
       archiver = goma_lib.LogsArchiver(
           log_source_dir,
           dest_dir=input_proto.goma_config.log_dir.dir,
@@ -304,8 +325,8 @@ def InstallPackages(input_proto, output_proto, _config):
 
 def _LogBinhost(board):
   """Log the portage binhost for the given board."""
-  binhost = portage_util.PortageqEnvvar('PORTAGE_BINHOST', board=board,
-                                        allow_undefined=True)
+  binhost = portage_util.PortageqEnvvar(
+      'PORTAGE_BINHOST', board=board, allow_undefined=True)
   if not binhost:
     logging.warning('Portage Binhost not found.')
   else:

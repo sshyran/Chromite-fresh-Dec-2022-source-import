@@ -49,6 +49,13 @@ def ProcessShellFlags(defines):
   return _NameValueListToDict(shlex.split(defines))
 
 
+def ProcessVersionFile(src_dir):
+  """Returns the contents of //chrome/VERSION encoded as a dictionary."""
+  version_file = os.path.join(src_dir, 'chrome', 'VERSION')
+  version_contents = osutils.ReadFile(version_file).strip().splitlines()
+  return _NameValueListToDict(version_contents)
+
+
 class Conditions(object):
   """Functions that return conditions used to construct Path objects.
 
@@ -209,7 +216,7 @@ class Copier(object):
     else:
       for p in paths:
         rel_src = os.path.relpath(p, src_base)
-        if path.IsBlacklisted(rel_src):
+        if path.IsIgnored(rel_src):
           continue
         if path.dest is None:
           rel_dest = rel_src
@@ -226,9 +233,9 @@ class Copier(object):
           for sub_path in osutils.DirectoryIterator(p):
             rel_path = os.path.relpath(sub_path, p)
             sub_dest = os.path.join(dest, rel_path)
-            if path.IsBlacklisted(rel_path):
+            if path.IsIgnored(rel_path):
               continue
-            if sub_path.endswith('/'):
+            if sub_path.is_dir():
               osutils.SafeMakedirs(sub_dest, mode=self.dir_mode)
             else:
               self._CopyFile(sub_path, sub_dest, path)
@@ -241,7 +248,7 @@ class Copier(object):
 class Path(object):
   """Represents an artifact to be copied from build dir to staging dir."""
 
-  DEFAULT_BLACKLIST = (r'(^|.*/)\.git($|/.*)',)
+  DEFAULT_IGNORELIST = (r'(^|.*/)\.git($|/.*)',)
 
   def __init__(self,
                src,
@@ -251,7 +258,7 @@ class Path(object):
                mode=None,
                optional=False,
                strip=True,
-               blacklist=None):
+               ignorelist=None):
     """Initializes the object.
 
     Args:
@@ -273,8 +280,8 @@ class Path(object):
                 script errors out if the artifact does not exist.  In 'sloppy'
                 mode, the Copier class treats all artifacts as optional.
       strip: If |exe| is set, whether to strip the executable.
-      blacklist: A list of path patterns to ignore during the copy. This gets
-                 added to a default blacklist pattern.
+      ignorelist: A list of path patterns to ignore during the copy. This gets
+        added to a default ignorelist pattern.
     """
     self.src = src
     self.exe = exe
@@ -283,19 +290,19 @@ class Path(object):
     self.mode = mode
     self.optional = optional
     self.strip = strip
-    self.blacklist = self.DEFAULT_BLACKLIST
-    if blacklist is not None:
-      self.blacklist += tuple(blacklist)
+    self.ignorelist = self.DEFAULT_IGNORELIST
+    if ignorelist is not None:
+      self.ignorelist += tuple(ignorelist)
 
-  def IsBlacklisted(self, path):
-    """Returns whether |path| is in the blacklist.
+  def IsIgnored(self, path):
+    """Returns whether |path| is ignored.
 
-    A file in the blacklist is not copied over to the staging directory.
+    Ignored files are not copied over to the staging directory.
 
     Args:
       path: The path of a file, relative to the path of this Path object.
     """
-    for pattern in self.blacklist:
+    for pattern in self.ignorelist:
       if re.match(pattern, path):
         return True
     return False
@@ -404,14 +411,16 @@ _COPY_PATHS_CHROME = (
     Path('WidevineCdm/', optional=True),
 
     # In component build, copy so files (e.g. libbase.so) except for the
-    # blacklist.
+    # ignorelist.
     Path(
         '*.so',
-        blacklist=(r'libwidevinecdm.so',),
+        ignorelist=(r'libwidevinecdm.so',),
         exe=True,
         cond=C.GnSetTo(_IS_COMPONENT_BUILD, True)),
     Path('locales/*.pak', optional=True),
     Path('locales/*.pak.gz', optional=True),
+    Path('metadata.json', optional=True),
+    Path('mojo_service_manager/', optional=True),
     Path('Packages/chrome_content_browser/manifest.json', optional=True),
     Path('Packages/chrome_content_gpu/manifest.json', optional=True),
     Path('Packages/chrome_content_plugin/manifest.json', optional=True),
@@ -463,6 +472,11 @@ _COPY_PATHS_LACROS = (
     Path('swiftshader/', optional=True),
     Path('crashpad_handler', exe=True, optional=True),
     Path('chrome_crashpad_handler', exe=True, optional=True),
+    # Text file containing a seed for the lacros_variations_tast_tests target.
+    # This is not a lacros build artifact, just some variable test data that
+    # will be used by a Tast test that is too large to pass on the command
+    # line from a swarming task.
+    Path('variations_seed.txt', optional=True),
     Path('WidevineCdm/', optional=True),
     Path('libEGL.so', exe=True, optional=True),
     Path('libGLESv2.so', exe=True, optional=True),
@@ -569,7 +583,7 @@ def GetChromeRuntimeDeps(build_dir, build_target):
       raise GetRuntimeDepsError(
           'Failed to get runtime deps for: %s' % build_target)
 
-    runtime_deps = result.output.splitlines()
+    runtime_deps = result.stdout.splitlines()
 
   # |runtime_deps| is relative to |build_dir|. Make them relative to |src_dir|.
   src_dir = os.path.dirname(os.path.dirname(build_dir))
@@ -599,10 +613,10 @@ def GetChromeTestCopyPaths(build_dir, test_target):
     |build_dir|, i.e. chrome src dir.
   """
 
-  # Black list of file patterns for files in the runtime deps of the test target
-  # but are not really needed to run the test. Keep sync with the list in
+  # Ignore list for files in the runtime deps of the test target but are not
+  # really needed to run the test. Keep sync with the list in
   # build/chromeos/test_runner.py in chromium code.
-  _BLACKLIST = [
+  _IGNORELIST = [
       re.compile(r'.*build/android.*'),
       re.compile(r'.*build/chromeos.*'),
       re.compile(r'.*build/cros_cache.*'),
@@ -613,7 +627,7 @@ def GetChromeTestCopyPaths(build_dir, test_target):
   src_dir = os.path.dirname(os.path.dirname(build_dir))
   copy_paths = []
   for f in GetChromeRuntimeDeps(build_dir, test_target):
-    if not any(regex.match(f) for regex in _BLACKLIST):
+    if not any(regex.match(f) for regex in _IGNORELIST):
       local_path = os.path.join(src_dir, f)
       is_exe = os.path.isfile(local_path) and os.access(local_path, os.X_OK)
       copy_paths.append(Path(f, exe=is_exe))

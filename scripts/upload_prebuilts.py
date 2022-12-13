@@ -1,4 +1,4 @@
- # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
+# Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -32,8 +32,8 @@ from chromite.lib import binpkg
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import git
 from chromite.lib import gerrit
+from chromite.lib import git
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import parallel
@@ -54,7 +54,7 @@ _SLEEP_TIME = 60
 # be something big.
 _BINPKG_TTL = 60 * 60 * 24 * 365
 
-_HOST_PACKAGES_PATH = 'chroot/var/lib/portage/pkgs'
+_HOST_PACKAGES_PATH = 'var/lib/portage/pkgs'
 _CATEGORIES_PATH = 'chroot/etc/portage/categories'
 _PYM_PATH = 'chroot/usr/lib/portage/pym'
 _HOST_ARCH = 'amd64'
@@ -108,41 +108,49 @@ def UpdateLocalFile(filename, value, key='PORTAGE_BINHOST'):
   Returns:
     True if changes were made to the file.
   """
-  if os.path.exists(filename):
-    file_fh = open(filename)
-  else:
-    file_fh = open(filename, 'w+')
-  file_lines = []
-  found = False
-  made_changes = False
+
   keyval_str = '%(key)s=%(value)s'
-  for line in file_fh:
+
+  # Add quotes around the value, if missing.
+  if not value or value[0] != '"' or value[-1] != '"':
+    value = f'"{value}"'
+
+  # new_lines is the content to be used to overwrite/create the config file
+  # at the end of this function.
+  made_changes = False
+  new_lines = []
+
+  # Read current lines.
+  try:
+    current_lines = osutils.ReadFile(filename).splitlines()
+  except FileNotFoundError:
+    current_lines = []
+    print(f'Creating new file {filename}')
+
+  # Scan current lines, copy all vars to new_lines, change the line with |key|.
+  found = False
+  for line in current_lines:
     # Strip newlines from end of line. We already add newlines below.
     line = line.rstrip('\n')
-
     if len(line.split('=')) != 2:
       # Skip any line that doesn't fit key=val.
-      file_lines.append(line)
+      new_lines.append(line)
       continue
-
     file_var, file_val = line.split('=')
     if file_var == key:
       found = True
-      print('Updating %s=%s to %s="%s"' % (file_var, file_val, key, value))
-      value = '"%s"' % value
+      print(f'Updating {file_var}={file_val} to {key}={value}')
       made_changes |= (file_val != value)
-      file_lines.append(keyval_str % {'key': key, 'value': value})
+      new_lines.append(keyval_str % {'key': key, 'value': value})
     else:
-      file_lines.append(keyval_str % {'key': file_var, 'value': file_val})
-
+      new_lines.append(keyval_str % {'key': file_var, 'value': file_val})
   if not found:
-    value = '"%s"' % value
+    print(f'Adding new variable {key}={value}')
     made_changes = True
-    file_lines.append(keyval_str % {'key': key, 'value': value})
+    new_lines.append(keyval_str % {'key': key, 'value': value})
 
-  file_fh.close()
-  # write out new file
-  osutils.WriteFile(filename, '\n'.join(file_lines) + '\n')
+  # Write out new file.
+  osutils.WriteFile(filename, '\n'.join(new_lines) + '\n')
   return made_changes
 
 
@@ -370,7 +378,7 @@ class PrebuiltUploader(object):
 
   def __init__(self, upload_location, acl, binhost_base_url, pkg_indexes,
                build_path, packages, skip_upload, binhost_conf_dir, dryrun,
-               target, slave_targets, version):
+               target, slave_targets, version, chroot=None):
     """Constructor for prebuilt uploader object.
 
     This object can upload host or prebuilt files to Google Storage.
@@ -394,6 +402,7 @@ class PrebuiltUploader(object):
       slave_targets: List of BuildTargets managed by slave builders.
       version: A unique string, intended to be included in the upload path,
           which identifies the version number of the uploaded prebuilts.
+      chroot: Path to the chroot containing the prebuilts.
     """
     self._upload_location = upload_location
     self._acl = acl
@@ -408,6 +417,8 @@ class PrebuiltUploader(object):
     self._target = target
     self._slave_targets = slave_targets
     self._version = version
+    self._chroot = chroot or os.path.join(build_path,
+                                          constants.DEFAULT_CHROOT_DIR)
     self._gs_context = gs.GSContext(retries=_RETRIES, sleep=_SLEEP_TIME,
                                     dry_run=self._dryrun)
 
@@ -562,7 +573,7 @@ class PrebuiltUploader(object):
 
       if self._target == target and not self._skip_upload:
         # Upload prebuilts.
-        package_path = os.path.join(self._build_path, _HOST_PACKAGES_PATH)
+        package_path = os.path.join(self._chroot, _HOST_PACKAGES_PATH)
         self._UploadPrebuilt(package_path, packages_url_suffix)
 
       # Record URL where prebuilts were uploaded.
@@ -722,6 +733,9 @@ def ParseOptions(argv):
                            'Applies to previous slave board.')
   parser.add_argument('-p', '--build-path', required=True,
                       help='Path to the directory containing the chroot')
+  parser.add_argument('--chroot',
+                      help='Path where the chroot is located. '
+                           '(Default: {build_path}/chroot)')
   parser.add_argument('--packages', action='append', default=[],
                       help='Only include the specified packages. '
                            '(Default is to include all packages.)')
@@ -817,7 +831,7 @@ def ParseOptions(argv):
 
 
 def main(argv):
-  # Set umask to a sane value so that files created as root are readable.
+  # Set umask so that files created as root are readable.
   os.umask(0o22)
 
   options, target = ParseOptions(argv)
@@ -858,7 +872,8 @@ def main(argv):
                               pkg_indexes, options.build_path,
                               options.packages, options.skip_upload,
                               binhost_conf_dir, options.dryrun,
-                              target, options.slave_targets, version)
+                              target, options.slave_targets, version,
+                              options.chroot)
 
   if options.sync_host:
     uploader.SyncHostPrebuilts(options.key, options.git_sync,

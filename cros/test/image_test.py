@@ -27,7 +27,7 @@ import unittest
 from chromite.third_party import lddtree
 from chromite.third_party.pyelftools.elftools.common import exceptions
 from chromite.third_party.pyelftools.elftools.elf import elffile
-import magic  # pylint: disable=import-error,wrong-import-order
+import magic  # pylint: disable=import-error
 
 # pylint: disable=ungrouped-imports
 from chromite.cros.test import usergroup_baseline
@@ -166,9 +166,6 @@ class BlockedTest(image_test_lib.ImageTestCase):
     """Fail if any blocked files exist."""
     for path in self.BLOCKED_FILES:
       full_path = os.path.join(image_test_lib.ROOT_A, path.lstrip(os.sep))
-      # TODO(saklein) Convert ImageTestCase to extend cros_build_lib.unittest
-      # and change to an assertNotExists. Currently produces an error importing
-      # mox on at least some builders.
       self.assertFalse(os.path.exists(full_path),
                        'Path exists but should not: %s' % full_path)
 
@@ -231,7 +228,7 @@ class LinkageTest(image_test_lib.ImageTestCase):
 
   def _IsPackageMerged(self, package_name):
     has_version = portage_util.PortageqHasVersion(
-        package_name, sysroot=image_test_lib.ROOT_A)
+        package_name, sysroot=os.path.abspath(image_test_lib.ROOT_A))
     if has_version:
       logging.info('Package is available: %s', package_name)
     else:
@@ -259,6 +256,10 @@ class LinkageTest(image_test_lib.ImageTestCase):
       elif self._IsPackageMerged('chromeos-base/chromeos-chrome'):
         binaries.append('opt/google/chrome/chrome')
 
+    if self._IsPackageMerged('net-print/hplip'):
+      binaries.append('usr/libexec/cups/filter/hpcups')
+      binaries.append('usr/libexec/cups/filter/hpps')
+
     binaries = [os.path.join(image_test_lib.ROOT_A, x) for x in binaries]
 
     # Grab all .so files
@@ -279,7 +280,29 @@ class LinkageTest(image_test_lib.ImageTestCase):
         else:
           to_test = os.path.join(os.path.dirname(to_test), link)
       try:
-        lddtree.ParseELF(to_test, root=image_test_lib.ROOT_A, ldpaths=ldpaths)
+        elf = lddtree.ParseELF(to_test, root=image_test_lib.ROOT_A,
+                               ldpaths=ldpaths)
+
+        if os.path.basename(to_test) in [
+            # Deps mounted from squashfs at runtime.
+            'libcros_camera.so',
+
+            # Deps mounted from squashfs at runtime.
+            'intel-ipu6.so',
+
+            # Deps mounted from squashfs at runtime.
+            'camera.qcom.core.so',
+
+            # libasound_module_ctl_ipaudio.so dep outside normal search paths.
+            'libasound_module_pcm_ipaudio.so',
+        ]:
+          continue
+
+        for lib in elf['needed']:
+          if not lib in elf['libs'] or not elf['libs'][lib]['path']:
+            self.fail('Fail linkage test for /%s: unresolved library %s' % (
+                os.path.relpath(to_test, start=image_test_lib.ROOT_A), lib))
+
       except lddtree.exceptions.ELFError:
         continue
       except IOError as e:
@@ -320,7 +343,7 @@ class FileSystemMetaDataTest(image_test_lib.ImageTestCase):
     # So we need to ignore the first line.
     ret = cros_build_lib.sudo_run(cmd, capture_output=True,
                                   extra_env={'LC_ALL': 'C'})
-    fs_stat = dict(line.split(':', 1) for line in ret.output.splitlines()
+    fs_stat = dict(line.split(':', 1) for line in ret.stdout.splitlines()
                    if ':' in line)
     free_inodes = int(fs_stat['Free inodes'])
     free_blocks = int(fs_stat['Free blocks'])
@@ -420,8 +443,15 @@ class SymbolsTest(image_test_lib.ImageTestCase):
           importeds[full_name] = imp
           exported.update(exp)
 
+    # TODO(toolchain): Remove the old libthread_db-1.0.so entry once glibc
+    # is upgraded past 2.34
     known_unsatisfieds = {
         'libthread_db-1.0.so': {
+            b'ps_pdwrite', b'ps_pdread', b'ps_lgetfpregs', b'ps_lsetregs',
+            b'ps_lgetregs', b'ps_lsetfpregs', b'ps_pglobal_lookup',
+            b'ps_getpid',
+        },
+        'libthread_db.so.1': {
             b'ps_pdwrite', b'ps_pdread', b'ps_lgetfpregs', b'ps_lsetregs',
             b'ps_lgetregs', b'ps_lsetfpregs', b'ps_pglobal_lookup',
             b'ps_getpid',
@@ -433,12 +463,20 @@ class SymbolsTest(image_test_lib.ImageTestCase):
         # imports that will appear to be unsatisfied.
         'libmojo_core_arc32.so',
         'libmojo_core_arc64.so',
+        # The camera shared libraries these libraries need are mounted at
+        # runtime.
+        'libcros_camera.so',
+        'camera_hal/intel-ipu6.so',
+        'camera.qcom.core.so',
+        'camera_hal/usb.so',
     ])
 
     failures = []
     for full_name, imported in importeds.items():
-      file_name = os.path.basename(full_name)
-      if file_name in excluded_files:
+      parts = full_name.split('/')
+      file_name = parts[-1]
+      dir_file_name = '/'.join(parts[-2:])
+      if file_name in excluded_files or dir_file_name in excluded_files:
         continue
       missing = imported - exported - known_unsatisfieds.get(file_name, set())
       if missing:
@@ -715,6 +753,14 @@ class SymlinkTest(image_test_lib.ImageTestCase):
           '/usr/local/usr/lib/python-exec',
           '/usr/local/lib/python-exec',
       },
+      '/usr/lib/python*': {
+          '/usr/local/usr/lib/python*',
+          '/usr/local/lib/python*',
+      },
+      '/usr/lib64/python*': {
+          '/usr/local/usr/lib64/python*',
+          '/usr/local/lib64/python*',
+      },
       '/usr/lib/debug': {'/usr/local/usr/lib/debug'},
       # Used by `file` and libmagic.so when the package is in /usr/local.
       '/usr/share/misc/magic.mgc': {'/usr/local/share/misc/magic.mgc'},
@@ -862,7 +908,7 @@ class IntelWifiTest(image_test_lib.ImageTestCase):
       logging.warning('stderr: %s', e.stderr)
       return []
 
-    return modinfo.output.splitlines()
+    return modinfo.stdout.splitlines()
 
   def _GetLinuxFirmwareIwlwifiFlags(self):
     """Extract 'iwlwifi-*' flags from LINUX_FIRMWARE."""

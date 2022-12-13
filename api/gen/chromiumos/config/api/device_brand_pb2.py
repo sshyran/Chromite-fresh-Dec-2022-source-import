@@ -22,7 +22,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z(go.chromium.org/chromiumos/config/go/api',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n(chromiumos/config/api/device_brand.proto\x12\x15\x63hromiumos.config.api\x1a%chromiumos/config/api/design_id.proto\x1a+chromiumos/config/api/device_brand_id.proto\x1a&chromiumos/config/api/partner_id.proto\"\xcd\x01\n\x0b\x44\x65viceBrand\x12\x30\n\x02id\x18\x01 \x01(\x0b\x32$.chromiumos.config.api.DeviceBrandId\x12\x32\n\tdesign_id\x18\x02 \x01(\x0b\x32\x1f.chromiumos.config.api.DesignId\x12\x30\n\x06oem_id\x18\x03 \x01(\x0b\x32 .chromiumos.config.api.PartnerId\x12\x12\n\nbrand_code\x18\x04 \x01(\t\x12\x12\n\nbrand_name\x18\x05 \x01(\tB*Z(go.chromium.org/chromiumos/config/go/apib\x06proto3'
+  serialized_pb=b'\n(chromiumos/config/api/device_brand.proto\x12\x15\x63hromiumos.config.api\x1a%chromiumos/config/api/design_id.proto\x1a+chromiumos/config/api/device_brand_id.proto\x1a&chromiumos/config/api/partner_id.proto\"\xe6\x01\n\x0b\x44\x65viceBrand\x12\x30\n\x02id\x18\x01 \x01(\x0b\x32$.chromiumos.config.api.DeviceBrandId\x12\x32\n\tdesign_id\x18\x02 \x01(\x0b\x32\x1f.chromiumos.config.api.DesignId\x12\x30\n\x06oem_id\x18\x03 \x01(\x0b\x32 .chromiumos.config.api.PartnerId\x12\x17\n\x0f\x65xport_oem_info\x18\x06 \x01(\x08\x12\x12\n\nbrand_code\x18\x04 \x01(\t\x12\x12\n\nbrand_name\x18\x05 \x01(\tB*Z(go.chromium.org/chromiumos/config/go/apib\x06proto3'
   ,
   dependencies=[chromiumos_dot_config_dot_api_dot_design__id__pb2.DESCRIPTOR,chromiumos_dot_config_dot_api_dot_device__brand__id__pb2.DESCRIPTOR,chromiumos_dot_config_dot_api_dot_partner__id__pb2.DESCRIPTOR,])
 
@@ -59,14 +59,21 @@ _DEVICEBRAND = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='brand_code', full_name='chromiumos.config.api.DeviceBrand.brand_code', index=3,
+      name='export_oem_info', full_name='chromiumos.config.api.DeviceBrand.export_oem_info', index=3,
+      number=6, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='brand_code', full_name='chromiumos.config.api.DeviceBrand.brand_code', index=4,
       number=4, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='brand_name', full_name='chromiumos.config.api.DeviceBrand.brand_name', index=4,
+      name='brand_name', full_name='chromiumos.config.api.DeviceBrand.brand_name', index=5,
       number=5, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -85,7 +92,7 @@ _DEVICEBRAND = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=192,
-  serialized_end=397,
+  serialized_end=422,
 )
 
 _DEVICEBRAND.fields_by_name['id'].message_type = chromiumos_dot_config_dot_api_dot_device__brand__id__pb2._DEVICEBRANDID

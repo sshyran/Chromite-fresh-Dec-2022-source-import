@@ -4,31 +4,30 @@
 
 """Unittests for the artifact stages."""
 
-import json
 import os
 import sys
 from unittest import mock
 
 from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot import commands
-from chromite.lib import constants
-from chromite.lib import failures_lib
 from chromite.cbuildbot import prebuilts
-from chromite.lib import results_lib
 from chromite.cbuildbot.stages import artifact_stages
 from chromite.cbuildbot.stages import build_stages_unittest
 from chromite.cbuildbot.stages import generic_stages_unittest
+from chromite.cbuildbot.stages.generic_stages_unittest import patch
+from chromite.cbuildbot.stages.generic_stages_unittest import patches
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import failures_lib
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import parallel_unittest
 from chromite.lib import partial_mock
 from chromite.lib import path_util
+from chromite.lib import results_lib
 from chromite.lib.buildstore import FakeBuildStore
 
-from chromite.cbuildbot.stages.generic_stages_unittest import patch
-from chromite.cbuildbot.stages.generic_stages_unittest import patches
 
 # pylint: disable=too-many-ancestors
 
@@ -210,7 +209,7 @@ class CPEExportStageTest(generic_stages_unittest.AbstractStageTestCase,
     self.StartPatcher(parallel_unittest.ParallelMock())
 
     self.rc_mock = self.StartPatcher(cros_test_lib.RunCommandMock())
-    self.rc_mock.SetDefaultCmdResult(output='')
+    self.rc_mock.SetDefaultCmdResult(stdout='')
 
     self.stage = None
     self.buildstore = FakeBuildStore()
@@ -258,7 +257,7 @@ class DebugSymbolsStageTest(generic_stages_unittest.AbstractStageTestCase,
     self.tar_mock = self.PatchObject(commands, 'GenerateDebugTarball')
 
     self.rc_mock = self.StartPatcher(cros_test_lib.RunCommandMock())
-    self.rc_mock.SetDefaultCmdResult(output='')
+    self.rc_mock.SetDefaultCmdResult(stdout='')
 
     self.stage = None
 
@@ -541,140 +540,3 @@ class GenerateSysrootStageTest(generic_stages_unittest.AbstractStageTestCase,
     stage._GenerateSysroot()
     sysroot_tarball = 'sysroot_%s.tar.xz' % ('virtual_target-os')
     stage._upload_queue.put.assert_called_with([sysroot_tarball])
-
-
-class CollectPGOProfilesStageTest(generic_stages_unittest.AbstractStageTestCase,
-                                  cbuildbot_unittest.SimpleBuilderTestCase,
-                                  cros_test_lib.RunCommandTestCase):
-  """Exercise CollectPGOProfilesStage functionality."""
-
-  RELEASE_TAG = ''
-
-  _VALID_CLANG_VERSION_SHA = '4e8231b5cf0f5f62c7a51a857e29f5be5cb55734'
-  _VALID_CLANG_VERSION_STRING = (
-      'Chromium OS 10.0_pre377782_p20200113-r1 clang version 10.0.0 '
-      '(/var/cache/chromeos-cache/distfiles/host/egit-src/llvm-project '
-      '4e8231b5cf0f5f62c7a51a857e29f5be5cb55734)\n'
-      'Target: x86_64-pc-linux-gnu\n'
-      'Thread model: posix\n'
-      'InstalledDir: /usr/bin\n'
-  )
-
-  # pylint: disable=protected-access
-
-  def setUp(self):
-    self._Prepare()
-    self.buildstore = FakeBuildStore()
-
-  def ConstructStage(self):
-    self._run.GetArchive().SetupArchivePath()
-    return artifact_stages.CollectPGOProfilesStage(self._run, self.buildstore,
-                                                   self._current_board)
-
-  def testParseLLVMHeadSHA(self):
-    stage = self.ConstructStage()
-    actual_sha = stage._ParseLLVMHeadSHA(self._VALID_CLANG_VERSION_STRING)
-    self.assertEqual(actual_sha, self._VALID_CLANG_VERSION_SHA)
-
-  def testCollectLLVMMetadataRaisesOnAnInvalidVersionString(self):
-    stage = self.ConstructStage()
-
-    self.rc.AddCmdResult(partial_mock.In('equery'),
-                         stdout=' - + llvm_pgo_generate :\n')
-
-    valid_version_lines = self._VALID_CLANG_VERSION_STRING.splitlines()
-    valid_version_lines[0] = 'clang version 8.0.1'
-    self.rc.AddCmdResult(partial_mock.In('clang'),
-                         stdout='\n'.join(valid_version_lines))
-
-    with self.assertRaises(ValueError) as raised:
-      stage._CollectLLVMMetadata()
-
-    self.assertIn('version string', str(raised.exception))
-
-  def testCollectLLVMMetadataRaisesIfClangIsntPGOGeneratedEmpty(self):
-    stage = self.ConstructStage()
-
-    self.rc.AddCmdResult(partial_mock.In('equery'), stdout='\n')
-    self.rc.AddCmdResult(partial_mock.In('clang'),
-                         stdout=self._VALID_CLANG_VERSION_STRING)
-
-    with self.assertRaises(ValueError) as raised:
-      stage._CollectLLVMMetadata()
-
-    self.assertIn('pgo_generate flag', str(raised.exception))
-
-  def testCollectLLVMMetadataRaisesIfClangIsntPGOGenerated(self):
-    stage = self.ConstructStage()
-
-    self.rc.AddCmdResult(partial_mock.In('equery'),
-                         stdout=' - - llvm_pgo_generate :\n')
-    self.rc.AddCmdResult(partial_mock.In('clang'),
-                         stdout=self._VALID_CLANG_VERSION_STRING)
-
-    with self.assertRaises(ValueError) as raised:
-      stage._CollectLLVMMetadata()
-
-    self.assertIn('pgo_generate flag', str(raised.exception))
-
-  def testCollectLLVMMetadataFunctionsInASimpleCase(self):
-    stage = self.ConstructStage()
-
-    self.rc.AddCmdResult(partial_mock.In('equery'),
-                         stdout=' - + llvm_pgo_generate :\n')
-    self.rc.AddCmdResult(partial_mock.In('clang'),
-                         stdout=self._VALID_CLANG_VERSION_STRING)
-
-    upload_queue_put = self.PatchObject(stage._upload_queue, 'put')
-    stage._CollectLLVMMetadata()
-
-    upload_queue_put.assert_called_once()
-
-    written_file = os.path.join(stage.archive_path, 'llvm_metadata.json')
-    given_metadata = json.loads(osutils.ReadFile(written_file))
-    expected_metadata = {
-        'head_sha': self._VALID_CLANG_VERSION_SHA,
-    }
-    self.assertEqual(given_metadata, expected_metadata)
-
-    upload_queue_put.assert_called_with([written_file])
-
-  def testCollectPGOProfiles(self):
-    """Test that the sysroot generation was called correctly."""
-    stage = self.ConstructStage()
-
-    # No profiles directory
-    with self.assertRaises(Exception) as msg:
-      stage._CollectPGOProfiles()
-    self.assertEqual('No profile directories found.', str(msg.exception))
-
-    # Create profiles directory
-    cov_path = 'build/%s/build/coverage_data' % stage._current_board
-    out_cov_path = os.path.abspath(
-        os.path.join(self.build_root, 'chroot', cov_path))
-    os.makedirs(os.path.join(out_cov_path, 'raw_profiles'))
-
-    # No profraw files
-    with self.assertRaises(Exception) as msg:
-      stage._CollectPGOProfiles()
-    self.assertEqual('No profraw files found in profiles directory.',
-                     str(msg.exception))
-
-    # Create profraw file
-    profraw = os.path.join(out_cov_path, 'raw_profiles', 'a.profraw')
-    with open(profraw, 'a') as f:
-      f.write('123')
-
-    # Check uploading tarball
-    self.PatchObject(stage._upload_queue, 'put', autospec=True)
-    stage._CollectPGOProfiles()
-    llvm_profdata = path_util.ToChrootPath(
-        os.path.join(stage.archive_path, 'llvm.profdata'))
-    profraw_list = path_util.ToChrootPath(
-        os.path.join(stage.archive_path, 'profraw_list'))
-    self.assertEqual(['llvm-profdata', 'merge',
-                      '-output', llvm_profdata,
-                      '-f', profraw_list],
-                     stage._merge_cmd)
-    tarball = stage.PROFDATA_TAR
-    stage._upload_queue.put.assert_called_with([tarball])

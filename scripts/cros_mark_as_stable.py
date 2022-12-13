@@ -7,7 +7,7 @@
 import logging
 import os
 
-from chromite.cbuildbot import manifest_version
+from chromite.lib import chromeos_version
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -82,7 +82,7 @@ def CleanStalePackages(srcroot, boards, package_atoms):
 def _DoWeHaveLocalCommits(stable_branch, tracking_branch, cwd):
   """Returns true if there are local commits."""
   output = git.RunGit(
-      cwd, ['rev-parse', stable_branch, tracking_branch]).output.split()
+      cwd, ['rev-parse', stable_branch, tracking_branch]).stdout.split()
   return output[0] != output[1]
 
 
@@ -143,7 +143,7 @@ def PushChange(stable_branch, tracking_branch, dryrun, cwd,
       '^(?!chrome-bot|chromeos-ci-prod|chromeos-ci-release)',
       '%s..%s' % (remote_ref.ref, stable_branch)
   ]
-  bad_cls = git.RunGit(cwd, bad_cl_cmd).output
+  bad_cls = git.RunGit(cwd, bad_cl_cmd).stdout
   if bad_cls.strip() and not dryrun:
     logging.error(
         'The Uprev stage found changes from users other than '
@@ -157,7 +157,7 @@ def PushChange(stable_branch, tracking_branch, dryrun, cwd,
   description = git.RunGit(
       cwd,
       ['log', '--format=format:%s%n%n%b',
-       '%s..%s' % (remote_ref.ref, stable_branch)]).output
+       '%s..%s' % (remote_ref.ref, stable_branch)]).stdout
   description = '%s\n\n%s' % (GIT_COMMIT_SUBJECT, description)
   logging.info('For %s, using description %s', cwd, description)
   git.CreatePushBranch(constants.MERGE_BRANCH, cwd,
@@ -219,7 +219,7 @@ class GitBranch(object):
     """Returns True if the branch exists."""
     if not branch:
       branch = self.branch_name
-    branches = git.RunGit(self.cwd, ['branch']).output
+    branches = git.RunGit(self.cwd, ['branch']).stdout
     return branch in branches.split()
 
 
@@ -377,8 +377,8 @@ def _WorkOnCommit(options, overlays, overlay_tracking_branch,
   """
   # We cleaned up self referential ebuilds by this version, but don't enforce
   # the check on older ones to avoid breaking factory/firmware branches.
-  root_version = manifest_version.VersionInfo.from_repo(options.buildroot)
-  no_self_repos_version = manifest_version.VersionInfo('13099.0.0')
+  root_version = chromeos_version.VersionInfo.from_repo(options.buildroot)
+  no_self_repos_version = chromeos_version.VersionInfo('13099.0.0')
   reject_self_repo = root_version >= no_self_repos_version
 
   overlay_ebuilds = _GetOverlayToEbuildsMap(options, overlays, package_list)
@@ -413,8 +413,8 @@ def _GetOverlayToEbuildsMap(options, overlays, package_list):
   Returns:
     A dict mapping each overlay to a list of ebuilds belonging to it.
   """
-  root_version = manifest_version.VersionInfo.from_repo(options.buildroot)
-  subdir_removal = manifest_version.VersionInfo('10363.0.0')
+  root_version = chromeos_version.VersionInfo.from_repo(options.buildroot)
+  subdir_removal = chromeos_version.VersionInfo('10363.0.0')
   require_subdir_support = root_version < subdir_removal
 
   overlay_ebuilds = {}
@@ -559,7 +559,7 @@ def _WorkOnEbuild(overlay, ebuild, manifest, options, ebuild_paths_to_add,
               'log', '%s..%s' % (old_commit_id[:8], new_commit_id[:8]),
               '--pretty=format:%h %<(63,trunc)%s'])
           git_log.append('$ ' + logs.cmdstr)
-          git_log.extend(line.strip() for line in logs.output.splitlines())
+          git_log.extend(line.strip() for line in logs.stdout.splitlines())
         if git_log:
           messages.append('\n'.join(git_log))
 

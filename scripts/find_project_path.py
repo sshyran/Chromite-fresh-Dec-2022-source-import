@@ -10,8 +10,8 @@ exception if no match can be found.
 """
 
 from chromite.lib import commandline
-from chromite.lib import repo_manifest
 from chromite.lib import repo_util
+from chromite.utils import repo_manifest
 
 
 def get_parser():

@@ -4,39 +4,53 @@
 
 """Image API unittests."""
 
+import errno
 import os
 from pathlib import Path
 
-from chromite.lib import constants
+from chromite.lib import build_target_lib
+from chromite.lib import chromeos_version
 from chromite.lib import chroot_lib
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
+from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 from chromite.service import image
 
 
-class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase):
+class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase,
+                     cros_test_lib.LoggingTestCase):
   """Build Image tests."""
 
   def setUp(self):
-    osutils.Touch(os.path.join(self.tempdir,
-                               image.PARALLEL_EMERGE_STATUS_FILE_NAME))
+    osutils.Touch(
+        os.path.join(self.tempdir, image.PARALLEL_EMERGE_STATUS_FILE_NAME))
     self.PatchObject(osutils.TempDir, '__enter__', return_value=self.tempdir)
-
-  def testInsideChrootCommand(self):
-    """Test the build_image command when called from inside the chroot."""
-    self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=True)
-    image.Build('board', [constants.IMAGE_TYPE_BASE])
-    self.assertCommandContains(
-        [os.path.join(constants.CROSUTILS_DIR, 'build_image')])
-
-  def testOutsideChrootCommand(self):
-    """Test the build_image command when called from outside the chroot."""
-    self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=False)
-    image.Build('board', [constants.IMAGE_TYPE_BASE])
-    self.assertCommandContains(['./build_image'])
+    self.PatchObject(portage_util, 'GetBoardUseFlags', return_value='')
+    self.PatchObject(
+        chromeos_version,
+        'VersionInfo',
+        return_value=chromeos_version.VersionInfo(
+            version_string='1.2.3', chrome_branch='4'))
+    self.config = image.BuildConfig(
+        build_root=self.tempdir / 'build',
+        output_root=self.tempdir / 'output',
+        replace=True,
+        build_attempt=1)
+    self.build_dir, self.output_dir, self.image_dir = image_lib.CreateBuildDir(
+        self.config.build_root,
+        self.config.output_root,
+        '4',
+        '1.2.3',
+        'board',
+        'latest',
+        replace=True,
+        build_attempt=1,
+    )
+    self.MoveDir_mock = self.PatchObject(osutils, 'MoveDirContents')
 
   def testBuildBoardHandling(self):
     """Test the argument handling."""
@@ -47,58 +61,247 @@ class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase):
     with self.assertRaises(image.InvalidArgumentError):
       image.Build('', [constants.IMAGE_TYPE_BASE])
 
-    # Should be using the passed board.
-    image.Build('board', [constants.IMAGE_TYPE_BASE])
-    self.assertCommandContains(['--board', 'board'])
-
   def testBuildImageTypes(self):
     """Test the image type handling."""
     result = image.Build('board', [])
     assert result.all_built and not result.build_run
 
     # Should be using the argument when passed.
-    image.Build('board', [constants.IMAGE_TYPE_DEV])
-    self.assertCommandContains([constants.IMAGE_TYPE_DEV])
+    image.Build('board', [constants.IMAGE_TYPE_DEV], config=self.config)
+    self.assertCommandContains(
+        [constants.IMAGE_TYPE_TO_NAME[constants.IMAGE_TYPE_DEV]])
 
     # Multiple should all be passed.
-    multi = [constants.IMAGE_TYPE_BASE, constants.IMAGE_TYPE_DEV,
-             constants.IMAGE_TYPE_TEST]
-    image.Build('board', multi)
-    self.assertCommandContains(multi)
+    multi = [
+        constants.IMAGE_TYPE_BASE,
+        constants.IMAGE_TYPE_DEV,
+        constants.IMAGE_TYPE_TEST,
+    ]
+    image.Build('board', multi, config=self.config)
+    for x in multi:
+      self.assertCommandContains([constants.IMAGE_TYPE_TO_NAME[x]])
 
     # Building RECOVERY only should cause base to be built.
-    image.Build('board', [constants.IMAGE_TYPE_RECOVERY])
-    self.assertCommandContains([constants.IMAGE_TYPE_BASE])
+    image.Build('board', [constants.IMAGE_TYPE_RECOVERY], config=self.config)
+    self.assertCommandContains(
+        [constants.IMAGE_TYPE_TO_NAME[constants.IMAGE_TYPE_BASE]])
+
+  def testInvalidBuildImageTypes(self):
+    """Test the image type handling with invalid input."""
+    build_result = image.Build(
+        'board', [constants.IMAGE_TYPE_BASE, constants.FACTORY_IMAGE_BIN])
+    self.assertEqual(build_result.return_code, errno.EINVAL)
+
+  def testBuildDir(self):
+    """Test the case if build directory exists."""
+    config = image.BuildConfig(
+        build_root=self.tempdir / 'build', output_root=self.tempdir / 'build')
+    build_result = image.Build(
+        'board', [constants.IMAGE_TYPE_DEV], config=config)
+    build_result = image.Build(
+        'board', [constants.IMAGE_TYPE_DEV], config=config)
+    self.assertEqual(build_result.return_code, errno.EEXIST)
+
+  def testDlcCommand(self):
+    """Test if DLC installation is called."""
+    image.Build('board', [constants.IMAGE_TYPE_DEV], config=self.config)
+    self.assertCommandContains([
+        'build_dlc',
+        '--sysroot',
+        build_target_lib.get_default_sysroot_path('board'),
+        '--install-root-dir',
+        self.output_dir / 'dlc',
+        '--board',
+        'board',
+    ])
+
+  def testMoveDir(self):
+    """Test if MoveDirContents is called."""
+    image.Build('board', [constants.IMAGE_TYPE_DEV], config=self.config)
+    self.MoveDir_mock.assert_called_once_with(
+        self.build_dir,
+        self.output_dir,
+        remove_from_dir=True,
+        allow_nonempty=True)
+
+  def testSummary(self):
+    """Test if summary text is printed correctly."""
+    base_image_path = os.path.relpath(self.output_dir /
+                                      constants.BASE_IMAGE_BIN)
+    dev_image_path = os.path.relpath(self.output_dir / constants.DEV_IMAGE_BIN)
+    test_image_path = os.path.relpath(self.output_dir /
+                                      constants.TEST_IMAGE_BIN)
+
+    with cros_test_lib.LoggingCapturer() as logs:
+      image.Build(
+          'board', [
+              constants.IMAGE_TYPE_BASE, constants.IMAGE_TYPE_DEV,
+              constants.IMAGE_TYPE_TEST,
+          ],
+          config=self.config)
+      # pylint: disable=protected-access
+      # Base Image summary text.
+      self.AssertLogsContain(
+          logs,
+          (f'{image._IMAGE_TYPE_DESCRIPTION[constants.BASE_IMAGE_BIN]} image '
+           f'created as {constants.BASE_IMAGE_BIN}'),
+      )
+      self.AssertLogsContain(logs, f'cros flash usb:// {base_image_path}')
+      self.AssertLogsContain(logs,
+                             f'cros flash YOUR_DEVICE_IP {base_image_path}')
+      self.AssertLogsContain(
+          logs,
+          f'cros_vm --start --image-path={base_image_path} --board=board',
+          inverted=True)
+      # Dev Image summary text.
+      self.AssertLogsContain(
+          logs,
+          (f'{image._IMAGE_TYPE_DESCRIPTION[constants.DEV_IMAGE_BIN]} image '
+           f'created as {constants.DEV_IMAGE_BIN}'),
+      )
+      self.AssertLogsContain(logs, f'cros flash usb:// {dev_image_path}')
+      self.AssertLogsContain(logs,
+                             f'cros flash YOUR_DEVICE_IP {dev_image_path}')
+      self.AssertLogsContain(
+          logs,
+          f'cros_vm --start --image-path={dev_image_path} --board=board',
+      )
+      # Test Image summary text.
+      self.AssertLogsContain(
+          logs,
+          (f'{image._IMAGE_TYPE_DESCRIPTION[constants.TEST_IMAGE_BIN]} image '
+           f'created as {constants.TEST_IMAGE_BIN}'),
+      )
+      self.AssertLogsContain(logs, f'cros flash usb:// {test_image_path}')
+      self.AssertLogsContain(logs,
+                             f'cros flash YOUR_DEVICE_IP {test_image_path}')
+      self.AssertLogsContain(
+          logs,
+          f'cros_vm --start --image-path={test_image_path} --board=board',
+      )
 
 
-class BuildConfigTest(cros_test_lib.MockTestCase):
+class BuildImageCommandTest(cros_test_lib.MockTestCase):
   """BuildConfig tests."""
 
-  def testGetArguments(self):
+  def testBuildImageCommand(self):
     """GetArguments tests."""
-    config = image.BuildConfig()
-    self.assertEqual([], config.GetArguments())
+    cmd = image.GetBuildImageCommand(image.BuildConfig(),
+                                     [constants.BASE_IMAGE_BIN], 'testBoard')
+    expected = {
+        Path(constants.CROSUTILS_DIR) / 'build_image.sh',
+        '--script-is-run-only-by-chromite-and-not-users',
+        '--board',
+        'testBoard',
+    }
+    self.assertTrue(expected.issubset(set(cmd)))
 
     # Make sure each arg produces the correct argument individually.
-    config.builder_path = 'test'
-    self.assertEqual(['--builder_path', 'test'], config.GetArguments())
-    config.builder_path = None
+    cmd = image.GetBuildImageCommand(
+        image.BuildConfig(builder_path='test_builder_path'),
+        [constants.BASE_IMAGE_BIN], 'testBoard')
+    expected = {
+        '--builder_path',
+        'testBoard',
+    }
+    self.assertTrue(expected.issubset(set(cmd)))
 
-    config.disk_layout = 'disk'
-    self.assertEqual(['--disk_layout', 'disk'], config.GetArguments())
-    config.disk_layout = None
+    # disk_layout
+    cmd = image.GetBuildImageCommand(
+        image.BuildConfig(disk_layout='disk'), [constants.BASE_IMAGE_BIN],
+        'testBoard')
+    expected = {
+        '--disk_layout',
+        'disk',
+    }
+    self.assertTrue(expected.issubset(set(cmd)))
 
-    config.enable_rootfs_verification = False
-    self.assertEqual(['--noenable_rootfs_verification'], config.GetArguments())
-    config.enable_rootfs_verification = True
+    # enable_rootfs_verification
+    self.assertIn(
+        '--noenable_rootfs_verification',
+        image.GetBuildImageCommand(
+            image.BuildConfig(enable_rootfs_verification=False),
+            [constants.BASE_IMAGE_BIN], 'testBoard'))
+    self.assertIn(
+        '--noenable_rootfs_verification',
+        image.GetBuildImageCommand(
+            image.BuildConfig(enable_rootfs_verification=True),
+            [constants.FACTORY_IMAGE_BIN], 'testBoard'))
 
-    config.replace = True
-    self.assertEqual(['--replace'], config.GetArguments())
-    config.replace = False
+    # adjust_partition
+    cmd = image.GetBuildImageCommand(
+        image.BuildConfig(adjust_partition='ROOT-A:+1G'),
+        [constants.BASE_IMAGE_BIN], 'testBoard')
+    expected = {
+        '--adjust_part',
+        'ROOT-A:+1G',
+    }
+    self.assertTrue(expected.issubset(set(cmd)))
 
-    config.version = 'version'
-    self.assertEqual(['--version', 'version'], config.GetArguments())
-    config.version = None
+    # boot_args
+    config = image.BuildConfig(boot_args='initrd')
+    cmd = image.GetBuildImageCommand(config, [constants.BASE_IMAGE_BIN],
+                                     'testBoard')
+    expected = {
+        '--boot_args',
+        'initrd',
+    }
+    self.assertTrue(expected.issubset(set(cmd)))
+
+    cmd = image.GetBuildImageCommand(config, [constants.FACTORY_IMAGE_BIN],
+                                     'testBoard')
+    expected = {
+        '--boot_args',
+        'initrd cros_factory_install',
+    }
+    self.assertTrue(expected.issubset(set(cmd)))
+
+    # enable_bootcache
+    config = image.BuildConfig(enable_bootcache=True)
+    self.assertIn(
+        '--enable_bootcache',
+        image.GetBuildImageCommand(config, [constants.BASE_IMAGE_BIN],
+                                   'testBoard'))
+    self.assertNotIn(
+        '--enable_bootcache',
+        image.GetBuildImageCommand(config, [constants.FACTORY_IMAGE_BIN],
+                                   'testBoard'))
+
+    # enable_serial
+    cmd = image.GetBuildImageCommand(
+        image.BuildConfig(enable_serial='ttyS1'), [constants.BASE_IMAGE_BIN],
+        'testBoard')
+    expected = {
+        '--enable_serial',
+        'ttyS1',
+    }
+    self.assertTrue(expected.issubset(set(cmd)))
+
+    # kernel_loglevel
+    cmd = image.GetBuildImageCommand(
+        image.BuildConfig(kernel_loglevel=4), [constants.BASE_IMAGE_BIN],
+        'testBoard')
+    expected = {
+        '--loglevel',
+        '4',
+    }
+    self.assertTrue(expected.issubset(set(cmd)))
+
+    # jobs
+    cmd = image.GetBuildImageCommand(
+        image.BuildConfig(jobs=40), [constants.BASE_IMAGE_BIN], 'testBoard')
+    expected = {
+        '--jobs',
+        '40',
+    }
+    self.assertTrue(expected.issubset(set(cmd)))
+
+    # image_name
+    config = image.BuildConfig()
+    for image_name in constants.IMAGE_NAME_TO_TYPE.keys():
+      self.assertIn(
+          image_name,
+          image.GetBuildImageCommand(config, [image_name], 'testBoard'))
 
 
 class CreateVmTest(cros_test_lib.RunCommandTestCase):
@@ -141,9 +344,33 @@ class CreateVmTest(cros_test_lib.RunCommandTestCase):
   def testResultPath(self):
     """Test the path building."""
     self.PatchObject(image_lib, 'GetLatestImageLink', return_value='/tmp')
-    self.assertEqual(os.path.join('/tmp', constants.VM_IMAGE_BIN),
-                     image.CreateVm('board'))
+    self.assertEqual(
+        os.path.join('/tmp', constants.VM_IMAGE_BIN), image.CreateVm('board'))
 
+
+class CopyBaseToRecoveryTest(cros_test_lib.MockTempDirTestCase):
+  """Tests the CopyBaseToRecovery method."""
+
+  def setUp(self):
+    self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=True)
+    self.PatchObject(Path, 'exists', return_value=True)
+    self.base_image = self.tempdir / constants.BASE_IMAGE_BIN
+    self.recovery_image = self.tempdir / constants.RECOVERY_IMAGE_BIN
+
+  def testCopyRecoveryImage(self):
+    self.base_image.touch()
+    result = image.CopyBaseToRecovery('board', self.base_image)
+
+    self.assertEqual(result.return_code, 0)
+    self.assertEqual(result.images[constants.IMAGE_TYPE_RECOVERY],
+                     self.recovery_image)
+    self.assertExists(self.recovery_image)
+
+  def testCopyRecoveryImageInvalid(self):
+    result = image.CopyBaseToRecovery('board', self.base_image)
+
+    self.assertNotEqual(result.return_code, 0)
+    self.assertNotExists(self.recovery_image)
 
 class BuildRecoveryTest(cros_test_lib.RunCommandTestCase):
   """Create recovery image tests."""
@@ -178,19 +405,15 @@ class ImageTestTest(cros_test_lib.RunCommandTempDirTestCase):
                                           'inside/build/board/latest')
 
     D = cros_test_lib.Directory
-    filesystem = (
-        D('outside', (
-            D('results', ()),
-            D('inside', (
-                D('results_inside', ()),
-                D('build', (
-                    D('board', (
-                        D('latest', ('%s.bin' % constants.BASE_IMAGE_NAME,)),
-                    )),
-                )),
-            )),
+    filesystem = (D('outside', (
+        D('results', ()),
+        D('inside', (
+            D('results_inside', ()),
+            D('build', (D('board',
+                          (D('latest',
+                             ('%s.bin' % constants.BASE_IMAGE_NAME,)),)),)),
         )),
-    )
+    )),)
 
     cros_test_lib.CreateOnDiskHierarchy(self.tempdir, filesystem)
 
@@ -208,14 +431,18 @@ class ImageTestTest(cros_test_lib.RunCommandTempDirTestCase):
   def testTestInsideChrootAllProvided(self):
     """Test behavior when inside the chroot and all paths provided."""
     self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=True)
-    image.Test(self.board, self.outside_result_dir,
-               image_dir=self.image_dir_inside)
+    image.Test(
+        self.board, self.outside_result_dir, image_dir=self.image_dir_inside)
 
     # Inside chroot shouldn't need to do any path manipulations, so we should
     # see exactly what we called it with.
-    self.assertCommandContains(['--board', self.board,
-                                '--test_results_root', self.outside_result_dir,
-                                self.image_dir_inside])
+    self.assertCommandContains([
+        '--board',
+        self.board,
+        '--test_results_root',
+        self.outside_result_dir,
+        self.image_dir_inside,
+    ])
 
   def testTestInsideChrootNoImageDir(self):
     """Test image dir generation inside the chroot."""
@@ -224,9 +451,14 @@ class ImageTestTest(cros_test_lib.RunCommandTempDirTestCase):
     self.PatchObject(image_lib, 'GetLatestImageLink', return_value=mocked_dir)
     image.Test(self.board, self.outside_result_dir)
 
-    self.assertCommandContains(['--board', self.board,
-                                '--test_results_root', self.outside_result_dir,
-                                mocked_dir])
+    self.assertCommandContains([
+        '--board',
+        self.board,
+        '--test_results_root',
+        self.outside_result_dir,
+        mocked_dir,
+    ])
+
 
 class TestCreateFactoryImageZip(cros_test_lib.MockTempDirTestCase):
   """Unittests for create_factory_image_zip."""
@@ -241,7 +473,7 @@ class TestCreateFactoryImageZip(cros_test_lib.MockTempDirTestCase):
     # Create appropriate sysroot structure.
     osutils.SafeMakedirs(self.sysroot_path)
     factory_bundle_path = self.chroot.full_path(self.sysroot.path, 'usr',
-      'local','factory', 'bundle')
+                                                'local', 'factory', 'bundle')
     osutils.SafeMakedirs(factory_bundle_path)
     osutils.Touch(os.path.join(factory_bundle_path, 'bundle_foo'))
 
@@ -261,23 +493,25 @@ class TestCreateFactoryImageZip(cros_test_lib.MockTempDirTestCase):
     """create_factory_image_zip calls cbuildbot/commands with correct args."""
     version = '1.2.3.4'
     output_file = image.create_factory_image_zip(self.chroot, self.sysroot,
-      Path(self.factory_shim_path), version, self.output_dir)
+                                                 Path(self.factory_shim_path),
+                                                 version, self.output_dir)
 
     # Check that all expected files are present.
     zip_contents = cros_build_lib.run(['zipinfo', '-1', output_file],
-                                      cwd=self.output_dir,  stdout=True)
-    zip_files = sorted(zip_contents.output.decode('UTF-8').strip().split('\n'))
+                                      cwd=self.output_dir,
+                                      stdout=True)
+    zip_files = sorted(zip_contents.stdout.decode('UTF-8').strip().split('\n'))
     expected_files = sorted([
-      'factory_shim_dir/netboot/',
-      'factory_shim_dir/netboot/bar',
-      'factory_shim_dir/factory_install.bin',
-      'factory_shim_dir/partition',
-      'bundle_foo',
-      'BUILD_VERSION',
+        'factory_shim_dir/netboot/',
+        'factory_shim_dir/netboot/bar',
+        'factory_shim_dir/factory_install.bin',
+        'factory_shim_dir/partition',
+        'bundle_foo',
+        'BUILD_VERSION',
     ])
     self.assertListEqual(zip_files, expected_files)
 
     # Check contents of BUILD_VERSION.
     cmd = ['unzip', '-p', output_file, 'BUILD_VERSION']
-    version_file = cros_build_lib.run(cmd, cwd=self.output_dir,  stdout=True)
-    self.assertEqual(version_file.output.decode('UTF-8').strip(), version)
+    version_file = cros_build_lib.run(cmd, cwd=self.output_dir, stdout=True)
+    self.assertEqual(version_file.stdout.decode('UTF-8').strip(), version)

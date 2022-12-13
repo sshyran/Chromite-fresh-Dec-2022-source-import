@@ -184,8 +184,8 @@ class RepoRepository(object):
           cmd, cwd=self.directory, capture_output=True, log_output=True,
           encoding='utf-8')
 
-      if (cmd_result.error is not None and
-          SELFUPDATE_WARNING_RE.search(cmd_result.error)):
+      if (cmd_result.stderr is not None and
+          SELFUPDATE_WARNING_RE.search(cmd_result.stderr)):
         logging.warning('Unable to selfupdate because of warning "%s"',
                         SELFUPDATE_WARNING)
         failed_to_selfupdate = True
@@ -288,7 +288,7 @@ class RepoRepository(object):
         except cros_build_lib.RunCommandError as e:
           result = e.result
           cbuildbot_alerts.PrintBuildbotStepWarnings()
-          logging.warning('\n%s', result.error)
+          logging.warning('\n%s', result.stderr)
 
           # If there's no repository corruption, just delete the index.
           corrupted = git.IsGitRepositoryCorrupted(repo_git_store)
@@ -527,7 +527,7 @@ class RepoRepository(object):
 
   def Sync(self, local_manifest=None, jobs=None, all_branches=True,
            network_only=False, detach=False,
-           downgrade_repo=False):
+           downgrade_repo: bool = False):
     """Sync/update the source.  Changes manifest if specified.
 
     Args:
@@ -546,7 +546,7 @@ class RepoRepository(object):
         invoking code is fine w/ operating on bare repos, ie .repo/projects/*.
       detach: If true, throw away all local changes, even if on tracking
         branches.
-      downgrade_repo (bool): Bool whether to downgrade repo version.
+      downgrade_repo: Whether to downgrade repo version.
     """
     try:
       if downgrade_repo:
@@ -671,14 +671,14 @@ class RepoRepository(object):
       return output
     modified = git.RunGit(os.path.join(self.directory, '.repo/manifests'),
                           ['rev-list', '-n1', 'HEAD'])
-    assert modified.output
+    assert modified.stdout
     return output.replace('<manifest>', '<manifest revision="%s">' %
-                          modified.output.strip())
+                          modified.stdout.strip())
 
   def IsManifestDifferent(self, other_manifest):
     """Checks whether this manifest is different than another.
 
-    May blacklists certain repos as part of the diff.
+    May ignore certain repos as part of the diff.
 
     Args:
       other_manifest: Second manifest file to compare against.
@@ -689,8 +689,8 @@ class RepoRepository(object):
     """
     logging.debug('Calling IsManifestDifferent against %s', other_manifest)
 
-    black_list = ['="chromium/']
-    blacklist_pattern = re.compile(r'|'.join(black_list))
+    ignore_list = ['="chromium/']
+    ignore_pattern = re.compile(r'|'.join(ignore_list))
     manifest_revision_pattern = re.compile(r'<manifest revision="[a-f0-9]+">',
                                            re.I)
 
@@ -699,7 +699,7 @@ class RepoRepository(object):
       for (line1, line2) in zip(current.splitlines(), manifest2_fh):
         line1 = line1.strip()
         line2 = line2.strip()
-        if blacklist_pattern.search(line1):
+        if ignore_pattern.search(line1):
           logging.debug('%s ignored %s', line1, line2)
           continue
 

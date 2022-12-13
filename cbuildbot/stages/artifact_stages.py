@@ -4,14 +4,12 @@
 
 """Module containing stages that generate and/or archive artifacts."""
 
-import datetime
 import glob
 import itertools
 import json
 import logging
 import multiprocessing
 import os
-import re
 import shutil
 
 from chromite.cbuildbot import commands
@@ -21,7 +19,6 @@ from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import failures_lib
-from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import path_util
@@ -466,8 +463,8 @@ class CPEExportStage(generic_stages.BoardSpecificBuilderStage,
     results_filename = os.path.join(self.archive_path,
                                     'cpe-chromeos-%s.json' % board)
 
-    osutils.WriteFile(warnings_filename, result.error)
-    osutils.WriteFile(results_filename, result.output)
+    osutils.WriteFile(warnings_filename, result.stderr)
+    osutils.WriteFile(results_filename, result.stdout)
 
     logging.info('Uploading CPE files.')
     self.UploadArtifact(os.path.basename(warnings_filename), archive=False)
@@ -874,6 +871,54 @@ class UploadTestArtifactsStage(generic_stages.BoardSpecificBuilderStage,
     return super().HandleSkip()
 
 
+class UploadCFTArtifactsStage(generic_stages.BoardSpecificBuilderStage,
+                              generic_stages.ArchivingStageMixin):
+  """Upload needed CFT artifacts."""
+
+  category = constants.CI_INFRA_STAGE
+
+  def BuildCFTArtifacts(self):
+    """Build & upload the CFT artifacts & upload the metadata defining them."""
+    with osutils.TempDir(prefix='cbuildbot-cft') as tempdir:
+      # Examples from CFT:
+      # chroot = /b/s/w/ir/cache/cros_chroot/chroot
+      chroot = os.path.join(self._build_root, 'chroot')
+      # sysroot = /build/drallion
+      sysroot = os.path.join('build', self._current_board)
+      # version = drallion-postsubmit.R105-14916.0.0-66732-8811281600896265665
+      logging.info('Found version config %s', self.build_config)
+      version = self.version
+
+      if self._current_board:
+        version = ('%s-%s' % (self.build_config, self.version))
+        logging.info('Using full version %s', version)
+
+      logging.info('Running commands.BuildCFTArtifacts')
+      metadata_proto = commands.BuildCFTImages(chroot, sysroot, str(version))
+      logging.info('Generating proto for CFT using\n %s\n', metadata_proto)
+
+      md_data = commands.ConvertResultsProtoToJson(metadata_proto,
+                                                   self._current_board)
+      with osutils.TempDir(prefix='md') as tempdir:
+        if md_data:
+          fn = os.path.join(tempdir, 'containers.jsonpb')
+          with open(fn, 'w') as f:
+            f.write(md_data)
+          self.UploadArtifact(fn, prefix='metadata')
+
+
+  @failures_lib.SetFailureType(failures_lib.InfrastructureFailure)
+  def PerformStage(self):
+    """Upload any needed CFT artifacts."""
+    if (self._run.ShouldBuildAutotest() and
+        self._run.config.upload_hw_test_artifacts):
+      try:
+        self.BuildCFTArtifacts()
+      except Exception as e:
+        # Catch any exception to ensure we do not break the builder.
+        logging.info('CFT Building failed with err:\n%s', e)
+
+
 # TODO(mtennant): This class continues to exist only for subclasses that still
 # need self.archive_stage.  Hopefully, we can get rid of that need, eventually.
 class ArchivingStage(generic_stages.BoardSpecificBuilderStage,
@@ -926,184 +971,3 @@ class GenerateSysrootStage(generic_stages.BoardSpecificBuilderStage,
   def PerformStage(self):
     with self.ArtifactUploader(self._upload_queue, archive=False):
       self._GenerateSysroot()
-
-
-# This stage generates and uploads the clang-tidy warnings files for the
-# build, for all the packages built in build packages stage with
-# WITH_TIDY=1.
-class GenerateTidyWarningsStage(generic_stages.BoardSpecificBuilderStage,
-                                generic_stages.ArchivingStageMixin):
-  """Generate and upload the warnings files for the board."""
-
-  category = constants.CI_INFRA_STAGE
-
-  CLANG_TIDY_TAR = 'clang_tidy_warnings.tar.xz'
-  GS_URL = 'gs://chromeos-clang-tidy-artifacts/clang-tidy-1'
-
-  def __init__(self, *args, **kwargs):
-    super().__init__(*args, **kwargs)
-    self._upload_queue = multiprocessing.Queue()
-
-  def _UploadTidyWarnings(self, path, tar_file):
-    """Upload the warnings tarball to the clang-tidy gs bucket."""
-    gs_context = gs.GSContext()
-    filename = os.path.join(path, tar_file)
-
-    debug = self._run.options.debug_forced
-    if debug:
-      logging.info('Debug run: not uploading tarball.')
-      logging.info('If this were not a debug run, would upload %s to %s.',
-                   filename, self.GS_URL)
-      return
-
-    try:
-      logging.info('Uploading tarball %s to %s', filename, self.GS_URL)
-      gs_context.CopyInto(filename, self.GS_URL)
-    except:
-      logging.info('Error: Unable to upload tarball %s to %s', filename,
-                   self.GS_URL)
-      raise
-
-  def _GenerateTidyWarnings(self):
-    """Generate and upload the tidy warnings files for the board."""
-    assert self.archive_path.startswith(self._build_root)
-    logs_dir = os.path.join('/tmp', 'clang-tidy-logs', self._current_board)
-    timestamp = datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d')
-    clang_tidy_tarball = '%s.%s.%s' % (self._current_board, timestamp,
-                                       self.CLANG_TIDY_TAR)
-    in_chroot_path = path_util.ToChrootPath(self.archive_path)
-    out_chroot_path = os.path.abspath(
-        os.path.join(self._build_root, 'chroot', self.archive_path))
-    cmd = [
-        'cros_generate_tidy_warnings', '--out-file', clang_tidy_tarball,
-        '--out-dir', in_chroot_path, '--board', self._current_board,
-        '--logs-dir', logs_dir
-    ]
-    cros_build_lib.run(cmd, cwd=self._build_root, enter_chroot=True)
-    self._UploadTidyWarnings(out_chroot_path, clang_tidy_tarball)
-    self._upload_queue.put([clang_tidy_tarball])
-
-  def PerformStage(self):
-    with self.ArtifactUploader(self._upload_queue, archive=False):
-      self._GenerateTidyWarnings()
-
-
-# This stage collects and uploads the LLVM PGO profile files for the build.
-class CollectPGOProfilesStage(generic_stages.BoardSpecificBuilderStage,
-                              generic_stages.ArchivingStageMixin):
-  """Collect and upload PGO profile files for the board."""
-
-  category = constants.CI_INFRA_STAGE
-  PROFDATA_TAR = 'llvm_profdata.tar.xz'
-  LLVM_METADATA = 'llvm_metadata.json'
-  PROFDATA = 'llvm.profdata'
-
-  def __init__(self, *args, **kwargs):
-    super().__init__(*args, **kwargs)
-    self._upload_queue = multiprocessing.Queue()
-    self._merge_cmd = ''
-
-  @staticmethod
-  def _ParseUseFlagState(use_flags):
-    """Converts the textual output of equery to a +/- USE flag list."""
-    # Equery prints out a large header. The lines we're interested in look
-    # like:
-    # " + - use_flag : foo", where `use_flag` is the name of the use flag, the
-    # initial - or + says whether the flag is enabled by default, and the
-    # second one says whether the flag was enabled upon installation. `foo` is
-    # the description, but that's unimportant to us.
-    matcher = re.compile(r'^\s+[+-]\s+([+-])\s+(\S+)\s+:', re.MULTILINE)
-    matches = matcher.findall(use_flags)
-    return [state + flag_name for state, flag_name in matches]
-
-  @staticmethod
-  def _ParseLLVMHeadSHA(version_string):
-    # The first line of clang's version string looks something like:
-    # Chromium OS 10.0_pre377782_p20200113-r1 clang version 10.0.0 \
-    # (/var/cache/chromeos-cache/distfiles/host/egit-src/llvm-project \
-    # 4e8231b5cf0f5f62c7a51a857e29f5be5cb55734)
-    #
-    # The SHA after llvm-project is the SHA we're looking for.
-    # Note that len('4e8231b5cf0f5f62c7a51a857e29f5be5cb55734') == 40.
-    sha_re = re.compile(r'llvm-project ([A-Fa-f0-9]{40})\)$')
-    first_line = version_string.splitlines()[0].strip()
-    match = sha_re.search(first_line)
-    if not match:
-      raise ValueError("Can't recognize the version string %r" % first_line)
-    return match.group(1)
-
-  def _CollectLLVMMetadata(self):
-    def check_chroot_output(command):
-      cmd = cros_build_lib.run(command, enter_chroot=True, stdout=True,
-                               encoding='utf-8')
-      return cmd.output
-
-    # The baked-in clang should be the one we're looking for. If not, yell.
-    llvm_uses = check_chroot_output(
-        ['equery', '-C', '-N', 'uses', 'sys-devel/llvm'])
-    use_vars = self._ParseUseFlagState(llvm_uses)
-    if '+llvm_pgo_generate' not in use_vars:
-      raise ValueError("The pgo_generate flag isn't enabled; USE flags: %r" %
-                       sorted(use_vars))
-
-    clang_version_str = check_chroot_output(['clang', '--version'])
-    head_sha = self._ParseLLVMHeadSHA(clang_version_str)
-    metadata_output_path = os.path.join(self.archive_path, self.LLVM_METADATA)
-    pformat.json({'head_sha': head_sha}, fp=metadata_output_path, compact=True)
-    # This is a tiny JSON file, so it doesn't need to be tarred/compressed.
-    self._upload_queue.put([metadata_output_path])
-
-  def _CollectPGOProfiles(self):
-    """Collect and upload PGO profiles for the board."""
-    assert self.archive_path.startswith(self._build_root)
-
-    # Look for profiles generated by instrumented LLVM
-    out_chroot = os.path.abspath(
-        os.path.join(self._build_root, 'chroot'))
-    cov_data_location = 'build/%s/build/coverage_data' % self._current_board
-    out_chroot_cov_data = os.path.join(out_chroot, cov_data_location)
-    try:
-      profiles_dirs = [root for root, _, _ in os.walk(out_chroot_cov_data)
-                       if os.path.basename(root) == 'raw_profiles']
-      if not profiles_dirs:
-        raise Exception('No profile directories found.')
-      # Get out of chroot profile paths, and convert to in chroot paths
-      profraws = [path_util.ToChrootPath(os.path.join(profiles_dir, f))
-                  for profiles_dir in profiles_dirs
-                  for f in os.listdir(profiles_dir)]
-      if not profraws:
-        raise Exception('No profraw files found in profiles directory.')
-    except:
-      logging.info('Error: Not able to collect correct profiles.')
-      raise
-
-    # Create profdata file and make tarball
-    in_chroot_path = path_util.ToChrootPath(self.archive_path)
-    profdata_loc = os.path.join(in_chroot_path, self.PROFDATA)
-
-    out_chroot_path = os.path.join(out_chroot, self.archive_path)
-    out_profdata_loc = os.path.join(out_chroot_path, self.PROFDATA)
-
-    # There can bee too many profraws to merge, put them as a list in the file
-    # so that bash will not complain about arguments getting too long.
-    profraw_list = os.path.join(in_chroot_path, 'profraw_list')
-    out_profraw_list = os.path.join(out_chroot_path, 'profraw_list')
-
-    with open(out_profraw_list, 'w') as f:
-      f.write('\n'.join(profraws))
-
-    self._merge_cmd = ['llvm-profdata', 'merge',
-                       '-output', profdata_loc,
-                       '-f', profraw_list]
-    cros_build_lib.run(self._merge_cmd, cwd=self._build_root, enter_chroot=True)
-
-    cros_build_lib.CreateTarball(self.PROFDATA_TAR, cwd=out_chroot_path,
-                                 inputs=[out_profdata_loc])
-
-    # Upload profdata tarball
-    self._upload_queue.put([self.PROFDATA_TAR])
-
-  def PerformStage(self):
-    with self.ArtifactUploader(self._upload_queue, archive=False):
-      self._CollectPGOProfiles()
-      self._CollectLLVMMetadata()

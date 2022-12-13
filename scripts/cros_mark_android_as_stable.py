@@ -82,7 +82,7 @@ def FindAndroidCandidates(package_dir):
     else:
       stable_ebuilds.append(ebuild)
 
-  # Apply some sanity checks.
+  # Apply some confidence checks.
   if not unstable_ebuilds:
     raise Exception('Missing 9999 ebuild for %s' % package_dir)
   if not stable_ebuilds:
@@ -150,7 +150,7 @@ def FindDataCollectorArtifacts(gs_context,
   """
   variables = {}
 
-  buckets = ['ureadahead_pack', 'gms_core_cache']
+  buckets = ['ureadahead_pack', 'gms_core_cache', 'tts_cache']
   archs = ['arm', 'arm64', 'x86', 'x86_64']
   build_types = ['user', 'userdebug']
 

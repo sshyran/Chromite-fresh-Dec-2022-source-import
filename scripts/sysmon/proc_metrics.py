@@ -34,26 +34,29 @@ class _ProcessMetricsCollector(object):
 
   def __init__(self):
     self._metrics = [
-        _ProcessMetric('apache',
-                       test_func=partial(_is_process_name, 'apache2')),
         _ProcessMetric('autoserv',
                        test_func=_is_parent_autoserv),
+        _ProcessMetric('curl',
+                       test_func=partial(_is_process_name, 'curl')),
         _ProcessMetric('getty',
                        test_func=partial(_is_process_name, 'getty')),
+        _ProcessMetric('gs_archive_server',
+                       test_func=partial(_is_python_module,
+                                         'gs_archive_server')),
         _ProcessMetric('gs_offloader',
-                       test_func=_is_gs_offloader),
-        _ProcessMetric('job_aborter',
-                       test_func=partial(_is_python_module,
-                                         'lucifer.cmd.job_aborter')),
-        _ProcessMetric('job_reporter',
-                       test_func=partial(_is_python_module,
-                                         'lucifer.cmd.job_reporter')),
-        _ProcessMetric('lucifer',
-                       test_func=partial(_is_process_name, 'lucifer')),
-        _ProcessMetric('lxc-start',
-                       test_func=partial(_is_process_name, 'lxc-start')),
+                       test_func=partial(_is_process_name, 'gs_offloader.py')),
+        _ProcessMetric('gsutil',
+                       test_func=_is_gsutil),
+        _ProcessMetric('java',
+                       test_func=partial(_is_process_name, 'java')),
         _ProcessMetric('lxc-attach',
                        test_func=partial(_is_process_name, 'lxc-attach')),
+        _ProcessMetric('lxc-start',
+                       test_func=partial(_is_process_name, 'lxc-start')),
+        _ProcessMetric('sshd',
+                       test_func=partial(_is_process_name, 'sshd')),
+        _ProcessMetric('swarming_bot',
+                       test_func=_is_swarming_bot),
         _ProcessMetric('sysmon',
                        test_func=partial(_is_python_module,
                                          'chromite.scripts.sysmon')),
@@ -129,14 +132,6 @@ def _is_autoserv(proc):
   return _is_process_name('autoserv', proc)
 
 
-def _is_gs_offloader(proc):
-  """Return whether proc is a gs_offloader process."""
-  cmdline = proc.cmdline()
-  return (len(cmdline) >= 2
-          and cmdline[0].endswith('python')
-          and cmdline[1].endswith('gs_offloader.py'))
-
-
 def _is_python_module(module, proc):
   """Return whether proc is a process running a Python module."""
   cmdline = proc.cmdline()
@@ -148,3 +143,22 @@ def _is_python_module(module, proc):
 def _is_process_name(name, proc):
   """Return whether process proc is named name."""
   return proc.name() == name
+
+
+def _is_swarming_bot(proc):
+  """Return whether proc is a Swarming bot.
+
+  A swarming bot process is like '/usr/bin/python3.8 <bot-zip-path> start_bot'.
+  """
+  cmdline = proc.cmdline()
+  return (len(cmdline) == 3 and
+          cmdline[0].split('/')[-1].startswith('python') and
+          cmdline[2] == 'start_bot')
+
+
+def _is_gsutil(proc):
+  """Return whether proc is gsutil."""
+  cmdline = proc.cmdline()
+  return (len(cmdline) >= 2 and
+          cmdline[0] == 'python' and
+          cmdline[1].endswith('gsutil'))

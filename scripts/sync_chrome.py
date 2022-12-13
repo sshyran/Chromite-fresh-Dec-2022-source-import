@@ -4,6 +4,7 @@
 
 """Sync the Chrome source code used by Chrome OS to the specified directory."""
 
+import argparse
 import logging
 import os
 
@@ -28,8 +29,7 @@ def GetParser():
                       action='store_true', default=False)
   parser.add_argument('--reset', help='Revert local changes',
                       action='store_true', default=False)
-  parser.add_argument('--gclient', help=commandline.argparse.SUPPRESS,
-                      default=None)
+  parser.add_argument('--gclient', help=argparse.SUPPRESS, default=None)
   parser.add_argument('--gclient_template', help='Template gclient input file')
   parser.add_argument('--skip_cache', help='Skip using git cache',
                       dest='use_cache', action='store_false')
@@ -46,7 +46,10 @@ def SyncChrome(gclient_path, options):
                           options.internal, options.version,
                           options.gclient_template, options.use_cache,
                           git_cache_dir=options.git_cache_dir)
-  gclient.Sync(gclient_path, options.chrome_root, reset=options.reset)
+  try:
+    gclient.Sync(gclient_path, options.chrome_root, reset=options.reset)
+  except cros_build_lib.RunCommandError as e:
+    cros_build_lib.Die(f'gclient sync exited {e.returncode}')
 
 
 def main(argv):

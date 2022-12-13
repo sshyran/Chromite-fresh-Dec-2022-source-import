@@ -6,8 +6,9 @@
 
 import os
 
-from chromite.lib import cros_test_lib
 from chromite.lib import chrome_util
+from chromite.lib import cros_test_lib
+from chromite.lib import osutils
 
 
 # Convenience alias
@@ -193,7 +194,7 @@ class DirCopyTest(FileCopyTest):
   ELEMENT_SRC_NAME = 'monkey1/'
   ELEMENT_SRC = Dir(ELEMENT_SRC_NAME, FILES)
   ELEMENTS_SRC = [
-      # Add .git directory to test black list functionality.
+      # Add .git directory to test ignore functionality.
       Dir('monkey1', FILES + [Dir('.git', FILES)]), Dir('monkey2', FILES),
       Dir('monkey3', FILES),
       Dir('foon1', []), Dir('foon2', []), Dir('foon3', [])
@@ -210,3 +211,21 @@ class DirCopyTest(FileCopyTest):
 
 class SloppyDirCopyTest(SloppyFileCopyTest, DirCopyTest):
   """Test directory copies with sloppy=True"""
+
+
+class ProcessVersionFileTest(cros_test_lib.TempDirTestCase):
+  """Tests ProcessVersionFile()"""
+
+  def testBasicFile(self):
+    osutils.SafeMakedirs(os.path.join(self.tempdir, 'chrome'))
+    contents = """
+MAJOR=123
+MINOR=456
+BUILD=0
+PATCH=9
+"""
+    osutils.WriteFile(
+        os.path.join(self.tempdir, 'chrome', 'VERSION'), contents)
+    versions = chrome_util.ProcessVersionFile(self.tempdir)
+    self.assertEqual(
+        versions, {'MAJOR': 123, 'MINOR': 456, 'BUILD': 0, 'PATCH': 9})

@@ -73,12 +73,12 @@ class NonClassTests(cros_test_lib.MockTestCase):
     if bad_cls:
       push_mock.side_effect = side_effect
       create_mock.side_effect = side_effect
-      git_mock.AddCmdResult(cmd, output='Found bad stuff')
+      git_mock.AddCmdResult(cmd, stdout='Found bad stuff')
     else:
-      git_mock.AddCmdResult(cmd, output='\n')
+      git_mock.AddCmdResult(cmd, stdout='\n')
       cmd = ['log', '--format=format:%s%n%n%b',
              'refs/remotes/gerrit/master..%s' % self._branch]
-      git_mock.AddCmdResult(cmd, output=git_log)
+      git_mock.AddCmdResult(cmd, stdout=git_log)
       git_mock.AddCmdResult(['merge', '--squash', self._branch])
       git_mock.AddCmdResult(['commit', '-m', fake_description])
       git_mock.AddCmdResult(['config', 'push.default', 'tracking'])
@@ -401,6 +401,6 @@ class GitBranchTest(cros_test_lib.MockTestCase):
 
   def testExists(self):
     """Test if branch exists that is created."""
-    result = cros_build_lib.CommandResult(output=self._branch_name + '\n')
+    result = cros_build_lib.CompletedProcess(stdout=self._branch_name + '\n')
     self.PatchObject(git, 'RunGit', return_value=result)
     self.assertTrue(self._branch.Exists())

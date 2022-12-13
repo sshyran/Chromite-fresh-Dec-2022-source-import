@@ -17,6 +17,7 @@ from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib.parser import package_info
 
+
 if cros_build_lib.IsInsideChroot():
   from chromite.lib import depgraph
 

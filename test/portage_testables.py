@@ -16,6 +16,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib.parser import package_info
 
+
 __all__ = ['Overlay', 'Package', 'Profile', 'Sysroot']
 
 _EXCLUDED_OVERLAYS = ('chromiumos', 'portage-stable')
@@ -159,7 +160,7 @@ class Overlay(object):
       formatted_parents = []
       for parent in profile.parents:
         formatted_parents.append(str(parent.overlay) + ':' + str(parent.path))
-      osutils.WriteFile(self.path / 'profiles' / profile.path / 'parents',
+      osutils.WriteFile(self.path / 'profiles' / profile.path / 'parent',
                         '\n'.join(formatted_parents) + '\n')
 
 

@@ -26,11 +26,13 @@ import sys
 
 import pytest  # pylint: disable=import-error
 
+from chromite.api import compile_build_api_proto
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import gs
 from chromite.lib import namespaces
+from chromite.lib import osutils
 
 
 def main(argv):
@@ -53,9 +55,7 @@ def main(argv):
   if opts.network:
     pytest_args += ['-m', 'not network_test or network_test']
 
-  # This is a cheesy hack to make sure gsutil is populated in the cache before
-  # we run tests. This is a partial workaround for crbug.com/468838.
-  gs.GSContext.InitializeCache()
+  precache()
 
   if opts.quick:
     logging.info('Skipping test namespacing due to --quickstart.')
@@ -70,21 +70,32 @@ def main(argv):
 
   # Check the environment.  https://crbug.com/1015450
   st = os.stat('/')
-  if st.st_mode & 0o7777 != 0o755:
+  if st.st_mode & 0o007 != 0o005:
     cros_build_lib.Die(
         f'The root directory has broken permissions: {st.st_mode:o}\n'
-        'Fix with: sudo chmod 755 /')
+        'Fix with: sudo chmod o+rx-w /')
   if st.st_uid or st.st_gid:
     cros_build_lib.Die(
         f'The root directory has broken ownership: {st.st_uid}:{st.st_gid}'
         ' (should be 0:0)\nFix with: sudo chown 0:0 /')
 
+  logging.debug('Running: pytest %s', cros_build_lib.CmdToStr(pytest_args))
   sys.exit(pytest.main(pytest_args))
+
+
+def precache():
+  """Do some network-dependent stuff before we disallow network access."""
+  # This is a cheesy hack to make sure gsutil is populated in the cache before
+  # we run tests. This is a partial workaround for crbug.com/468838.
+  gs.GSContext.InitializeCache()
+  # Ensure protoc is installed for api/compile_build_api_proto_unittest.
+  compile_build_api_proto.InstallProtoc(
+      compile_build_api_proto.ProtocVersion.CHROMITE)
 
 
 def re_execute_with_namespace(argv, network=False):
   """Re-execute as root so we can unshare resources."""
-  if os.geteuid() != 0:
+  if osutils.IsNonRootUser():
     cmd = [
         'sudo',
         'HOME=%s' % os.environ['HOME'],

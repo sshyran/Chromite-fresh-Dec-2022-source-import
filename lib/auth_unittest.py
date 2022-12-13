@@ -27,7 +27,7 @@ class AuthTest(cros_test_lib.RunCommandTestCase):
 
   def testLoginPassed(self):
     """Test Login working."""
-    self.rc.AddCmdResult(['luci-auth', 'login'], stdout=None)
+    self.rc.AddCmdResult(['luci-auth', 'login'], stdout='')
     self.assertIsNone(auth.Login())
 
   def testTokenFailed(self):

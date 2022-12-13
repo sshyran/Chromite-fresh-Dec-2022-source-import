@@ -8,7 +8,11 @@ import logging
 import time
 
 from chromite.third_party.google.protobuf import field_mask_pb2
-from chromite.third_party.infra_libs.buildbucket.proto import builder_pb2, builds_service_pb2, common_pb2
+from chromite.third_party.infra_libs.buildbucket.proto import (
+    builder_common_pb2,
+    builds_service_pb2,
+    common_pb2,
+)
 
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot.stages import generic_stages
@@ -34,18 +38,18 @@ class ScheduleSlavesStage(generic_stages.BuilderStage):
       logging.info('No buildbucket_client, no bot found.')
       return None
 
-    builder = builder_pb2.BuilderID(project='chromeos',
-                                  bucket='general')
+    builder = builder_common_pb2.BuilderID(project='chromeos',
+                                           bucket='general')
     tags = [common_pb2.StringPair(key='cbb_config',
                                   value=build_config),
             common_pb2.StringPair(key='cbb_branch',
                                   value=branch)]
     predicate = builds_service_pb2.BuildPredicate(
-      builder=builder,
-      status=common_pb2.SUCCESS,
-      tags=tags)
+        builder=builder,
+        status=common_pb2.SUCCESS,
+        tags=tags)
     field_mask = field_mask_pb2.FieldMask(
-      paths=['builds.*.infra.swarming.bot_dimensions.*']
+        paths=['builds.*.infra.swarming.bot_dimensions.*']
     )
     previous_builds = self.buildbucket_client.SearchBuild(
         build_predicate=predicate,
@@ -64,11 +68,11 @@ class ScheduleSlavesStage(generic_stages.BuilderStage):
     return bot_id
 
   def _CreateScheduledBuild(self,
-                          build_name,
-                          build_config,
-                          master_build_id,
-                          master_buildbucket_id,
-                          requested_bot=None):
+                            build_name,
+                            build_config,
+                            master_build_id,
+                            master_buildbucket_id,
+                            requested_bot=None):
     if build_config.build_affinity:
       requested_bot = self._FindMostRecentBotId(build_config.name,
                                                 self._run.manifest_branch)
@@ -134,18 +138,18 @@ class ScheduleSlavesStage(generic_stages.BuilderStage):
       return (str(master_build_id), '1')
 
     result = self.buildbucket_client.ScheduleBuild(
-      request_id=str(request['request_id']),
-      builder=request['builder'],
-      properties=request['properties'],
-      tags=request['tags'],
-      dimensions=request['dimensions'])
+        request_id=str(request['request_id']),
+        builder=request['builder'],
+        properties=request['properties'],
+        tags=request['tags'],
+        dimensions=request['dimensions'])
 
     logging.info('Build_name %s buildbucket_id %s created_timestamp %s',
                  build_name, result.id,
                  result.create_time.ToJsonString())
     cbuildbot_alerts.PrintBuildbotLink(build_name,
-                             '{}{}'.format(constants.CHROMEOS_MILO_HOST,
-                                           result.id))
+                                       '{}{}'.format(constants.CHROMEOS_MILO_HOST,
+                                                     result.id))
 
     return (result.id, result.create_time.ToJsonString())
 
@@ -184,6 +188,11 @@ class ScheduleSlavesStage(generic_stages.BuilderStage):
     # Get all active slave build configs.
     slave_config_map = self._GetSlaveConfigMap(important_only)
     for slave_config_name, slave_config in sorted(slave_config_map.items()):
+      if (slave_config_name.endswith('-release') and
+          slave_config_name not in constants.LEGACY_RELEASE_ALLOWLIST):
+        logging.info('Child %s not in LEGACY_RELEASE_ALLOWLIST (b/238925754), skipping...',
+                     slave_config_name)
+        continue
       try:
         if dryrun:
           buildbucket_id = '1'

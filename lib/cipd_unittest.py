@@ -8,11 +8,12 @@ import hashlib
 import json
 from unittest import mock
 
+from chromite.third_party import httplib2
+
 from chromite.lib import cipd
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
-from chromite.third_party import httplib2
 
 
 class CIPDTest(cros_test_lib.MockTestCase):
@@ -69,4 +70,4 @@ class CipdCacheTest(cros_test_lib.MockTempDirTestCase):
     path = cipd.GetCIPDFromCache()
     # This is more about making sure the func doesn't crash than inspecting the
     # internal caching logic (which is handled by lib.cache_unittest already).
-    self.assertTrue(path.startswith(self.tempdir))
+    self.assertTrue(path.startswith(str(self.tempdir)))

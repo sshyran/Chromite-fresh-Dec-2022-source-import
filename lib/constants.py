@@ -7,6 +7,7 @@
 import itertools
 import os
 
+
 def _FindSourceRoot():
   """Try and find the root check out of the chromiumos tree"""
   source_root = path = os.path.realpath(os.path.join(
@@ -36,8 +37,10 @@ CHROMITE_SCRIPTS_DIR = os.path.join(CHROMITE_DIR, 'scripts')
 PATH_TO_CBUILDBOT = os.path.join(CHROMITE_BIN_SUBDIR, 'cbuildbot')
 DEFAULT_CHROOT_DIR = 'chroot'
 DEFAULT_CHROOT_PATH = os.path.join(SOURCE_ROOT, DEFAULT_CHROOT_DIR)
+DEFAULT_BUILD_ROOT = os.path.join(SOURCE_ROOT, 'src/build')
 TERMINA_TOOLS_DIR = os.path.join(
     CHROOT_SOURCE_ROOT, 'src/platform/container-guest-tools/termina')
+RULES_CROS_PATH = os.path.join(CHROOT_SOURCE_ROOT, 'src/platform/rules_cros')
 
 STATEFUL_DIR = '/mnt/stateful_partition'
 
@@ -264,20 +267,23 @@ DEFAULT_CTS_APFE_GSURI = 'gs://chromeos-cts-apfe/'
 ANDROID_PI_PACKAGE = 'android-container-pi'
 ANDROID_VMRVC_PACKAGE = 'android-vm-rvc'
 ANDROID_VMSC_PACKAGE = 'android-vm-sc'
-# T uses master until the T branch is cut.
-ANDROID_VMT_PACKAGE = 'android-vm-master'
+ANDROID_VMTM_PACKAGE = 'android-vm-tm'
+# U uses master until the U branch is cut.
+ANDROID_VMUDC_PACKAGE = 'android-vm-master'
 
 ANDROID_ALL_PACKAGES = frozenset([ANDROID_PI_PACKAGE,
                                   ANDROID_VMRVC_PACKAGE,
                                   ANDROID_VMSC_PACKAGE,
-                                  ANDROID_VMT_PACKAGE])
+                                  ANDROID_VMTM_PACKAGE,
+                                  ANDROID_VMUDC_PACKAGE])
 
 # List of supported Android branches. When adding/removing branches make sure
 # the ANDROID_BRANCH_TO_BUILD_TARGETS map is also updated.
 ANDROID_PI_BUILD_BRANCH = 'git_pi-arc'
 ANDROID_VMRVC_BUILD_BRANCH = 'git_rvc-arc'
 ANDROID_VMSC_BUILD_BRANCH = 'git_sc-arc-dev'
-ANDROID_VMT_BUILD_BRANCH = 'git_master-arc-dev'
+ANDROID_VMTM_BUILD_BRANCH = 'git_tm-arc-dev'
+ANDROID_VMUDC_BUILD_BRANCH = 'git_master-arc-dev'
 
 # Supported Android build targets for each branch. Maps from *_TARGET variables
 # in Android ebuilds to Android build targets. Used during Android uprev to fill
@@ -309,7 +315,14 @@ ANDROID_BRANCH_TO_BUILD_TARGETS = {
         'ARM64_USERDEBUG_TARGET': 'bertha_arm64-userdebug',
         'X86_64_USERDEBUG_TARGET': 'bertha_x86_64-userdebug',
     },
-    ANDROID_VMT_BUILD_BRANCH: {
+    ANDROID_VMTM_BUILD_BRANCH: {
+        'ARM64_TARGET': 'bertha_arm64-user',
+        'X86_64_TARGET': 'bertha_x86_64-user',
+        'ARM64_USERDEBUG_TARGET': 'bertha_arm64-userdebug',
+        'X86_64_USERDEBUG_TARGET': 'bertha_x86_64-userdebug',
+    },
+    ANDROID_VMUDC_BUILD_BRANCH: {
+        'ARM64_USERDEBUG_TARGET': 'bertha_arm64-userdebug',
         'X86_64_USERDEBUG_TARGET': 'bertha_x86_64-userdebug',
     },
 }
@@ -444,9 +457,6 @@ INCREMENTAL_TYPE = 'binary'
 # These builds serve as PFQ builders.  This is being deprecated.
 PFQ_TYPE = 'pfq'
 
-# Android PFQ type.  Builds and validates new versions of Android.
-ANDROID_PFQ_TYPE = 'android'
-
 # Builds from source and non-incremental.  This builds fully wipe their
 # chroot before the start of every build and no not use a BINHOST.
 FULL_TYPE = 'full'
@@ -456,6 +466,9 @@ CANARY_TYPE = 'canary'
 
 # Generate payloads for an already built build/version.
 PAYLOADS_TYPE = 'payloads'
+
+# How long we should wait for the signing fleet to sign payloads.
+PAYLOAD_SIGNING_TIMEOUT = 10800
 
 # Similar behavior to canary, but used to validate toolchain changes.
 TOOLCHAIN_TYPE = 'toolchain'
@@ -477,7 +490,6 @@ VALID_BUILD_TYPES = (
     CANARY_TYPE,
     CHROOT_BUILDER_TYPE,
     CHROOT_BUILDER_BOARD,
-    ANDROID_PFQ_TYPE,
     PFQ_TYPE,
     PAYLOADS_TYPE,
     TOOLCHAIN_TYPE,
@@ -652,6 +664,7 @@ VERSION_FILE = os.path.join(CHROMIUMOS_OVERLAY_DIR,
 SDK_VERSION_FILE = os.path.join(PUBLIC_BINHOST_CONF_DIR,
                                 'host/sdk_version.conf')
 SDK_GS_BUCKET = 'cos-sdk'
+RELEASE_GS_BUCKET = 'chromeos-build-release-console'
 
 PUBLIC = 'public'
 PRIVATE = 'private'
@@ -768,9 +781,35 @@ TEST_KEY_PUBLIC = 'id_rsa.pub'
 BREAKPAD_DEBUG_SYMBOLS_NAME = 'debug_breakpad'
 BREAKPAD_DEBUG_SYMBOLS_TAR = '%s.tar.xz' % BREAKPAD_DEBUG_SYMBOLS_NAME
 
+# Code coverage related constants
 CODE_COVERAGE_LLVM_JSON_SYMBOLS_NAME = 'code_coverage'
 CODE_COVERAGE_LLVM_JSON_SYMBOLS_TAR = ('%s.tar.xz'
                                        % CODE_COVERAGE_LLVM_JSON_SYMBOLS_NAME)
+CODE_COVERAGE_LLVM_FILE_NAME = 'coverage.json'
+ZERO_COVERAGE_FILE_EXTENSIONS_TO_PROCESS = ['.cc', '.h', '.c', '.cpp']
+ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES = (
+    '/*',
+    '#include',
+    '//',
+    '* ',
+    '*/',
+    '\n',
+    '}\n',
+    '};\n',
+    '**/\n')
+ZERO_COVERAGE_EXCLUDE_FILES_SUFFIXES = (
+    # Exclude unit test code from zero coverage
+    'test.c',
+    'test.cc',
+    'tests.c',
+    'tests.cc',
+    'test.cpp',
+    'tests.cpp'
+)
+
+# For more details see code_coverage_util.py's _ShouldExclude
+# method.
+EXTENSIONS_TO_REMOVE_EXCLUSION_CHECK = ('.h',)
 
 DEBUG_SYMBOLS_NAME = 'debug'
 DEBUG_SYMBOLS_TAR = '%s.tgz' % DEBUG_SYMBOLS_NAME
@@ -815,6 +854,91 @@ IMAGE_TYPE_TO_NAME = {
 }
 IMAGE_NAME_TO_TYPE = dict((v, k) for k, v in IMAGE_TYPE_TO_NAME.items())
 
+DEFAULT_INSTALL_MASK = {
+    '*.a',
+    '*.c',
+    '*.cc',
+    '*.cmake',
+    '*.go',
+    '*.la',
+    '*.h',
+    '*.hh',
+    '*.hpp',
+    '*.h++',
+    '*.hxx',
+    '*.proto',
+    '*/.keep*',
+    '/build/initramfs',
+    '/build/libexec/tast',
+    '/build/manatee',
+    '/build/rootfs/dlc',
+    '/build/share',
+    '/etc/init.d',
+    '/etc/runlevels',
+    '/etc/selinux/intermediates',
+    '/etc/xinetd.d',
+    '/firmware',
+    '/lib/modules/*/vdso',
+    '/lib/rc',
+    '/opt/google/containers/android/vendor/lib*/pkgconfig',
+    '/opt/google/containers/android/build',
+    '/usr/bin/*-config',
+    '/usr/bin/Xnest',
+    '/usr/bin/Xvfb',
+    '/usr/include',
+    '/usr/lib/cros_rust_registry',
+    '/usr/lib/debug',
+    '/usr/lib/gopath',
+    '/usr/lib*/pkgconfig',
+    '/usr/local/autotest-chrome',
+    '/usr/man',
+    '/usr/share/aclocal',
+    '/usr/share/applications',
+    '/usr/share/cups/drv',
+    '/usr/share/doc',
+    '/usr/share/gettext',
+    '/usr/share/gtk-2.0',
+    '/usr/share/gtk-doc',
+    '/usr/share/info',
+    '/usr/share/man',
+    '/usr/share/ppd',
+    '/usr/share/openrc',
+    '/usr/share/pkgconfig',
+    '/usr/share/profiling',
+    '/usr/share/readline',
+    '/usr/src',
+    '/boot/config-*',
+    '/boot/System.map-*',
+    '/usr/local/build/autotest',
+    '/lib/modules/*/build',
+    '/lib/modules/*/source',
+    'test_*.ko',
+}
+
+FACTORY_SHIM_INSTALL_MASK = DEFAULT_INSTALL_MASK.union({
+    '/opt/google/chrome',
+    '/opt/google/containers',
+    '/opt/google/vms',
+    '/usr/lib64/dri',
+    '/usr/lib/dri',
+    '/usr/share/X11',
+    '/usr/share/chromeos-assets/[^i]*',
+    '/usr/share/chromeos-assets/i[^m]*',
+    '/usr/share/fonts',
+    '/usr/share/locale',
+    '/usr/share/mime',
+    '/usr/share/oem',
+    '/usr/share/sounds',
+    '/usr/share/tts',
+    '/usr/share/zoneinfo',
+})
+
+SYSTEMD_INSTALL_MASK = {
+    '/lib/systemd/network',
+    '/usr/lib/systemd/system',
+}
+
+BUILD_REPORT_JSON = 'build_report.json'
 METADATA_JSON = 'metadata.json'
 PARTIAL_METADATA_JSON = 'partial-metadata.json'
 METADATA_TAGS = 'tags'
@@ -838,26 +962,16 @@ CHROME_GARDENER = 'chrome'
 # assign to the current gardener.
 CHROME_GARDENER_REVIEW_EMAIL = 'chrome-os-gardeners-reviews@google.com'
 
-# Useful config targets.
-CANARY_MASTER = 'master-release'
-PFQ_MASTER = 'master-chromium-pfq'
-PI_ANDROID_PFQ_MASTER = 'master-pi-android-pfq'
-VMRVC_ANDROID_PFQ_MASTER = 'master-vmrvc-android-pfq'
-VMSC_ANDROID_PFQ_MASTER = 'master-vmsc-android-pfq'
-VMT_ANDROID_PFQ_MASTER = 'master-vmt-android-pfq'
-TOOLCHAIN_MASTTER = 'master-toolchain'
-
-
 # Email validation regex. Not quite fully compliant with RFC 2822, but good
 # approximation.
 EMAIL_REGEX = r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}'
 
-# Blacklist of files not allowed to be uploaded into the Partner Project Google
+# Blocklist of files not allowed to be uploaded into the Partner Project Google
 # Storage Buckets:
 # debug.tgz contains debug symbols.
 # manifest.xml exposes all of our repo names.
 # vm_test_results can contain symbolicated crash dumps.
-EXTRA_BUCKETS_FILES_BLACKLIST = [
+EXTRA_BUCKETS_FILES_BLOCKLIST = [
     'debug.tgz',
     'manifest.xml',
     'vm_test_results_*'
@@ -941,15 +1055,6 @@ QUICK_PROVISION_PAYLOAD_KERNEL = 'full_dev_part_KERN.bin.gz'
 QUICK_PROVISION_PAYLOAD_ROOTFS = 'full_dev_part_ROOT.bin.gz'
 QUICK_PROVISION_PAYLOAD_MINIOS = 'full_dev_part_MINIOS.bin.gz'
 
-# Provenance bundle name. This file name should never be changed, since the
-# signer needs to know where to look for provenance.
-# This is generated via the generate_attestations function in build_menu.
-# This archive contains one JSON file per artifact of interest: image,
-# update payload, etc. It ends up in the expected location because
-# the provenance generation function parses the build_api response to ensure
-# that if they exist, the manifests will be uploaded to GCS.
-ARTIFACT_PROVENANCE_MANIFESTS = 'artifact_provenance_manifests.tar'
-
 # Mock build and stage IDs.
 MOCK_STAGE_ID = 313377
 MOCK_BUILD_ID = 31337
@@ -983,3 +1088,66 @@ RECOVERY_DATA_PRIVATE_KEY = 'recovery_kernel_data_key.vbprivk'
 RECOVERY_KEYBLOCK = 'recovery_kernel.keyblock'
 MINIOS_DATA_PRIVATE_KEY = 'minios_kernel_data_key.vbprivk'
 MINIOS_KEYBLOCK = 'minios_kernel.keyblock'
+
+# LegacyRelease allowlist.
+# TODO(b/238925754): Delete when Rubik is fully rolled out.
+LEGACY_RELEASE_ALLOWLIST = [
+    'asuka-release',
+    'asurada-release',
+    'atlas-release',
+    'betty-pi-arc-release', # b/240524235
+    'betty-release',
+    'bob-release',
+    'brask-release',
+    'brya-release',
+    'bubs-release',
+    'caroline-release',
+    'cave-release',
+    'chell-release',
+    'cherry-release',
+    'coral-release',
+    'corsola-release',
+    'dedede-release',
+    'draco-release',
+    'drallion-release',
+    'elm-release',
+    'eve-release',
+    'fizz-release',
+    'grunt-release',
+    'guybrush-release',
+    'hana-release',
+    'hatch-release',
+    'herobrine-release',
+    'jacuzzi-release',
+    'kalista-release',
+    'keeby-release',
+    'kevin-release',
+    'kukui-release',
+    'lars-release',
+    'nami-release',
+    'nautilus-release',
+    'nissa-release',
+    'nocturne-release',
+    'novato-arc64-release',
+    'novato-release',
+    'octopus-release',
+    'puff-release',
+    'pyro-release',
+    'rammus-release',
+    'reef-release',
+    'reven-vmtest-release', # b/240524235
+    'sand-release',
+    'sarien-release',
+    'scarlet-release',
+    'senor-release',
+    'sentry-release',
+    'shotzo-release',
+    'snappy-release',
+    'soraka-release',
+    'strongbad-release',
+    'tael-release',
+    'tatl-release',
+    'trogdor-release',
+    'volteer-release',
+    'zork-release',
+]

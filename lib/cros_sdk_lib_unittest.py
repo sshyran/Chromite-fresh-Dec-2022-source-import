@@ -5,7 +5,6 @@
 """Test the cros_sdk_lib module."""
 
 import os
-from pathlib import Path
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_sdk_lib
@@ -151,7 +150,7 @@ class TestFindVolumeGroupForDevice(cros_test_lib.MockTempDirTestCase):
 
   def testExistingDevice(self):
     with cros_test_lib.RunCommandMock() as rc_mock:
-      rc_mock.SetDefaultCmdResult(output="""
+      rc_mock.SetDefaultCmdResult(stdout="""
   wrong_vg1\t/dev/sda1
   test_vg\t/dev/loop1
   wrong_vg2\t/dev/loop0
@@ -161,7 +160,7 @@ class TestFindVolumeGroupForDevice(cros_test_lib.MockTempDirTestCase):
 
   def testNoMatchingVolumeGroup(self):
     with cros_test_lib.RunCommandMock() as rc_mock:
-      rc_mock.SetDefaultCmdResult(output="""
+      rc_mock.SetDefaultCmdResult(stdout="""
   wrong_vg1\t/dev/sda1
   wrong_vg2\t/dev/loop0
 """)
@@ -170,7 +169,7 @@ class TestFindVolumeGroupForDevice(cros_test_lib.MockTempDirTestCase):
 
   def testPhysicalVolumeWithoutVolumeGroup(self):
     with cros_test_lib.RunCommandMock() as rc_mock:
-      rc_mock.SetDefaultCmdResult(output="""
+      rc_mock.SetDefaultCmdResult(stdout="""
   wrong_vg1\t/dev/sda1
   \t/dev/loop0
 """)
@@ -179,7 +178,7 @@ class TestFindVolumeGroupForDevice(cros_test_lib.MockTempDirTestCase):
 
   def testMatchingVolumeGroup(self):
     with cros_test_lib.RunCommandMock() as rc_mock:
-      rc_mock.SetDefaultCmdResult(output="""
+      rc_mock.SetDefaultCmdResult(stdout="""
   wrong_vg1\t/dev/sda1
   cros_chroot_000\t/dev/loop1
   wrong_vg2\t/dev/loop0
@@ -189,7 +188,7 @@ class TestFindVolumeGroupForDevice(cros_test_lib.MockTempDirTestCase):
 
   def testTooManyVolumeGroups(self):
     with cros_test_lib.RunCommandMock() as rc_mock:
-      rc_mock.SetDefaultCmdResult(output="""
+      rc_mock.SetDefaultCmdResult(stdout="""
   wrong_vg1\t/dev/sda1
 %s
   wrong_vg2\t/dev/loop0
@@ -199,7 +198,7 @@ class TestFindVolumeGroupForDevice(cros_test_lib.MockTempDirTestCase):
 
   def testInvalidChars(self):
     with cros_test_lib.RunCommandMock() as rc_mock:
-      rc_mock.SetDefaultCmdResult(output="""
+      rc_mock.SetDefaultCmdResult(stdout="""
   wrong_vg1\t/dev/sda1
   cros_chroot_000\t/dev/loop1
   wrong_vg2\t/dev/loop0
@@ -210,7 +209,7 @@ class TestFindVolumeGroupForDevice(cros_test_lib.MockTempDirTestCase):
 
   def testInvalidLines(self):
     with cros_test_lib.RunCommandMock() as rc_mock:
-      rc_mock.SetDefaultCmdResult(output="""
+      rc_mock.SetDefaultCmdResult(stdout="""
   \t/dev/sda1
 
   wrong_vg2\t/dev/loop0\t
@@ -236,9 +235,8 @@ class TestMountChroot(cros_test_lib.MockTempDirTestCase):
   _LVM_SUCCESS_CODE = 0  # Shell exit code when lvm commands succeed.
 
   def _makeImageFile(self, chroot_img):
-    with open(chroot_img, 'w') as f:
-      f.seek(2**30)
-      f.write('\0')
+    # Create a 1GiB sparse disk image.
+    osutils.AllocateFile(chroot_img, 1024 * 1024 * 1024)
 
   def _mockFindVolumeGroupForDevice(self):
     m = self.PatchObject(cros_sdk_lib, 'FindVolumeGroupForDevice')
@@ -271,7 +269,7 @@ class TestMountChroot(cros_test_lib.MockTempDirTestCase):
 
     with cros_test_lib.RunCommandMock() as rc_mock:
       rc_mock.AddCmdResult(self._VGS_LOOKUP, returncode=self._LVM_FAILURE_CODE)
-      rc_mock.AddCmdResult(self._VGCREATE, output='')
+      rc_mock.AddCmdResult(self._VGCREATE, stdout='')
       rc_mock.AddCmdResult(self._LVS_LOOKUP, returncode=self._LVM_FAILURE_CODE)
       rc_mock.AddCmdResult(self._LVCREATE)
       rc_mock.AddCmdResult(self._MKE2FS)
@@ -527,7 +525,7 @@ class TestCleanupChrootMount(cros_test_lib.MockTempDirTestCase):
               self.chroot_path)
 
     with cros_test_lib.RunCommandMock() as rc_mock:
-      rc_mock.AddCmdResult(self._VGS_DEV_LOOKUP, output='  /dev/loop0')
+      rc_mock.AddCmdResult(self._VGS_DEV_LOOKUP, stdout='  /dev/loop0')
       rc_mock.AddCmdResult(self._VGCHANGE_N)
       rc_mock.AddCmdResult(self._LOSETUP_DETACH)
 
@@ -547,7 +545,7 @@ class TestCleanupChrootMount(cros_test_lib.MockTempDirTestCase):
               self.chroot_path)
 
     with cros_test_lib.RunCommandMock() as rc_mock:
-      rc_mock.AddCmdResult(self._VGS_DEV_LOOKUP, output='  /dev/loop0')
+      rc_mock.AddCmdResult(self._VGS_DEV_LOOKUP, stdout='  /dev/loop0')
       rc_mock.AddCmdResult(self._VGCHANGE_N)
       rc_mock.AddCmdResult(self._LOSETUP_DETACH)
 
@@ -569,7 +567,7 @@ class TestCleanupChrootMount(cros_test_lib.MockTempDirTestCase):
               self.chroot_path)
 
     with cros_test_lib.RunCommandMock() as rc_mock:
-      rc_mock.AddCmdResult(self._VGS_DEV_LOOKUP, output='  /dev/loop0')
+      rc_mock.AddCmdResult(self._VGS_DEV_LOOKUP, stdout='  /dev/loop0')
       rc_mock.AddCmdResult(self._VGCHANGE_N)
       rc_mock.AddCmdResult(self._LOSETUP_DETACH)
 
@@ -592,7 +590,7 @@ class TestCleanupChrootMount(cros_test_lib.MockTempDirTestCase):
       f.write('sysfs /sys sysfs rw 0 0\n')
 
     with cros_test_lib.RunCommandMock() as rc_mock:
-      rc_mock.AddCmdResult(self._LOSETUP_FIND, output='/dev/loop1')
+      rc_mock.AddCmdResult(self._LOSETUP_FIND, stdout='/dev/loop1')
       rc_mock.AddCmdResult(self._VGS_VG_LOOKUP,
                            returncode=self._LVM_SUCCESS_CODE)
       rc_mock.AddCmdResult(self._VGCHANGE_N)
@@ -616,7 +614,7 @@ class TestCleanupChrootMount(cros_test_lib.MockTempDirTestCase):
       f.write('sysfs /sys sysfs rw 0 0\n')
 
     with cros_test_lib.RunCommandMock() as rc_mock:
-      rc_mock.AddCmdResult(self._LOSETUP_FIND, output='/dev/loop1')
+      rc_mock.AddCmdResult(self._LOSETUP_FIND, stdout='/dev/loop1')
       rc_mock.AddCmdResult(self._VGS_VG_LOOKUP,
                            returncode=self._LVM_FAILURE_CODE)
       rc_mock.AddCmdResult(self._LOSETUP_DETACH)
@@ -678,8 +676,7 @@ class ChrootUpdaterTest(cros_test_lib.MockTestCase, VersionHookTestCase):
 
   def setUp(self):
     # Avoid sudo password prompt for config writing.
-    self.PatchObject(os, 'getuid', return_value=0)
-    self.PatchObject(os, 'geteuid', return_value=0)
+    self.PatchObject(osutils, 'IsRootUser', return_value=True)
 
     self.chroot = cros_sdk_lib.ChrootUpdater(version_file=self.version_file,
                                              hooks_dir=self.hooks_dir)
@@ -742,7 +739,7 @@ class ChrootUpdaterTest(cros_test_lib.MockTestCase, VersionHookTestCase):
   def testApplyUpdates(self):
     """Test ApplyUpdates."""
     self.PatchObject(cros_build_lib, 'run',
-                     return_value=cros_build_lib.CommandResult(returncode=0))
+                     return_value=cros_build_lib.CompletedProcess(returncode=0))
     for version in self.success_versions:
       self.chroot.SetVersion(version)
       self.chroot.ApplyUpdates()
@@ -781,10 +778,9 @@ class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
   """ChrootCreator tests."""
 
   def setUp(self):
-    tempdir = Path(self.tempdir)
-    self.chroot_path = tempdir / 'chroot'
-    self.sdk_tarball = tempdir / 'chroot.tar'
-    self.cache_dir = tempdir / 'cache_dir'
+    self.chroot_path = self.tempdir / 'chroot'
+    self.sdk_tarball = self.tempdir / 'chroot.tar'
+    self.cache_dir = self.tempdir / 'cache_dir'
 
     # We can't really verify these in any useful way atm.
     self.mount_mock = self.PatchObject(osutils, 'Mount')
@@ -793,7 +789,7 @@ class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
         self.chroot_path, self.sdk_tarball, self.cache_dir)
 
     # Create a minimal tarball to extract during testing.
-    tar_dir = tempdir / 'tar_dir'
+    tar_dir = self.tempdir / 'tar_dir'
     D = cros_test_lib.Directory
     cros_test_lib.CreateOnDiskHierarchy(tar_dir, (
         D('etc', (

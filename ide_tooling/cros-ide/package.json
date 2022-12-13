@@ -1,116 +1,199 @@
 {
   "name": "cros-ide",
-  "displayName": "cros-ide",
-  "description": "Connect to Chrome OS DUTs over VNC",
-  "version": "0.0.4",
-  "publisher": "cros-velocity",
-  "repository": "https://chromium.googlesource.com/chromiumos/chromite/+/HEAD/ide_tooling",
-  "engines": {
-    "vscode": "^1.63.1"
+  "displayName": "CrOS IDE",
+  "description": "ChromiumOS Development",
+  "version": "0.0.13",
+  "publisher": "Google",
+  "author": {
+    "name": "ChromeOS Velocity Team at Google"
   },
+  "repository": "https://chromium.googlesource.com/chromiumos/chromite/+/HEAD/ide_tooling",
+  "license": "BSD-3-Clause",
+  "engines": {
+    "vscode": "^1.63.0",
+    "node": ">=14.0.0"
+  },
+  "icon": "media/cros-device.png",
   "categories": [
-    "Other"
+    "Linters",
+    "Other",
+    "Programming Languages",
+    "Testing"
   ],
   "activationEvents": [
-    "onCommand:cros-ide.addHost",
-    "onCommand:cros-ide.deleteHost",
-    "onCommand:cros-ide.connectToHostForScreen",
-    "onCommand:cros-ide.connectToHostForShell",
-    "onCommand:cros-ide.refreshCrosfleet",
-    "onCommand:cros-ide.addFleetHost",
+    "onCommand:cros-ide.deviceManagement.addDevice",
+    "onCommand:cros-ide.deviceManagement.deleteDevice",
+    "onCommand:cros-ide.deviceManagement.connectToDeviceForScreen",
+    "onCommand:cros-ide.deviceManagement.connectToDeviceForShell",
+    "onCommand:cros-ide.deviceManagement.flashPrebuiltImage",
+    "onCommand:cros-ide.deviceManagement.crosfleetLogin",
+    "onCommand:cros-ide.deviceManagement.refreshLeases",
+    "onCommand:cros-ide.deviceManagement.addLease",
+    "onCommand:cros-ide.deviceManagement.copyHostname",
+    "onCommand:cros-ide.refreshBoardsPackages",
     "onCommand:cros-ide.codeSearchOpenCurrentFile",
+    "onCommand:cros-ide.codeSearchCopyCurrentFile",
     "onCommand:cros-ide.codeSearchSearchForSelection",
     "onCommand:cros-ide.crosWorkonStart",
     "onCommand:cros-ide.crosWorkonStop",
-    "onView:static-devices",
-    "onView:fleet-devices",
+    "onCommand:cros-ide.selectBoard",
+    "onCommand:cros-ide.fileIdeBug",
+    "onCommand:cros-ide.resetUserID",
+    "onCommand:cros-ide.openEbuild",
+    "onView:devices",
     "onView:boards-packages",
+    "onView:cros-ide-status",
     "onLanguage:cpp",
     "onLanguage:gn",
+    "onLanguage:go",
     "onLanguage:python",
-    "onLanguage:shellscript"
+    "onLanguage:shellscript",
+    "onLanguage:upstart"
   ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "cros-ide.connectToHostForScreen",
-        "title": "CrOS: Connect to Host (VNC)",
+        "command": "cros-ide.deviceManagement.connectToDeviceForScreen",
+        "category": "CrOS",
+        "title": "Connect to Device (VNC)",
         "icon": "$(window)"
       },
       {
-        "command": "cros-ide.connectToHostForShell",
-        "title": "CrOS: Connect to Host (Shell)",
+        "command": "cros-ide.deviceManagement.connectToDeviceForShell",
+        "category": "CrOS",
+        "title": "Connect to Device (Shell)",
         "icon": "$(terminal)"
       },
       {
-        "command": "cros-ide.addHost",
-        "title": "CrOS: Add New Host",
+        "command": "cros-ide.deviceManagement.addDevice",
+        "category": "CrOS",
+        "title": "Add New Device",
         "icon": "$(add)"
       },
       {
-        "command": "cros-ide.deleteHost",
-        "title": "CrOS: Delete Host",
+        "command": "cros-ide.deviceManagement.deleteDevice",
+        "category": "CrOS",
+        "title": "Delete Device",
         "icon": "$(remove)"
       },
       {
-        "command": "cros-ide.refreshCrosfleet",
-        "title": "CrOS: Refresh crosfleet devices",
+        "command": "cros-ide.deviceManagement.flashPrebuiltImage",
+        "category": "CrOS",
+        "title": "Flash Image to Device",
+        "icon": "$(cloud-download)"
+      },
+      {
+        "command": "cros-ide.deviceManagement.crosfleetLogin",
+        "category": "CrOS",
+        "title": "Log in to crosfleet"
+      },
+      {
+        "command": "cros-ide.deviceManagement.refreshLeases",
+        "category": "CrOS",
+        "title": "Refresh Leased Device List",
         "icon": "$(refresh)"
       },
       {
-        "command": "cros-ide.addFleetHost",
-        "title": "CrOS: Add crosfleet Host",
+        "command": "cros-ide.deviceManagement.addLease",
+        "category": "CrOS",
+        "title": "Lease a Device",
         "icon": "$(add)"
       },
       {
+        "command": "cros-ide.deviceManagement.copyHostname",
+        "category": "CrOS",
+        "title": "Copy Hostname"
+      },
+      {
         "command": "cros-ide.refreshBoardsPackages",
-        "title": "CrOS: Refresh Boards and Packages",
+        "category": "CrOS",
+        "title": "Refresh Boards and Packages",
         "icon": "$(refresh)"
       },
       {
         "command": "cros-ide.codeSearchOpenCurrentFile",
+        "category": "CrOS",
         "title": "Open in Code Search"
       },
       {
+        "command": "cros-ide.codeSearchCopyCurrentFile",
+        "category": "CrOS",
+        "title": "Copy Code Search URL to clipboard"
+      },
+      {
         "command": "cros-ide.codeSearchSearchForSelection",
+        "category": "CrOS",
         "title": "Search for selection in Code Search"
       },
       {
         "command": "cros-ide.crosWorkonStart",
-        "title": "CrOS: Start Working on a Package"
+        "category": "CrOS",
+        "title": "Start Working on a new Package",
+        "icon": "$(add)"
       },
       {
         "command": "cros-ide.crosWorkonStop",
-        "title": "CrOS: Stop Working on a Package"
+        "category": "CrOS",
+        "title": "Stop Working On",
+        "icon": "$(remove)"
+      },
+      {
+        "command": "cros-ide.openEbuild",
+        "category": "CrOS",
+        "title": "Open Ebuild",
+        "icon": "$(edit)"
       },
       {
         "command": "cros-ide.selectBoard",
-        "title": "CrOS: Select target board"
+        "category": "CrOS",
+        "title": "Select target board"
+      },
+      {
+        "command": "cros-ide.fileIdeBug",
+        "category": "CrOS",
+        "title": "File a bug on Buganizer"
+      },
+      {
+        "command": "cros-ide.resetUserID",
+        "category": "CrOS",
+        "title": "Generate a new random user ID for metrics collection"
+      },
+      {
+        "command": "cros-ide.coverage.generate",
+        "category": "CrOS",
+        "title": "Generate Coverage Data",
+        "enablement": "config.cros-ide.underDevelopment.testCoverage"
+      },
+      {
+        "command": "cros-ide.coverage.showReport",
+        "category": "CrOS",
+        "title": "Show Coverage Report",
+        "enablement": "config.cros-ide.underDevelopment.testCoverage"
       }
     ],
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "cros-devices",
-          "title": "CrOS Remote Testing",
+          "id": "cros-view",
+          "title": "CrOS Development",
           "icon": "media/cros-device.svg"
         }
       ]
     },
     "views": {
-      "cros-devices": [
+      "cros-view": [
         {
-          "id": "static-devices",
-          "name": "my devices"
-        },
-        {
-          "id": "fleet-devices",
-          "name": "crosfleet devices"
+          "id": "devices",
+          "name": "Devices"
         },
         {
           "id": "boards-packages",
           "name": "Boards and Packages"
+        },
+        {
+          "id": "cros-ide-status",
+          "name": "IDE Status"
         }
       ]
     },
@@ -120,25 +203,13 @@
           "command": "cros-ide.codeSearchOpenCurrentFile"
         },
         {
+          "command": "cros-ide.codeSearchCopyCurrentFile"
+        },
+        {
           "command": "cros-ide.codeSearchSearchForSelection"
         }
       ],
       "view/title": [
-        {
-          "command": "cros-ide.addHost",
-          "when": "view == static-devices",
-          "group": "navigation"
-        },
-        {
-          "command": "cros-ide.addFleetHost",
-          "when": "view == fleet-devices",
-          "group": "navigation"
-        },
-        {
-          "command": "cros-ide.refreshCrosfleet",
-          "when": "view == fleet-devices",
-          "group": "navigation"
-        },
         {
           "command": "cros-ide.refreshBoardsPackages",
           "when": "view == boards-packages",
@@ -147,26 +218,106 @@
       ],
       "view/item/context": [
         {
-          "command": "cros-ide.connectToHostForScreen",
-          "when": "view == static-devices || view == fleet-devices",
+          "command": "cros-ide.deviceManagement.addDevice",
+          "when": "view == devices && viewItem == category-owned",
+          "group": "inline"
+        },
+        {
+          "command": "cros-ide.deviceManagement.connectToDeviceForScreen",
+          "when": "view == devices && viewItem =~ /^device-/",
           "group": "inline@1"
         },
         {
-          "command": "cros-ide.connectToHostForShell",
-          "when": "view == static-devices || view == fleet-devices",
+          "command": "cros-ide.deviceManagement.connectToDeviceForScreen",
+          "when": "view == devices && viewItem =~ /^device-/",
+          "group": "1_connect@1"
+        },
+        {
+          "command": "cros-ide.deviceManagement.connectToDeviceForShell",
+          "when": "view == devices && viewItem =~ /^device-/",
           "group": "inline@2"
         },
         {
-          "command": "cros-ide.deleteHost",
-          "when": "view == static-devices || view == fleet-devices",
+          "command": "cros-ide.deviceManagement.connectToDeviceForShell",
+          "when": "view == devices && viewItem =~ /^device-/",
+          "group": "1_connect@2"
+        },
+        {
+          "command": "cros-ide.deviceManagement.flashPrebuiltImage",
+          "when": "view == devices && viewItem =~ /^device-/",
           "group": "inline@3"
+        },
+        {
+          "command": "cros-ide.deviceManagement.flashPrebuiltImage",
+          "when": "view == devices && viewItem =~ /^device-/",
+          "group": "2_operation@1"
+        },
+        {
+          "command": "cros-ide.deviceManagement.copyHostname",
+          "when": "view == devices && viewItem =~ /^device-/",
+          "group": "8_copy"
+        },
+        {
+          "command": "cros-ide.deviceManagement.deleteDevice",
+          "when": "view == devices && viewItem == device-owned",
+          "group": "inline@9"
+        },
+        {
+          "command": "cros-ide.deviceManagement.deleteDevice",
+          "when": "view == devices && viewItem == device-owned",
+          "group": "9_delete"
+        },
+        {
+          "command": "cros-ide.deviceManagement.addLease",
+          "when": "view == devices && viewItem == category-leased",
+          "group": "inline@1"
+        },
+        {
+          "command": "cros-ide.deviceManagement.refreshLeases",
+          "when": "view == devices && viewItem == category-leased",
+          "group": "inline@2"
+        },
+        {
+          "command": "cros-ide.crosWorkonStart",
+          "when": "view == boards-packages && viewItem == board",
+          "group": "inline"
+        },
+        {
+          "command": "cros-ide.crosWorkonStop",
+          "when": "view == boards-packages && viewItem == package",
+          "group": "inline"
+        },
+        {
+          "command": "cros-ide.openEbuild",
+          "when": "view == boards-packages && viewItem == package",
+          "group": "inline"
+        },
+        {
+          "command": "cros-ide.coverage.generate",
+          "when": "view == boards-packages && viewItem == package && config.cros-ide.underDevelopment.testCoverage"
+        },
+        {
+          "command": "cros-ide.coverage.showReport",
+          "when": "view == boards-packages && viewItem == package && config.cros-ide.underDevelopment.testCoverage"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "cros-ide.deviceManagement.copyHostname",
+          "when": "false"
         }
       ]
     },
     "viewsWelcome": [
       {
-        "view": "static-devices",
-        "contents": "No host added yet.\n[Add New Host](command:cros-ide.addHost)"
+        "view": "boards-packages",
+        "contents": "This view shows boards set up in the chroot and packages marked active with [cros_workon start](https://chromium.googlesource.com/chromiumos/docs/+/HEAD/developer_guide.md#run-cros_workon-start). You can start and stop working on new packages from the UI. Selecting a new board and initializizing the build must be done on the command line. Visit [the developer guide](https://chromium.googlesource.com/chromiumos/docs/+/HEAD/developer_guide.md#Select-a-board) to learn more.\n[Show Boards and Packages](command:cros-ide.dismissBoardsPkgsWelcome)",
+        "when": "config.cros-ide.boardsAndPackages.showWelcomeMessage"
+      },
+      {
+        "view": "boards-packages",
+        "contents": "You have not yet opened a folder with ChromeOS sources (for example, platform2).\n[Open Folder](command:vscode.openFolder)\nCrOS IDE uses source location to detect the chroot and show [initialized boards](https://chromium.googlesource.com/chromiumos/docs/+/HEAD/developer_guide.md#Select-a-board).",
+        "when": "!config.cros-ide.boardsAndPackages.showWelcomeMessage && !cros-ide.chrootPath"
       }
     ],
     "configuration": {
@@ -174,7 +325,12 @@
       "properties": {
         "cros-ide.board": {
           "type": "string",
-          "description": "The board to use on commands such as emerge"
+          "description": "The board to use for generating C++ cross references and autocompletion"
+        },
+        "cros-ide.boardsAndPackages.showWelcomeMessage": {
+          "type": "boolean",
+          "description": "Show a description of the view and a button to go to the actual content.",
+          "default": true
         },
         "cros-ide.codeSearch": {
           "type": "string",
@@ -186,18 +342,53 @@
           "description": "Code Search instance to open files in",
           "default": "public"
         },
-        "cros-ide.features.testCoverage": {
+        "cros-ide.codeSearchHash": {
           "type": "boolean",
-          "description": "Enable Test Coverage",
+          "description": "Link to the hash of the current revision instead of TOT",
           "default": false
         },
-        "cros-ide.hosts": {
+        "cros-ide.cppCodeCompletion.useHardcodedMapping": {
+          "type": "boolean",
+          "description": "Disable the new logic to automatically detect a Portage package from the filepath, and use hardcoded mapping instead",
+          "default": false
+        },
+        "cros-ide.underDevelopment.crosFormat": {
+          "type": "boolean",
+          "description": "Format files with 'cros format' (under development)",
+          "default": false
+        },
+        "cros-ide.underDevelopment.deviceManagement": {
+          "type": "boolean",
+          "description": "Enable experimental Device Management features.",
+          "default": false
+        },
+        "cros-ide.underDevelopment.testCoverage": {
+          "type": "boolean",
+          "description": "Enable Test Coverage (incomplete)",
+          "default": false
+        },
+        "cros-ide.underDevelopment.gerrit": {
+          "type": "boolean",
+          "description": "Enable Gerrit support (incomplete)",
+          "default": false
+        },
+        "cros-ide.deviceManagement.devices": {
           "type": "array",
           "scope": "machine-overridable",
-          "description": "List of devices under testing",
+          "description": "List of developer-owned device hostnames",
           "items": {
             "type": "string"
           }
+        },
+        "cros-ide.metrics.collectMetrics": {
+          "type": "boolean",
+          "description": "Enable pseudonymous metrics collection. Randomly generated unique user ID resets automatically every 180 days. You can also reset it anytime by running the command in the Command Palette.",
+          "default": false
+        },
+        "cros-ide.metrics.showMessage": {
+          "type": "boolean",
+          "description": "Show information on metrics collection.",
+          "default": true
         }
       }
     },
@@ -210,34 +401,87 @@
         "aliases": [
           "Eclass"
         ]
+      },
+      {
+        "id": "gn",
+        "extensions": [
+          ".gn",
+          ".gni"
+        ]
+      },
+      {
+        "id": "upstart",
+        "aliases": [
+          "Upstart"
+        ],
+        "filenamePatterns": [
+          "**/init/*.conf",
+          "**/upstart/*.conf"
+        ],
+        "configuration": "./languages/upstart-language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "upstart",
+        "scopeName": "source.upstart",
+        "path": "./languages/upstart.tmLanguage.json",
+        "embeddedLanguages": {
+          "meta.embedded.block.shellscript": "shellscript"
+        }
       }
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run package",
-    "compile": "webpack",
-    "package": "webpack --mode production --devtool hidden-source-map",
-    "compile-tests": "tsc -p . --outDir out",
-    "lint": "eslint src --ext ts",
-    "test": "npm run compile-tests && npm run compile && npm run lint && xvfb-run -a node ./out/test/runTest.js",
-    "unit-test": "npm run compile-tests && node ./node_modules/mocha/bin/_mocha -u tdd --timeout 5000 --colors ./out/test/unit",
-    "publish": "./install.sh --upload"
+    "build": "rm -rf dist && webpack",
+    "build-release": "rm -rf dist && webpack --mode production --devtool hidden-source-map",
+    "build-tests": "rm -rf out && tsc -p . --outDir out",
+    "build-all": "npm run build && npm run build-tests",
+    "test": "npm run unit-test && npm run integration-test",
+    "unit-test": "npm run build-tests && NODE_PATH=out/test/unit/injected_modules jasmine --config=src/test/unit/jasmine.json",
+    "integration-test": "npm run build-all && rm -rf .vscode-test/user-data && xvfb-run -a node ./out/test/integration/runTest.js",
+    "lint": "npm run lint-code && npm run lint-license",
+    "lint-code": "gts lint",
+    "lint-license": "jsgl --local .",
+    "fix": "gts fix",
+    "preupload": "npm run lint && npm run test",
+    "vscode:prepublish": "npm run build-release"
+  },
+  "dependencies": {
+    "@novnc/novnc": "^1.3.0",
+    "date-fns": "^2.28.0",
+    "glob": "^7.1.7",
+    "js-base64": "^3.7.2",
+    "semver": "^7.3.7",
+    "uuid": "^8.3.2",
+    "ws": "^8.6.0"
   },
   "devDependencies": {
     "@types/glob": "^7.1.4",
-    "@types/mocha": "^9.0.0",
-    "@types/node": "^12.16.1",
-    "@types/vscode": "^1.63.1",
+    "@types/jasmine": "^4.0.0",
+    "@types/node": "^14.17.6",
+    "@types/semver": "^7.3.9",
+    "@types/ssh2": "^0.5.52",
+    "@types/uuid": "^8.3.4",
+    "@types/vscode": "^1.60.0",
+    "@types/vscode-webview": "^1.57.0",
+    "@types/ws": "^8.5.3",
     "@typescript-eslint/eslint-plugin": "^5.1.0",
     "@typescript-eslint/parser": "^5.1.0",
-    "@vscode/test-electron": "^1.6.2",
+    "@vscode/test-electron": "^2.1.3",
+    "copy-webpack-plugin": "^10.2.4",
     "eslint": "^7",
     "eslint-config-google": "^0.14.0",
-    "glob": "^7.1.7",
-    "mocha": "^9.1.3",
-    "ts-loader": "~9.2.6",
+    "eslint-plugin-import": "^2.26.0",
+    "gts": "^3.1.0",
+    "jasmine": "^4.1.0",
+    "js-green-licenses": "^3.0.1",
+    "ssh2": "^1.10.0",
+    "ts-loader": "^9.2.6",
     "typescript": "^4.5.5",
-    "webpack": "~5.3.2",
-    "webpack-cli": "~3.3.11"
+    "vscode-tmgrammar-test": "^0.1.1",
+    "vscode-uri": "^3.0.3",
+    "webpack": "^5.71.0",
+    "webpack-cli": "^4.9.2"
   }
 }

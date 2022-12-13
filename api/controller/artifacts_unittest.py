@@ -66,6 +66,7 @@ class BundleTestCase(cros_test_lib.MockTempDirTestCase,
   """Basic setup for all artifacts unittests."""
 
   def setUp(self):
+    self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=False)
     self.output_dir = os.path.join(self.tempdir, 'artifacts')
     osutils.SafeMakedirs(self.output_dir)
     self.sysroot_path = '/build/target'
@@ -119,7 +120,7 @@ class BundleImageArchivesTest(BundleTestCase):
 
   def testNoBuildTarget(self):
     """Test that no build target fails."""
-    request = self.BuildTargetRequest(output_dir=self.tempdir)
+    request = self.BuildTargetRequest(output_dir=str(self.tempdir))
     with self.assertRaises(cros_build_lib.DieSystemExit):
       artifacts.BundleImageArchives(request, self.response, self.api_config)
 
@@ -198,39 +199,19 @@ class BundleAutotestFilesTest(BundleTestCase):
   def testValidateOnly(self):
     """Quick check that a validate only call does not execute any logic."""
     patch = self.PatchObject(artifacts_svc, 'BundleAutotestFiles')
-    artifacts.BundleAutotestFiles(self.target_request, self.response,
+    artifacts.BundleAutotestFiles(self.sysroot_request, self.response,
                                   self.validate_only_config)
     patch.assert_not_called()
 
   def testMockCall(self):
     """Test that a mock call does not execute logic, returns mocked value."""
     patch = self.PatchObject(artifacts_svc, 'BundleAutotestFiles')
-    artifacts.BundleAutotestFiles(self.target_request, self.response,
+    artifacts.BundleAutotestFiles(self.sysroot_request, self.response,
                                   self.mock_call_config)
     patch.assert_not_called()
     self.assertEqual(len(self.response.artifacts), 1)
     self.assertEqual(self.response.artifacts[0].path,
                      os.path.join(self.output_dir, 'autotest-a.tar.gz'))
-
-  def testBundleAutotestFilesLegacy(self):
-    """BundleAutotestFiles calls service correctly with legacy args."""
-    files = {
-        artifacts_svc.ARCHIVE_CONTROL_FILES: '/tmp/artifacts/autotest-a.tar.gz',
-        artifacts_svc.ARCHIVE_PACKAGES: '/tmp/artifacts/autotest-b.tar.gz',
-    }
-    patch = self.PatchObject(artifacts_svc, 'BundleAutotestFiles',
-                             return_value=files)
-
-    artifacts.BundleAutotestFiles(self.target_request, self.response,
-                                  self.api_config)
-
-    # Verify the arguments are being passed through.
-    patch.assert_called_with(mock.ANY, self.sysroot, self.output_dir)
-
-    # Verify the output proto is being populated correctly.
-    self.assertTrue(self.response.artifacts)
-    paths = [artifact.path for artifact in self.response.artifacts]
-    self.assertCountEqual(list(files.values()), paths)
 
   def testBundleAutotestFiles(self):
     """BundleAutotestFiles calls service correctly."""
@@ -274,8 +255,8 @@ class BundleAutotestFilesTest(BundleTestCase):
                                   sysroot='/does/not/exist',
                                   output_dir=self.output_dir)
 
-    with self.assertRaises(cros_build_lib.DieSystemExit):
-      artifacts.BundleAutotestFiles(request, self.response, self.api_config)
+    artifacts.BundleAutotestFiles(request, self.response, self.api_config)
+    self.assertFalse(self.response.artifacts)
 
 
 class BundleTastFilesTest(BundleTestCase):
@@ -284,14 +265,14 @@ class BundleTastFilesTest(BundleTestCase):
   def testValidateOnly(self):
     """Quick check that a validate only call does not execute any logic."""
     patch = self.PatchObject(artifacts_svc, 'BundleTastFiles')
-    artifacts.BundleTastFiles(self.target_request, self.response,
+    artifacts.BundleTastFiles(self.sysroot_request, self.response,
                               self.validate_only_config)
     patch.assert_not_called()
 
   def testMockCall(self):
     """Test that a mock call does not execute logic, returns mocked value."""
     patch = self.PatchObject(artifacts_svc, 'BundleTastFiles')
-    artifacts.BundleTastFiles(self.target_request, self.response,
+    artifacts.BundleTastFiles(self.sysroot_request, self.response,
                               self.mock_call_config)
     patch.assert_not_called()
     self.assertEqual(len(self.response.artifacts), 1)
@@ -302,35 +283,9 @@ class BundleTastFilesTest(BundleTestCase):
     """BundleTasteFiles succeeds when no tast files found."""
     self.PatchObject(commands, 'BuildTastBundleTarball',
                      return_value=None)
-    artifacts.BundleTastFiles(self.target_request, self.response,
+    artifacts.BundleTastFiles(self.sysroot_request, self.response,
                               self.api_config)
-    self.assertEqual(list(self.response.artifacts), [])
-
-  def testBundleTastFilesLegacy(self):
-    """BundleTastFiles handles legacy args correctly."""
-    buildroot = self.tempdir
-    chroot_dir = os.path.join(buildroot, 'chroot')
-    sysroot_path = os.path.join(chroot_dir, 'build', 'board')
-    output_dir = os.path.join(self.tempdir, 'results')
-    osutils.SafeMakedirs(sysroot_path)
-    osutils.SafeMakedirs(output_dir)
-
-    chroot = chroot_lib.Chroot(chroot_dir)
-    sysroot = sysroot_lib.Sysroot('/build/board')
-
-    expected_archive = os.path.join(output_dir, artifacts_svc.TAST_BUNDLE_NAME)
-    # Patch the service being called.
-    bundle_patch = self.PatchObject(artifacts_svc, 'BundleTastFiles',
-                                    return_value=expected_archive)
-    self.PatchObject(constants, 'SOURCE_ROOT', new=buildroot)
-
-    request = artifacts_pb2.BundleRequest(build_target={'name': 'board'},
-                                          output_dir=output_dir)
-    artifacts.BundleTastFiles(request, self.response, self.api_config)
-    self.assertEqual(
-        [artifact.path for artifact in self.response.artifacts],
-        [expected_archive])
-    bundle_patch.assert_called_once_with(chroot, sysroot, output_dir)
+    self.assertFalse(self.response.artifacts)
 
   def testBundleTastFiles(self):
     """BundleTastFiles calls service correctly."""
@@ -441,14 +396,14 @@ class BundleEbuildLogsTest(BundleTestCase):
   def testValidateOnly(self):
     """Quick check that a validate only call does not execute any logic."""
     patch = self.PatchObject(commands, 'BuildEbuildLogsTarball')
-    artifacts.BundleEbuildLogs(self.target_request, self.response,
+    artifacts.BundleEbuildLogs(self.sysroot_request, self.response,
                                self.validate_only_config)
     patch.assert_not_called()
 
   def testMockCall(self):
     """Test that a mock call does not execute logic, returns mocked value."""
     patch = self.PatchObject(commands, 'BuildEbuildLogsTarball')
-    artifacts.BundleEbuildLogs(self.target_request, self.response,
+    artifacts.BundleEbuildLogs(self.sysroot_request, self.response,
                                self.mock_call_config)
     patch.assert_not_called()
     self.assertEqual(len(self.response.artifacts), 1)
@@ -469,24 +424,13 @@ class BundleEbuildLogsTest(BundleTestCase):
         bundle_ebuild_logs_tarball.call_args_list,
         [mock.call(mock.ANY, self.sysroot, self.output_dir)])
 
-  def testBundleEBuildLogsOldProto(self):
-    bundle_ebuild_logs_tarball = self.PatchObject(
-        artifacts_svc, 'BundleEBuildLogsTarball',
-        return_value='ebuild-logs.tar.gz')
-
-    artifacts.BundleEbuildLogs(self.target_request, self.response,
-                               self.api_config)
-
-    self.assertEqual(
-        bundle_ebuild_logs_tarball.call_args_list,
-        [mock.call(mock.ANY, self.sysroot, self.output_dir)])
-
   def testBundleEbuildLogsNoLogs(self):
     """BundleEbuildLogs dies when no logs found."""
     self.PatchObject(commands, 'BuildEbuildLogsTarball', return_value=None)
-    with self.assertRaises(cros_build_lib.DieSystemExit):
-      artifacts.BundleEbuildLogs(self.sysroot_request, self.response,
-                                 self.api_config)
+    artifacts.BundleEbuildLogs(self.sysroot_request, self.response,
+                               self.api_config)
+
+    self.assertFalse(self.response.artifacts)
 
 
 class BundleChromeOSConfigTest(BundleTestCase):
@@ -495,40 +439,26 @@ class BundleChromeOSConfigTest(BundleTestCase):
   def testValidateOnly(self):
     """Quick check that a validate only call does not execute any logic."""
     patch = self.PatchObject(artifacts_svc, 'BundleChromeOSConfig')
-    artifacts.BundleChromeOSConfig(self.target_request, self.response,
+    artifacts.BundleChromeOSConfig(self.sysroot_request, self.response,
                                    self.validate_only_config)
     patch.assert_not_called()
 
   def testMockCall(self):
     """Test that a mock call does not execute logic, returns mocked value."""
     patch = self.PatchObject(artifacts_svc, 'BundleChromeOSConfig')
-    artifacts.BundleChromeOSConfig(self.target_request, self.response,
+    artifacts.BundleChromeOSConfig(self.sysroot_request, self.response,
                                    self.mock_call_config)
     patch.assert_not_called()
     self.assertEqual(len(self.response.artifacts), 1)
     self.assertEqual(self.response.artifacts[0].path,
                      os.path.join(self.output_dir, 'config.yaml'))
 
-  def testBundleChromeOSConfigCallWithSysroot(self):
-    """Call with a request that sets sysroot."""
+  def testBundleChromeOSConfigSuccess(self):
+    """Test standard success case."""
     bundle_chromeos_config = self.PatchObject(
         artifacts_svc, 'BundleChromeOSConfig', return_value='config.yaml')
     artifacts.BundleChromeOSConfig(self.sysroot_request, self.response,
                                    self.api_config)
-    self.assertEqual(
-        [artifact.path for artifact in self.response.artifacts],
-        [os.path.join(self.output_dir, 'config.yaml')])
-
-    self.assertEqual(bundle_chromeos_config.call_args_list,
-                     [mock.call(mock.ANY, self.sysroot, self.output_dir)])
-
-  def testBundleChromeOSConfigCallWithBuildTarget(self):
-    """Call with a request that sets build_target."""
-    bundle_chromeos_config = self.PatchObject(
-        artifacts_svc, 'BundleChromeOSConfig', return_value='config.yaml')
-    artifacts.BundleChromeOSConfig(self.target_request, self.response,
-                                   self.api_config)
-
     self.assertEqual(
         [artifact.path for artifact in self.response.artifacts],
         [os.path.join(self.output_dir, 'config.yaml')])
@@ -589,9 +519,13 @@ class BundleTestUpdatePayloadsTest(cros_test_lib.MockTempDirTestCase,
     artifacts.BundleTestUpdatePayloads(self.input_proto, self.output_proto,
                                        self.mock_call_config)
     patch.assert_not_called()
-    self.assertEqual(len(self.output_proto.artifacts), 1)
+    self.assertEqual(len(self.output_proto.artifacts), 3)
     self.assertEqual(self.output_proto.artifacts[0].path,
                      os.path.join(self.archive_root, 'payload1.bin'))
+    self.assertEqual(self.output_proto.artifacts[1].path,
+                     os.path.join(self.archive_root, 'payload1.json'))
+    self.assertEqual(self.output_proto.artifacts[2].path,
+                     os.path.join(self.archive_root, 'payload1.log'))
 
   def testBundleTestUpdatePayloads(self):
     """BundleTestUpdatePayloads calls cbuildbot/commands with correct args."""
@@ -856,22 +790,15 @@ class BundleVmFilesTest(cros_test_lib.MockTempDirTestCase,
 
 
 
-class ExportCpeReportTest(cros_test_lib.MockTempDirTestCase,
-                          api_config.ApiConfigMixin):
+class ExportCpeReportTest(BundleTestCase):
   """ExportCpeReport tests."""
-
-  def setUp(self):
-    self.response = artifacts_pb2.BundleResponse()
 
   def testValidateOnly(self):
     """Quick check validate only calls don't execute."""
     patch = self.PatchObject(artifacts_svc, 'GenerateCpeReport')
 
-    request = artifacts_pb2.BundleRequest()
-    request.build_target.name = 'board'
-    request.output_dir = self.tempdir
-
-    artifacts.ExportCpeReport(request, self.response, self.validate_only_config)
+    artifacts.ExportCpeReport(self.sysroot_request, self.response,
+                              self.validate_only_config)
 
     patch.assert_not_called()
 
@@ -879,25 +806,15 @@ class ExportCpeReportTest(cros_test_lib.MockTempDirTestCase,
     """Test that a mock call does not execute logic, returns mocked value."""
     patch = self.PatchObject(artifacts_svc, 'GenerateCpeReport')
 
-    request = artifacts_pb2.BundleRequest()
-    request.build_target.name = 'board'
-    request.output_dir = self.tempdir
-
-    artifacts.ExportCpeReport(request, self.response, self.mock_call_config)
+    artifacts.ExportCpeReport(self.sysroot_request, self.response,
+                              self.mock_call_config)
 
     patch.assert_not_called()
     self.assertEqual(len(self.response.artifacts), 2)
     self.assertEqual(self.response.artifacts[0].path,
-                     os.path.join(self.tempdir, 'cpe_report.txt'))
+                     os.path.join(self.output_dir, 'cpe_report.txt'))
     self.assertEqual(self.response.artifacts[1].path,
-                     os.path.join(self.tempdir, 'cpe_warnings.txt'))
-
-  def testNoBuildTarget(self):
-    request = artifacts_pb2.BundleRequest()
-    request.output_dir = self.tempdir
-
-    with self.assertRaises(cros_build_lib.DieSystemExit):
-      artifacts.ExportCpeReport(request, self.response, self.api_config)
+                     os.path.join(self.output_dir, 'cpe_warnings.txt'))
 
   def testSuccess(self):
     """Test success case."""
@@ -905,11 +822,8 @@ class ExportCpeReportTest(cros_test_lib.MockTempDirTestCase,
         report='/output/report.json', warnings='/output/warnings.json')
     self.PatchObject(artifacts_svc, 'GenerateCpeReport', return_value=expected)
 
-    request = artifacts_pb2.BundleRequest()
-    request.build_target.name = 'board'
-    request.output_dir = self.tempdir
-
-    artifacts.ExportCpeReport(request, self.response, self.api_config)
+    artifacts.ExportCpeReport(self.sysroot_request, self.response,
+                              self.api_config)
 
     for artifact in self.response.artifacts:
       self.assertIn(artifact.path, [expected.report, expected.warnings])
@@ -969,6 +883,7 @@ class FetchMetadataTestCase(cros_test_lib.MockTempDirTestCase,
   chroot_name = 'chroot'
 
   def setUp(self):
+    self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=False)
     self.chroot_path = os.path.join(self.tempdir, 'chroot')
     pathlib.Path(self.chroot_path).touch()
     self.expected_filepaths = [os.path.join(self.chroot_path, fp) for fp in (
@@ -1026,5 +941,5 @@ class FetchMetadataTestCase(cros_test_lib.MockTempDirTestCase,
     artifacts.FetchMetadata(request, response, self.api_config)
     actual_filepaths = [fp.path.path for fp in response.filepaths]
     self.assertEqual(sorted(actual_filepaths), sorted(self.expected_filepaths))
-    self.assertTrue(all([fp.path.location == common_pb2.Path.OUTSIDE
-                         for fp in response.filepaths]))
+    self.assertTrue(all(fp.path.location == common_pb2.Path.OUTSIDE
+                        for fp in response.filepaths))

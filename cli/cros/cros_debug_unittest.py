@@ -10,6 +10,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import remote_access
 
+
 pytestmark = cros_test_lib.pytestmark_inside_only
 
 
@@ -40,7 +41,7 @@ class DebugRunThroughTest(cros_test_lib.MockTempDirTestCase):
   def SetupCommandMock(self, cmd_args):
     """Set up command mock."""
     self.cmd_mock = MockDebugCommand(
-        cmd_args, base_args=['--cache-dir', self.tempdir])
+        cmd_args, base_args=['--cache-dir', str(self.tempdir)])
     self.StartPatcher(self.cmd_mock)
 
   def setUp(self):

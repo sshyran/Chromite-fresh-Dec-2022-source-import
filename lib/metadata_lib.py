@@ -8,14 +8,15 @@ import datetime
 import json
 import logging
 import math
+import pathlib
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import results_lib
 
 
-class _DummyLock(object):
-  """A Dummy clone of RLock that does nothing."""
+class _StubLock(object):
+  """A Stub clone of RLock that does nothing."""
   def acquire(self, blocking=1):
     pass
 
@@ -53,8 +54,8 @@ class CBuildbotMetadata(object):
       self._cl_action_list = []
       self._per_board_dict = {}
       # If we are not using a manager, then metadata is not expected to be
-      # multiprocess safe. Use a dummy RLock.
-      self._subdict_update_lock = _DummyLock()
+      # multiprocess safe. Use a stub RLock.
+      self._subdict_update_lock = _StubLock()
 
     if metadata_dict:
       self.UpdateWithDict(metadata_dict)
@@ -230,10 +231,16 @@ class CBuildbotMetadata(object):
       key: Key to return as JSON representation.  If None, returns all
            metadata.  Default: None
     """
+    def _serialize(obj):
+      if isinstance(obj, pathlib.PurePath):
+        return str(obj)
+      return obj
+
     if key:
-      return json.dumps(self.GetValue(key))
+      return json.dumps(self.GetValue(key), default=_serialize)
     else:
-      return json.dumps(self.GetDict(), indent=2, sort_keys=True)
+      return json.dumps(self.GetDict(), default=_serialize, indent=2,
+                        sort_keys=True)
 
   @staticmethod
   def GetReportMetadataDict(builder_run, get_statuses_from_slaves,

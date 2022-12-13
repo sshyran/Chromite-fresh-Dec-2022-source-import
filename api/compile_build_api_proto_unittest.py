@@ -4,7 +4,10 @@
 
 """compile_build_api_proto tests."""
 
+import os
+
 from chromite.third_party.google import protobuf
+
 from chromite.api import compile_build_api_proto
 
 
@@ -23,3 +26,12 @@ def test_versions_match():
   assert compile_build_api_proto.PROTOC_VERSION == protobuf.__version__, (
       'The protobuf library or compile_build_api_proto.PROTOC_VERSION has been '
       'updated, but the other has not. They must be updated together.')
+
+
+def test_compiles(tmpdir):
+  """Test the script successfully compiles something."""
+  assert not os.listdir(tmpdir)
+  compile_build_api_proto.main(['--destination', str(tmpdir)])
+  # It may produce an __init__.py even if nothing else succeeded, so make sure
+  # we have more than just that.
+  assert len(os.listdir(tmpdir)) > 1

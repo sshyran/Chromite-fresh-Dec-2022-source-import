@@ -7,13 +7,17 @@
 import os
 
 from chromite.lib import chroot_lib
+from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import remoteexec_util
 
 
-class ChrootTest(cros_test_lib.TempDirTestCase):
+class ChrootTest(cros_test_lib.MockTempDirTestCase):
   """Chroot class tests."""
+
+  def setUp(self):
+    self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=False)
 
   def testGetEnterArgsEmpty(self):
     """Test empty instance behavior."""
@@ -28,10 +32,9 @@ class ChrootTest(cros_test_lib.TempDirTestCase):
     expected = ['--chroot', path, '--cache-dir', cache_dir,
                 '--chrome-root', chrome_root]
 
-    reclient_dir = os.path.join(self.tempdir, 'cipd/rbe')
+    reclient_dir = self.tempdir / 'cipd' / 'rbe'
     osutils.SafeMakedirs(reclient_dir)
-    reproxy_cfg_file = os.path.join(self.tempdir,
-                                    'reclient_cfgs/reproxy_config.cfg')
+    reproxy_cfg_file = self.tempdir / 'reclient_cfgs' / 'reproxy_config.cfg'
     osutils.Touch(reproxy_cfg_file, makedirs=True)
     remoteexec = remoteexec_util.Remoteexec(
         reclient_dir=reclient_dir,
@@ -94,34 +97,39 @@ class ChrootTest(cros_test_lib.TempDirTestCase):
     # Make sure that it gives an absolute path inside the chroot.
     self.assertEqual('/some/path', chroot.chroot_path(path1))
     # Make sure it raises an error for paths not inside the chroot.
-    self.assertRaises(chroot_lib.ChrootError, chroot.chroot_path, path2)
+    self.assertRaises(ValueError, chroot.chroot_path, path2)
 
   def testFullPath(self):
     """Test full_path functionality."""
     chroot = chroot_lib.Chroot(self.tempdir)
-    path1 = 'some/path'
-    path2 = '/some/path'
 
     # Make sure it's building out the path in the chroot.
-    self.assertEqual(os.path.join(self.tempdir, path1), chroot.full_path(path1))
-    # Make sure it can handle absolute paths.
-    self.assertEqual(chroot.full_path(path1), chroot.full_path(path2))
+    self.assertEqual(os.path.join(self.tempdir, 'some/path'),
+                     chroot.full_path('/some/path'))
+
+  def testRelativePath(self):
+    """Test relative path functionality."""
+    self.PatchObject(os, 'getcwd', return_value='/path/to/workspace')
+    chroot = chroot_lib.Chroot(self.tempdir)
+
+    # Relative paths are assumed to be rooted in the chroot
+    self.assertEqual(
+        os.path.join(self.tempdir, 'some/path'),
+        chroot.full_path('some/path'))
 
   def testFullPathWithExtraArgs(self):
     """Test full_path functionality with extra args passed."""
     chroot = chroot_lib.Chroot(self.tempdir)
-    path1 = 'some/path'
     self.assertEqual(os.path.join(self.tempdir, 'some/path/abc/def/g/h/i'),
-                     chroot.full_path(path1, '/abc', 'def', '/g/h/i'))
+                     chroot.full_path('/some/path', 'abc', 'def', 'g/h/i'))
 
   def testHasPathSuccess(self):
     """Test has path for a valid path."""
-    path = 'some/file.txt'
-    tempdir_path = os.path.join(self.tempdir, path)
+    tempdir_path = os.path.join(self.tempdir, 'some/file.txt')
     osutils.Touch(tempdir_path, makedirs=True)
 
-    chroot = chroot_lib.Chroot(self.tempdir)
-    self.assertTrue(chroot.has_path(path))
+    chroot = chroot_lib.Chroot(path=self.tempdir)
+    self.assertTrue(chroot.has_path('/some/file.txt'))
 
   def testHasPathInvalidPath(self):
     """Test has path for a non-existent path."""
@@ -135,10 +143,10 @@ class ChrootTest(cros_test_lib.TempDirTestCase):
     osutils.Touch(tempdir_path, makedirs=True)
 
     chroot = chroot_lib.Chroot(self.tempdir)
-    self.assertTrue(chroot.has_path(*path))
+    self.assertTrue(chroot.has_path('/some', 'file.txt'))
 
   def testEqual(self):
-    """__eq__ method sanity check."""
+    """__eq__ method check."""
     path = '/chroot/path'
     cache_dir = '/cache/dir'
     chrome_root = '/chrome/root'

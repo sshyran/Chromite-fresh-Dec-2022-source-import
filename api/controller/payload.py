@@ -4,6 +4,8 @@
 
 """Payload API Service."""
 
+from typing import TYPE_CHECKING
+
 from chromite.api import controller
 from chromite.api import faux
 from chromite.api import validate
@@ -12,6 +14,9 @@ from chromite.lib import cros_build_lib
 from chromite.lib.paygen import paygen_payload_lib
 from chromite.service import payload
 
+
+if TYPE_CHECKING:
+  from chromite.api import api_config
 
 _VALID_IMAGE_PAIRS = (('src_signed_image', 'tgt_signed_image'),
                       ('src_unsigned_image', 'tgt_unsigned_image'),
@@ -32,13 +37,15 @@ _DEFAULT_PAYGEN_CACHE_DIR = '.paygen_cache'
 @faux.empty_success
 @faux.empty_completed_unsuccessfully_error
 @validate.require('bucket')
-def GeneratePayload(input_proto, output_proto, config):
+def GeneratePayload(input_proto: payload_pb2.GenerationRequest,
+                    output_proto: payload_pb2.GenerationResponse,
+                    config: 'api_config.ApiConfig') -> int:
   """Generate a update payload ('do paygen').
 
   Args:
-    input_proto (PayloadGenerationRequest): Input proto.
-    output_proto (PayloadGenerationResult): Output proto.
-    config (api.config.ApiConfig): The API call config.
+    input_proto: Input proto.
+    output_proto: Output proto.
+    config: The API call config.
 
   Returns:
     A controller return code (e.g. controller.RETURN_CODE_SUCCESS).
@@ -102,17 +109,21 @@ def GeneratePayload(input_proto, output_proto, config):
   _SetGeneratePayloadOutputProto(output_proto, local_path, remote_uri)
   if remote_uri or input_proto.dryrun and local_path:
     return controller.RETURN_CODE_SUCCESS
+  elif output_proto.failure_reason:
+    return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
   else:
     return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
 
 
-def _SetGeneratePayloadOutputProto(output_proto, local_path, remote_uri):
+def _SetGeneratePayloadOutputProto(output_proto: payload_pb2.GenerationResponse,
+                                   local_path: str,
+                                   remote_uri: str):
   """Set the output proto with the results from the service class.
 
   Args:
-    output_proto (PayloadGenerationResult_pb2): The output proto.
-    local_path (str): set output_proto with the local path, or ''.
-    remote_uri (str): set output_proto with the remote uri, or ''.
+    output_proto: The output proto.
+    local_path: set output_proto with the local path, or ''.
+    remote_uri: set output_proto with the remote uri, or ''.
   """
   output_proto.success = True
   output_proto.local_path = local_path or ''

@@ -64,6 +64,9 @@ class _FdCapturer(object):
   def Start(self):
     """Begin capturing output."""
     if self._capturefile_name is None:
+      # Disable pylint from suggesting to use context manager. The open files
+      # are closed explicitly in the Stop() function.
+      # pylint: disable=consider-using-with
       tempfile_obj = tempfile.NamedTemporaryFile(delete=False)
       self._capturefile = tempfile_obj.file
       self._capturefile_name = tempfile_obj.name

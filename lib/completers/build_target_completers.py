@@ -5,8 +5,8 @@
 """Completer functions to use with --b, --board, --build-target."""
 
 import os
-import re
 from pathlib import Path
+import re
 from typing import Iterator, List
 
 from chromite.lib import constants

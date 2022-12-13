@@ -6,7 +6,6 @@
 
 import json
 import os
-from pathlib import Path
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -149,7 +148,7 @@ inherit cros-workon superpower
     # git rev-parse HEAD
     self.PatchObject(
         git, 'RunGit',
-        return_value=cros_build_lib.CommandResult(stdout=fake_hash + '\n'))
+        return_value=cros_build_lib.CompletedProcess(stdout=fake_hash + '\n'))
     test_hash = fake_ebuild.GetCommitId(self.tempdir)
     self.assertEqual(test_hash, fake_hash)
 
@@ -233,7 +232,7 @@ inherit cros-workon superpower
     package_path = os.path.join(self.tempdir, package_name)
     os.makedirs(package_path)
     with self.assertRaises(failures_lib.PackageBuildFailure):
-      portage_util._CheckHasTest(self.tempdir, package_name)
+      portage_util._CheckHasTest(package_name, self.tempdir)
 
   def testEBuildGetAutotestTests(self):
     """Test extraction of test names from IUSE_TESTS variable.
@@ -556,11 +555,15 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
 
   def setUp(self):
     self.overlay = os.path.join(self.tempdir, 'overlay')
-    package_name = os.path.join(self.overlay,
-                                'category/test_package/test_package-0.0.1')
-    ebuild_path = package_name + '-r1.ebuild'
+    package_name_no_version = os.path.join(self.overlay,
+                                           'category/test_package/test_package')
+    package_name_version = package_name_no_version + '-0.0.1'
+    package_name_forced_version = package_name_no_version + '-777.0.0'
+    ebuild_path = package_name_version + '-r1.ebuild'
     self.m_ebuild = StubEBuild(ebuild_path, False)
-    self.revved_ebuild_path = package_name + '-r2.ebuild'
+    self.revved_ebuild_path = package_name_version + '-r2.ebuild'
+    self.revved_ebuild_path_forced_version = (package_name_forced_version +
+                                              '-r1.ebuild')
     self.git_files_changed = []
 
   def createRevWorkOnMocks(self, ebuild_content, rev, multi=False):
@@ -591,7 +594,7 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
         # Just get the last path component so we can specify the file_list
         # without concerning outselves with tempdir
         file_list = [os.path.split(f)[1] for f in file_list]
-        # Return a dummy file if we have changes in any of the listed files.
+        # Return a stub file if we have changes in any of the listed files.
         if set(self.git_files_changed).intersection(file_list):
           return 'somefile'
         return ''
@@ -773,6 +776,40 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
     self.assertEqual(self._revved_ebuild,
                      osutils.ReadFile(self.revved_ebuild_path))
 
+  def testRevForceStableVersionEBuild(self):
+    """Test force stable version uprev of a ebuild."""
+    self.createRevWorkOnMocks(self._mock_ebuild, rev=True)
+    result = self.m_ebuild.RevWorkOnEBuild(
+        self.tempdir, MANIFEST, new_version='777.0.0')
+    self.assertEqual(result[0], 'category/test_package-777.0.0-r1')
+    self.assertExists(self.revved_ebuild_path_forced_version)
+    self.assertEqual(self._revved_ebuild,
+                     osutils.ReadFile(self.revved_ebuild_path_forced_version))
+
+  def testRevForceStableVersionSameVersionEBuild(self):
+    """Test force stable version uprev of a ebuild with same version."""
+    self.createRevWorkOnMocks(self._mock_ebuild, rev=True)
+    result = self.m_ebuild.RevWorkOnEBuild(self.tempdir, MANIFEST,
+                                           new_version='0.0.1')
+    self.assertEqual(result[0], 'category/test_package-0.0.1-r2')
+    self.assertExists(self.revved_ebuild_path)
+    self.assertEqual(self._revved_ebuild,
+                     osutils.ReadFile(self.revved_ebuild_path))
+
+  def testRevInvalidVersionWithRevisionEBuild(self):
+    """Test force stable version uprev of a ebuild with same version."""
+    self.createRevWorkOnMocks(self._mock_ebuild, rev=True)
+    with self.assertRaises(ValueError):
+      self.m_ebuild.RevWorkOnEBuild(self.tempdir, MANIFEST,
+                                    new_version='0.0.1-r777')
+
+  def testRevInvalidGibberishVersionEBuild(self):
+    """Test force stable version uprev of a ebuild with same version."""
+    self.createRevWorkOnMocks(self._mock_ebuild, rev=True)
+    with self.assertRaises(ValueError):
+      self.m_ebuild.RevWorkOnEBuild(self.tempdir, MANIFEST,
+                                    new_version='gibberish-version-0000')
+
   def testCommitChange(self):
     m = self.PatchObject(portage_util.EBuild, '_RunGit', return_value='')
     mock_message = 'Commitme'
@@ -803,8 +840,8 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
                      return_value=portage_util.SourceInfo(
                          projects=None, srcdirs=[], subdirs=[], subtrees=[]))
     self.PatchObject(cros_build_lib, 'run',
-                     return_value=cros_build_lib.CommandResult(
-                         returncode=0, output='1122', error='STDERR'))
+                     return_value=cros_build_lib.CompletedProcess(
+                         returncode=0, stdout='1122', stderr='STDERR'))
     self.assertEqual('1122', self.m_ebuild.GetVersion(None, None, '1234'))
     # Sanity check.
     self.assertEqual(exists.call_count, 1)
@@ -818,8 +855,8 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
     run = self.PatchObject(cros_build_lib, 'run')
 
     # Reject no output.
-    run.return_value = cros_build_lib.CommandResult(
-        returncode=0, output='', error='STDERR')
+    run.return_value = cros_build_lib.CompletedProcess(
+        returncode=0, stdout='', stderr='STDERR')
     self.assertRaises(portage_util.Error,
                       self.m_ebuild.GetVersion, None, None, '1234')
     # Sanity check.
@@ -827,8 +864,8 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
     exists.reset_mock()
 
     # Reject simple output.
-    run.return_value = cros_build_lib.CommandResult(
-        returncode=0, output='\n', error='STDERR')
+    run.return_value = cros_build_lib.CompletedProcess(
+        returncode=0, stdout='\n', stderr='STDERR')
     self.assertRaises(portage_util.Error,
                       self.m_ebuild.GetVersion, None, None, '1234')
     # Sanity check.
@@ -836,8 +873,8 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
     exists.reset_mock()
 
     # Reject error.
-    run.return_value = cros_build_lib.CommandResult(
-        returncode=1, output='FAIL\n', error='STDERR')
+    run.return_value = cros_build_lib.CompletedProcess(
+        returncode=1, stdout='FAIL\n', stderr='STDERR')
     self.assertRaises(portage_util.Error,
                       self.m_ebuild.GetVersion, None, None, '1234')
     # Sanity check.
@@ -850,8 +887,8 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
                      return_value=portage_util.SourceInfo(
                          projects=None, srcdirs=[], subdirs=[], subtrees=[]))
     self.PatchObject(cros_build_lib, 'run',
-                     return_value=cros_build_lib.CommandResult(
-                         returncode=0, output='999999', error='STDERR'))
+                     return_value=cros_build_lib.CompletedProcess(
+                         returncode=0, stdout='999999', stderr='STDERR'))
     self.assertRaises(ValueError, self.m_ebuild.GetVersion, None, None, '1234')
     # Sanity check.
     self.assertEqual(exists.call_count, 1)
@@ -863,8 +900,8 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
                      return_value=portage_util.SourceInfo(
                          projects=None, srcdirs=[], subdirs=[], subtrees=[]))
     self.PatchObject(cros_build_lib, 'run',
-                     return_value=cros_build_lib.CommandResult(
-                         returncode=0, output='abcd', error='STDERR'))
+                     return_value=cros_build_lib.CompletedProcess(
+                         returncode=0, stdout='abcd', stderr='STDERR'))
     self.assertRaises(ValueError, self.m_ebuild.GetVersion, None, None, '1234')
     # Sanity check.
     self.assertEqual(exists.call_count, 1)
@@ -880,8 +917,8 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
     self.PatchObject(
         cros_build_lib,
         'run',
-        return_value=cros_build_lib.CommandResult(
-            returncode=0, output='4.4.21_baseline', error='STDERR'))
+        return_value=cros_build_lib.CompletedProcess(
+            returncode=0, stdout='4.4.21_baseline', stderr='STDERR'))
     with self.assertRaises(portage_util.EbuildVersionError):
       self.m_ebuild.GetVersion(None, None, '1234')
     # Sanity check.
@@ -1471,7 +1508,7 @@ class PortageqBestVisibleTest(cros_test_lib.MockTestCase):
   def testValidPackage(self):
     """Test valid outputs."""
     expected = package_info.PackageInfo('cat', 'pkg', '1.0')
-    result = cros_build_lib.CommandResult(output=expected.cpvr, returncode=0)
+    result = cros_build_lib.CompletedProcess(stdout=expected.cpvr, returncode=0)
     self.PatchObject(portage_util, '_Portageq', return_value=result)
 
     result = portage_util.PortageqBestVisible('cat/pkg')
@@ -1483,7 +1520,8 @@ class PortageqEnvvarTest(cros_test_lib.MockTestCase):
 
   def testValidEnvvar(self):
     """Test valid variables."""
-    result = cros_build_lib.CommandResult(output='TEST=value\n', returncode=0)
+    result = cros_build_lib.CompletedProcess(
+        stdout='TEST=value\n', returncode=0)
     self.PatchObject(portage_util, '_Portageq', return_value=result)
 
     envvar1 = portage_util.PortageqEnvvar('TEST')
@@ -1495,8 +1533,8 @@ class PortageqEnvvarTest(cros_test_lib.MockTestCase):
   def testUndefinedEnvvars(self):
     """Test undefined variable handling."""
     # The variable exists in the command output even when not actually defined.
-    result = cros_build_lib.CommandResult(output='DOES_NOT_EXIST=\n',
-                                          returncode=1)
+    result = cros_build_lib.CompletedProcess(
+        stdout='DOES_NOT_EXIST=\n', returncode=1)
     success_error = cros_build_lib.RunCommandError('', result)
     self.PatchObject(portage_util, '_Portageq', side_effect=success_error)
 
@@ -1513,7 +1551,7 @@ class PortageqEnvvarTest(cros_test_lib.MockTestCase):
     with self.assertRaises(portage_util.PortageqError):
       portage_util.PortageqEnvvars(['DOES_NOT_EXIST'])
 
-    run_error = cros_build_lib.CommandResult(output='\n', returncode=2)
+    run_error = cros_build_lib.CompletedProcess(stdout='\n', returncode=2)
     failure_error = cros_build_lib.RunCommandError('', run_error)
     self.PatchObject(portage_util, '_Portageq', side_effect=failure_error)
 
@@ -1547,9 +1585,9 @@ class PortageqHasVersionTest(cros_test_lib.MockTestCase):
 
   def testPortageqHasVersion(self):
     """Test HasVersion."""
-    result_true = cros_build_lib.CommandResult(returncode=0)
-    result_false = cros_build_lib.CommandResult(returncode=1)
-    result_error = cros_build_lib.CommandResult(returncode=2)
+    result_true = cros_build_lib.CompletedProcess(returncode=0)
+    result_false = cros_build_lib.CompletedProcess(returncode=1)
+    result_error = cros_build_lib.CompletedProcess(returncode=2)
 
     # Test has version.
     self.PatchObject(portage_util, '_Portageq', return_value=result_true)
@@ -1575,8 +1613,8 @@ class PortageqMatchTest(cros_test_lib.MockTestCase):
     a hard requirement, just the current expected behavior.
     """
     output_str = 'cat-1/pkg-one-1.0\ncat-2/pkg-two-2.1.3-r45\n'
-    result = cros_build_lib.CommandResult(returncode=0,
-                                          output=output_str)
+    result = cros_build_lib.CompletedProcess(
+        returncode=0, stdout=output_str)
     self.PatchObject(portage_util, '_Portageq', return_value=result)
 
     with self.assertRaises(ValueError):
@@ -1585,7 +1623,7 @@ class PortageqMatchTest(cros_test_lib.MockTestCase):
   def testValidPackage(self):
     """Test valid package produces the corresponding PackageInfo."""
     cpvr = 'cat/pkg-1.0-r1'
-    result = cros_build_lib.CommandResult(returncode=0, output=cpvr)
+    result = cros_build_lib.CompletedProcess(returncode=0, stdout=cpvr)
     self.PatchObject(portage_util, '_Portageq', return_value=result)
 
     pkg = portage_util.PortageqMatch('cat/pkg')
@@ -1600,8 +1638,8 @@ class FindEbuildTest(cros_test_lib.RunCommandTestCase):
     equery_output = ('/chromeos-overlay/misc/foo/foo.ebuild\n'
                      '/chromeos-overlay/misc/bar/bar.ebuild\n')
     self.rc.AddCmdResult(
-        ['/build/nami/build/bin/equery', 'which', 'misc/foo', 'misc/bar'],
-        output=equery_output)
+        ['equery', '--no-color', '--no-pipe', 'which', 'misc/foo', 'misc/bar'],
+        stdout=equery_output)
     self.assertEqual(
         portage_util.FindEbuildsForPackages(['misc/foo', 'misc/bar'],
                                             sysroot='/build/nami'),
@@ -1612,8 +1650,8 @@ class FindEbuildTest(cros_test_lib.RunCommandTestCase):
     equery_output = ('/chromeos-overlay/misc/foo/foo.ebuild\n'
                      '/chromeos-overlay/misc/bar/bar.ebuild\n')
     self.rc.AddCmdResult(
-        ['/build/nami/build/bin/equery', 'which', 'misc/foo', 'bar'],
-        output=equery_output)
+        ['equery', '--no-color', '--no-pipe', 'which', 'misc/foo', 'bar'],
+        stdout=equery_output)
     self.assertEqual(
         portage_util.FindEbuildsForPackages(['misc/foo', 'bar'],
                                             sysroot='/build/nami'),
@@ -1635,8 +1673,8 @@ class FindEbuildTest(cros_test_lib.RunCommandTestCase):
         'sys-libs/timezone-data-2018i:0',
     ]
     self.rc.AddCmdResult(
-        ['/build/nami/build/bin/equery', 'which'] + packages,
-        output=equery_output)
+        ['equery', '--no-color', '--no-pipe', 'which'] + packages,
+        stdout=equery_output)
     self.assertEqual(
         portage_util.FindEbuildsForPackages(packages,
                                             sysroot='/build/nami'),
@@ -1650,8 +1688,8 @@ class FindEbuildTest(cros_test_lib.RunCommandTestCase):
     # Result for package 'bar' is missing.
     equery_output = ('/chromeos-overlay/bar/bar.ebuild\n')
     self.rc.AddCmdResult(
-        ['/build/nami/build/bin/equery', 'which', 'foo', 'bar'],
-        output=equery_output, returncode=1)
+        ['equery', '--no-color', '--no-pipe', 'which', 'foo', 'bar'],
+        stdout=equery_output, returncode=1)
     self.assertEqual(portage_util.FindEbuildsForPackages(
         ['foo', 'bar'], sysroot='/build/nami'), {})
 
@@ -1659,8 +1697,8 @@ class FindEbuildTest(cros_test_lib.RunCommandTestCase):
     equery_output = ('/chromeos-overlay/bar/bar.ebuild\n'
                      '/chromeos-overlay/foo/foo.ebuild\n')
     self.rc.AddCmdResult(
-        ['/build/nami/build/bin/equery', 'which', 'foo', 'bar'],
-        output=equery_output)
+        ['equery', '--no-color', '--no-pipe', 'which', 'foo', 'bar'],
+        stdout=equery_output)
     with self.assertRaises(AssertionError):
       portage_util.FindEbuildsForPackages(
           ['foo', 'bar'], sysroot='/build/nami')
@@ -1668,8 +1706,8 @@ class FindEbuildTest(cros_test_lib.RunCommandTestCase):
   def testFindEbuildForPackageReturnResults(self):
     equery_output = '/chromeos-overlay/misc/foo/foo-9999.ebuild\n'
     self.rc.AddCmdResult(
-        ['/build/nami/build/bin/equery', 'which', 'misc/foo'],
-        output=equery_output)
+        ['equery', '--no-color', '--no-pipe', 'which', 'misc/foo'],
+        stdout=equery_output)
     self.assertEqual(
         portage_util.FindEbuildForPackage('misc/foo', sysroot='/build/nami'),
         '/chromeos-overlay/misc/foo/foo-9999.ebuild')
@@ -1677,8 +1715,8 @@ class FindEbuildTest(cros_test_lib.RunCommandTestCase):
   def testFindEbuildForPackageReturnNone(self):
     equery_output = "Cannot find ebuild for package 'foo'\n"
     self.rc.AddCmdResult(
-        ['/build/nami/build/bin/equery', 'which', 'foo'],
-        output=equery_output, returncode=1)
+        ['equery', '--no-color', '--no-pipe', 'which', 'foo'],
+        stdout=equery_output, returncode=1)
     self.assertEqual(portage_util.FindEbuildForPackage(
         'foo', sysroot='/build/nami'), None)
 
@@ -1740,8 +1778,7 @@ class PackageDependenciesTest(cros_test_lib.RunCommandTestCase):
                          stdout=_EMERGE_PRETEND_SDK_OUTPUT_CORPUS)
     self.assertEqual(
         expected,
-        portage_util.GetPackageDependencies(None,
-                                            'target-chromium-os-sdk'))
+        portage_util.GetPackageDependencies('target-chromium-os-sdk'))
 
 
 class FindEbuildsForOverlaysTest(cros_test_lib.MockTempDirTestCase):
@@ -1756,14 +1793,85 @@ class FindEbuildsForOverlaysTest(cros_test_lib.MockTempDirTestCase):
 
   def testFindEbuildsForOverlaysOutput(self):
     mock_overlay_paths = [
-        Path(self.tempdir) / 'package1' / 'bar1',
-        Path(self.tempdir) / 'package2' / 'bar2',
+        self.tempdir / 'package1' / 'bar1',
+        self.tempdir / 'package2' / 'bar2',
     ]
     expected_ebuilds = [
-        Path(self.tempdir) / 'package1' / 'bar1' / 'bar1-1.0.ebuild',
-        Path(self.tempdir) / 'package2' / 'bar2' / 'bar2-2.0.ebuild',
+        self.tempdir / 'package1' / 'bar1' / 'bar1-1.0.ebuild',
+        self.tempdir / 'package2' / 'bar2' / 'bar2-2.0.ebuild',
     ]
 
     ebuilds = yield from portage_util.FindEbuildsForOverlays(mock_overlay_paths)
 
     self.assertEqual(expected_ebuilds, ebuilds)
+
+
+_EQUERY_DEPENDS_OUTPUT_CORPUS = """\
+app-admin/perl-cleaner-2.20
+app-shells/bash-completion-2.8-r1
+chromeos-base/chromeos-base-1-r11
+sys-apps/portage-3.0.21-r73
+sys-devel/crossdev-20211027-r1
+virtual/target-chromium-os-sdk-1-r219
+"""
+
+
+class GetReverseDependenciesTest(cros_test_lib.RunCommandTestCase):
+  """Tests for GetReverseDependencies."""
+
+  def testGetReverseDependencies(self):
+    expected = [
+        package_info.parse('app-admin/perl-cleaner-2.20'),
+        package_info.parse('app-shells/bash-completion-2.8-r1'),
+        package_info.parse('chromeos-base/chromeos-base-1-r11'),
+        package_info.parse('sys-apps/portage-3.0.21-r73'),
+        package_info.parse('sys-devel/crossdev-20211027-r1'),
+        package_info.parse('virtual/target-chromium-os-sdk-1-r219'),
+    ]
+    self.rc.AddCmdResult(
+        partial_mock.Ignore(), stdout=_EQUERY_DEPENDS_OUTPUT_CORPUS)
+
+    result = portage_util.GetReverseDependencies(['app-shells/bash'])
+
+    self.assertEqual(expected, result)
+
+  def testGetReverseDependenciesNone(self):
+    self.rc.AddCmdResult(partial_mock.Ignore(), stdout='\n')
+
+    result = portage_util.GetReverseDependencies(['fake/package'])
+
+    self.assertEqual([], result)
+
+  def testGetReverseDependenciesValueError(self):
+    with self.assertRaises(ValueError) as e:
+      portage_util.GetReverseDependencies([])
+
+      self.assertEqual('Must provide at least one package.', e)
+
+
+class RegenDependencyCacheTest(cros_test_lib.RunCommandTestCase,
+                               cros_test_lib.LoggingTestCase):
+  """Tests for RegenDependencyCache."""
+
+  def testRegenDependencyCache(self):
+    with cros_test_lib.LoggingCapturer() as logs:
+      portage_util.RegenDependencyCache()
+
+      self.AssertLogsContain(logs, 'Rebuilding Portage dependency cache.')
+
+    self.assertCommandContains(['parallel_emerge', '--regen', '--quiet'])
+
+  def testRegenDependencyCacheBoard(self):
+    portage_util.RegenDependencyCache(board='eve')
+
+    self.assertCommandContains(['--board=eve'])
+
+  def testRegenDependencyCacheSysroot(self):
+    portage_util.RegenDependencyCache(sysroot='/build/eve')
+
+    self.assertCommandContains(['--sysroot=/build/eve'])
+
+  def testRegenDependencyCacheJobs(self):
+    portage_util.RegenDependencyCache(jobs=10)
+
+    self.assertCommandContains(['--jobs=10'])

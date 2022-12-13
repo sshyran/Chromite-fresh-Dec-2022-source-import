@@ -21,7 +21,6 @@ from chromite.lib import cros_build_lib
 from chromite.lib import gob_util
 from chromite.lib import gs
 from chromite.lib import osutils
-from chromite.lib import path_util
 from chromite.lib import portage_util
 from chromite.lib.parser import package_info
 from chromite.utils import pformat
@@ -661,14 +660,24 @@ class _CommonPrepareBundle(object):
       self._ebuild_info[constants.CHROME_PN] = candidate
       return candidate
 
-  def _GetBenchmarkAFDOName(self, template=CHROME_BENCHMARK_AFDO_FILE):
-    """Get the name of the benchmark AFDO file from the Chrome ebuild."""
+  def _GetBenchmarkAFDOName(self, template=CHROME_BENCHMARK_AFDO_FILE,
+                            wildcard_version=False):
+    """Get the name of the benchmark AFDO file from the Chrome ebuild.
+
+    wildcard_version=True replaces chrome version with *.
+    """
     pkg = self._GetEbuildInfo(constants.CHROME_PN).CPV
+    if wildcard_version:
+      ver = '*'
+      vernorev = '*'
+    else:
+      ver = pkg.vr
+      vernorev = pkg.version.split('_')[0]
     afdo_spec = {
         'arch': self.arch,
         'package': pkg.package,
-        'version': pkg.vr,
-        'versionnorev': pkg.version.split('_')[0]
+        'version': ver,
+        'versionnorev': vernorev
     }
     return template % afdo_spec
 
@@ -843,7 +852,7 @@ class _CommonPrepareBundle(object):
     """Find an artifact |name|, from a list of |gs_urls|.
 
     Args:
-      name: The name of the artifact.
+      name: The name of the artifact (supports wildcards).
       gs_urls: List of full gs:// directory paths to check.
 
     Returns:
@@ -851,8 +860,12 @@ class _CommonPrepareBundle(object):
     """
     for url in gs_urls:
       path = os.path.join(url, name)
-      if self.gs_context.Exists(path):
-        return path
+      found_paths = self.gs_context.LS(path)
+      if found_paths:
+        if len(found_paths) > 1:
+          raise PrepareForBuildHandlerError(
+              f'Found {found_paths} artifacts at {url}. Expected ONE file.')
+        return found_paths[0]
     return None
 
   def _PatchEbuild(self, info, rules, uprev):
@@ -913,7 +926,7 @@ class _CommonPrepareBundle(object):
       ebuild_prog = 'ebuild-%s' % self.build_target
       cmd = [
           ebuild_prog,
-          path_util.ToChrootPath(ebuild_file, self.chroot.path), 'manifest',
+          self.chroot.chroot_path(ebuild_file), 'manifest',
           '--force'
       ]
       cros_build_lib.run(cmd, enter_chroot=True)
@@ -1426,11 +1439,22 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
       osutils.RmDir(workdir_full, ignore_missing=True, sudo=True)
       osutils.SafeMakedirs(workdir_full)
 
-      bin_name = self._GetBenchmarkAFDOName(
-          CHROME_DEBUG_BINARY_NAME) + BZ2_COMPRESSION_SUFFIX
+      # We don't need a strict version from ebuild because it can change in the
+      # timeframe between afdo-generate and afdo-process (right, it happens!).
+      # Another edge case is revbump of chrome with patches in 9999.
+      bin_name = (self._GetBenchmarkAFDOName(
+          CHROME_DEBUG_BINARY_NAME, wildcard_version=True) +
+                  BZ2_COMPRESSION_SUFFIX)
+      gs_loc = self.input_artifacts.get('ChromeDebugBinary', [])
+      # url contains a concrete chrome version.
+      bin_url = self._FindArtifact(bin_name, gs_loc)
+      if not bin_url:
+        raise PrepareForBuildHandlerError(
+            'Could not find an artifact matching the pattern '
+            f'"{bin_name}" in {gs_loc}.')
+      # Extract the name with a concrete version of chrome.
+      bin_name = os.path.basename(bin_url)
       bin_compressed = self._AfdoTmpPath(bin_name)
-      bin_url = self._FindArtifact(
-          bin_name, self.input_artifacts.get('ChromeDebugBinary', []))
       cros_build_lib.run([
           'gsutil', '-o', 'Boto:num_retries=10', 'cp', '-v', '--', bin_url,
           bin_compressed
@@ -1445,9 +1469,11 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
           self._GetBenchmarkAFDOName(template=CHROME_PERF_AFDO_FILE) +
           BZ2_COMPRESSION_SUFFIX)
       perf_compressed = self._AfdoTmpPath(perf_name)
-      perf_url = self._FindArtifact(
-          perf_name,
-          self.input_artifacts.get('UnverifiedChromeBenchmarkPerfFile', []))
+      gs_loc = self.input_artifacts.get('UnverifiedChromeBenchmarkPerfFile', [])
+      perf_url = self._FindArtifact(perf_name, gs_loc)
+      if not perf_url:
+        raise PrepareForBuildHandlerError(
+            f'Could not find "{perf_name}" in {gs_loc}.')
       self.gs_context.Copy(perf_url, self.chroot.full_path(perf_compressed))
       cros_build_lib.run(['bzip2', '-d', perf_compressed],
                          enter_chroot=True,
@@ -1716,7 +1742,7 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         ['clang', '--version'],
         enter_chroot=True,
         stdout=True,
-        encoding='utf-8').output.splitlines()[0].strip()
+        encoding='utf-8').stdout.splitlines()[0].strip()
     # TODO(crbug.com/1132918): There's a git-r3 bug that caused the LLVM build
     # failed to find the upstream URL, so use the string contains the local
     # path to clang source instead.

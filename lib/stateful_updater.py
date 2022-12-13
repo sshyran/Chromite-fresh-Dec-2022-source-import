@@ -60,7 +60,7 @@ class StatefulUpdater(object):
         values: 'standard' (default) and 'clobber'.
     """
     try:
-      cmd = ['tar', '--ignore-command-error', '--overwrite',
+      cmd = ['tar', '--ignore-command-error', '--overwrite', '--selinux',
              '--directory', self._stateful_dir, '-xzf']
       if is_payload_on_device:
         if not self._device.IfPathExists(payload_path):

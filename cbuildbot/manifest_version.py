@@ -9,7 +9,6 @@ import fnmatch
 import glob
 import logging
 import os
-import re
 import shutil
 import tempfile
 from xml.dom import minidom
@@ -17,6 +16,7 @@ from xml.dom import minidom
 from chromite.cbuildbot import build_status
 from chromite.lib import buildbucket_v2
 from chromite.lib import builder_status_lib
+from chromite.lib import chromeos_version
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -44,10 +44,6 @@ PALADIN_PROJECT_ATTR = 'project'
 
 class FilterManifestException(Exception):
   """Exception thrown when failing to filter the internal manifest."""
-
-
-class VersionUpdateException(Exception):
-  """Exception gets thrown for failing to update the version file"""
 
 
 class StatusUpdateException(Exception):
@@ -133,7 +129,7 @@ def RefreshManifestCheckout(manifest_dir, manifest_repo):
     result = git.RunGit(manifest_dir, ['config', 'remote.origin.url'],
                         check=False)
     if (result.returncode == 0 and
-        result.output.rstrip() == manifest_repo):
+        result.stdout.rstrip() == manifest_repo):
       logging.info('Updating manifest-versions checkout.')
       try:
         git.RunGit(manifest_dir, ['gc', '--auto'])
@@ -204,213 +200,6 @@ def CreateSymlink(src_file, dest_file):
   rel_src_file = os.path.relpath(src_file, dest_dir)
   logging.debug('Linking %s to %s', rel_src_file, dest_file)
   os.symlink(rel_src_file, dest_file)
-
-
-class VersionInfo(object):
-  """Class to encapsulate the Chrome OS version info scheme.
-
-  You can instantiate this class in three ways.
-  1) using a version file, specifically chromeos_version.sh,
-     which contains the version information.
-  2) passing in a string with the 3 version components.
-  3) using a source repo and calling from_repo().
-  """
-  # Pattern for matching build name format.  Includes chrome branch hack.
-  VER_PATTERN = r'(\d+).(\d+).(\d+)(?:-R(\d+))*'
-  KEY_VALUE_PATTERN = r'%s=(\d+)\s*$'
-  VALID_INCR_TYPES = ('chrome_branch', 'build', 'branch', 'patch')
-
-  def __init__(self, version_string=None, chrome_branch=None,
-               incr_type='build', version_file=None):
-    """Initialize.
-
-    Args:
-      version_string: Optional 3 component version string to parse.  Contains:
-          build_number: release build number.
-          branch_build_number: current build number on a branch.
-          patch_number: patch number.
-      chrome_branch: If version_string specified, specify chrome_branch i.e. 13.
-      incr_type: How we should increment this version -
-          chrome_branch|build|branch|patch
-      version_file: version file location.
-    """
-    if version_file:
-      self.version_file = version_file
-      logging.debug('Using VERSION _FILE = %s', version_file)
-      self._LoadFromFile()
-    else:
-      match = re.search(self.VER_PATTERN, version_string)
-      self.build_number = match.group(1)
-      self.branch_build_number = match.group(2)
-      self.patch_number = match.group(3)
-      self.chrome_branch = chrome_branch
-      self.version_file = None
-
-    self.incr_type = incr_type
-
-  @classmethod
-  def from_repo(cls, source_repo, **kwargs):
-    kwargs['version_file'] = os.path.join(source_repo, constants.VERSION_FILE)
-    return cls(**kwargs)
-
-  def _LoadFromFile(self):
-    """Read the version file and set the version components"""
-    with open(self.version_file, 'r') as version_fh:
-      for line in version_fh:
-        if not line.strip():
-          continue
-
-        match = self.FindValue('CHROME_BRANCH', line)
-        if match:
-          self.chrome_branch = match
-          logging.debug('Set the Chrome branch number to:%s',
-                        self.chrome_branch)
-          continue
-
-        match = self.FindValue('CHROMEOS_BUILD', line)
-        if match:
-          self.build_number = match
-          logging.debug('Set the build version to:%s', self.build_number)
-          continue
-
-        match = self.FindValue('CHROMEOS_BRANCH', line)
-        if match:
-          self.branch_build_number = match
-          logging.debug('Set the branch version to:%s',
-                        self.branch_build_number)
-          continue
-
-        match = self.FindValue('CHROMEOS_PATCH', line)
-        if match:
-          self.patch_number = match
-          logging.debug('Set the patch version to:%s', self.patch_number)
-          continue
-
-    logging.debug(self.VersionString())
-
-  def FindValue(self, key, line):
-    """Given the key find the value from the line, if it finds key = value
-
-    Args:
-      key: key to look for
-      line: string to search
-
-    Returns:
-      None: on a non match
-      value: for a matching key
-    """
-    match = re.search(self.KEY_VALUE_PATTERN % (key,), line)
-    return match.group(1) if match else None
-
-  def IncrementVersion(self):
-    """Updates the version file by incrementing the patch component."""
-    if not self.incr_type or self.incr_type not in self.VALID_INCR_TYPES:
-      raise VersionUpdateException('Need to specify the part of the version to'
-                                   ' increment')
-
-    if self.incr_type == 'chrome_branch':
-      self.chrome_branch = str(int(self.chrome_branch) + 1)
-
-    # Increment build_number for 'chrome_branch' incr_type to avoid
-    # crbug.com/213075.
-    if self.incr_type in ('build', 'chrome_branch'):
-      self.build_number = str(int(self.build_number) + 1)
-      self.branch_build_number = '0'
-      self.patch_number = '0'
-    elif self.incr_type == 'branch' and self.patch_number == '0':
-      self.branch_build_number = str(int(self.branch_build_number) + 1)
-    else:
-      self.patch_number = str(int(self.patch_number) + 1)
-
-    return self.VersionString()
-
-  def UpdateVersionFile(self, message, dry_run, push_to=None):
-    """Update the version file with our current version.
-
-    Args:
-      message: Commit message.
-      dry_run: Git dryrun.
-      push_to: A git.RemoteRef object.
-    """
-
-    if not self.version_file:
-      raise VersionUpdateException('Cannot call UpdateVersionFile without '
-                                   'an associated version_file')
-
-    components = (('CHROMEOS_BUILD', self.build_number),
-                  ('CHROMEOS_BRANCH', self.branch_build_number),
-                  ('CHROMEOS_PATCH', self.patch_number),
-                  ('CHROME_BRANCH', self.chrome_branch))
-
-    with tempfile.NamedTemporaryFile(prefix='mvp', mode='w') as temp_fh:
-      with open(self.version_file, 'r') as source_version_fh:
-        for line in source_version_fh:
-          for key, value in components:
-            line = re.sub(self.KEY_VALUE_PATTERN % (key,),
-                          '%s=%s\n' % (key, value), line)
-          temp_fh.write(line)
-
-      temp_fh.flush()
-
-      repo_dir = os.path.dirname(self.version_file)
-
-      logging.info('Updating version file to: %s', self.VersionString())
-      try:
-        git.CreateBranch(repo_dir, PUSH_BRANCH)
-        shutil.copyfile(temp_fh.name, self.version_file)
-        _PushGitChanges(repo_dir, message, dry_run=dry_run, push_to=push_to)
-      finally:
-        # Update to the remote version that contains our changes. This is needed
-        # to ensure that we don't build a release using a local commit.
-        git.CleanAndCheckoutUpstream(repo_dir)
-
-  def VersionString(self):
-    """returns the version string"""
-    return '%s.%s.%s' % (self.build_number, self.branch_build_number,
-                         self.patch_number)
-
-  def VersionComponents(self):
-    """Return an array of ints of the version fields for comparing."""
-    return [int(x) for x in [self.build_number, self.branch_build_number,
-                             self.patch_number]]
-
-  @classmethod
-  def VersionCompare(cls, version_string):
-    """Useful method to return a comparable version of a LKGM string."""
-    return cls(version_string).VersionComponents()
-
-  def __lt__(self, other):
-    return self.VersionComponents() < other.VersionComponents()
-
-  def __le__(self, other):
-    return self.VersionComponents() <= other.VersionComponents()
-
-  def __eq__(self, other):
-    return self.VersionComponents() == other.VersionComponents()
-
-  def __ne__(self, other):
-    return self.VersionComponents() != other.VersionComponents()
-
-  def __gt__(self, other):
-    return self.VersionComponents() > other.VersionComponents()
-
-  def __ge__(self, other):
-    return self.VersionComponents() >= other.VersionComponents()
-
-  __hash__ = None
-
-  def BuildPrefix(self):
-    """Returns the build prefix to match the buildspecs in  manifest-versions"""
-    if self.incr_type == 'branch':
-      if self.patch_number == '0':
-        return '%s.' % self.build_number
-      else:
-        return '%s.%s.' % (self.build_number, self.branch_build_number)
-    # Default to build incr_type.
-    return ''
-
-  def __str__(self):
-    return '%s(%s)' % (self.__class__, self.VersionString())
 
 
 def OfficialBuildSpecPath(version_info):
@@ -531,7 +320,8 @@ def GenerateAndPublishOfficialBuildSpec(
   Returns:
     Path for buildspec, relative to manifest_versions root.
   """
-  version_info = VersionInfo.from_repo(repo.directory, incr_type=incr_type)
+  version_info = chromeos_version.VersionInfo.from_repo(
+      repo.directory, incr_type=incr_type)
 
   # Increment the version and push the new version file.
   version_info.IncrementVersion()
@@ -609,7 +399,7 @@ class BuildSpecsManager(object):
     self.latest = None
     self._latest_build = None
     self.latest_unprocessed = None
-    self.compare_versions_fn = VersionInfo.VersionCompare
+    self.compare_versions_fn = chromeos_version.VersionInfo.VersionCompare
 
     self.current_version = None
     self.rel_working_dir = ''
@@ -667,7 +457,8 @@ class BuildSpecsManager(object):
         return False
       assert len(dirs) <= 1, 'More than one spec found for %s' % version
       dir_pfx = os.path.basename(os.path.dirname(dirs[0]))
-      version_info = VersionInfo(chrome_branch=dir_pfx, version_string=version)
+      version_info = chromeos_version.VersionInfo(
+          chrome_branch=dir_pfx, version_string=version)
     else:
       dir_pfx = version_info.chrome_branch
 
@@ -701,7 +492,8 @@ class BuildSpecsManager(object):
   def GetCurrentVersionInfo(self):
     """Returns the current version info from the version file."""
     version_file_path = self.cros_source.GetRelativePath(constants.VERSION_FILE)
-    return VersionInfo(version_file=version_file_path, incr_type=self.incr_type)
+    return chromeos_version.VersionInfo(
+        version_file=version_file_path, incr_type=self.incr_type)
 
   def HasCheckoutBeenBuilt(self):
     """Checks to see if we've previously built this checkout."""
@@ -1089,7 +881,7 @@ def FilterManifest(manifest, whitelisted_remotes=None, whitelisted_groups=None):
                      project_remote not in whitelisted_remotes)
 
     filter_group = (whitelisted_groups and
-                    not any([g in groups for g in whitelisted_groups]))
+                    not any(g in groups for g in whitelisted_groups))
 
     if filter_remote or filter_group:
       filtered_projects.add(project)

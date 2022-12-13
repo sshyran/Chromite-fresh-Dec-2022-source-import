@@ -1,7 +1,6 @@
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """This library can use Google Storage files as basis for locking.
 
 A lock is acquired by creating a GS file (file creation is atomic). This means
@@ -85,18 +84,15 @@ class Lock(object):
     time.
   """
 
-  def __init__(self, gs_path, lock_timeout_mins=120, dry_run=False,
-               ctx=None):
+  def __init__(self, gs_path, lock_timeout_mins=120, dry_run=False, ctx=None):
     """Initializer for the lock.
 
     Args:
-      gs_path:
-        Path to the potential GS file we use for lock management.
-      lock_timeout_mins:
-        How long should an existing lock be considered valid? This timeout
-        should be long enough that it's never hit unless a server is
-        unexpectedly rebooted, lost network connectivity or had
-        some other catastrophic error.
+      gs_path: Path to the potential GS file we use for lock management.
+      lock_timeout_mins: How long should an existing lock be considered valid?
+        This timeout should be long enough that it's never hit unless a server
+        is unexpectedly rebooted, lost network connectivity or had some other
+        catastrophic error.
       dry_run: do nothing, always succeed
       ctx: chromite.lib.gs.GSContext to use.
     """
@@ -192,8 +188,8 @@ class Lock(object):
   def Release(self):
     """Release the lock."""
     try:
-      self._ctx.Remove(self._gs_path, version=self._generation,
-                       ignore_missing=True)
+      self._ctx.Remove(
+          self._gs_path, version=self._generation, ignore_missing=True)
     except gs.GSContextPreconditionFailed:
       if not self._LockExpired():
         raise

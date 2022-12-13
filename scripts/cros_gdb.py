@@ -152,7 +152,7 @@ To install the debug symbols for all available packages, run:
       return self.binary
 
     output_dir = os.path.join(self.chrome_path, 'src',
-                              'out_{}'.format(self.board))
+                              f'out_{self.board}')
     target_binary = None
     binary_name = os.path.basename(self.inf_cmd)
     for root, _, files in os.walk(output_dir):
@@ -392,7 +392,7 @@ To install the debug symbols for all available packages, run:
     try:
       res = device.run(command, capture_output=True)
       if res.returncode == 0:
-        self.inf_cmd = res.output.rstrip('\n')
+        self.inf_cmd = res.stdout.rstrip('\n')
     except cros_build_lib.RunCommandError:
       raise GdbCannotFindRemoteProcessError('Unable to find name of process '
                                             'with pid %s on %s' %
@@ -518,7 +518,7 @@ To install the debug symbols for all available packages, run:
     os.chroot(self.sysroot)
     os.chdir(cwd)
     # The TERM the user is leveraging might not exist in the sysroot.
-    # Force a sane default that supports standard color sequences.
+    # Force a reasonable default that supports standard color sequences.
     os.environ['TERM'] = 'ansi'
     # Some progs want this like bash else they get super confused.
     os.environ['PWD'] = cwd
@@ -547,7 +547,7 @@ def _ReExecuteIfNeeded(argv, ns_net=False, ns_pid=False):
   tests don't leak out to the normal chroot.  Also unshare the UTS namespace
   so changes to `hostname` do not impact the host.
   """
-  if os.geteuid() != 0:
+  if osutils.IsNonRootUser():
     cmd = ['sudo', '-E', '--'] + argv
     os.execvp(cmd[0], cmd)
   else:
@@ -659,7 +659,7 @@ def main(argv):
     if not os.path.exists(options.binary):
       parser.error('%s does not exist.' % options.binary)
 
-  # Once we've finished sanity checking args, make sure we're root.
+  # Once we've finished checking args, make sure we're root.
   if not options.remote:
     _ReExecuteIfNeeded([sys.argv[0]] + argv)
 

@@ -4,30 +4,27 @@
 
 """The test controller tests."""
 
-import contextlib
 import datetime
 import os
-from unittest import mock
+from typing import Union
+
+from chromite.third_party.google.protobuf import json_format
 
 from chromite.api import api_config
 from chromite.api import controller
 from chromite.api.controller import controller_util
 from chromite.api.controller import test as test_controller
-from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromite.api import test_pb2
+from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromiumos.build.api import container_metadata_pb2
 from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
-from chromite.lib import image_lib
 from chromite.lib import osutils
 from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
-from chromite.scripts import cros_set_lsb_release
 from chromite.service import test as test_service
-from chromite.third_party.google.protobuf import json_format
-from chromite.utils import key_value_store
 
 
 class DebugInfoTestTest(cros_test_lib.MockTempDirTestCase,
@@ -113,7 +110,6 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
 
   def _GetInput(self,
                 board=None,
-                result_path=None,
                 chroot_path=None,
                 cache_dir=None,
                 empty_sysroot=None,
@@ -128,12 +124,17 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
       })
     formatted_blocklist = []
     for pkg in blocklist or []:
-      formatted_blocklist.append({'category': pkg.category,
-                                  'package_name': pkg.package})
+      formatted_blocklist.append({
+          'category': pkg.category,
+          'package_name': pkg.package
+      })
 
     return test_pb2.BuildTargetUnitTestRequest(
-        build_target={'name': board}, result_path=result_path,
-        chroot={'path': chroot_path, 'cache_dir': cache_dir},
+        build_target={'name': board},
+        chroot={
+            'path': chroot_path,
+            'cache_dir': cache_dir
+        },
         flags={'empty_sysroot': empty_sysroot},
         packages=formatted_packages,
         package_blocklist=formatted_blocklist,
@@ -143,27 +144,29 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
     """Helper to get an empty output message instance."""
     return test_pb2.BuildTargetUnitTestResponse()
 
-  def _CreatePortageLogFile(self, log_path, pkg_info, timestamp):
+  def _CreatePortageLogFile(self, log_path: Union[str, os.PathLike],
+                            pkg_info: package_info.PackageInfo,
+                            timestamp: datetime.datetime) -> str:
     """Creates a log file for testing for individual packages built by Portage.
 
     Args:
-      log_path (pathlike): the PORTAGE_LOGDIR path
-      pkg_info (PackageInfo): name components for log file.
-      timestamp (datetime): timestamp used to name the file.
+      log_path: The PORTAGE_LOGDIR path.
+      pkg_info: name components for log file.
+      timestamp: Timestamp used to name the file.
     """
     path = os.path.join(log_path,
                         f'{pkg_info.category}:{pkg_info.pvr}:' \
                         f'{timestamp.strftime("%Y%m%d-%H%M%S")}.log')
-    osutils.WriteFile(path,
-                      f'Test log file for package {pkg_info.category}/'
-                      f'{pkg_info.package} written to {path}')
+    osutils.WriteFile(
+        path, f'Test log file for package {pkg_info.category}/'
+        f'{pkg_info.package} written to {path}')
     return path
 
   def testValidateOnly(self):
     """Sanity check that a validate only call does not execute any logic."""
     patch = self.PatchObject(test_service, 'BuildTargetUnitTest')
 
-    input_msg = self._GetInput(board='board', result_path=self.tempdir)
+    input_msg = self._GetInput(board='board')
     test_controller.BuildTargetUnitTest(input_msg, self._GetOutput(),
                                         self.validate_only_config)
     patch.assert_not_called()
@@ -172,36 +175,33 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
     """Test that a mock call does not execute logic, returns mocked value."""
     patch = self.PatchObject(test_service, 'BuildTargetUnitTest')
 
-    input_msg = self._GetInput(board='board', result_path=self.tempdir)
+    input_msg = self._GetInput(board='board')
     response = self._GetOutput()
     test_controller.BuildTargetUnitTest(input_msg, response,
                                         self.mock_call_config)
     patch.assert_not_called()
-    self.assertEqual(response.tarball_path,
-                     os.path.join(input_msg.result_path, 'unit_tests.tar'))
 
   def testMockError(self):
     """Test that a mock error does not execute logic, returns error."""
     patch = self.PatchObject(test_service, 'BuildTargetUnitTest')
 
-    input_msg = self._GetInput(board='board', result_path=self.tempdir)
+    input_msg = self._GetInput(board='board')
     response = self._GetOutput()
     rc = test_controller.BuildTargetUnitTest(input_msg, response,
                                              self.mock_error_config)
     patch.assert_not_called()
     self.assertEqual(controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE, rc)
-    self.assertTrue(response.failed_packages)
-    self.assertEqual(response.failed_packages[0].category, 'foo')
-    self.assertEqual(response.failed_packages[0].package_name, 'bar')
-    self.assertEqual(response.failed_packages[1].category, 'cat')
-    self.assertEqual(response.failed_packages[1].package_name, 'pkg')
+    self.assertTrue(response.failed_package_data)
+    self.assertEqual(response.failed_package_data[0].name.category, 'foo')
+    self.assertEqual(response.failed_package_data[0].name.package_name, 'bar')
+    self.assertEqual(response.failed_package_data[1].name.category, 'cat')
+    self.assertEqual(response.failed_package_data[1].name.package_name, 'pkg')
 
   def testInvalidPackageFails(self):
     """Test missing result path fails."""
     # Missing result_path.
     pkg = package_info.PackageInfo(package='bar')
-    input_msg = self._GetInput(board='board', result_path=self.tempdir,
-                               packages=[pkg])
+    input_msg = self._GetInput(board='board', packages=[pkg])
     output_msg = self._GetOutput()
     with self.assertRaises(cros_build_lib.DieSystemExit):
       test_controller.BuildTargetUnitTest(input_msg, output_msg,
@@ -219,28 +219,21 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
     for i, pkg in enumerate(pkgs):
       self._CreatePortageLogFile(self.portage_dir, cpvrs[i],
                                  datetime.datetime(2021, 6, 9, 13, 37, 0))
-      new_logs[pkg] = self._CreatePortageLogFile(self.portage_dir, cpvrs[i],
-                                                 datetime.datetime(2021, 6, 9,
-                                                                   16, 20, 0))
+      new_logs[pkg] = self._CreatePortageLogFile(
+          self.portage_dir, cpvrs[i], datetime.datetime(2021, 6, 9, 16, 20, 0))
 
     result = test_service.BuildTargetUnitTestResult(1, None)
     result.failed_pkgs = [package_info.parse(p) for p in pkgs]
     self.PatchObject(test_service, 'BuildTargetUnitTest', return_value=result)
 
-    input_msg = self._GetInput(board='board', result_path=self.tempdir)
+    input_msg = self._GetInput(board='board')
     output_msg = self._GetOutput()
 
     rc = test_controller.BuildTargetUnitTest(input_msg, output_msg,
                                              self.api_config)
 
     self.assertEqual(controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE, rc)
-    self.assertTrue(output_msg.failed_packages)
     self.assertTrue(output_msg.failed_package_data)
-    # TODO(b/206514844): remove when field is deleted
-    failed = []
-    for pi in output_msg.failed_packages:
-      failed.append((pi.category, pi.package_name))
-    self.assertCountEqual(expected, failed)
 
     failed_with_logs = []
     for data in output_msg.failed_package_data:
@@ -248,7 +241,6 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
       package = controller_util.deserialize_package_info(data.name)
       self.assertEqual(data.log_path.path, new_logs[package.cpvr])
     self.assertCountEqual(expected, failed_with_logs)
-
 
   def testOtherBuildScriptFailure(self):
     """Test build script failure due to non-package emerge error."""
@@ -260,15 +252,15 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
 
     pkgs = ['foo/bar', 'cat/pkg']
     blocklist = [package_info.SplitCPV(p, strict=False) for p in pkgs]
-    input_msg = self._GetInput(board='board', empty_sysroot=True,
-                               blocklist=blocklist)
+    input_msg = self._GetInput(
+        board='board', empty_sysroot=True, blocklist=blocklist)
     output_msg = self._GetOutput()
 
     rc = test_controller.BuildTargetUnitTest(input_msg, output_msg,
                                              self.api_config)
 
     self.assertEqual(controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY, rc)
-    self.assertFalse(output_msg.failed_packages)
+    self.assertFalse(output_msg.failed_package_data)
 
   def testBuildTargetUnitTest(self):
     """Test BuildTargetUnitTest successful call."""
@@ -280,9 +272,8 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
     self.PatchObject(test_service, 'BuildTargetUnitTest', return_value=result)
 
     response = self._GetOutput()
-    test_controller.BuildTargetUnitTest(input_msg, response,
-                                        self.api_config)
-    self.assertFalse(response.failed_packages)
+    test_controller.BuildTargetUnitTest(input_msg, response, self.api_config)
+    self.assertFalse(response.failed_package_data)
 
 
 class DockerConstraintsTest(cros_test_lib.MockTestCase):
@@ -302,7 +293,7 @@ class DockerConstraintsTest(cros_test_lib.MockTestCase):
         '.invalid-tag',
         '-invalid-tag',
         'invalid-tag;',
-        'invalid'*100,
+        'invalid' * 100,
     ]
 
     for tag in invalid_tags:
@@ -316,7 +307,6 @@ class DockerConstraintsTest(cros_test_lib.MockTestCase):
 
     for tag in valid_tags:
       self.assertValid(test_controller._ValidDockerTag(tag))
-
 
   def testValidDockerLabelKey(self):
     """Check logic for validating docker label key format."""
@@ -382,17 +372,14 @@ class BuildTestServiceContainers(cros_test_lib.RunCommandTempDirTestCase,
     output_path = os.path.join(self.tempdir, 'metadata.jsonpb')
     self.rc.SetDefaultCmdResult(
         returncode=0,
-        side_effect=lambda *_, **__: WriteContainerMetadata(output_path)
-    )
+        side_effect=lambda *_, **__: WriteContainerMetadata(output_path))
 
     # Patch TempDir so that we always use this test's directory.
     self.PatchObject(osutils.TempDir, '__enter__', return_value=self.tempdir)
 
     response = test_pb2.BuildTestServiceContainersResponse()
-    test_controller.BuildTestServiceContainers(
-        self.request,
-        response,
-        self.api_config)
+    test_controller.BuildTestServiceContainers(self.request, response,
+                                               self.api_config)
 
     self.assertTrue(self.rc.called)
     for result in response.results:
@@ -402,17 +389,17 @@ class BuildTestServiceContainers(cros_test_lib.RunCommandTempDirTestCase,
   def testFailure(self):
     """Check failure case with mocked cros_build_lib.run."""
     patch = self.PatchObject(
-        cros_build_lib, 'run',
-        return_value=cros_build_lib.CommandResult(returncode=1))
+        cros_build_lib,
+        'run',
+        return_value=cros_build_lib.CompletedProcess(returncode=1))
 
     response = test_pb2.BuildTestServiceContainersResponse()
-    test_controller.BuildTestServiceContainers(
-        self.request,
-        response,
-        self.api_config)
+    test_controller.BuildTestServiceContainers(self.request, response,
+                                               self.api_config)
     patch.assert_called()
     for result in response.results:
       self.assertEqual(result.WhichOneof('result'), 'failure')
+      self.assertEqual(result.name, 'Service Builder')
 
 
 class ChromiteUnitTestTest(cros_test_lib.MockTestCase,
@@ -425,9 +412,7 @@ class ChromiteUnitTestTest(cros_test_lib.MockTestCase,
 
   def _GetInput(self, chroot_path=None):
     """Helper to build an input message instance."""
-    proto = test_pb2.ChromiteUnitTestRequest(
-        chroot={'path': chroot_path},
-    )
+    proto = test_pb2.ChromiteUnitTestRequest(chroot={'path': chroot_path},)
     return proto
 
   def _GetOutput(self):
@@ -467,8 +452,9 @@ class ChromiteUnitTestTest(cros_test_lib.MockTestCase,
     """Call ChromiteUnitTest with mocked cros_build_lib.run."""
     request = self._GetInput(chroot_path=self.chroot_path)
     patch = self.PatchObject(
-        cros_build_lib, 'run',
-        return_value=cros_build_lib.CommandResult(returncode=0))
+        cros_build_lib,
+        'run',
+        return_value=cros_build_lib.CompletedProcess(returncode=0))
 
     test_controller.ChromiteUnitTest(request, self._GetOutput(),
                                      self.api_config)
@@ -484,9 +470,7 @@ class CrosSigningTestTest(cros_test_lib.RunCommandTestCase,
 
   def _GetInput(self, chroot_path=None):
     """Helper to build an input message instance."""
-    proto = test_pb2.CrosSigningTestRequest(
-        chroot={'path': chroot_path},
-    )
+    proto = test_pb2.CrosSigningTestRequest(chroot={'path': chroot_path},)
     return proto
 
   def _GetOutput(self):
@@ -508,11 +492,11 @@ class CrosSigningTestTest(cros_test_lib.RunCommandTestCase,
     """Call CrosSigningTest with mocked cros_build_lib.run."""
     request = self._GetInput(chroot_path=self.chroot_path)
     patch = self.PatchObject(
-        cros_build_lib, 'run',
-        return_value=cros_build_lib.CommandResult(returncode=0))
+        cros_build_lib,
+        'run',
+        return_value=cros_build_lib.CompletedProcess(returncode=0))
 
-    test_controller.CrosSigningTest(request, self._GetOutput(),
-                                    self.api_config)
+    test_controller.CrosSigningTest(request, self._GetOutput(), self.api_config)
     patch.assert_called_once()
 
 
@@ -549,40 +533,46 @@ class SimpleChromeWorkflowTestTest(cros_test_lib.MockTestCase,
 
   def testMissingBuildTarget(self):
     """Test SimpleChromeWorkflowTest dies when build_target not set."""
-    input_proto = self._Input(build_target=None, sysroot_path='/sysroot/dir',
-                              chrome_root='/chrome/path')
+    input_proto = self._Input(
+        build_target=None,
+        sysroot_path='/sysroot/dir',
+        chrome_root='/chrome/path')
     with self.assertRaises(cros_build_lib.DieSystemExit):
       test_controller.SimpleChromeWorkflowTest(input_proto, None,
                                                self.api_config)
 
   def testMissingSysrootPath(self):
     """Test SimpleChromeWorkflowTest dies when build_target not set."""
-    input_proto = self._Input(build_target='board', sysroot_path=None,
-                              chrome_root='/chrome/path')
+    input_proto = self._Input(
+        build_target='board', sysroot_path=None, chrome_root='/chrome/path')
     with self.assertRaises(cros_build_lib.DieSystemExit):
       test_controller.SimpleChromeWorkflowTest(input_proto, None,
                                                self.api_config)
 
   def testMissingChromeRoot(self):
     """Test SimpleChromeWorkflowTest dies when build_target not set."""
-    input_proto = self._Input(build_target='board', sysroot_path='/sysroot/dir',
-                              chrome_root=None)
+    input_proto = self._Input(
+        build_target='board', sysroot_path='/sysroot/dir', chrome_root=None)
     with self.assertRaises(cros_build_lib.DieSystemExit):
       test_controller.SimpleChromeWorkflowTest(input_proto, None,
                                                self.api_config)
 
   def testSimpleChromeWorkflowTest(self):
     """Call SimpleChromeWorkflowTest with valid args and temp dir."""
-    request = self._Input(sysroot_path='sysroot_path', build_target='board',
-                          chrome_root='/path/to/chrome')
+    request = self._Input(
+        sysroot_path='sysroot_path',
+        build_target='board',
+        chrome_root='/path/to/chrome')
     response = self._Output()
 
     test_controller.SimpleChromeWorkflowTest(request, response, self.api_config)
     self.mock_simple_chrome_workflow_test.assert_called()
 
   def testValidateOnly(self):
-    request = self._Input(sysroot_path='sysroot_path', build_target='board',
-                          chrome_root='/path/to/chrome')
+    request = self._Input(
+        sysroot_path='sysroot_path',
+        build_target='board',
+        chrome_root='/path/to/chrome')
     test_controller.SimpleChromeWorkflowTest(request, self._Output(),
                                              self.validate_only_config)
     self.mock_simple_chrome_workflow_test.assert_not_called()
@@ -592,8 +582,10 @@ class SimpleChromeWorkflowTestTest(cros_test_lib.MockTestCase,
     patch = self.mock_simple_chrome_workflow_test = self.PatchObject(
         test_service, 'SimpleChromeWorkflowTest')
 
-    request = self._Input(sysroot_path='sysroot_path', build_target='board',
-                          chrome_root='/path/to/chrome')
+    request = self._Input(
+        sysroot_path='sysroot_path',
+        build_target='board',
+        chrome_root='/path/to/chrome')
     rc = test_controller.SimpleChromeWorkflowTest(request, self._Output(),
                                                   self.mock_call_config)
     patch.assert_not_called()
@@ -606,13 +598,16 @@ class VmTestTest(cros_test_lib.RunCommandTestCase, api_config.ApiConfigMixin):
   def _GetInput(self, **kwargs):
     values = dict(
         build_target=common_pb2.BuildTarget(name='target'),
-        vm_path=common_pb2.Path(path='/path/to/image.bin',
-                                location=common_pb2.Path.INSIDE),
+        vm_path=common_pb2.Path(
+            path='/path/to/image.bin', location=common_pb2.Path.INSIDE),
         test_harness=test_pb2.VmTestRequest.TAST,
         vm_tests=[test_pb2.VmTestRequest.VmTest(pattern='suite')],
         ssh_options=test_pb2.VmTestRequest.SshOptions(
-            port=1234, private_key_path={'path': '/path/to/id_rsa',
-                                         'location': common_pb2.Path.INSIDE}),
+            port=1234,
+            private_key_path={
+                'path': '/path/to/id_rsa',
+                'location': common_pb2.Path.INSIDE
+            }),
     )
     values.update(kwargs)
     return test_pb2.VmTestRequest(**values)
@@ -639,12 +634,20 @@ class VmTestTest(cros_test_lib.RunCommandTestCase, api_config.ApiConfigMixin):
     """Test VmTest for Tast with all options set."""
     test_controller.VmTest(self._GetInput(), None, self.api_config)
     self.assertCommandContains([
-        'cros_run_test', '--debug', '--no-display', '--copy-on-write',
-        '--board', 'target',
-        '--image-path', '/path/to/image.bin',
-        '--tast', 'suite',
-        '--ssh-port', '1234',
-        '--private-key', '/path/to/id_rsa',
+        'cros_run_test',
+        '--debug',
+        '--no-display',
+        '--copy-on-write',
+        '--board',
+        'target',
+        '--image-path',
+        '/path/to/image.bin',
+        '--tast',
+        'suite',
+        '--ssh-port',
+        '1234',
+        '--private-key',
+        '/path/to/id_rsa',
     ])
 
   def testAutotestAllOptions(self):
@@ -652,12 +655,20 @@ class VmTestTest(cros_test_lib.RunCommandTestCase, api_config.ApiConfigMixin):
     input_proto = self._GetInput(test_harness=test_pb2.VmTestRequest.AUTOTEST)
     test_controller.VmTest(input_proto, None, self.api_config)
     self.assertCommandContains([
-        'cros_run_test', '--debug', '--no-display', '--copy-on-write',
-        '--board', 'target',
-        '--image-path', '/path/to/image.bin',
-        '--autotest', 'suite',
-        '--ssh-port', '1234',
-        '--private-key', '/path/to/id_rsa',
+        'cros_run_test',
+        '--debug',
+        '--no-display',
+        '--copy-on-write',
+        '--board',
+        'target',
+        '--image-path',
+        '/path/to/image.bin',
+        '--autotest',
+        'suite',
+        '--ssh-port',
+        '1234',
+        '--private-key',
+        '/path/to/id_rsa',
         '--test_that-args=--allow-chrome-crashes',
     ])
 
@@ -691,121 +702,19 @@ class VmTestTest(cros_test_lib.RunCommandTestCase, api_config.ApiConfigMixin):
     request = self._GetInput()
     response = self._Output()
     patch = self.PatchObject(
-        cros_build_lib, 'run',
-        return_value=cros_build_lib.CommandResult(returncode=0))
+        cros_build_lib,
+        'run',
+        return_value=cros_build_lib.CompletedProcess(returncode=0))
 
     test_controller.VmTest(request, response, self.api_config)
     patch.assert_called()
-
-
-class MoblabVmTestTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
-  """Test the MoblabVmTest endpoint."""
-
-  @staticmethod
-  def _Payload(path):
-    return test_pb2.MoblabVmTestRequest.Payload(
-        path=common_pb2.Path(path=path))
-
-  @staticmethod
-  def _Output():
-    return test_pb2.MoblabVmTestResponse()
-
-  def _Input(self):
-    return test_pb2.MoblabVmTestRequest(
-        chroot=common_pb2.Chroot(path=self.chroot_dir),
-        image_payload=self._Payload(self.image_payload_dir),
-        cache_payloads=[self._Payload(self.autotest_payload_dir)])
-
-  def setUp(self):
-    self.chroot_dir = '/chroot'
-    self.chroot_tmp_dir = '/chroot/tmp'
-    self.image_payload_dir = '/payloads/image'
-    self.autotest_payload_dir = '/payloads/autotest'
-    self.builder = 'moblab-generic-vm/R12-3.4.5-67.890'
-    self.image_cache_dir = '/mnt/moblab/cache'
-    self.image_mount_dir = '/mnt/image'
-
-    self.PatchObject(chroot_lib.Chroot, 'tempdir', osutils.TempDir)
-
-    self.mock_create_moblab_vms = self.PatchObject(
-        test_service, 'CreateMoblabVm')
-    self.mock_prepare_moblab_vm_image_cache = self.PatchObject(
-        test_service, 'PrepareMoblabVmImageCache',
-        return_value=self.image_cache_dir)
-    self.mock_run_moblab_vm_tests = self.PatchObject(
-        test_service, 'RunMoblabVmTest')
-    self.mock_validate_moblab_vm_tests = self.PatchObject(
-        test_service, 'ValidateMoblabVmTest')
-
-    @contextlib.contextmanager
-    def MockLoopbackPartitions(*_args, **_kwargs):
-      mount = mock.MagicMock()
-      mount.Mount.return_value = [self.image_mount_dir]
-      yield mount
-
-    self.PatchObject(image_lib, 'LoopbackPartitions', MockLoopbackPartitions)
-
-  def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
-    test_controller.MoblabVmTest(self._Input(), self._Output(),
-                                 self.validate_only_config)
-    self.mock_create_moblab_vms.assert_not_called()
-
-  def testMockCall(self):
-    """Test mock call does not execute any logic."""
-    patch = self.PatchObject(key_value_store, 'LoadFile')
-
-    # MoblabVmTest does not return a value, checking mocked value is flagged by
-    # lint.
-    test_controller.MoblabVmTest(self._Input(), self._Output(),
-                                 self.mock_call_config)
-    patch.assert_not_called()
-
-  def testImageContainsBuilder(self):
-    """MoblabVmTest calls service with correct args."""
-    request = self._Input()
-    response = self._Output()
-
-    self.PatchObject(
-        key_value_store, 'LoadFile',
-        return_value={cros_set_lsb_release.LSB_KEY_BUILDER_PATH: self.builder})
-
-    test_controller.MoblabVmTest(request, response, self.api_config)
-
-    self.assertEqual(
-        self.mock_create_moblab_vms.call_args_list,
-        [mock.call(mock.ANY, self.chroot_dir, self.image_payload_dir)])
-    self.assertEqual(
-        self.mock_prepare_moblab_vm_image_cache.call_args_list,
-        [mock.call(mock.ANY, self.builder, [self.autotest_payload_dir])])
-    self.assertEqual(
-        self.mock_run_moblab_vm_tests.call_args_list,
-        [mock.call(mock.ANY, mock.ANY, self.builder, self.image_cache_dir,
-                   mock.ANY)])
-    self.assertEqual(
-        self.mock_validate_moblab_vm_tests.call_args_list,
-        [mock.call(mock.ANY)])
-
-  def testImageMissingBuilder(self):
-    """MoblabVmTest dies when builder path not found in lsb-release."""
-    request = self._Input()
-    response = self._Output()
-
-    self.PatchObject(key_value_store, 'LoadFile', return_value={})
-
-    with self.assertRaises(cros_build_lib.DieSystemExit):
-      test_controller.MoblabVmTest(request, response, self.api_config)
 
 
 class GetArtifactsTest(cros_test_lib.MockTempDirTestCase):
   """Test GetArtifacts."""
 
   CODE_COVERAGE_LLVM_ARTIFACT_TYPE = (
-      common_pb2.ArtifactsByService.Test.ArtifactType.CODE_COVERAGE_LLVM_JSON
-  )
-  UNIT_TEST_ARTIFACT_TYPE = (
-      common_pb2.ArtifactsByService.Test.ArtifactType.UNIT_TESTS
-  )
+      common_pb2.ArtifactsByService.Test.ArtifactType.CODE_COVERAGE_LLVM_JSON)
 
   def setUp(self):
     """Set up the class for tests."""
@@ -823,8 +732,8 @@ class GetArtifactsTest(cros_test_lib.MockTempDirTestCase):
   def testReturnsEmptyListWhenNoOutputArtifactsProvided(self):
     """Test empty list is returned when there are no output_artifacts."""
     result = test_controller.GetArtifacts(
-        common_pb2.ArtifactsByService.Test(output_artifacts=[]),
-        self.chroot, self.sysroot, self.build_target, self.tempdir)
+        common_pb2.ArtifactsByService.Test(output_artifacts=[]), self.chroot,
+        self.sysroot, self.build_target, self.tempdir)
 
     self.assertEqual(len(result), 0)
 
@@ -832,54 +741,41 @@ class GetArtifactsTest(cros_test_lib.MockTempDirTestCase):
     """Test BundleCodeCoverageLlvmJson is called on each valid artifact."""
     BundleCodeCoverageLlvmJson_mock = (
         self.PatchObject(
-            test_service,
-            'BundleCodeCoverageLlvmJson',
-            return_value='test'))
+            test_service, 'BundleCodeCoverageLlvmJson', return_value='test'))
 
     test_controller.GetArtifacts(
         common_pb2.ArtifactsByService.Test(output_artifacts=[
             # Valid
             common_pb2.ArtifactsByService.Test.ArtifactInfo(
-                artifact_types=[
-                    self.CODE_COVERAGE_LLVM_ARTIFACT_TYPE
-                ]
-            ),
+                artifact_types=[self.CODE_COVERAGE_LLVM_ARTIFACT_TYPE]),
 
             # Invalid
-            common_pb2.ArtifactsByService.Test.ArtifactInfo(
-                artifact_types=[
-                    common_pb2.ArtifactsByService.Test.ArtifactType.UNIT_TESTS
-                ]
-            ),
+            common_pb2.ArtifactsByService.Test.ArtifactInfo(artifact_types=[
+                common_pb2.ArtifactsByService.Test.ArtifactType.UNIT_TESTS
+            ]),
         ]),
-        self.chroot, self.sysroot, self.build_target, self.tempdir)
+        self.chroot,
+        self.sysroot,
+        self.build_target,
+        self.tempdir)
 
     BundleCodeCoverageLlvmJson_mock.assert_called_once()
 
   def testShouldReturnValidResult(self):
     """Test result contains paths and code_coverage_llvm_json type."""
-    self.PatchObject(test_service, 'BundleCodeCoverageLlvmJson',
-                     return_value='test')
-    self.PatchObject(test_service, 'BuildTargetUnitTestTarball',
-                     return_value='unit_tests.tar')
+    self.PatchObject(
+        test_service, 'BundleCodeCoverageLlvmJson', return_value='test')
 
     result = test_controller.GetArtifacts(
         common_pb2.ArtifactsByService.Test(output_artifacts=[
             # Valid
             common_pb2.ArtifactsByService.Test.ArtifactInfo(
-                artifact_types=[
-                    self.UNIT_TEST_ARTIFACT_TYPE
-                ]
-            ),
-            common_pb2.ArtifactsByService.Test.ArtifactInfo(
-                artifact_types=[
-                    self.CODE_COVERAGE_LLVM_ARTIFACT_TYPE
-                ]
-            ),
+                artifact_types=[self.CODE_COVERAGE_LLVM_ARTIFACT_TYPE]),
         ]),
-        self.chroot, self.sysroot, self.build_target, self.tempdir)
+        self.chroot,
+        self.sysroot,
+        self.build_target,
+        self.tempdir)
 
-    self.assertEqual(result[0]['paths'], ['unit_tests.tar'])
-    self.assertEqual(result[0]['type'], self.UNIT_TEST_ARTIFACT_TYPE)
-    self.assertEqual(result[1]['paths'], ['test'])
-    self.assertEqual(result[1]['type'], self.CODE_COVERAGE_LLVM_ARTIFACT_TYPE)
+    self.assertEqual(result[0]['paths'], ['test'])
+    self.assertEqual(result[0]['type'], self.CODE_COVERAGE_LLVM_ARTIFACT_TYPE)

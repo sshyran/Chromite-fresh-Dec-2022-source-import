@@ -14,7 +14,7 @@ import distutils.version  # pylint: disable=import-error,no-name-in-module
 import logging
 import urllib.parse
 
-from chromite.cbuildbot import manifest_version
+from chromite.lib import chromeos_version
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -41,6 +41,7 @@ class ChromeLKGMCommitter(object):
       'chromeos-eve-chrome',
       'chromeos-kevin-chrome',
       'chromeos-octopus-chrome',
+      'chromeos-reven-chrome',
       'lacros-amd64-generic-chrome',
   ]
   # Files needed in a local checkout to successfully update the LKGM. The OWNERS
@@ -55,8 +56,9 @@ class ChromeLKGMCommitter(object):
   # First line of the commit message for all LKGM CLs.
   _COMMIT_MSG_HEADER = 'Automated Commit: LKGM %(lkgm)s for chromeos.'
 
-  def __init__(self, lkgm, dryrun=False, buildbucket_id=None):
+  def __init__(self, lkgm, branch, dryrun=False, buildbucket_id=None):
     self._dryrun = dryrun
+    self._branch = branch
     self._buildbucket_id = buildbucket_id
     self._gerrit_helper = gerrit.GetCrosExternal()
 
@@ -69,7 +71,7 @@ class ChromeLKGMCommitter(object):
       self._user_email = '3su6n15k.default@developer.gserviceaccount.com'
 
     # Strip any chrome branch from the lkgm version.
-    self._lkgm = manifest_version.VersionInfo(lkgm).VersionString()
+    self._lkgm = chromeos_version.VersionInfo(lkgm).VersionString()
     self._commit_msg_header = self._COMMIT_MSG_HEADER % {'lkgm': self._lkgm}
     self._old_lkgm = None
 
@@ -90,14 +92,14 @@ class ChromeLKGMCommitter(object):
     return self._committer.FullPath(constants.PATH_TO_CHROME_LKGM)
 
   def CloseOldLKGMRolls(self):
-    """Closes all open LKGM roll CLs that were last modified >24 hours ago.
+    """Closes all open LKGM roll CLs that were last modified >48 hours ago.
 
-    Any roll that hasn't passed the CQ in 24 hours is likely broken and can be
+    Any roll that hasn't passed the CQ in 48 hours is likely broken and can be
     discarded.
     """
     query_params = {
         'project': constants.CHROMIUM_SRC_PROJECT,
-        'branch': 'main',
+        'branch': self._branch,
         'file': constants.PATH_TO_CHROME_LKGM,
         'age': '2d',
         'status': 'open',
@@ -121,6 +123,7 @@ class ChromeLKGMCommitter(object):
         self._gerrit_helper.AbandonChange(
             open_issue, msg='Superceded by LKGM %s' % self._lkgm)
 
+  # TODO(b/232822787): Remove once we no longer do LKGMs on legacy.
   def FindAlreadyOpenLKGMRoll(self):
     """Queries Gerrit for a CL that already rolls the LKGM to our version.
 
@@ -138,7 +141,7 @@ class ChromeLKGMCommitter(object):
     """
     query_params = {
         'project': constants.CHROMIUM_SRC_PROJECT,
-        'branch': 'main',
+        'branch': self._branch,
         'file': constants.PATH_TO_CHROME_LKGM,
         'status': 'open',
         # Use 'owner' rather than 'uploader' or 'author' since those last two
@@ -186,7 +189,7 @@ class ChromeLKGMCommitter(object):
     logging.info('Updating LKGM version: %s (was %s),',
                  self._lkgm, self._old_lkgm)
     change = self._gerrit_helper.CreateChange(
-        'chromium/src', 'main', self.ComposeCommitMsg(), False)
+        'chromium/src', self._branch, self.ComposeCommitMsg(), False)
     self._gerrit_helper.ChangeEdit(
         change.gerrit_number, 'chromeos/CHROMEOS_LKGM', self._lkgm)
 
@@ -236,11 +239,15 @@ def GetOpts(argv):
   parser.add_argument('--buildbucket-id',
                       help='Buildbucket ID of the build that ran this script. '
                            'Will be linked in the commit message if specified.')
+  parser.add_argument('--branch', default='main',
+                      help='Branch to upload change to, e.g. '
+                           'refs/branch-heads/5112. Defaults to main.')
   return parser.parse_args(argv)
 
 
 def main(argv):
   opts = GetOpts(argv)
-  committer = ChromeLKGMCommitter(opts.lkgm, opts.dryrun, opts.buildbucket_id)
+  committer = ChromeLKGMCommitter(opts.lkgm, opts.branch, opts.dryrun,
+                                  opts.buildbucket_id)
   committer.Run()
   return 0

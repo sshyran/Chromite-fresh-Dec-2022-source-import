@@ -6,8 +6,8 @@
 
 import os
 
-from chromite.lib import constants
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.lib import portage_util
 
 

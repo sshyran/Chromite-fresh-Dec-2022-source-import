@@ -28,7 +28,6 @@ from portage._global_updates import _global_updates
 from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_event
 from chromite.lib import dependency_graph
 from chromite.lib import dependency_lib
 from chromite.lib.parser import package_info
@@ -115,10 +114,7 @@ class DepGraphGenerator(object):
         emerge_args.append('--fetchonly')
         self.unpack_only = True
       elif arg.startswith('--eventlogfile='):
-        log_file_name = arg.replace('--eventlogfile=', '')
-        event_logger = cros_event.getEventFileLogger(log_file_name)
-        event_logger.setKind('ParallelEmerge')
-        cros_event.setEventLogger(event_logger)
+        pass
       elif arg == '--include-bdepend':
         self.include_bdepend = True
       else:
@@ -344,9 +340,8 @@ class DepGraphGenerator(object):
     if '--quiet' not in emerge.opts:
       print('Calculating deps...')
 
-    with cros_event.newEvent(task_name='GenerateDepTree'):
-      self.CreateDepgraph(emerge, packages)
-      depgraph = emerge.depgraph
+    self.CreateDepgraph(emerge, packages)
+    depgraph = emerge.depgraph
 
     # Build our own tree from the emerge digraph.
     deps_tree = {}

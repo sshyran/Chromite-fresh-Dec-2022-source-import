@@ -4,9 +4,9 @@
 
 """Unittests for trybot_patch_pool."""
 
+from chromite.cbuildbot import trybot_patch_pool
 from chromite.lib import config_lib
 from chromite.lib import constants
-from chromite.cbuildbot import trybot_patch_pool
 from chromite.lib import patch as cros_patch
 from chromite.lib import patch_unittest
 

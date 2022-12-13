@@ -59,7 +59,6 @@ x86_internal_release_boards = frozenset([
 
 x86_external_boards = frozenset([
     'amd64-generic',
-    'moblab-generic-vm',
     'x32-generic',
 ])
 
@@ -71,10 +70,6 @@ brillo_boards = frozenset([
     'whirlwind',
 ])
 
-accelerator_boards = frozenset([
-    'fizz-accelerator',
-])
-
 beaglebone_boards = frozenset([
     'beaglebone',
     'beaglebone_servo',
@@ -82,10 +77,6 @@ beaglebone_boards = frozenset([
 
 dustbuster_boards = frozenset([
     'wristpin',
-])
-
-lassen_boards = frozenset([
-    'lassen',
 ])
 
 loonix_boards = frozenset([])
@@ -104,7 +95,6 @@ wshwos_boards = frozenset([
 moblab_boards = frozenset([
     'puff-moblab',
     'fizz-moblab',
-    'moblab-generic-vm',
 ])
 
 scribe_boards = frozenset([
@@ -118,11 +108,7 @@ termina_boards = frozenset([
     'tael',
 ])
 
-nofactory_boards = (
-    termina_boards | lassen_boards | reven_boards | frozenset([
-        'x30evb',
-    ])
-)
+nofactory_boards = (termina_boards | reven_boards)
 
 toolchains_from_source = frozenset([
     'x32-generic',
@@ -131,9 +117,9 @@ toolchains_from_source = frozenset([
 noimagetest_boards = (termina_boards | scribe_boards
                       | wshwos_boards | dustbuster_boards)
 
-nohwqual_boards = (lassen_boards | termina_boards
-                   | beaglebone_boards | wshwos_boards
-                   | dustbuster_boards | reven_boards)
+nohwqual_boards = (termina_boards | beaglebone_boards
+                   | wshwos_boards | dustbuster_boards
+                   | reven_boards)
 
 base_layout_boards = termina_boards
 

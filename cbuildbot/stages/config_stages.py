@@ -245,7 +245,7 @@ class UpdateConfigStage(generic_stages.BuilderStage):
     git.RunGit(self.chromite_dir, ['checkout', self.branch])
 
     output = git.RunGit(self.chromite_dir,
-                        ['rev-parse', '--abbrev-ref', 'HEAD']).output
+                        ['rev-parse', '--abbrev-ref', 'HEAD']).stdout
     current_branch = output.rstrip()
 
     if current_branch != self.branch:
@@ -287,7 +287,7 @@ class UpdateConfigStage(generic_stages.BuilderStage):
     modifications = git.RunGit(
         self.chromite_dir, ['status', '--porcelain', '--'] + self.config_paths,
         capture_output=True,
-        print_cmd=True).output
+        print_cmd=True).stdout
     if modifications:
       logging.info('Changed files: %s ', modifications)
       return True
@@ -360,7 +360,7 @@ class UpdateConfigStage(generic_stages.BuilderStage):
     result = git.RunGit(
         self.chromite_dir, ['diff'] + self.config_paths, print_cmd=True)
     with open(config_change_patch, 'w') as f:
-      f.write(result.output)
+      f.write(result.stdout)
 
     return config_change_patch
 
@@ -473,7 +473,7 @@ class DeployLuciSchedulerStage(generic_stages.BuilderStage):
 
     chromite_rev = git.RunGit(
         constants.CHROMITE_DIR,
-        ['rev-parse', 'HEAD:config/luci-scheduler.cfg']).output.rstrip()
+        ['rev-parse', 'HEAD:config/luci-scheduler.cfg']).stdout.rstrip()
 
     message = textwrap.dedent("""\
       luci-scheduler.cfg: Chromite %s

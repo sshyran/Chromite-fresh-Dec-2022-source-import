@@ -18,10 +18,6 @@ from chromite.lib import retry_util
 class DeviceError(Exception):
   """Exception for Device failures."""
 
-  def __init__(self, message):
-    super().__init__()
-    logging.error(message)
-
 
 class Device(object):
   """Class for managing a test device."""
@@ -76,7 +72,7 @@ class Device(object):
           'WaitForBoot timed out trying to connect to the device.')
 
     if result.returncode != 0:
-      raise DeviceError('WaitForBoot failed: %s.' % result.error)
+      raise DeviceError('WaitForBoot failed: %s.' % result.stderr)
 
   def remote_run(self, cmd, stream_output=False, **kwargs):
     """Run a remote command.
@@ -87,7 +83,7 @@ class Device(object):
       kwargs: additional args (see documentation for RemoteDevice.run).
 
     Returns:
-      cros_build_lib.CommandResult object.
+      cros_build_lib.CompletedProcess object.
     """
     kwargs.setdefault('check', False)
     if stream_output:

@@ -19,7 +19,11 @@ from typing import Callable, Optional
 
 from chromite.third_party.google.protobuf import field_mask_pb2
 from chromite.third_party.infra_libs.buildbucket.proto import (
-    builder_pb2, builds_service_pb2, builds_service_prpc_pb2, common_pb2)
+    builder_common_pb2,
+    builds_service_pb2,
+    builds_service_prpc_pb2,
+    common_pb2,
+)
 
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import constants
@@ -27,6 +31,7 @@ from chromite.lib import retry_util
 from chromite.lib.luci import utils
 from chromite.lib.luci.prpc.client import Client
 from chromite.lib.luci.prpc.client import ProtocolError
+
 
 BBV2_URL_ENDPOINT_PROD = (
     'cr-buildbucket.appspot.com'
@@ -70,7 +75,7 @@ def GetScheduledBuildDict(scheduled_slave_list):
 
   Args:
     scheduled_slave_list: A list of scheduled builds recorded in the
-                          master metadata. In the format of
+                          orchestrator metadata. In the format of
                           [(build_config, buildbucket_id, created_ts)].
 
   Returns:
@@ -160,7 +165,7 @@ def FetchCurrentSlaveBuilders(config, metadata, builders_array,
       True.
 
   Returns:
-    An updated list of slave build configs for a master build.
+    An updated list of slave build configs for a orchestrator build.
   """
   if config and metadata:
     scheduled_buildbucket_info_dict = GetBuildInfoDict(
@@ -261,7 +266,7 @@ def UpdateSelfCommonBuildProperties(critical=None,
     unibuild: (Optional) Boolean indicating whether build is unibuild.
     suite_scheduling: (Optional)
     killed_child_builds: (Optional) A list of Buildbucket IDs of child builds
-      that were killed by self-destructed master build.
+      that were killed by self-destructed orchestrator build.
     board: (Optional) board of the build.
     main_firmware_version: (Optional) main firmware version of the build.
     ec_firmware_version: (Optional) ec_firmware version of the build.
@@ -407,7 +412,7 @@ class BuildbucketV2(object):
   """Connection to Buildbucket V2 database."""
 
   def __init__(self, test_env=False,
-               access_token_retriever: Optional[Callable[[], str]]=None):
+               access_token_retriever: Optional[Callable[[], str]] = None):
     """Constructor for Buildbucket V2 Build client.
 
     Args:
@@ -635,14 +640,14 @@ class BuildbucketV2(object):
     return self.client.UpdateBuild(update_build_request, **self._client_kwargs)
 
   def GetKilledChildBuilds(self, buildbucket_id):
-    """Get IDs of all the builds killed by self-destructed master build.
+    """Get IDs of all the builds killed by self-destructed orchestrator build.
 
     Args:
-      buildbucket_id: Buildbucket ID of the master build.
+      buildbucket_id: Buildbucket ID of the orchestrator build.
 
     Returns:
       A list of Buildbucket IDs of the child builds that were killed by the
-      master build or None if the query was unsuccessful.
+      orchestrator build or None if the query was unsuccessful.
     """
     properties = 'output.properties'
     try:
@@ -832,7 +837,7 @@ class BuildbucketV2(object):
       build statuses in descending order (if |reverse| is True, ascending
       order).
     """
-    builder = builder_pb2.BuilderID(project='chromeos', bucket='general')
+    builder = builder_common_pb2.BuilderID(project='chromeos', bucket='general')
     tags = [common_pb2.StringPair(key='cbb_config',
                                   value=build_config)]
     create_time = DateToTimeRange(start_date, end_date)
@@ -862,13 +867,13 @@ class BuildbucketV2(object):
     """Retrieve statuses of all the child builds.
 
     Args:
-      buildbucket_id: buildbucket_id of the parent/master build.
+      buildbucket_id: buildbucket_id of the orchestrator build.
 
     Returns:
       A list of dictionary corresponding to each child build with keys like
       start_time, end_time, status, version info, critical, build_config, etc.
     """
-    builder = builder_pb2.BuilderID(project='chromeos', bucket='general')
+    builder = builder_common_pb2.BuilderID(project='chromeos', bucket='general')
     tag = common_pb2.StringPair(key='cbb_master_buildbucket_id',
                                 value=str(buildbucket_id))
     build_predicate = builds_service_pb2.BuildPredicate(

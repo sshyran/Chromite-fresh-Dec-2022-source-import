@@ -60,6 +60,7 @@ _ANDROID_DIR_EXTRACT_PATH = 'system/chrome/*'
 
 _CHROME_DIR = '/opt/google/chrome'
 _CHROME_DIR_MOUNT = '/mnt/stateful_partition/deploy_rootfs/opt/google/chrome'
+_CHROME_DIR_STAGING_TARBALL_ZSTD = 'chrome.tar.zst'
 _CHROME_TEST_BIN_DIR = '/usr/local/libexec/chrome-binary-tests'
 
 _UMOUNT_DIR_IF_MOUNTPOINT_CMD = (
@@ -151,7 +152,7 @@ class DeployChrome(object):
 
   def _GetRemoteMountFree(self, remote_dir):
     result = self.device.run(DF_COMMAND % remote_dir)
-    line = result.output.splitlines()[1]
+    line = result.stdout.splitlines()[1]
     value = line.split()[3]
     multipliers = {
         'G': 1024 * 1024 * 1024,
@@ -163,13 +164,13 @@ class DeployChrome(object):
   def _GetRemoteDirSize(self, remote_dir):
     result = self.device.run('du -ks %s' % remote_dir,
                              capture_output=True, encoding='utf-8')
-    return int(result.output.split()[0])
+    return int(result.stdout.split()[0])
 
   def _GetStagingDirSize(self):
     result = cros_build_lib.dbg_run(['du', '-ks', self.staging_dir],
                                     stdout=True, capture_output=True,
                                     encoding='utf-8')
-    return int(result.output.split()[0])
+    return int(result.stdout.split()[0])
 
   def _ChromeFileInUse(self):
     result = self.device.run(LSOF_COMMAND_CHROME % (self.options.target_dir,),
@@ -186,14 +187,14 @@ class DeployChrome(object):
     if not self.options.force:
       logging.error('Detected that the device has rootfs verification enabled.')
       logging.info('This script can automatically remove the rootfs '
-                   'verification, which requires that it reboot the device.')
+                   'verification, which requires it to reboot the device.')
       logging.info('Make sure the device is in developer mode!')
       logging.info('Skip this prompt by specifying --force.')
       if not cros_build_lib.BooleanPrompt('Remove rootfs verification?', False):
         return False
 
     logging.info('Removing rootfs verification from %s', self.options.device)
-    # Running in VM's cause make_dev_ssd's firmware sanity checks to fail.
+    # Running in VMs cause make_dev_ssd's firmware confidence checks to fail.
     # Use --force to bypass the checks.
     cmd = ('/usr/share/vboot/bin/make_dev_ssd.sh --partitions %d '
            '--remove_rootfs_verification --force')
@@ -218,12 +219,12 @@ class DeployChrome(object):
       result = self.device.run('status ui', capture_output=True,
                                encoding='utf-8')
     except cros_build_lib.RunCommandError as e:
-      if 'Unknown job' in e.result.error:
+      if 'Unknown job' in e.result.stderr:
         return False
       else:
         raise e
 
-    return result.output.split()[1].split('/')[0] == 'start'
+    return result.stdout.split()[1].split('/')[0] == 'start'
 
   def _KillLacrosChrome(self):
     """This method kills lacros-chrome on the device, if it's running."""
@@ -372,7 +373,7 @@ class DeployChrome(object):
     if r.returncode != 0:
       raise DeployFailure('Unable to ls contents of %s' % _CHROME_TEST_BIN_DIR)
     binaries_to_copy = []
-    for f in r.output.splitlines():
+    for f in r.stdout.splitlines():
       binaries_to_copy.append(
           chrome_util.Path(os.path.basename(f), exe=True, optional=True))
 
@@ -624,6 +625,12 @@ def _CreateParser():
                       help='By default, deploying lacros-chrome modifies the '
                            '/etc/chrome_dev.conf file, which interferes with '
                            'automated testing, and this argument disables it.')
+  parser.add_argument('--use-external-config', action='store_true',
+                      help='When identifying the configuration for a board, '
+                           'force usage of the external configuration if both '
+                           'internal and external are available. This only '
+                           'has an effect when stripping Chrome, i.e. when '
+                           '--nostrip is not passed in.')
 
   group = parser.add_argument_group('Advanced Options')
   group.add_argument('-l', '--local-pkg-path', type='path',
@@ -677,6 +684,12 @@ def _CreateParser():
   # Only prepare the staging directory, and skip deploying to the device.
   parser.add_argument('--staging-only', action='store_true', default=False,
                       help=argparse.SUPPRESS)
+  # Uploads the compressed staging directory to the given gs:// path URI.
+  parser.add_argument('--staging-upload', type='gs_path',
+                      help='GS path to upload the compressed staging files to.')
+  # Used alongside --staging-upload to upload with public-read ACL.
+  parser.add_argument('--public-read', action='store_true', default=False,
+                      help='GS path to upload the compressed staging files to.')
   # Path to a binutil 'strip' tool to strip binaries with.  The passed-in path
   # is used as-is, and not normalized.  Used by the Chrome ebuild to skip
   # fetching the SDK toolchain.
@@ -701,13 +714,8 @@ def _ParseCommandLine(argv):
     parser.error('Cannot specify both --build_dir and '
                  '--gs-path/--local-pkg-patch')
   if options.lacros:
-    if options.board:
-      parser.error('--board is not supported with --lacros')
-    # The stripping implemented in this file rely on the cros-chrome-sdk, which
-    # is inappropriate for Lacros. Lacros stripping is currently not
-    # implemented.
-    if options.dostrip:
-      parser.error('--lacros requires --nostrip')
+    if options.dostrip and not options.board:
+      parser.error('Please specify --board.')
     if options.mount_dir or options.mount:
       parser.error('--lacros does not support --mount or --mount-dir')
     if options.deploy_test_binaries:
@@ -810,7 +818,9 @@ def _StripBinContext(options):
   elif options.strip_bin:
     yield options.strip_bin
   else:
-    sdk = cros_chrome_sdk.SDKFetcher(options.cache_dir, options.board)
+    sdk = cros_chrome_sdk.SDKFetcher(
+        options.cache_dir, options.board,
+        use_external_config=options.use_external_config)
     components = (sdk.TARGET_TOOLCHAIN_KEY, constants.CHROME_ENV_TAR)
     with sdk.Prepare(components=components, target_tc=options.target_tc,
                      toolchain_url=options.toolchain_url) as ctx:
@@ -820,6 +830,30 @@ def _StripBinContext(options):
       strip_bin = os.path.join(ctx.key_map[sdk.TARGET_TOOLCHAIN_KEY].path,
                                'bin', os.path.basename(strip_bin))
       yield strip_bin
+
+
+def _UploadStagingDir(options: commandline.ArgumentNamespace, tempdir: str,
+                      staging_dir: str) -> None:
+  """Uploads the compressed staging directory.
+
+  Args:
+    options: options object.
+    tempdir: Scratch space.
+    staging_dir: Directory staging chrome files.
+  """
+  staging_tarball_path = os.path.join(tempdir, _CHROME_DIR_STAGING_TARBALL_ZSTD)
+  logging.info('Compressing staging dir (%s) to (%s)',
+               staging_dir, staging_tarball_path)
+  cros_build_lib.CreateTarball(
+      staging_tarball_path,
+      staging_dir,
+      compression=cros_build_lib.COMP_ZSTD,
+      extra_env={'ZSTD_CLEVEL': '9'})
+  logging.info('Uploading staging tarball (%s) into %s',
+               staging_tarball_path, options.staging_upload)
+  ctx = gs.GSContext()
+  ctx.Copy(staging_tarball_path, options.staging_upload,
+           acl='public-read' if options.public_read else '')
 
 
 def _PrepareStagingDir(options, tempdir, staging_dir, copy_paths=None,
@@ -861,10 +895,15 @@ def _PrepareStagingDir(options, tempdir, staging_dir, copy_paths=None,
         shutil.move(filename, staging_dir)
       osutils.RmDir(os.path.join(staging_dir, 'system'), ignore_missing=True)
     else:
+      compression = cros_build_lib.CompressionDetectType(pkg_path)
+      compressor = cros_build_lib.FindCompressor(compression)
       cros_build_lib.dbg_run(
-          ['tar', '--strip-components', '4', '--extract',
+          ['tar', '--strip-components', '4', '--extract', '-I', compressor,
            '--preserve-permissions', '--file', pkg_path, '.%s' % chrome_dir],
           cwd=staging_dir)
+
+  if options.staging_upload:
+    _UploadStagingDir(options, tempdir, staging_dir)
 
 
 def main(argv):

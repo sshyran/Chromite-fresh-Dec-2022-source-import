@@ -4,11 +4,11 @@
 
 """Collection of tools to create sysroots."""
 
-import os
 import sys
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
+from chromite.lib import osutils
 from chromite.lib import sysroot_lib
 
 
@@ -65,10 +65,13 @@ def main(argv):
   if not cros_build_lib.IsInsideChroot():
     raise commandline.ChrootRequiredError(argv)
 
-  if os.geteuid() != 0:
+  if osutils.IsNonRootUser():
     cros_build_lib.sudo_run(sys.argv, print_cmd=False)
     return
 
+  # This short script is using |output| for the whole duration, thus we are
+  # not concerned with leaking it, and `with` is awkward to use with sys.stdout.
+  # pylint: disable=consider-using-with
   output = sys.stdout
   if opts.out_file:
     output = open(opts.out_file, 'w')

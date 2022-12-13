@@ -6,10 +6,10 @@
 
 import json
 
-from chromite.lib import failures_lib
-from chromite.lib import failure_message_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import failure_message_lib
+from chromite.lib import failures_lib
 
 
 class StepFailureTests(cros_test_lib.TestCase):
@@ -69,8 +69,9 @@ class CompoundFailureTest(cros_test_lib.TestCase):
     exc_infos.extend(self._CreateExceptInfos(ValueError))
     exc = failures_lib.CompoundFailure(exc_infos=exc_infos)
     self.assertTrue(exc.HasFatalFailure())
-    self.assertTrue(exc.HasFatalFailure(whitelist=[KeyError]))
-    self.assertFalse(exc.HasFatalFailure(whitelist=[KeyError, ValueError]))
+    self.assertTrue(exc.HasFatalFailure(exempt_exception_list=[KeyError]))
+    self.assertFalse(
+        exc.HasFatalFailure(exempt_exception_list=[KeyError, ValueError]))
 
     exc = failures_lib.CompoundFailure()
     self.assertFalse(exc.HasFatalFailure())
@@ -160,8 +161,8 @@ class SetFailureTypeTest(cros_test_lib.TestCase):
 
   def testReraiseACompoundFailure(self):
     """Tests that the list of ExceptInfo objects are copied over."""
-    tb1 = 'Dummy traceback1'
-    tb2 = 'Dummy traceback2'
+    tb1 = 'Stub traceback1'
+    tb2 = 'Stub traceback2'
     org_infos = (failures_lib.CreateExceptInfo(ValueError('No taco.'), tb1) +
                  failures_lib.CreateExceptInfo(OSError('No salsa'), tb2))
     try:
@@ -221,7 +222,7 @@ class ExceptInfoTest(cros_test_lib.TestCase):
 
   def testConvertToExceptInfo(self):
     """Tests converting an exception to an ExceptInfo object."""
-    traceback = 'Dummy traceback'
+    traceback = 'Stub traceback'
     message = 'Taco is not a valid option!'
     except_infos = failures_lib.CreateExceptInfo(
         ValueError(message), traceback)

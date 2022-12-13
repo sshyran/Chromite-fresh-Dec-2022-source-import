@@ -12,8 +12,10 @@ import hashlib
 import json
 import logging
 import os
+from pathlib import Path
 import pprint
 import tempfile
+from typing import Union
 import urllib.parse
 
 from chromite.third_party import httplib2
@@ -58,7 +60,7 @@ def _ChromeInfraRequest(method, request):
     Deserialized RPC response body.
   """
   resp, body = httplib2.Http().request(
-      uri=CHROME_INFRA_PACKAGES_API_BASE+method,
+      uri=CHROME_INFRA_PACKAGES_API_BASE + method,
       method='POST',
       headers={
           'Accept': 'application/json',
@@ -84,17 +86,17 @@ def _DownloadCIPD(instance_sha256):
     The CIPD binary as a string.
   """
   # Grab the signed URL to fetch the client binary from.
-  resp = _ChromeInfraRequest('DescribeClient', {
-      'package': CIPD_CLIENT_PACKAGE,
-      'instance': {
-          'hashAlgo': 'SHA256',
-          'hexDigest': instance_sha256,
-      },
-  })
+  resp = _ChromeInfraRequest(
+      'DescribeClient', {
+          'package': CIPD_CLIENT_PACKAGE,
+          'instance': {
+              'hashAlgo': 'SHA256',
+              'hexDigest': instance_sha256,
+          },
+      })
   if 'clientBinary' not in resp:
-    logging.error(
-        'Error requesting the link to download CIPD from. Got:\n%s',
-        pprint.pformat(resp))
+    logging.error('Error requesting the link to download CIPD from. Got:\n%s',
+                  pprint.pformat(resp))
     raise Error('Failed to bootstrap CIPD client')
 
   # Download the actual binary.
@@ -108,9 +110,8 @@ def _DownloadCIPD(instance_sha256):
   for alias in resp['clientRefAliases']:
     if alias['hashAlgo'] == 'SHA256':
       if digest != alias['hexDigest']:
-        raise Error(
-            'Unexpected CIPD client SHA256: got %s, want %s' %
-            (digest, alias['hexDigest']))
+        raise Error('Unexpected CIPD client SHA256: got %s, want %s' %
+                    (digest, alias['hexDigest']))
       break
   else:
     raise Error("CIPD server didn't provide expected SHA256")
@@ -120,6 +121,7 @@ def _DownloadCIPD(instance_sha256):
 
 class CipdCache(cache.RemoteCache):
   """Supports caching of the CIPD download."""
+
   def _Fetch(self, url, local_path):
     instance_sha256 = urllib.parse.urlparse(url).netloc
     binary = _DownloadCIPD(instance_sha256)
@@ -161,14 +163,19 @@ def GetInstanceID(cipd_path, package, version, service_account_json=None):
 
   result = cros_build_lib.run(
       [cipd_path, 'resolve', package, '-version', version] +
-      service_account_flag, capture_output=True, encoding='utf-8')
+      service_account_flag,
+      capture_output=True,
+      encoding='utf-8')
   # An example output of resolve is like:
   #   Packages:\n package:instance_id
-  return result.output.splitlines()[-1].split(':')[-1]
+  return result.stdout.splitlines()[-1].split(':')[-1]
 
 
 @memoize.Memoize
-def InstallPackage(cipd_path, package, version, destination,
+def InstallPackage(cipd_path,
+                   package,
+                   version,
+                   destination: Union[os.PathLike, str] = None,
                    service_account_json=None):
   """Installs a package at a given destination using cipd.
 
@@ -183,7 +190,12 @@ def InstallPackage(cipd_path, package, version, destination,
   Returns:
     The path of the package.
   """
-  destination = os.path.join(destination, package)
+  if not destination:
+    # GetCacheDir does a non-trivial amount of work, too much for a constant.
+    # If needed elsewhere, a memoized function would be a good alternative.
+    destination = Path(path_util.GetCacheDir()).absolute() / 'cipd' / 'packages'
+
+  destination = Path(destination) / package
 
   service_account_flag = []
   if service_account_json:
@@ -193,16 +205,15 @@ def InstallPackage(cipd_path, package, version, destination,
     f.write(('%s %s' % (package, version)).encode('utf-8'))
     f.flush()
 
-    cros_build_lib.run(
-        [cipd_path, 'ensure', '-root', destination, '-list', f.name]
-        + service_account_flag,
+    cros_build_lib.dbg_run(
+        [cipd_path, 'ensure', '-root', destination, '-list', f.name] +
+        service_account_flag,
         capture_output=True)
 
   return destination
 
 
-def CreatePackage(cipd_path, package, in_dir, tags, refs,
-                  cred_path=None):
+def CreatePackage(cipd_path, package, in_dir, tags, refs, cred_path=None):
   """Create (build and register) a package using cipd.
 
   Args:
@@ -214,9 +225,12 @@ def CreatePackage(cipd_path, package, in_dir, tags, refs,
     cred_path: The path of the service account credentials.
   """
   args = [
-      cipd_path, 'create',
-      '-name', package,
-      '-in', in_dir,
+      cipd_path,
+      'create',
+      '-name',
+      package,
+      '-in',
+      in_dir,
   ]
   for key, value in tags.items():
     args.extend(['-tag', '%s:%s' % (key, value)])
@@ -225,42 +239,4 @@ def CreatePackage(cipd_path, package, in_dir, tags, refs,
   if cred_path:
     args.extend(['-service-account-json', cred_path])
 
-  cros_build_lib.run(args, capture_output=True)
-
-
-def BuildPackage(cipd_path, package, in_dir, outfile):
-  """Build a package using cipd.
-
-  Args:
-    cipd_path: The path to a cipd executable. GetCIPDFromCache can give this.
-    package: A package name.
-    in_dir: The directory to create the package from.
-    outfile: Output file.  Should have extension .cipd
-  """
-  args = [
-      cipd_path, 'pkg-build',
-      '-name', package,
-      '-in', in_dir,
-      '-out', outfile,
-  ]
-  cros_build_lib.run(args, capture_output=True)
-
-
-def RegisterPackage(cipd_path, package_file, tags, refs, cred_path=None):
-  """Register and upload a package using cipd.
-
-  Args:
-    cipd_path: The path to a cipd executable. GetCIPDFromCache can give this.
-    package_file: The path to a .cipd package file.
-    tags: A mapping of tags to apply to the package.
-    refs: An Iterable of refs to apply to the package.
-    cred_path: The path of the service account credentials.
-  """
-  args = [cipd_path, 'pkg-register', package_file]
-  for key, value in tags.items():
-    args.extend(['-tag', '%s:%s' % (key, value)])
-  for ref in refs:
-    args.extend(['-ref', ref])
-  if cred_path:
-    args.extend(['-service-account-json', cred_path])
   cros_build_lib.run(args, capture_output=True)

@@ -33,7 +33,7 @@ class CalculateRootfsHashMock(imagefile.CalculateRootfsHash):
   def __init__(self, image, kern_cmdline, calc_dm_args=None, calc_conf=None):
     self.image = image
     self.kern_cmdline = kern_cmdline
-    self._file = tempfile.NamedTemporaryFile(delete=False)
+    self._file = tempfile.NamedTemporaryFile(delete=False)  # pylint: disable=consider-using-with
     if not calc_dm_args:
       calc_dm_args = '1 vroot none ro 1,0 800 verity alg=sha1'
     self.calculated_dm_config = kernel_cmdline.DmConfig(calc_dm_args)
@@ -102,7 +102,7 @@ class TestGetKernelConfig(cros_test_lib.RunCommandTestCase):
     self.rc.AddCmdResult(partial_mock.In('/dev/loop9999p3'), returncode=1)
     self.rc.AddCmdResult(
         partial_mock.InOrder(['dump_kernel_config', '/dev/loop9999p4']),
-        output=SAMPLE_KERNEL_CONFIG)
+        stdout=SAMPLE_KERNEL_CONFIG)
 
   def testCallsDumpKernelConfig(self):
     """Verify that it calls dump_kernel_config correctly."""
@@ -195,7 +195,7 @@ class TestSignImage(cros_test_lib.RunCommandTempDirTestCase):
                   extra_env={'PATH': 'path'}),
     ]
     self.assertEqual(expected_rc, self.rc.call_args_list)
-    self.assertTrue(rootfs_dir.startswith(self.tempdir + '/'))
+    self.assertTrue(rootfs_dir.startswith(f'{self.tempdir}/'))
     self.assertTrue(rootfs_dir.endswith('/dir-3'))
     self.assertEqual('/keydir', keyset.key_dir)
     self.uefi_mock.assert_called_once_with(
@@ -213,7 +213,7 @@ class TestSignImage(cros_test_lib.RunCommandTempDirTestCase):
     """Verify that strip is not called for legacy."""
     self.rc.AddCmdResult(
         ['sudo', '--', 'dump_kernel_config', '/dev/loop9999p2'],
-        output=' cros_legacy ')
+        stdout=' cros_legacy ')
     imagefile.SignImage('USB', 'infile', 'outfile', 2, '/keydir')
     self.assertNotIn(
         mock.call(['strip_boot_from_image.sh', '--image', '/dev/loop9999p3'],
@@ -224,7 +224,7 @@ class TestSignImage(cros_test_lib.RunCommandTempDirTestCase):
     """Verify that strip is not called for EFI."""
     self.rc.AddCmdResult(
         ['sudo', '--', 'dump_kernel_config', '/dev/loop9999p2'],
-        output=' cros_efi ')
+        stdout=' cros_efi ')
     imagefile.SignImage('USB', 'infile', 'outfile', 2, '/keydir')
     self.assertNotIn(
         mock.call(['strip_boot_from_image.sh', '--image', '/dev/loop9999p3'],
@@ -357,7 +357,7 @@ class TestCalculateRootfsHash(cros_test_lib.RunCommandTempDirTestCase):
   def testSimple(self):
     """Test the simple case for CalculateRootfsHash."""
     self.rc.AddCmdResult(
-        partial_mock.In('verity'), output=SAMPLE_VERITY_OUTPUT)
+        partial_mock.In('verity'), stdout=SAMPLE_VERITY_OUTPUT)
     rootfs_hash = imagefile.CalculateRootfsHash(
         self.image, kernel_cmdline.CommandLine(SAMPLE_KERNEL_CONFIG))
     expected_rc = [
@@ -391,7 +391,7 @@ class TestCalculateRootfsHash(cros_test_lib.RunCommandTempDirTestCase):
   def testTempfileDeletedOnDelete(self):
     """Test that the tempfile is deleted only when the object is deleted."""
     self.rc.AddCmdResult(
-        partial_mock.In('verity'), output=SAMPLE_VERITY_OUTPUT)
+        partial_mock.In('verity'), stdout=SAMPLE_VERITY_OUTPUT)
     rootfs_hash = imagefile.CalculateRootfsHash(
         self.image, kernel_cmdline.CommandLine(SAMPLE_KERNEL_CONFIG))
     # We don't actually care about the return, it's checked elsewhere.
@@ -410,7 +410,7 @@ class TestCalculateRootfsHash(cros_test_lib.RunCommandTempDirTestCase):
     """Test that salt= is properly optional."""
     self.rc.AddCmdResult(
         partial_mock.In('verity'),
-        output=re.sub(' salt=b*', '', SAMPLE_VERITY_OUTPUT))
+        stdout=re.sub(' salt=b*', '', SAMPLE_VERITY_OUTPUT))
     kern_cmdline = re.sub(' salt=b*', '', SAMPLE_KERNEL_CONFIG)
     rootfs_hash = imagefile.CalculateRootfsHash(
         self.image, kernel_cmdline.CommandLine(kern_cmdline))
@@ -462,7 +462,7 @@ class TestUpdateRootfsHash(cros_test_lib.RunCommandTempDirTestCase):
     self.rc.SetDefaultCmdResult()
     self.rc.AddCmdResult(
         partial_mock.InOrder(['dump_kernel_config', '/dev/loop9999p2']),
-        output=SAMPLE_KERNEL_CONFIG)
+        stdout=SAMPLE_KERNEL_CONFIG)
     self.keytempdir = osutils.TempDir()
     self.keyset = keys.Keyset(self.keytempdir.tempdir)
     self.image = image_lib_unittest.LoopbackPartitionsMock(
@@ -471,14 +471,14 @@ class TestUpdateRootfsHash(cros_test_lib.RunCommandTempDirTestCase):
     self.PatchObject(imagefile, 'CalculateRootfsHash',
                      return_value=self.root_hash)
     self.rc.AddCmdResult(
-        partial_mock.In('tune2fs'), output='Block count: 4480\n')
+        partial_mock.In('tune2fs'), stdout='Block count: 4480\n')
     self.ukc = self.PatchObject(imagefile, '_UpdateKernelConfig')
 
   def testSimple(self):
     """Test the normal path"""
     self.rc.AddCmdResult(
         partial_mock.InOrder(['dump_kernel_config', '/dev/loop9999p4']),
-        output=SAMPLE_KERNEL_CONFIG)
+        stdout=SAMPLE_KERNEL_CONFIG)
     self.keyset.keys['keyA_kernel_data_key'] = keys.KeyPair(
         'keyA_kernel_data_key', self.keytempdir.tempdir)
     self.keyset.keys['kernel_data_key'] = keys.KeyPair(
@@ -509,7 +509,7 @@ class TestUpdateRootfsHash(cros_test_lib.RunCommandTempDirTestCase):
         'keyA_kernel_data_key', self.keytempdir.tempdir)
     self.rc.AddCmdResult(
         partial_mock.InOrder(['dump_kernel_config', '/dev/loop9999p2']),
-        output=SAMPLE_KERNEL_CONFIG)
+        stdout=SAMPLE_KERNEL_CONFIG)
     self.rc.AddCmdResult(partial_mock.In('/dev/loop9999p4'), returncode=1)
     imagefile.UpdateRootfsHash(
         self.image, self.image.GetPartitionDevName('KERN-A'), self.keyset,
@@ -557,7 +557,7 @@ class TestUpdateStatefulVblock(cros_test_lib.RunCommandTempDirTestCase):
     self.rc.SetDefaultCmdResult()
     self.rc.AddCmdResult(
         partial_mock.InOrder(['dump_kernel_config', '/dev/loop9999p2']),
-        output=SAMPLE_KERNEL_CONFIG)
+        stdout=SAMPLE_KERNEL_CONFIG)
     self.keytempdir = osutils.TempDir()
     self.keyset = keys.Keyset(self.keytempdir.tempdir)
     self.image = image_lib_unittest.LoopbackPartitionsMock(
@@ -569,7 +569,7 @@ class TestUpdateStatefulVblock(cros_test_lib.RunCommandTempDirTestCase):
     self.keyset.keys['kernel_data_key'] = kernel_key
     self.rc.AddCmdResult(
         partial_mock.InOrder(['dump_kernel_config', '/dev/loop9999p4']),
-        output=SAMPLE_KERNEL_CONFIG)
+        stdout=SAMPLE_KERNEL_CONFIG)
     imagefile.UpdateStatefulPartitionVblock(self.image, self.keyset)
     self.rc.assertCommandCalled(
         ['sudo', '--', 'dump_kernel_config', '/dev/loop9999p4'],
@@ -611,7 +611,7 @@ class TestUpdateRecoveryKernelHash(cros_test_lib.RunCommandTempDirTestCase):
     self.rc.SetDefaultCmdResult()
     self.expected_sha1sum = '5' * 40
     self.rc.AddCmdResult(
-        partial_mock.In('sha1sum'), output=self.expected_sha1sum + '  meh')
+        partial_mock.In('sha1sum'), stdout=self.expected_sha1sum + '  meh')
     self.loginfo = self.PatchObject(logging, 'info')
     self.keytempdir = osutils.TempDir()
     self.keyset = keys.Keyset(self.keytempdir.tempdir)
@@ -623,7 +623,7 @@ class TestUpdateRecoveryKernelHash(cros_test_lib.RunCommandTempDirTestCase):
     """Test the normal path"""
     self.rc.AddCmdResult(
         partial_mock.InOrder(['dump_kernel_config', '/dev/loop9999p2']),
-        output=SAMPLE_KERNEL_CONFIG + 'kern_b_hash=888888888 ')
+        stdout=SAMPLE_KERNEL_CONFIG + 'kern_b_hash=888888888 ')
     recovery = keys.KeyPair('recovery', self.keytempdir.tempdir, version=3)
     self.keyset.keys['recovery'] = recovery
     imagefile.UpdateRecoveryKernelHash(self.image, self.keyset)
@@ -642,7 +642,7 @@ class TestUpdateRecoveryKernelHash(cros_test_lib.RunCommandTempDirTestCase):
     """Test no KERN-B hash case."""
     self.rc.AddCmdResult(
         partial_mock.InOrder(['dump_kernel_config', '/dev/loop9999p2']),
-        output=SAMPLE_KERNEL_CONFIG)
+        stdout=SAMPLE_KERNEL_CONFIG)
     recovery = keys.KeyPair('recovery', self.keytempdir.tempdir, version=3)
     self.keyset.keys['recovery'] = recovery
     imagefile.UpdateRecoveryKernelHash(self.image, self.keyset)
@@ -663,7 +663,7 @@ class TestUpdateLegacyBootloader(cros_test_lib.RunCommandTempDirTestCase):
     self.rc.SetDefaultCmdResult()
     self.rc.AddCmdResult(
         partial_mock.InOrder(['dump_kernel_config', '/dev/loop9999p2']),
-        output=SAMPLE_KERNEL_CONFIG)
+        stdout=SAMPLE_KERNEL_CONFIG)
     self.image = image_lib_unittest.LoopbackPartitionsMock(
         'outfile', self.tempdir)
 

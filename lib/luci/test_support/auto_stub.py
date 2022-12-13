@@ -8,6 +8,7 @@ import collections
 import inspect
 import unittest
 
+
 __version__ = '1.0'
 
 

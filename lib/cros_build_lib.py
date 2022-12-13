@@ -5,7 +5,6 @@
 """Common python commands used by various build scripts."""
 
 import base64
-import contextlib
 from datetime import datetime
 import email.utils
 import errno
@@ -15,6 +14,7 @@ import inspect
 import logging
 import operator
 import os
+import pathlib
 from pathlib import Path
 import re
 import signal
@@ -27,7 +27,7 @@ from typing import List, Optional, Union
 
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import constants
-from chromite.lib import cros_collections
+from chromite.lib import osutils
 from chromite.lib import signals
 
 
@@ -79,24 +79,13 @@ def ShellQuote(s):
   Returns:
     A safely (possibly quoted) string.
   """
-  if sys.version_info.major < 3:
-    # This is a bit of a hack.  Python 2 will display strings with u prefixes
-    # when logging which makes things harder to work with.  Writing bytes to
-    # stdout will be interpreted as UTF-8 content implicitly.
-    if isinstance(s, str):
-      try:
-        s = s.encode('utf-8')
-      except UnicodeDecodeError:
-        # We tried our best.  Let Python's automatic mixed encoding kick in.
-        pass
-    else:
-      return repr(s)
-  else:
-    # If callers pass down bad types, don't blow up.
-    if isinstance(s, bytes):
-      s = s.decode('utf-8', 'backslashreplace')
-    elif not isinstance(s, str):
-      return repr(s)
+  # If callers pass down bad types, don't blow up.
+  if isinstance(s, bytes):
+    s = s.decode('utf-8', 'backslashreplace')
+  elif isinstance(s, pathlib.PurePath):
+    return str(s)
+  elif not isinstance(s, str):
+    return repr(s)
 
   # See if no quoting is needed so we can return the string as-is.
   for c in s:
@@ -202,24 +191,15 @@ def CmdToStr(cmd):
                      (type(cmd), repr(cmd)))
 
 
-class CompletedProcess(getattr(subprocess, 'CompletedProcess', object)):
+class CompletedProcess(subprocess.CompletedProcess):
   """An object to store various attributes of a child process.
 
-  This is akin to subprocess.CompletedProcess.
+  This is the same as subprocess.CompletedProcess except we allow None defaults
+  for |args| and |returncode|.
   """
 
-  # The linter is confused by the getattr usage above.
-  # TODO(vapier): Drop this once we're Python 3-only and we drop getattr.
-  # pylint: disable=bad-option-value,super-on-old-class
-  def __init__(self, args=None, returncode=None, stdout=None, stderr=None):
-    if sys.version_info.major < 3:
-      self.args = args
-      self.stdout = stdout
-      self.stderr = stderr
-      self.returncode = returncode
-    else:
-      super().__init__(
-          args=args, returncode=returncode, stdout=stdout, stderr=stderr)
+  def __init__(self, args=None, returncode=None, **kwargs):
+    super().__init__(args=args, returncode=returncode, **kwargs)
 
   @property
   def cmd(self):
@@ -242,45 +222,6 @@ class CompletedProcess(getattr(subprocess, 'CompletedProcess', object)):
           stderr=self.stderr, msg='check_returncode failed')
 
 
-# TODO(crbug.com/1006587): Migrate users to CompletedProcess and drop this.
-class CommandResult(CompletedProcess):
-  """An object to store various attributes of a child process.
-
-  This is akin to subprocess.CompletedProcess.
-  """
-
-  # The linter is confused by the getattr usage above.
-  # TODO(vapier): Drop this once we're Python 3-only and we drop getattr.
-  # pylint: disable=bad-option-value,super-on-old-class
-  def __init__(self, cmd=None, error=None, output=None, returncode=None,
-               args=None, stdout=None, stderr=None):
-    if args is None:
-      args = cmd
-    elif cmd is not None:
-      raise TypeError('Only specify |args|, not |cmd|')
-    if stdout is None:
-      stdout = output
-    elif output is not None:
-      raise TypeError('Only specify |stdout|, not |output|')
-    if stderr is None:
-      stderr = error
-    elif error is not None:
-      raise TypeError('Only specify |stderr|, not |error|')
-
-    super().__init__(args=args, stdout=stdout, stderr=stderr,
-                     returncode=returncode)
-
-  @property
-  def output(self):
-    """Backwards compat API."""
-    return self.stdout
-
-  @property
-  def error(self):
-    """Backwards compat API."""
-    return self.stderr
-
-
 class CalledProcessError(subprocess.CalledProcessError):
   """Error caught in run() function.
 
@@ -300,14 +241,13 @@ class CalledProcessError(subprocess.CalledProcessError):
       raise TypeError('exception must be an exception instance; got %r'
                       % (exception,))
 
-    super().__init__(returncode, cmd, stdout)
-    # The parent class will set |output|, so delete it.
+    super().__init__(returncode, cmd, stdout, stderr=stderr)
+
+    # The parent class will set |output|, so delete it.  If Python ever drops
+    # this output/stdout compat logic, we can drop this to match.
     del self.output
-    # TODO(vapier): When we're Python 3-only, delete this assignment as the
-    # parent handles it for us.
     self.stdout = stdout
-    # TODO(vapier): When we're Python 3-only, move stderr to the init above.
-    self.stderr = stderr
+
     self.msg = msg
     self.exception = exception
 
@@ -351,11 +291,7 @@ class CalledProcessError(subprocess.CalledProcessError):
     return u'\n'.join(items)
 
   def __str__(self):
-    if sys.version_info.major < 3:
-      # __str__ needs to return ascii, thus force a conversion to be safe.
-      return self.Stringify().encode('ascii', 'xmlcharrefreplace')
-    else:
-      return self.Stringify()
+    return self.Stringify()
 
   def __eq__(self, other):
     return (isinstance(other, type(self)) and
@@ -377,16 +313,16 @@ class RunCommandError(CalledProcessError):
   Attributes:
     args: Tuple of the attributes below.
     msg: Short explanation of the error.
-    result: The CommandResult that triggered this error, if available.
+    result: The CompletedProcess that triggered this error, if available.
     exception: The underlying Exception if available.
   """
 
   def __init__(self, msg, result=None, exception=None):
     # This makes mocking tests easier.
     if result is None:
-      result = CommandResult()
-    elif not isinstance(result, CommandResult):
-      raise TypeError('result must be a CommandResult instance; got %r'
+      result = CompletedProcess()
+    elif not isinstance(result, CompletedProcess):
+      raise TypeError('result must be a CompletedProcess instance; got %r'
                       % (result,))
 
     self.args = (msg, result, exception)
@@ -396,7 +332,7 @@ class RunCommandError(CalledProcessError):
         stderr=result.stderr, msg=msg, exception=exception)
 
 
-class TerminateRunCommandError(RunCommandError):
+class _TerminateRunCommandError(RunCommandError):
   """We were signaled to shutdown while running a command.
 
   Client code shouldn't generally know, nor care about this class.  It's
@@ -404,7 +340,8 @@ class TerminateRunCommandError(RunCommandError):
   """
 
 
-def sudo_run(cmd, user='root', preserve_env=False, **kwargs) -> CommandResult:
+def sudo_run(cmd, user='root', preserve_env: bool = False, **kwargs
+            ) -> CompletedProcess:
   """Run a command via sudo.
 
   Client code must use this rather than coming up with their own run
@@ -415,7 +352,7 @@ def sudo_run(cmd, user='root', preserve_env=False, **kwargs) -> CommandResult:
     cmd: The command to run.  See run for rules of this argument: sudo_run
          purely prefixes it with sudo.
     user: The user to run the command as.
-    preserve_env (bool): Whether to preserve the environment.
+    preserve_env: Whether to preserve the environment.
     kwargs: See run() options, it's a direct pass thru to it.
           Note that this supports a 'strict' keyword that defaults to True.
           If set to False, it'll suppress strict sudo behavior.
@@ -433,7 +370,7 @@ def sudo_run(cmd, user='root', preserve_env=False, **kwargs) -> CommandResult:
 
   strict = kwargs.pop('strict', True)
 
-  if user == 'root' and os.geteuid() == 0:
+  if user == 'root' and osutils.IsRootUser():
     return run(cmd, **kwargs)
 
   if strict and STRICT_SUDO:
@@ -441,7 +378,7 @@ def sudo_run(cmd, user='root', preserve_env=False, **kwargs) -> CommandResult:
       raise RunCommandError(
           'We were invoked in a strict sudo non - interactive context, but no '
           'sudo keep alive daemon is running.  This is a bug in the code.',
-          CommandResult(args=cmd, returncode=126))
+          CompletedProcess(args=cmd, returncode=126))
     sudo_cmd += ['-n']
 
   if user != 'root':
@@ -513,17 +450,13 @@ def _KillChildProcess(proc, int_timeout, kill_timeout, cmd, original_handler,
       logging.warning('Ignoring unhandled exception in _KillChildProcess: %s',
                       e)
 
-    # Ensure our child process has been reaped.
-    kwargs = {}
-    if sys.version_info.major >= 3:
-      # ... but don't wait forever.
-      kwargs['timeout'] = 60
-    proc.wait_lock_breaker(**kwargs)
+    # Ensure our child process has been reaped, but don't wait forever.
+    proc.wait_lock_breaker(timeout=60)
 
   if not signals.RelaySignal(original_handler, signum, frame):
     # Mock up our own, matching exit code for signaling.
-    cmd_result = CommandResult(args=cmd, returncode=signum << 8)
-    raise TerminateRunCommandError('Received signal %i' % signum, cmd_result)
+    cmd_result = CompletedProcess(args=cmd, returncode=signum << 8)
+    raise _TerminateRunCommandError(f'Received signal {signum}', cmd_result)
 
 
 class _Popen(subprocess.Popen):
@@ -608,7 +541,7 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
         check=True, int_timeout=1, kill_timeout=1,
         log_output=False, capture_output=False,
         quiet=False, encoding=None, errors=None, dryrun=False,
-        **kwargs) -> CommandResult:
+        **kwargs) -> CompletedProcess:
   """Runs a command.
 
   Args:
@@ -649,7 +582,7 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
     chroot_args: An array of arguments for the chroot environment wrapper.
     debug_level: The debug level of run's output.
     check: Whether to raise an exception when command returns a non-zero exit
-      code, or return the CommandResult object containing the exit code.
+      code, or return the CompletedProcess object containing the exit code.
       Note: will still raise an exception if the cmd file does not exist.
     int_timeout: If we're interrupted, how long (in seconds) should we give the
       invoked process to clean up before we send a SIGTERM.
@@ -665,7 +598,7 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
     dryrun: Only log the command,and return a stub result.
 
   Returns:
-    A CommandResult object.
+    A CompletedProcess object.
 
   Raises:
     RunCommandError: Raised on error.
@@ -711,7 +644,7 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
   popen_stdout = None
   popen_stderr = None
   stdin = None
-  cmd_result = CommandResult()
+  cmd_result = CompletedProcess()
 
   # Force the timeout to float; in the process, if it's not convertible,
   # a self-explanatory exception will be thrown.
@@ -735,6 +668,8 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
   # view of the file.
   log_stdout_to_file = False
   if isinstance(stdout, str):
+    # We explicitly close this handle below before returning.
+    # pylint: disable=consider-using-with
     popen_stdout = open(stdout, stdout_file_mode)
     log_stdout_to_file = True
   elif hasattr(stdout, 'fileno'):
@@ -750,7 +685,12 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
     popen_stdout = _get_tempfile()
 
   log_stderr_to_file = False
-  if hasattr(stderr, 'fileno'):
+  if isinstance(stderr, str):
+    # We explicitly close this handle below before returning.
+    # pylint: disable=consider-using-with
+    popen_stderr = open(stderr, 'w+b')
+    log_stderr_to_file = True
+  elif hasattr(stderr, 'fileno'):
     popen_stderr = stderr
     log_stderr_to_file = True
   elif isinstance(stderr, bool):
@@ -799,8 +739,8 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
   elif not isinstance(cmd, (list, tuple)):
     raise TypeError('cmd must be list or tuple, not %s: %r' %
                     (type(cmd), repr(cmd)))
-  elif not all(isinstance(x, (bytes, str)) for x in cmd):
-    raise TypeError('All command elements must be bytes/strings: %r' % (cmd,))
+  elif not all(isinstance(x, (bytes, str, os.PathLike)) for x in cmd):
+    raise TypeError(f'All command elements must be bytes/strings/Path: {cmd!r}')
 
   # If we are using enter_chroot we need to use enterchroot pass env through
   # to the final command.
@@ -849,35 +789,38 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
   popen_cmd = ['true'] if dryrun else cmd
 
   proc = None
-  # Verify that the signals modules is actually usable, and won't segfault
-  # upon invocation of getsignal.  See signals.SignalModuleUsable for the
-  # details and upstream python bug.
-  use_signals = signals.SignalModuleUsable()
   try:
     proc = _Popen(popen_cmd, cwd=cwd, stdin=stdin, stdout=popen_stdout,
                   stderr=popen_stderr, shell=False, env=env,
                   close_fds=True)
 
-    if use_signals:
-      if ignore_sigint:
-        old_sigint = signal.signal(signal.SIGINT, signal.SIG_IGN)
-      else:
-        old_sigint = signal.getsignal(signal.SIGINT)
-        signal.signal(signal.SIGINT,
-                      functools.partial(_KillChildProcess, proc, int_timeout,
-                                        kill_timeout, cmd, old_sigint))
+    old_sigint = signal.getsignal(signal.SIGINT)
+    if ignore_sigint:
+      new_sigint = signal.SIG_IGN
+    else:
+      new_sigint = functools.partial(_KillChildProcess, proc, int_timeout,
+                                     kill_timeout, cmd, old_sigint)
+    # We have to ignore ValueError in case we're run from a thread.
+    try:
+      signal.signal(signal.SIGINT, new_sigint)
+    except ValueError:
+      old_sigint = None
 
-      old_sigterm = signal.getsignal(signal.SIGTERM)
-      signal.signal(signal.SIGTERM,
-                    functools.partial(_KillChildProcess, proc, int_timeout,
-                                      kill_timeout, cmd, old_sigterm))
+    old_sigterm = signal.getsignal(signal.SIGTERM)
+    new_sigterm = functools.partial(_KillChildProcess, proc, int_timeout,
+                                    kill_timeout, cmd, old_sigterm)
+    try:
+      signal.signal(signal.SIGTERM, new_sigterm)
+    except ValueError:
+      old_sigterm = None
 
     try:
       try:
         (cmd_result.stdout, cmd_result.stderr) = proc.communicate(input)
       finally:
-        if use_signals:
+        if old_sigint is not None:
           signal.signal(signal.SIGINT, old_sigint)
+        if old_sigterm is not None:
           signal.signal(signal.SIGTERM, old_sigterm)
 
         if (popen_stdout and not isinstance(popen_stdout, int) and
@@ -893,7 +836,9 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
           popen_stderr.seek(0)
           cmd_result.stderr = popen_stderr.read()
           popen_stderr.close()
-    except TerminateRunCommandError as e:
+        elif log_stderr_to_file:
+          popen_stderr.close()
+    except _TerminateRunCommandError as e:
       # If we were killed by a signal (like SIGTERM in case of a timeout), don't
       # swallow the output completely as it can be a huge help for figuring out
       # why the command failed.
@@ -931,7 +876,7 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
     estr = str(e)
     if e.errno == errno.EACCES:
       estr += '; does the program need `chmod a+x`?'
-    raise RunCommandError(estr, CommandResult(args=cmd), exception=e)
+    raise RunCommandError(estr, CompletedProcess(args=cmd), exception=e)
   finally:
     if proc is not None:
       # Ensure the process is dead.
@@ -1014,6 +959,18 @@ def AssertOutsideChroot():
     Die('%s: please run outside the chroot', os.path.basename(sys.argv[0]))
 
 
+def AssertRootUser() -> None:
+  """Die if non-root user."""
+  if osutils.IsNonRootUser():
+    Die('%s: please run as root user', os.path.basename(sys.argv[0]))
+
+
+def AssertNonRootUser() -> None:
+  """Die if root user."""
+  if osutils.IsRootUser():
+    Die('%s: please run as non-root user', os.path.basename(sys.argv[0]))
+
+
 def GetHostName(fully_qualified=False):
   """Return hostname of current machine, with domain if |fully_qualified|."""
   hostname = socket.gethostname()
@@ -1067,6 +1024,7 @@ COMP_NONE = 0
 COMP_GZIP = 1
 COMP_BZIP2 = 2
 COMP_XZ = 3
+COMP_ZSTD = 4
 
 
 def FindCompressor(
@@ -1095,6 +1053,8 @@ def FindCompressor(
     possible_progs = ['pigz', 'gzip']
   elif compression == COMP_BZIP2:
     possible_progs = ['lbzip2', 'pbzip2', 'bzip2']
+  elif compression == COMP_ZSTD:
+    return 'zstd'
   elif compression == COMP_NONE:
     return 'cat'
   else:
@@ -1115,6 +1075,33 @@ def FindCompressor(
   return possible_progs[-1]
 
 
+def CompressionDetectType(path: Union[str, os.PathLike]) -> int:
+  """Detect the type of compression used by |path| by sniffing its data.
+
+  Args:
+    path: The file to sniff.
+
+  Returns:
+    The compression type if we could detect it.
+  """
+  if not isinstance(path, Path):
+    path = Path(path)
+
+  with path.open('rb') as f:
+    data = f.read(6)
+
+  MAGIC_TO_TYPE = (
+      (b'BZh', COMP_BZIP2),
+      (b'\x1f\x8b', COMP_GZIP),
+      (b'\xfd\x37\x7a\x58\x5a\x00', COMP_XZ),
+      (b'\x28\xb5\x2f\xfd', COMP_ZSTD),
+  )
+  for magic, ctype in MAGIC_TO_TYPE:
+    if data.startswith(magic):
+      return ctype
+  return COMP_NONE
+
+
 def CompressionStrToType(s):
   """Convert a compression string type to a constant.
 
@@ -1128,6 +1115,7 @@ def CompressionStrToType(s):
       'gz': COMP_GZIP,
       'bz2': COMP_BZIP2,
       'xz': COMP_XZ,
+      'zst': COMP_ZSTD,
   }
   if s:
     return _COMP_STR.get(s)
@@ -1152,6 +1140,7 @@ def CompressionExtToType(file_name: Union[Path, str]):
       '.bz2': COMP_BZIP2,
       '.txz': COMP_XZ,
       '.xz': COMP_XZ,
+      '.zst': COMP_ZSTD,
   }
   return _COMP_EXT.get(ext, COMP_NONE)
 
@@ -1318,7 +1307,10 @@ def ExtractTarball(tarball_path: Union[Path, str],
   cmd = ['tar', '--sparse', '-xf', str(tarball_path),
          '--directory', str(install_path)]
 
-  comp_type = CompressionExtToType(tarball_path)
+  try:
+    comp_type = CompressionDetectType(tarball_path)
+  except FileNotFoundError as e:
+    raise TarballError(str(e))
   if comp_type != COMP_NONE:
     cmd += ['--use-compress-program', FindCompressor(comp_type)]
 
@@ -1748,11 +1740,11 @@ def GetDefaultBoard():
   return default_board
 
 
-def SetDefaultBoard(board):
+def SetDefaultBoard(board: str):
   """Set the default board.
 
   Args:
-    board (str): The name of the board to save as the default.
+    board: The name of the board to save as the default.
 
   Returns:
     bool - True if successfully wrote default, False otherwise.
@@ -1803,36 +1795,6 @@ def GetBoard(device_board, override_board=None, force=False, strict=False):
   return board
 
 
-# Structure to hold the values produced by TimedSection.
-#
-#  Attributes:
-#    start: The absolute start time as a datetime.
-#    finish: The absolute finish time as a datetime, or None if in progress.
-#    delta: The runtime as a timedelta, or None if in progress.
-TimedResults = cros_collections.Collection(
-    'TimedResults', start=None, finish=None, delta=None)
-
-
-@contextlib.contextmanager
-def TimedSection():
-  """Context manager to time how long a code block takes.
-
-  Examples:
-    with cros_build_lib.TimedSection() as timer:
-      DoWork()
-    logging.info('DoWork took %s', timer.delta)
-
-  Context manager value will be a TimedResults instance.
-  """
-  # Create our context manager value.
-  times = TimedResults(start=datetime.now())
-  try:
-    yield times
-  finally:
-    times.finish = datetime.now()
-    times.delta = times.finish - times.start
-
-
 def GetRandomString():
   """Returns a random string.
 
@@ -1877,21 +1839,30 @@ def MachineDetails():
 
 def UnbufferedTemporaryFile(**kwargs):
   """Handle buffering changes in tempfile.TemporaryFile."""
-  assert 'bufsize' not in kwargs
-  assert 'buffering' not in kwargs
-  if sys.version_info.major < 3:
-    kwargs['bufsize'] = 0
-  else:
-    kwargs['buffering'] = 0
-  return tempfile.TemporaryFile(**kwargs)
+  # File handles are closed in tempfile's close() overload or on garbage
+  # collection.
+  # pylint: disable=consider-using-with
+  return tempfile.TemporaryFile(buffering=0, **kwargs)
 
 
 def UnbufferedNamedTemporaryFile(**kwargs):
   """Handle buffering changes in tempfile.NamedTemporaryFile."""
-  assert 'bufsize' not in kwargs
-  assert 'buffering' not in kwargs
-  if sys.version_info.major < 3:
-    kwargs['bufsize'] = 0
-  else:
-    kwargs['buffering'] = 0
-  return tempfile.NamedTemporaryFile(**kwargs)
+  # File handles are closed in tempfile's close() overload or on garbage
+  # collection.
+  # pylint: disable=consider-using-with
+  return tempfile.NamedTemporaryFile(buffering=0, **kwargs)
+
+
+def ClearShadowLocks(sysroot: Union[str, os.PathLike] = '/') -> None:
+  """Clears out stale shadow-utils locks in the given sysroot."""
+  sysroot = Path(sysroot)
+  logging.info('Clearing shadow-utils lockfiles under %s', sysroot)
+  filenames = ('passwd.lock', 'group.lock', 'shadow.lock', 'gshadow.lock')
+  etc_path = sysroot / 'etc'
+  if not etc_path.exists():
+    logging.warning(
+        'Unable to clear shadow-utils lockfiles, path does not exist: %s',
+        etc_path)
+    return
+  for f in (x for x in os.listdir(etc_path) if x.startswith(filenames)):
+    osutils.RmDir(etc_path / f, ignore_missing=True, sudo=True)

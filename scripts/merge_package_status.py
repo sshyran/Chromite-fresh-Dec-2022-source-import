@@ -243,8 +243,8 @@ def FinalizeTable(csv_table):
 def WriteTable(csv_table, outpath):
   """Write |csv_table| out to |outpath| as csv."""
   try:
-    fh = open(outpath, 'w')
-    csv_table.WriteCSV(fh)
+    with open(outpath, 'w') as fh:
+      csv_table.WriteCSV(fh)
     oper.Notice('Wrote merged table to "%s"' % outpath)
   except IOError as ex:
     oper.Error('Unable to open %s for write: %s' % (outpath, ex))

@@ -9,6 +9,7 @@ import datetime
 import functools
 import numbers
 import os
+from pathlib import Path
 import string
 import sys
 from unittest import mock
@@ -79,8 +80,8 @@ PreconditionException: 412 Precondition Failed"""
 
     rc_mock = cros_test_lib.RunCommandMock()
     rc_mock.AddCmdResult(
-        partial_mock.ListRegex('gsutil'), result.returncode, result.output,
-        result.error)
+        partial_mock.ListRegex('gsutil'), result.returncode,
+        stdout=result.stdout, stderr=result.stderr)
 
     with rc_mock:
       try:
@@ -130,6 +131,20 @@ class CanonicalizeURLTest(cros_test_lib.TestCase):
          'https://storage.cloud.google.com/some/file/t.gz'),
         ('gs://releases/some/'
          'https://storage.cloud.google.com/some/file/t.gz'))
+
+
+class PathIsGsTests(cros_test_lib.TestCase):
+  """Tests for the PathIsGs function."""
+
+  def testString(self):
+    """Test strings!"""
+    self.assertTrue(gs.PathIsGs('gs://foo'))
+    self.assertFalse(gs.PathIsGs('/tmp/f'))
+
+  def testPath(self):
+    """Test Path objects!"""
+    self.assertFalse(gs.PathIsGs(Path.cwd()))
+    self.assertFalse(gs.PathIsGs(Path('gs://foo')))
 
 
 class GsUrlToHttpTest(cros_test_lib.TestCase):
@@ -195,13 +210,13 @@ class VersionTest(AbstractGSContextTest):
   def testGetVersionStdout(self):
     """Simple gsutil_version fetch test from stdout."""
     self.gs_mock.AddCmdResult(partial_mock.In('version'), returncode=0,
-                              output='gsutil version 3.35\n')
+                              stdout='gsutil version 3.35\n')
     self.assertEqual('3.35', self.ctx.gsutil_version)
 
   def testGetVersionStderr(self):
     """Simple gsutil_version fetch test from stderr."""
     self.gs_mock.AddCmdResult(partial_mock.In('version'), returncode=0,
-                              error='gsutil version 3.36\n')
+                              stderr='gsutil version 3.36\n')
     self.assertEqual('3.36', self.ctx.gsutil_version)
 
   def testGetVersionCached(self):
@@ -213,13 +228,13 @@ class VersionTest(AbstractGSContextTest):
   def testGetVersionNewFormat(self):
     """Simple gsutil_version fetch test for new gsutil output format."""
     self.gs_mock.AddCmdResult(partial_mock.In('version'), returncode=0,
-                              output='gsutil version: 4.5\n')
+                              stdout='gsutil version: 4.5\n')
     self.assertEqual('4.5', self.ctx.gsutil_version)
 
   def testGetVersionBadOutput(self):
     """Simple gsutil_version fetch test from cache."""
     self.gs_mock.AddCmdResult(partial_mock.In('version'), returncode=0,
-                              output='gobblety gook\n')
+                              stdout='gobblety gook\n')
     self.assertRaises(gs.GSContextException, getattr, self.ctx,
                       'gsutil_version')
 
@@ -240,7 +255,7 @@ class GetSizeTest(AbstractGSContextTest):
   def testBasic(self):
     """Simple test."""
     self.gs_mock.AddCmdResult(['stat', '--', self.GETSIZE_PATH],
-                              output=StatTest.STAT_OUTPUT)
+                              stdout=StatTest.STAT_OUTPUT)
     self.assertEqual(self.GetSize(), 74)
 
 
@@ -335,7 +350,7 @@ class LSTest(AbstractGSContextTest):
 
   def testBasicLS(self):
     """Simple LS test."""
-    self.gs_mock.SetDefaultCmdResult(output=self.LS_OUTPUT)
+    self.gs_mock.SetDefaultCmdResult(stdout=self.LS_OUTPUT)
     result = self.LS()
     self.gs_mock.assertCommandContains(['ls', '--', self.LS_PATH])
 
@@ -343,7 +358,7 @@ class LSTest(AbstractGSContextTest):
 
   def testBasicList(self):
     """Simple List test."""
-    self.gs_mock.SetDefaultCmdResult(output=self.DETAILED_LS_OUTPUT)
+    self.gs_mock.SetDefaultCmdResult(stdout=self.DETAILED_LS_OUTPUT)
     result = self.List(details=True)
     self.gs_mock.assertCommandContains(['ls', '-l', '--', self.LS_PATH])
 
@@ -409,6 +424,16 @@ class UnmockedLSTest(cros_test_lib.TempDirTestCase):
       for f in found:
         l = len(os.path.basename(f.url)) * 10
         self.assertEqual(f.content_length, l)
+        self.assertIsNone(f.generation)
+        self.assertIsNone(f.metageneration)
+
+      # Check the generation listing with multiple paths.
+      found = ctx.List([f'{tempuri}/{x}' for x in files], generation=True)
+      self.assertGreater(len(found), 0)
+
+      for f in found:
+        self.assertGreater(f.generation, 0)
+        self.assertGreater(f.metageneration, 0)
 
 
 class CopyTest(AbstractGSContextTest, cros_test_lib.TempDirTestCase):
@@ -461,7 +486,7 @@ class CopyTest(AbstractGSContextTest, cros_test_lib.TempDirTestCase):
     """GSContextPreconditionFailed is raised properly."""
     self.gs_mock.AddCmdResult(
         partial_mock.In('cp'), returncode=1,
-        error=self.gs_mock.GSResponsePreconditionFailed)
+        stderr=self.gs_mock.GSResponsePreconditionFailed)
     self.assertRaises(gs.GSContextPreconditionFailed, self.Copy)
 
   def testNonRecursive(self):
@@ -485,19 +510,20 @@ class CopyTest(AbstractGSContextTest, cros_test_lib.TempDirTestCase):
   def testGeneration(self):
     """Test generation return value."""
     exp_gen = 1413571271901000
-    error = (
+    stderr = (
         'Copying file:///dev/null [Content-Type=application/octet-stream]...\n'
         'Uploading   %(uri)s:               0 B    \r'
         'Uploading   %(uri)s:               0 B    \r'
         'Created: %(uri)s#%(gen)s\n'
     ) % {'uri': self.GIVEN_REMOTE, 'gen': exp_gen}
-    self.gs_mock.AddCmdResult(partial_mock.In('cp'), returncode=0, error=error)
+    self.gs_mock.AddCmdResult(
+        partial_mock.In('cp'), returncode=0, stderr=stderr)
     gen = self.Copy()
     self.assertEqual(gen, exp_gen)
 
   def testGeneration404(self):
     """Test behavior when we get weird output."""
-    error = (
+    stderr = (
         # This is a bit verbose, but it's from real output, so should be fine.
         'Copying file:///tmp/tmpyUUPg1 [Content-Type=application/octet-stream]'
         '...\n'
@@ -514,7 +540,8 @@ class CopyTest(AbstractGSContextTest, cros_test_lib.TempDirTestCase):
         'directory\n'
         '(e.g., leaving off -R option on gsutil cp, mv, or ls of a bucket)\n'
     )
-    self.gs_mock.AddCmdResult(partial_mock.In('cp'), returncode=1, error=error)
+    self.gs_mock.AddCmdResult(
+        partial_mock.In('cp'), returncode=1, stderr=stderr)
     self.assertEqual(self.Copy(), None)
 
 
@@ -537,7 +564,7 @@ class UnmockedCopyTest(cros_test_lib.TempDirTestCase):
       # Upload the file.
       gen = ctx.Copy(local_src_file, tempuri)
 
-      # Verify the generation is sane.  All we can assume is that it's a valid
+      # Verify the generation is valid.  All we can assume is that it's a valid
       # whole number greater than 0.
       self.assertNotEqual(gen, None)
       self.assertIsInstance(gen, numbers.Integral)
@@ -569,7 +596,7 @@ class UnmockedCopyTest(cros_test_lib.TempDirTestCase):
       # Upload & compress the file.
       gen = ctx.Copy(local_src_file, tempuri, auto_compress=True)
 
-      # Verify the generation is sane.  All we can assume is that it's a valid
+      # Verify the generation is valid.  All we can assume is that it's a valid
       # whole number greater than 0.
       self.assertNotEqual(gen, None)
       self.assertGreater(gen, 0)
@@ -594,7 +621,7 @@ class UnmockedCopyTest(cros_test_lib.TempDirTestCase):
       osutils.WriteFile(local_src_file, 'gen0')
       gen = ctx.Copy(local_src_file, tempuri, version=0)
 
-      # Verify the generation is sane.  All we can assume is that it's a valid
+      # Verify the generation is valid.  All we can assume is that it's a valid
       # whole number greater than 0.
       self.assertNotEqual(gen, None)
       self.assertGreater(gen, 0)
@@ -634,8 +661,8 @@ class RemoveTest(AbstractGSContextTest):
   def testMissing(self):
     """Test behavior w/missing files."""
     self.gs_mock.AddCmdResult(['rm', '--', 'gs://foo/bar'],
-                              error='CommandException: No URLs matched: '
-                                    'gs://foo/bar',
+                              stderr='CommandException: No URLs matched: '
+                                     'gs://foo/bar',
                               returncode=1)
     self.assertRaises(gs.GSNoSuchKey, self.ctx.Remove, 'gs://foo/bar')
     # This one should not throw an exception.
@@ -865,7 +892,7 @@ class GSDoCommandTest(cros_test_lib.TestCase):
     if sleep is None:
       sleep = ctx.DEFAULT_SLEEP_TIME
 
-    result = cros_build_lib.CommandResult(error='')
+    result = cros_build_lib.CompletedProcess(stderr='')
     with mock.patch.object(retry_stats, 'RetryWithStats', autospec=True,
                            return_value=result):
       ctx.Copy('/blah', 'gs://foon', version=version, recursive=recursive)
@@ -928,9 +955,9 @@ class GSRetryFilterTest(cros_test_lib.TestCase):
     self.ctx.DEFAULT_GSUTIL_TRACKER_DIR = self.GSUTIL_TRACKER_DIR
 
   def _getException(self, cmd, error, returncode=RETURN_CODE):
-    result = cros_build_lib.CommandResult(
-        error=error,
-        cmd=cmd,
+    result = cros_build_lib.CompletedProcess(
+        args=cmd,
+        stderr=error,
         returncode=returncode)
     return cros_build_lib.RunCommandError('blah', result)
 
@@ -1172,7 +1199,7 @@ class GSContextTest(AbstractGSContextTest):
   def testGetGeneration(self):
     """Test ability to get the generation of a file."""
     self.gs_mock.AddCmdResult(['stat', '--', 'gs://abc/1'],
-                              output=StatTest.STAT_OUTPUT)
+                              stdout=StatTest.STAT_OUTPUT)
     ctx = gs.GSContext()
     ctx.GetGeneration('gs://abc/1')
     self.gs_mock.assertCommandContains(['stat', '--', 'gs://abc/1'])
@@ -1246,7 +1273,7 @@ class GSContextTest(AbstractGSContextTest):
 
     # GSUtil ls gs://archive_url_prefix/.
     self.gs_mock.SetDefaultCmdResult(
-        output='\n'.join(self.DETAILED_LS_OUTPUT_LINES))
+        stdout='\n'.join(self.DETAILED_LS_OUTPUT_LINES))
 
     # Timeout explicitly set to 0 to test that we always run at least once.
     result = ctx.GetGsNamesWithWait(pattern, self.URL, period=1, timeout=0)
@@ -1284,7 +1311,7 @@ class GSContextTest(AbstractGSContextTest):
     ctx = gs.GSContext()
 
     # GSUtil ls gs://archive_url_prefix/.
-    self.gs_mock.SetDefaultCmdResult(output=[])
+    self.gs_mock.SetDefaultCmdResult(stdout=[])
 
     # Timeout explicitly set to 0 to test that we always run at least once.
     result = ctx.GetGsNamesWithWait(pattern, self.URL, period=2, timeout=1)
@@ -1394,7 +1421,7 @@ class StatTest(AbstractGSContextTest):
   def testStat(self):
     """Test ability to get the generation of a file."""
     self.gs_mock.AddCmdResult(['stat', '--', 'gs://abc/1'],
-                              output=self.STAT_OUTPUT)
+                              stdout=self.STAT_OUTPUT)
     ctx = gs.GSContext()
     result = ctx.Stat('gs://abc/1')
     self.gs_mock.assertCommandContains(['stat', '--', 'gs://abc/1'])
@@ -1412,7 +1439,7 @@ class StatTest(AbstractGSContextTest):
   def testStatOlderOutput(self):
     """Test ability to get the generation of a file."""
     self.gs_mock.AddCmdResult(['stat', '--', 'gs://abc/1'],
-                              output=self.STAT_OUTPUT_OLDER)
+                              stdout=self.STAT_OUTPUT_OLDER)
     ctx = gs.GSContext()
     result = ctx.Stat('gs://abc/1')
     self.gs_mock.assertCommandContains(['stat', '--', 'gs://abc/1'])
@@ -1430,7 +1457,7 @@ class StatTest(AbstractGSContextTest):
   def testStatNoMD5(self):
     """Make sure GSContext works without an MD5."""
     self.gs_mock.AddCmdResult(['stat', '--', 'gs://abc/1'],
-                              output=self.STAT_OUTPUT_NO_MD5)
+                              stdout=self.STAT_OUTPUT_NO_MD5)
     ctx = gs.GSContext()
     result = ctx.Stat('gs://abc/1')
     self.gs_mock.assertCommandContains(['stat', '--', 'gs://abc/1'])
@@ -1448,7 +1475,7 @@ class StatTest(AbstractGSContextTest):
   def testStatNoExist(self):
     """Test ability to get the generation of a file."""
     self.gs_mock.AddCmdResult(['stat', '--', 'gs://abc/1'],
-                              error=self.STAT_ERROR_OUTPUT,
+                              stderr=self.STAT_ERROR_OUTPUT,
                               returncode=1)
     ctx = gs.GSContext()
     self.assertRaises(gs.GSNoSuchKey, ctx.Stat, 'gs://abc/1')
@@ -1457,7 +1484,7 @@ class StatTest(AbstractGSContextTest):
   def testStatRetryNoExist(self):
     """Test ability to get the generation of a file."""
     self.gs_mock.AddCmdResult(['stat', '--', 'gs://abc/1'],
-                              error=self.RETRY_STAT_ERROR_OUTPUT,
+                              stderr=self.RETRY_STAT_ERROR_OUTPUT,
                               returncode=1)
     ctx = gs.GSContext()
     self.assertRaises(gs.GSNoSuchKey, ctx.Stat, 'gs://abc/1')
@@ -1699,19 +1726,19 @@ detail=A nonempty x-goog-project-id header is required for this request."""
   def testGSLsSkippableError(self):
     """Benign GS error."""
     self.gs_mock.AddCmdResult(self.auth_cmd,
-                              returncode=1, error=self.GS_LS_BENIGN)
+                              returncode=1, stderr=self.GS_LS_BENIGN)
     self.assertTrue(self.ctx._TestGSLs())
 
   def testGSLsAuthorizationError1(self):
     """GS authorization error 1."""
     self.gs_mock.AddCmdResult(self.auth_cmd,
-                              returncode=1, error=self.GS_LS_ERROR)
+                              returncode=1, stderr=self.GS_LS_ERROR)
     self.assertFalse(self.ctx._TestGSLs())
 
   def testGSLsError2(self):
     """GS authorization error 2."""
     self.gs_mock.AddCmdResult(self.auth_cmd,
-                              returncode=1, error=self.GS_LS_ERROR2)
+                              returncode=1, stderr=self.GS_LS_ERROR2)
     self.assertFalse(self.ctx._TestGSLs())
 
   def _WriteBotoFile(self, contents, *_args, **_kwargs):
@@ -1720,12 +1747,12 @@ detail=A nonempty x-goog-project-id header is required for this request."""
   def testInitGSLsFailButSuccess(self):
     """Invalid GS Config, but we config properly."""
     self.gs_mock.AddCmdResult(self.auth_cmd,
-                              returncode=1, error=self.GS_LS_ERROR)
+                              returncode=1, stderr=self.GS_LS_ERROR)
     self.ctx._InitBoto()
 
   def _AddLsConfigResult(self, side_effect=None):
     self.gs_mock.AddCmdResult(self.auth_cmd,
-                              returncode=1, error=self.GS_LS_ERROR)
+                              returncode=1, stderr=self.GS_LS_ERROR)
     self.gs_mock.AddCmdResult(['config'], returncode=1, side_effect=side_effect)
 
   def testGSLsFailAndConfigError(self):

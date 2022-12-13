@@ -238,7 +238,7 @@ class _BackgroundTask(multiprocessing.Process):
     log_level = kwargs['debug_level']
     try:
       with timeout_util.Timeout(cls.DEBUG_CMD_TIMEOUT):
-        return cros_build_lib.run(cmd, **kwargs).output
+        return cros_build_lib.run(cmd, **kwargs).stdout
     except (cros_build_lib.RunCommandError, timeout_util.TimeoutError) as e:
       logging.log(log_level, 'Running %s failed: %s', cmd[0], str(e))
       return ''
@@ -254,9 +254,8 @@ class _BackgroundTask(multiprocessing.Process):
   )
 
   @classmethod
-  def _DumpDebugPid(cls, log_level, pid):
+  def _DumpDebugPid(cls, log_level: int, pid: str) -> None:
     """Dump debug info about the hanging |pid|."""
-    pid = str(pid)
     commands = (
         ('pstree', '-Apals', pid),
         ('lsof', '-p', pid),
@@ -290,7 +289,7 @@ class _BackgroundTask(multiprocessing.Process):
         ppid = str(self.pid)
         output = self._DebugRunCommand(
             ('pgrep', '-P', ppid), debug_level=log_level, print_cmd=False,
-            check=False, capture_output=True)
+            check=False, capture_output=True, encoding='utf-8')
         for pid in [ppid] + output.splitlines():
           self._DumpDebugPid(log_level, pid)
 

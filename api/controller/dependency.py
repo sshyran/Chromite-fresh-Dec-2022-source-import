@@ -13,6 +13,7 @@ from chromite.api import faux
 from chromite.api import validate
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import depgraph_pb2
+
 # TODO(crbug/1081828): stop using build_target and drop it from the proto.
 from chromite.lib import build_target_lib
 from chromite.lib.parser import package_info
@@ -126,13 +127,13 @@ def List(input_proto: depgraph_pb2.ListRequest,
     controller_util.serialize_package_info(package, pkg_info_msg)
 
 
-def _DummyGetToolchainPathsResponse(_input_proto, output_proto, _config):
+def _StubGetToolchainPathsResponse(_input_proto, output_proto, _config):
   """Create a fake successful response for GetToolchainPaths."""
-  dummy_entry = output_proto.paths.add()
-  dummy_entry.path = 'src/third_party/dummy-package'
+  stub_entry = output_proto.paths.add()
+  stub_entry.path = 'src/third_party/stub-package'
 
 
-@faux.success(_DummyGetToolchainPathsResponse)
+@faux.success(_StubGetToolchainPathsResponse)
 @faux.empty_error
 @validate.validation_complete
 def GetToolchainPaths(_input_proto, output_proto, _config):

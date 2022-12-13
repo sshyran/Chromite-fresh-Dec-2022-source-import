@@ -193,7 +193,7 @@ class Downloader(object):
     if exceptions:
       raise DownloaderException(exceptions)
 
-    return all([artifact.ArtifactStaged() for artifact in required_artifacts])
+    return all(artifact.ArtifactStaged() for artifact in required_artifacts)
 
   def _DownloadArtifactsSerially(self, artifacts, no_wait):
     """Simple function to download all the given artifacts serially.

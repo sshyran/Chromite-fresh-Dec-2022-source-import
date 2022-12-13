@@ -72,10 +72,10 @@ def MockDumpFmap(rc, ec_ro=True):
     ec_output += 'KEY_RO 130112 1024'
 
   rc.AddCmdResult(partial_mock.ListRegex('futility dump_fmap -p .*bios.bin'),
-                  output=bios_output)
+                  stdout=bios_output)
 
   rc.AddCmdResult(partial_mock.ListRegex('futility dump_fmap -p .*ec.bin'),
-                  output=ec_output)
+                  stdout=ec_output)
 
 def MockBiosSigner(rc):
   """Add Bios Signing Mocks to |rc|."""
@@ -137,8 +137,6 @@ class TestBiosSigner(cros_test_lib.RunCommandTempDirTestCase):
                           '--keyblock', fw_key.keyblock,
                           '--kernelkey', kernel_key.public,
                           '--version', str(fw_key.version),
-                          '--devsign', fw_key.private,
-                          '--devkeyblock', fw_key.keyblock,
                           bios_bin, bios_out])
 
   def testGetCmdArgsWithDevKeys(self):
@@ -147,12 +145,6 @@ class TestBiosSigner(cros_test_lib.RunCommandTempDirTestCase):
 
     bios_bin = os.path.join(self.tempdir, 'bios.bin')
     bios_out = os.path.join(self.tempdir, 'bios.out')
-
-    # Add 'dev_firmware' keys and keyblock
-    dev_fw_key = keys.KeyPair('dev_firmware_data_key', keydir=self.tempdir)
-    ks.AddKey(dev_fw_key)
-    keys_unittest.CreateDummyPrivateKey(dev_fw_key)
-    keys_unittest.CreateDummyKeyblock(dev_fw_key)
 
     fw_key = ks.keys['firmware_data_key']
     kernel_key = ks.keys['kernel_subkey']
@@ -164,8 +156,6 @@ class TestBiosSigner(cros_test_lib.RunCommandTempDirTestCase):
                           '--keyblock', fw_key.keyblock,
                           '--kernelkey', kernel_key.public,
                           '--version', str(fw_key.version),
-                          '--devsign', dev_fw_key.private,
-                          '--devkeyblock', dev_fw_key.keyblock,
                           bios_bin, bios_out])
 
   def testGetCmdArgsWithPreamble(self):
@@ -174,12 +164,6 @@ class TestBiosSigner(cros_test_lib.RunCommandTempDirTestCase):
 
     bios_bin = os.path.join(self.tempdir, 'bios.bin')
     bios_out = os.path.join(self.tempdir, 'bios.out')
-
-    # Add 'dev_firmware' keys and keyblock
-    dev_fw_key = keys.KeyPair('dev_firmware_data_key', keydir=self.tempdir)
-    ks.AddKey(dev_fw_key)
-    keys_unittest.CreateDummyPrivateKey(dev_fw_key)
-    keys_unittest.CreateDummyKeyblock(dev_fw_key)
 
     args = bs.GetFutilityArgs(ks, bios_bin, bios_out)
 
@@ -205,8 +189,6 @@ class TestBiosSigner(cros_test_lib.RunCommandTempDirTestCase):
                           '--keyblock', fw_key.keyblock,
                           '--kernelkey', kernel_key.public,
                           '--version', str(fw_key.version),
-                          '--devsign', fw_key.private,
-                          '--devkeyblock', fw_key.keyblock,
                           '--loemdir', loem_dir,
                           '--loemid', loem_id,
                           bios_bin, loem_dir])
@@ -270,7 +252,7 @@ class TestFirmwareSigner(cros_test_lib.RunCommandTempDirTestCase):
     fs = firmware.FirmwareSigner()
     keyset_dir = os.path.join(self.tempdir, 'keyset')
     ks = keys_unittest.KeysetMock(keyset_dir)
-    ks.CreateDummyKeys()
+    ks.CreateStubKeys()
 
     shellball_dir = os.path.join(self.tempdir, 'shellball')
     bios_path = os.path.join(shellball_dir, 'bios.bin')
@@ -284,7 +266,7 @@ class TestFirmwareSigner(cros_test_lib.RunCommandTempDirTestCase):
     fs = firmware.FirmwareSigner()
     keyset_dir = os.path.join(self.tempdir, 'keyset')
     ks = keys_unittest.KeysetMock(keyset_dir)
-    ks.CreateDummyKeys()
+    ks.CreateStubKeys()
     ks_subset = ks.GetBuildKeyset('ACME')
 
     shellball_dir = os.path.join(self.tempdir, 'shellball')
@@ -303,7 +285,7 @@ class TestFirmwareSigner(cros_test_lib.RunCommandTempDirTestCase):
     fs = firmware.FirmwareSigner()
     keyset_dir = os.path.join(self.tempdir, 'keyset')
     ks = keys_unittest.KeysetMock(keyset_dir)
-    ks.CreateDummyKeys()
+    ks.CreateStubKeys()
 
     shellball_dir = os.path.join(self.tempdir, 'shellball')
     osutils.SafeMakedirs(shellball_dir)
@@ -324,7 +306,7 @@ class TestFirmwareSigner(cros_test_lib.RunCommandTempDirTestCase):
     fs = firmware.FirmwareSigner()
     keyset_dir = os.path.join(self.tempdir, 'keyset')
     ks = keys_unittest.KeysetMock(keyset_dir)
-    ks.CreateDummyKeys()
+    ks.CreateStubKeys()
 
     shellball_dir = os.path.join(self.tempdir, 'shellball')
 
@@ -348,7 +330,7 @@ class TestFirmwareSigner(cros_test_lib.RunCommandTempDirTestCase):
     fs = firmware.FirmwareSigner()
     keyset_dir = os.path.join(self.tempdir, 'keyset')
     ks = keys_unittest.KeysetMock(keyset_dir, has_loem_ini=False)
-    ks.CreateDummyKeys()
+    ks.CreateStubKeys()
 
     shellball_dir = os.path.join(self.tempdir, 'shellball')
 
@@ -506,9 +488,9 @@ class TestWriteSignerNotes(cros_test_lib.RunCommandTempDirTestCase):
     keyset.AddKey(root_key)
 
     sha1sum = keys_unittest.MOCK_SHA1SUM
-    expected_output = ['Signed with keyset in ' + self.tempdir,
-                       'recovery: ' + sha1sum,
-                       'root: ' + sha1sum]
+    expected_output = [f'Signed with keyset in {self.tempdir}',
+                       f'recovery: {sha1sum}',
+                       f'root: {sha1sum}']
 
     version_signer = io.StringIO()
     firmware.WriteSignerNotes(keyset, version_signer)
@@ -532,8 +514,8 @@ class TestWriteSignerNotes(cros_test_lib.RunCommandTempDirTestCase):
       keyset.AddKey(k)
 
     sha1sum = keys_unittest.MOCK_SHA1SUM
-    expected_header = ['Signed with keyset in ' + self.tempdir,
-                       'recovery: ' + sha1sum,
+    expected_header = [f'Signed with keyset in {self.tempdir}',
+                       f'recovery: {sha1sum}',
                        "List sha1sum of all loem/model's signatures:"]
 
     expected_loems = ['loem1: ' + sha1sum,

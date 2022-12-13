@@ -6,6 +6,7 @@
 
 from chromite.lib import cros_collections
 
+
 # firewall:!:236:236:firewall daemon:/dev/null:/bin/false
 UserEntry = cros_collections.Collection('UserEntry',
                                         user=None, encpasswd='!',
@@ -110,7 +111,7 @@ GROUP_BASELINE = dict((e.group, e) for e in (
                                              'dlm', 'rtanalytics', 'crosvm',
                                              'cfm-monitor', 'runtime_probe',
                                              'smdisplay', 'cdm-oemcrypto',
-                                             'cros_healthd'}),
+                                             'cros_healthd', 'nvpd'}),
     GroupEntry(group='cdrw', gid=80, users={'cros-disks'}),
     GroupEntry(group='usb', gid=85, users={'mtp', 'brltty', 'dlm', 'modem',
                                            'fwupd'}),
@@ -170,7 +171,9 @@ GROUP_BASELINE = dict((e.group, e) for e in (
     GroupEntry(group='cros_ec-access', gid=416, users={'runtime_probe',
                                                        'healthd_ec',
                                                        'power',
-                                                       'typecd_ec'}),
+                                                       'typecd_ec',
+                                                       'rgbkbd'}),
+    GroupEntry(group='rgbkbd', gid=20186, users={'rgbkbd', 'power'}),
     GroupEntry(group='virtaccess', gid=418, users={'crosvm', 'wilco_dtc'}),
     GroupEntry(group='crash-access', gid=419, users={'crash', 'secanomaly'}),
     GroupEntry(group='crash-user-access', gid=420,
@@ -227,6 +230,9 @@ GROUP_BASELINE = dict((e.group, e) for e in (
     GroupEntry(group='android-everybody', gid=665357,
                users={'chronos', 'cros-disks', 'seneschal'}),
     GroupEntry(group='android-root', gid=655360, users={'android-root'}),
+    GroupEntry(group='nvpd', gid=20190, users={'nvpd'}),
+    GroupEntry(group='missived_senders', gid=20191, users={'cros_healthd',
+                                                           'secanomaly'}),
 ))
 
 GROUP_BASELINE_LAKITU = dict((e.group, e) for e in (

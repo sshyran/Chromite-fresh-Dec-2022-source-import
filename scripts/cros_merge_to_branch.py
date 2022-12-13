@@ -132,7 +132,7 @@ def _UploadChangeToBranch(work_dir, patch, branch, draft, dryrun):
           carbon_copy=False, dryrun=dryrun, reviewers=reviewers)
     except cros_build_lib.RunCommandError as e:
       if (e.result.returncode == 128 and
-          re.search(r'fatal: user ".*?" not found', e.result.error)):
+          re.search(r'fatal: user ".*?" not found', e.result.stderr)):
         logging.warning('Some reviewers were not found (%s); '
                         'dropping them & retrying upload', ' '.join(reviewers))
         continue

@@ -88,9 +88,12 @@ class DebugSymbolsInstaller(object):
     if not os.path.isfile(archive):
       self._gs_context.Copy(url, archive, debug_level=logging.DEBUG)
 
+    compression = cros_build_lib.CompressionDetectType(archive)
+    compressor = cros_build_lib.FindCompressor(compression)
+
     with osutils.TempDir(sudo_rm=True) as tempdir:
       cros_build_lib.sudo_run(
-          ['tar', '-I', 'bzip2 -q', '-xf', archive, '-C', tempdir], quiet=True)
+          ['tar', '-I', compressor, '-xf', archive, '-C', tempdir], quiet=True)
 
       with open(self._vartree.getpath(cpv, filename='CONTENTS'),
                 'a') as content_file:
@@ -296,7 +299,7 @@ def GetInstallArgsList(argv):
   # package when a package is given.
   cmd = [argv[0]] + ['--list'] + argv[1:]
   result = cros_build_lib.run(cmd, capture_output=True, encoding='utf-8')
-  lines = result.output.splitlines()
+  lines = result.stdout.splitlines()
   return [line.split() for line in lines if line]
 
 
@@ -369,13 +372,13 @@ def main(argv):
   if not cros_build_lib.IsInsideChroot():
     raise commandline.ChrootRequiredError(argv)
 
+  options = ParseArgs(argv)
+
   cmd = [os.path.join(constants.CHROMITE_BIN_DIR,
                       'cros_install_debug_syms')] + argv
-  if os.geteuid() != 0:
+  if osutils.IsNonRootUser():
     cros_build_lib.sudo_run(cmd)
     return
-
-  options = ParseArgs(argv)
 
   # sysroot must have a trailing / as the tree dictionary produced by
   # create_trees in indexed with a trailing /.
@@ -394,8 +397,8 @@ def main(argv):
   # Partial to simplify the arguments to parallel since the first two are the
   # same for every call.
   partial_install = functools.partial(_InstallOne, sysroot, options.debug)
-  pool = multiprocessing.Pool(processes=options.jobs)
-  pool.map(partial_install, args)
+  with multiprocessing.Pool(processes=options.jobs) as pool:
+    pool.map(partial_install, args)
 
   logging.debug('installation done, updating packages index file')
   packages_dir = os.path.join(sysroot, 'packages')

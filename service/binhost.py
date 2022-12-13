@@ -16,6 +16,7 @@ from chromite.lib import parallel
 from chromite.lib import portage_util
 from chromite.utils import key_value_store
 
+
 if TYPE_CHECKING:
   from chromite.lib import build_target_lib
   from chromite.lib import chroot_lib
@@ -44,8 +45,8 @@ class NoAclFileFound(Error):
 def _ValidateBinhostConf(path: str, key: str) -> None:
   """Validates the binhost conf file defines only one environment variable.
 
-  This function is effectively a sanity check that ensures unexpected
-  configuration is not clobbered by conf overwrites.
+  This function checks to ensure unexpected configuration is not clobbered by
+  conf overwrites.
 
   Args:
     path: Path to the file to validate.

@@ -5,6 +5,7 @@
 """Test the commandline module."""
 
 import argparse
+import enum
 import logging
 import os
 import pickle
@@ -363,6 +364,45 @@ class AppendOptionTest(cros_test_lib.TestCase):
     )
 
 
+class Size(enum.Enum):
+  """Example enum for test cases."""
+  SMALL = 0
+  MEDIUM = 1
+  LARGE = 2
+
+
+class EnumActionTest(cros_test_lib.TestCase):
+  """Verify action="enum" functionality."""
+
+  def setUp(self):
+    """Create a parser to use for tests."""
+    self.parser = commandline.ArgumentParser()
+    self.parser.add_argument('--size', action='enum', enum=Size)
+
+  def testParseValid(self):
+    """Test the usual, valid inputs."""
+    opts = self.parser.parse_args(['--size', 'small'])
+    self.assertEqual(opts.size, Size.SMALL)
+
+    opts = self.parser.parse_args(['--size', 'medium'])
+    self.assertEqual(opts.size, Size.MEDIUM)
+
+    opts = self.parser.parse_args(['--size', 'large'])
+    self.assertEqual(opts.size, Size.LARGE)
+
+  def testParseInvalidCase(self):
+    """Test when the enum was given in all uppercase (should be lowercase)."""
+    with self.assertRaises(SystemExit) as e:
+      self.parser.parse_args(['--size', 'SMALL'])
+      self.assertNotEqual(e.status, 0)
+
+  def testParseInvalid(self):
+    """Test when something else completely unexpected is given."""
+    with self.assertRaises(SystemExit) as e:
+      self.parser.parse_args(['--size', 'extra_medium'])
+      self.assertNotEqual(e.status, 0)
+
+
 class SplitExtendActionTest(cros_test_lib.TestCase):
   """Verify _SplitExtendAction/split_extend action."""
 
@@ -389,7 +429,7 @@ class SplitExtendActionTest(cros_test_lib.TestCase):
     self.assertEqual(opts.x, ['f'])
 
   def testNoArgs(self):
-    """This is more of a sanity check for resting state."""
+    """This is more of a confidence check for resting state."""
     self._CheckArgs([], [])
 
   def testEmptyArg(self):

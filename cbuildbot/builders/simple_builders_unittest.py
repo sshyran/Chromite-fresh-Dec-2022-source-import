@@ -10,8 +10,8 @@ from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot.builders import generic_builders
 from chromite.cbuildbot.builders import simple_builders
 from chromite.cbuildbot.stages import generic_stages
-from chromite.cbuildbot.stages import test_stages
 from chromite.cbuildbot.stages import tast_test_stages
+from chromite.cbuildbot.stages import test_stages
 from chromite.cbuildbot.stages import vm_test_stages
 from chromite.lib import config_lib
 from chromite.lib import constants
@@ -21,6 +21,7 @@ from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib.buildstore import FakeBuildStore
 from chromite.scripts import cbuildbot
+
 
 # pylint: disable=protected-access
 

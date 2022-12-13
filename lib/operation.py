@@ -106,6 +106,7 @@ class ProgressBarOperation(object):
   def OpenStdoutStderr(self):
     """Open the stdout and stderr streams."""
     if self._stdout is None and self._stderr is None:
+      # pylint: disable=consider-using-with
       self._stdout = open(self._stdout_path, 'r')
       self._stderr = open(self._stderr_path, 'r')
 
@@ -215,7 +216,7 @@ class ProgressBarOperation(object):
               break
         # Before we exit, parse the output again to update progress bar.
         self.ParseOutput()
-        # Final sanity check to update the progress bar to 100% if it was used
+        # Final check to update the progress bar to 100% if it was used
         # by ParseOutput
         self.Cleanup()
       except:

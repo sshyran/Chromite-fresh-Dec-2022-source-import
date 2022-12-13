@@ -51,7 +51,7 @@ class DeviceTester(cros_test_lib.RunCommandTestCase):
     boot_mock.assert_called()
 
   @mock.patch('chromite.lib.device.Device.remote_run',
-              return_value=cros_build_lib.CommandResult(returncode=1))
+              return_value=cros_build_lib.CompletedProcess(returncode=1))
   def testWaitForBootReturnCode(self, boot_mock):
     """Verify an exception is raised when the returncode is not 0."""
     self.assertRaises(device.DeviceError, self._device.WaitForBoot)

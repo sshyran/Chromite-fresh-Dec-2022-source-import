@@ -136,7 +136,7 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
     for target, versions in targets.items():
       url = self.makeSrcTargetUrl(target)
       versions = '\n'.join(os.path.join(url, version) for version in versions)
-      self.gs_mock.AddCmdResult(['ls', '--', url], output=versions)
+      self.gs_mock.AddCmdResult(['ls', '--', url], stdout=versions)
 
     for version in [self.old_version, self.old2_version, self.new_version]:
       for target in self.targets:
@@ -188,7 +188,7 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
     if valid:
       # Show source subpath directory.
       src_subdir = os.path.join(src_url, self.makeSubpath(target, version))
-      self.gs_mock.AddCmdResult(['ls', '--', src_url], output=src_subdir)
+      self.gs_mock.AddCmdResult(['ls', '--', src_url], stdout=src_subdir)
 
       # Show files.
       mock_file_template_list = {
@@ -214,10 +214,10 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
       src_filelist = [os.path.join(src_subdir, filename)
                       for filename in filelist]
       self.gs_mock.AddCmdResult(['ls', '--', src_subdir],
-                                output='\n'.join(src_filelist))
+                                stdout='\n'.join(src_filelist))
       for src_file in src_filelist:
         self.gs_mock.AddCmdResult(['stat', '--', src_file],
-                                  output=(self.STAT_OUTPUT) % src_url)
+                                  stdout=(self.STAT_OUTPUT) % src_url)
 
       # Show nothing in destination.
       dst_url = self.makeDstUrl(target, version)

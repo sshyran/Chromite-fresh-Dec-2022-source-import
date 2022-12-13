@@ -9,6 +9,170 @@ to do something destructive they didn't intend.
 
 [TOC]
 
+## Short Options
+
+Short options should be used prudently, after careful thought & consideration.
+Do not add them to long options purely for the sake of having a short option.
+Not every option needs a short option, plus the set of possible short options
+is significantly smaller than the set of possible long options (since a short
+option, practically speaking, can only be printable ASCII).
+
+Short options should only be used when a developer is expected to type it often
+themselves (not for script usage), ideally should be "obvious" as to what long
+option it implies, and should be considered in context of other tools.
+See [Required Option Conventions] for more information.
+
+All short options must provide a long option.
+See [Long Option Naming Conventions] for more details.
+
+See [Short Long Options] as an alternative to using a short option.
+
+## Boolean Options
+
+Long options that control boolean settings should provide both positive and
+negative options, and allow them to be specified multiple times.
+The default value should be clearly documented.
+
+### Naming
+
+The negative option prefix is `--no-`.
+For example, `--reboot` and `--no-reboot`.
+
+Do not omit the `-` after the `no`.
+This makes reading the option at a glance more difficult (e.g. `--noclean`),
+or end up making it look like a different word (e.g. is `--nobody` "no body", or
+is it the "nobody" user account).
+
+Do not use other prefix words like `skip` or `set` or `disable` or `enable`, nor
+use them in conjunction with `no` (e.g. `--skip-reboot` and `--no-skip-reboot`).
+This provides consistent naming & style for developers.
+
+### Internal Variables
+
+Even when the default behavior is the negative value, the code should avoid
+negative variable names.
+
+Python's argparse module makes it easy to support multiple boolean options that
+store the result in a specifically named variable.
+See the [Example Code](#bool-example-code) below.
+
+### Chaining
+
+Specifying multiple boolean options should work fine, and should follow the
+standard "last option wins" policy.
+This makes it easy for developers to copy & paste long commands (e.g. from logs)
+and change options slightly by adding another flag to the end without having to
+scan the entire command line and edit it in the terminal.
+
+For example:
+
+* `--wipe`: "wipe" is enabled.
+* `--no-wipe`: "wipe" is disabled.
+* `--wipe --no-wipe`: "wipe" is disabled.
+* `--no-wipe --wipe`: "wipe" is enabled.
+* `--wipe --wipe --no-wipe --wipe --no-wipe`: "wipe" is disabled.
+
+Python's argparse module already behaves this way by default.
+
+If you need to add more complicated options, such as aliases, you probably want
+to define a custom `action` when calling `add_argument()`.
+Custom actions are called immediately when processing which allows for updating
+the state rather than post-processing at the end.
+See the [Example Code](#bool-example-code) below.
+
+### Example Code {#bool-example-code}
+
+```python
+# Create a boolean option.  The default is None to indicate the user hasn't made
+# a choice.  This can sometimes be useful when processing default behavior.  If
+# the default should be explicit, use `default=...` with the --reboot option.
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--reboot', action='store_true')
+parser.add_argument('--no-reboot', dest='reboot', action='store_false')
+```
+
+```python
+# Create boolean options with another option that implies others.  This is
+# written so that multiple stacked options are handled correctly.  The custom
+# action hooks directly into the option processing state machine.
+class _ActionAliasForAB(argparse.Action):
+  def __call__(self, parser, namespace, values, option_string=None):
+    setattr(namespace, 'A', True)
+    setattr(namespace, 'B', True)
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--A', action='store_true')
+parser.add_argument('--B', action='store_true')
+parser.add_argument('--no-B', dest='B', action='store_false')
+parser.add_argument('--alias-for-A-B', nargs=0, action=_ActionAliasForAB)
+```
+
+## Long Option Separators
+
+Long options use kebab-case, not snake_case, when separating words.
+For example, `--a-long-option` is correct while `--a_long_option` is not.
+
+Since the option has to start with two dashes (`--`) and never two underscores
+(`__`), using dashes consistently is preferred.
+
+Dashes are easier to type on the most common keyboard layouts our developers
+use (US English [QWERTY]) as `_` requires holding the Shift key.
+
+Do not omit separators entirely as it makes it hard for readers at a glance.
+Tryreadingthiswithoutseparators.
+
+If backwards compatibility is a factor, both variants can usually be supported.
+Document the dashes (e.g. `--an-opt`) as the primary one, and list the
+underscores (e.g. `--an_opt`) as a deprecated compatibility form.
+
+## Long Option Naming Conventions
+
+Long option names should use full words when possible and avoid unnecessary
+abbreviations or uncommon acronyms.
+The point of long options is to aid in clarity & readability (and logs), and
+abbreviations can often be inconsistent between tools.
+
+Some examples:
+
+* Use `--description`, not `--desc`.
+* Use `--message`, not `--msg`.
+* Use `--text`, not `--txt`.
+
+[Long Option Naming Conventions]: #long-option-naming-conventions
+
+### Short Long Options
+
+While long options are great for scripts & automation, they can be painful for
+developers, especially for longer multi-word options.
+This can lead people to providing nonsensical short options simply so users
+don't have to type out the full long option.
+This is an anti-pattern and leads to inconsistent short options between tools,
+and makes developers have to read help/manuals constantly since they won't be
+able to easily remember which option does what for every tool.
+
+One alternative is that Python's argparse, and some other option parsing APIs,
+will automatically complete unambiguous partial long options for you.
+So if a CLI supports `--description`, but no other long option that starts with
+a `--d`, users can already use `--d`, `--de`, `--desc`, etc... for free.
+Keep in mind this should never be used in a script as there is no long term
+guarantee that these remain unambiguous.
+If `--delicious` is added later, then `--d` and `--de` are no longer unambiguous
+leading to errors (although `--des`, etc... still work).
+
+Another alternative is to provide a terse short long option.
+Again, this is purely for users to type out, not to use in automation.
+These should only be provided as secondary aliases to the more formal option,
+and never as the only one per the naming conventions outlined above.
+This should also only be provided when demand suggests that it's an option that
+users will regularly use -- do not provide a terse short long option purely for
+the sake of it.
+
+Some examples:
+
+* `--description` & `--desc`
+* `--branch` & `--br`
+
+[Short Long Options]: #short-long-options
+
 ## Required Option Conventions
 
 Tools should adhere to these conventions whenever possible, and any deviation
@@ -25,6 +189,8 @@ should be strongly reconsidered.
 | [-v]  | [--verbose]   | Verbose(r) output. |
 |       | [--version]   | Show tool version information. |
 | [-y]  | [--yes]       | Skip prompts. |
+
+[Required Option Conventions]: #required-option-conventions
 
 ### --debug {#debug}
 
@@ -140,7 +306,7 @@ use of dry-run first is a common user flow.
 
 The [--dryrun] option should be accepted as an alias to [--dry-run], but should
 be omitted from documentation (i.e. [--help] output).
-This helps users who typo things, and because some tools have adopted one that
+This helps users who typo things, and because some tools have adopted that
 convention instead of [--dry-run] (although the latter is still more common).
 
 [-n]: #dryrun

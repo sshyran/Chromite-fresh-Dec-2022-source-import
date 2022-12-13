@@ -12,6 +12,7 @@ If given args those are passed to the chroot environment, and executed.
 """
 
 import argparse
+import ast
 import glob
 import logging
 import os
@@ -40,7 +41,8 @@ from chromite.lib import toolchain
 from chromite.utils import key_value_store
 
 
-COMPRESSION_PREFERENCE = ('xz', 'bz2')
+# Which compression algos the SDK tarball uses.  We've used xz since 2012.
+COMPRESSION_PREFERENCE = ('xz',)
 
 # TODO(zbehan): Remove the dependency on these, reimplement them in python
 ENTER_CHROOT = [
@@ -83,7 +85,7 @@ MAX_UNUSED_IMAGE_GBS = 20
 
 def GetArchStageTarballs(version):
   """Returns the URL for a given arch/version"""
-  extension = {'bz2': 'tbz2', 'xz': 'tar.xz'}
+  extension = {'xz': 'tar.xz'}
   return [
       toolchain.GetSdkURL(
           suburl='%s.%s' % (version, extension[compressor]))
@@ -91,13 +93,12 @@ def GetArchStageTarballs(version):
   ]
 
 
-def FetchRemoteTarballs(storage_dir, urls, desc):
+def FetchRemoteTarballs(storage_dir, urls):
   """Fetches a tarball given by url, and place it in |storage_dir|.
 
   Args:
     storage_dir: Path where to save the tarball.
     urls: List of URLs to try to download. Download will stop on first success.
-    desc: A string describing what tarball we're downloading (for logging).
 
   Returns:
     Full path to the downloaded file.
@@ -105,14 +106,13 @@ def FetchRemoteTarballs(storage_dir, urls, desc):
   Raises:
     ValueError: None of the URLs worked.
   """
-
   # Note we track content length ourselves since certain versions of curl
   # fail if asked to resume a complete file.
   # https://sourceforge.net/tracker/?func=detail&atid=100976&aid=3482927&group_id=976
-  logging.notice('Downloading %s tarball...', desc)
   status_re = re.compile(br'^HTTP/[0-9]+(\.[0-9]+)? 200')
   # pylint: disable=undefined-loop-variable
   for url in urls:
+    logging.notice('Downloading tarball %s ...', urls[0].rsplit('/', 1)[-1])
     parsed = urllib.parse.urlparse(url)
     tarball_name = os.path.basename(parsed.path)
     if parsed.scheme in ('', 'file'):
@@ -126,7 +126,7 @@ def FetchRemoteTarballs(storage_dir, urls, desc):
                                 debug_level=logging.NOTICE,
                                 capture_output=True)
     successful = False
-    for header in result.output.splitlines():
+    for header in result.stdout.splitlines():
       # We must walk the output to find the 200 code for use cases where
       # a proxy is involved and may have pushed down the actual header.
       if status_re.match(header):
@@ -157,17 +157,11 @@ def FetchRemoteTarballs(storage_dir, urls, desc):
   # Cleanup old tarballs now since we've successfull fetched; only cleanup
   # the tarballs for our prefix, or unknown ones. This gets a bit tricky
   # because we might have partial overlap between known prefixes.
-  my_prefix = tarball_name.rsplit('-', 1)[0] + '-'
-  all_prefixes = ('stage3-amd64-', 'cros-sdk-', 'cros-sdk-overlay-')
-  ignored_prefixes = [prefix for prefix in all_prefixes if prefix != my_prefix]
-  for filename in os.listdir(storage_dir):
-    if (filename == tarball_name or
-        any([(filename.startswith(p) and
-              not (len(my_prefix) > len(p) and filename.startswith(my_prefix)))
-             for p in ignored_prefixes])):
+  for p in Path(storage_dir).glob('cros-sdk-*'):
+    if p.name == tarball_name:
       continue
-    logging.info('Cleaning up old tarball: %s', filename)
-    osutils.SafeUnlink(os.path.join(storage_dir, filename))
+    logging.info('Cleaning up old tarball: %s', p)
+    osutils.SafeUnlink(p)
 
   return tarball_dest
 
@@ -200,17 +194,28 @@ def EnterChroot(chroot_path, cache_dir, chrome_root, chrome_root_mount,
     cmd.append('--')
     cmd.extend(additional_args)
 
+  if 'CHROMEOS_SUDO_RLIMITS' in os.environ:
+    _SetRlimits(os.environ.pop('CHROMEOS_SUDO_RLIMITS'))
+
+  # Some systems set the soft limit too low.  Bump it up to the hard limit.
+  # We don't override the hard limit because it's something the admins put
+  # in place and we want to respect such configs.  http://b/234353695
+  soft, hard = resource.getrlimit(resource.RLIMIT_NPROC)
+  if soft != resource.RLIM_INFINITY and soft < 4096:
+    if soft < hard or hard == resource.RLIM_INFINITY:
+      resource.setrlimit(resource.RLIMIT_NPROC, (hard, hard))
+
   # ThinLTO opens lots of files at the same time.
   # Set rlimit and vm.max_map_count to accommodate this.
   file_limit = 262144
   soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
   resource.setrlimit(resource.RLIMIT_NOFILE,
                      (max(soft, file_limit), max(hard, file_limit)))
-  max_map_count = int(open('/proc/sys/vm/max_map_count').read())
+  max_map_count = int(osutils.ReadFile('/proc/sys/vm/max_map_count'))
   if max_map_count < file_limit:
     logging.notice(
         'Raising vm.max_map_count from %s to %s', max_map_count, file_limit)
-    open('/proc/sys/vm/max_map_count', 'w').write(f'{file_limit}\n')
+    osutils.WriteFile('/proc/sys/vm/max_map_count', str(file_limit))
   return cros_build_lib.dbg_run(cmd, check=False)
 
 
@@ -406,7 +411,7 @@ def ListChrootSnapshots(chroot_vg, chroot_lv):
   # valid snapshots.
   snapshots = []
   snapshot_attrs = re.compile(r'^V.....t.{2,}')  # Matches a thin volume.
-  for line in result.output.splitlines():
+  for line in result.stdout.splitlines():
     lv_name, pool_lv, lv_attr = line.lstrip().split('\t')
     if (lv_name == chroot_lv or lv_name == cros_sdk_lib.CHROOT_THINPOOL_NAME or
         pool_lv != cros_sdk_lib.CHROOT_THINPOOL_NAME or
@@ -414,6 +419,42 @@ def ListChrootSnapshots(chroot_vg, chroot_lv):
       continue
     snapshots.append(lv_name)
   return snapshots
+
+
+# The rlimits we will lookup & pass down, in order.
+RLIMITS_TO_PASS = (
+    resource.RLIMIT_AS,
+    resource.RLIMIT_CORE,
+    resource.RLIMIT_CPU,
+    resource.RLIMIT_FSIZE,
+    resource.RLIMIT_MEMLOCK,
+    resource.RLIMIT_NICE,
+    resource.RLIMIT_NOFILE,
+    resource.RLIMIT_NPROC,
+    resource.RLIMIT_RSS,
+    resource.RLIMIT_STACK,
+)
+
+
+def _GetRlimits() -> str:
+  """Serialize current rlimits."""
+  return str(tuple(resource.getrlimit(x) for x in RLIMITS_TO_PASS))
+
+
+def _SetRlimits(limits: str) -> None:
+  """Deserialize rlimits."""
+  for rlim, limit in zip(RLIMITS_TO_PASS, ast.literal_eval(limits)):
+    cur_limit = resource.getrlimit(rlim)
+    if cur_limit != limit:
+      # Turn the number into a symbolic name for logging.
+      name = 'RLIMIT_???'
+      for name, num in resource.__dict__.items():
+        if name.startswith('RLIMIT_') and num == rlim:
+          break
+      logging.debug('Restoring user rlimit %s from %r to %r',
+                    name, cur_limit, limit)
+
+      resource.setrlimit(rlim, limit)
 
 
 def _SudoCommand():
@@ -432,6 +473,9 @@ def _SudoCommand():
   # will take care of initializing PATH to the right value then.  But we can't
   # override the system's default PATH for root as that will hide /sbin.
   cmd += ['CHROMEOS_SUDO_PATH=%s' % os.environ.get('PATH', '')]
+
+  # Pass along current rlimit settings so we can restore them.
+  cmd += [f'CHROMEOS_SUDO_RLIMITS={_GetRlimits()}']
 
   # Pass in the path to the depot_tools so that users can access them from
   # within the chroot.
@@ -628,7 +672,7 @@ def _ReExecuteIfNeeded(argv):
   Also unshare the mount namespace so as to ensure that processes outside
   the chroot can't mess with our mounts.
   """
-  if os.geteuid() != 0:
+  if osutils.IsNonRootUser():
     # Make sure to preserve the active Python executable in case the version
     # we're running as is not the default one found via the (new) $PATH.
     cmd = _SudoCommand() + ['--'] + [sys.executable] + argv
@@ -709,6 +753,13 @@ def _CreateParser(sdk_latest_version, bootstrap_latest_version):
       '--reproxy-cfg-file',
       type='path',
       help="Config file for re-client's reproxy used for remoteexec.")
+  parser.add_argument(
+      '--skip-chroot-upgrade',
+      dest='chroot_upgrade',
+      action='store_false',
+      default=True,
+      help='Skip automatic SDK and toolchain upgrade when entering the chroot. '
+           'Never guaranteed to work, especially as ToT moves forward.')
 
   # Use type=str instead of type='path' to prevent the given path from being
   # transfered to absolute path automatically.
@@ -851,7 +902,7 @@ def main(argv):
   options = parser.parse_args(argv)
   chroot_command = options.commands
 
-  # Some sanity checks first, before we ask for sudo credentials.
+  # Some basic checks first, before we ask for sudo credentials.
   cros_build_lib.AssertOutsideChroot()
 
   host = os.uname()[4]
@@ -1160,8 +1211,7 @@ snapshots will be unavailable).""" % ', '.join(missing_image_tools))
 
     if options.download:
       lock.write_lock()
-      sdk_tarball = FetchRemoteTarballs(
-          sdk_cache, urls, 'stage3' if options.bootstrap else 'SDK')
+      sdk_tarball = FetchRemoteTarballs(sdk_cache, urls)
 
     mounted = False
     if options.create:
@@ -1176,7 +1226,8 @@ snapshots will be unavailable).""" % ', '.join(missing_image_tools))
             Path(options.chroot),
             Path(sdk_tarball),
             Path(options.cache_dir),
-            usepkg=not options.bootstrap and not options.nousepkg)
+            usepkg=not options.bootstrap and not options.nousepkg,
+            chroot_upgrade=options.chroot_upgrade)
         mounted = True
 
     if options.enter:

@@ -12,12 +12,13 @@ import json
 import logging
 import multiprocessing
 import os
+from pathlib import Path
 import re
 import shutil
-from pathlib import Path
-from typing import Dict, Iterator, List, Optional, Union
+from typing import Dict, Iterable, Iterator, List, Optional, Tuple, Union
 
 from chromite.lib import build_target_lib
+from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import failures_lib
@@ -26,6 +27,8 @@ from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib.parser import package_info
 from chromite.utils import key_value_store
+from chromite.utils import pms
+
 
 # The parsed output of running `ebuild <ebuild path> info`.
 RepositoryInfoTuple = collections.namedtuple('RepositoryInfoTuple',
@@ -222,18 +225,18 @@ def FindOverlays(overlay_type, board=None, buildroot=constants.SOURCE_ROOT):
     return []
 
 
-def FindOverlaysForBoards(overlay_type, boards):
+def FindOverlaysForBoards(overlay_type: str, boards: List[str]) -> List[str]:
   """Convenience function to find the overlays for multiple boards.
 
   Unlike FindOverlays, there is no guarantee about the overlay ordering.
   Produces a unique list of overlays.
 
   Args:
-    overlay_type (str): Type of overlays to search. See FindOverlays.
-    boards (list[str]): The list of boards to compile a the overlays for.
+    overlay_type: Type of overlays to search. See FindOverlays.
+    boards: The list of boards to compile a the overlays for.
 
   Returns:
-    list[str] - The list of unique overlays from all boards.
+    The list of unique overlays from all boards.
   """
   overlays = set()
   for board in boards:
@@ -328,6 +331,25 @@ def GetOverlayName(overlay):
       return None
 
 
+def _GetSysrootTool(tool: str,
+                    board: Optional[str] = None,
+                    sysroot: Optional[Union[str, os.PathLike]] = None) -> str:
+  """Return the |tool| to use for a sysroot/board/host."""
+  # If there is no board or sysroot, return the host tool.
+  if sysroot is None and board is None:
+    return tool
+
+  # Prefer the sysroot tool if it exists.
+  if sysroot is None:
+    sysroot = build_target_lib.get_default_sysroot_path(board)
+  tool_path = cros_build_lib.GetSysrootToolPath(sysroot, tool)
+  if os.path.exists(tool_path):
+    return tool_path
+
+  # Fallback to the general PATH wrappers if possible.
+  return tool if board is None else f'{tool}-{board}'
+
+
 class EBuildVersionFormatError(Error):
   """Exception for bad ebuild version string format."""
 
@@ -379,12 +401,12 @@ class EBuild(object):
   def _RunCommand(cls, command, **kwargs):
     kwargs.setdefault('capture_output', True)
     kwargs.setdefault('encoding', 'utf-8')
-    return cros_build_lib.run(command, print_cmd=cls.VERBOSE, **kwargs).output
+    return cros_build_lib.run(command, print_cmd=cls.VERBOSE, **kwargs).stdout
 
   @classmethod
   def _RunGit(cls, cwd, command, **kwargs):
     result = git.RunGit(cwd, command, print_cmd=cls.VERBOSE, **kwargs)
-    return None if result is None else result.output
+    return None if result is None else result.stdout
 
   def IsSticky(self):
     """Returns True if the ebuild is sticky."""
@@ -976,12 +998,12 @@ class EBuild(object):
         check=False,
         encoding='utf-8')
 
-    output = result.output.strip()
+    output = result.stdout.strip()
     if result.returncode or not output:
       raise Error(
           'Package %s has a chromeos-version.sh script but failed:\n'
           'return code = %s\nstdout = %s\nstderr = %s\n' %
-          (self.pkgname, result.returncode, result.output, result.error))
+          (self.pkgname, result.returncode, result.stdout, result.stderr))
 
     # Sanity check: disallow versions that will be larger than the 9999 ebuild
     # used by cros-workon.
@@ -1021,7 +1043,8 @@ class EBuild(object):
     else:
       return '"%s"' % unformatted_list[0]
 
-  def RevWorkOnEBuild(self, srcroot, manifest, reject_self_repo=True):
+  def RevWorkOnEBuild(self, srcroot, manifest, reject_self_repo=True,
+                      new_version=None):
     """Revs a workon ebuild given the git commit hash.
 
     By default this class overwrites a new ebuild given the normal
@@ -1033,6 +1056,7 @@ class EBuild(object):
       manifest: git.ManifestCheckout object.
       reject_self_repo: Whether to abort if the ebuild lives in the same git
           repo as it is tracking for uprevs.
+      new_version: The new version number for this ebuild. No revision number.
 
     Returns:
       If the revved package is different than the old ebuild, return a tuple
@@ -1044,6 +1068,12 @@ class EBuild(object):
       OSError: Error occurred while creating a new ebuild.
       IOError: Error occurred while writing to the new revved ebuild file.
     """
+    if new_version is not None:
+      if not pms.version_valid(new_version):
+        raise ValueError(f'Invalid version {new_version}')
+      if re.search(r'-r[0-9]+$', new_version):
+        raise ValueError(f'Revision is not allowed, given {new_version}')
+
     if self.is_stable:
       starting_pv = self.version_no_rev
     else:
@@ -1059,9 +1089,13 @@ class EBuild(object):
     old_version = '%s-r%d' % (stable_version_no_rev, self.current_revision)
     old_stable_ebuild_path = '%s-%s.ebuild' % (self._ebuild_path_no_version,
                                                old_version)
-    new_version = '%s-r%d' % (stable_version_no_rev, self.current_revision + 1)
+
+    revision = (1 if new_version is not None
+                and new_version != stable_version_no_rev
+                else self.current_revision + 1)
+    version = f'{new_version or stable_version_no_rev}-r{revision}'
     new_stable_ebuild_path = '%s-%s.ebuild' % (self._ebuild_path_no_version,
-                                               new_version)
+                                               version)
 
     info = self.GetSourceInfo(
         srcroot, manifest, reject_self_repo=reject_self_repo)
@@ -1142,7 +1176,7 @@ class EBuild(object):
       logging.info('Creating new stable ebuild %s', new_stable_ebuild_path)
       logging.info('New ebuild commit id: %s', self.FormatBashArray(commit_ids))
       ebuild_path_to_remove = old_ebuild_path if self.is_stable else None
-      return ('%s-%s' % (self.package, new_version), new_stable_ebuild_path,
+      return ('%s-%s' % (self.package, version), new_stable_ebuild_path,
               ebuild_path_to_remove)
 
   def _ShouldRevEBuild(self, commit_ids, srcdirs, subdirs_to_rev):
@@ -1228,11 +1262,11 @@ class EBuild(object):
         line for line in lines if not cls._WORKON_COMMIT_PATTERN.search(line))
 
   @classmethod
-  def List(cls, package_dir):
+  def List(cls, package_dir: Union[str, os.PathLike]):
     """Generate the path to each ebuild in |package_dir|.
 
     Args:
-      package_dir (str): The package directory.
+      package_dir: The package directory.
     """
     for entry in os.listdir(package_dir):
       if entry.endswith('.ebuild'):
@@ -1246,14 +1280,23 @@ class PortageDBError(Error):
 class PortageDB(object):
   """Wrapper class to access the portage database located in var/db/pkg."""
 
-  def __init__(self, root='/'):
+  def __init__(self,
+               root: os.PathLike = '/',
+               vdb: Optional[os.PathLike] = None,
+               package_install_path: Optional[os.PathLike] = None):
     """Initialize the internal structure for the database in the given root.
 
     Args:
       root: The path to the root to inspect, for example "/build/foo".
+      vdb: Known path to package database in the partition. Defaults to
+        VDB_PATH.
+      package_install_path: The subdirectory path from the root where installed
+        files are stored. e.g. for stateful partitions on test images,
+        'dev_image'.
     """
     self.root = root
-    self.db_path = os.path.join(root, VDB_PATH)
+    self.package_install_path = os.path.join(root, package_install_path or '')
+    self.db_path = os.path.join(root, vdb or VDB_PATH)
     self._ebuilds = {}
 
   def GetInstalledPackage(self, category, pv):
@@ -1587,7 +1630,7 @@ def GetOverlayEBuilds(overlay,
 def _Egencache(repo_name: str,
                overlay: str,
                chroot_args: List[str] = None,
-               log_output: bool = True) -> cros_build_lib.CommandResult:
+               log_output: bool = True) -> cros_build_lib.CompletedProcess:
   """Execute egencache for repo_name inside the chroot.
 
   Args:
@@ -1597,7 +1640,7 @@ def _Egencache(repo_name: str,
     log_output: Log output of cros_build_run commands.
 
   Returns:
-    A cros_build_lib.CommandResult object.
+    A cros_build_lib.CompletedProcess object.
   """
   return cros_build_lib.run([
       'egencache', '--update', '--repo', repo_name, '--jobs',
@@ -1609,19 +1652,21 @@ def _Egencache(repo_name: str,
                             log_output=log_output)
 
 
-def RegenCache(overlay, commit_changes=True, chroot=None):
+def RegenCache(overlay: str,
+               commit_changes: bool = True,
+               chroot: Optional[chroot_lib.Chroot] = None) -> Optional[str]:
   """Regenerate the cache of the specified overlay.
 
   Args:
     overlay: The tree to regenerate the cache for.
-    commit_changes (bool): Whether to commit the changes.
-    chroot (chroot_lib.Chroot): Optionally specify a chroot to enter.
+    commit_changes: Whether to commit the changes.
+    chroot: A chroot to enter.
 
   Returns:
-    str|None: The overlay when there are outstanding changes, or None when
-        there were no updates or all updates were committed. This is meant to
-        be a simple, parallel_lib friendly means of identifying which overlays
-        have been changed.
+    The overlay when there are outstanding changes, or None when there were no
+    updates or all updates were committed. This is meant to be a simple,
+    parallel_lib friendly means of identifying which overlays have been
+    changed.
   """
   repo_name = GetOverlayName(overlay)
   if not repo_name:
@@ -1641,7 +1686,7 @@ def RegenCache(overlay, commit_changes=True, chroot=None):
   _Egencache(repo_name, overlay, chroot_args)
   # If there was nothing new generated, then let's just bail.
   result = git.RunGit(overlay, ['status', '-s', 'metadata/'])
-  if not result.output:
+  if not result.stdout:
     return
 
   if not commit_changes:
@@ -1651,6 +1696,37 @@ def RegenCache(overlay, commit_changes=True, chroot=None):
   git.RunGit(overlay, ['add', 'metadata/'])
   # Explicitly tell git to also include rm-ed files.
   git.RunGit(overlay, ['commit', '-m', 'regen cache', 'metadata/'])
+
+
+def RegenDependencyCache(
+    board: Optional[str] = None,
+    sysroot: Optional[Union[str, os.PathLike]] = None,
+    jobs: Optional[int] = None,
+) -> None:
+  """Regenerate the dependency cache in parallel.
+
+  Use emerge --regen instead of egencache to regenerate metadata caches for all
+  overlays (egencache only updates the cache for specific overlays).
+
+  Args:
+    board: The board to inspect.
+    sysroot: The root directory being inspected.
+    jobs: The number of regeneration jobs to run in parallel.
+
+  Raises:
+    cros_build_lib.RunCommandError
+  """
+  logging.info('Rebuilding Portage dependency cache.')
+  cmd = ['parallel_emerge', '--regen', '--quiet']
+
+  if board:
+    cmd.append(f'--board={board}')
+  if sysroot:
+    cmd.append(f'--sysroot={sysroot}')
+  if jobs:
+    cmd.append(f'--jobs={jobs}')
+
+  cros_build_lib.run(cmd, enter_chroot=True)
 
 
 def ParseBashArray(value):
@@ -1704,40 +1780,6 @@ def WorkonEBuildGenerator(buildroot, overlay_type):
   for overlay in overlays:
     for ebuild in WorkonEBuildGeneratorForDirectory(overlay):
       yield ebuild
-
-
-def BuildFullWorkonPackageDictionary(buildroot, overlay_type, manifest):
-  """Scans all cros_workon ebuilds and build a dictionary.
-
-  Args:
-    buildroot: Path to source root to find overlays.
-    overlay_type: The type of overlay to use (one of
-      constants.VALID_OVERLAYS).
-    manifest: git.ManifestCheckout object.
-
-  Returns:
-    A dictionary mapping (project, branch) to a list of packages.
-    E.g., {('chromiumos/third_party/kernel', 'chromeos-3.14'):
-           ['sys-kernel/chromeos-kernel-3_14']}.
-  """
-  # we want (project, branch) -> package (CP or P?)
-  directory_src = os.path.join(buildroot, 'src')
-
-  pkg_map = dict()
-  for ebuild in WorkonEBuildGenerator(buildroot, overlay_type):
-    if ebuild.is_manually_uprevved:
-      continue
-    package = ebuild.package
-    paths = ebuild.GetSourceInfo(directory_src, manifest).srcdirs
-    for path in paths:
-      checkout = manifest.FindCheckoutFromPath(path)
-      project = checkout['name']
-      branch = git.StripRefs(checkout['tracking_branch'])
-      pkg_list = pkg_map.get((project, branch), [])
-      pkg_list.append(package)
-      pkg_map[(project, branch)] = pkg_list
-
-  return pkg_map
 
 
 def GetWorkonProjectMap(overlay, subdirectories):
@@ -1842,10 +1884,54 @@ def IsPackageInstalled(package, sysroot='/'):
   return False
 
 
+def _Equery(module: str,
+            *args: str,
+            board: Optional[str] = None,
+            sysroot: Optional[str] = None,
+            buildroot: str = constants.SOURCE_ROOT,
+            quiet: bool = True,
+            print_cmd: bool = True,
+            extra_env: Optional[Dict[str, str]] = None,
+            check: bool = True) -> cros_build_lib.CompletedProcess:
+  """Executes equery commands.
+
+  Args:
+    module: The equery module to run.
+    *args: Arguments to the equery module.
+    board: The board to inspect.
+    sysroot: The root directory being inspected.
+    buildroot: Source root to run commands against.
+    quiet: Whether to run the module in quiet mode.  This is module specific, so
+        consult the documentation for behavior.
+    print_cmd: Whether to print the command before running it.
+    extra_env: Extra environment settings to pass down.
+    check: Whether to throw an exception if the command fails.
+
+  Returns:
+    A cros_build_lib.CompletedProcess object.
+  """
+  # There is no situation where we want color or pipe detection.
+  cmd = [_GetSysrootTool('equery', board, sysroot), '--no-color', '--no-pipe']
+  if quiet:
+    cmd += ['--quiet']
+  cmd += [module]
+  cmd += args
+
+  return cros_build_lib.run(
+      cmd,
+      enter_chroot=True,
+      cwd=buildroot,
+      print_cmd=print_cmd,
+      capture_output=True,
+      extra_env=extra_env,
+      check=check,
+      encoding='utf-8')
+
+
 def _EqueryList(
     pkg_str: str,
     board: Optional[str] = None,
-    buildroot: str = constants.SOURCE_ROOT) -> cros_build_lib.CommandResult:
+    buildroot: str = constants.SOURCE_ROOT) -> cros_build_lib.CompletedProcess:
   """Executes equery list command.
 
   Args:
@@ -1854,20 +1940,9 @@ def _EqueryList(
     buildroot: Source root to find overlays.
 
   Returns:
-    A cros_build_lib.CommandResult object.
+    A cros_build_lib.CompletedProcess object.
   """
-  cmd = [f'equery-{board}' if board else 'equery']
-  # Simplify output.
-  cmd += ['-Cq']
-  cmd += ['list', pkg_str]
-
-  return cros_build_lib.run(
-      cmd,
-      cwd=buildroot,
-      enter_chroot=True,
-      capture_output=True,
-      check=False,
-      encoding='utf-8')
+  return _Equery('list', pkg_str, board=board, buildroot=buildroot, check=False)
 
 
 def FindPackageNameMatches(
@@ -1888,7 +1963,7 @@ def FindPackageNameMatches(
 
   matches = []
   if result.returncode == 0:
-    matches = [package_info.parse(x) for x in result.output.splitlines()]
+    matches = [package_info.parse(x) for x in result.stdout.splitlines()]
 
   return matches
 
@@ -1910,7 +1985,7 @@ def _EqueryWhich(packages_list: List[str],
                  sysroot: str,
                  include_masked: bool = False,
                  extra_env: Optional[Dict[str, str]] = None,
-                 check: bool = False) -> cros_build_lib.CommandResult:
+                 check: bool = False) -> cros_build_lib.CompletedProcess:
   """Executes an equery command, returns the result of the cmd.
 
   Args:
@@ -1927,19 +2002,20 @@ def _EqueryWhich(packages_list: List[str],
       empty dictionary.
 
   Returns:
-    result (cros_build_lib.CommandResult)
+    result (cros_build_lib.CompletedProcess)
   """
-  cmd = [cros_build_lib.GetSysrootToolPath(sysroot, 'equery'), 'which']
+  args = []
   if include_masked:
-    cmd += ['--include-masked']
-  cmd += packages_list
-  return cros_build_lib.run(
-      cmd,
-      extra_env=extra_env,
+    args += ['--include-masked']
+  args += packages_list
+  return _Equery(
+      'which',
+      *args,
+      sysroot=sysroot,
+      quiet=False,
       print_cmd=False,
-      capture_output=True,
-      check=check,
-      encoding='utf-8')
+      extra_env=extra_env,
+      check=check)
 
 
 def FindEbuildsForPackages(packages_list,
@@ -1973,7 +2049,7 @@ def FindEbuildsForPackages(packages_list,
   if result.returncode:
     return {}
 
-  ebuilds_results = result.output.strip().splitlines()
+  ebuilds_results = result.stdout.strip().splitlines()
   # Asserting the directory name of the ebuild matches the package name.
   mismatches = []
   ret = dict(zip(packages_list, ebuilds_results))
@@ -2036,7 +2112,7 @@ def FindEbuildsForOverlays(
 
 def _EqueryDepgraph(pkg_str: str,
                     sysroot: str,
-                    depth: int = 0) -> cros_build_lib.CommandResult:
+                    depth: int = 0) -> cros_build_lib.CompletedProcess:
   """Executes equery depgraph to find dependencies.
 
   Args:
@@ -2046,18 +2122,10 @@ def _EqueryDepgraph(pkg_str: str,
       unlimited.
 
   Returns:
-    result (cros_build_lib.CommandResult)
+    result (cros_build_lib.CompletedProcess)
   """
-  cmd = [
-      cros_build_lib.GetSysrootToolPath(sysroot, 'equery'),
-      '-CNq',
-      'depgraph',
-      '--depth=%d' % depth,
-  ]
-
-  cmd += [pkg_str]
-  return cros_build_lib.run(
-      cmd, print_cmd=False, capture_output=True, check=True, encoding='utf-8')
+  return _Equery(
+      'depgraph', f'--depth={depth}', pkg_str, sysroot=sysroot, print_cmd=False)
 
 
 def GetFlattenedDepsForPackage(pkg_str, sysroot='/', depth=0):
@@ -2078,7 +2146,7 @@ def GetFlattenedDepsForPackage(pkg_str, sysroot='/', depth=0):
 
   result = _EqueryDepgraph(pkg_str, sysroot, depth)
 
-  return _ParseDepTreeOutput(result.output)
+  return _ParseDepTreeOutput(result.stdout)
 
 
 def _ParseDepTreeOutput(equery_output):
@@ -2101,10 +2169,44 @@ def _ParseDepTreeOutput(equery_output):
   return re.findall(equery_output_regex, equery_output)
 
 
+def GetReverseDependencies(
+    packages: List[str],
+    sysroot: Union[str, os.PathLike] = '/',
+    indirect: bool = False) -> List[Optional[package_info.PackageInfo]]:
+  """List all reverse dependencies for the given list of packages.
+
+  Args:
+    packages: Packages with optional category, version, and slot.
+    sysroot: The root directory being inspected.
+    indirect: If True, search for both the direct and indirect dependencies
+      on the specified packages.
+
+  Returns:
+    List[package_info.PackageInfo]: Packages that depend on the given packages.
+
+  Raises:
+    ValueError when no packages are provided.
+    cros_build_lib.RunCommandError when the equery depends command errors.
+  """
+  if not packages:
+    raise ValueError('Must provide at least one package.')
+
+  sysroot = Path(sysroot)
+
+  args = []
+  if indirect:
+    args += ['--indirect']
+  args += packages
+
+  result = _Equery(
+      'depends', *args, sysroot=str(sysroot), print_cmd=False, check=False)
+  return [package_info.parse(x) for x in result.stdout.strip().splitlines()]
+
+
 def _Qlist(
     args: List[str],
     board: Optional[str] = None,
-    buildroot: str = constants.SOURCE_ROOT) -> cros_build_lib.CommandResult:
+    buildroot: str = constants.SOURCE_ROOT) -> cros_build_lib.CompletedProcess:
   """Run qlist with the given args.
 
   Args:
@@ -2115,7 +2217,7 @@ def _Qlist(
   Returns:
     The command result
   """
-  cmd = [f'qlist-{board}' if board else 'qlist']
+  cmd = [_GetSysrootTool('qlist', board=board)]
   # Simplify output.
   cmd += ['-Cq']
   cmd += args
@@ -2146,7 +2248,7 @@ def GetInstalledPackageUseFlags(pkg_str,
   result = _Qlist(['-U', pkg_str], board, buildroot)
   use_flags = {}
   if result.returncode == 0:
-    for line in result.output.splitlines():
+    for line in result.stdout.splitlines():
       tokens = line.split()
       use_flags[tokens[0]] = tokens[1:]
 
@@ -2186,23 +2288,31 @@ def GetBoardUseFlags(board):
 
 
 def _EmergeBoard(
-    board: str,
     package: str,
-    buildroot: str = constants.SOURCE_ROOT) -> cros_build_lib.CommandResult:
+    board: Optional[str] = None,
+    sysroot: Optional[Union[str, os.PathLike]] = None,
+    buildroot: str = constants.SOURCE_ROOT,
+    set_empty_root: bool = False,
+) -> cros_build_lib.CompletedProcess:
   """Call emerge board to get dependences of package.
 
   Args:
     board: The board to inspect.
+    sysroot: The root directory being inspected.
     package: The package name with optional category, version, and slot.
     buildroot: Source root to find overlays.
+    set_empty_root: Set the --root argument to /mnt/empty. This is a
+      workaround for an issue for portage versions before 2.3.75.
 
   Returns:
-    result (cros_build_lib.CommandResult)
+    result (cros_build_lib.CompletedProcess)
   """
-  emerge = 'emerge-%s' % board if board else 'emerge'
-  cmd = [
-      emerge, '-p', '--cols', '--quiet', '--root', '/mnt/empty', '-e', package
-  ]
+  emerge = _GetSysrootTool('emerge', board=board, sysroot=sysroot)
+  cmd = [emerge, '-p', '--cols', '--quiet', '-e']
+  if set_empty_root:
+    cmd += ['--root', '/mnt/empty']
+  cmd.append(package)
+
   return cros_build_lib.run(
       cmd,
       cwd=buildroot,
@@ -2211,18 +2321,23 @@ def _EmergeBoard(
       encoding='utf-8')
 
 
-def GetPackageDependencies(board, package, buildroot=constants.SOURCE_ROOT):
+def GetPackageDependencies(package: str,
+                           board: Optional[str] = None,
+                           sysroot: Optional[Union[str, os.PathLike]] = None,
+                           buildroot: str = constants.SOURCE_ROOT,
+                           set_empty_root: bool = False) -> List[str]:
   """Returns the depgraph list of packages for a board and package."""
-  emerge_output = _EmergeBoard(board, package, buildroot).stdout.splitlines()
+  output = _EmergeBoard(package, board, sysroot, buildroot,
+                        set_empty_root).stdout.splitlines()
   packages = []
-  for line in emerge_output:
+  for line in output:
     # The first column is ' NRfUD '
     columns = line[7:].split()
     try:
       package = columns[0] + '-' + columns[1]
       packages.append(package)
     except IndexError:
-      logging.error('Wrong format of output: \n%r', emerge_output)
+      logging.error('Wrong format of output: \n%r', output)
       raise
 
   return packages
@@ -2253,7 +2368,9 @@ def GetRepositoryFromEbuildInfo(info):
   ]
 
 
-def _EbuildInfo(ebuild_path: str, sysroot: str) -> cros_build_lib.CommandResult:
+def _EbuildInfo(
+    ebuild_path: str,
+    sysroot: str) -> cros_build_lib.CompletedProcess:
   """Get ebuild info for <ebuild_path>.
 
   Args:
@@ -2261,10 +2378,9 @@ def _EbuildInfo(ebuild_path: str, sysroot: str) -> cros_build_lib.CommandResult:
     sysroot: The root directory being inspected.
 
   Returns:
-    result (cros_build_lib.CommandResult)
+    result (cros_build_lib.CompletedProcess)
   """
-  cmd = (cros_build_lib.GetSysrootToolPath(sysroot,
-                                           'ebuild'), ebuild_path, 'info')
+  cmd = (_GetSysrootTool('ebuild', sysroot=sysroot), ebuild_path, 'info')
   return cros_build_lib.run(
       cmd, capture_output=True, print_cmd=False, check=False, encoding='utf-8')
 
@@ -2283,13 +2399,40 @@ def GetRepositoryForEbuild(ebuild_path, sysroot):
     list of RepositoryInfoTuples.
   """
   result = _EbuildInfo(ebuild_path, sysroot)
-  return GetRepositoryFromEbuildInfo(result.output)
+  return GetRepositoryFromEbuildInfo(result.stdout)
 
 
-def CleanOutdatedBinaryPackages(sysroot):
-  """Cleans outdated binary packages from |sysroot|."""
-  return cros_build_lib.run(
-      [cros_build_lib.GetSysrootToolPath(sysroot, 'eclean'), '-d', 'packages'])
+def CleanOutdatedBinaryPackages(
+    sysroot: Union[str, os.PathLike],
+    deep: bool = True,
+    exclusion_file: Optional[Union[str, os.PathLike]] = None
+) -> cros_build_lib.CompletedProcess:
+  """Cleans outdated binary packages from |sysroot|.
+
+  Args:
+    sysroot: The root directory being inspected.
+    deep: If set to True, keep minimal files for reinstallation by examining
+      vartree for installed packages. If set to False, use porttree, which
+      contains every ebuild in the tree, to determine which binpkgs to clean.
+    exclusion_file: Path to the exclusion file.
+
+  Returns:
+    result (cros_build_lib.CompletedProcess)
+
+  Raises:
+    cros_build_lib.RunCommandError
+  """
+  sysroot = Path(sysroot)
+  if exclusion_file:
+    exclusion_file = Path(exclusion_file)
+
+  cmd = [_GetSysrootTool('eclean', sysroot=str(sysroot))]
+  if deep:
+    cmd += ['-d']
+  if exclusion_file:
+    cmd += ['-e', str(exclusion_file)]
+  cmd += ['packages']
+  return cros_build_lib.run(cmd)
 
 
 def _CheckHasTest(cp, sysroot, require_workon: bool = False):
@@ -2340,15 +2483,15 @@ def PackagesWithTest(sysroot, packages, require_workon: bool = False):
   return pkg_with_test
 
 
-def ParseDieHookStatusFile(metrics_dir):
+def ParseDieHookStatusFile(metrics_dir: str) -> List[package_info.CPV]:
   """Parse the status file generated by the failed packages die_hook
 
   Args:
-    metrics_dir (str): The value of CROS_METRICS_DIR, which is where the status
-                       file is expected to have been generated.
+    metrics_dir: The value of CROS_METRICS_DIR, which is where the status file
+      is expected to have been generated.
 
   Returns:
-    list[package_info.CPV] - Packages that failed in the build attempt.
+    Packages that failed in the build attempt.
   """
   file_path = os.path.join(metrics_dir, constants.DIE_HOOK_STATUS_FILE_NAME)
   if not os.path.exists(file_path):
@@ -2357,7 +2500,7 @@ def ParseDieHookStatusFile(metrics_dir):
   with open(file_path) as failed_pkgs_file:
     failed_pkgs = []
     for line in failed_pkgs_file:
-      cpv, _phase = line.strip().split()
+      cpv, _phase = line.split()
       failed_pkgs.append(package_info.parse(cpv))
     return failed_pkgs
 
@@ -2397,22 +2540,6 @@ class PortageqError(Error):
   """Portageq command error."""
 
 
-def _GetPortageq(board=None, sysroot=None):
-  """Return the portageq tool to use."""
-  if sysroot is None and board is None:
-    return 'portageq'
-
-  # Prefer the sysroot tool if it exists.
-  if sysroot is None:
-    sysroot = build_target_lib.get_default_sysroot_path(board)
-  tool = cros_build_lib.GetSysrootToolPath(sysroot, 'portageq')
-  if os.path.exists(tool):
-    return tool
-
-  # Fallback to the general PATH wrappers if possible.
-  return 'portageq' if board is None else 'portageq-%s' % board
-
-
 def _Portageq(command, board=None, sysroot=None, **kwargs):
   """Run a portageq command.
 
@@ -2423,7 +2550,7 @@ def _Portageq(command, board=None, sysroot=None, **kwargs):
     kwargs: Additional run arguments.
 
   Returns:
-    cros_build_lib.CommandResult
+    cros_build_lib.CompletedProcess
 
   Raises:
     cros_build_lib.RunCommandError
@@ -2434,7 +2561,8 @@ def _Portageq(command, board=None, sysroot=None, **kwargs):
   kwargs.setdefault('encoding', 'utf-8')
   kwargs.setdefault('enter_chroot', True)
 
-  return cros_build_lib.run([_GetPortageq(board, sysroot)] + command, **kwargs)
+  portageq = _GetSysrootTool('portageq', board, sysroot)
+  return cros_build_lib.run([portageq] + command, **kwargs)
 
 
 def PortageqBestVisible(atom: str,
@@ -2467,7 +2595,7 @@ def PortageqBestVisible(atom: str,
     raise NoVisiblePackageError(
         f'No best visible package for "{atom}" could be found.') from e
 
-  return package_info.parse(result.output.strip())
+  return package_info.parse(result.stdout.strip())
 
 
 def PortageqEnvvar(variable, board=None, sysroot=None, allow_undefined=False):
@@ -2537,12 +2665,12 @@ def PortageqEnvvars(variables, board=None, sysroot=None, allow_undefined=False):
     elif not allow_undefined:
       # Error for undefined variable.
       raise PortageqError('One or more variables undefined: %s' %
-                          e.result.output)
+                          e.result.stdout)
     else:
       # Undefined variable but letting it slide.
       result = e.result
 
-  return key_value_store.LoadData(result.output, multiline=True)
+  return key_value_store.LoadData(result.stdout, multiline=True)
 
 
 def PortageqHasVersion(category_package, board=None, sysroot=None):
@@ -2563,10 +2691,11 @@ def PortageqHasVersion(category_package, board=None, sysroot=None):
     sysroot = build_target_lib.get_default_sysroot_path(board)
   # Exit codes 0/1+ indicate "have"/"don't have".
   # Normalize them into True/False values.
-  result = _Portageq(['has_version', sysroot, category_package],
-                     board=board,
-                     sysroot=sysroot,
-                     check=False)
+  result = _Portageq(
+      ['has_version', os.path.abspath(sysroot), category_package],
+      board=board,
+      sysroot=sysroot,
+      check=False)
   return not result.returncode
 
 
@@ -2586,7 +2715,7 @@ def PortageqMatch(atom, board=None, sysroot=None):
   if sysroot is None:
     sysroot = build_target_lib.get_default_sysroot_path(board)
   result = _Portageq(['match', sysroot, atom], board=board, sysroot=sysroot)
-  return package_info.parse(result.output.strip()) if result.output else None
+  return package_info.parse(result.stdout.strip()) if result.stdout else None
 
 
 class PackageNotFoundError(Error):
@@ -2619,35 +2748,66 @@ def GeneratePackageSizes(db, root, installed_packages):
     assert package_cpv not in visited_cpvs
     visited_cpvs.add(package_cpv)
 
-    total_package_filesize = 0
     if not installed_package:
       raise PackageNotFoundError('Unable to locate installed_package %s in %s' %
                                  (package_cpv, root))
-    for content_type, path in installed_package.ListContents():
-      if content_type == InstalledPackage.OBJ:
-        filename = os.path.join(db.root, path)
-        try:
-          filesize = os.path.getsize(filename)
-        except OSError as e:
-          logging.warning('unable to compute the size of %s (skipping): %s',
-                          filename, e)
-          continue
-        logging.debug('size of %s = %d', filename, filesize)
-        total_package_filesize += filesize
+    total_package_filesize = CalculatePackageSize(
+        installed_package.ListContents(), db.package_install_path)
     logging.debug('%s installed_package size is %d', package_cpv,
                   total_package_filesize)
     yield package_cpv, total_package_filesize
 
 
-def UpdateEbuildManifest(ebuild_path, chroot=None):
+def CalculatePackageSize(files_in_package: Iterable[Tuple[str, str]],
+                         package_install_path: os.PathLike) -> int:
+  """Given a fileset for a Portage package, calculate the apparent package size.
+
+  This function provides the apparent size of the given package on disk. It is
+  provided in bytes (not blocks). It does not account for overall disk usage;
+  by implication, the size does not include allocated blocks when files are very
+  small, or when the apparent size is much larger than allocated blocks on disk
+  (as is the case with sparse files).
+
+  This function also only calculates the size of package files which are actual
+  OBJ-type files listed in the CONTENTS file for the package in the package db.
+  As such, the storage needs for any existing symlinks or relevant inodes is
+  not accounted for in this function.
+
+  Args:
+    files_in_package: A list of file information for all files installed by a
+      single package.
+    package_install_path: The path prefix for the installation location.
+
+  Returns:
+    The total apparent size of the installed package, in bytes.
+  """
+  total_package_filesize = 0
+  for content_type, path in files_in_package:
+    if content_type == InstalledPackage.OBJ:
+      filename = os.path.join(package_install_path, path)
+      try:
+        filesize = os.path.getsize(filename)
+      except OSError as e:
+        logging.warning('unable to compute the size of %s (skipping): %s',
+                        filename, e)
+        continue
+      logging.debug('size of %s = %d bytes', filename, filesize)
+      total_package_filesize += filesize
+  return total_package_filesize
+
+
+def UpdateEbuildManifest(
+    ebuild_path: Union[str, os.PathLike],
+    chroot: Optional[chroot_lib.Chroot] = None,
+) -> cros_build_lib.CompletedProcess:
   """Updates the ebuild manifest for the provided ebuild path.
 
   Args:
-    ebuild_path: path - The absolute path to the ebuild.
-    chroot (chroot_lib.Chroot): Optionally specify a chroot to enter.
+    ebuild_path: The absolute path to the ebuild.
+    chroot: A chroot to enter.
 
   Returns:
-    CommandResult
+    The command result.
   """
 
   chroot_args = None

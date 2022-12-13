@@ -5,16 +5,20 @@
 """Utilities for manipulating ChromeOS images."""
 
 import collections
+import errno
 import glob
 import logging
 import os
+from pathlib import Path
 import re
-from typing import Optional, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
 
+from chromite.lib import chromeos_version
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import git
 from chromite.lib import osutils
+from chromite.lib import portage_util
 from chromite.lib import retry_util
 from chromite.lib import signing
 
@@ -26,7 +30,7 @@ _SECURITY_CHECKS = {
     'secure_kernelparams': True,
     'not_ASAN': False,
 }
-
+_FACTORY_SHIM_USE_FLAGS = 'fbconsole vtconsole factory_shim_ramfs i2cdev vfat'
 
 class Error(Exception):
   """Base image_lib error class."""
@@ -46,7 +50,8 @@ class LoopbackPartitions(object):
   In either case, the same arguments should be passed to init.
   """
 
-  def __init__(self, path, destination=None, part_ids=None, mount_opts=('ro',)):
+  def __init__(self, path, destination=None, part_ids=None, mount_opts=('ro',),
+               delete: bool = True):
     """Initialize.
 
     Args:
@@ -57,15 +62,17 @@ class LoopbackPartitions(object):
           used during initialization of the context manager.
       mount_opts: Use these mount_opts for mounting |part_ids|.  This is only
           used during initialization of the context manager.
+      delete: Whether to automatically tear down the loopback device.
     """
     self.path = path
     self.destination = destination
     self.dev = None
     self.part_ids = part_ids
     self.mount_opts = mount_opts
+    self.delete = delete
     self.parts = {}
     self._destination_created = False
-    self._gpt_table = GetImageDiskPartitionInfo(path)
+    self._gpt_table = {}
     # Set of _gpt_table elements currently mounted.
     self._mounted = set()
     # Set of dirs that need to be removed in close().
@@ -73,11 +80,26 @@ class LoopbackPartitions(object):
     # Set of symlinks created.
     self._symlinks = set()
 
+    self._InitGpt()
+    self._InitLoopback()
+
+  def _InitGpt(self):
+    """Initialize the GPT info.
+
+    This is a separate function for test mocking purposes.
+    """
+    self._gpt_table = GetImageDiskPartitionInfo(self.path)
+
+  def _InitLoopback(self):
+    """Initialize the loopback device.
+
+    This is a separate function for test mocking purposes.
+    """
     try:
       cmd = ['losetup', '--show', '-f', self.path]
       ret = cros_build_lib.sudo_run(
           cmd, debug_level=logging.DEBUG, capture_output=True, encoding='utf-8')
-      self.dev = ret.output.strip()
+      self.dev = ret.stdout.strip()
       cmd = ['partx', '-d', self.dev]
       cros_build_lib.sudo_run(cmd, quiet=True, check=False)
       cmd = ['partx', '-a', self.dev]
@@ -90,7 +112,6 @@ class LoopbackPartitions(object):
         cmd = ['partx', '-u', self.dev]
         cros_build_lib.sudo_run(cmd)
 
-      self.parts = {}
       part_devs = glob.glob(self.dev + 'p*')
       if not part_devs:
         logging.warning("Didn't find partition devices nodes for %s.",
@@ -186,17 +207,7 @@ class LoopbackPartitions(object):
   def _IsExt2(self, part_id, offset=0):
     """Is the given partition an ext2 file system?"""
     dev = self.GetPartitionDevName(part_id)
-    magic_ofs = offset + 0x438
-    # We shouldn't need the sync here, but we sometimes see flakes with some
-    # kernels where it looks like the metadata written isn't seen when we try
-    # to mount later on.  Adding a sync for 1 byte shouldn't be too bad.
-    ret = cros_build_lib.sudo_run(
-        ['dd', 'if=%s' % dev, 'skip=%d' % magic_ofs,
-         'conv=notrunc,fsync', 'count=2', 'bs=1'],
-        debug_level=logging.DEBUG, capture_output=True, check=False)
-    if ret.returncode:
-      return False
-    return ret.output == b'\x53\xef'
+    return IsExt2Image(dev, offset=offset)
 
   def EnableRwMount(self, part_id, offset=0):
     """Enable RW mounts of the specified partition."""
@@ -288,10 +299,12 @@ class LoopbackPartitions(object):
     return self
 
   def __exit__(self, exc_type, exc, tb):
-    self.close()
+    if self.delete:
+      self.close()
 
   def __del__(self):
-    self.close()
+    if self.delete:
+      self.close()
 
 
 def WriteLsbRelease(sysroot, fields):
@@ -649,10 +662,173 @@ def GetImageDiskPartitionInfo(image_path):
 
   # The 'I' input tells parted to ignore its supposed concern about overlapping
   # partitions. Cgpt simply ignores the input.
-  lines = cros_build_lib.run(
+  lines = cros_build_lib.dbg_run(
       cmd,
       extra_env={'PATH': '/sbin:%s' % os.environ['PATH'], 'LC_ALL': 'C'},
       capture_output=True,
       encoding='utf-8',
       input=b'I').stdout.splitlines()
   return func(lines)
+
+
+def GetImagesToBuild(image_types: List[str]) -> Set[str]:
+  """Construct the images to build from the image type.
+
+  Args:
+    image_types: list of image types.
+
+  Returns:
+    A list of image name to build.
+
+  Raises:
+    ValueError if an invalid image type is given as input or if factory shim
+    image is requested along with any other image type.
+  """
+  image_names = set()
+
+  for image in image_types:
+    if image not in constants.IMAGE_TYPE_TO_NAME:
+      raise ValueError(f'Invalid image type : {image}')
+    image_names.add(constants.IMAGE_TYPE_TO_NAME[image])
+
+  if constants.FACTORY_IMAGE_BIN in image_names and len(image_names) > 1:
+    raise ValueError(
+        f"Can't build {constants.FACTORY_IMAGE_BIN} with any other image.")
+
+  return image_names
+
+
+def GetBuildImageEnvvars(
+    image_names: Set[str],
+    board: str,
+    version_info: Optional[chromeos_version.VersionInfo] = None,
+    build_dir: Optional[Union[str, os.PathLike]] = None,
+    output_dir: Optional[Union[str, os.PathLike]] = None,
+    env_var_init: Optional[Dict[str, str]] = None) -> Dict[str, str]:
+  """Get the environment variables required to build the given images.
+
+  Args:
+    image_names: The list of images to build.
+    board: The board for which the images will be built.
+    version_info: ChromeOS version information that needs to be populated.
+    build_dir: Directory in which to compose the image.
+    output_dir: Directory in which to place image result.
+    env_var_init: Initial environment variables to use.
+
+  Returns:
+    A dictionary of environment variables.
+  """
+  if not env_var_init:
+    env_var_init = {}
+  env_var_init['INSTALL_MASK'] = '\n'.join(constants.DEFAULT_INSTALL_MASK)
+  env_var_init['PRISTINE_IMAGE_NAME'] = constants.BASE_IMAGE_BIN
+  env_var_init['BASE_PACKAGE'] = 'virtual/target-os'
+
+  if constants.FACTORY_IMAGE_BIN in image_names:
+    env_var_init['INSTALL_MASK'] = '\n'.join(
+        constants.FACTORY_SHIM_INSTALL_MASK)
+    env_var_init['USE'] = (env_var_init.get('USE', '') + ' ' +
+                           _FACTORY_SHIM_USE_FLAGS).strip()
+    env_var_init['PRISTINE_IMAGE_NAME'] = constants.FACTORY_IMAGE_BIN
+    env_var_init['BASE_PACKAGE'] = 'virtual/target-os-factory-shim'
+
+  # Mask systemd directories if this is not a systemd image.
+  if 'systemd' not in portage_util.GetBoardUseFlags(board):
+    env_var_init['INSTALL_MASK'] += '\n' + '\n'.join(
+        constants.SYSTEMD_INSTALL_MASK)
+
+  if version_info:
+    env_var_init['CHROME_BRANCH'] = version_info.chrome_branch
+    env_var_init['CHROMEOS_BUILD'] = version_info.build_number
+    env_var_init['CHROMEOS_BRANCH'] = version_info.branch_build_number
+    env_var_init['CHROMEOS_PATCH'] = version_info.patch_number
+    env_var_init['CHROMEOS_VERSION_STRING'] = version_info.VersionString()
+
+  # TODO(rchandrasekar): Remove 'BUILD_DIR' and 'OUTPUT_DIR' env variables after
+  # image creation is moved out of build_image.sh script.
+  if build_dir:
+    env_var_init['BUILD_DIR'] = str(build_dir)
+
+  if output_dir:
+    env_var_init['OUTPUT_DIR'] = str(output_dir)
+
+  return env_var_init
+
+
+def CreateBuildDir(
+    build_root: Union[str, os.PathLike],
+    output_root: Union[str, os.PathLike],
+    chrome_branch: str,
+    version: str,
+    board: str,
+    symlink: str,
+    replace: bool = False,
+    build_attempt: Optional[int] = None,
+    output_suffix: Optional[str] = None) -> Tuple[Path, Path, Path]:
+  """Create the build directory based on input arguments.
+
+  Args:
+    build_root: Directory in which to compose the image.
+    output_root: Directory in which to place the image result.
+    chrome_branch: Chrome branch number to use.
+    version: The version string to use for the output directory.
+    board: The board for which the image is generated.
+    symlink: The output directory symlink to be created.
+    replace: Whether to remove and replace the existing directory.
+    build_attempt: build attempt count to append to directory name.
+    output_suffix: Any user given output suffix to append to directory name.
+
+  Returns:
+    A tuple of build directory, output directory and symlink directory.
+
+  Raises:
+    FileExistsError when the output build directory already exists.
+  """
+  image_dir = f'R{chrome_branch}-{version}'
+
+  if build_attempt:
+    image_dir += f'-a{build_attempt}'
+
+  if output_suffix:
+    image_dir += f'-{output_suffix}'
+
+  board_dir = Path(board) / image_dir
+  build_dir = Path(build_root) / board_dir
+  output_dir = Path(output_root) / board_dir
+  symlink_dir = Path(output_root) / board / symlink
+
+  if replace and build_dir.exists():
+    osutils.RmDir(build_dir, sudo=True)
+
+  if build_dir.exists():
+    logging.error('Directory %s already exists.', build_dir)
+    logging.error('Use --build_attempt option to specify an unused attempt.')
+    logging.error('Or use --replace if you want to overwrite this directory.')
+    raise FileExistsError(errno.EEXIST, 'Unwilling to overwrite %s', build_dir)
+
+  osutils.SafeMakedirs(build_dir)
+  osutils.SafeMakedirs(output_dir)
+  osutils.SafeSymlink(image_dir, symlink_dir)
+
+  return [build_dir, output_dir, symlink_dir]
+
+
+def IsSquashfsImage(path):
+  """Returns true if |path| is a squashfs filesystem."""
+  MAGIC = b'\x68\x73\x71\x73'
+
+  logging.debug('Checking if image is squashfs: %s', path)
+  # Read the magic number in the file's superblock.
+  return osutils.ReadFile(path, mode='rb', size=len(MAGIC), sudo=True) == MAGIC
+
+
+def IsExt2Image(path, offset=0):
+  """Returns true if |path| is an ext2/ext3/ext4 filesystem."""
+  MAGIC = b'\x53\xef'
+  SB_OFFSET = 0x438
+
+  logging.debug('Checking if image is ext2/3/4: %s', path)
+  # Read the magic number in the file's superblock.
+  return osutils.ReadFile(
+      path, mode='rb', seek=offset + SB_OFFSET, size=len(MAGIC),
+      sudo=True) == MAGIC

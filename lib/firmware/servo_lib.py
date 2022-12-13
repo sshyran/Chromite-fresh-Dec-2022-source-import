@@ -10,6 +10,7 @@ CCD/servo v4/servo micro.
 """
 from typing import List, NamedTuple
 
+
 SERVO_C2D2 = 'c2d2'
 SERVO_CCD_CR50 = 'ccd_cr50'
 SERVO_CCD_TI50 = 'ccd_ti50'

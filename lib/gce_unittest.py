@@ -6,12 +6,13 @@
 
 import os
 
-from chromite.lib import cros_test_lib
-from chromite.lib import gce
-from chromite.lib import osutils
 from chromite.third_party.googleapiclient.errors import HttpError
 from chromite.third_party.googleapiclient.http import HttpMockSequence
 from chromite.third_party.oauth2client.client import GoogleCredentials
+
+from chromite.lib import cros_test_lib
+from chromite.lib import gce
+from chromite.lib import osutils
 
 
 class GceTest(cros_test_lib.MockTempDirTestCase):

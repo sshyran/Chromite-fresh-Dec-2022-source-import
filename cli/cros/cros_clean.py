@@ -21,6 +21,7 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import dev_server_wrapper
 from chromite.lib import osutils
+from chromite.utils import pformat
 from chromite.utils import timer
 
 
@@ -123,7 +124,7 @@ class CleanCommand(command.CliCommand):
 
     group = parser.add_argument_group(
         'Advanced Customization',
-        description='Advanced options that are rarely be needed.')
+        description='Advanced options that are rarely needed.')
     group.add_argument(
         '--sdk-path',
         type='path',
@@ -179,8 +180,22 @@ class CleanCommand(command.CliCommand):
 
     cros_build_lib.AssertOutsideChroot()
 
+    total_size = 0
+
+    def _GetSize(path):
+      """Calculate human size used by |path|."""
+      nonlocal total_size
+      result = cros_build_lib.dbg_run(['du', '--bytes', '--summarize', path],
+                                      check=False, capture_output=True,
+                                      encoding='utf-8')
+      size = int(result.stdout.split()[0])
+      total_size += size
+      return pformat.size(size)
+
     def _LogClean(path):
-      logging.notice('would have cleaned: %s', path)
+      if not os.path.exists(path):
+        return
+      logging.notice('would have cleaned: %s (%s)', path, _GetSize(path))
 
     def Clean(path):
       """Helper wrapper for the dry-run checks"""
@@ -192,7 +207,8 @@ class CleanCommand(command.CliCommand):
     def Empty(path):
       """Helper wrapper for the dry-run checks"""
       if self.options.dry_run:
-        logging.notice('would have emptied: %s', path)
+        if os.path.exists(path):
+          logging.notice('would have emptied: %s (%s)', path, _GetSize(path))
       else:
         osutils.EmptyDir(path, ignore_missing=True, sudo=True)
 
@@ -240,11 +256,25 @@ class CleanCommand(command.CliCommand):
       # TODO: When sdk_lib/enter_chroot.sh is moved to chromite, we should unify
       # with those code paths.
       if not self.options.dry_run:
-        for subdir in ('ccache', 'host', 'target'):
-          osutils.SafeMakedirs(
-              os.path.join(self.options.cache_dir, 'distfiles', subdir))
-        os.chmod(
-            os.path.join(self.options.cache_dir, 'distfiles', 'ccache'), 0o2775)
+        distfiles_dir = os.path.join(self.options.cache_dir, 'distfiles')
+        osutils.SafeMakedirs(distfiles_dir)
+        os.chmod(distfiles_dir, 0o2775)
+
+        # The host & target subdirs aren't used anymore since we unified them,
+        # but if the cache is shared with older branches, we don't want to have
+        # files duplicated in them.  The unification happened in Jul 2020 for
+        # 13360.0.0+ / R86+, so we can prob drop this logic ~Jul 2028?
+        for subdir in ('host', 'target'):
+          subdir = os.path.join(distfiles_dir, subdir)
+          # Recreate the path if it isn't a symlink.
+          if not os.path.islink(subdir):
+            osutils.RmDir(subdir, ignore_missing=True, sudo=True)
+            # Have the subdirs point to the common (parent) dir.
+            os.symlink('.', subdir)
+
+        ccache_dir = os.path.join(distfiles_dir, 'ccache')
+        osutils.SafeMakedirs(ccache_dir)
+        os.chmod(ccache_dir, 0o2775)
 
     if self.options.chromite:
       logging.debug('Clean chromite workdirs.')
@@ -307,3 +337,6 @@ class CleanCommand(command.CliCommand):
         packages_dir = os.path.join(constants.SOURCE_ROOT, 'src', 'third_party',
                                     'autotest', 'files', 'site-packages')
         Clean(packages_dir)
+
+    if total_size:
+      logging.notice('Freed %s (apparent) space', pformat.size(total_size))

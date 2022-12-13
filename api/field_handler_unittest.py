@@ -211,7 +211,7 @@ class CopyPathInTest(cros_test_lib.TempDirTestCase):
                                      prefix=self.tempdir):
       new_path = message.path.path
       # The prefix should be removed.
-      self.assertFalse(new_path.startswith(self.tempdir))
+      self.assertFalse(new_path.startswith(str(self.tempdir)))
 
 
 class SyncDirsTest(cros_test_lib.TempDirTestCase):

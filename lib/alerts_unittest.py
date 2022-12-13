@@ -32,7 +32,7 @@ class SmtpServerTest(cros_test_lib.MockTestCase):
     self.smtp_mock = self.PatchObject(smtplib, 'SMTP')
 
   def testBasic(self):
-    """Basic sanity check."""
+    """Basic spot check."""
     msg = alerts.CreateEmail('fake subject', 'fake@localhost', 'fake message')
     server = alerts.SmtpServer(('localhost', 1))
     ret = server.Send(msg)
@@ -180,13 +180,13 @@ class SendEmailTest(cros_test_lib.MockTestCase):
   """Tests for SendEmail."""
 
   def testSmtp(self):
-    """Smtp sanity check."""
+    """Smtp check."""
     send_mock = self.PatchObject(alerts.SmtpServer, 'Send')
     alerts.SendEmail('mail', 'root@localhost')
     self.assertEqual(send_mock.call_count, 1)
 
   def testGmail(self):
-    """Gmail sanity check."""
+    """Gmail check."""
     send_mock = self.PatchObject(alerts.GmailServer, 'Send')
     alerts.SendEmail('mail', 'root@localhost',
                      server=alerts.GmailServer(token_cache_file='fakefile'))
@@ -197,13 +197,13 @@ class SendEmailLogTest(cros_test_lib.MockTestCase):
   """Tests for SendEmailLog()."""
 
   def testSmtp(self):
-    """Smtp sanity check."""
+    """Smtp check."""
     send_mock = self.PatchObject(alerts.SmtpServer, 'Send')
     alerts.SendEmailLog('mail', 'root@localhost')
     self.assertEqual(send_mock.call_count, 1)
 
   def testGmail(self):
-    """Gmail sanity check."""
+    """Gmail check."""
     send_mock = self.PatchObject(alerts.GmailServer, 'Send')
     alerts.SendEmailLog('mail', 'root@localhost',
                         server=alerts.GmailServer(token_cache_file='fakefile'))

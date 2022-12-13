@@ -23,10 +23,11 @@ from chromite.lib.paygen import partition_lib
 from chromite.lib.paygen import paygen_payload_lib
 from chromite.lib.paygen import paygen_stateful_payload_lib
 
+
 if TYPE_CHECKING:
+  from chromite.lib import build_target_lib
   from chromite.lib import chroot_lib
   from chromite.lib import sysroot_lib
-  from chromite.lib import build_target_lib
 
 # Archive type constants.
 ARCHIVE_CONTROL_FILES = 'control'
@@ -447,6 +448,11 @@ def BundleTestUpdatePayloads(image_path: str, output_dir: str) -> List[str]:
   return payloads
 
 
+def ExtendBinPaths(cros_payload_path: str) -> List[str]:
+  """Return an array with corresponding .json and .log for a .bin."""
+  return [cros_payload_path, cros_payload_path + '.json',
+          cros_payload_path + '.log']
+
 def GenerateTestPayloads(target_image_path: str,
                          archive_dir: str,
                          full: bool = False,
@@ -464,35 +470,60 @@ def GenerateTestPayloads(target_image_path: str,
     dlc: Generate sample-dlc payload if available.
 
   Returns:
-    The list of payloads that were generated.
+    The list of artifacts that were generated.
   """
   real_target = os.path.realpath(target_image_path)
   # The path to the target should look something like this:
   # .../link/R37-5952.0.2014_06_12_2302-a1/chromiumos_test_image.bin
   board, os_version = real_target.split('/')[-3:-1]
-  prefix = 'chromeos'
+  cros_prefix = 'chromeos'
+  minios_prefix = 'minios'
   suffix = 'dev.bin'
   generated = []
 
   if full:
     # Names for full payloads look something like this:
-    # chromeos_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin
-    name = '_'.join([prefix, os_version, board, 'full', suffix])
-    payload_path = os.path.join(archive_dir, name)
-    paygen_payload_lib.GenerateUpdatePayload(target_image_path, payload_path)
-    generated.append(payload_path)
+    # [chromeos|minios]_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin
+    cros_name = '_'.join([cros_prefix, os_version, board, 'full', suffix])
+    cros_payload_path = os.path.join(archive_dir, cros_name)
+    if paygen_payload_lib.GenerateUpdatePayload(
+        target_image_path, cros_payload_path):
+      generated.extend(ExtendBinPaths(cros_payload_path))
+    else:
+      logging.info('CrOS full payload generation skipped.')
+
+    minios_name = '_'.join([minios_prefix, os_version, board, 'full', suffix])
+    minios_payload_path = os.path.join(archive_dir, minios_name)
+    if paygen_payload_lib.GenerateUpdatePayload(
+        target_image_path, minios_payload_path, minios=True):
+      generated.extend(ExtendBinPaths(minios_payload_path))
+    else:
+      logging.info('MiniOS full payload generation skipped.')
 
   if delta:
     # Names for delta payloads look something like this:
-    # chromeos_R37-5952.0.2014_06_12_2302-a1_R37-
+    # [chromeos|minios]_R37-5952.0.2014_06_12_2302-a1_R37-
     # 5952.0.2014_06_12_2302-a1_link_delta_dev.bin
-    name = '_'.join([prefix, os_version, os_version, board, 'delta', suffix])
-    payload_path = os.path.join(archive_dir, name)
-    paygen_payload_lib.GenerateUpdatePayload(
-        target_image_path, payload_path, src_image=target_image_path)
-    generated.append(payload_path)
+    cros_name = '_'.join(
+        [cros_prefix, os_version, os_version, board, 'delta', suffix])
+    cros_payload_path = os.path.join(archive_dir, cros_name)
+    if paygen_payload_lib.GenerateUpdatePayload(
+        target_image_path, cros_payload_path, src_image=target_image_path):
+      generated.extend(ExtendBinPaths(cros_payload_path))
+    else:
+      logging.info('CrOS delta payload generation skipped.')
 
-  if dlc and 'dlc_test' in portage_util.GetBoardUseFlags(board):
+    minios_name = '_'.join(
+        [minios_prefix, os_version, os_version, board, 'delta', suffix])
+    minios_payload_path = os.path.join(archive_dir, minios_name)
+    if paygen_payload_lib.GenerateUpdatePayload(
+        target_image_path, minios_payload_path, src_image=target_image_path,
+        minios=True):
+      generated.extend(ExtendBinPaths(minios_payload_path))
+    else:
+      logging.info('MiniOS delta payload generation skipped.')
+
+  if dlc and 'dlc' in portage_util.GetBoardUseFlags(board):
     dlc_prefix = 'dlc'
     dlc_id = 'sample-dlc'
     dlc_package = 'package'
@@ -505,8 +536,11 @@ def GenerateTestPayloads(target_image_path: str,
       name = '_'.join([dlc_prefix, dlc_id, dlc_package, os_version, board,
                        'full', suffix])
       payload_path = os.path.join(archive_dir, name)
-      paygen_payload_lib.GenerateUpdatePayload(sample_dlc_image, payload_path)
-      generated.append(payload_path)
+      if paygen_payload_lib.GenerateUpdatePayload(
+          sample_dlc_image, payload_path):
+        generated.extend(ExtendBinPaths(payload_path))
+      else:
+        logging.info('DLC (%s) full payload generation skipped.', dlc_id)
 
     if delta:
       # Names for delta payloads look something like this:
@@ -515,9 +549,11 @@ def GenerateTestPayloads(target_image_path: str,
       name = '_'.join([dlc_prefix, dlc_id, dlc_package, os_version, os_version,
                        board, 'delta', suffix])
       payload_path = os.path.join(archive_dir, name)
-      paygen_payload_lib.GenerateUpdatePayload(sample_dlc_image, payload_path,
-                                               src_image=sample_dlc_image)
-      generated.append(payload_path)
+      if paygen_payload_lib.GenerateUpdatePayload(
+          sample_dlc_image, payload_path, src_image=sample_dlc_image):
+        generated.extend(ExtendBinPaths(payload_path))
+      else:
+        logging.info('DLC (%s) delta payload generation skipped.', dlc_id)
 
   if stateful:
     generated.append(
@@ -614,7 +650,6 @@ def GenerateCpeReport(chroot: 'chroot_lib.Chroot',
   # Call cros_extract_deps to create the report that the export produced.
   # We'll assume the basename for the board name to match how these were built
   # out in the old system.
-  # TODO(saklein): Can we remove the board name from the report file names?
   build_target = os.path.basename(sysroot.path)
   report_path = os.path.join(output_dir,
                              CPE_RESULT_FILE_TEMPLATE % build_target)

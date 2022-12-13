@@ -21,6 +21,7 @@ from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 
+
 if cros_build_lib.IsInsideChroot():
   from chromite.lib import depgraph
 
@@ -591,13 +592,25 @@ class WorkonHelper(object):
     ebuilds = portage_util.FindEbuildsForPackages(atoms, self._sysroot)
     for ebuild_path in ebuilds.values():
       infos = portage_util.GetRepositoryForEbuild(ebuild_path, self._sysroot)
+      if not infos:
+        logging.warning('Unable to determine project information for %s. '
+                        'If you already have the project(s) for the package '
+                        'synced, no action is needed.', ebuild_path)
+        continue
+
       for info in infos:
         if not info.project or manifest.FindCheckouts(info.project):
           continue
 
         cmd = ['loman', 'add', '--workon', info.project]
-        cros_build_lib.run(cmd, print_cmd=False)
-        should_repo_sync = True
+        try:
+          cros_build_lib.dbg_run(cmd)
+          should_repo_sync = True
+        except cros_build_lib.RunCommandError as e:
+          logging.warning('Error adding project %s for %s to the manifest. '
+                          'If you already have the project synced, no '
+                          'action is needed.', info.project, ebuild_path)
+          logging.debug(e)
 
     if should_repo_sync:
       print('Please run "repo sync" now.')

@@ -6,8 +6,8 @@
 
 import datetime
 
-from chromite.lib import constants
 from chromite.lib import cidb
+from chromite.lib import constants
 from chromite.lib import failure_message_lib
 
 

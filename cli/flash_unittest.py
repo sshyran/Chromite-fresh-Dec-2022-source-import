@@ -58,8 +58,10 @@ class USBImagerTest(cros_test_lib.MockTempDirTestCase):
                      return_value=('taco-paladin/R36/chromiumos_test_image.bin',
                                    'remote/taco-paladin/R36/test'))
     self.PatchObject(os.path, 'exists', return_value=True)
+    self.PatchObject(os.path, 'getsize', return_value=200)
     self.isgpt_mock = self.PatchObject(flash, '_IsFilePathGPTDiskImage',
                                        return_value=True)
+    self.PatchObject(osutils, 'GetDeviceSize', return_value=200)
 
   def testLocalImagePathCopy(self):
     """Tests that imaging methods are called correctly."""
@@ -91,19 +93,24 @@ class USBImagerTest(cros_test_lib.MockTempDirTestCase):
   def testConfirmNonRemovableDevice(self):
     """Tests that we ask user to confirm if the device is not removable."""
     with mock.patch.object(cros_build_lib, 'BooleanPrompt') as mock_prompt:
-      flash.Flash(self.Device('/dev/dummy'), self.IMAGE)
+      flash.Flash(self.Device('/dev/stub'), self.IMAGE)
       self.assertTrue(mock_prompt.called)
 
   def testSkipPromptNonRemovableDevice(self):
     """Tests that we skip the prompt for non-removable with --yes."""
     with mock.patch.object(cros_build_lib, 'BooleanPrompt') as mock_prompt:
-      flash.Flash(self.Device('/dev/dummy'), self.IMAGE, yes=True)
+      flash.Flash(self.Device('/dev/stub'), self.IMAGE, yes=True)
       self.assertFalse(mock_prompt.called)
 
   def testChooseRemovableDevice(self):
     """Tests that we ask user to choose a device if none is given."""
     flash.Flash(self.Device(''), self.IMAGE)
     self.assertTrue(self.imager_mock.patched['ChooseRemovableDevice'].called)
+
+  def testInsufficientRemovableDeviceStorage(self):
+    self.PatchObject(osutils, 'GetDeviceSize', return_value=100)
+    with self.assertRaises(flash.FlashError):
+      flash.Flash(self.Device(''), self.IMAGE)
 
 
 class UsbImagerOperationTest(cros_test_lib.RunCommandTestCase):
@@ -117,7 +124,7 @@ class UsbImagerOperationTest(cros_test_lib.RunCommandTestCase):
     """Test that flash.UsbImagerOperation is called when log level <= NOTICE."""
     expected_cmd = ['dd', 'if=foo', 'of=bar', 'bs=4M', 'iflag=fullblock',
                     'oflag=direct', 'conv=fdatasync']
-    usb_imager = flash.USBImager('dummy_device', 'board', 'foo', 'latest')
+    usb_imager = flash.USBImager('stub_device', 'board', 'foo', 'latest')
     run_mock = self.PatchObject(flash.UsbImagerOperation, 'Run')
     self.PatchObject(logging.Logger, 'getEffectiveLevel',
                      return_value=logging.NOTICE)
@@ -132,7 +139,7 @@ class UsbImagerOperationTest(cros_test_lib.RunCommandTestCase):
     """Test that sudo_run is called when log level > NOTICE."""
     expected_cmd = ['dd', 'if=foo', 'of=bar', 'bs=4M', 'iflag=fullblock',
                     'oflag=direct', 'conv=fdatasync']
-    usb_imager = flash.USBImager('dummy_device', 'board', 'foo', 'latest')
+    usb_imager = flash.USBImager('stub_device', 'board', 'foo', 'latest')
     run_mock = self.PatchObject(cros_build_lib, 'sudo_run')
     self.PatchObject(logging.Logger, 'getEffectiveLevel',
                      return_value=logging.WARNING)
@@ -158,7 +165,7 @@ class UsbImagerOperationTest(cros_test_lib.RunCommandTestCase):
     op = flash.UsbImagerOperation('foo')
     self.PatchObject(osutils, 'IsChildProcess', return_value=True)
     self.rc.AddCmdResult(partial_mock.Ignore(),
-                         output='%d\n10\n' % expected_pid)
+                         stdout=f'{expected_pid}\n10\n')
 
     pid = op._GetDDPid()
 
@@ -170,7 +177,7 @@ class UsbImagerOperationTest(cros_test_lib.RunCommandTestCase):
     expected_pid = -1
     op = flash.UsbImagerOperation('foo')
     self.PatchObject(osutils, 'IsChildProcess', return_value=False)
-    self.rc.AddCmdResult(partial_mock.Ignore(), output='5\n10\n')
+    self.rc.AddCmdResult(partial_mock.Ignore(), stdout='5\n10\n')
 
     pid = op._GetDDPid()
 

@@ -4,10 +4,12 @@
 
 """Test the archive_lib module."""
 
+import json
 import multiprocessing
+from pathlib import Path
 
-from chromite.lib import metadata_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import metadata_lib
 from chromite.lib import parallel
 
 
@@ -37,6 +39,20 @@ class MetadataTest(cros_test_lib.TestCase):
     self.assertEqual(metadata.GetValue('key1'), 1)
     self.assertEqual(metadata.GetValue('key2'), '2')
     self.assertRaises(KeyError, metadata.GetValue, 'key3')
+
+  def testGetJSON(self):
+    """Test GetJSON."""
+    starting_dict = {
+        'key1': 1,
+        'key2': '2',
+        'path': Path('/foo'),
+    }
+    metadata = metadata_lib.CBuildbotMetadata(starting_dict)
+    sdata = metadata.GetJSON()
+    data = json.loads(sdata)
+    self.assertEqual(data['key1'], 1)
+    self.assertEqual(data['key2'], '2')
+    self.assertEqual(data['path'], '/foo')
 
   def testGetValueWithDefault(self):
     """Test GetValueWithDefault."""

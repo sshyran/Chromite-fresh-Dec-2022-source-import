@@ -20,10 +20,11 @@ import threading
 
 from chromite.third_party.gn_helpers import gn_helpers
 
-from chromite.cbuildbot import commands
 from chromite.cli import command
 from chromite.lib import cache
+from chromite.lib import chrome_util
 from chromite.lib import chromite_config
+from chromite.lib import cipd
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -93,15 +94,19 @@ class SDKFetcher(object):
   SDKContext = collections.namedtuple(
       'SDKContext', ['version', 'target_tc', 'key_map'])
 
+  CIPD_CACHE = 'cipd'
   TARBALL_CACHE = 'tarballs'
   MISC_CACHE = 'misc'
   SYMLINK_CACHE = 'symlinks'
 
   TARGET_TOOLCHAIN_KEY = 'target_toolchain'
+  NACL_ARM32_TOOLCHAIN_KEY = 'arm32_toolchain_for_nacl_helper'
   QEMU_BIN_PATH = 'app-emulation/qemu'
   SEABIOS_BIN_PATH = 'sys-firmware/seabios'
   TAST_CMD_PATH = 'chromeos-base/tast-cmd'
   TAST_REMOTE_TESTS_PATH = 'chromeos-base/tast-remote-tests-cros'
+  ZSTD_CIPD_PATH = 'infra/3pp/static_libs/libzstd/linux-amd64'
+  ZSTD_CIPD_VER = 'znTYHKuCvEQXnJ16VeZl1-TvGRwrCUBoFDuKLIB_5IIC'
 
   CANARIES_PER_DAY = 3
   DAYS_TO_CONSIDER = 14
@@ -130,8 +135,6 @@ class SDKFetcher(object):
       fallback_versions: The number of versions to consider.
       is_lacros: whether it's Lacros-Chrome build or not.
     """
-    site_config = config_lib.GetConfig()
-
     self.cache_base = os.path.join(cache_dir, COMMAND_NAME)
     if clear_cache:
       logging.warning('Clearing the SDK cache.')
@@ -142,10 +145,9 @@ class SDKFetcher(object):
         os.path.join(self.cache_base, self.MISC_CACHE))
     self.symlink_cache = cache.DiskCache(
         os.path.join(self.cache_base, self.SYMLINK_CACHE))
+    self.cipd_cache = cache.DiskCache(
+        os.path.join(self.cache_base, self.CIPD_CACHE))
     self.board = board
-    self.config = site_config.FindCanonicalConfigForBoard(
-        board, allow_internal=not use_external_config)
-    self.gs_base = f'gs://chromeos-image-archive/{self.config.name}'
     self.clear_cache = clear_cache
     self.chrome_src = chrome_src
     self.sdk_path = sdk_path
@@ -154,16 +156,91 @@ class SDKFetcher(object):
     self.silent = silent
     self.is_lacros = is_lacros
 
-    # For external configs, there is no need to run 'gsutil config', because
-    # the necessary files are all accessible to anonymous users.
-    internal = self.config['internal']
-    self.gs_ctx = gs.GSContext(cache_dir=cache_dir, init_boto=internal)
+    self.gs_ctx = gs.GSContext(cache_dir=cache_dir, init_boto=False)
 
     if self.sdk_path is None:
       self.sdk_path = os.environ.get(self.SDK_PATH_ENV)
 
     if self.toolchain_path is None:
       self.toolchain_path = 'gs://%s' % constants.SDK_GS_BUCKET
+
+    if use_external_config or not self._HasInternalConfig(cache_dir):
+      self.config_name = f'{board}-{config_lib.CONFIG_TYPE_FULL}'
+    else:
+      self.config_name = f'{board}-{config_lib.CONFIG_TYPE_RELEASE}'
+    self.gs_base = f'gs://chromeos-image-archive/{self.config_name}'
+
+  def _HasInternalConfig(self, cache_dir):
+    """Determines if the SDK we need is provided by an internal builder.
+
+    A given board can have a public and/or an internal builder that publishes
+    its Simple Chrome SDK. e.g. "amd64-generic" only has a public builder,
+    "scarlet" only has an internal builder, "octopus" has both. So if we haven't
+    explicitly passed "--use-external-config", we need to figure out if we want
+    to use a public or internal builder.
+
+    This fetches the configs files in constants.RELEASE_CONFIG_GS_BUCKET to
+    determine if the internal release builders support the given board. If
+    they don't, we fall back to trying to use the public builders.
+
+    Args:
+      cache_dir: The toplevel cache dir to use.
+
+    Returns:
+      True if there's an internal builder available that publishes SDKs for the
+      board.
+    """
+    try:
+      configs = self.gs_ctx.LS(f'gs://{constants.RELEASE_GS_BUCKET}', retries=0)
+    except gs.GSCommandError:
+      # If we can't list the config files, assume that means we don't have the
+      # needed credentials and that we want a public config.
+      return False
+
+    # If we're on a release branch, we don't want to use ToT's config, so read
+    # //chrome/VERSION to determine which branch we're on and use the
+    # corresponding config file.
+    src_dir = self.chrome_src
+    if not src_dir:
+      src_dir = os.path.abspath(os.path.join(cache_dir, '..', '..'))
+    chrome_version = chrome_util.ProcessVersionFile(src_dir)['MAJOR']
+    relevant_config = None
+    for config in configs:
+      if f'-R{chrome_version}-' in config:
+        relevant_config = config
+        break
+    if not relevant_config:
+      # If no config was found for our branch, assume that means we want ToT.
+      relevant_config = (
+          f'gs://{constants.RELEASE_GS_BUCKET}/build_config.ToT.json')
+
+    config = json.loads(self.gs_ctx.Cat(relevant_config))
+    for board in config.get('boards', []):
+      if board.get('name') != self.board:
+        continue
+      if any(c.get('builder') == 'RELEASE' for c in board.get('configs', [])):
+        return True
+    for board in config.get('reference_board_unified_builds', []):
+      if board.get('name') == self.board and board.get('builder') == 'RELEASE':
+        return True
+    return False
+
+  def _InstallZstdFromCipd(self):
+    """Install zstd from cipd if the system doesn't have it."""
+    if osutils.Which('zstd'):
+      return
+
+    key = (self.ZSTD_CIPD_PATH.replace('/', '-'), self.ZSTD_CIPD_VER)
+    with self.cipd_cache.Lookup(key) as ref:
+      if not ref.Exists(lock=True):
+        Log('SDK: Getting zstd')
+        path = cipd.InstallPackage(cipd.GetCIPDFromCache(),
+                                   self.ZSTD_CIPD_PATH,
+                                   self.ZSTD_CIPD_VER,
+                                   self.cipd_cache.staging_dir)
+        ref.SetDefault(os.path.join(path, 'bin'))
+
+    os.environ['PATH'] += f':{ref.path}'
 
   def _UpdateTarball(self, ref_queue):
     """Worker function to fetch tarballs.
@@ -207,6 +284,31 @@ class SDKFetcher(object):
       link_name_path = os.path.join(tempdir, 'tmp-link')
       osutils.SafeSymlink(rel_source_path, link_name_path)
       ref.SetDefault(link_name_path, lock=True)
+
+  def _GetBuildReport(self, version):
+    """Return build_report.json (in the form of a dict) for a given version."""
+    raw_json = None
+    version_base = self._GetVersionGSBase(version)
+    report_path = os.path.join(version_base, constants.BUILD_REPORT_JSON)
+    with self.misc_cache.Lookup(
+        self._GetTarballCacheKey(constants.BUILD_REPORT_JSON,
+                                 report_path)) as ref:
+      if ref.Exists(lock=True):
+        raw_json = osutils.ReadFile(ref.path)
+      else:
+        try:
+          raw_json = self.gs_ctx.Cat(report_path,
+                                     retries=0,
+                                     debug_level=logging.DEBUG,
+                                     encoding='utf-8')
+        except (gs.GSNoSuchKey, gs.GSCommandError):
+          # Make this fatal once we stop using metadata.json from old cbuildbot
+          # builders. (GSCommandError gets thrown instead of GSNoSuchKey for
+          # anonymous users, e.g. Chrome's public bots.)
+          return
+        ref.AssignText(raw_json)
+
+    return json.loads(raw_json)
 
   def _GetMetadata(self, version):
     """Return metadata (in the form of a dict) for a given version."""
@@ -387,7 +489,9 @@ class SDKFetcher(object):
     Returns:
       sdk_version, e.g. 2018.06.04.200410
     """
-    return self._GetMetadata(version)['sdk-version']
+    metadata = self._GetMetadata(version)
+    build_report = self._GetBuildReport(version)
+    return metadata.get('sdk-version') or build_report.get('sdkVersion')
 
   def _GetManifest(self, version):
     """Get the build manifest from the cache, downloading it if necessary.
@@ -628,7 +732,7 @@ class SDKFetcher(object):
         full_version = self._GetFullVersionFromLatest(version)
 
         if full_version is None:
-          raise MissingSDK(self.config.name, version)
+          raise MissingSDK(self.config_name, version)
 
         ref.AssignText(full_version)
         return full_version
@@ -697,10 +801,33 @@ class SDKFetcher(object):
     key_map = {}
     fetch_urls = {}
 
+    self._InstallZstdFromCipd()
+
     if not target_tc or not toolchain_url:
+      # Look-up the toolchain data in both metadata.json and build_report.json.
+      # We can stop using metadata.json once no one needs to build Simple Chrome
+      # using artifacts released from a cbuildbot build. Likely ~2023.
       metadata = self._GetMetadata(version)
-      target_tc = target_tc or metadata['toolchain-tuple'][0]
-      toolchain_url = toolchain_url or metadata['toolchain-url']
+      build_report = self._GetBuildReport(version)
+      if not target_tc:
+        if 'toolchain-tuple' in metadata:
+          target_tc = metadata['toolchain-tuple'][0]
+        elif build_report and 'toolchains' in build_report:
+          target_tc = build_report['toolchains'][0]
+
+      if not toolchain_url:
+        if 'toolchain-url' in metadata:
+          toolchain_url = metadata['toolchain-url']
+        elif build_report and 'toolchainUrl' in build_report:
+          toolchain_url = build_report['toolchainUrl']
+
+    # Fetch Arm32 toolchain for NaCl in Arm64 builds.
+    aarch64_cros_tuple = 'aarch64-cros-linux-gnu'
+    arm32_cros_tuple = 'armv7a-cros-linux-gnueabihf'
+
+    if target_tc == aarch64_cros_tuple:
+      fetch_urls[self.NACL_ARM32_TOOLCHAIN_KEY] = os.path.join(
+          self.toolchain_path, toolchain_url % {'target': arm32_cros_tuple})
 
     # Fetch toolchains from separate location.
     if self.TARGET_TOOLCHAIN_KEY in components:
@@ -938,7 +1065,7 @@ class ChromeSDKCommand(command.CliCommand):
         '--gomadir', type='path',
         help='Use the goma installation at the specified PATH.')
     parser.add_argument(
-        '--use-rbe', action='store_true', default=False,
+        '--use-remoteexec', action='store_true', default=False,
         help='Enable RBE client for the build. '
              'This automatically disables Goma.')
     parser.add_argument(
@@ -1044,7 +1171,7 @@ class ChromeSDKCommand(command.CliCommand):
     """
     current_ps1 = cros_build_lib.run(
         ['bash', '-l', '-c', 'echo "$PS1"'], print_cmd=False, encoding='utf-8',
-        capture_output=True).output.splitlines()
+        capture_output=True).stdout.splitlines()
     if current_ps1:
       current_ps1 = current_ps1[-1]
     if not current_ps1:
@@ -1063,7 +1190,7 @@ class ChromeSDKCommand(command.CliCommand):
 
     # If the board is a generic family, generate -crostoolchain.gni files,
     # too, which is used by Lacros build.
-    if board in ('amd64-generic', 'arm-generic'):
+    if board.endswith('-generic'):
       toolchain_key_pattern = re.compile(r'^(%s)$' % '|'.join([
           'cros_board',
           'cros_sdk_version',
@@ -1074,9 +1201,10 @@ class ChromeSDKCommand(command.CliCommand):
           'cros_target_(ar|cc|cxx|ld|nm|readelf|extra_(c|cpp|cxx|ld)flags)',
           'cros_v8_snapshot_(cc|cxx|ld|extra_(c|cpp|cxx|ld)flags)',
           '(custom|host|v8_snapshot)_toolchain',
+          'rbe_cros_cc_wrapper',
           'system_libdir',
           'target_sysroot',
-          'arm_(arch|float_abi|use_neon)',
+          'arm_(float_abi|use_neon)',
       ]))
       toolchain_gn_args = {k: v for k, v in gn_args.items()
                            if toolchain_key_pattern.match(k)}
@@ -1335,11 +1463,11 @@ class ChromeSDKCommand(command.CliCommand):
     # adjustment made in _SetupTCEnvironment is for split debug which
     # is done with 'use_debug_fission'.
 
-    if options.use_rbe:
-      gn_args['use_rbe'] = True
+    if options.use_remoteexec:
+      gn_args['use_remoteexec'] = True
 
     # Enable goma if requested.
-    if not options.goma or options.use_rbe:
+    if not options.goma or options.use_remoteexec:
       # If --nogoma option is explicitly set, disable goma, even if it is
       # used in the original GN_ARGS.
       gn_args['use_goma'] = False
@@ -1354,6 +1482,9 @@ class ChromeSDKCommand(command.CliCommand):
     # true for bots. But we'd like developers using DCHECKs when possible, so
     # we let dcheck_always_on use the default value for Simple Chrome.
     gn_args.pop('dcheck_always_on', None)
+
+    # Always allow LOG()s to be enabled via command line flag.
+    gn_args['use_runtime_vlog'] = True
 
     # Disable ThinLTO and CFI for simplechrome. Tryjob machines do not have
     # enough file descriptors to use. crbug.com/789607
@@ -1501,7 +1632,7 @@ class ChromeSDKCommand(command.CliCommand):
     """Returns current active Goma port."""
     port = cros_build_lib.run(
         self.GOMACC_PORT_CMD, cwd=goma_dir, debug_level=logging.DEBUG,
-        check=False, encoding='utf-8', capture_output=True).output.strip()
+        check=False, encoding='utf-8', capture_output=True).stdout.strip()
     return port
 
   def _GomaDir(self, goma_dir):
@@ -1620,13 +1751,13 @@ class ChromeSDKCommand(command.CliCommand):
     components = [self.sdk.TARGET_TOOLCHAIN_KEY, constants.CHROME_ENV_TAR]
     if not self.options.chroot:
       components.append(constants.CHROME_SYSROOT_TAR)
-      components.append(commands.AUTOTEST_SERVER_PACKAGE)
+    components.append('autotest_server_package.tar.bz2')
     if self.options.download_vm:
       components.append(constants.TEST_IMAGE_TAR)
 
     goma_dir = None
     goma_port = None
-    if self.options.goma and not self.options.use_rbe:
+    if self.options.goma and not self.options.use_remoteexec:
       try:
         goma_dir, goma_port = self._SetupGoma()
       except GomaError as e:

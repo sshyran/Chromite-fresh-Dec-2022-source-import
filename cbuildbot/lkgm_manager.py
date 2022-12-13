@@ -11,6 +11,7 @@ import re
 from xml.dom import minidom
 
 from chromite.cbuildbot import manifest_version
+from chromite.lib import chromeos_version
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -30,7 +31,7 @@ class PromoteCandidateException(Exception):
   """Exception thrown for failure to promote manifest candidate."""
 
 
-class _LKGMCandidateInfo(manifest_version.VersionInfo):
+class _LKGMCandidateInfo(chromeos_version.VersionInfo):
   """Class to encapsualte the Chrome OS LKGM candidate info."""
   LKGM_RE = r'(\d+\.\d+\.\d+)(?:-rc(\d+))?'
 
@@ -58,8 +59,7 @@ class _LKGMCandidateInfo(manifest_version.VersionInfo):
     if version_string:
       match = re.search(self.LKGM_RE, version_string)
       assert match, 'LKGM did not re %s' % self.LKGM_RE
-      super().__init__(match.group(1), chrome_branch,
-                                               incr_type=incr_type)
+      super().__init__(match.group(1), chrome_branch, incr_type=incr_type)
       if match.group(2):
         self.revision_number = int(match.group(2))
 
@@ -141,13 +141,7 @@ class LKGMManager(manifest_version.BuildSpecsManager):
     self.build_type = build_type
     # Chrome PFQ and PFQ's exist at the same time and version separately so they
     # must have separate subdirs in the manifest-versions repository.
-    if self.build_type == constants.ANDROID_PFQ_TYPE:
-      # Separate manifests from different Android PFQs.
-      assert '/' not in config.android_package, (
-          f'"{config.android_package}" must not have / in it')
-      self.rel_working_dir = os.path.join(self.ANDROID_PFQ_SUBDIR,
-                                          config.android_package)
-    elif self.build_type == constants.TOOLCHAIN_TYPE:
+    if self.build_type == constants.TOOLCHAIN_TYPE:
       self.rel_working_dir = self.TOOLCHAIN_SUBDIR
     elif self.build_type == constants.FULL_TYPE:
       self.rel_working_dir = self.FULL_SUBDIR

@@ -6,13 +6,14 @@
 
 import abc
 import enum
+from io import BytesIO
 import logging
 import os
 import re
 import tempfile
 import threading
 import time
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple, Union
 
 from chromite.cli import command
 from chromite.cli import flash
@@ -79,7 +80,8 @@ class DeviceImager(object):
                no_reboot: bool = False,
                disable_verification: bool = False,
                clobber_stateful: bool = False,
-               clear_tpm_owner: bool = False):
+               clear_tpm_owner: bool = False,
+               delta: bool = False):
     """Initialize DeviceImager for flashing a Chromium OS device.
 
     Args:
@@ -95,6 +97,7 @@ class DeviceImager(object):
           device.
       clobber_stateful: Whether to do a clean stateful partition.
       clear_tpm_owner: If true, it will clear the TPM owner on reboot.
+      delta: Whether to use delta compression when transferring image bytes.
     """
 
     self._device = device
@@ -110,8 +113,8 @@ class DeviceImager(object):
     self._clear_tpm_owner = clear_tpm_owner
 
     self._image_type = None
-    self._compression = cros_build_lib.COMP_GZIP
     self._inactive_state = None
+    self._delta = delta
 
   def Run(self):
     """Update the device with image of specific version."""
@@ -133,10 +136,7 @@ class DeviceImager(object):
 
   def _Run(self):
     """Runs the various operations to install the image on device."""
-    # Override the compression as remote quick provision images are gzip
-    # compressed only.
-    if self._image_type == ImageType.REMOTE_DIRECTORY:
-      self._compression = cros_build_lib.COMP_GZIP
+    # TODO(b/228389041): Switch to delta compression if self._delta is True
 
     self._InstallPartitions()
 
@@ -257,17 +257,15 @@ class DeviceImager(object):
       current_root = prefix + str(active_state[Partition.ROOTFS])
       target_root = prefix + str(self._inactive_state[Partition.ROOTFS])
       updaters.append(RootfsUpdater(current_root, self._device, self._image,
-                                    self._image_type, target_root,
-                                    self._compression))
+                                    self._image_type, target_root))
 
       target_kernel = prefix + str(self._inactive_state[Partition.KERNEL])
       updaters.append(KernelUpdater(self._device, self._image, self._image_type,
-                                    target_kernel, self._compression))
+                                    target_kernel))
 
     if not self._no_stateful_update:
       updaters.append(StatefulUpdater(self._clobber_stateful, self._device,
-                                      self._image, self._image_type, None,
-                                      None))
+                                      self._image, self._image_type, None))
 
     if not self._no_minios_update:
       minios_priority = self._device.run(
@@ -280,8 +278,7 @@ class DeviceImager(object):
             9 if minios_priority == 'A' else 10)
         target_minios = prefix + str(inactive_minios_state[Partition.MINIOS])
         minios_updater = MiniOSUpdater(self._device, self._image,
-                                       self._image_type, target_minios,
-                                       self._compression)
+                                       self._image_type, target_minios)
         updaters.append(minios_updater)
 
     # Retry the partitions updates that failed, in case a transient error (like
@@ -422,21 +419,22 @@ class PartialFileReader(ReaderBase):
   # sizes.
   _BLOCK_SIZE = 512
 
-  def __init__(self, image: str, offset: int, length: int, compression):
+  def __init__(self, image: str, offset: int, length: int,
+               compression_command: List[str]):
     """Initializes the class.
 
     Args:
       image: The path to an image (local or remote directory).
       offset: The offset (in bytes) to read from the image.
       length: The length (in bytes) to read from the image.
-      compression: The compression type (see cros_build_lib.COMP_XXX).
+      compression_command: The command to compress transferred bytes.
     """
     super().__init__()
 
     self._image = image
     self._offset = offset
     self._length = length
-    self._compression = compression
+    self._compression_command = compression_command
 
   def run(self):
     """Runs the reading and compression."""
@@ -448,7 +446,7 @@ class PartialFileReader(ReaderBase):
         f'skip={int(self._offset/self._BLOCK_SIZE)}',
         f'count={int(self._length/self._BLOCK_SIZE)}',
         '|',
-        cros_build_lib.FindCompressor(self._compression),
+        *self._compression_command,
     ]
 
     try:
@@ -483,7 +481,7 @@ class PartitionUpdaterBase(object):
   Sub-classes should implement the abstract methods to provide the core
   functionality.
   """
-  def __init__(self, device, image: str, image_type, target: str, compression):
+  def __init__(self, device, image: str, image_type, target: str):
     """Initializes this base class with values that most sub-classes will need.
 
     Args:
@@ -491,13 +489,11 @@ class PartitionUpdaterBase(object):
       image: The target image path for the partition update.
       image_type: The type of the image (ImageType).
       target: The target path (e.g. block dev) to install the update.
-      compression: The compression used for compressing the update payload.
     """
     self._device = device
     self._image = image
     self._image_type = image_type
     self._target = target
-    self._compression = compression
     self._finished = False
 
   def Run(self):
@@ -554,28 +550,38 @@ class RawPartitionUpdater(PartitionUpdaterBase):
       part_name: The name of the partition in the source image that needs to be
         extracted.
     """
-    cmd = self._GetWriteToTargetCommand()
-
     offset, length = self._GetPartLocation(part_name)
     offset, length = self._OptimizePartLocation(offset, length)
-    with PartialFileReader(self._image, offset, length,
-                           self._compression) as generator:
+    compressor, decompressor = self._GetCompressionAndDecompression()
+
+    with PartialFileReader(self._image, offset, length, compressor) \
+        as generator:
       try:
-        self._device.run(cmd, input=generator.Target(), shell=True)
+        self._WriteToTarget(generator.Target(), decompressor)
       finally:
         generator.CloseTarget()
 
-  def _GetWriteToTargetCommand(self):
-    """Returns a write to target command to run on a Chromium OS device.
+  def _GetCompressionAndDecompression(self) -> Tuple[List[str], List[str]]:
+    """Returns compression / decompression commands."""
+
+    return (
+        [cros_build_lib.FindCompressor(cros_build_lib.COMP_GZIP)],
+        self._device.GetDecompressor(cros_build_lib.COMP_GZIP),
+    )
+
+  def _WriteToTarget(self, source: Union[int, BytesIO],
+                     decompress_command: List[str]) -> None:
+    """Writes bytes source to the target device on DUT.
 
     Returns:
       A string command to run on a device to read data from stdin, uncompress it
       and write it to the target partition.
     """
-    cmd = self._device.GetDecompressor(self._compression)
     # Using oflag=direct to tell the OS not to cache the writes (faster).
-    cmd += ['|', 'dd', 'bs=1M', 'oflag=direct', f'of={self._target}']
-    return ' '.join(cmd)
+    cmd = ' '.join([
+        *decompress_command,
+        '|', 'dd', 'bs=1M', 'oflag=direct', f'of={self._target}'])
+    self._device.run(cmd, input=source, shell=True)
 
   def _GetPartLocation(self, part_name: str):
     """Extracts the location and size of the raw partition from the image.
@@ -623,13 +629,14 @@ class RawPartitionUpdater(PartitionUpdaterBase):
     Args:
       file_name: The file name in the remote directory self._image.
     """
-    cmd = self._GetWriteToTargetCommand()
-
     image_path = os.path.join(self._image, file_name)
     with GsFileCopier(image_path) as generator:
       try:
         with open(generator.Target(), 'rb') as fp:
-          self._device.run(cmd, input=fp, shell=True)
+          # Always use GZIP as remote quick provision images are gzip
+          # compressed only.
+          self._WriteToTarget(
+              fp, self._device.GetDecompressor(cros_build_lib.COMP_GZIP))
       finally:
         generator.CloseTarget()
 
@@ -795,7 +802,7 @@ class MiniOSUpdater(RawPartitionUpdater):
       self._FlipMiniOSPriority()
 
   def _GetMiniOSPriority(self):
-    return self._device.run(['crossystem', constants.MINIOS_PRIORITY]).output
+    return self._device.run(['crossystem', constants.MINIOS_PRIORITY]).stdout
 
   def _SetMiniOSPriority(self, priority: str):
     self._device.run(
@@ -927,12 +934,11 @@ class ProgressWatcher(threading.Thread):
     dev_size = int(output)
 
     # Using lsof to find out which process is writing to the target rootfs.
-    cmd = f'lsof 2>/dev/null | grep {self._target_root}'
+    cmd = ['lsof', '-t', self._target_root]
     while not self._ShouldExit():
       try:
-        output = self._device.run(cmd, capture_output=True,
-                                  shell=True).stdout.strip()
-        if output:
+        pid = self._device.run(cmd, capture_output=True).stdout.strip()
+        if pid:
           break
       except cros_build_lib.RunCommandError:
         continue
@@ -942,7 +948,6 @@ class ProgressWatcher(threading.Thread):
     # Now that we know which process is writing to it, we can look the fdinfo of
     # stdout of that process to get its offset. We're assuming there will be no
     # seek, which is correct.
-    pid = output.split()[1]
     cmd = ['cat', f'/proc/{pid}/fdinfo/1']
     while not self._ShouldExit():
       try:

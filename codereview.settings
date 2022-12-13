@@ -2,5 +2,3 @@
 GERRIT_HOST: True
 GERRIT_PORT: True
 CODE_REVIEW_SERVER: https://chromium-review.googlesource.com
-# TODO: Should there be a tryserver url?
-#TRYSERVER_SVN_URL: svn://svn.chromium.org/xxx-try

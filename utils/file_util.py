@@ -8,6 +8,7 @@ import contextlib
 from pathlib import Path
 from typing import TextIO, TYPE_CHECKING, Union
 
+
 if TYPE_CHECKING:
   import os
 

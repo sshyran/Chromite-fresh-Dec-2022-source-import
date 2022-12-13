@@ -4,8 +4,8 @@
 
 """Show the builder layout for CrOS waterfalls."""
 
-from chromite.lib import config_lib
 from chromite.lib import commandline
+from chromite.lib import config_lib
 
 
 def _ParseArguments(argv):

@@ -212,8 +212,8 @@ class RepositoryCommandMethodTest(cros_test_lib.RunCommandTempDirTestCase):
 
   def testListSimple(self):
     """Test Repository.List simple call."""
-    output = 'src/project : my/project\nsrc/ugly : path : other/project\n'
-    self.AddRepoResult(['list'], output=output)
+    stdout = 'src/project : my/project\nsrc/ugly : path : other/project\n'
+    self.AddRepoResult(['list'], stdout=stdout)
     projects = self.repo.List()
     self.AssertRepoCalled(['list'], capture_output=True)
     self.assertListEqual(projects, [
@@ -230,14 +230,14 @@ class RepositoryCommandMethodTest(cros_test_lib.RunCommandTempDirTestCase):
   def testListProjectNotFound(self):
     """Test Repository.List fails when given a nonexistant project."""
     self.AddRepoResult(['list', 'foobar'], returncode=1,
-                       error='error: project foobar not found')
+                       stderr='error: project foobar not found')
     with self.assertRaises(repo_util.ProjectNotFoundError):
       self.repo.List(['foobar'])
 
   def testManifest(self):
     """Test Repository.Manifest."""
-    output = '<manifest></manifest>'
-    self.AddRepoResult(['manifest'], output=output)
+    stdout = '<manifest></manifest>'
+    self.AddRepoResult(['manifest'], stdout=stdout)
     manifest = self.repo.Manifest()
     self.assertIsNotNone(manifest)
 
@@ -248,8 +248,8 @@ class RepositoryCommandMethodTest(cros_test_lib.RunCommandTempDirTestCase):
     def mkdirDestRepo(*_args, **_kwargs):
       os.mkdir(os.path.join(copy_root, '.repo'))
 
-    output = 'src/p1 : p1\nother : other/project\n'
-    self.AddRepoResult(['list'], output=output, side_effect=mkdirDestRepo)
+    stdout = 'src/p1 : p1\nother : other/project\n'
+    self.AddRepoResult(['list'], stdout=stdout, side_effect=mkdirDestRepo)
     copy = self.repo.Copy(copy_root)
     self.assertEqual(copy.root, copy_root)
     kwargs = dict(debug_level=logging.DEBUG, capture_output=True,

@@ -217,7 +217,7 @@ class GerritHelper(object):
     try:
       result = git.RunGit('.', cmd, print_cmd=self.print_cmd)
       if result:
-        return result.output.split()[0]
+        return result.stdout.split()[0]
     except cros_build_lib.RunCommandError:
       logging.error('Command "%s" failed.', cros_build_lib.CmdToStr(cmd),
                     exc_info=True)

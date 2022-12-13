@@ -9,6 +9,7 @@ from typing import List, Optional
 
 from chromite.lib.firmware import servo_lib
 
+
 # BUILD CONFIGS.
 # You probably don't need to fill those in.
 # BUILD_WORKON_PACKAGES is the list packages that will be `cros_workon`ed.

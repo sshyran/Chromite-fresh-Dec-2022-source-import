@@ -82,7 +82,7 @@ For more information of cros build usage:
     advanced = parser.add_argument_group('Advanced options')
     advanced.add_argument(
         '--force', action='store_true',
-        help='Ignore sanity checks, just do it.')
+        help='Ignore confidence checks, just do it.')
     # TODO(garnold) Make deep and check installed the default behavior.
     advanced.add_argument(
         '--update', action='store_true',

@@ -12,6 +12,7 @@ from chromite.api import validate
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 
+
 # API version number.
 # The major version MUST be updated on breaking changes.
 VERSION_MAJOR = 1

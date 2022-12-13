@@ -12,3 +12,7 @@ per-file minios*=file:/OWNERS.au
 per-file nebraska*=file:/OWNERS.au
 per-file toolchain_util*=file:chromiumos/third_party/toolchain-utils:/OWNERS.toolchain
 per-file vm*=file:/OWNERS.chrome
+
+# Only Lacros related changes
+per-file chrome_util.py=svenzheng@chromium.org
+per-file chrome_util.py=erikchen@chromium.org

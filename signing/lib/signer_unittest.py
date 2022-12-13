@@ -23,7 +23,7 @@ class TestSignerConfig(cros_test_lib.TestCase):
                       versionrev='R24-1.2.3.4', keyset='link-mp', channel='dev',
                       input_files=('foo.bin'),
                       output_files=('@ROOTNAME@-@VERSION@.bin')):
-    """Returns SignerConfig, providing sane defaults."""
+    """Returns SignerConfig, providing the defaults."""
     return(signer.SignerInstructionConfig(archive=archive,
                                           board=board,
                                           artifact_type=artifact_type,
@@ -208,27 +208,27 @@ def KeysetFromSigner(s, keydir, subdir='keyset'):
   for key_name in s.required_keys:
     key = keys.KeyPair(key_name, keydir=keydir)
     ks.AddKey(key)
-    keys_unittest.CreateDummyKeys(key)
+    keys_unittest.CreateStubKeys(key)
 
   for key_name in s.required_keys_public:
     key = keys.KeyPair(key_name, keydir=keydir)
     ks.AddKey(key)
-    keys_unittest.CreateDummyPublic(key)
+    keys_unittest.CreateStubPublic(key)
 
     if key in s.required_keyblocks:
-      keys_unittest.CreateDummyKeyblock(key)
+      keys_unittest.CreateStubKeyblock(key)
 
   for key_name in s.required_keys_private:
     key = keys.KeyPair(key_name, keydir=keydir)
     ks.AddKey(key)
-    keys_unittest.CreateDummyPrivateKey(key)
+    keys_unittest.CreateStubPrivateKey(key)
 
   for keyblock_name in s.required_keyblocks:
     if keyblock_name not in ks.keys:
       ks.AddKey(keys.KeyPair(keyblock_name, keydir=keydir))
 
     key = ks.keys[keyblock_name]
-    keys_unittest.CreateDummyKeyblock(key)
+    keys_unittest.CreateStubKeyblock(key)
 
   return ks
 
@@ -248,11 +248,11 @@ class TestFutilitySigner(cros_test_lib.RunCommandTempDirTestCase):
   def testSign(self):
     keyset = keys.Keyset()
     fs = signer.FutilitySigner()
-    self.assertRaises(NotImplementedError, fs.Sign, keyset, 'dummy', 'dummy')
+    self.assertRaises(NotImplementedError, fs.Sign, keyset, 'stub', 'stub')
 
   def testSignWithMock(self):
     foo_key = keys.KeyPair('foo', self.tempdir)
-    keys_unittest.CreateDummyKeys(foo_key)
+    keys_unittest.CreateStubKeys(foo_key)
 
     keyset = keys.Keyset()
     keyset.AddKey(foo_key)

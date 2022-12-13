@@ -8,10 +8,11 @@ from chromite.lib import builder_status_lib
 from chromite.lib import cidb
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
-from chromite.lib import fake_cidb
 from chromite.lib import failure_message_lib
 from chromite.lib import failure_message_lib_unittest
-from chromite.lib.buildstore import FakeBuildStore, BuildIdentifier
+from chromite.lib import fake_cidb
+from chromite.lib.buildstore import BuildIdentifier
+from chromite.lib.buildstore import FakeBuildStore
 
 
 stage_failure_helper = failure_message_lib_unittest.StageFailureHelper

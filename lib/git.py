@@ -28,7 +28,7 @@ class GitException(Exception):
 
 # remote: git remote name (e.g., 'origin',
 #   'https://chromium.googlesource.com/chromiumos/chromite.git', etc.).
-# ref: git remote/local ref name (e.g., 'refs/heads/master').
+# ref: git remote/local ref name (e.g., 'refs/heads/main').
 # project_name: git project name (e.g., 'chromiumos/chromite'.)
 _RemoteRef = collections.namedtuple(
     '_RemoteRef', ('remote', 'ref', 'project_name'))
@@ -72,7 +72,7 @@ def IsSubmoduleCheckoutRoot(path, remote, url):
     remote_url = cros_build_lib.run(
         ['git', '--git-dir', path, 'config', 'remote.%s.url' % remote],
         stdout=True, debug_level=logging.DEBUG,
-        check=False, encoding='utf-8').output.strip()
+        check=False, encoding='utf-8').stdout.strip()
     if remote_url == url:
       return True
   return False
@@ -164,7 +164,7 @@ def GetGitRepoRevision(cwd, branch='HEAD', short=False):
   cmd = ['rev-parse', branch]
   if short:
     cmd.insert(1, '--short')
-  return RunGit(cwd, cmd).output.strip()
+  return RunGit(cwd, cmd).stdout.strip()
 
 
 def IsReachable(cwd, to_ref, from_ref):
@@ -212,14 +212,14 @@ def DoesCommitExistInRepo(cwd, commit):
 def GetCurrentBranchOrId(cwd):
   """Returns current branch of a repo, commit ID if repo is on detached HEAD."""
   return GetCurrentBranch(cwd) or RunGit(cwd,
-                                         ['rev-parse', 'HEAD']).output.strip()
+                                         ['rev-parse', 'HEAD']).stdout.strip()
 
 
 def GetCurrentBranch(cwd):
   """Returns current branch of a repo, and None if repo is on detached HEAD."""
   try:
     ret = RunGit(cwd, ['symbolic-ref', '-q', 'HEAD'])
-    return StripRefsHeads(ret.output.strip(), False)
+    return StripRefsHeads(ret.stdout.strip(), False)
   except cros_build_lib.RunCommandError as e:
     if e.result.returncode != 1:
       raise
@@ -474,6 +474,7 @@ class Manifest(object):
       except EnvironmentError as e:
         if e.errno != errno.ENOENT or not ignore_missing:
           raise
+        return None
     source.seek(0)
     md5 = hashlib.md5(source.read()).hexdigest()
     source.seek(0)
@@ -657,9 +658,9 @@ class ManifestCheckout(Manifest):
       The branch name.
     """
     # Suppress the normal "if it ain't refs/heads, we don't want none o' that"
-    # check for the merge target; repo writes the ambigious form of the branch
-    # target for `repo init -u url -b some-branch` usages (aka, 'master'
-    # instead of 'refs/heads/master').
+    # check for the merge target; repo writes the ambiguous form of the branch
+    # target for `repo init -u url -b some-branch` usages (aka, 'main'
+    # instead of 'refs/heads/main').
     path = os.path.join(root, '.repo', 'manifests')
     current_branch = GetCurrentBranch(path)
     if current_branch != 'default':
@@ -726,7 +727,7 @@ def RunGit(git_repo, cmd, **kwargs):
     kwargs: Any run or GenericRetry options/overrides to use.
 
   Returns:
-    A CommandResult object.
+    A CompletedProcess object.
   """
   kwargs.setdefault('print_cmd', False)
   kwargs.setdefault('cwd', git_repo)
@@ -735,15 +736,16 @@ def RunGit(git_repo, cmd, **kwargs):
   return cros_build_lib.run(['git'] + cmd, **kwargs)
 
 
-def Init(git_repo):
+def Init(git_repo, branch='main'):
   """Create a new git repository, in the given location.
 
   Args:
     git_repo: Path for where to create a git repo. Directory will be created if
               it doesnt exist.
+    branch: The initial branch name.
   """
   osutils.SafeMakedirs(git_repo)
-  RunGit(git_repo, ['init'])
+  RunGit(git_repo, ['init', '-b', branch])
 
 
 def Clone(dest_path, git_url, reference=None, depth=None, branch=None,
@@ -807,14 +809,14 @@ def FindGitTopLevel(path):
   """Returns the top-level directory of the given git working tree path."""
   try:
     ret = RunGit(path, ['rev-parse', '--show-toplevel'])
-    return ret.output.strip()
+    return ret.stdout.strip()
   except cros_build_lib.RunCommandError:
     return None
 
 
 def GetProjectUserEmail(git_repo):
   """Get the email configured for the project."""
-  output = RunGit(git_repo, ['var', 'GIT_COMMITTER_IDENT']).output
+  output = RunGit(git_repo, ['var', 'GIT_COMMITTER_IDENT']).stdout
   m = re.search(r'<([^>]*)>', output.strip())
   return m.group(1) if m else None
 
@@ -830,7 +832,7 @@ def MatchBranchName(git_repo, pattern, namespace=''):
   Returns:
     List of matching branch names (with |namespace| trimmed).
   """
-  output = RunGit(git_repo, ['ls-remote', git_repo, namespace + '*']).output
+  output = RunGit(git_repo, ['ls-remote', git_repo, namespace + '*']).stdout
   branches = [x.split()[1] for x in output.splitlines()]
   branches = [x[len(namespace):] for x in branches if x.startswith(namespace)]
 
@@ -896,7 +898,7 @@ def GetTrackingBranchViaGitConfig(git_repo, branch, for_checkout=True,
   try:
     cmd = ['config', '--get-regexp',
            r'branch\.%s\.(remote|merge)' % re.escape(branch)]
-    data = RunGit(git_repo, cmd).output.splitlines()
+    data = RunGit(git_repo, cmd).stdout.splitlines()
 
     prefix = 'branch.%s.' % (branch,)
     data = [x.split() for x in data]
@@ -1005,7 +1007,7 @@ def GetTrackingBranch(git_repo, branch=None, for_checkout=True, fallback=True,
   Assumptions:
    1. We assume the manifest defined upstream is desirable.
    2. No manifest?  Assume tracking if configured is accurate.
-   3. If none of the above apply, you get 'origin', 'master' or None,
+   3. If none of the above apply, you get 'origin', 'main' or None,
       depending on fallback.
 
   Args:
@@ -1015,7 +1017,7 @@ def GetTrackingBranch(git_repo, branch=None, for_checkout=True, fallback=True,
     for_checkout: Whether to return localized refspecs, or the remotes
       view of it.
     fallback: If true and no remote/branch could be discerned, return
-      'origin', 'master'.  If False, you get None.
+      'origin', 'main'.  If False, you get None.
       Note that depending on the remote, the remote may differ
       if for_push is True or set to False.
     for_push: Controls whether the remote and refspec returned is explicitly
@@ -1100,7 +1102,7 @@ def GetObjectAtRev(git_repo, obj, rev, binary=False):
   """
   rev_obj = '%s:%s' % (rev, obj)
   encoding = None if binary else 'utf-8'
-  return RunGit(git_repo, ['show', rev_obj], encoding=encoding).output
+  return RunGit(git_repo, ['show', rev_obj], encoding=encoding).stdout
 
 
 def RevertPath(git_repo, filename, rev):
@@ -1234,7 +1236,7 @@ def RawDiff(path, target):
   entries = []
 
   cmd = ['diff', '-M', '--raw', target]
-  diff = RunGit(path, cmd).output
+  diff = RunGit(path, cmd).stdout
   diff_lines = diff.strip().splitlines()
   for line in diff_lines:
     match = DIFF_RE.match(line)
@@ -1306,7 +1308,7 @@ def CreatePushBranch(branch, git_repo, sync=True, remote_push_branch=None):
     git_repo: Git repository to create the branch in.
     sync: Update remote before creating push branch.
     remote_push_branch: A RemoteRef to push to. i.e.,
-                        RemoteRef('cros', 'master').  By default it tries to
+                        RemoteRef('cros', 'main').  By default it tries to
                         automatically determine which tracking branch to use
                         (see GetTrackingBranch()).
   """
@@ -1467,8 +1469,8 @@ def GetChromiteTrackingBranch():
       "Chromite checkout at %s isn't controlled by repo, nor is it on a "
       'branch (or if it is, the tracking configuration is missing or broken).  '
       'Falling back to assuming the chromite checkout is derived from '
-      "'master'; this *may* result in breakage." % cwd)
-  return 'master'
+      "'main'; this *may* result in breakage." % cwd)
+  return 'main'
 
 
 def GarbageCollection(git_repo, prune_all=False):

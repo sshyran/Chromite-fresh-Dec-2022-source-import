@@ -161,7 +161,7 @@ class KeyPair(object):
                              check=False, encoding='utf-8', stdout=True)
 
     # Match line that looks like: 'Key sha1sum: <sha1sum>'.
-    match = re.search(r'Key sha1sum: +(\w+)', res.output)
+    match = re.search(r'Key sha1sum: +(\w+)', res.stdout)
     if match:
       return match.group(1)
     else:

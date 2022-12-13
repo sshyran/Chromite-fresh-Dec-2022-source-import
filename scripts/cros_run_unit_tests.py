@@ -4,7 +4,6 @@
 
 """Tool to run ebuild unittests."""
 
-import argparse
 import logging
 import multiprocessing
 import os
@@ -53,10 +52,6 @@ def ParseArgs(argv):
                            'that should be tested.')
   parser.add_argument('--packages',
                       help='Space-separated list of packages to test.')
-  parser.add_argument('--blacklist_packages',
-                      dest='skip_packages',
-                      deprecated='Use --skip-packages instead.',
-                      help=argparse.SUPPRESS)
   parser.add_argument('--skip-packages',
                       help='Space-separated list of packages to NOT test even '
                            'if they otherwise would have been tested.')

@@ -12,7 +12,6 @@ import sys
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot import commands
-from chromite.cbuildbot import goma_util
 from chromite.cbuildbot.stages import completion_stages
 from chromite.cbuildbot.stages import generic_stages
 from chromite.lib import alerts
@@ -21,6 +20,7 @@ from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import failures_lib
+from chromite.lib import goma_lib
 from chromite.lib import gs
 from chromite.lib import metadata_lib
 from chromite.lib import metrics
@@ -108,7 +108,7 @@ def WriteTagMetadata(builder_run):
   try:
     cmd_result = cros_build_lib.run(['git', '--version'], capture_output=True,
                                     encoding='utf-8')
-    tags['git_version'] = cmd_result.output.strip()
+    tags['git_version'] = cmd_result.stdout.strip()
   except cros_build_lib.RunCommandError:
     pass  # If we fail, just don't include the tag.
 
@@ -126,7 +126,7 @@ def WriteTagMetadata(builder_run):
     # git version 2.8.0.rc3.226.g39d4020
     # Python 2.7.6 (default, Jun 22 2015, 17:58:13)
     # [GCC 4.8.2]
-    tags['repo_version'] = cmd_result.output.splitlines()[0].split(' ')[-1]
+    tags['repo_version'] = cmd_result.stdout.splitlines()[0].split(' ')[-1]
   except (cros_build_lib.RunCommandError, IndexError):
     pass  # If we fail, just don't include the tag.
 
@@ -178,7 +178,7 @@ def _UploadAndLinkGomaLogIfNecessary(
   if not goma_tmp_dir:
     return
 
-  goma = goma_util.Goma(goma_dir, goma_client_json, goma_tmp_dir=goma_tmp_dir)
+  goma = goma_lib.Goma(goma_dir, goma_client_json, goma_tmp_dir=goma_tmp_dir)
   # Just in case, stop the goma. E.g. In case of timeout, we do not want to
   # keep goma compiler_proxy running.
   goma.Stop()
@@ -216,7 +216,7 @@ class BuildStartStage(generic_stages.BuilderStage):
   def PerformStage(self):
     if self._run.config['doc']:
       cbuildbot_alerts.PrintBuildbotLink('Builder documentation',
-                                self._run.config['doc'])
+                                         self._run.config['doc'])
 
     WriteBasicMetadata(self._run)
 
@@ -274,7 +274,7 @@ class BuildStartStage(generic_stages.BuilderStage):
       logging.info('Inserted build_id %s into cidb database type %s.',
                    build_id, db_type)
       cbuildbot_alerts.PrintBuildbotStepText('database: %s, build_id: %s' %
-                                    (db_type, build_id))
+                                             (db_type, build_id))
 
       master_build_id = d['master_build_id']
       if master_build_id is not None:
@@ -343,8 +343,8 @@ class SlaveFailureSummaryStage(generic_stages.BuilderStage):
       slave_stage_url = uri_lib.ConstructMiloBuildUri(
           failure.buildbucket_id)
       cbuildbot_alerts.PrintBuildbotLink('%s %s' % (failure.build_config,
-                                           failure.stage_name),
-                                slave_stage_url)
+                                                    failure.stage_name),
+                                         slave_stage_url)
 
 
 class BuildReexecutionFinishedStage(generic_stages.BuilderStage,
@@ -835,7 +835,9 @@ class ReportStage(generic_stages.BuilderStage,
     # Upload metadata, and update the pass/fail streak counter for the main
     # run only. These aren't needed for the child builder runs.
     self.UploadMetadata(export=True)
-    self._UpdateEmailNotify(self._run, final_status)
+    # This non-critical step is killing all CBuildbot builders. Disabling.
+    # BUG: http://b/227316467
+    # self._UpdateEmailNotify(self._run, final_status)
 
     build_identifier, db = self._run.GetCIDBHandle()
     build_id = build_identifier.cidb_id

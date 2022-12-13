@@ -115,7 +115,7 @@ def uploadFiles(dir_entry, build, apfe_id, job_id, package, uploader,
                           build + '-' + job_id + '_' + timestamp)
     uploader(gs_url, xml, *args, **kwargs)
 
-  # Results produced by CTS test list collector are dummy results.
+  # Results produced by CTS test list collector are stub results.
   # They don't need to be copied to APFE bucket which is mainly being used for
   # CTS APFE submission.
   if not _is_test_collector(package):

@@ -179,7 +179,7 @@ def ListRemoteBranches():
     List of branch names as strings.
   """
   ret = git.RunGit(constants.CHROMITE_DIR, ['branch', '-lr'])
-  return [l.strip() for l in ret.output.splitlines()]
+  return [l.strip() for l in ret.stdout.splitlines()]
 
 
 def SafeList(ctx, url):

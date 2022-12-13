@@ -2,31 +2,355 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Module to archive goma logs."""
+"""Module to use goma and archive goma logs."""
 
-import collections
 import datetime
 import getpass
 import glob
 import json
 import logging
 import os
+from pathlib import Path
 import shlex
 import shutil
-from typing import Optional
+import tempfile
+from typing import List, NamedTuple, Optional, Union
 
+from chromite.cbuildbot import goma_util
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
+from chromite.lib import path_util
+
+
+class GomaApproach(NamedTuple):
+  """GomaApproach server and rpc details."""
+  rpc_extra_params: str
+  server_host: str
+  arbitrary_toolchain_support: bool
+
+
+class ArchivedFiles(NamedTuple):
+  """Goma files to be archived."""
+  stats_file: Optional[str]
+  counterz_file: Optional[str]
+  log_files: List[str]
 
 
 class SpecifiedFileMissingError(Exception):
   """Error occurred when running LogsArchiver."""
 
 
-# For the ArchivedFiles tuple, log_files is a list of strings. The value of
-# the stats_file and counterz_file entry can be a string or None.
-ArchivedFiles = collections.namedtuple(
-    'ArchivedFiles', ('stats_file', 'counterz_file', 'log_files'))
+# TODO(crbug.com/1035114) Refactor.
+class Goma(object):
+  """Interface to use goma on bots."""
+
+  # Default environment variables to use goma.
+  _DEFAULT_ENV_VARS = {
+      # Set MAX_COMPILER_DISABLED_TASKS to let goma enter Burst mode, if
+      # there are too many local fallback failures. In the Burst mode, goma
+      # tries to use CPU cores as many as possible. Note that, by default,
+      # goma runs only a few local fallback tasks in parallel at once.
+      # The value is the threshold of the number of local fallback failures
+      # to enter the mode.
+      # Note that 30 is just heuristically chosen by discussion with goma team.
+      #
+      # Specifically, this is short-term workaround of the case that all
+      # compile processes get local fallback. Otherwise, because goma uses only
+      # several processes for local fallback by default, it causes significant
+      # slow down of the build.
+      # Practically, this happens when toolchain is updated in repository,
+      # but prebuilt package is not yet ready. (cf. crbug.com/728971)
+      'GOMA_MAX_COMPILER_DISABLED_TASKS': '30',
+
+      # Disable goma soft stickiness.
+      # Goma was historically using `soft stickiness cookie` so that uploaded
+      # file cache is available as much as possible. However, such sticky
+      # requests are causing unbalanced server load, and the disadvantage of the
+      # unbalance cannot be negligible now. According to chrome's
+      # experiment, the disadvantage of disabling soft stickiness is negligible,
+      # and achieving balanced server load will have more advantage for entire
+      # build. (cf. crbug.com/730962)
+      # TODO(shinyak): This will be removed after crbug.com/730962 is resolved.
+      'GOMA_BACKEND_SOFT_STICKINESS': 'false',
+
+      # Enable DepsCache. DepsCache is a cache that holds a file list that
+      # compiler_proxy sends to goma server for each compile. This can
+      # reduces a lot of I/O and calculation.
+      # This is the base file name under GOMA_CACHE_DIR.
+      'GOMA_DEPS_CACHE_FILE': 'goma.deps',
+
+      # Only run one command in parallel per core.
+      #
+      # TODO(crbug.com/998076): Increase if Goma fork issue is fixed.
+      'NINJA_CORE_MULTIPLIER': '1',
+  }
+
+  def __init__(self,
+               goma_dir: Union[str, os.PathLike],
+               goma_client_json: Optional[Union[str, os.PathLike]] = None,
+               goma_tmp_dir: Optional[Union[str, os.PathLike]] = None,
+               stage_name: Optional[str] = None,
+               chromeos_goma_dir: Optional[Union[str, os.PathLike]] = None,
+               chroot_dir: Optional[Union[str, os.PathLike]] = None,
+               goma_approach: Optional[GomaApproach] = None,
+               log_dir: Optional[Union[str, os.PathLike]] = None,
+               stats_filename: Optional[Union[str, os.PathLike]] = None,
+               counterz_filename: Optional[Union[str, os.PathLike]] = None):
+    """Initializes Goma instance.
+
+    This ensures that |self.goma_log_dir| directory exists (if missing,
+    creates it).
+
+    Args:
+      goma_dir: Path to the Goma client used for simplechrome (outside of
+        chroot).
+      goma_client_json: Path to the service account json file to use goma. On
+        bots, this must be specified, otherwise raise a ValueError. On local,
+        this is optional, and can be set to None.
+      goma_tmp_dir: Path to the GOMA_TMP_DIR to be passed to goma programs. If
+        given, it is used. If not given, creates a directory under /tmp in the
+        chroot, expecting that the directory is removed in the next run's clean
+        up phase on bots.
+      stage_name: optional name of the currently running stage. E.g.
+        "build_packages" or "test_simple_chrome_workflow". If this is set deps
+        cache is enabled.
+      chromeos_goma_dir: Path to the Goma client used for build package. path
+        should be represented as outside of chroot. If None, goma_dir will be
+        used instead.
+      chroot_dir: The base chroot path to use when the chroot path is not at the
+        default location.
+      goma_approach: Indicates some extra environment variables to set when
+        testing alternative goma approaches.
+      log_dir: Allows explicitly setting the log directory. Used for the Build
+        API for extracting the logs afterwords. Should be the log directory
+        inside the chroot, based on the chroot path when outside the chroot.
+      stats_filename: The name of the file to use for the GOMA_DUMP_STATS_FILE
+        setting. The file will be created in the log directory.
+      counterz_filename: The name of the file to use for the
+        GOMA_DUMP_COUNTERZ_FILE setting. The file will be created in the log
+        directory.
+
+    Raises:
+      ValueError if 1) |goma_dir| does not point to a directory, 2)
+      on bots, but |goma_client_json| is not given, 3) |goma_client_json|
+      is given, but it does not point to a file, or 4) if |goma_tmp_dir| is
+      given but it does not point to a directory.
+    """
+    # Sanity checks of given paths.
+    goma_dir = Path(goma_dir)
+
+    if goma_client_json:
+      goma_client_json = Path(goma_client_json)
+
+    if goma_tmp_dir:
+      goma_tmp_dir = Path(goma_tmp_dir)
+
+    if chromeos_goma_dir:
+      chromeos_goma_dir = Path(chromeos_goma_dir)
+
+    if chroot_dir:
+      chroot_dir = Path(chroot_dir)
+
+    if log_dir:
+      log_dir = Path(log_dir)
+
+    if stats_filename:
+      stats_filename = Path(stats_filename)
+
+    if counterz_filename:
+      counterz_filename = Path(counterz_filename)
+
+    if not goma_dir.is_dir():
+      raise ValueError(f'goma_dir does not point a directory: {goma_dir}')
+
+    # If this script runs on bot, service account json file needs to be
+    # provided, otherwise it cannot access to goma service.
+    if cros_build_lib.HostIsCIBuilder() and goma_client_json is None:
+      raise ValueError(
+          'goma is enabled on bot, but goma_client_json is not provided')
+
+    # If goma_client_json file is provided, it must be an existing file.
+    if goma_client_json and not goma_client_json.is_file():
+      raise ValueError(f'Goma client json file is missing: {goma_client_json}')
+
+    # If goma_tmp_dir is provided, it must be an existing directory.
+    if goma_tmp_dir and not goma_tmp_dir.is_dir():
+      raise ValueError(
+          f'GOMA_TMP_DIR does not point a directory: {goma_tmp_dir}')
+
+    self.linux_goma_dir = goma_dir
+    self.chromeos_goma_dir = chromeos_goma_dir
+    self.goma_approach = goma_approach
+    # If Goma dir for ChromeOS SDK does not set, fallback to use goma_dir.
+    if self.chromeos_goma_dir is None:
+      self.chromeos_goma_dir = goma_dir
+    # Sanity checks of given paths.
+    if not self.chromeos_goma_dir.is_dir():
+      raise ValueError('chromeos_goma_dir does not point a directory: '
+                       f'{self.chromeos_goma_dir}')
+
+    self.goma_client_json = goma_client_json
+    if stage_name:
+      self.goma_cache = goma_dir / 'goma_cache' / stage_name
+      osutils.SafeMakedirs(self.goma_cache)
+    else:
+      self.goma_cache = None
+
+    if goma_tmp_dir is None:
+      # path_util depends on the chroot directory existing at
+      # SOURCE_ROOT/chroot. This assumption is not valid for Luci builders,
+      # but generally shouldn't be an assumption anyway since we allow setting
+      # the chroot location. This block, and the two a few lines down, bypass
+      # path_util to compensate for those assumptions.
+      # TODO(crbug.com/1014138) Cleanup when path_util can handle custom chroot.
+      if chroot_dir:
+        chroot_tmp = chroot_dir / 'tmp'
+      else:
+        chroot_tmp = path_util.FromChrootPath('/tmp')
+
+      # If |goma_tmp_dir| is not given, create GOMA_TMP_DIR (goma
+      # compiler_proxy's working directory), and its log directory.
+      # Create unique directory by mkdtemp under chroot's /tmp.
+      # Expect this directory is removed in next run's clean up phase.
+      goma_tmp_dir = Path(
+          tempfile.mkdtemp(prefix='goma_tmp_dir.', dir=chroot_tmp))
+    self.goma_tmp_dir = goma_tmp_dir
+
+    root_dir = Path('/')
+    if chroot_dir:
+      self.chroot_goma_tmp_dir = root_dir / self.goma_tmp_dir.relative_to(
+          chroot_dir)
+    else:
+      self.chroot_goma_tmp_dir = path_util.ToChrootPath(self.goma_tmp_dir)
+
+    self._log_dir = log_dir
+    # Create log directory if not exist.
+    if not self.goma_log_dir.is_dir():
+      osutils.SafeMakedirs(self.goma_log_dir)
+
+    self._stats_file = None
+    self._chroot_stats_file = None
+    self._counterz_file = None
+    self._chroot_counterz_file = None
+    if stats_filename:
+      self._stats_file = self.goma_log_dir / stats_filename
+    if counterz_filename:
+      self._counterz_file = self.goma_log_dir / counterz_filename
+
+    if chroot_dir:
+      self.chroot_goma_log_dir = root_dir / self.goma_log_dir.relative_to(
+          chroot_dir)
+      if self._stats_file:
+        self._chroot_stats_file = root_dir / self._stats_file.relative_to(
+            chroot_dir)
+      if self._counterz_file:
+        self._chroot_counterz_file = root_dir / self._counterz_file.relative_to(
+            chroot_dir)
+    else:
+      self.chroot_goma_log_dir = path_util.ToChrootPath(self.goma_log_dir)
+      if self._stats_file:
+        self._chroot_stats_file = path_util.ToChrootPath(self._stats_file)
+      if self._counterz_file:
+        self._chroot_counterz_file = path_util.ToChrootPath(self._counterz_file)
+
+  @property
+  def goma_log_dir(self):
+    """Path to goma's log directory."""
+    return self._log_dir or self.goma_tmp_dir / 'log_dir'
+
+  def GetExtraEnv(self):
+    """Extra env vars set to use goma."""
+    result = dict(
+        Goma._DEFAULT_ENV_VARS,
+        GOMA_DIR=str(self.linux_goma_dir),
+        GOMA_TMP_DIR=str(self.goma_tmp_dir),
+        GLOG_log_dir=str(self.goma_log_dir))
+
+    self._AddCommonExtraEnv(result)
+
+    if self.goma_client_json:
+      result['GOMA_SERVICE_ACCOUNT_JSON_FILE'] = str(self.goma_client_json)
+
+    if self.goma_cache:
+      result['GOMA_CACHE_DIR'] = str(self.goma_cache)
+
+    if self._stats_file:
+      result['GOMA_DUMP_STATS_FILE'] = str(self._stats_file)
+    if self._counterz_file:
+      result['GOMA_DUMP_COUNTERZ_FILE'] = str(self._counterz_file)
+      result['GOMA_ENABLE_COUNTERZ'] = 'true'
+
+    return result
+
+  def GetChrootExtraEnv(self):
+    """Extra env vars set to use goma inside chroot."""
+    # Note: GOMA_DIR and GOMA_SERVICE_ACCOUNT_JSON_FILE in chroot is hardcoded.
+    # Please see also enter_chroot.sh.
+    goma_dir = Path.home() / 'goma'
+    result = dict(
+        Goma._DEFAULT_ENV_VARS,
+        GOMA_DIR=str(goma_dir),
+        GOMA_TMP_DIR=str(self.chroot_goma_tmp_dir),
+        GLOG_log_dir=str(self.chroot_goma_log_dir))
+
+    self._AddCommonExtraEnv(result)
+
+    if self.goma_client_json:
+      result['GOMA_SERVICE_ACCOUNT_JSON_FILE'] = (
+          '/creds/service_accounts/service-account-goma-client.json')
+
+    if self.goma_cache:
+      result['GOMA_CACHE_DIR'] = str(goma_dir / self.goma_cache.relative_to(
+          self.chromeos_goma_dir))
+
+    if self._chroot_stats_file:
+      result['GOMA_DUMP_STATS_FILE'] = str(self._chroot_stats_file)
+    if self._chroot_counterz_file:
+      result['GOMA_DUMP_COUNTERZ_FILE'] = str(self._chroot_counterz_file)
+      result['GOMA_ENABLE_COUNTERZ'] = 'true'
+
+    return result
+
+  def _AddCommonExtraEnv(self, result):
+    """Sets extra env vars to use goma common to in / out chroot."""
+    if self.goma_approach:
+      result['GOMA_RPC_EXTRA_PARAMS'] = self.goma_approach.rpc_extra_params
+      result['GOMA_SERVER_HOST'] = self.goma_approach.server_host
+      result['GOMA_ARBITRARY_TOOLCHAIN_SUPPORT'] = (
+          'true' if self.goma_approach.arbitrary_toolchain_support else 'false')
+
+  def _RunGomaCtl(self, command):
+    goma_ctl = self.linux_goma_dir / 'goma_ctl.py'
+    cros_build_lib.run(
+        ['python3', goma_ctl, command], extra_env=self.GetExtraEnv())
+
+  def Start(self):
+    """Starts goma compiler proxy."""
+    self._RunGomaCtl('start')
+
+  def Restart(self):
+    """Restarts goma compiler proxy."""
+    self._RunGomaCtl('restart')
+
+  def Stop(self):
+    """Stops goma compiler proxy."""
+    self._RunGomaCtl('stop')
+
+  def UploadLogs(self, cbb_config_name):
+    """Uploads INFO files related to goma.
+
+    Args:
+      cbb_config_name: name of cbb_config.
+
+    Returns:
+      URL to the compiler_proxy log visualizer. None if unavailable.
+    """
+    # TODO(rchandrasekar): The only client that uses UploadLogs is cbuildbot.
+    # Once it is removed, assess if we need to use LogsArchiver instead or
+    # remove this interface.
+    uploader = goma_util.GomaLogUploader(
+        self.goma_log_dir, cbb_config_name=cbb_config_name)
+    return uploader.Upload()
 
 
 class LogsArchiver(object):

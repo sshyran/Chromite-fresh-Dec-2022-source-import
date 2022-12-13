@@ -6,17 +6,23 @@
 
 from operator import attrgetter
 import os
+from pathlib import Path
 import shutil
+from typing import Optional, Union
 from unittest import mock
 
 from chromite.lib import binpkg
 from chromite.lib import build_target_lib
-from chromite.lib import constants
 from chromite.lib import chroot_lib
+from chromite.lib import constants
+from chromite.lib import cpupower_helper
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import goma_lib
 from chromite.lib import osutils
+from chromite.lib import partial_mock
 from chromite.lib import portage_util
+from chromite.lib import remoteexec_util
 from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
 from chromite.service import sysroot
@@ -29,8 +35,9 @@ class SetupBoardRunConfigTest(cros_test_lib.TestCase):
     """Test the update chroot args conversion method."""
     # False/0/None tests.
     instance = sysroot.SetupBoardRunConfig(
-        usepkg=False, jobs=None, update_toolchain=False)
+        usepkg=False, jobs=None, update_toolchain=False, backtrack=1)
     args = instance.GetUpdateChrootArgs()
+    self.assertIn('--backtrack=1', args)
     self.assertIn('--nousepkg', args)
     self.assertIn('--skip_toolchain_update', args)
     self.assertNotIn('--usepkg', args)
@@ -59,8 +66,8 @@ class SetupBoardTest(cros_test_lib.MockTestCase):
   def testFullRun(self):
     """Test a regular full run.
 
-    This method is basically just a sanity check that it's trying to create the
-    sysroot and install the toolchain by default.
+    This method just checks that it's trying to create the sysroot and install
+    the toolchain by default.
     """
     target_sysroot = sysroot_lib.Sysroot('/build/board')
     create_mock = self.PatchObject(
@@ -95,8 +102,7 @@ class CreateTest(cros_test_lib.RunCommandTempDirTestCase):
 
   def setUp(self):
     # Avoid sudo password prompt for config writing.
-    self.PatchObject(os, 'getuid', return_value=0)
-    self.PatchObject(os, 'geteuid', return_value=0)
+    self.PatchObject(osutils, 'IsRootUser', return_value=True)
 
     # It has to be run inside the chroot.
     self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=True)
@@ -240,12 +246,12 @@ class ArchiveChromeEbuildEnvTest(cros_test_lib.MockTempDirTestCase):
     cros_build_lib.run(['bzip2', env_file])
     self.env_bz2 = '%s.bz2' % env_file
 
-  def _CreateChromeDir(self, path, populate=True):
+  def _CreateChromeDir(self, path: str, populate: bool = True):
     """Setup a chrome package directory.
 
     Args:
-      path (str): The full chrome package path.
-      populate (bool): Whether to include the environment bz2.
+      path: The full chrome package path.
+      populate: Whether to include the environment bz2.
     """
     osutils.SafeMakedirs(path)
     if populate:
@@ -352,62 +358,22 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase):
     update_patch.assert_called_with(self.board, local_init=True)
 
 
-class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
+class BuildPackagesRunConfigTest(cros_test_lib.RunCommandTestCase,
+                                 cros_test_lib.LoggingTestCase):
   """Tests for the BuildPackagesRunConfig."""
 
-  def AssertHasRequiredArgs(self, args):
-    """Tests the default/required args for the builders."""
-    self.assertIn('--accept_licenses', args)
-    self.assertIn('@CHROMEOS', args)
-    self.assertIn('--skip_chroot_upgrade', args)
-
-  def testGetBuildPackagesDefaultArgs(self):
-    """Test the build_packages args building for empty/false/0 values."""
-    # Test False/None/0 values.
-    instance = sysroot.BuildPackagesRunConfig(
-        usepkg=False, install_debug_symbols=False, packages=None)
-
-    args = instance.GetBuildPackagesArgs()
-    self.AssertHasRequiredArgs(args)
-    # Debug symbols not included.
-    self.assertNotIn('--withdebugsymbols', args)
-    # Source used.
-    self.assertIn('--nousepkg', args)
-    # Flag removed due to broken logic.  See crbug/1048419.
-    self.assertNotIn('--reuse_pkgs_from_local_boards', args)
-
-  def testGetBuildPackagesArgs(self):
-    """Test the build_packages args building for non-empty values."""
-    packages = ['cat/pkg', 'cat2/pkg2']
-    instance = sysroot.BuildPackagesRunConfig(
-        usepkg=True,
-        install_debug_symbols=True,
-        packages=packages,
-        setup_board=False,
-        dryrun=True)
-
-    args = instance.GetBuildPackagesArgs()
-    self.AssertHasRequiredArgs(args)
-    # Local build not used.
-    self.assertNotIn('--nousepkg', args)
-    self.assertNotIn('--reuse_pkgs_from_local_boards', args)
-    # Debug symbols included.
-    self.assertIn('--withdebugsymbols', args)
-    self.assertIn('--skip_setup_board', args)
-    # Packages included.
-    for package in packages:
-      self.assertIn(package, args)
-    # Pretend flag included.
-    self.assertIn('--pretend', args)
-
-  def testGetBuildPackagesEnv(self):
-    """Test the build_packages env."""
+  def testGetBuildPackagesExtraEnv(self):
+    """Test the build_packages extra env."""
+    # Test the default config.
     instance = sysroot.BuildPackagesRunConfig()
 
-    # PORTAGE_BINHOST is not set when there are no package_indexes
-    self.assertNotIn('PORTAGE_BINHOST', instance.GetEnv())
+    extra_env = instance.GetExtraEnv()
 
-    # PORTAGE_BINHOST is correctly set when there are package_indexes.
+    self.assertNotIn('USE_GOMA', extra_env)
+    self.assertNotIn('USE_REMOTEEXEC', extra_env)
+    self.assertNotIn('PORTAGE_BINHOST', extra_env)
+
+    # Test when package_indexes are specified.
     pkg_indexes = [
         binpkg.PackageIndexInfo(
             build_target=build_target_lib.BuildTarget('board'),
@@ -418,16 +384,160 @@ class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
             snapshot_sha='B',
             location='BBBB')
     ]
-
     instance = sysroot.BuildPackagesRunConfig(package_indexes=pkg_indexes)
 
-    env = instance.GetEnv()
+    extra_env = instance.GetExtraEnv()
+
     self.assertEqual(
-        env.get('PORTAGE_BINHOST'),
+        extra_env.get('PORTAGE_BINHOST'),
         ' '.join([x.location for x in reversed(pkg_indexes)]))
 
+    # Test when use_flags are specified.
+    use_flags = ['flag1', 'flag2']
+    instance = sysroot.BuildPackagesRunConfig(use_flags=use_flags)
 
-class BuildPackagesTest(cros_test_lib.RunCommandTestCase):
+    extra_env = instance.GetExtraEnv()
+
+    self.assertEqual(extra_env.get('USE'), instance.GetUseFlags())
+
+  def testGetPackages(self):
+    """Test getting packages for the config."""
+    # Test the default config.
+    instance = sysroot.BuildPackagesRunConfig()
+
+    packages = instance.GetPackages()
+
+    self.assertIn('virtual/target-os', packages)
+    self.assertIn('virtual/target-os-dev', packages)
+    self.assertIn('virtual/target-os-factory', packages)
+    self.assertIn('virtual/target-os-test', packages)
+    self.assertIn('chromeos-base/autotest-all', packages)
+
+    # Test when packages are specified.
+    test_packages = ['test/package']
+    instance = sysroot.BuildPackagesRunConfig(packages=test_packages)
+
+    packages = instance.GetPackages()
+
+    self.assertEqual(packages, test_packages)
+
+  def testGetForceLocalBuildPackages(self):
+    """Test getting force local build packages for the config."""
+    test_sysroot_path = '/sysroot/path'
+    test_sysroot = sysroot_lib.Sysroot(test_sysroot_path)
+    get_reverse_dependencies_mock = self.PatchObject(portage_util,
+                                                     'GetReverseDependencies')
+
+    # Test the default config.
+    instance = sysroot.BuildPackagesRunConfig()
+    self.rc.AddCmdResult(
+        ['cros_list_modified_packages', '--sysroot', test_sysroot.path],
+        stdout='')
+
+    packages = instance.GetForceLocalBuildPackages(test_sysroot)
+
+    self.assertIn('chromeos-base/chromeos-ssh-testkeys', packages)
+
+    # Test when there are cros_workon packages and reverse dependencies
+    # but skipping base install packages and their reverse dependencies.
+    instance = sysroot.BuildPackagesRunConfig(incremental_build=False)
+    test_cros_list_modified_packages_output = 'test/package1 test/package2\n'
+    self.rc.AddCmdResult(
+        ['cros_list_modified_packages', '--sysroot', test_sysroot.path],
+        stdout=test_cros_list_modified_packages_output)
+    test_reverse_dependencies = [
+        package_info.parse('test/package3-1.0'),
+        package_info.parse('test/package4-2.0-r1'),
+    ]
+    get_reverse_dependencies_mock.return_value = test_reverse_dependencies
+
+    packages = instance.GetForceLocalBuildPackages(test_sysroot)
+
+    self.assertIn('test/package1', packages)
+    self.assertIn('test/package2', packages)
+    self.assertIn('test/package3', packages)
+    self.assertIn('test/package4', packages)
+
+    # Test base install packages and their reverse dependency packages
+    # but skipping cros workon packages and their reverse dependencies.
+    instance = sysroot.BuildPackagesRunConfig(workon=False)
+    test_emerge_output = (
+        '[binary N] test/package1 ... to /build/sysroot/\n'
+        '[ebuild r U] chromeos-base/tast-build-deps ... to /build/sysroot/\n'
+        '[binary U] chromeos-base/chromeos-chrome ... /build/sysroot/')
+    self.rc.AddCmdResult(
+        partial_mock.ListRegex(
+            f'parallel_emerge --sysroot={test_sysroot.path}'),
+        stdout=test_emerge_output)
+    test_reverse_dependencies = [
+        package_info.parse('virtual/package3-1.0'),
+        package_info.parse('test/package4-2.0-r1'),
+    ]
+    get_reverse_dependencies_mock.return_value = test_reverse_dependencies
+
+    packages = instance.GetForceLocalBuildPackages(test_sysroot)
+
+    self.assertIn('chromeos-base/tast-build-deps', packages)
+    self.assertIn('test/package4', packages)
+
+    # Test base install packages and their reverse dependencies are skipped
+    # when --no-withrevdeps is specified.
+    instance = sysroot.BuildPackagesRunConfig(incremental_build=False)
+
+    with cros_test_lib.LoggingCapturer() as logs:
+      instance.GetForceLocalBuildPackages(test_sysroot)
+
+      self.AssertLogsContain(
+          logs, 'Starting reverse dependency calculations...', inverted=True)
+
+    # Test base install packages and their reverse dependencies are skipped
+    # when --cleanbuild is specified and the sysroot does not exist.
+    instance = sysroot.BuildPackagesRunConfig(clean_build=True)
+
+    with cros_test_lib.LoggingCapturer() as logs:
+      instance.GetForceLocalBuildPackages(test_sysroot)
+
+      self.AssertLogsContain(
+          logs, 'Starting reverse dependency calculations...', inverted=True)
+
+  def testGetEmergeFlags(self):
+    """Test building the emerge flags."""
+    # Test the default config.
+    instance = sysroot.BuildPackagesRunConfig()
+
+    flags = instance.GetEmergeFlags()
+
+    self.assertIn('--with-test-deps', flags)
+    self.assertIn('--getbinpkg', flags)
+    self.assertIn('--with-bdeps', flags)
+    self.assertIn('--usepkg', flags)
+    self.assertIn('--rebuild-if-new-rev', flags)
+
+    # Test when use_any_chrome is specified.
+    instance = sysroot.BuildPackagesRunConfig(use_any_chrome=True)
+
+    flags = instance.GetEmergeFlags()
+
+    self.assertIn('--force-remote-binary=chromeos-base/chromeos-chrome', flags)
+    self.assertIn('--force-remote-binary=chromeos-base/chrome-icu', flags)
+
+    # Test when usepkgonly is specified.
+    instance = sysroot.BuildPackagesRunConfig(usepkgonly=True)
+
+    flags = instance.GetEmergeFlags()
+
+    self.assertIn('--usepkgonly', flags)
+
+    # Test when jobs is specified.
+    instance = sysroot.BuildPackagesRunConfig(jobs=10)
+
+    flags = instance.GetEmergeFlags()
+
+    self.assertIn('--jobs=10', flags)
+
+
+class BuildPackagesTest(cros_test_lib.RunCommandTestCase,
+                        cros_test_lib.LoggingTestCase):
   """Test BuildPackages function."""
 
   def setUp(self):
@@ -440,49 +550,113 @@ class BuildPackagesTest(cros_test_lib.RunCommandTestCase):
 
     self.board = 'board'
     self.target = build_target_lib.BuildTarget(self.board)
-    self.sysroot_path = '/sysroot/path'
-    self.sysroot = sysroot_lib.Sysroot(self.sysroot_path)
+    self.sysroot = sysroot_lib.Sysroot(self.target.root)
+    self.build_target_name_mock = self.PatchObject(
+        sysroot_lib.Sysroot, 'build_target_name', return_value=self.board)
 
-    self.build_packages = os.path.join(constants.CROSUTILS_DIR,
-                                       'build_packages')
     self.base_command = [
-        self.build_packages, '--board', self.board, '--board_root',
-        self.sysroot_path
+        Path(constants.CHROMITE_BIN_DIR) / 'parallel_emerge',
+        f'--sysroot={self.sysroot.path}',
+        f'--root={self.sysroot.path}',
     ]
+
+    # Prevent the test from switching the cpu governor.
+    self.PatchObject(cpupower_helper, 'ModifyCpuGovernor')
+    # Prevent the test from remove files in the system.
+    self.PatchObject(cros_build_lib, 'ClearShadowLocks')
+    self.PatchObject(
+        portage_util, 'PortageqEnvvar', return_value='gs://fake/binhost')
+    self.PatchObject(portage_util, 'RegenDependencyCache')
+    self.installed_packages_mock = self.PatchObject(portage_util.PortageDB,
+                                                    'InstalledPackages')
+    self.clean_outdated_binpkgs_mock = self.PatchObject(
+        portage_util, 'CleanOutdatedBinaryPackages')
 
   def testSuccess(self):
     """Test successful run."""
     config = sysroot.BuildPackagesRunConfig()
+    self.PatchObject(
+        config, 'GetForceLocalBuildPackages', return_value=['test/package1'])
+    sdk_pkgs = ' '.join(sysroot._CRITICAL_SDK_PACKAGES)  # pylint: disable=protected-access
+
+    with cros_test_lib.LoggingCapturer() as logs:
+      sysroot.BuildPackages(self.target, self.sysroot, config)
+
+      # The rest of the command's args we test in BuildPackagesRunConfigTest,
+      # so just make sure we're calling the right command and pass the args not
+      # handled by the run config.
+      self.assertCommandContains(self.base_command)
+      self.assertCommandContains(
+          ['--reinstall-atoms=test/package1', '--usepkg-exclude=test/package1'])
+      self.assertCommandContains(
+          [f'--useoldpkg-atoms={sdk_pkgs}', f'--rebuild-exclude={sdk_pkgs}'])
+
+      # Verify the extra environment variables are passed correctly.
+      self.assertCommandContains([f'PKGDIR={self.sysroot.path}/packages'])
+
+      # Check and the logs contain the expected output.
+      self.AssertLogsContain(logs, 'PORTAGE_BINHOST')
+      self.AssertLogsContain(logs, 'Rebuilding Portage cache.')
+      self.AssertLogsContain(logs, 'Cleaning stale binpkgs.')
+      self.AssertLogsContain(logs, 'Merging board packages now.')
+
+  def testEcleanBinpkgs(self):
+    """Test that eclean is called with the expected packages."""
+
+    def assert_file_contents(
+        sysroot_path: Union[str, os.PathLike],
+        deep: bool,
+        exclusion_file: Optional[Union[str, os.PathLike]] = None):
+      if exclusion_file:
+        contents = osutils.ReadFile(exclusion_file)
+        self.assertEqual('cross-dev/package', contents)
+
+      self.assertEqual(self.sysroot.path, sysroot_path)
+      self.assertTrue(deep)
+
+    self.PatchObject(os.path, 'exists', return_value=True)
+    self.installed_packages_mock.return_value = [
+        portage_util.InstalledPackage(None, '', 'test', 'package-1.0'),
+        portage_util.InstalledPackage(None, '', 'cross-dev', 'package-1.0'),
+    ]
+    self.clean_outdated_binpkgs_mock.side_effect = assert_file_contents
+    config = sysroot.BuildPackagesRunConfig()
+
     sysroot.BuildPackages(self.target, self.sysroot, config)
 
-    # The rest of the command's args we test in BuildPackagesRunConfigTest,
-    # so just make sure we're calling the right command and pass the args not
-    # handled by the run config.
-    self.assertCommandContains(self.base_command)
+  def testInstallDebugSymbols(self):
+    """Test that cros_install_debug_syms is called with the expected args."""
+    config = sysroot.BuildPackagesRunConfig(install_debug_symbols=True)
+
+    with cros_test_lib.LoggingCapturer() as logs:
+      sysroot.BuildPackages(self.target, self.sysroot, config)
+
+      self.assertCommandContains([
+          Path(constants.CHROMITE_BIN_DIR) / 'cros_install_debug_syms',
+          f'--board={self.build_target_name_mock}',
+          '--all',
+      ])
+      self.AssertLogsContain(logs, 'Fetching the debug symbols.')
 
   def testPackageFailure(self):
     """Test package failure handling."""
     failed = ['cat/pkg', 'foo/bar']
     cpvs = [package_info.SplitCPV(p, strict=False) for p in failed]
     self.PatchObject(portage_util, 'ParseDieHookStatusFile', return_value=cpvs)
-
     config = sysroot.BuildPackagesRunConfig()
-    command = self.base_command + config.GetBuildPackagesArgs()
 
-    result = cros_build_lib.CommandResult(cmd=command, returncode=1)
+    result = cros_build_lib.CompletedProcess(self.base_command, returncode=1)
     error = cros_build_lib.RunCommandError('Error', result)
+    self.PatchObject(
+        cros_build_lib,
+        'run',
+        side_effect=(cros_build_lib.CompletedProcess(stdout=''),
+                     cros_build_lib.CompletedProcess(stdout=''), error))
 
-    self.rc.AddCmdResult(command, side_effect=error)
-
-    try:
+    with self.assertRaises(sysroot_lib.PackageInstallError) as e:
       sysroot.BuildPackages(self.target, self.sysroot, config)
-    except sysroot_lib.PackageInstallError as e:
       self.assertEqual(cpvs, e.failed_packages)
       self.assertEqual(result, e.result)
-    except Exception as e:
-      self.fail('Unexpected exception type: %s' % type(e))
-    else:
-      self.fail('Expected an exception to be thrown.')
 
 
 class GatherSymbolFilesTest(cros_test_lib.MockTempDirTestCase):
@@ -803,7 +977,7 @@ class BundleDebugSymbolsTest(cros_test_lib.MockTempDirTestCase):
     generate_breakpad_symbols_patch = self.PatchObject(
         sysroot,
         'GenerateBreakpadSymbols',
-        return_value=cros_build_lib.CommandResult(returncode=0, output=''))
+        return_value=cros_build_lib.CompletedProcess(returncode=0, stdout=''))
     gather_symbol_files_patch = self.PatchObject(
         sysroot,
         'GatherSymbolFiles',
@@ -833,7 +1007,7 @@ class BundleDebugSymbolsTest(cros_test_lib.MockTempDirTestCase):
     create_tarball_patch = self.PatchObject(
         cros_build_lib,
         'CreateTarball',
-        return_value=cros_build_lib.CommandResult(returncode=0, output=''))
+        return_value=cros_build_lib.CompletedProcess(returncode=0, stdout=''))
 
     tar_file = sysroot.BundleDebugSymbols(self.chroot, self.sysroot, None,
                                           self.output_dir)
@@ -841,3 +1015,116 @@ class BundleDebugSymbolsTest(cros_test_lib.MockTempDirTestCase):
 
     # Verify response contents.
     self.assertTrue(tar_file.endswith('/output_dir/debug.tgz'))
+
+
+class RemoteExecutionTest(cros_test_lib.MockLoggingTestCase):
+  """Unittests for remote execution context manager."""
+
+  def setUp(self):
+    self.goma_mock = self.PatchObject(goma_lib, 'Goma', autospec=True)
+    self.goma_instance = self.goma_mock.return_value
+    self.remoteexec_mock = self.PatchObject(remoteexec_util, 'Remoteexec')
+    self.remoteexec_instance = self.remoteexec_mock.return_value
+
+  def testGomaDir(self):
+    """Test the case where GOMA env variable is defined."""
+    os.environ.update({
+        'GOMA_DIR': 'goma/path',
+        'GOMA_TMP_DIR': 'goma/tmp/dir',
+        'GOMA_SERVICE_ACCOUNT_JSON_FILE': 'goma_account.json',
+        'GLOG_log_dir': 'glog/log/dir'
+    })
+
+    with sysroot.RemoteExecution(use_goma=True, use_remoteexec=False):
+      self.goma_mock.assert_called_once_with(
+          Path('goma/path'),
+          'goma_account.json',
+          'goma/tmp/dir',
+          stage_name='BuildPackages',
+          log_dir='glog/log/dir')
+    self.goma_instance.Restart.assert_called_once()
+    self.goma_instance.Stop.assert_called_once()
+    self.remoteexec_mock.assert_not_called()
+
+  def testGomaHomeDir(self):
+    """Test the case where Home Path is used."""
+    self.PatchObject(Path, 'home', return_value=Path('home'))
+
+    with sysroot.RemoteExecution(use_goma=True, use_remoteexec=False):
+      self.goma_mock.assert_called_once_with(
+          Path('home/goma'),
+          None,
+          None,
+          stage_name='BuildPackages',
+          log_dir=None)
+    self.goma_instance.Restart.assert_called_once()
+    self.goma_instance.Stop.assert_called_once()
+    self.remoteexec_mock.assert_not_called()
+
+  def testGomaException(self):
+    """Test the case where GOMA interface raises exception."""
+    self.goma_mock.side_effect = ValueError()
+
+    with cros_test_lib.LoggingCapturer() as log:
+      with sysroot.RemoteExecution(use_goma=True, use_remoteexec=False):
+        self.AssertLogsMatch(log, '.*initialization error.*')
+    self.goma_instance.Restart.assert_not_called()
+    self.goma_instance.Stop.assert_not_called()
+    self.remoteexec_mock.assert_not_called()
+
+  def testRemoteExec(self):
+    """Test the case where remoteexec env variables are defined."""
+    os.environ.update({
+        'RECLIENT_DIR': 'reclient/path',
+        'REPROXY_CFG': 'reclient_cfg',
+    })
+
+    with sysroot.RemoteExecution(use_goma=False, use_remoteexec=True):
+      self.remoteexec_mock.assert_called_once_with('reclient/path',
+                                                   'reclient_cfg')
+    self.remoteexec_instance.Start.assert_called_once()
+    self.remoteexec_instance.Stop.assert_called_once()
+    self.goma_mock.assert_not_called()
+
+  def testRemoteExecNoEnv(self):
+    """Test the case where remoteexec env variables are not defined."""
+    with sysroot.RemoteExecution(use_goma=False, use_remoteexec=True):
+      pass
+    self.remoteexec_mock.assert_not_called()
+    self.goma_mock.assert_not_called()
+
+  def testRemoteExecException(self):
+    """Test the case where remoteexec raises exception."""
+    os.environ.update({
+        'RECLIENT_DIR': 'reclient/path',
+        'REPROXY_CFG': 'reclient_cfg',
+    })
+    self.remoteexec_mock.side_effect = ValueError()
+
+    with cros_test_lib.LoggingCapturer() as log:
+      with sysroot.RemoteExecution(use_goma=False, use_remoteexec=True):
+        self.AssertLogsMatch(log, '.*initialization error.*')
+    self.remoteexec_instance.Start.assert_not_called()
+    self.remoteexec_instance.Stop.assert_not_called()
+    self.goma_mock.assert_not_called()
+
+  def testNoRemoteExec(self):
+    """Test the case where no remoteexec is requested with env variable."""
+    os.environ.update({
+        'RECLIENT_DIR': 'reclient/path',
+        'REPROXY_CFG': 'reclient_cfg',
+        'GOMA_DIR': 'goma/path',
+        'GOMA_SERVICE_ACCOUNT_JSON_FILE': 'goma_account.json',
+    })
+
+    with sysroot.RemoteExecution(use_goma=False, use_remoteexec=False):
+      pass
+    self.remoteexec_mock.assert_not_called()
+    self.goma_mock.assert_not_called()
+
+  def testNoRemoteExecNoEnv(self):
+    """Test the case where no remoteexec is requested without env variable."""
+    with sysroot.RemoteExecution(use_goma=False, use_remoteexec=False):
+      pass
+    self.remoteexec_mock.assert_not_called()
+    self.goma_mock.assert_not_called()

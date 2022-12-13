@@ -276,7 +276,7 @@ def GconvStrip(opts):
          '--symbol', symbols, opts.root]
   result = cros_build_lib.run(cmd, stdout=True, print_cmd=False,
                               encoding='utf-8')
-  files = set(result.output.splitlines())
+  files = set(result.stdout.splitlines())
   logging.debug('Symbols %s found on %d files.', symbols, len(files))
 
   # The charsets are represented as nul-terminated strings in the binary files,

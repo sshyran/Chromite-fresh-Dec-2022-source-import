@@ -13,6 +13,7 @@ from chromite.cli.cros import cros_chrome_sdk_unittest
 from chromite.lib import chrome_util
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import parallel_unittest
 from chromite.lib import partial_mock
@@ -84,18 +85,20 @@ class InterfaceTest(cros_test_lib.OutputTestCase):
 
   def testLacros(self):
     """Test basic lacros invocation."""
-    argv = ['--lacros', '--nostrip', '--build-dir', '/path/to/nowhere',
-            '--device', 'monkey']
+    argv = ['--lacros', '--build-dir', '/path/to/nowhere',
+            '--device', 'monkey', '--board', 'atlas']
     options = _ParseCommandLine(argv)
     self.assertTrue(options.lacros)
     self.assertEqual(options.target_dir, deploy_chrome.LACROS_DIR)
 
-  def testLacrosRequiresNostrip(self):
-    """Lacros requires --nostrip"""
-    argv = ['--lacros', '--build-dir', '/path/to/nowhere', '--device',
-            'monkey']
-    self.assertRaises2(SystemExit, _ParseCommandLine, argv,
-                       check_attrs={'code': 2})
+  def testLacrosNoStrip(self):
+    """Test lacros invocation with nostrip."""
+    argv = ['--lacros', '--nostrip', '--build-dir', '/path/to/nowhere',
+            '--device', 'monkey']
+    options = _ParseCommandLine(argv)
+    self.assertTrue(options.lacros)
+    self.assertFalse(options.dostrip)
+    self.assertEqual(options.target_dir, deploy_chrome.LACROS_DIR)
 
   def assertParseError(self, argv):
     with self.OutputCapturer():
@@ -301,17 +304,17 @@ class TestUiJobStarted(DeployTest):
 
   def testUiJobStartedFalse(self):
     """Correct results with a stopped job."""
-    self.MockStatusUiCmd(output='ui stop/waiting')
+    self.MockStatusUiCmd(stdout='ui stop/waiting')
     self.assertFalse(self.deploy._CheckUiJobStarted())
 
   def testNoUiJob(self):
     """Correct results when the job doesn't exist."""
-    self.MockStatusUiCmd(error='start: Unknown job: ui', returncode=1)
+    self.MockStatusUiCmd(stderr='start: Unknown job: ui', returncode=1)
     self.assertFalse(self.deploy._CheckUiJobStarted())
 
   def testCheckRootfsWriteableTrue(self):
     """Correct results with a running job."""
-    self.MockStatusUiCmd(output='ui start/running, process 297')
+    self.MockStatusUiCmd(stdout='ui start/running, process 297')
     self.assertTrue(self.deploy._CheckUiJobStarted())
 
 
@@ -320,10 +323,13 @@ class StagingTest(cros_test_lib.MockTempDirTestCase):
 
   def setUp(self):
     self.staging_dir = os.path.join(self.tempdir, 'staging')
+    osutils.SafeMakedirs(self.staging_dir)
+    self.staging_tarball_path = os.path.join(
+        self.tempdir, deploy_chrome._CHROME_DIR_STAGING_TARBALL_ZSTD)
     self.build_dir = os.path.join(self.tempdir, 'build_dir')
     self.common_flags = ['--board', _TARGET_BOARD,
                          '--build-dir', self.build_dir, '--staging-only',
-                         '--cache-dir', self.tempdir]
+                         '--cache-dir', str(self.tempdir)]
     self.sdk_mock = self.StartPatcher(cros_chrome_sdk_unittest.SDKFetcherMock())
     self.PatchObject(
         osutils, 'SourceEnvironment', autospec=True,
@@ -351,6 +357,33 @@ class StagingTest(cros_test_lib.MockTempDirTestCase):
     deploy_chrome._PrepareStagingDir(options, self.tempdir, self.staging_dir,
                                      chrome_util._COPY_PATHS_CHROME)
 
+  @cros_test_lib.pytestmark_network_test
+  def testUploadStagingDir(self):
+    """Upload staging directory."""
+    mockGsCopy = self.PatchObject(gs.GSContext, 'Copy')
+    staging_upload = 'gs://some-path'
+    options = _ParseCommandLine(
+        self.common_flags + ['--staging-upload', staging_upload])
+    osutils.Touch(os.path.join(self.build_dir, 'chrome'), makedirs=True)
+    deploy_chrome._UploadStagingDir(options, self.tempdir, self.staging_dir)
+    self.assertEqual(mockGsCopy.call_args_list, [
+        mock.call(self.staging_tarball_path, staging_upload, acl=''),
+    ])
+
+  @cros_test_lib.pytestmark_network_test
+  def testUploadStagingPublicReadACL(self):
+    """Upload staging directory with public-read ACL."""
+    mockGsCopy = self.PatchObject(gs.GSContext, 'Copy')
+    staging_upload = 'gs://some-path'
+    options = _ParseCommandLine(
+        self.common_flags +
+        ['--staging-upload', staging_upload, '--public-read'])
+    osutils.Touch(os.path.join(self.build_dir, 'chrome'), makedirs=True)
+    deploy_chrome._UploadStagingDir(options, self.tempdir, self.staging_dir)
+    self.assertEqual(mockGsCopy.call_args_list, [
+        mock.call(self.staging_tarball_path, staging_upload, acl='public-read'),
+    ])
+
 
 class DeployTestBuildDir(cros_test_lib.MockTempDirTestCase):
   """Set up a deploy object with a build-dir for use in deployment type tests"""
@@ -367,7 +400,7 @@ class DeployTestBuildDir(cros_test_lib.MockTempDirTestCase):
     self.deploy = self._GetDeployChrome(
         list(_REGULAR_TO) + ['--board', _TARGET_BOARD,
                              '--build-dir', self.build_dir, '--staging-only',
-                             '--cache-dir', self.tempdir, '--sloppy'])
+                             '--cache-dir', str(self.tempdir), '--sloppy'])
 
   def getCopyPath(self, source_path):
     """Return a chrome_util.Path or None if not present."""

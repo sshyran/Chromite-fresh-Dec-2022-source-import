@@ -7,9 +7,9 @@
 import os
 
 from chromite.api.gen.chromiumos import common_pb2
-from chromite.lib.build_target_lib import BuildTarget
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
+from chromite.lib.build_target_lib import BuildTarget
 
 
 class BuildTargetTest(cros_test_lib.TempDirTestCase):

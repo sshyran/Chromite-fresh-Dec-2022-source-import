@@ -24,7 +24,7 @@ from chromite.lib.parser import package_info
 # We use wildcard imports here to make fixtures defined in the test module
 # globally visible.
 # pylint: disable=unused-wildcard-import, wildcard-import
-
+#
 # Importing from *_fixtures.py files into conftest.py is the only time a
 # module should use a wildcard import. *_fixtures.py files should ensure
 # that the only items visible to a wildcard import are pytest fixtures,

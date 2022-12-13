@@ -60,21 +60,20 @@ class CrosSdkUtilsTest(cros_test_lib.MockTempDirTestCase):
     """Basic test of GetArchStageTarballs."""
     self.assertCountEqual([
         'https://storage.googleapis.com/chromiumos-sdk/cros-sdk-123.tar.xz',
-        'https://storage.googleapis.com/chromiumos-sdk/cros-sdk-123.tbz2',
     ], cros_sdk.GetArchStageTarballs('123'))
 
   def testFetchRemoteTarballsEmpty(self):
     """Test FetchRemoteTarballs with no results."""
     m = self.PatchObject(retry_util, 'RunCurl')
     with self.assertRaises(ValueError):
-      cros_sdk.FetchRemoteTarballs(self.tempdir, [], 'tarball')
-    m.return_value = cros_build_lib.CommandResult(stdout=b'Foo: bar\n')
+      cros_sdk.FetchRemoteTarballs(self.tempdir, [])
+    m.return_value = cros_build_lib.CompletedProcess(stdout=b'Foo: bar\n')
     with self.assertRaises(ValueError):
-      cros_sdk.FetchRemoteTarballs(self.tempdir, ['gs://x.tar'], 'tarball')
+      cros_sdk.FetchRemoteTarballs(self.tempdir, ['gs://x.tar'])
 
   def testFetchRemoteTarballsSuccess(self):
     """Test FetchRemoteTarballs with a successful download."""
-    curl = cros_build_lib.CommandResult(stdout=(
+    curl = cros_build_lib.CompletedProcess(stdout=(
         b'HTTP/1.0 200\n'
         b'Foo: bar\n'
         b'Content-Length: 100\n'
@@ -82,7 +81,7 @@ class CrosSdkUtilsTest(cros_test_lib.MockTempDirTestCase):
     self.PatchObject(retry_util, 'RunCurl', return_value=curl)
     self.assertEqual(
         os.path.join(self.tempdir, 'tar'),
-        cros_sdk.FetchRemoteTarballs(self.tempdir, ['gs://x/tar'], 'tarball'))
+        cros_sdk.FetchRemoteTarballs(self.tempdir, ['gs://x/tar']))
 
 
 @unittest.skipIf(cros_build_lib.IsInsideChroot(),
@@ -121,7 +120,7 @@ class CrosSdkSnapshotTest(cros_test_lib.TempDirTestCase):
     except cros_build_lib.RunCommandError as e:
       raise SystemExit('Running %r failed!: %s' % (cmd, e))
 
-    return result.returncode, result.output
+    return result.returncode, result.stdout
 
   def testSnapshotsRequireImage(self):
     code, output = self._crosSdk(['--snapshot-list', '--nouse-image'])

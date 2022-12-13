@@ -65,7 +65,7 @@ class ModificationTimeMonitor(object):
     cmd = 'find . -name .git -prune -o -printf "%T@\n" | sort -nr | head -n1'
     ret = cros_build_lib.run(cmd, cwd=path, shell=True, print_cmd=False,
                              capture_output=True)
-    return float(ret.output) if ret.output else 0
+    return float(ret.stdout) if ret.stdout else 0
 
   def GetModificationTimes(self):
     """Get the latest modification time for each of the queued keys."""

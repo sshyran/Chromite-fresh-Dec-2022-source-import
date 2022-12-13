@@ -17,6 +17,7 @@ from chromite.lib import osutils
 from chromite.lib.parser import package_info
 from chromite.service import dependency as dependency_service
 
+
 pytestmark = cros_test_lib.pytestmark_inside_only
 
 

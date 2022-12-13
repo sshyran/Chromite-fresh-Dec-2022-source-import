@@ -8,6 +8,7 @@ import logging
 import os
 
 from chromite.config import chromeos_config
+from chromite.format import formatters
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -30,7 +31,8 @@ def main(argv):
                               capture_output=True,
                               encoding='utf-8',
                               debug_level=logging.DEBUG)
-  osutils.WriteFile(constants.WATERFALL_CONFIG_FILE, result.stdout)
+  waterfall_data = formatters.whitespace.Data(result.stdout)
+  osutils.WriteFile(constants.WATERFALL_CONFIG_FILE, waterfall_data)
 
   # Regenerate `luci-scheduler.cfg`.
   logging.info('Regenerating luci-scheduler.cfg')

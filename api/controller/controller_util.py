@@ -7,17 +7,19 @@
 import glob
 import logging
 import os
-from typing import TYPE_CHECKING, Union
+from typing import Iterable, Optional, TYPE_CHECKING, Union
 
-from chromite.api.gen.chromite.api import sysroot_pb2, test_pb2
+from chromite.api.gen.chromite.api import sysroot_pb2
+from chromite.api.gen.chromite.api import test_pb2
 from chromite.api.gen.chromiumos import common_pb2
-from chromite.cbuildbot import goma_util
 from chromite.lib import build_target_lib
-from chromite.lib import constants
-from chromite.lib.parser import package_info
 from chromite.lib import chroot_lib
+from chromite.lib import constants
+from chromite.lib import goma_lib
 from chromite.lib import remoteexec_util
 from chromite.lib import sysroot_lib
+from chromite.lib.parser import package_info
+
 
 if TYPE_CHECKING:
   from chromite.api.gen.chromiumos.build.api import portage_pb2
@@ -30,11 +32,11 @@ class InvalidMessageError(Error):
   """Invalid message."""
 
 
-def ParseChroot(chroot_message):
+def ParseChroot(chroot_message: common_pb2.Chroot) -> chroot_lib.Chroot:
   """Create a chroot object from the chroot message.
 
   Args:
-    chroot_message (common_pb2.Chroot): The chroot message.
+    chroot_message: The chroot message.
 
   Returns:
     Chroot: The parsed chroot object.
@@ -68,11 +70,11 @@ def ParseChroot(chroot_message):
   return chroot
 
 
-def ParseSysroot(sysroot_message):
+def ParseSysroot(sysroot_message: sysroot_pb2.Sysroot) -> sysroot_lib.Sysroot:
   """Create a sysroot object from the sysroot message.
 
   Args:
-    sysroot_message (commmon_pb2.Sysroot): The sysroot message.
+    sysroot_message: The sysroot message.
 
   Returns:
     Sysroot: The parsed sysroot object.
@@ -107,34 +109,38 @@ def ParseGomaConfig(goma_message, chroot_path):
   # Parse the goma config.
   chromeos_goma_dir = goma_message.chromeos_goma_dir or None
   if goma_message.goma_approach == common_pb2.GomaConfig.RBE_STAGING:
-    goma_approach = goma_util.GomaApproach('?staging',
-                                           'staging-goma.chromium.org', True)
+    goma_approach = goma_lib.GomaApproach('?staging',
+                                          'staging-goma.chromium.org', True)
   elif goma_message.goma_approach == common_pb2.GomaConfig.RBE_PROD:
-    goma_approach = goma_util.GomaApproach('?prod', 'goma.chromium.org', True)
+    goma_approach = goma_lib.GomaApproach('?prod', 'goma.chromium.org', True)
   else:
-    goma_approach = goma_util.GomaApproach('?cros', 'goma.chromium.org', True)
+    goma_approach = goma_lib.GomaApproach('?cros', 'goma.chromium.org', True)
 
   # Note that we are not specifying the goma log_dir so that goma will create
   # and use a tmp dir for the logs.
   stats_filename = goma_message.stats_file or None
   counterz_filename = goma_message.counterz_file or None
 
-  return goma_util.Goma(goma_message.goma_dir,
-                        goma_message.goma_client_json,
-                        stage_name='BuildAPI',
-                        chromeos_goma_dir=chromeos_goma_dir,
-                        chroot_dir=chroot_path,
-                        goma_approach=goma_approach,
-                        stats_filename=stats_filename,
-                        counterz_filename=counterz_filename)
+  return goma_lib.Goma(
+      goma_message.goma_dir,
+      goma_message.goma_client_json,
+      stage_name='BuildAPI',
+      chromeos_goma_dir=chromeos_goma_dir,
+      chroot_dir=chroot_path,
+      goma_approach=goma_approach,
+      stats_filename=stats_filename,
+      counterz_filename=counterz_filename)
 
 
-def ParseBuildTarget(build_target_message, profile_message=None):
+def ParseBuildTarget(
+    build_target_message: common_pb2.BuildTarget,
+    profile_message: Optional[sysroot_pb2.Profile] = None
+) -> build_target_lib.BuildTarget:
   """Create a BuildTarget object from a build_target message.
 
   Args:
-    build_target_message (common_pb2.BuildTarget): The BuildTarget message.
-    profile_message (sysroot_pb2.Profile|None): The profile message.
+    build_target_message: The BuildTarget message.
+    profile_message: The profile message.
 
   Returns:
     BuildTarget: The parsed instance.
@@ -189,7 +195,7 @@ def deserialize_package_info(pkg_info_msg):
   return package_info.parse(PackageInfoToString(pkg_info_msg))
 
 
-def retrieve_package_log_paths(error: sysroot_lib.PackageInstallError,
+def retrieve_package_log_paths(packages: Iterable[package_info.PackageInfo],
                                output_proto: Union[
                                    sysroot_pb2.InstallPackagesResponse,
                                    sysroot_pb2.InstallToolchainResponse,
@@ -199,15 +205,12 @@ def retrieve_package_log_paths(error: sysroot_lib.PackageInstallError,
   """Get the path to the log file for each package that failed to build.
 
   Args:
-    error: The error message produced by the build step.
+    packages: A list of packages which failed to build.
     output_proto: The Response message for a given API call. This response proto
       must contain a failed_package_data field.
     target_sysroot: The sysroot used by the build step.
   """
-  for pkg_info in error.failed_packages:
-    # TODO(b/206514844): remove when field is deleted
-    package_info_msg = output_proto.failed_packages.add()
-    serialize_package_info(pkg_info, package_info_msg)
+  for pkg_info in packages:
     # Grab the paths to the log files for each failed package from the
     # sysroot.
     # Logs currently exist within the sysroot in the form of:
@@ -248,14 +251,11 @@ def PackageInfoToString(package_info_msg):
   return '%s%s%s' % (c, p, v)
 
 
-def CPVToString(cpv):
+def CPVToString(cpv: package_info.CPV) -> str:
   """Get the most useful string representation from a CPV.
 
   Args:
-    cpv (package_info.CPV): The CPV object.
-
-  Returns:
-    str
+    cpv: The CPV object.
 
   Raises:
     ValueError - when the CPV has no useful fields set.

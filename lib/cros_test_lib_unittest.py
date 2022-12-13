@@ -43,8 +43,8 @@ class CrosTestCaseTest(cros_test_lib.TestCase):
 class TruthTableTest(cros_test_lib.TestCase):
   """Test TruthTable functionality."""
 
-  def _TestTableSanity(self, tt, lines):
-    """Run the given truth table through basic sanity checks.
+  def _TestTableSmoke(self, tt, lines):
+    """Run the given truth table through basic smoke checks.
 
     Args:
       tt: A TruthTable object.
@@ -91,7 +91,7 @@ class TruthTableTest(cros_test_lib.TestCase):
     self.assertEqual((True, False), lines[2])
     self.assertEqual((True, True), lines[3])
 
-    self._TestTableSanity(tt, lines)
+    self._TestTableSmoke(tt, lines)
 
   def testFourDimensions(self):
     """Test TruthTable behavior for four boolean inputs."""
@@ -119,7 +119,7 @@ class TruthTableTest(cros_test_lib.TestCase):
     self.assertEqual((False, True, True, True), lines[7])
     self.assertEqual((True, True, True, True), lines[15])
 
-    self._TestTableSanity(tt, lines)
+    self._TestTableSmoke(tt, lines)
 
 
 class VerifyTarballTest(cros_test_lib.MockTempDirTestCase):
@@ -137,7 +137,7 @@ class VerifyTarballTest(cros_test_lib.MockTempDirTestCase):
       files: A list of contents to return.
     """
     self.rc_mock.AddCmdResult(
-        partial_mock.ListRegex('tar -tf'), output='\n'.join(files))
+        partial_mock.ListRegex('tar -tf'), stdout='\n'.join(files))
 
   def testNormPath(self):
     """Test path normalization."""
@@ -288,7 +288,7 @@ class RunCommandTestCase(cros_test_lib.RunCommandTestCase):
 
   def testPopenMockBinaryData(self):
     """Verify our automatic encoding in PopenMock works with bytes."""
-    self.rc.AddCmdResult(['/x'], error=b'\xff')
+    self.rc.AddCmdResult(['/x'], stderr=b'\xff')
     result = cros_build_lib.run(['/x'], capture_output=True)
     self.assertEqual(b'', result.stdout)
     self.assertEqual(b'\xff', result.stderr)
@@ -297,7 +297,7 @@ class RunCommandTestCase(cros_test_lib.RunCommandTestCase):
 
   def testPopenMockMixedData(self):
     """Verify our automatic encoding in PopenMock works with mixed data."""
-    self.rc.AddCmdResult(['/x'], error=b'abc\x00', output=u'Yes\u20a0')
+    self.rc.AddCmdResult(['/x'], stderr=b'abc\x00', stdout=u'Yes\u20a0')
     result = cros_build_lib.run(['/x'], capture_output=True)
     self.assertEqual(b'Yes\xe2\x82\xa0', result.stdout)
     self.assertEqual(b'abc\x00', result.stderr)

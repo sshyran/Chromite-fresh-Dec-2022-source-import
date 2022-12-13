@@ -1,7 +1,6 @@
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Classes for holding autoupdate_EndToEnd test parameters."""
 
 from chromite.lib.paygen import test_control
@@ -16,10 +15,18 @@ class TestConfig(object):
   Stores and generates arguments for running autotest_EndToEndTest.
   """
 
-  def __init__(self, board, name, is_delta_update, source_release,
-               target_release, source_payload_uri, target_payload_uri,
-               suite_name=_DEFAULT_AU_SUITE_NAME, source_archive_uri=None,
-               payload_type=None, applicable_models=None):
+  def __init__(self,
+               board,
+               name,
+               is_delta_update,
+               source_release,
+               target_release,
+               source_payload_uri,
+               target_payload_uri,
+               suite_name=_DEFAULT_AU_SUITE_NAME,
+               source_archive_uri=None,
+               payload_type=None,
+               applicable_models=None):
     """Initialize a test configuration.
 
     Args:
@@ -32,12 +39,11 @@ class TestConfig(object):
       target_payload_uri: target payload URI ('gs://...')
       suite_name: the name of the test suite (default: 'au')
       source_archive_uri: location of source build artifacts
-      payload_type: The type of update we are doing with this payload.
-                    Possible types are in defined in PAYLOAD_TYPES at
-                    chromite/lib/paygen/paygen_build_lib.
-      applicable_models: A list of models that this config should run
-                         against. Only used for FSI configs. None
-                         indicates it can run on any board.
+      payload_type: The type of update we are doing with this payload. Possible
+        types are in defined in PAYLOAD_TYPES at
+        chromite/lib/paygen/paygen_build_lib.
+      applicable_models: A list of models that this config should run against.
+        Only used for FSI configs. None indicates it can run on any board.
     """
     self.board = board
     self.name = name
@@ -60,10 +66,8 @@ class TestConfig(object):
     payload_type_ending = ''
     if self.payload_type:
       payload_type_ending = '_%s' % self.payload_type.lower()
-    return '%s_%s_%s%s' % (self.name,
-                           'delta' if self.is_delta_update else 'full',
-                           self.source_release,
-                           payload_type_ending)
+    return '%s_%s_%s%s' % (self.name, 'delta' if self.is_delta_update else
+                           'full', self.source_release, payload_type_ending)
 
   def get_autotest_name(self):
     """Returns job name to use when creating an autotest job.
@@ -88,14 +92,16 @@ class TestConfig(object):
   def __str__(self):
     """Short textual representation w/o image/payload URIs."""
     return ('[%s/%s/%s/%s -> %s]' %
-            (self.board, self.name, self.get_update_type(),
-             self.source_release, self.target_release))
+            (self.board, self.name, self.get_update_type(), self.source_release,
+             self.target_release))
 
   def __repr__(self):
     """Full textual representation w/ image/payload URIs."""
-    return '\n'.join([str(self),
-                      'source payload : %s' % self.source_payload_uri,
-                      'target payload : %s' % self.target_payload_uri])
+    return '\n'.join([
+        str(self),
+        'source payload : %s' % self.source_payload_uri,
+        'target payload : %s' % self.target_payload_uri
+    ])
 
   def _get_args(self, assign, delim, is_quote_val):
     template = "%s%s'%s'" if is_quote_val else '%s%s%s'
@@ -115,8 +121,7 @@ class TestConfig(object):
     if self.payload_type:
       arg_values.append(('payload_type', self.payload_type))
 
-    return delim.join(
-        template % (key, assign, val) for key, val in arg_values)
+    return delim.join(template % (key, assign, val) for key, val in arg_values)
 
   def get_cmdline_args(self):
     return self._get_args('=', ' ', False)

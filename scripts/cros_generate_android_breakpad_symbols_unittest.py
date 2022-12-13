@@ -28,8 +28,8 @@ INFO: Unpacked         : 66888 bytes
 INFO: Relocations      : 2787 entries
 INFO: Expansion     : 57344 bytes
 """
-    cmd_result = cros_build_lib.CommandResult(
-        cmd=None, error=None, output=output, returncode=0)
+    cmd_result = cros_build_lib.CompletedProcess(
+        stderr=None, stdout=output, returncode=0)
 
     result = cros_generate_android_breakpad_symbols.FindExpansionOffset(
         cmd_result)
@@ -38,8 +38,8 @@ INFO: Expansion     : 57344 bytes
   def testFinaExpansionOffsetNoUnpack(self):
     """Make sure we get an offset of zero, if the file wasn't unpacked."""
 
-    cmd_result = cros_build_lib.CommandResult(
-        cmd=None, error=None, output=None, returncode=1)
+    cmd_result = cros_build_lib.CompletedProcess(
+        stderr=None, stdout=None, returncode=1)
 
     result = cros_generate_android_breakpad_symbols.FindExpansionOffset(
         cmd_result)
@@ -48,8 +48,8 @@ INFO: Expansion     : 57344 bytes
   def testFinaExpansionOffsetBadOutput(self):
     """Make sure we get an error without expected output."""
 
-    cmd_result = cros_build_lib.CommandResult(
-        cmd=None, error=None, output='foo', returncode=0)
+    cmd_result = cros_build_lib.CompletedProcess(
+        stderr=None, stdout='foo', returncode=0)
 
     with self.assertRaises(
         cros_generate_android_breakpad_symbols.OffsetDiscoveryError):

@@ -17,6 +17,7 @@ import warnings
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import cros_build_lib
 
+
 warnings.warn('lib/tee.py is deprecated', DeprecationWarning)
 
 # Max amount of data we're hold in the buffer at a given time.
@@ -28,7 +29,7 @@ class ToldToDie(Exception):
   """Exception thrown via signal handlers."""
 
   def __init__(self, signum):
-    Exception.__init__(self, 'We received signal %i' % (signum,))
+    Exception.__init__(self, f'We received signal {signum}')
 
 
 def _TeeProcessSignalHandler(signum, _frame):
@@ -63,11 +64,10 @@ def _output(line, output_files, complain):
       if offset < len(line) and complain:
         flags = fcntl.fcntl(f.fileno(), fcntl.F_GETFL, 0)
         if flags & os.O_NONBLOCK:
-          warning = '\nWarning: %s/%d is non-blocking.\n' % (f.name,
-                                                             f.fileno())
+          warning = f'\nWarning: {f.name}/{f.fileno()} is non-blocking.\n'
           _output(warning, output_files, False)
 
-        warning = '\nWarning: Short write for %s/%d.\n' % (f.name, f.fileno())
+        warning = f'\nWarning: Short write for {f.name}/{f.fileno()}.\n'
         _output(warning, output_files, False)
 
 
@@ -87,8 +87,7 @@ def _tee(input_fd, output_files, complain):
 class _TeeProcess(multiprocessing.Process):
   """Replicate output to multiple file handles."""
 
-  def __init__(self, output_filenames, complain, error_fd,
-               master_pid):
+  def __init__(self, output_filenames, complain, error_fd, master_pid):
     """Write to stdout and supplied filenames.
 
     Args:
@@ -118,8 +117,10 @@ class _TeeProcess(multiprocessing.Process):
       max_fd_value = os.sysconf('SC_OPEN_MAX')
     except ValueError:
       max_fd_value = 256
-    preserve = set([1, 2, self._error_handle.fileno(), self._reader_pipe,
-                    max_fd_value])
+    preserve = {
+        1, 2,
+        self._error_handle.fileno(), self._reader_pipe, max_fd_value
+    }
     preserve = iter(sorted(preserve))
     fd = 0
     while fd < max_fd_value:
@@ -156,11 +157,10 @@ class _TeeProcess(multiprocessing.Process):
       failed = False
     except ToldToDie:
       failed = False
-    except Exception as e:
+    except Exception:
       tb = traceback.format_exc()
       cbuildbot_alerts.PrintBuildbotStepFailure(self._error_handle)
-      self._error_handle.write(
-          'Unhandled exception occured in tee:\n%s\n' % (tb,))
+      self._error_handle.write(f'Unhandled exception occured in tee:\n{tb}\n')
       # Try to signal the parent telling them of our
       # imminent demise.
 
@@ -173,7 +173,7 @@ class _TeeProcess(multiprocessing.Process):
         try:
           os.kill(self.master_pid, signal.SIGTERM)
         except Exception as e:
-          self._error_handle.write('\nTee failed signaling %s\n' % e)
+          self._error_handle.write(f'\nTee failed signaling {e}\n')
 
       # Finally, kill ourself.
       # Specifically do it in a fashion that ensures no inherited

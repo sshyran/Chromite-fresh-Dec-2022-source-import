@@ -1,33 +1,31 @@
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
 """Test service.
 
 Handles test related functionality.
 """
-
 import json
 import logging
 import os
-import re
 import shutil
-from typing import Iterable, List, NamedTuple, Optional, TYPE_CHECKING
+from typing import Dict, Iterable, List, NamedTuple, Optional, TYPE_CHECKING
 
 from chromite.cbuildbot import commands
 from chromite.lib import autotest_util
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import failures_lib
 from chromite.lib import image_lib
-from chromite.lib import moblab_vm
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.utils import code_coverage_util
 
+
 if TYPE_CHECKING:
-  from chromite.cbuildbot import goma_util
   from chromite.lib import build_target_lib
   from chromite.lib import chroot_lib
+  from chromite.lib import goma_lib
   from chromite.lib import sysroot_lib
   from chromite.lib.parser import package_info
 
@@ -59,20 +57,18 @@ class BuildTargetUnitTestResult(object):
     return self.return_code == 0 and len(self.failed_pkgs) == 0
 
 
-def BuildTargetUnitTest(
-    build_target: 'build_target_lib.BuildTarget',
-    chroot: 'chroot_lib.Chroot',
-    packages: Optional[List[str]] = None,
-    blocklist: Optional[List[str]] = None,
-    was_built: bool = True,
-    code_coverage: bool = False,
-    testable_packages_optional: bool = False,
-    filter_only_cros_workon: bool = False) -> BuildTargetUnitTestResult:
+def BuildTargetUnitTest(build_target: 'build_target_lib.BuildTarget',
+                        packages: Optional[List[str]] = None,
+                        blocklist: Optional[List[str]] = None,
+                        was_built: bool = True,
+                        code_coverage: bool = False,
+                        testable_packages_optional: bool = False,
+                        filter_only_cros_workon: bool = False
+                       ) -> BuildTargetUnitTestResult:
   """Run the ebuild unit tests for the target.
 
   Args:
     build_target: The build target.
-    chroot: The chroot where the tests are running.
     packages: Packages to be tested. If none, uses all testable packages.
     blocklist: Tests to skip.
     was_built: Whether packages were built.
@@ -85,6 +81,7 @@ def BuildTargetUnitTest(
   Returns:
     BuildTargetUnitTestResult
   """
+  cros_build_lib.AssertInsideChroot()
   # TODO(saklein) Refactor commands.RunUnitTests to use this/the API.
   # TODO(crbug.com/960805) Move cros_run_unit_tests logic here.
   cmd = ['cros_run_unit_tests']
@@ -109,59 +106,25 @@ def BuildTargetUnitTest(
   if not was_built:
     cmd.append('--assume-empty-sysroot')
 
-  extra_env = chroot.env
-
+  extra_env = {}
   if code_coverage:
-    use_flags = extra_env.get('USE', '').split()
+    use_flags = os.environ.get('USE', '').split()
     if 'coverage' not in use_flags:
       use_flags.append('coverage')
     extra_env['USE'] = ' '.join(use_flags)
 
   # Set up the failed package status file.
-  with chroot.tempdir() as tempdir:
-    extra_env[constants.CROS_METRICS_DIR_ENVVAR] = chroot.chroot_path(tempdir)
+  with osutils.TempDir() as tempdir:
+    extra_env[constants.CROS_METRICS_DIR_ENVVAR] = tempdir
 
     result = cros_build_lib.run(
         cmd,
-        enter_chroot=True,
         extra_env=extra_env,
-        chroot_args=chroot.get_enter_args(),
         check=False)
 
     failed_pkgs = portage_util.ParseDieHookStatusFile(tempdir)
 
   return BuildTargetUnitTestResult(result.returncode, failed_pkgs)
-
-
-def BuildTargetUnitTestTarball(chroot: 'chroot_lib.Chroot',
-                               sysroot: 'sysroot_lib.Sysroot',
-                               result_path: str) -> Optional[str]:
-  """Build the unittest tarball.
-
-  Args:
-    chroot: Chroot where the tests were run.
-    sysroot: The sysroot where the tests were run.
-    result_path: The directory where the archive should be created.
-
-  Returns:
-    The tarball path or None.
-  """
-  tarball = 'unit_tests.tar'
-  tarball_path = os.path.join(result_path, tarball)
-
-  cwd = chroot.full_path(sysroot.path, constants.UNITTEST_PKG_PATH)
-
-  if not os.path.exists(cwd):
-    return None
-
-  result = cros_build_lib.CreateTarball(
-      tarball_path,
-      cwd,
-      chroot=chroot.path,
-      compression=cros_build_lib.COMP_NONE,
-      check=False)
-
-  return tarball_path if result.returncode == 0 else None
 
 
 def BundleHwqualTarball(board: str, version: str, chroot: 'chroot_lib.Chroot',
@@ -247,97 +210,23 @@ def ChromiteUnitTest() -> bool:
   return result.returncode == 0
 
 
-def CreateMoblabVm(workspace_dir: str, chroot_dir: str,
-                   image_dir: str) -> moblab_vm.MoblabVm:
-  """Create the moblab VMs.
-
-  Assumes that image_dir is in exactly the state it was after building
-  a test image and then converting it to a VM image.
-
-  Args:
-    workspace_dir: Workspace for the moblab VM.
-    chroot_dir: Directory containing the chroot for the moblab VM.
-    image_dir: Directory containing the VM image.
+def RulesCrosUnitTest() -> bool:
+  """Run rules_cros unittests.
 
   Returns:
-    The resulting VM.
+    True iff all tests passed, False otherwise.
   """
-  vms = moblab_vm.MoblabVm(workspace_dir, chroot_dir=chroot_dir)
-  vms.Create(image_dir, dut_image_dir=image_dir, create_vm_images=False)
-  return vms
+  cmd = [
+      os.path.join(constants.RULES_CROS_PATH, 'run_tests.sh'),
+  ]
+  result = cros_build_lib.run(cmd, enter_chroot=True, check=False)
 
-
-def PrepareMoblabVmImageCache(vms: moblab_vm.MoblabVm, builder: str,
-                              payload_dirs: List[str]) -> str:
-  """Preload the given payloads into the moblab VM image cache.
-
-  Args:
-    vms: The Moblab VM.
-    builder: The builder path, used to name the cache dir.
-    payload_dirs: List of payload directories to load.
-
-  Returns:
-    Absolute path to the image cache path.
-  """
-  with vms.MountedMoblabDiskContext() as disk_dir:
-    image_cache_root = os.path.join(disk_dir, 'static/prefetched')
-    # If by any chance this path exists, the permission bits are surely
-    # nonsense, since 'moblab' user doesn't exist on the host system.
-    osutils.RmDir(image_cache_root, ignore_missing=True, sudo=True)
-
-    image_cache_dir = os.path.join(image_cache_root, builder)
-    osutils.SafeMakedirsNonRoot(image_cache_dir)
-    for payload_dir in payload_dirs:
-      osutils.CopyDirContents(payload_dir, image_cache_dir, allow_nonempty=True)
-
-  image_cache_rel_dir = image_cache_dir[len(disk_dir):].strip('/')
-  return os.path.join('/', 'mnt/moblab', image_cache_rel_dir)
-
-
-def RunMoblabVmTest(chroot: 'chroot_lib.Chroot', vms: moblab_vm.MoblabVm,
-                    builder: str, image_cache_dir: str,
-                    results_dir: str) -> None:
-  """Run Moblab VM tests.
-
-  Args:
-    chroot: The chroot in which to run tests.
-    builder: The builder path, used to find artifacts on GS.
-    vms: The Moblab VMs to test.
-    image_cache_dir: Path to artifacts cache.
-    results_dir: Path to output test results.
-  """
-  with vms.RunVmsContext():
-    # TODO(evanhernandez): Move many of these arguments to test config.
-    test_args = [
-        # moblab in VM takes longer to bring up all upstart services on first
-        # boot than on physical machines.
-        'services_init_timeout_m=10',
-        'target_build="%s"' % builder,
-        'test_timeout_hint_m=90',
-        'clear_devserver_cache=False',
-        'image_storage_server="%s"' % (image_cache_dir.rstrip('/') + '/'),
-    ]
-    cros_build_lib.run(
-        [
-            'test_that',
-            '--no-quickmerge',
-            '--results_dir',
-            results_dir,
-            '-b',
-            'moblab-generic-vm',
-            'localhost:%s' % vms.moblab_ssh_port,
-            'moblab_DummyServerNoSspSuite',
-            '--args',
-            ' '.join(test_args),
-        ],
-        enter_chroot=True,
-        chroot_args=chroot.get_enter_args(),
-    )
+  return result.returncode == 0
 
 
 def SimpleChromeWorkflowTest(sysroot_path: str, build_target_name: str,
                              chrome_root: str,
-                             goma: Optional['goma_util.Goma']) -> None:
+                             goma: Optional['goma_lib.Goma']) -> None:
   """Execute SimpleChrome workflow tests
 
   Args:
@@ -405,7 +294,7 @@ def _VerifySDKEnvironment(out_board_dir: str) -> None:
 
 
 def _BuildChrome(sdk_cmd: commands.ChromeSDK, chrome_root: str,
-                 out_board_dir: str, goma: Optional['goma_util.Goma']) -> None:
+                 out_board_dir: str, goma: Optional['goma_lib.Goma']) -> None:
   """Build Chrome with SimpleChrome environment.
 
   Args:
@@ -501,25 +390,6 @@ def _VMTestChrome(board: str, sdk_cmd: commands.ChromeSDK) -> None:
     sdk_cmd.VMTest(image_path)
 
 
-def ValidateMoblabVmTest(results_dir: str) -> None:
-  """Determine if the VM test passed or not.
-
-  Args:
-    results_dir: Path to directory containing test_that results.
-
-  Raises:
-    failures_lib.TestFailure: If dummy_PassServer did not run or failed.
-  """
-  log_file = os.path.join(results_dir, 'debug', 'test_that.INFO')
-  if not os.path.isfile(log_file):
-    raise failures_lib.TestFailure('Found no test_that logs at %s' % log_file)
-
-  log_file_contents = osutils.ReadFile(log_file)
-  if not re.match(r'dummy_PassServer\s*\[\s*PASSED\s*]', log_file_contents):
-    raise failures_lib.TestFailure('Moblab run_suite succeeded, but did '
-                                   'not successfully run dummy_PassServer.')
-
-
 def BundleCodeCoverageLlvmJson(chroot: 'chroot_lib.Chroot',
                                sysroot_class: 'sysroot_lib.Sysroot',
                                output_dir: str) -> Optional[str]:
@@ -533,16 +403,46 @@ def BundleCodeCoverageLlvmJson(chroot: 'chroot_lib.Chroot',
   Returns:
     A string path to the output code_coverage.tar.xz artifact, or None.
   """
+
   try:
     base_path = chroot.full_path(sysroot_class.path)
 
+    # Gather all LLVM compiler generated coverage data into single coverage.json
+    coverage_dir = os.path.join(base_path, 'build/coverage_data')
+    llvm_generated_cov_json = GatherCodeCoverageLlvmJsonFile(coverage_dir)
+
+    llvm_generated_cov_json = (
+        code_coverage_util.GetLLVMCoverageWithFilesExcluded(
+            llvm_generated_cov_json,
+            constants.ZERO_COVERAGE_EXCLUDE_FILES_SUFFIXES))
+
+    # Generate zero coverage for all src files, excluding those which are
+    # already present in llvm_generated_cov_json
+    files_with_cov = code_coverage_util.ExtractFilenames(
+        llvm_generated_cov_json)
+    zero_coverage_json = code_coverage_util.GenerateZeroCoverageLlvm(
+        # TODO(b/227649725): Input path_to_src_directories and language specific
+        # src_file_extensions and exclude_line_prefixes from GetArtifact API
+        path_to_src_directories=[
+            os.path.join(constants.SOURCE_ROOT, 'src/platform/'),
+            os.path.join(constants.SOURCE_ROOT, 'src/platform2/')
+        ],
+        src_file_extensions=constants.ZERO_COVERAGE_FILE_EXTENSIONS_TO_PROCESS,
+        exclude_line_prefixes=constants.ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES,
+        exclude_files=files_with_cov,
+        exclude_files_suffixes=constants.ZERO_COVERAGE_EXCLUDE_FILES_SUFFIXES,
+        src_prefix_path=constants.SOURCE_ROOT,
+        extensions_to_remove_exclusion_check
+                =(constants.EXTENSIONS_TO_REMOVE_EXCLUSION_CHECK))
+    # Merge generated zero coverage data and
+    # llvm compiler generated coverage data.
+    merged_coverage_json = code_coverage_util.MergeLLVMCoverageJson(
+        llvm_generated_cov_json, zero_coverage_json)
+
     with chroot.tempdir() as dest_tmpdir:
-      coverage_dir = os.path.join(base_path, 'build/coverage_data')
-      coverage_file = GatherCodeCoverageLlvmJsonFile(
-          destdir=dest_tmpdir, paths=[coverage_dir])
-      if coverage_file is None:
-        logging.warning('No coverage files found in %s.', coverage_dir)
-        return None
+      osutils.WriteFile(
+          os.path.join(dest_tmpdir, constants.CODE_COVERAGE_LLVM_FILE_NAME),
+          json.dumps(merged_coverage_json))
 
       tarball_path = os.path.join(output_dir,
                                   constants.CODE_COVERAGE_LLVM_JSON_SYMBOLS_TAR)
@@ -551,7 +451,7 @@ def BundleCodeCoverageLlvmJson(chroot: 'chroot_lib.Chroot',
         logging.error('Error (%d) when creating tarball %s from %s',
                       result.returncode, tarball_path, dest_tmpdir)
         return None
-    return tarball_path
+      return tarball_path
   except Exception as e:
     logging.error('BundleCodeCoverageLlvmJson failed %s', e)
     return None
@@ -559,76 +459,49 @@ def BundleCodeCoverageLlvmJson(chroot: 'chroot_lib.Chroot',
 
 class GatherCodeCoverageLlvmJsonFileResult(NamedTuple):
   """Class containing result data of GatherCodeCoverageLlvmJsonFile."""
-  joined_file_paths: List[str]
+  coverage_json: Dict
 
 
-def GatherCodeCoverageLlvmJsonFile(
-    destdir: str,
-    paths: List[str],
-    output_file_name: str = 'coverage.json'
-) -> GatherCodeCoverageLlvmJsonFileResult:
-  """Locate code coverage llvm json files in |paths|.
+def GatherCodeCoverageLlvmJsonFile(path: str):
+  """Locate code coverage llvm json files in |path|.
 
    This function locates all the coverage llvm json files and merges them
    into one file, in the correct llvm json format.
 
   Args:
-    destdir: Where the combined coverage file should be output to.
-    paths: A list of input paths to walk.
-    output_file_name: The name of the combined coverage file to output.
+    path: The input path to walk.
 
   Returns:
-    A CodeCoverageFileTuple containing coverage.json file information or None.
+    Code coverage json llvm format.
   """
-  logging.info('GatherCodeCoverageLlvmJsonFile destdir %s paths %s', destdir,
-               paths)
-
   joined_file_paths = []
-  coverage_type = None
-  coverage_version = None
   coverage_data = []
+  if not os.path.exists(path):
+    # Builder might only build packages that does not have
+    # unit test setup,therefore there will be no
+    # coverage_data to gather.
+    logging.info('The path does not exists %s. Returning empty coverage.',
+                 path)
+    return code_coverage_util.CreateLlvmCoverageJson(coverage_data)
+  if not os.path.isdir(path):
+    raise ValueError('The path is not a directory: ', path)
 
-  for p in paths:
-    if not os.path.exists(p):
-      raise NoFilesError('The path did not exist: ', p)
+  for root, _, files in os.walk(path):
+    for f in files:
+      # Make sure the file contents match the llvm json format.
+      path_to_file = os.path.join(root, f)
+      file_data = code_coverage_util.GetLlvmJsonCoverageDataIfValid(
+          path_to_file)
+      if file_data is None:
+        continue
 
-    if not os.path.isdir(p):
-      raise ValueError('The path is not a directory: ', p)
+      # Copy over data from this file.
+      joined_file_paths.append(path_to_file)
+      for datum in file_data['data']:
+        for file_data in datum['files']:
+          coverage_data.append(file_data)
 
-    for root, _, files in os.walk(p):
-      for f in files:
-        # Make sure the file contents match the llvm json format.
-        path_to_file = os.path.join(root, f)
-        file_data = code_coverage_util.GetLlvmJsonCoverageDataIfValid(
-            path_to_file)
-        if file_data is None:
-          continue
-
-        # Copy over data from this file.
-        joined_file_paths.append(path_to_file)
-        coverage_type = file_data['type']
-        coverage_version = file_data['version']
-        for datum in file_data['data']:
-          for file_data in datum['files']:
-            coverage_data.append(file_data)
-
-  # Make sure some data was processed.
-  if not coverage_type or coverage_version is None or len(coverage_data) <= 0:
-    return None
-
-  # Write out the file
-  osutils.WriteFile(
-      os.path.join(destdir, output_file_name),
-      json.dumps({
-          'data': [{
-              'files': coverage_data
-          }],
-          'type': coverage_type,
-          'version': coverage_version
-      }))
-
-  return GatherCodeCoverageLlvmJsonFileResult(
-      joined_file_paths=joined_file_paths)
+  return code_coverage_util.CreateLlvmCoverageJson(coverage_data)
 
 
 def FindAllMetadataFiles(chroot: 'chroot_lib.Chroot',

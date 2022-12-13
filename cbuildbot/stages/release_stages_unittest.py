@@ -9,6 +9,7 @@ from unittest import mock
 from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot.stages import generic_stages_unittest
 from chromite.cbuildbot.stages import release_stages
+from chromite.cbuildbot.stages.generic_stages_unittest import patch
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import failures_lib
@@ -17,9 +18,6 @@ from chromite.lib import parallel_unittest
 from chromite.lib import results_lib
 from chromite.lib import timeout_util
 from chromite.lib.buildstore import FakeBuildStore
-
-from chromite.cbuildbot.stages.generic_stages_unittest import patch
-
 from chromite.lib.paygen import gspaths
 from chromite.lib.paygen import paygen_build_lib
 

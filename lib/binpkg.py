@@ -28,6 +28,7 @@ from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import sysroot_lib
 
+
 TWO_WEEKS = 60 * 60 * 24 * 7 * 2
 HTTP_FORBIDDEN_CODES = (401, 403)
 HTTP_NOT_FOUND_CODES = (404, 410)

@@ -4,26 +4,30 @@
 
 """Packages service tests."""
 
+import io
 import json
 import os
 import re
-
-import pytest
+from unittest import mock
 
 from chromite.third_party.google.protobuf import json_format
 from chromite.third_party.google.protobuf.field_mask_pb2 import FieldMask
+import pytest
 
 import chromite as cr
 from chromite.api.gen.config.replication_config_pb2 import (
-    ReplicationConfig, FileReplicationRule, FILE_TYPE_JSON,
-    REPLICATION_TYPE_FILTER)
-from chromite.cbuildbot import manifest_version
+    FILE_TYPE_JSON,
+    FileReplicationRule,
+    REPLICATION_TYPE_FILTER,
+    ReplicationConfig,
+)
 from chromite.lib import build_target_lib
+from chromite.lib import chromeos_version
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
-from chromite.lib import depgraph
 from chromite.lib import dependency_graph
+from chromite.lib import depgraph
 from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import portage_util
@@ -33,6 +37,7 @@ from chromite.lib.parser import package_info
 from chromite.lib.uprev_lib import GitRef
 from chromite.service import android
 from chromite.service import packages
+
 
 D = cros_test_lib.Directory
 
@@ -182,6 +187,97 @@ class UprevBuildTargetsTest(cros_test_lib.RunCommandTestCase):
     """Test None type fails."""
     with self.assertRaises(AssertionError):
       packages.uprev_build_targets([build_target_lib.BuildTarget('foo')], None)
+
+
+class PatchEbuildVarsTest(cros_test_lib.MockTestCase):
+  """patch_ebuild_vars test."""
+  def setUp(self):
+    self.mock_input = self.PatchObject(packages.fileinput, 'input')
+    self.mock_stdout_write = self.PatchObject(packages.sys.stdout, 'write')
+    self.ebuild_path = '/path/to/ebuild'
+    self.old_var_value = 'R100-5678.0.123456789'
+    self.new_var_value = 'R102-5678.0.234566789'
+
+  def test_patch_ebuild_vars_var_only(self):
+    """patch_ebuild_vars changes ^var=value$."""
+    ebuild_contents = (
+        'This line does not change.\n'
+        'AFDO_PROFILE_VERSION="{var_value}"\n'
+        '\n'
+        '# The line with AFDO_PROFILE_VERSION is also unchanged.'
+    )
+    # Ebuild contains old_var_value.
+    self.mock_input.return_value = io.StringIO(
+        ebuild_contents.format(var_value=self.old_var_value))
+    expected_calls = []
+    # Expect the line with new_var_value.
+    for line in io.StringIO(ebuild_contents.format(
+        var_value=self.new_var_value)):
+      expected_calls.append(mock.call(line))
+
+    packages.patch_ebuild_vars(self.ebuild_path,
+                               {'AFDO_PROFILE_VERSION': self.new_var_value})
+
+    self.mock_stdout_write.assert_has_calls(expected_calls)
+
+  def test_patch_ebuild_vars_ignore_export(self):
+    """patch_ebuild_vars changes ^export var=value$ and keeps export."""
+    ebuild_contents = (
+        'This line does not change.\n'
+        'export AFDO_PROFILE_VERSION="{var_value}"\n'
+        '# This line is also unchanged.'
+    )
+    # Ebuild contains old_var_value.
+    self.mock_input.return_value = io.StringIO(
+        ebuild_contents.format(var_value=self.old_var_value))
+    expected_calls = []
+    # Expect the line with new_var_value.
+    for line in io.StringIO(ebuild_contents.format(
+        var_value=self.new_var_value)):
+      expected_calls.append(mock.call(line))
+
+    packages.patch_ebuild_vars(self.ebuild_path,
+                               {'AFDO_PROFILE_VERSION': self.new_var_value})
+
+    self.mock_stdout_write.assert_has_calls(expected_calls)
+
+  def test_patch_ebuild_vars_partial_match(self):
+    """patch_ebuild_vars ignores ^{prefix}var=value$."""
+    ebuild_contents = (
+        'This and the line below do not change.\n'
+        'NEW_AFDO="{var_value}"'
+    )
+    # Ebuild contains old_var_value.
+    self.mock_input.return_value = io.StringIO(
+        ebuild_contents.format(var_value=self.old_var_value))
+    expected_calls = []
+    # Expect the line with UNCHANGED old_var_value.
+    for line in io.StringIO(ebuild_contents.format(
+        var_value=self.old_var_value)):
+      expected_calls.append(mock.call(line))
+
+    # Note that the var name partially matches the ebuild var and hence it has
+    # to be ignored.
+    packages.patch_ebuild_vars(self.ebuild_path,
+                               {'AFDO': self.new_var_value})
+
+    self.mock_stdout_write.assert_has_calls(expected_calls)
+
+  def test_patch_ebuild_vars_no_vars(self):
+    """patch_ebuild_vars keeps ebuild intact if there are no vars."""
+    ebuild_contents = (
+        'This line does not change.\n'
+        'The line with AFDO_PROFILE_VERSION is also unchanged.'
+    )
+    self.mock_input.return_value = io.StringIO(ebuild_contents)
+    expected_calls = []
+    for line in io.StringIO(ebuild_contents):
+      expected_calls.append(mock.call(line))
+
+    packages.patch_ebuild_vars(self.ebuild_path,
+                               {'AFDO_PROFILE_VERSION': self.new_var_value})
+
+    self.mock_stdout_write.assert_has_calls(expected_calls)
 
 
 class UprevsVersionedPackageTest(cros_test_lib.MockTestCase):
@@ -775,7 +871,7 @@ class GetAllFirmwareVersionsTest(cros_test_lib.RunCommandTempDirTestCase):
 
   def setUp(self):
     self.board = 'test-board'
-    self.rc.SetDefaultCmdResult(output="""
+    self.rc.SetDefaultCmdResult(stdout="""
 
 flashrom(8): 68935ee2fcfcffa47af81b966269cd2b */build/reef/usr/sbin/flashrom
              ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, for GNU/Linux 2.6.32, BuildID[sha1]=e102cc98d45300b50088999d53775acbeff407dc, stripped
@@ -895,7 +991,7 @@ class GetFirmwareVersionsTest(cros_test_lib.RunCommandTempDirTestCase):
 
   def setUp(self):
     self.board = 'test-board'
-    self.rc.SetDefaultCmdResult(output="""
+    self.rc.SetDefaultCmdResult(stdout="""
 
 flashrom(8): a8f99c2e61e7dc09c4b25ef5a76ef692 */build/kevin/usr/sbin/flashrom
              ELF 32-bit LSB executable, ARM, EABI5 version 1 (SYSV), statically linked, for GNU/Linux 2.d
@@ -1022,10 +1118,10 @@ class PlatformVersionsTest(cros_test_lib.MockTestCase):
     # return it.
     test_platform_version = '12575.0.0'
     test_chrome_branch = '75'
-    version_info_mock = manifest_version.VersionInfo(test_platform_version)
+    version_info_mock = chromeos_version.VersionInfo(test_platform_version)
     version_info_mock.chrome_branch = test_chrome_branch
     self.PatchObject(
-        manifest_version.VersionInfo,
+        chromeos_version.VersionInfo,
         'from_repo',
         return_value=version_info_mock)
     test_full_version = 'R' + test_chrome_branch + '-' + test_platform_version
@@ -1125,7 +1221,7 @@ def test_uprev_chrome_all_files_already_exist(old_version, new_version,
 
   git_refs = [
       GitRef(
-          path='/foo', ref=f'refs/tags/{new_version}', revision='dummycommit')
+          path='/foo', ref=f'refs/tags/{new_version}', revision='stubcommit')
   ]
   res = packages.uprev_chrome_from_ref(None, git_refs, None)
 
@@ -1139,7 +1235,7 @@ class GetModelsTest(cros_test_lib.RunCommandTempDirTestCase):
 
   def setUp(self):
     self.board = 'test-board'
-    self.rc.SetDefaultCmdResult(output='pyro\nreef\nsnappy\n')
+    self.rc.SetDefaultCmdResult(stdout='pyro\nreef\nsnappy\n')
     self.monkeypatch.setattr(constants, 'SOURCE_ROOT', self.tempdir)
     build_bin = os.path.join(self.tempdir, constants.DEFAULT_CHROOT_DIR, 'usr',
                              'bin')

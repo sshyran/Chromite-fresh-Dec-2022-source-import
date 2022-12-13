@@ -300,7 +300,7 @@ def RetryCommand(functor, max_retry, *args, **kwargs):
     kwargs: Optional args passed to run; see run for specifics.
 
   Returns:
-    A CommandResult object.
+    A CompletedProcess object.
 
   Raises:
     RunCommandError: Raised on error.
@@ -351,7 +351,7 @@ def RunCommandWithRetries(max_retry, *args, **kwargs):
     **kwargs: See RetryCommand and run.
 
   Returns:
-    A CommandResult object.
+    A CompletedProcess object.
 
   Raises:
     RunCommandError: Raised on error.
@@ -373,12 +373,12 @@ def RunCurl(curl_args, *args, **kwargs):
       overwritten.
 
   Returns:
-    A CommandResult object.
+    A CompletedProcess object.
 
   Raises:
     DownloadError: Whenever curl fails for any reason.
   """
-  cmd = ['curl', '--http1.1'] + curl_args
+  cmd = ['curl'] + curl_args
 
   # These values were discerned via scraping the curl manpage; they're all
   # retry related (dns failed, timeout occurred, etc, see  the manpage for
@@ -390,7 +390,7 @@ def RunCurl(curl_args, *args, **kwargs):
   # google storage occasionally.
   # Finally, we do not use curl's --retry option since it generally doesn't
   # actually retry anything; code 18 for example, it will not retry on.
-  retriable_exits = frozenset([5, 6, 7, 15, 18, 22, 26, 28, 35, 52, 56])
+  retriable_exits = frozenset([5, 6, 7, 15, 16, 18, 22, 26, 28, 35, 52, 56])
 
   def _CheckExit(exc):
     """Filter out specific error codes when getting exit 22
@@ -400,8 +400,8 @@ def RunCurl(curl_args, *args, **kwargs):
     """
     assert isinstance(exc, cros_build_lib.RunCommandError)
     if exc.result.returncode == 22:
-      logging.debug('curl stderr %s', exc.result.error)
-      matched = CURL_STATUS_RE.search(exc.result.error)
+      logging.debug('curl stderr %s', exc.result.stderr)
+      matched = CURL_STATUS_RE.search(exc.result.stderr)
       if not matched:
         # Unexpected stderr.  It may not be error output from --fail.
         return True
@@ -422,4 +422,4 @@ def RunCurl(curl_args, *args, **kwargs):
       raise DownloadError(
           'Download failed with certificate error? Try "sudo c_rehash".')
     raise DownloadError('Curl failed w/ exit code %i: %s' %
-                        (e.result.returncode, e.result.error))
+                        (e.result.returncode, e.result.stderr))

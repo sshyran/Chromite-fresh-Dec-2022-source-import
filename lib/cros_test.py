@@ -21,6 +21,12 @@ from chromite.lib import vm
 from chromite.lib.xbuddy import xbuddy
 
 
+# The Lacros sub directory when builds using alternate toolchain.
+# Defined in
+# https://source.chromium.org/chromium/chromium/src/+/main:build/toolchain/cros/BUILD.gn?q=lacros_clang&ss=chromium
+_ADDITIONAL_LACROS_SUBDIR = 'lacros_clang'
+
+
 class CrOSTest(object):
   """Class for running Chrome OS tests."""
 
@@ -43,6 +49,9 @@ class CrOSTest(object):
     self.deploy = opts.deploy
     self.deploy_lacros = opts.deploy_lacros
     self.lacros_launcher_script = opts.lacros_launcher_script
+    if opts.deploy_lacros and opts.deploy:
+      self.additional_lacros_build_dir = os.path.join(opts.build_dir,
+          _ADDITIONAL_LACROS_SUBDIR)
     self.nostrip = opts.nostrip
     self.build_dir = opts.build_dir
     self.mount = opts.mount
@@ -202,18 +211,27 @@ class CrOSTest(object):
     if self.chrome_test:
       self._DeployChromeTest()
     else:
-      self._DeployChrome()
+      if self.deploy and self.deploy_lacros:
+        self._DeployChrome(self.build_dir, False)
+        self._DeployChrome(self.additional_lacros_build_dir, True)
+      else:
+        self._DeployChrome(self.build_dir, self.deploy_lacros)
 
     if self.deploy_lacros:
       self._DeployLacrosLauncherScript()
 
-  def _DeployChrome(self):
-    """Deploy lacros-chrome or ash-chrome."""
+  def _DeployChrome(self, build_dir, is_lacros):
+    """Deploy lacros-chrome or ash-chrome.
+
+    Args:
+      build_dir: str the build dir contains chrome binary.
+      is_lacros: bool whether it's lacros or ash.
+    """
     deploy_cmd = [
         'deploy_chrome',
         '--force',
         '--build-dir',
-        self.build_dir,
+        build_dir,
         '--process-timeout',
         '180',
     ]
@@ -228,7 +246,7 @@ class CrOSTest(object):
     if self.cache_dir:
       deploy_cmd += ['--cache-dir', self.cache_dir]
 
-    if self.deploy_lacros:
+    if is_lacros:
       # By default, deploying lacros-chrome modifies the /etc/chrome_dev.conf
       # file, which is desired behavior for local development, however, a
       # modified config file interferes with automated testing.
@@ -241,6 +259,8 @@ class CrOSTest(object):
         deploy_cmd += ['--nostrip']
       if self.mount:
         deploy_cmd += ['--mount']
+      if self.public_image:
+        deploy_cmd += ['--use-external-config']
 
     cros_build_lib.run(deploy_cmd, dryrun=self.dryrun)
     self._device.WaitForBoot()
@@ -293,7 +313,7 @@ class CrOSTest(object):
     """Run catapult tests matching a pattern using run_tests.
 
     Returns:
-      cros_build_lib.CommandResult object.
+      cros_build_lib.CompletedProcess object.
     """
 
     browser = 'system-guest' if self.guest else 'system'
@@ -307,7 +327,7 @@ class CrOSTest(object):
     """Run an autotest using test_that.
 
     Returns:
-      cros_build_lib.CommandResult object.
+      cros_build_lib.CompletedProcess object.
     """
     cmd = ['test_that']
     if self._device.board:
@@ -336,7 +356,7 @@ class CrOSTest(object):
     """Run Tast tests.
 
     Returns:
-      cros_build_lib.CommandResult object.
+      cros_build_lib.CompletedProcess object.
     """
     # Try using the Tast binaries that the SimpleChrome SDK downloads
     # automatically.
@@ -483,7 +503,7 @@ class CrOSTest(object):
     """Tells the VM to save its image on shutdown if the test failed.
 
     Args:
-      result: A cros_build_lib.CommandResult object from a test run.
+      result: A cros_build_lib.CompletedProcess object from a test run.
     """
     if not self._device.should_start_vm or not self.save_snapshot_on_failure:
       return
@@ -513,7 +533,7 @@ class CrOSTest(object):
     self.cwd, run the command in self.args, and cleanup.
 
     Returns:
-      cros_build_lib.CommandResult object.
+      cros_build_lib.CompletedProcess object.
     """
     DEST_BASE = '/usr/local/cros_test'
     files = FileList(self.files, self.files_from)
@@ -708,8 +728,12 @@ def ParseCommandLine(argv):
   if opts.tast_vars and not opts.tast:
     parser.error('--tast-var is only applicable to Tast tests.')
 
-  if opts.deploy and opts.deploy_lacros:
-    parser.error('Cannot deploy lacros-chrome and ash-chrome at the same time.')
+  if opts.deploy_lacros and opts.deploy:
+    additional_lacros_build_dir = os.path.join(opts.build_dir,
+        _ADDITIONAL_LACROS_SUBDIR)
+    if not os.path.exists(additional_lacros_build_dir):
+      parser.error('Script will deploy both Ash and Lacros but can not find '
+        'Lacros at %s' % additional_lacros_build_dir)
 
   if bool(opts.deploy_lacros) != bool(opts.lacros_launcher_script):
     parser.error(

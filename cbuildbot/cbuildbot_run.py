@@ -29,10 +29,10 @@ import types
 
 from chromite.cbuildbot import archive_lib
 from chromite.lib import buildstore
-from chromite.lib import constants
-from chromite.lib import metadata_lib
 from chromite.lib import cidb
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
+from chromite.lib import metadata_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import portage_util
@@ -737,7 +737,7 @@ class _BuilderRunBase(object):
     it could return a confusing value.
 
     Returns:
-      A manifest_version.VersionInfo object.
+      A chromeos_version.VersionInfo object.
 
     Raises:
       VersionNotSetError if the version has not yet been set.
@@ -871,7 +871,8 @@ class _BuilderRunBase(object):
 
   def DetermineAndroidPackage(self, board):
     """Returns the active Android container package in use by the board."""
-    packages = portage_util.GetPackageDependencies(board, 'virtual/target-os')
+    packages = portage_util.GetPackageDependencies(
+        'virtual/target-os', board=board)
     # We assume there is only one Android package in the depgraph.
     for package in packages:
       if (package.startswith('chromeos-base/android-container-') or

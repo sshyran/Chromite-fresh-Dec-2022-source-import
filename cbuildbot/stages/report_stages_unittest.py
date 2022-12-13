@@ -14,12 +14,12 @@ from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot import commands
-from chromite.cbuildbot import manifest_version
 from chromite.cbuildbot import topology
 from chromite.cbuildbot import topology_unittest
 from chromite.cbuildbot.stages import generic_stages_unittest
 from chromite.cbuildbot.stages import report_stages
 from chromite.lib import alerts
+from chromite.lib import chromeos_version
 from chromite.lib import cidb
 from chromite.lib import config_lib
 from chromite.lib import constants
@@ -52,7 +52,7 @@ class BuildReexecutionStageTest(generic_stages_unittest.AbstractStageTestCase):
 
     release_tag = '4815.0.0-rc1'
     self._run.attrs.release_tag = '4815.0.0-rc1'
-    fake_versioninfo = manifest_version.VersionInfo(release_tag, '39')
+    fake_versioninfo = chromeos_version.VersionInfo(release_tag, '39')
     self.gs_mock = self.StartPatcher(gs_unittest.GSContextMock())
     self.gs_mock.SetDefaultCmdResult()
     self.PatchObject(cbuildbot_run._BuilderRunBase, 'GetVersionInfo',
@@ -344,34 +344,35 @@ class ReportStageTest(AbstractReportStageTestCase):
                         debug=False, update_list=True, acl=mock.ANY)]
     self.assertEqual(calls, commands.UploadArchivedFile.call_args_list)
 
-  def testEmailNotifyMasterBranch(self):
-    """Send out alerts when streak counter reaches the threshold."""
-    self.PatchObject(cbuildbot_run._BuilderRunBase,
-                     'InEmailReportingEnvironment', return_value=True)
-    self.PatchObject(cros_build_lib, 'HostIsCIBuilder', return_value=True)
-    self.buildstore.UpdateLuciNotifyProperties = mock.Mock()
-    notification_config_1 = config_lib.NotificationConfig(
-        'test1@chromium.org', threshold=1)
-    notification_config_2 = config_lib.NotificationConfig(
-        'test2@chromium.org', threshold=2)
-    notification_config_3 = config_lib.NotificationConfig(
-        'test3@chromium.org', threshold=3, template='explicit_template')
-    self._Prepare(
-        extra_config={
-            'notification_configs': [
-                notification_config_1,
-                notification_config_2,
-                notification_config_3,
-            ]
-        },
-        cmd_args=['-r', self.build_root, '--branch', 'master', self.BOT_ID])
-    self._SetupUpdateStreakCounter(counter_value=-2)
-    self.RunStage()
-    self.buildstore.UpdateLuciNotifyProperties.assert_called_once_with(
-        email_notify=[
-            notification_config_1.email_notify,
-            notification_config_2.email_notify,
-        ])
+#   Disabled because of: http://b/227316467
+#   def testEmailNotifyMasterBranch(self):
+#     """Send out alerts when streak counter reaches the threshold."""
+#     self.PatchObject(cbuildbot_run._BuilderRunBase,
+#                      'InEmailReportingEnvironment', return_value=True)
+#     self.PatchObject(cros_build_lib, 'HostIsCIBuilder', return_value=True)
+#     self.buildstore.UpdateLuciNotifyProperties = mock.Mock()
+#     notification_config_1 = config_lib.NotificationConfig(
+#         'test1@chromium.org', threshold=1)
+#     notification_config_2 = config_lib.NotificationConfig(
+#         'test2@chromium.org', threshold=2)
+#     notification_config_3 = config_lib.NotificationConfig(
+#         'test3@chromium.org', threshold=3, template='explicit_template')
+#     self._Prepare(
+#         extra_config={
+#             'notification_configs': [
+#                 notification_config_1,
+#                 notification_config_2,
+#                 notification_config_3,
+#             ]
+#         },
+#         cmd_args=['-r', self.build_root, '--branch', 'master', self.BOT_ID])
+#     self._SetupUpdateStreakCounter(counter_value=-2)
+#     self.RunStage()
+#     self.buildstore.UpdateLuciNotifyProperties.assert_called_once_with(
+#         email_notify=[
+#             notification_config_1.email_notify,
+#             notification_config_2.email_notify,
+#         ])
 
   def testEmailNotifyNonMasterBranch(self):
     """Do not send out email alerts for non-master branches."""

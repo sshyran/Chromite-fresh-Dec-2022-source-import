@@ -13,6 +13,8 @@ import os
 from chromite.lib import constants
 from chromite.lib import osutils
 from chromite.utils import memoize
+from chromite.utils import pformat
+
 
 GS_PATH_DEFAULT = 'default'  # Means gs://chromeos-image-archive/ + bot_id
 
@@ -159,17 +161,12 @@ def IsCanaryMaster(builder_run):
 
 def IsPFQType(b_type):
   """Returns True if this build type is a PFQ."""
-  return b_type in (constants.PFQ_TYPE, constants.ANDROID_PFQ_TYPE)
+  return b_type in (constants.PFQ_TYPE,)
 
 
 def IsCanaryType(b_type):
   """Returns True if this build type is a Canary."""
   return b_type == constants.CANARY_TYPE
-
-
-def IsMasterAndroidPFQ(config):
-  """Returns True if this build is master Android PFQ type."""
-  return config.build_type == constants.ANDROID_PFQ_TYPE and config.master
 
 
 def GetHWTestEnv(builder_run_config, model_config=None, suite_config=None):
@@ -822,8 +819,8 @@ def DefaultSettings():
       # Runs unittests for packages.
       unittests=True,
 
-      # A list of the packages to blacklist from unittests.
-      unittest_blacklist=[],
+      # A list of the packages whose unittests will not be run.
+      unittests_disabled=[],
 
       # Generates AFDO data. Will capture a profile of chrome using a hwtest
       # to run a predetermined set of benchmarks.
@@ -910,10 +907,6 @@ def DefaultSettings():
       # If true, uploads individual image tarballs.
       upload_standalone_images=True,
 
-      # A list of GCETestConfig objects to use. Currently only some lakitu
-      # builders run gce tests.
-      gce_tests=[],
-
       # Whether to run CPEExport stage. This stage generates portage depgraph
       # data that is used for bugs reporting (see go/why-cpeexport). Only
       # release builders should run this stage.
@@ -927,10 +920,6 @@ def DefaultSettings():
       # A list of TastVMTestConfig objects describing Tast-based test suites
       # that should be run in a VM.
       tast_vm_tests=[],
-
-      # Default to not run moblab tests. Currently the blessed moblab board runs
-      # these tests.
-      moblab_vm_tests=[],
 
       # List of patterns for portage packages for which stripped binpackages
       # should be uploaded to GS. The patterns are used to search for packages
@@ -1916,6 +1905,7 @@ def GetNonUniBuildLabBoardName(board):
       '-arc-r',  #
       '-arc-r-userdebug',  #
       '-arc-s',  #
+      '-arc-t',  #
       '-arcnext',  #
       '-arcvm',  #
       '-connectivitynext',  #
@@ -1981,12 +1971,7 @@ class ObjectJSONEncoder(json.JSONEncoder):
 
 def PrettyJsonDict(dictionary):
   """Returns a pretty-ified json dump of a dictionary."""
-  return json.dumps(
-      dictionary,
-      cls=ObjectJSONEncoder,
-      sort_keys=True,
-      indent=4,
-      separators=(',', ': ')) + '\n'
+  return pformat.json(dictionary, cls=ObjectJSONEncoder)
 
 
 def LoadConfigFromFile(config_file=constants.CHROMEOS_CONFIG_FILE):
@@ -2070,9 +2055,7 @@ def _DeserializeConfigs(build_dict):
   _DeserializeConfig(build_dict, 'hw_tests', HWTestConfig)
   _DeserializeConfig(
       build_dict, 'hw_tests_override', HWTestConfig, preserve_none=True)
-  _DeserializeConfig(build_dict, 'gce_tests', GCETestConfig)
   _DeserializeConfig(build_dict, 'tast_vm_tests', TastVMTestConfig)
-  _DeserializeConfig(build_dict, 'moblab_vm_tests', MoblabVMTestConfig)
   _DeserializeConfig(build_dict, 'notification_configs', NotificationConfig)
 
 

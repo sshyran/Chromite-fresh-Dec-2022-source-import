@@ -70,7 +70,7 @@ def EnsureInitialized(functor):
     self.Instantiate()
     return functor(self, *args, **kwargs)
 
-  # Dummy up our wrapper to make it look like what we're wrapping,
+  # Stub up our wrapper to make it look like what we're wrapping,
   # and expose the underlying docstrings.
   f.__name__ = functor.__name__
   f.__doc__ = functor.__doc__
@@ -150,7 +150,7 @@ class Cgroup(object):
   @classmethod
   @memoize.MemoizedSingleCall
   def IsUsable(cls):
-    """Function to sanity check if everything is setup to use cgroups"""
+    """Function to check if everything is setup to use cgroups"""
     if not cls.InitSystem():
       return False
     cls._SUPPORTS_AUTOINHERIT = os.path.exists(
@@ -215,7 +215,7 @@ class Cgroup(object):
       self.Instantiate()
 
   def _LimitName(self, name, for_path=False, multilevel=False):
-    """Translation function doing sanity checks on derivative namespaces
+    """Translation function doing confidence checks on derivative namespaces
 
     If you're extending this class, you should be using this for any namespace
     operations that pass through a nested group.
@@ -458,8 +458,7 @@ class Cgroup(object):
     # in cgroup (only namespaces can be removed via rmdir).
     # See Documentation/cgroups/ for further details.
     path = os.path.normpath(path) + '/'
-    # Do a sanity check to ensure that we're not touching anything we
-    # shouldn't.
+    # Check to ensure that we're not touching anything we shouldn't.
     if not path.startswith(cls.CGROUP_ROOT):
       raise RuntimeError('cgroups.py: Was asked to wipe path %s, refusing. '
                          'strict was %r, sudo_strict was %r'
@@ -484,7 +483,7 @@ class Cgroup(object):
     as a helpful default since python stdlib generates some background
     threads (even when the code is operated synchronously).  While we
     try to handle that scenario, it's implicitly racy since python
-    gives no clean/sane way to control/stop thread creation; thus it's
+    gives no clean/correct way to control/stop thread creation; thus it's
     on the invokers head to ensure no new threads are being generated
     while this is ran.
     """

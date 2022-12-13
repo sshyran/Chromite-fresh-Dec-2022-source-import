@@ -1,7 +1,6 @@
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Test download_cache library.
 
 DEPRECATED: Should be migrated to chromite.lib.cache_unittest.
@@ -20,6 +19,7 @@ from chromite.lib.paygen import download_cache
 
 # We access a lot of protected members during testing.
 # pylint: disable=protected-access
+
 
 # The inProcess methods have to be standalone to be pickleable.
 def _inProcessFetchIntoCache(uri_tempdir):
@@ -73,37 +73,37 @@ class DownloadCachePickleTest(cros_test_lib.TempDirTestCase):
 class FetchFuncTest(cros_test_lib.TempDirTestCase):
   """Test getting files with a custom fetch function."""
 
-  dummy_uri = 'dummy URI'
-  dummy_uri2 = 'dummy URI 2'
+  stub_uri = 'stub URI'
+  stub_uri2 = 'stub URI 2'
 
   def testFetchFunc(self):
     """Test getting files with a custome fetch function."""
 
     call_count = [0]
 
-    def dummyFetchFunction(uri, cache_file):
+    def stubFetchFunction(uri, cache_file):
       """Write the uri into the file to have verifiable content"""
       call_count[0] += 1
       osutils.WriteFile(cache_file, uri)
 
     cache = download_cache.DownloadCache(self.tempdir)
     self.assertEqual(call_count[0], 0)
-    cache.GetFileObject(self.dummy_uri, dummyFetchFunction)
+    cache.GetFileObject(self.stub_uri, stubFetchFunction)
     self.assertEqual(call_count[0], 1)
-    with cache.GetFileObject(self.dummy_uri, dummyFetchFunction) as f:
-      self.assertEqual(f.read(), self.dummy_uri.encode('utf-8'))
+    with cache.GetFileObject(self.stub_uri, stubFetchFunction) as f:
+      self.assertEqual(f.read(), self.stub_uri.encode('utf-8'))
     self.assertEqual(call_count[0], 1)
 
-    cache.GetFileObject(self.dummy_uri2, dummyFetchFunction)
+    cache.GetFileObject(self.stub_uri2, stubFetchFunction)
     self.assertEqual(call_count[0], 2)
-    with cache.GetFileObject(self.dummy_uri2, dummyFetchFunction) as f:
-      self.assertEqual(f.read(), self.dummy_uri2.encode('utf-8'))
+    with cache.GetFileObject(self.stub_uri2, stubFetchFunction) as f:
+      self.assertEqual(f.read(), self.stub_uri2.encode('utf-8'))
     self.assertEqual(call_count[0], 2)
 
-    with cache.GetFileObject(self.dummy_uri, dummyFetchFunction) as f:
-      self.assertEqual(f.read(), self.dummy_uri.encode('utf-8'))
-    with cache.GetFileObject(self.dummy_uri2, dummyFetchFunction) as f:
-      self.assertEqual(f.read(), self.dummy_uri2.encode('utf-8'))
+    with cache.GetFileObject(self.stub_uri, stubFetchFunction) as f:
+      self.assertEqual(f.read(), self.stub_uri.encode('utf-8'))
+    with cache.GetFileObject(self.stub_uri2, stubFetchFunction) as f:
+      self.assertEqual(f.read(), self.stub_uri2.encode('utf-8'))
     self.assertEqual(call_count[0], 2)
 
 
@@ -172,8 +172,8 @@ class DownloadCacheTest(cros_test_lib.TempDirTestCase):
                                  'lock/3ba505fc7774455169af6f50b7964dff')
 
     # Make sure a cache content file is named as expected.
-    self.assertEqual(cache._UriToCacheFile('gs://bucket/of/awesome'),
-                     expected_cache)
+    self.assertEqual(
+        cache._UriToCacheFile('gs://bucket/of/awesome'), expected_cache)
 
     # Make sure the lock file for a cache content file is named as expected.
     with cache._CacheFileLock(expected_cache) as file_lock:
@@ -294,8 +294,7 @@ class DownloadCacheTest(cros_test_lib.TempDirTestCase):
     cache.GetFileObject(self.uri_b).close()
 
     # Change the timestamp so uri_a hasn't been used for a very long time.
-    os.utime(os.path.join(self.cache_dir, 'cache', self.hash_a),
-             (2, 2))
+    os.utime(os.path.join(self.cache_dir, 'cache', self.hash_a), (2, 2))
 
     # Purge files that haven't been used recently.
     cache.Purge(max_age=1000)
@@ -327,18 +326,17 @@ class DownloadCacheTest(cros_test_lib.TempDirTestCase):
        Ensure the process locking allows the file to be downloaded exactly
        once.
     """
-    pool = multiprocessing.Pool(processes=10)
+    with multiprocessing.Pool(processes=10) as pool:
+      # Create a tuple of the three args we want to pass to inProcess test,
+      # use map semantics as a convenient way to run in parallel.
+      results = pool.map(_inProcessFetchIntoCache,
+                         [(self.uri_large, self.cache_dir)] * 20)
 
-    # Create a tuple of the three args we want to pass to inProcess test,
-    # use map semantics as a convenient way to run in parallel.
-    results = pool.map(_inProcessFetchIntoCache,
-                       [(self.uri_large, self.cache_dir)] * 20)
-
-    # Results contains a list of booleans showing which instances actually
-    # performed the download. Exactly one of them should have. The list could
-    # also contain exceptions if one of the downloads failed.
-    results.sort()
-    self.assertEqual(results, [False] * 19 + [True])
+      # Results contains a list of booleans showing which instances actually
+      # performed the download. Exactly one of them should have. The list could
+      # also contain exceptions if one of the downloads failed.
+      results.sort()
+      self.assertEqual(results, [False] * 19 + [True])
 
   @cros_test_lib.pytestmark_network_test
   def testThreadedGetFile(self):
@@ -346,23 +344,21 @@ class DownloadCacheTest(cros_test_lib.TempDirTestCase):
 
        Ensure all processes complete, and return the same local file.
     """
-    pool = multiprocessing.Pool(processes=10)
+    with multiprocessing.Pool(processes=10) as pool:
+      # Create a tuple of the three args we want to pass to inProcess test,
+      # use map semantics as a convenient way to run in parallel.
+      results = pool.map(_inProcessGetFile, [(self.uri_a, self.cache_dir)] * 20)
 
-    # Create a tuple of the three args we want to pass to inProcess test,
-    # use map semantics as a convenient way to run in parallel.
-    results = pool.map(_inProcessGetFile,
-                       [(self.uri_a, self.cache_dir)] * 20)
+      # Fetch it ourselves and verify the results.
+      cache = download_cache.DownloadCache(self.cache_dir)
+      self._verifyFileContents(cache, self.uri_a)
 
-    # Fetch it ourselves and verify the results.
-    cache = download_cache.DownloadCache(self.cache_dir)
-    self._verifyFileContents(cache, self.uri_a)
+      with cache.GetFileObject(self.uri_a) as f:
+        contents_a = f.read()
 
-    with cache.GetFileObject(self.uri_a) as f:
-      contents_a = f.read()
-
-    # Ensure that every process gave back the expected result.
-    expected = [contents_a] * 20
-    self.assertEqual(results, expected)
+      # Ensure that every process gave back the expected result.
+      expected = [contents_a] * 20
+      self.assertEqual(results, expected)
 
   @cros_test_lib.pytestmark_network_test
   def testThreadedGetFileMultiple(self):
@@ -370,29 +366,27 @@ class DownloadCacheTest(cros_test_lib.TempDirTestCase):
 
        Ensure all processes complete, and return the right local file.
     """
-    pool = multiprocessing.Pool(processes=20)
+    with multiprocessing.Pool(processes=20) as pool:
+      # Create a tuple of the three args we want to pass to inProcess test,
+      # use map semantics as a convenient way to run in parallel.
+      results = pool.map(_inProcessGetFile, [(self.uri_a, self.cache_dir),
+                                             (self.uri_b, self.cache_dir)] * 10)
 
-    # Create a tuple of the three args we want to pass to inProcess test,
-    # use map semantics as a convenient way to run in parallel.
-    results = pool.map(_inProcessGetFile,
-                       [(self.uri_a, self.cache_dir),
-                        (self.uri_b, self.cache_dir)] * 10)
+      # Fetch it ourselves and verify the results.
+      cache = download_cache.DownloadCache(self.cache_dir)
 
-    # Fetch it ourselves and verify the results.
-    cache = download_cache.DownloadCache(self.cache_dir)
+      with cache.GetFileObject(self.uri_a) as f:
+        contents_a = f.read()
 
-    with cache.GetFileObject(self.uri_a) as f:
-      contents_a = f.read()
+      with cache.GetFileObject(self.uri_b) as f:
+        contents_b = f.read()
 
-    with cache.GetFileObject(self.uri_b) as f:
-      contents_b = f.read()
+      self._verifyFileContents(cache, self.uri_a)
+      self._verifyFileContents(cache, self.uri_b)
 
-    self._verifyFileContents(cache, self.uri_a)
-    self._verifyFileContents(cache, self.uri_b)
-
-    # Ensure that every process gave back the expected result.
-    expected = [contents_a, contents_b] * 10
-    self.assertEqual(results, expected)
+      # Ensure that every process gave back the expected result.
+      expected = [contents_a, contents_b] * 10
+      self.assertEqual(results, expected)
 
   @cros_test_lib.pytestmark_network_test
   def testThreadedGetFileMultiplePurge(self):
@@ -400,28 +394,26 @@ class DownloadCacheTest(cros_test_lib.TempDirTestCase):
 
        Ensure all processes complete, and return the right local file.
     """
-    pool = multiprocessing.Pool(processes=30)
+    with multiprocessing.Pool(processes=30) as pool:
+      requests = [(self.uri_a, self.cache_dir), (self.uri_b, self.cache_dir),
+                  (None, self.cache_dir)] * 10
 
-    requests = [(self.uri_a, self.cache_dir),
-                (self.uri_b, self.cache_dir),
-                (None, self.cache_dir)] * 10
+      # Create a tuple of the three args we want to pass to inProcess test,
+      # use map semantics as a convenient way to run in parallel.
+      results = pool.map(_inProcessGetFile, requests)
 
-    # Create a tuple of the three args we want to pass to inProcess test,
-    # use map semantics as a convenient way to run in parallel.
-    results = pool.map(_inProcessGetFile, requests)
+      # Fetch it ourselves and verify the results.
+      cache = download_cache.DownloadCache(self.cache_dir)
 
-    # Fetch it ourselves and verify the results.
-    cache = download_cache.DownloadCache(self.cache_dir)
+      with cache.GetFileObject(self.uri_a) as f:
+        contents_a = f.read()
 
-    with cache.GetFileObject(self.uri_a) as f:
-      contents_a = f.read()
+      with cache.GetFileObject(self.uri_b) as f:
+        contents_b = f.read()
 
-    with cache.GetFileObject(self.uri_b) as f:
-      contents_b = f.read()
+      self._verifyFileContents(cache, self.uri_a)
+      self._verifyFileContents(cache, self.uri_b)
 
-    self._verifyFileContents(cache, self.uri_a)
-    self._verifyFileContents(cache, self.uri_b)
-
-    # Ensure that every process gave back the expected result.
-    expected = [contents_a, contents_b, None] * 10
-    self.assertEqual(results, expected)
+      # Ensure that every process gave back the expected result.
+      expected = [contents_a, contents_b, None] * 10
+      self.assertEqual(results, expected)

@@ -176,7 +176,7 @@ class USBImager(object):
     devices = osutils.ListBlockDevices()
     removable_devices = []
     for d in devices:
-      if d.TYPE == 'disk' and d.RM == '1':
+      if d.TYPE == 'disk' and (d.RM == '1' or d.HOTPLUG == '1'):
         removable_devices.append(d.NAME)
 
     return removable_devices
@@ -217,7 +217,7 @@ class USBImager(object):
     # dd likely didn't put the backup GPT in the last block. sfdisk fixes this
     # up for us with a 'write' command, so we have a standards-conforming GPT.
     # Ignore errors because sfdisk (util-linux < v2.32) isn't always happy to
-    # fix GPT sanity issues.
+    # fix GPT correctness issues.
     cros_build_lib.sudo_run(['sfdisk', device], input='write\n',
                             check=False,
                             debug_level=self.debug_level)
@@ -278,8 +278,16 @@ class USBImager(object):
       raise FlashError('No removable devices detected.')
 
     image_path = self._GetImagePath()
+    device = self.DeviceNameToPath(target)
+
+    device_size_bytes = osutils.GetDeviceSize(device, in_bytes=True)
+    image_size_bytes = os.path.getsize(image_path)
+    if device_size_bytes < image_size_bytes:
+      raise FlashError(
+          'Removable device %s has less storage (%d) than the image size (%d).'
+          % (device, device_size_bytes, image_size_bytes))
+
     try:
-      device = self.DeviceNameToPath(target)
       self.CopyImageToDevice(image_path, device)
     except cros_build_lib.RunCommandError:
       logging.error('Failed copying image to device %s',
@@ -312,7 +320,7 @@ def Flash(device, image, board=None, version=None,
           no_minios_update=True, clobber_stateful=False, reboot=True,
           ssh_private_key=None, ping=True, disable_rootfs_verification=False,
           clear_cache=False, yes=False, force=False, debug=False,
-          clear_tpm_owner=False):
+          clear_tpm_owner=False, delta=False):
   """Flashes a device, USB drive, or file with an image.
 
   This provides functionality common to `cros flash` and `brillo flash`
@@ -337,9 +345,10 @@ def Flash(device, image, board=None, version=None,
         |device| scheme only.
     clear_cache: Clear the devserver static directory.
     yes: Assume "yes" for any prompt.
-    force: Ignore sanity checks and prompts. Overrides |yes| if True.
+    force: Ignore confidence checks and prompts. Overrides |yes| if True.
     debug: Print additional debugging messages.
     version: Default version.
+    delta: Whether to use delta compression when tranferring image bytes.
 
   Raises:
     FlashError: An unrecoverable error occured.
@@ -374,7 +383,8 @@ def Flash(device, image, board=None, version=None,
           no_reboot=not reboot,
           disable_verification=disable_rootfs_verification,
           clobber_stateful=clobber_stateful,
-          clear_tpm_owner=clear_tpm_owner).Run()
+          clear_tpm_owner=clear_tpm_owner,
+          delta=delta).Run()
   elif device.scheme == commandline.DEVICE_SCHEME_USB:
     path = osutils.ExpandPath(device.path) if device.path else ''
     logging.info('Preparing to image the removable device %s', path)

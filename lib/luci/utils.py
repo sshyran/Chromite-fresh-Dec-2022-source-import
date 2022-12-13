@@ -7,17 +7,16 @@
 
 """Mixed bag of utilities."""
 
-from datetime import datetime
+import binascii
 from datetime import date
+from datetime import datetime
 from datetime import time
 from datetime import timedelta
 from email import utils as email_utils
-import binascii
 import functools
 import hashlib
 import numbers
 import os
-import sys
 import threading
 import urllib.parse
 

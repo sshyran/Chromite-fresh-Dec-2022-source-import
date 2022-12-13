@@ -1,4 +1,8 @@
 {
+  "chroot": {
+    "path": ""
+  },
+  "filter_modified": true,
   "packages": [
     {
       "category": "dev-rust",
@@ -21,8 +25,5 @@
       "name": "%(build_target)s"
     },
     "path": "/build/%(build_target)s"
-  },
-  "chroot": {
-    "path": ""
   }
 }

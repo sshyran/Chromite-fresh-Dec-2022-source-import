@@ -588,50 +588,30 @@ class PartialCmdMock(PartialMock):
 
   DEFAULT_ATTR = None
 
-  # TODO(crbug.com/1006587): Drop redundant arguments & backwards compat APIs.
   @CheckAttr
-  def SetDefaultCmdResult(self, returncode=0, output=None, error=None,
-                          stdout=None, stderr=None,
+  def SetDefaultCmdResult(self, returncode=0, stdout='', stderr='',
                           side_effect=None, mock_attr=None):
     """Specify the default command result if no command is matched.
 
     Args:
       returncode: See AddCmdResult.
-      output: (Deprecated) Alias to stdout.
-      error: (Deprecated) Alias to stderr.
       stdout: See AddCmdResult.
       stderr: See AddCmdResult.
       side_effect: See MockedCallResults.AddResultForParams
       mock_attr: Which attributes's mock is being referenced.
     """
-    if stdout is None:
-      stdout = output
-    elif output is not None:
-      raise ValueError('Only specify |stdout|, not |output|')
-    if stdout is None:
-      stdout = ''
-    if stderr is None:
-      stderr = error
-    elif error is not None:
-      raise ValueError('Only specify |stderr|, not |error|')
-    if stderr is None:
-      stderr = ''
-    result = cros_build_lib.CommandResult(
+    result = cros_build_lib.CompletedProcess(
         returncode=returncode, stdout=stdout, stderr=stderr)
     self._results[mock_attr].SetDefaultResult(result, side_effect)
 
-  # TODO(crbug.com/1006587): Drop redundant arguments & backwards compat APIs.
   @CheckAttr
-  def AddCmdResult(self, cmd, returncode=0, output=None, error=None,
-                   stdout=None, stderr=None, kwargs=None, strict=False,
-                   side_effect=None, mock_attr=None):
+  def AddCmdResult(self, cmd, returncode=0, stdout='', stderr='', kwargs=None,
+                   strict=False, side_effect=None, mock_attr=None):
     """Specify the result to simulate for a given command.
 
     Args:
       cmd: The command string or list to record a result for.
       returncode: The returncode of the command (on the command line).
-      output: (Deprecated) Alias to stdout.
-      error: (Deprecated) Alias to stderr.
       stdout: The stdout output of the command.
       stderr: The stderr output of the command.
       kwargs: Keyword arguments that the function needs to be invoked with.
@@ -639,19 +619,7 @@ class PartialCmdMock(PartialMock):
       side_effect: See MockedCallResults.AddResultForParams
       mock_attr: Which attributes's mock is being referenced.
     """
-    if stdout is None:
-      stdout = output
-    elif output is not None:
-      raise ValueError('Only specify |stdout|, not |output|')
-    if stdout is None:
-      stdout = ''
-    if stderr is None:
-      stderr = error
-    elif error is not None:
-      raise ValueError('Only specify |stderr|, not |error|')
-    if stderr is None:
-      stderr = ''
-    result = cros_build_lib.CommandResult(
+    result = cros_build_lib.CompletedProcess(
         returncode=returncode, stdout=stdout, stderr=stderr)
     self._results[mock_attr].AddResultForParams(
         (cmd,), result, kwargs=kwargs, side_effect=side_effect, strict=strict)

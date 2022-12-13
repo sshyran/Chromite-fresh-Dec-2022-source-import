@@ -23,7 +23,7 @@ class GetBinhostsTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     self.response = binhost_pb2.BinhostGetResponse()
 
   def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Check that a validate only call does not execute any logic."""
     patch = self.PatchObject(binhost_service, 'GetBinhosts')
 
     request = binhost_pb2.BinhostGetRequest()
@@ -70,7 +70,7 @@ class GetPrivatePrebuiltAclArgsTest(cros_test_lib.MockTestCase,
     self.response = binhost_pb2.AclArgsResponse()
 
   def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Check that a validate only call does not execute any logic."""
     patch = self.PatchObject(binhost_service, 'GetPrebuiltAclArgs')
 
     request = binhost_pb2.AclArgsRequest()
@@ -127,7 +127,7 @@ class PrepareBinhostUploadsTest(cros_test_lib.MockTestCase,
     self.response = binhost_pb2.PrepareBinhostUploadsResponse()
 
   def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Check that a validate only call does not execute any logic."""
     patch = self.PatchObject(binhost_service, 'GetPrebuiltsRoot')
 
     request = binhost_pb2.PrepareBinhostUploadsRequest()
@@ -179,7 +179,7 @@ class SetBinhostTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     self.response = binhost_pb2.SetBinhostResponse()
 
   def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Check that a validate only call does not execute any logic."""
     patch = self.PatchObject(binhost_service, 'SetBinhost')
 
     request = binhost_pb2.SetBinhostRequest()
@@ -230,7 +230,7 @@ class RegenBuildCacheTest(cros_test_lib.MockTestCase,
     self.response = binhost_pb2.RegenBuildCacheResponse()
 
   def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Check that a validate only call does not execute any logic."""
     patch = self.PatchObject(binhost_service, 'RegenBuildCache')
 
     request = binhost_pb2.RegenBuildCacheRequest()
@@ -277,6 +277,7 @@ class PrepareDevInstallerBinhostUploadsTest(cros_test_lib.MockTempDirTestCase,
                                             api_config.ApiConfigMixin):
   """Tests for the UploadDevInstallerPrebuilts stage."""
   def setUp(self):
+    self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=False)
     # target packages dir
     self.chroot_path = os.path.join(self.tempdir, 'chroot')
     self.sysroot_path = '/build/target'
@@ -329,14 +330,13 @@ CPV: virtual/python-enum34-1
       osutils.SafeMakedirs(os.path.join(packages_dir, category))
       package_tbz2_file = os.path.join(packages_dir, package) + '.tbz2'
       osutils.Touch(package_tbz2_file)
-    package_installable_file = open(package_installable_filename, 'w')
-    for package in self.dev_install_packages:
-      package_installable_file.write(package + '\n')
-    package_installable_file.close()
+    with open(package_installable_filename, 'w') as package_installable_file:
+      for package in self.dev_install_packages:
+        package_installable_file.write(package + '\n')
     self.response = binhost_pb2.PrepareDevInstallBinhostUploadsResponse()
 
   def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Check that a validate only call does not execute any logic."""
     patch = self.PatchObject(binhost_service,
                              'ReadDevInstallFilesToCreatePackageIndex')
 
@@ -366,7 +366,7 @@ CPV: virtual/python-enum34-1
     patch.assert_not_called()
 
   def testDevInstallerUpload(self):
-    """Basic sanity test testing uploads of dev installer prebuilts."""
+    """Test uploads of dev installer prebuilts."""
     # self.RunStage()
     input_proto = binhost_pb2.PrepareDevInstallBinhostUploadsRequest()
     input_proto.uri = 'gs://chromeos-prebuilt/target'

@@ -259,12 +259,12 @@ def Sync(gclient, cwd, reset=False, nohooks=True, verbose=True,
     run_args: If set (dict), pass to run as kwargs.
 
   Returns:
-    A CommandResult object.
+    A CompletedProcess object.
   """
   if run_args is None:
     run_args = {}
 
-  cmd = [gclient, 'sync', '--with_branch_heads', '--with_tags']
+  cmd = [gclient, 'sync']
   if reset:
     cmd += ['--reset', '--force', '--delete_unversioned_trees']
   if nohooks:

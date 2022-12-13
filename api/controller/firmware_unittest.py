@@ -26,7 +26,7 @@ class BuildAllFirmwareTestCase(cros_test_lib.MockTempDirTestCase,
     self.cros_build_run_patch = self.PatchObject(
         cros_build_lib,
         'run',
-        return_value=cros_build_lib.CommandResult(returncode=0))
+        return_value=cros_build_lib.CompletedProcess(returncode=0))
 
   def _GetInput(self,
                 chroot_path=None,

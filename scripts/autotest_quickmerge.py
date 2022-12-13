@@ -254,7 +254,7 @@ def RsyncQuickmerge(source_path, sysroot_autotest_path,
                not just older files.
 
   Returns:
-    The cros_build_lib.CommandResult object resulting from the rsync command.
+    The cros_build_lib.CompletedProcess object resulting from the rsync command.
   """
   command = ['rsync', '-a']
 
@@ -347,7 +347,7 @@ def main(argv):
 
   args = ParseArguments(argv)
 
-  if os.geteuid() != 0:
+  if osutils.IsNonRootUser():
     try:
       cros_build_lib.sudo_run([sys.executable] + sys.argv)
     except cros_build_lib.RunCommandError:
@@ -404,8 +404,8 @@ def main(argv):
                                    args.overwrite)
 
     if args.verbose:
-      logging.info(rsync_output.output)
-    change_report = ItemizeChangesFromRsyncOutput(rsync_output.output,
+      logging.info(rsync_output.stdout)
+    change_report = ItemizeChangesFromRsyncOutput(rsync_output.stdout,
                                                   sysroot_autotest_path)
     num_new_files = num_new_files + len(change_report.new_files)
     num_modified_files = num_modified_files + len(change_report.modified_files)

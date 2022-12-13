@@ -12,13 +12,14 @@ from chromite.api.controller import toolchain
 from chromite.api.gen.chromite.api import artifacts_pb2
 from chromite.api.gen.chromite.api import sysroot_pb2
 from chromite.api.gen.chromite.api import toolchain_pb2
-from chromite.api.gen.chromiumos.builder_config_pb2 import BuilderConfig
 from chromite.api.gen.chromiumos import common_pb2
-
+from chromite.api.gen.chromiumos.builder_config_pb2 import BuilderConfig
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
+from chromite.lib import toolchain as toolchain_lib
 from chromite.lib import toolchain_util
+
 
 # pylint: disable=protected-access
 
@@ -67,7 +68,7 @@ class PrepareForBuildTest(cros_test_lib.MockTempDirTestCase,
                   artifact_types=None,
                   input_artifacts=None,
                   additional_args=None):
-    chroot = common_pb2.Chroot(path=self.tempdir)
+    chroot = common_pb2.Chroot(path=str(self.tempdir))
     sysroot = sysroot_pb2.Sysroot(
         path='/build/board', build_target=common_pb2.BuildTarget(name='board'))
     return toolchain_pb2.PrepareForToolchainBuildRequest(
@@ -206,13 +207,13 @@ class BundleToolchainTest(cros_test_lib.MockTempDirTestCase,
     osutils.Touch(os.path.join(self.tempdir, 'empty'))
 
   def _GetRequest(self, artifact_types=None):
-    chroot = common_pb2.Chroot(path=self.tempdir)
+    chroot = common_pb2.Chroot(path=str(self.tempdir))
     sysroot = sysroot_pb2.Sysroot(
         path='/build/board', build_target=common_pb2.BuildTarget(name='board'))
     return toolchain_pb2.BundleToolchainRequest(
         chroot=chroot,
         sysroot=sysroot,
-        output_dir=self.tempdir,
+        output_dir=str(self.tempdir),
         artifact_types=artifact_types,
     )
 
@@ -300,3 +301,38 @@ class GetUpdatedFilesTest(cros_test_lib.MockTempDirTestCase,
     )
     self.assertIn('Commit Message', self.response.commit_message)
     self.assertEqual(len(self.response.commit_footer), 0)
+
+
+class GetToolchainsForBoardTest(cros_test_lib.MockTempDirTestCase,
+                                api_config.ApiConfigMixin):
+  """Unittests for GetToolchainsForBoard."""
+
+  def setUp(self):
+    self.response = toolchain_pb2.ToolchainsResponse()
+
+  def _GetRequest(self, board='betty-pi-arc'):
+    return toolchain_pb2.ToolchainsRequest(board=board)
+
+  def testValidateOnly(self):
+    """Confidence check that a validate only call does not execute any logic."""
+    request = self._GetRequest()
+    toolchain.GetToolchainsForBoard(request, self.response,
+                                    self.validate_only_config)
+
+  def testUpdateSuccess(self):
+    toolchain_info = {
+        'default-a': {'default': True},
+        'default-b': {'default': True},
+        'nondefault-a': {'default': False},
+        'nondefault-b': {'default': False},
+    }
+    self.PatchObject(toolchain_lib, 'GetToolchainsForBoard',
+                     return_value=toolchain_info)
+
+    request = self._GetRequest()
+    toolchain.GetToolchainsForBoard(request, self.response, self.api_config)
+
+    self.assertEqual(self.response.default_toolchains,
+                     ['default-a', 'default-b'])
+    self.assertEqual(self.response.nondefault_toolchains,
+                     ['nondefault-a', 'nondefault-b'])

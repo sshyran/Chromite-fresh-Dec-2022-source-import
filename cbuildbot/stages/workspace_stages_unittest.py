@@ -8,17 +8,18 @@ import os
 from unittest import mock
 
 from chromite.cbuildbot import commands
-from chromite.cbuildbot import manifest_version
 from chromite.cbuildbot.builders import workspace_builders_unittest
 from chromite.cbuildbot.stages import generic_stages
 from chromite.cbuildbot.stages import generic_stages_unittest
 from chromite.cbuildbot.stages import workspace_stages
+from chromite.lib import chromeos_version
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import portage_util
 from chromite.lib.parser import package_info
+
 
 # pylint: disable=too-many-ancestors
 # pylint: disable=protected-access
@@ -39,8 +40,8 @@ class WorkspaceStageBase(
     # Make it a 'repo' for chroot path conversions.
     osutils.SafeMakedirs(os.path.join(self.workspace, '.repo'))
 
-    self.from_repo_mock = self.PatchObject(
-        manifest_version.VersionInfo, 'from_repo')
+    self.from_repo_mock = self.PatchObject(chromeos_version.VersionInfo,
+                                           'from_repo')
     self.SetWorkspaceVersion(self.OLD_VERSION)
 
     self.manifest_versions = os.path.join(
@@ -52,7 +53,7 @@ class WorkspaceStageBase(
 
   def SetWorkspaceVersion(self, version, chrome_branch='1'):
     """Change the "version" of the workspace."""
-    self.from_repo_mock.return_value = manifest_version.VersionInfo(
+    self.from_repo_mock.return_value = chromeos_version.VersionInfo(
         version, chrome_branch=chrome_branch)
 
   def ConstructStage(self):
@@ -280,9 +281,9 @@ class WorkspaceSyncStageTest(WorkspaceStageBase):
     self.assertEqual(self.sync_stage_mock.call_args_list, [
         mock.call(self._run, self.buildstore,
                   patch_pool=mock.ANY,
-                  suffix=' [Infra]',
+                  suffix=' [Infra ooga_booga]',
                   external=True,
-                  branch='master',
+                  branch='ooga_booga',
                   build_root=self.build_root),
 
         mock.call(self._run, self.buildstore,
@@ -465,7 +466,7 @@ class WorkspaceUpdateSDKStageTest(WorkspaceStageBase):
 
     self.assertEqual(self.rc.call_count, 1)
     self.rc.assertCommandCalled(
-        ['./update_chroot',],
+        ['./update_chroot', '--toolchain_boards', 'board'],
         enter_chroot=True,
         chroot_args=['--cache-dir', '/cache'],
         extra_env={
@@ -486,7 +487,7 @@ class WorkspaceUpdateSDKStageTest(WorkspaceStageBase):
 
     self.assertEqual(self.rc.call_count, 1)
     self.rc.assertCommandCalled(
-        ['./update_chroot',],
+        ['./update_chroot', '--toolchain_boards', 'board'],
         enter_chroot=True,
         chroot_args=['--cache-dir', '/cache'],
         extra_env={
@@ -646,6 +647,7 @@ class WorkspaceBuildPackagesStageTest(WorkspaceStageBase):
             '--board=board',
             '--accept_licenses=@CHROMEOS',
             '--skip_chroot_upgrade',
+            '--withdebugsymbols',
             '--nousepkg',
             'virtual/target-os',
             'virtual/target-os-dev',
@@ -670,18 +672,6 @@ class WorkspaceUnitTestStageTest(WorkspaceStageBase):
   def ConstructStage(self):
     return workspace_stages.WorkspaceUnitTestStage(
         self._run, self.buildstore, build_root=self.workspace, board='board')
-
-  def testFactoryOld(self):
-    self.SetWorkspaceVersion(self.OLD_VERSION)
-
-    self._Prepare(
-        'test-factorybranch',
-        site_config=workspace_builders_unittest.CreateMockSiteConfig(),
-        extra_cmd_args=['--cache-dir', '/cache'])
-
-    self.RunStage()
-
-    self.assertEqual(self.rc.call_args_list, [])
 
   def testFactoryNew(self):
     self.SetWorkspaceVersion(self.MODERN_VERSION)
@@ -787,7 +777,7 @@ class WorkspaceDebugSymbolsStageTest(WorkspaceStageBase):
 
   def ConstructStage(self):
     # Version for the infra branch.
-    self._run.attrs.version_info = manifest_version.VersionInfo(
+    self._run.attrs.version_info = chromeos_version.VersionInfo(
         '10.0.0', chrome_branch='10')
     self._run.attrs.release_tag = 'infra-tag'
 
@@ -800,6 +790,11 @@ class WorkspaceDebugSymbolsStageTest(WorkspaceStageBase):
         'test-factorybranch',
         site_config=workspace_builders_unittest.CreateMockSiteConfig(),
         extra_cmd_args=['--cache-dir', '/cache'])
+
+    pkg_dep_patch = self.PatchObject(
+        portage_util,
+        'GetPackageDependencies',
+        return_value=[])
 
     self.RunStage()
 
@@ -817,6 +812,11 @@ class WorkspaceDebugSymbolsStageTest(WorkspaceStageBase):
         },
         cwd=self.workspace)
 
+    # Verify set_empty_root is True when using an old version.
+    pkg_dep_patch.assert_called_with(mock.ANY,
+                                     board=mock.ANY,
+                                     buildroot=mock.ANY,
+                                     set_empty_root=True)
     self.assertEqual(
         self.tarball_mock.call_args_list,
         [

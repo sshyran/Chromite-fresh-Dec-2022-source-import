@@ -13,7 +13,7 @@ import re
 from chromite.lib import cros_build_lib
 from chromite.lib import git
 from chromite.lib import osutils
-from chromite.lib import repo_manifest
+from chromite.utils import repo_manifest
 
 
 # Match `repo` error: "error: project <name> not found"
@@ -150,10 +150,10 @@ class Repository(object):
       cwd: The path to run the command in. Defaults to Repository root.
         Must be within the root.
       capture_output: Whether to capture the output, making it available in the
-        CommandResult object, or print it to stdout/err. Defaults to False.
+        CompletedProcess object, or print it to stdout/err. Defaults to False.
 
     Returns:
-      A CommandResult object.
+      A CompletedProcess object.
 
     Raises:
       NotInRepoError: if cwd is not within the Repository root.
@@ -238,13 +238,13 @@ class Repository(object):
     try:
       result = self._Run(['list'] + projects, cwd=cwd, capture_output=True)
     except cros_build_lib.RunCommandError as rce:
-      m = PROJECT_NOT_FOUND_RE.search(rce.result.error)
+      m = PROJECT_NOT_FOUND_RE.search(rce.result.stderr)
       if m:
         raise ProjectNotFoundError(m.group('name'))
       raise rce
 
     infos = []
-    for line in result.output.splitlines():
+    for line in result.stdout.splitlines():
       path, name = line.rsplit(' : ', 1)
       infos.append(ProjectInfo(name=name, path=path))
     return infos
@@ -264,7 +264,7 @@ class Repository(object):
     if revision_locked:
       cmd += ['--revision-as-HEAD']
     result = self._Run(cmd, capture_output=True)
-    return repo_manifest.Manifest.FromString(result.output)
+    return repo_manifest.Manifest.FromString(result.stdout)
 
   def Copy(self, dest_root):
     """Efficiently `cp` the .repo directory, using hardlinks if possible.
@@ -298,10 +298,10 @@ class Repository(object):
               debug_level=logging.DEBUG, capture_output=True, encoding='utf-8',
               extra_env={'LC_MESSAGES': 'C'}, cwd=self.root)
         except cros_build_lib.RunCommandError as e:
-          if 'Invalid cross-device link' in e.result.error:
+          if 'Invalid cross-device link' in e.result.stderr:
             logging.warning("Can't hard link across devices; aborting linking.")
             break
-          logging.warning('Copy linking failed: %s', e.result.error)
+          logging.warning('Copy linking failed: %s', e.result.stderr)
 
       # Copy everything that wasn't created by the hard linking above.
       try:
@@ -313,10 +313,10 @@ class Repository(object):
         # Despite the --no-clobber, `cp` still complains when trying to copy a
         # file to its existing hard link. Filter these errors from the output
         # to see if there were any real failures.
-        errors = e.result.error.splitlines()
+        errors = e.result.stderr.splitlines()
         real_errors = [x for x in errors if 'are the same file' not in x]
         if real_errors:
-          e.result.error = '\n'.join(real_errors)
+          e.result.stderr = '\n'.join(real_errors)
           raise e
       return Repository(dest_root)
 

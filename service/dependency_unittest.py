@@ -7,11 +7,12 @@
 import pytest
 
 from chromite.lib import cros_test_lib
-from chromite.lib import depgraph
 from chromite.lib import dependency_graph
 from chromite.lib import dependency_lib
+from chromite.lib import depgraph
 from chromite.lib.parser import package_info
 from chromite.service import dependency
+
 
 pytestmark = cros_test_lib.pytestmark_inside_only
 

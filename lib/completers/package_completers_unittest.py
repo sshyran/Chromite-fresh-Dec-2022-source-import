@@ -14,6 +14,7 @@ from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 from chromite.lib.completers import package_completers
 
+
 # Pytest's method of declaring fixtures causes Pylint to complain about
 # redefined outer names.
 # pylint: disable=redefined-outer-name

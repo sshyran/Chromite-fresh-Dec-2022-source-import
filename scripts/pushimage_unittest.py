@@ -65,7 +65,7 @@ class InputInsnsTest(cros_test_lib.MockTestCase):
       self.assertEqual(ret, exp)
 
   def testOutputInsnsBasic(self):
-    """Verify output instructions are sane"""
+    """Verify output instructions are correct"""
     exp_content = """[insns]
 channel = dev canary
 keyset = stumpy-mp-v3
@@ -290,7 +290,7 @@ class PushImageTests(gs_unittest.AbstractGSContextTest):
     with mock.patch.object(gs.GSContext, 'Exists', return_value=True):
       urls = pushimage.PushImage('/src', 'test.board', 'R34-5126.0.0',
                                  sign_types=['recovery'])
-    self.assertEqual(self.gs_mock.call_count, 36)
+    self.assertEqual(self.gs_mock.call_count, 34)
     self.assertTrue(self.mark_mock.called)
     self.assertEqual(urls, EXPECTED)
 
@@ -308,7 +308,7 @@ class PushImageTests(gs_unittest.AbstractGSContextTest):
     with mock.patch.object(gs.GSContext, 'Exists', return_value=True):
       urls = pushimage.PushImage('/src', 'test.board', 'R34-5126.0.0',
                                  sign_types=['base'])
-    self.assertEqual(self.gs_mock.call_count, 38)
+    self.assertEqual(self.gs_mock.call_count, 36)
     self.assertTrue(self.mark_mock.called)
     self.assertEqual(urls, EXPECTED)
 
@@ -326,7 +326,7 @@ class PushImageTests(gs_unittest.AbstractGSContextTest):
     with mock.patch.object(gs.GSContext, 'Exists', return_value=True):
       urls = pushimage.PushImage('/src', 'board2', 'R34-5126.0.0',
                                  sign_types=['gsc_firmware'])
-    self.assertEqual(self.gs_mock.call_count, 36)
+    self.assertEqual(self.gs_mock.call_count, 34)
     self.assertTrue(self.mark_mock.called)
     self.assertEqual(urls, EXPECTED)
 
@@ -334,14 +334,14 @@ class PushImageTests(gs_unittest.AbstractGSContextTest):
     """Verify nothing is signed when we request an unavailable type"""
     urls = pushimage.PushImage('/src', 'test.board', 'R34-5126.0.0',
                                sign_types=['nononononono'])
-    self.assertEqual(self.gs_mock.call_count, 34)
+    self.assertEqual(self.gs_mock.call_count, 32)
     self.assertFalse(self.mark_mock.called)
     self.assertEqual(urls, {})
 
   def testGsError(self):
     """Verify random GS errors don't make us blow up entirely"""
     self.gs_mock.AddCmdResult(partial_mock.In('stat'), returncode=1,
-                              output='gobblety gook\n')
+                              stdout='gobblety gook\n')
     with cros_test_lib.LoggingCapturer('chromite'):
       self.assertRaises(pushimage.PushError, pushimage.PushImage, '/src',
                         'test.board', 'R34-5126.0.0')

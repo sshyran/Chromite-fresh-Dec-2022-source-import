@@ -9,6 +9,7 @@ import sys
 # Import as private to avoid polluting module namespace.
 from chromite.lib import buildbot_annotations as _annotations
 
+
 # Only buildbot aware entry-points need to spew buildbot specific logs. Require
 # user action for the special log lines.
 _buildbot_markers_enabled = False

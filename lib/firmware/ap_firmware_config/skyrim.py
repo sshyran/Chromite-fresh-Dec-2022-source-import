@@ -6,16 +6,15 @@
 
 from chromite.lib.firmware import servo_lib
 
+
 BUILD_PACKAGES = (
-    'chromeos-ec',
+    'chromeos-zephyr',
     'coreboot',
     'depthcharge',
     'libpayload',
     'vboot_reference',
     'chromeos-bootimage',
-    'coreboot-private-files-board',
     'coreboot-private-files-chipset',
-    'amd-cezanne-fsp',
 )
 
 
@@ -44,7 +43,8 @@ def get_config(servo: servo_lib.Servo) -> servo_lib.ServoConfig:
   # Shutdown AP so that it enters G3 state.
   dut_control_on.append(['ec_uart_cmd:apshutdown'])
   # Sleep to ensure the SoC rails get chance to discharge enough.
-  dut_control_on.append(['sleep:5'])
+  # Skyrim requires more dicharge time than other platforms.
+  dut_control_on.append(['sleep:20'])
 
   if servo.is_c2d2:
     # CPLD will actually require AP_FLASH_SELECT of 0 in flashing

@@ -35,9 +35,12 @@ if cros_build_lib.IsInsideChroot():
 EMERGE_CMD = os.path.join(constants.CHROMITE_BIN_DIR, 'parallel_emerge')
 PACKAGE_STABLE = '[stable]'
 
-CHROMIUMOS_OVERLAY = '/usr/local/portage/chromiumos'
-ECLASS_OVERLAY = '/usr/local/portage/eclass-overlay'
-STABLE_OVERLAY = '/usr/local/portage/stable'
+CHROMIUMOS_OVERLAY = os.path.join(
+    constants.CHROOT_SOURCE_ROOT, constants.CHROMIUMOS_OVERLAY_DIR)
+ECLASS_OVERLAY = os.path.join(
+    constants.CHROOT_SOURCE_ROOT, constants.ECLASS_OVERLAY_DIR)
+STABLE_OVERLAY = os.path.join(
+    constants.CHROOT_SOURCE_ROOT, constants.PORTAGE_STABLE_OVERLAY_DIR)
 CROSSDEV_OVERLAY = '/usr/local/portage/crossdev'
 
 
@@ -50,6 +53,8 @@ CROSSDEV_OVERLAY = '/usr/local/portage/crossdev'
 # want crossdev managing /etc/portage config files for the sdk
 HOST_PACKAGES = (
     'dev-lang/go',
+    'dev-lang/rust-bootstrap',
+    'dev-lang/rust-host',
     'dev-libs/elfutils',
     'sys-devel/binutils',
     'sys-devel/gcc',
@@ -57,7 +62,6 @@ HOST_PACKAGES = (
     'sys-kernel/linux-headers',
     'sys-libs/glibc',
     'sys-libs/libcxx',
-    'sys-libs/libcxxabi',
     'sys-libs/llvm-libunwind',
 )
 
@@ -66,7 +70,6 @@ HOST_PACKAGES = (
 # build), so we have to delay their installation.
 HOST_POST_CROSS_PACKAGES = (
     'dev-lang/rust',
-    'dev-lang/rust-bootstrap',
     'virtual/target-sdk-post-cross',
     'dev-embedded/coreboot-sdk',
     'dev-embedded/hps-sdk',
@@ -88,27 +91,29 @@ TARGET_GO_ENABLED = (
 )
 CROSSDEV_GO_ARGS = ['--ex-pkg', 'dev-lang/go']
 
+CROSSDEV_LIBXCRYPT_ARGS = ['--ex-pkg', 'sys-libs/libxcrypt']
+
 # Enable llvm's compiler-rt for these targets.
 TARGET_COMPILER_RT_ENABLED = (
     'armv7a-cros-linux-gnueabi',
     'armv7a-cros-linux-gnueabihf',
     'aarch64-cros-linux-gnu',
+    'arm-none-eabi',
     'armv7m-cros-eabi',
 )
 CROSSDEV_COMPILER_RT_ARGS = ['--ex-pkg', 'sys-libs/compiler-rt']
 
 TARGET_LLVM_PKGS_ENABLED = (
+    'armv7m-cros-eabi',
     'armv7a-cros-linux-gnueabi',
     'armv7a-cros-linux-gnueabihf',
     'aarch64-cros-linux-gnu',
     'i686-cros-linux-gnu',
-    'i686-pc-linux-gnu',
     'x86_64-cros-linux-gnu',
 )
 
 LLVM_PKGS_TABLE = {
     'ex_llvm-libunwind' : ['--ex-pkg', 'sys-libs/llvm-libunwind'],
-    'ex_libcxxabi' : ['--ex-pkg', 'sys-libs/libcxxabi'],
     'ex_libcxx' : ['--ex-pkg', 'sys-libs/libcxx'],
 }
 
@@ -123,7 +128,6 @@ class Crossdev(object):
       'rust': 'dev-lang',
       'llvm': 'sys-devel',
       'llvm-libunwind': 'sys-libs',
-      'libcxxabi': 'sys-libs',
       'libcxx': 'sys-libs',
       'elfutils': 'dev-libs',
   }
@@ -203,6 +207,9 @@ class Crossdev(object):
       else:
         # Build the crossdev command.
         cmd = ['crossdev', '--show-target-cfg', '--ex-gdb']
+        # Enable libxcrypt for all linux-gnu targets.
+        if 'cros-linux-gnu' in target:
+          cmd.extend(CROSSDEV_LIBXCRYPT_ARGS)
         if target in TARGET_COMPILER_RT_ENABLED:
           cmd.extend(CROSSDEV_COMPILER_RT_ARGS)
         if target in TARGET_LLVM_PKGS_ENABLED:
@@ -286,6 +293,8 @@ class Crossdev(object):
       if pkg == 'gdb':
         # Gdb does not have selectable versions.
         cmd.append('--ex-gdb')
+      elif pkg == 'ex_libxcrypt':
+        cmd.extend(CROSSDEV_LIBXCRYPT_ARGS)
       elif pkg == 'ex_compiler-rt':
         cmd.extend(CROSSDEV_COMPILER_RT_ARGS)
       elif pkg == 'ex_go':
@@ -658,7 +667,7 @@ def SelectActiveToolchains(targets, root='/'):
       result = cros_build_lib.run(
           cmd, print_cmd=False, stdout=True, encoding='utf-8',
           extra_env=extra_env)
-      current = result.output.splitlines()[0]
+      current = result.stdout.splitlines()[0]
 
       # Do not reconfig when the current is live or nothing needs to be done.
       extra_env = {'ROOT': root} if root != '/' else None
@@ -1125,7 +1134,7 @@ def _ProcessBinutilsConfig(target, output_dir):
   """Do what binutils-config would have done"""
   binpath = os.path.join('/bin', target + '-')
 
-  # Locate the bin dir holding the linker and perform some sanity checks
+  # Locate the bin dir holding the linker and perform some confidence checks
   binutils_bin_path = os.path.join(output_dir, 'usr', toolchain.GetHostTuple(),
                                    target, 'binutils-bin')
   globpath = os.path.join(binutils_bin_path, '*')
@@ -1322,7 +1331,7 @@ def GetParser():
   parser = commandline.ArgumentParser(description=__doc__)
   parser.add_argument('-u', '--nousepkg',
                       action='store_false', dest='usepkg', default=True,
-                      help='Use prebuilt packages if possible')
+                      help='Do not use prebuilt packages')
   parser.add_argument('-d', '--deleteold',
                       action='store_true', dest='deleteold', default=False,
                       help='Unmerge deprecated packages')
@@ -1389,7 +1398,7 @@ def main(argv):
   else:
     cros_build_lib.AssertInsideChroot()
     # This has to be always run as root.
-    if os.geteuid() != 0:
+    if osutils.IsNonRootUser():
       cros_build_lib.Die('this script must be run as root')
 
     Crossdev.Load(options.reconfig)

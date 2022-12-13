@@ -4,22 +4,33 @@
 
 """The Image API is the entry point for image functionality."""
 
+import errno
 import logging
 import os
-import shutil
 from pathlib import Path
-from typing import Iterable, List, Optional, Union
+import shutil
+from typing import Iterable, List, NamedTuple, Optional, Union
 
+from chromite.lib import build_target_lib
+from chromite.lib import chromeos_version
 from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
-from chromite.lib.parser import package_info
 from chromite.lib import sysroot_lib
+from chromite.lib.parser import package_info
+
 
 PARALLEL_EMERGE_STATUS_FILE_NAME = 'status_file'
+
+_IMAGE_TYPE_DESCRIPTION = {
+    constants.BASE_IMAGE_BIN: 'Non-developer Chromium OS',
+    constants.DEV_IMAGE_BIN: 'Developer',
+    constants.TEST_IMAGE_BIN: 'Test',
+    constants.FACTORY_IMAGE_BIN: 'Chromium OS Factory install shim',
+}
 
 
 class Error(Exception):
@@ -38,62 +49,99 @@ class ImageToVmError(Error):
   """Error converting the image to a vm."""
 
 
-class BuildConfig(object):
-  """Value object to hold the build configuration options."""
+class BuildConfig(NamedTuple):
+  """Named tuple to hold the build configuration options.
 
-  def __init__(self,
-               builder_path: Optional[str] = None,
-               disk_layout: Optional[str] = None,
-               enable_rootfs_verification: bool = True,
-               replace: bool = False,
-               version: Optional[str] = None,
-               build_attempt: Optional[int] = None,
-               symlink: Optional[str] = None,
-               output_dir_suffix: Optional[str] = None):
-    """Build config initialization.
+  Attributes:
+    builder_path: The value to which the builder path lsb key should be
+      set, the build_name installed on DUT during hwtest.
+    disk_layout: The disk layout type.
+    enable_rootfs_verification: Whether the rootfs verification is enabled.
+    replace: Whether to replace existing output if any exists.
+    version: The version string to use for the image.
+    build_attempt: The build_attempt number to pass to build_image.
+    symlink: Symlink name (defaults to "latest").
+    output_dir_suffix: String to append to the image build directory.
+    adjust_partition: Adjustments to apply to partition table (LABEL:[+-=]SIZE)
+      e.g. ROOT-A:+1G
+    boot_args: Additional boot arguments to pass to the commandline.
+    enable_bootcache: Enable bootloaders to use boot cache.
+    output_root: Directory in which to place image result directories.
+    build_root: Directory in which to compose the image, before copying it to
+      output_root.
+    enable_serial: Enable serial port for printks. Example values: ttyS0
+    kernel_loglevel: The loglevel to add to the kernel command line.
+    jobs: Number of packages to process in parallel at maximum.
+    base_is_recovery: Copy the base image to recovery_image.bin.
+  """
+  builder_path: Optional[str] = None
+  disk_layout: Optional[str] = None
+  enable_rootfs_verification: bool = True
+  replace: bool = False
+  version: Optional[str] = None
+  build_attempt: int = 1
+  symlink: str = 'latest'
+  output_dir_suffix: Optional[str] = None
+  adjust_partition: Optional[str] = None
+  boot_args: str = 'noinitrd'
+  enable_bootcache: bool = False
+  output_root: Union[str, os.PathLike] = Path(
+      constants.DEFAULT_BUILD_ROOT) / 'images'
+  build_root: Union[str, os.PathLike] = Path(
+      constants.DEFAULT_BUILD_ROOT) / 'images'
+  enable_serial: Optional[str] = None
+  kernel_loglevel: int = 7
+  jobs: int = os.cpu_count()
+  base_is_recovery: bool = False
 
-    Args:
-      builder_path: The value to which the builder path lsb key should be
-        set, the build_name installed on DUT during hwtest.
-      disk_layout: The disk layout type.
-      enable_rootfs_verification: Whether the rootfs verification is enabled.
-      replace: Whether to replace existing output if any exists.
-      version: The version string to use for the image.
-      build_attempt: The build_attempt number to pass to build_image.
-      symlink: Symlink name (defaults to "latest").
-      output_dir_suffix: String to append to the image build directory.
-    """
-    self.builder_path = builder_path
-    self.disk_layout = disk_layout
-    self.enable_rootfs_verification = enable_rootfs_verification
-    self.replace = replace
-    self.version = version
-    self.build_attempt = build_attempt
-    self.symlink = symlink
-    self.output_dir_suffix = output_dir_suffix
 
-  def GetArguments(self):
-    """Get the build_image arguments for the configuration."""
-    args = []
+# TODO(b/232566937): Remove the argument generation function, once the
+# build_image.sh is removed.
+def GetBuildImageCommand(config: BuildConfig, image_names: List[str],
+                         board: str) -> List[Union[str, os.PathLike]]:
+  """Get the build_image command for the configuration.
 
-    if self.builder_path:
-      args.extend(['--builder_path', self.builder_path])
-    if self.disk_layout:
-      args.extend(['--disk_layout', self.disk_layout])
-    if not self.enable_rootfs_verification:
-      args.append('--noenable_rootfs_verification')
-    if self.replace:
-      args.append('--replace')
-    if self.version:
-      args.extend(['--version', self.version])
-    if self.build_attempt:
-      args.extend(['--build_attempt', self.build_attempt])
-    if self.symlink:
-      args.extend(['--symlink', self.symlink])
-    if self.output_dir_suffix:
-      args.extend(['--output_suffix', self.output_dir_suffix])
+  Args:
+    config: BuildConfig to use to generate the command.
+    image_names: A set of image names that needs to be built.
+    board: The board for which the image to be built.
 
-    return args
+  Returns:
+    List with build_image command with arguments.
+  """
+  cmd = [
+      Path(constants.CROSUTILS_DIR) / 'build_image.sh',
+      '--script-is-run-only-by-chromite-and-not-users',
+      '--board',
+      board,
+  ]
+
+  _config = config._asdict()
+  if constants.FACTORY_IMAGE_BIN in image_names:
+    _config['boot_args'] += ' cros_factory_install'
+    _config['enable_rootfs_verification'] = False
+    _config['enable_bootcache'] = False
+
+  if _config['builder_path']:
+    cmd.extend(['--builder_path', _config['builder_path']])
+  if not _config['enable_rootfs_verification']:
+    cmd.append('--noenable_rootfs_verification')
+  if _config['adjust_partition']:
+    cmd.extend(['--adjust_part', _config['adjust_partition']])
+  if _config['enable_bootcache']:
+    cmd.append('--enable_bootcache')
+  if _config['enable_serial']:
+    cmd.extend(['--enable_serial', _config['enable_serial']])
+  cmd.extend([
+      '--disk_layout',
+      _config['disk_layout'] if _config['disk_layout'] else 'default',
+  ])
+  cmd.extend(['--boot_args', _config['boot_args']])
+  cmd.extend(['--loglevel', f"{_config['kernel_loglevel']}"])
+  cmd.extend(['--jobs', f"{_config['jobs']}"])
+
+  cmd.extend(image_names)
+  return cmd
 
 
 class BuildResult(object):
@@ -180,24 +228,46 @@ def Build(board: str,
   Returns:
     BuildResult
   """
+  cros_build_lib.AssertInsideChroot()
+
   if not board:
     raise InvalidArgumentError('A build target name is required.')
 
   build_result = BuildResult(images[:])
   if not images:
     return build_result
+
   config = config or BuildConfig()
+  try:
+    image_names = image_lib.GetImagesToBuild(images)
+  except ValueError:
+    logging.error('Invalid image types requested: %s', ' '.join(images))
+    build_result.return_code = errno.EINVAL
+    return build_result
+  logging.info('The following images will be built %s', ' '.join(image_names))
 
-  if cros_build_lib.IsInsideChroot():
-    cmd = [os.path.join(constants.CROSUTILS_DIR, 'build_image')]
-  else:
-    cmd = ['./build_image']
+  version_info = chromeos_version.VersionInfo(
+      version_file=Path(constants.SOURCE_ROOT) / constants.VERSION_FILE)
+  cmd = GetBuildImageCommand(config, image_names, board)
 
-  cmd.extend(['--board', board])
-  cmd.extend(config.GetArguments())
-  cmd.extend(images)
+  try:
+    build_dir, output_dir, image_dir = image_lib.CreateBuildDir(
+        config.build_root,
+        config.output_root,
+        version_info.chrome_branch,
+        config.version or version_info.VersionStringWithDateTime(),
+        board,
+        config.symlink,
+        config.replace,
+        config.build_attempt,
+        config.output_dir_suffix)
+  except FileExistsError:
+    build_result.return_code = errno.EEXIST
+    return build_result
 
-  extra_env_local = extra_env.copy() if extra_env else {}
+  extra_env_local = image_lib.GetBuildImageEnvvars(image_names, board,
+                                                   version_info, build_dir,
+                                                   output_dir, extra_env)
 
   with osutils.TempDir() as tempdir:
     status_file = os.path.join(tempdir, PARALLEL_EMERGE_STATUS_FILE_NAME)
@@ -213,16 +283,110 @@ def Build(board: str,
     else:
       build_result.failed_packages = content.split() if content else None
 
+  if build_result.return_code != 0:
+    return build_result
+
+  # Move the completed image to the output_root.
+  osutils.MoveDirContents(
+      build_dir, output_dir, remove_from_dir=True, allow_nonempty=True)
+
+  # TODO(rchandrasekar): move build_dlc to a module that we can import.
+  # Copy DLC images to the output_root directory.
+  dlc_dir = output_dir / 'dlc'
+  dlc_cmd = [
+      'build_dlc',
+      '--sysroot',
+      build_target_lib.get_default_sysroot_path(board),
+      '--install-root-dir',
+      dlc_dir,
+      '--board',
+      board,
+  ]
+  result = cros_build_lib.run(dlc_cmd, enter_chroot=True, check=False)
+  if result.returncode:
+    logging.warning('Copying DLC images to %s failed.', dlc_dir)
+
+  logging.info('Done. Image(s) created in %s\n', output_dir)
+
   # Save the path to each image that was built.
-  image_dir = Path(
-      image_lib.GetLatestImageLink(board, pointer=config.symlink))
   for image_type in images:
     filename = constants.IMAGE_TYPE_TO_NAME[image_type]
     image_path = (image_dir / filename).resolve()
     logging.debug('%s Resolved Image Path: %s', image_type, image_path)
     build_result.add_image(image_type, image_path)
 
+    if image_type is constants.IMAGE_TYPE_RECOVERY:
+      continue
+    # Get the image path relative to the CWD.
+    image_path = os.path.relpath(image_path)
+    msg = (f'{_IMAGE_TYPE_DESCRIPTION[filename]} image created as {filename}\n'
+           'To copy the image to a USB key, use:\n'
+           f'  cros flash usb:// {image_path}\n'
+           'To flash the image to a Chrome OS device, use:\n'
+           f'  cros flash YOUR_DEVICE_IP {image_path}\n'
+           'Note that the device must be accessible over the network.\n'
+           'A base image will not work in this mode, but a test or dev image'
+           ' will.\n')
+    if any(filename == x
+           for x in [constants.DEV_IMAGE_BIN, constants.TEST_IMAGE_BIN]):
+      msg += ('To run the image in a virtual machine, use:\n'
+              f'  cros_vm --start --image-path={image_path} --board={board}\n')
+    logging.info(msg)
+
   return build_result
+
+
+def _GetResultAndAddImage(board: str, cmd: list,
+                          image_path: Path = None) -> BuildResult:
+  """Add an image to the BuildResult.
+
+  Args:
+    board: The board name.
+    cmd: An array of command-line arguments.
+    image_path: The chrooted path to the image.
+
+  Returns:
+    BuildResult
+  """
+  build_result = BuildResult([constants.IMAGE_TYPE_RECOVERY])
+  result = cros_build_lib.run(cmd, enter_chroot=True, check=False)
+  build_result.return_code = result.returncode
+
+  if result.returncode:
+    return build_result
+
+  image_name = constants.IMAGE_TYPE_TO_NAME[constants.IMAGE_TYPE_RECOVERY]
+  if image_path:
+    recovery_image = image_path.parent / image_name
+  else:
+    image_dir = Path(image_lib.GetLatestImageLink(board))
+    image_path = image_dir / image_name
+    recovery_image = image_path.resolve()
+
+  if recovery_image.exists():
+    build_result.add_image(constants.IMAGE_TYPE_RECOVERY, recovery_image)
+
+  return build_result
+
+
+def CopyBaseToRecovery(board: str, image_path: Path) -> BuildResult:
+  """Copy the first base image to recovery_image.bin.
+
+  For build targets that do not support a recovery image: the base image gets
+  copied to "recovery_image.bin" so images are available in the Chromebook
+  Recovery Utility, GoldenEye and other locations.
+
+  Args:
+    board: The board name.
+    image_path: The chrooted path to the base image.
+
+  Returns:
+    BuildResult
+  """
+  image_name = constants.IMAGE_TYPE_TO_NAME[constants.IMAGE_TYPE_RECOVERY]
+  recovery_image_path = image_path.parent / image_name
+  cmd = ['cp', image_path, recovery_image_path]
+  return _GetResultAndAddImage(board, cmd, recovery_image_path)
 
 
 def BuildRecoveryImage(board: str,
@@ -250,26 +414,7 @@ def BuildRecoveryImage(board: str,
   if image_path:
     cmd.extend(['--image', str(image_path)])
 
-  build_result = BuildResult([constants.IMAGE_TYPE_RECOVERY])
-  result = cros_build_lib.run(cmd, enter_chroot=True, check=False)
-  build_result.return_code = result.returncode
-
-  if result.returncode:
-    return build_result
-
-  # Record the image path.
-  image_name = constants.IMAGE_TYPE_TO_NAME[constants.IMAGE_TYPE_RECOVERY]
-  if image_path:
-    recovery_image = image_path.parent / image_name
-  else:
-    image_dir = Path(image_lib.GetLatestImageLink(board))
-    image_path = image_dir / image_name
-    recovery_image = image_path.resolve()
-
-  if recovery_image.exists():
-    build_result.add_image(constants.IMAGE_TYPE_RECOVERY, recovery_image)
-
-  return build_result
+  return _GetResultAndAddImage(board, cmd, image_path)
 
 
 def CreateVm(board: str,

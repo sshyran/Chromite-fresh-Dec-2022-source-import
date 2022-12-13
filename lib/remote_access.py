@@ -15,6 +15,7 @@ import stat
 import subprocess
 import tempfile
 import time
+from typing import Optional, Union
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -286,8 +287,12 @@ class RemoteAccess(object):
 
   DEFAULT_USERNAME = ROOT_ACCOUNT
 
-  def __init__(self, remote_host, tempdir, port=None, username=None,
-               private_key=None, debug_level=logging.DEBUG, interactive=True):
+  def __init__(
+      self, remote_host,
+      tempdir: Union[str, os.PathLike],
+      port: int = None,
+      username=None,
+      private_key=None, debug_level=logging.DEBUG, interactive=True):
     """Construct the object.
 
     Args:
@@ -301,7 +306,8 @@ class RemoteAccess(object):
       debug_level: Logging level to use for all run invocations.
       interactive: If set to False, pass /dev/null into stdin for the sh cmd.
     """
-    self.tempdir = tempdir
+    # TODO(vapier): Convert this to Path.
+    self.tempdir = str(tempdir)
     self.remote_host = remote_host
     self.port = port
     self.username = username if username else self.DEFAULT_USERNAME
@@ -317,7 +323,7 @@ class RemoteAccess(object):
   @staticmethod
   def _mockable_popen(*args, **kwargs):
     """This wraps subprocess.Popen so it can be mocked in unit tests."""
-    return subprocess.Popen(*args, **kwargs)
+    return subprocess.Popen(*args, **kwargs)  # pylint: disable=consider-using-with
 
   @property
   def target_ssh_url(self):
@@ -370,8 +376,8 @@ class RemoteAccess(object):
       **kwargs: See cros_build_lib.run documentation.
 
     Returns:
-      A CommandResult object.  The returncode is the returncode of the command,
-      or 255 if ssh encountered an error (could not connect, connection
+      A CompletedProcess object.  The returncode is the returncode of the
+      command, or 255 if ssh encountered an error (could not connect, connection
       interrupted, etc.)
 
     Raises:
@@ -416,7 +422,7 @@ class RemoteAccess(object):
            and not check)):
         return e.result
       elif e.result.returncode == SSH_ERROR_CODE:
-        raise SSHConnectionError(e.result.error)
+        raise SSHConnectionError(e.result.stderr)
       else:
         raise
     finally:
@@ -476,14 +482,14 @@ class RemoteAccess(object):
       if result.returncode == SSH_ERROR_CODE:
         return None
       elif result.returncode == 0:
-        return result.output.rstrip()
+        return result.stdout.rstrip()
       else:
         raise Exception('Unexpected error code %s getting boot ID.'
                         % result.returncode)
     else:
       result = self.RemoteSh(['cat', '/proc/sys/kernel/random/boot_id'],
                              log_output=True)
-      return result.output.rstrip()
+      return result.stdout.rstrip()
 
 
   def CheckIfRebooted(self, old_boot_id):
@@ -540,9 +546,20 @@ class RemoteAccess(object):
       raise RebootError('Reboot has not completed after %s seconds; giving up.'
                         % (timeout_sec,))
 
-  def Rsync(self, src, dest, to_local=False, follow_symlinks=False,
-            recursive=True, inplace=False, verbose=False, sudo=False,
-            remote_sudo=False, compress=True, files_from=None, **kwargs):
+  def Rsync(
+      self,
+      src: Union[str, os.PathLike],
+      dest: Union[str, os.PathLike],
+      to_local: bool = False,
+      follow_symlinks: bool = False,
+      recursive: bool = True,
+      inplace: bool = False,
+      verbose: bool = False,
+      sudo: bool = False,
+      remote_sudo: bool = False,
+      compress: bool = True,
+      files_from: Optional[Union[str, os.PathLike]] = None,
+      **kwargs):
     """Rsync a path to the remote device.
 
     Rsync a path to the remote device. If |to_local| is set True, it
@@ -604,8 +621,15 @@ class RemoteAccess(object):
     """Rsync a path from the remote device to the local machine."""
     return self.Rsync(*args, to_local=kwargs.pop('to_local', True), **kwargs)
 
-  def Scp(self, src, dest, to_local=False, recursive=True, verbose=False,
-          sudo=False, **kwargs):
+  def Scp(
+      self,
+      src: Union[str, os.PathLike],
+      dest: Union[str, os.PathLike],
+      to_local: bool = False,
+      recursive: bool = True,
+      verbose: bool = False,
+      sudo: bool = False,
+      **kwargs):
     """Scp a file or directory to the remote device.
 
     Args:
@@ -620,7 +644,7 @@ class RemoteAccess(object):
       **kwargs: See cros_build_lib.run documentation.
 
     Returns:
-      A CommandResult object containing the information and return code of
+      A CompletedProcess object containing the information and return code of
       the scp command.
     """
     remote_sudo = kwargs.pop('remote_sudo', False)
@@ -659,7 +683,7 @@ class RemoteAccess(object):
     if to_local:
       scp_cmd += ['%s:%s' % (target_ssh_url, src), dest]
     else:
-      scp_cmd += glob.glob(src) + ['%s:%s' % (target_ssh_url, dest)]
+      scp_cmd += [src, '%s:%s' % (target_ssh_url, dest)]
 
     rc_func = cros_build_lib.run
     if sudo:
@@ -681,7 +705,7 @@ class RemoteAccess(object):
     """
     result = cros_build_lib.run(producer_cmd, print_cmd=False,
                                 capture_output=True)
-    return self.RemoteSh(cmd, input=kwargs.pop('input', result.output),
+    return self.RemoteSh(cmd, input=kwargs.pop('input', result.stdout),
                          **kwargs)
 
 
@@ -821,7 +845,7 @@ class RemoteDevice(object):
       self._work_dir = self.BaseRunCommand(
           ['mkdir', '-p', self._base_dir, '&&',
            'mktemp', '-d', '--tmpdir=%s' % self._base_dir],
-          capture_output=True).output.strip()
+          capture_output=True).stdout.strip()
       logging.debug('The temporary working directory on the device is %s',
                     self._work_dir)
       self.RegisterCleanupCmd(['rm', '-rf', self._work_dir])
@@ -852,7 +876,7 @@ class RemoteDevice(object):
     """
     result = self.GetAgent().RemoteSh(['ethtool', 'eth0'], check=False,
                                       capture_output=True)
-    return re.search(r'Speed: \d+000Mb/s', result.output)
+    return re.search(r'Speed: \d+000Mb/s', result.stdout)
 
   @memoize.MemoizedSingleCall
   def IsSELinuxAvailable(self):
@@ -1054,7 +1078,7 @@ class RemoteDevice(object):
     """
     cmd = ['du', '-Lb', '--max-depth=0', path]
     result = self.BaseRunCommand(cmd, remote_sudo=True, capture_output=True)
-    return int(result.output.split()[0])
+    return int(result.stdout.split()[0])
 
   def CatFile(self, path, max_size=1000000, encoding='utf-8'):
     """Reads the file on device to string if its size is less than |max_size|.
@@ -1085,7 +1109,7 @@ class RemoteDevice(object):
                            capture_output=True, encoding=encoding)
     if result.returncode:
       raise CatFileError('Failed to read file "%s" on the device' % path)
-    return result.output
+    return result.stdout
 
   def DeletePath(self, path, relative_to_work_dir=False, recursive=False):
     """Deletes a path on the remote device.
@@ -1132,9 +1156,9 @@ class RemoteDevice(object):
       result = self.GetAgent().RemoteSh(cmd, check=False,
                                         capture_output=True)
       try:
-        return [int(pid) for pid in result.output.splitlines()]
+        return [int(pid) for pid in result.stdout.splitlines()]
       except ValueError:
-        logging.error('Parsing output failed:\n%s', result.output)
+        logging.error('Parsing output failed:\n%s', result.stdout)
         raise RunningPidsError('Unable to get running pids of %s' % exe)
     except SSHConnectionError:
       logging.error('Error connecting to device %s', self.hostname)
@@ -1268,6 +1292,8 @@ class RemoteDevice(object):
       prog = 'gzip'
     elif compression == cros_build_lib.COMP_BZIP2:
       prog = 'bzip2'
+    elif compression == cros_build_lib.COMP_ZSTD:
+      prog = 'zstd'
     elif compression == cros_build_lib.COMP_NONE:
       return ['cat']
     else:
@@ -1308,10 +1334,10 @@ class ChromiumOSDevice(RemoteDevice):
       try:
         result = self.BaseRunCommand(['echo', '${PATH}'])
       except cros_build_lib.RunCommandError as e:
-        logging.error('Failed to get $PATH on the device: %s', e.result.error)
+        logging.error('Failed to get $PATH on the device: %s', e.result.stderr)
         raise
 
-      self._orig_path = result.output.strip()
+      self._orig_path = result.stdout.strip()
 
     return self._orig_path
 
@@ -1384,7 +1410,7 @@ class ChromiumOSDevice(RemoteDevice):
   def _RootfsIsReadOnly(self):
     """Returns True if rootfs on is mounted as read-only."""
     r = self.run(self.LIST_MOUNTS_CMD, capture_output=True)
-    for line in r.output.splitlines():
+    for line in r.stdout.splitlines():
       if not line:
         continue
 

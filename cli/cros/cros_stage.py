@@ -249,7 +249,7 @@ NOTES:
         logging.info('Image is staged on Moblab as %s',
                      self.staged_image_name)
       else:
-        logging.info('Staging failed. Error Message: %s', res.error)
+        logging.info('Staging failed. Error Message: %s', res.stderr)
 
       device.run(['rm', '-rf', self.stage_directory])
 

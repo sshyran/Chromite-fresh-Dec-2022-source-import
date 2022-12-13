@@ -56,25 +56,33 @@ class TestUpdateFile(cros_test_lib.TempDirTestCase):
     if not version_file:
       version_file = self.version_file
 
-    version_fh = open(version_file)
-    try:
+    with open(version_file) as version_fh:
       return [line.strip() for line in version_fh.readlines()]
-    finally:
-      version_fh.close()
+
 
   def _verify_key_pair(self, key, val):
     file_contents = self._read_version_file()
-    # ensure key for verify is wrapped on quotes
+
+    # Make sure 'key' entry is only found once.
+    entry_found = False
+
+    # Ensure value is wrapped on quotes.
     if '"' not in val:
       val = '"%s"' % val
+
+    # Inspect file contents.
     for entry in file_contents:
       if '=' not in entry:
         continue
-      file_key, file_val = entry.split('=')
+      file_key, file_val = entry.split('=', maxsplit=1)
       if file_key == key:
         if val == file_val:
-          break
-    else:
+          if entry_found:
+            self.fail(f'Variable {file_key} appears twice')
+          else:
+            entry_found = True
+
+    if not entry_found:
       self.fail('Could not find "%s=%s" in version file' % (key, val))
 
   def testAddVariableThatDoesNotExist(self):
@@ -89,11 +97,26 @@ class TestUpdateFile(cros_test_lib.TempDirTestCase):
 
   def testUpdateVariable(self):
     """Test updating a variable that already exists."""
-    key, val = self.contents_str[2].split('=')
-    new_val = 'test_update'
-    self._verify_key_pair(key, val)
-    prebuilt.UpdateLocalFile(self.version_file, new_val)
-    self._verify_key_pair(key, new_val)
+    binhost_key, binhost_val = self.contents_str[2].split('=')
+    if binhost_key != 'PORTAGE_BINHOST':
+      self.fail('unexpected test input: expected PORTAGE_BINHOST at line[2]')
+    self._verify_key_pair(binhost_key, binhost_val)
+
+    # Confirm that unrelated variable 'PKGDIR' does not change.
+    pkgdir_key, pkgdir_val = self.contents_str[1].split('=')
+    if pkgdir_key != 'PKGDIR':
+      self.fail('unexpected test input: expected PKGDIR at line[1]')
+    self._verify_key_pair(pkgdir_key, pkgdir_val)
+
+    binhost_new_val = 'test_update'
+    prebuilt.UpdateLocalFile(self.version_file, binhost_new_val)
+    self._verify_key_pair(binhost_key, binhost_new_val)
+    self._verify_key_pair(pkgdir_key, pkgdir_val)
+
+    binhost_new_val = 'test_update2'
+    prebuilt.UpdateLocalFile(self.version_file, binhost_new_val)
+    self._verify_key_pair(binhost_key, binhost_new_val)
+    self._verify_key_pair(pkgdir_key, pkgdir_val)
 
   def testUpdateNonExistentFile(self):
     key = 'PORTAGE_BINHOST'
@@ -342,12 +365,16 @@ class TestSyncPrebuilts(cros_test_lib.MockTestCase):
     self.upload_mock = self.PatchObject(prebuilt.PrebuiltUploader,
                                         '_UploadPrebuilt', return_value=True)
 
-  def testSyncHostPrebuilts(self):
+  def _testSyncHostPrebuilts(self, chroot):
     board = 'x86-foo'
     target = prebuilt.BuildTarget(board, 'aura')
     slave_targets = [prebuilt.BuildTarget('x86-bar', 'aura')]
-    package_path = os.path.join(self.build_path,
-                                prebuilt._HOST_PACKAGES_PATH)
+    if chroot is None:
+      package_path = os.path.join(self.build_path,
+                                  'chroot',
+                                  prebuilt._HOST_PACKAGES_PATH)
+    else:
+      package_path = os.path.join(chroot, prebuilt._HOST_PACKAGES_PATH)
     url_suffix = prebuilt._REL_HOST_PATH % {
         'version': self.version,
         'host_arch': prebuilt._HOST_ARCH,
@@ -361,13 +388,19 @@ class TestSyncPrebuilts(cros_test_lib.MockTestCase):
     uploader = prebuilt.PrebuiltUploader(
         self.upload_location, 'public-read', self.binhost, [],
         self.build_path, [], False, 'foo', False, target, slave_targets,
-        self.version)
+        self.version, chroot=chroot)
     uploader.SyncHostPrebuilts(self.key, True, True)
     self.upload_mock.assert_called_once_with(package_path, packages_url_suffix)
     self.rev_mock.assert_called_once_with(
         mock.ANY, {self.key: binhost}, dryrun=False)
     self.update_binhost_mock.assert_called_once_with(
         mock.ANY, self.key, binhost)
+
+  def testSyncHostPrebuilts(self):
+    self._testSyncHostPrebuilts(chroot=None)
+
+  def testSyncHostPrebuiltsWithChroot(self):
+    self._testSyncHostPrebuilts('/test/chroot')
 
   def testSyncBoardPrebuilts(self):
     board = 'x86-foo'
@@ -422,6 +455,7 @@ class TestMain(cros_test_lib.MockTestCase):
     options.profile = None
     target = prebuilt.BuildTarget(options.board, options.profile)
     options.build_path = '/trunk'
+    options.chroot = None
     options.dryrun = False
     options.private = True
     options.packages = []
@@ -464,7 +498,7 @@ class TestMain(cros_test_lib.MockTestCase):
                                       options.build_path, options.packages,
                                       False, None, False,
                                       target, options.slave_targets,
-                                      mock.ANY)
+                                      mock.ANY, None)
     board_mock.assert_called_once_with(
         options.key, options.git_sync,
         options.sync_binhost_conf, options.upload_board_tarball, None,

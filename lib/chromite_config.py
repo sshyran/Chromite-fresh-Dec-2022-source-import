@@ -27,6 +27,8 @@ CHROME_SDK_BASHRC = DIR / 'chrome_sdk.bashrc'
 
 GERRIT_CONFIG = DIR / 'gerrit.cfg'
 
+AUTO_SET_GOV_CONFIG = DIR / 'autosetgov'
+
 
 def initialize():
   """Initialize the config dir for use.

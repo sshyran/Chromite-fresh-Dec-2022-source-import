@@ -192,7 +192,7 @@ def RunSwarmingCommandWithRetries(max_retry, *args, **kwargs):
   return retry_util.RetryCommand(RunSwarmingCommand, max_retry, *args, **kwargs)
 
 
-class SwarmingCommandResult(cros_build_lib.CommandResult):
+class SwarmingCommandResult(cros_build_lib.CompletedProcess):
   """An object to store result of a command that is run via swarming."""
 
   def __init__(self, task_summary_json, *args, **kwargs):
@@ -222,23 +222,23 @@ class SwarmingCommandResult(cros_build_lib.CommandResult):
 
   @staticmethod
   def CreateSwarmingCommandResult(task_summary_json_path, command_result):
-    """Create a SwarmingCommandResult object from a CommandResult object.
+    """Create a SwarmingCommandResult object from a CompletedProcess object.
 
     Args:
       task_summary_json_path: The path to a json file that contains
                               output of a swarming task.
-      command_result: A CommandResult object.
+      command_result: A CompletedProcess object.
 
     Returns:
       A SwarmingCommandResult object.
     """
     task_summary_json = SwarmingCommandResult.LoadJsonSummary(
         task_summary_json_path)
-    return  SwarmingCommandResult(task_summary_json=task_summary_json,
-                                  cmd=command_result.cmd,
-                                  error=command_result.error,
-                                  output=command_result.output,
-                                  returncode=command_result.returncode)
+    return SwarmingCommandResult(task_summary_json=task_summary_json,
+                                 args=command_result.cmd,
+                                 stderr=command_result.stderr,
+                                 stdout=command_result.stdout,
+                                 returncode=command_result.returncode)
 
   def HasValidSummary(self):
     """Check whether the result has valid summary json.

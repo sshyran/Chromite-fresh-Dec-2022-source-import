@@ -30,6 +30,7 @@ from chromite.cbuildbot import trybot_patch_pool
 from chromite.cbuildbot.stages import artifact_stages
 from chromite.cbuildbot.stages import generic_stages
 from chromite.lib import buildbucket_v2
+from chromite.lib import chromeos_version
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -45,13 +46,11 @@ from chromite.lib.parser import package_info
 
 
 BUILD_PACKAGES_PREBUILTS = '10774.0.0'
-BUILD_PACKAGES_WITH_DEBUG_SYMBOLS = '6302.0.0'
-CROS_RUN_UNITTESTS = '6773.0.0'
 BUILD_IMAGE_BUILDER_PATH = '8183.0.0'
 BUILD_IMAGE_ECLEAN_FLAG = '8318.0.0'
 ANDROID_BREAKPAD = '9667.0.0'
+PORTAGE_2_3_75_UPDATE = '12693.0.0'
 SETUP_BOARD_PORT_COMPLETE = '11802.0.0'
-USE_TOOLCHAINS_BOARDS = '6480.0.0'
 
 
 class InvalidWorkspace(failures_lib.StepFailure):
@@ -118,7 +117,7 @@ class WorkspaceStageBase(generic_stages.BuilderStage):
     Returns:
       manifest-version.VersionInfo object based on the workspace checkout.
     """
-    return manifest_version.VersionInfo.from_repo(self._build_root)
+    return chromeos_version.VersionInfo.from_repo(self._build_root)
 
   def AfterLimit(self, limit):
     """Is worksapce version newer than cutoff limit?
@@ -130,7 +129,7 @@ class WorkspaceStageBase(generic_stages.BuilderStage):
       bool: True if workspace has newer version than limit.
     """
     version_info = self.GetWorkspaceVersionInfo()
-    return version_info > manifest_version.VersionInfo(limit)
+    return version_info > chromeos_version.VersionInfo(limit)
 
   # Standardize manifest_versions paths for workspaces.
 
@@ -251,14 +250,16 @@ class WorkspaceSyncStage(WorkspaceStageBase):
     branch_pool = patch_pool.FilterFn(trybot_patch_pool.ChromiteFilter,
                                       negate=True)
 
+    infra_branch = self._run.manifest_branch
+
     SyncStage(
         self._run,
         self.buildstore,
         build_root=self._orig_root,
         external=True,
-        branch='master',
+        branch=infra_branch,
         patch_pool=infra_pool,
-        suffix=' [Infra]').Run()
+        suffix=' [Infra %s]' % infra_branch).Run()
 
     branch = self._run.config.workspace_branch
 
@@ -345,7 +346,7 @@ class WorkspacePublishBuildspecStage(WorkspaceStageBase):
     repo = self.GetWorkspaceRepo()
 
     # TODO: Add 'patch' support somehow,
-    if repo.branch == 'master':
+    if repo.branch in ('main', 'master'):
       incr_type = 'build'
     else:
       incr_type = 'branch'
@@ -384,31 +385,34 @@ class WorkspaceScheduleChildrenStage(WorkspaceStageBase):
       extra_args.append('--debug')
 
     for child_name in self._run.config.slave_configs:
-      request = request_build.RequestBuild(
+      raw_request = request_build.RequestBuild(
           build_config=child_name,
+          branch=self._run.manifest_branch,
           # See crbug.com/940969. These id's get children killed during
           # multiple quick builds.
           # master_cidb_id=build_id,
           # master_buildbucket_id=master_buildbucket_id,
           extra_args=extra_args,
-      ).CreateBuildRequest()
+      )
+      request = raw_request.CreateBuildRequest()
       buildbucket_client = buildbucket_v2.BuildbucketV2()
 
       if self._run.options.debug:
+        logging.info(
+            'Build_name %s request_branch %s', child_name, raw_request.branch)
         continue
       result = buildbucket_client.ScheduleBuild(
-        request_id=str(request['request_id']),
-        builder=request['builder'],
-        properties=request['properties'],
-        tags=request['tags'],
-        dimensions=request['dimensions'])
+          request_id=str(request['request_id']),
+          builder=request['builder'],
+          properties=request['properties'],
+          tags=request['tags'],
+          dimensions=request['dimensions'])
 
       logging.info(
           'Build_name %s buildbucket_id %s created_timestamp %s',
           child_name, result.id, result.create_time.ToJsonString())
-      cbuildbot_alerts.PrintBuildbotLink(child_name,
-                                '{}{}'.format(constants.CHROMEOS_MILO_HOST,
-                                              result.id))
+      cbuildbot_alerts.PrintBuildbotLink(
+          child_name, f'{constants.CHROMEOS_MILO_HOST}{result.id}')
 
 
 class WorkspaceInitSDKStage(WorkspaceStageBase):
@@ -440,15 +444,12 @@ class WorkspaceUpdateSDKStage(WorkspaceStageBase):
     """Do the work of updating the chroot."""
     usepkg_toolchain = (
         self._run.config.usepkg_toolchain and not self._latest_toolchain)
-    toolchain_boards = None
-    if self.AfterLimit(USE_TOOLCHAINS_BOARDS):
-      toolchain_boards = self._run.config.boards
 
     commands.UpdateChroot(
         self._build_root,
         usepkg=usepkg_toolchain,
         extra_env=self._portage_extra_env,
-        toolchain_boards=toolchain_boards,
+        toolchain_boards=self._run.config.boards,
         chroot_args=['--cache-dir', self._run.options.cache_dir])
 
 
@@ -484,13 +485,11 @@ class WorkspaceBuildPackagesStage(generic_stages.BoardSpecificBuilderStage,
     packages = self.GetListOfPackagesToBuild()
 
     cmd = ['./build_packages', '--board=%s' % self._current_board,
-           '--accept_licenses=@CHROMEOS', '--skip_chroot_upgrade']
+           '--accept_licenses=@CHROMEOS', '--skip_chroot_upgrade',
+           '--withdebugsymbols']
 
     if not self._run.options.tests:
       cmd.append('--nowithautotest')
-
-    if self.AfterLimit(BUILD_PACKAGES_WITH_DEBUG_SYMBOLS):
-      cmd.append('--withdebugsymbols')
 
     if not usepkg:
       cmd.extend(commands.LOCAL_BUILD_FLAGS)
@@ -522,16 +521,6 @@ class WorkspaceUnitTestStage(generic_stages.BoardSpecificBuilderStage,
   # minutes, so we picked 90 minutes because it gives us a little buffer time.
   UNIT_TEST_TIMEOUT = 90 * 60
 
-  def WaitUntilReady(self):
-    """Decide if we should run the unittest stage."""
-    # See crbug.com/937328.
-    if not self.AfterLimit(CROS_RUN_UNITTESTS):
-      cbuildbot_alerts.PrintBuildbotStepWarnings()
-      logging.warning('cros_run_unit_tests does not exist on this branch.')
-      return False
-
-    return True
-
   def PerformStage(self):
     extra_env = {}
     if self._run.config.useflags:
@@ -542,7 +531,7 @@ class WorkspaceUnitTestStage(generic_stages.BoardSpecificBuilderStage,
         commands.RunUnitTests(
             self._build_root,
             self._current_board,
-            blacklist=self._run.config.unittest_blacklist,
+            blocklist=self._run.config.unittests_disabled,
             build_stage=self._run.config.build_packages,
             chroot_args=ChrootArgs(self._run.options),
             extra_env=extra_env)
@@ -723,8 +712,10 @@ class WorkspaceDebugSymbolsStage(WorkspaceStageBase,
       String identifier for a package, or None
     """
     packages = portage_util.GetPackageDependencies(
-        self._current_board, 'virtual/target-os',
-        buildroot=self._build_root)
+        'virtual/target-os',
+        board=self._current_board,
+        buildroot=self._build_root,
+        set_empty_root=not self.AfterLimit(PORTAGE_2_3_75_UPDATE))
 
     android_packages = {p for p in packages
                         if p.startswith('chromeos-base/android-container-') or

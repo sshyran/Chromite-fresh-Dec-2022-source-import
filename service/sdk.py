@@ -14,6 +14,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_sdk_lib
 from chromite.lib import osutils
 
+
 if TYPE_CHECKING:
   from chromite.lib import chroot_lib
 
@@ -48,7 +49,8 @@ class CreateArguments(object):
                use_image: bool = True,
                chroot_path: Optional[str] = None,
                cache_dir: Optional[str] = None,
-               sdk_version: Optional[str] = None):
+               sdk_version: Optional[str] = None,
+               skip_chroot_upgrade: Optional[bool] = False):
     """Create arguments init.
 
     Args:
@@ -59,6 +61,8 @@ class CreateArguments(object):
       chroot_path: Path to where the chroot should be reside.
       cache_dir: Alternative directory to use as a cache for the chroot.
       sdk_version: Specific SDK version to use, e.g. 2022.01.20.073008.
+      skip_chroot_upgrade: Whether or not to skip any chroot upgrades (using
+        the --skip-chroot-upgrade arg to cros_sdk).
     """
     self.replace = replace
     self.bootstrap = bootstrap
@@ -66,6 +70,7 @@ class CreateArguments(object):
     self.chroot_path = chroot_path
     self.cache_dir = cache_dir
     self.sdk_version = sdk_version
+    self.skip_chroot_upgrade = skip_chroot_upgrade
 
   def GetArgList(self) -> List[str]:
     """Get the list of the corresponding command line arguments.
@@ -96,6 +101,9 @@ class CreateArguments(object):
 
     if self.sdk_version:
       args.extend(['--sdk-version', self.sdk_version])
+
+    if self.skip_chroot_upgrade:
+      args.append('--skip-chroot-upgrade')
 
     return args
 
@@ -417,3 +425,74 @@ def _EnsureSnapshottableState(chroot: Optional['chroot_lib.Chroot'] = None,
     return
   else:
     res.check_returncode()
+
+
+def BuildPrebuilts(chroot: 'chroot_lib.Chroot'):
+  """Builds the binary packages that comprise the Chromium OS SDK.
+
+  Args:
+    chroot: The chroot in which to run the build.
+  """
+  cros_build_lib.run(
+      ['./build_sdk_board'],
+      enter_chroot=True,
+      extra_env=chroot.env,
+      chroot_args=chroot.get_enter_args(),
+      check=True)
+
+
+def CreateBinhostCLs(prepend_version: str,
+                     version: str,
+                     upload_location: str) -> None:
+  """Create CLs that update the binhost to point at uploaded prebuilts.
+
+  The CLs are *not* automatically submitted.
+
+  Args:
+    prepend_version: String to prepend to version.
+    version: The SDK version string.
+    upload_location: prefix of the upload path (e.g. 'gs://bucket')
+  """
+  cros_build_lib.run(
+      [os.path.join(constants.CHROMITE_BIN_DIR,
+                    'upload_prebuilts'),
+       '--skip-upload',
+       '--dry-run',
+       '--sync-host',
+       '--git-sync',
+       '--key', 'FULL_BINHOST',
+       '--build-path', constants.SOURCE_ROOT,
+       '--board', 'amd64-host',
+       '--set-version', version,
+       '--prepend-version', prepend_version,
+       '--upload', upload_location,
+       '--binhost-conf-dir', constants.PUBLIC_BINHOST_CONF_DIR],
+      check=True)
+
+
+def UploadPrebuiltPackages(chroot: 'chroot_lib.Chroot',
+                           prepend_version: str,
+                           version: str,
+                           upload_location: str):
+  """Uploads prebuilt packages (such as built by BuildSdkPrebuilts).
+
+  Args:
+    chroot: The chroot that contains the packages to upload.
+    build_path: Location of the sources.
+    prepend_version: String to prepend to version.
+    version: The SDK version string.
+    upload_location: prefix of the upload path (e.g. 'gs://bucket')
+  """
+  cros_build_lib.run(
+      [os.path.join(constants.CHROMITE_BIN_DIR, 'upload_prebuilts'),
+       '--sync-host',
+       '--build-path', constants.SOURCE_ROOT,
+       '--chroot', chroot.path,
+       '--board', 'amd64-host',
+       '--set-version', version,
+       '--prepend-version', prepend_version,
+       '--upload', upload_location,
+       '--binhost-conf-dir',
+       os.path.join(constants.SOURCE_ROOT,
+                    'src/third_party/chromiumos-overlay/chromeos/binhost')],
+      check=True)

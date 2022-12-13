@@ -22,14 +22,15 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 
-def get_fw_loc(fw_loc):
+
+def get_fw_loc(fw_loc: int) -> str:
   """Get firmware_builder.py location.
 
   Args:
-    fw_loc (enum): FwLocation enum.
+    fw_loc: FwLocation enum.
 
   Returns:
-    (str): path to firmware_builder.py for valid fw_loc.
+    path to firmware_builder.py for valid fw_loc.
   """
   return {
       common_pb2.PLATFORM_EC: 'src/platform/ec/',
@@ -207,7 +208,8 @@ def BundleFirmwareArtifacts(input_proto, output_proto, _config):
 
     for typ, name in (
         (input_proto.artifacts.FIRMWARE_TARBALL, 'tarball_info'),
-        (input_proto.artifacts.FIRMWARE_LCOV, 'lcov_info')):
+        (input_proto.artifacts.FIRMWARE_LCOV, 'lcov_info'),
+        (input_proto.artifacts.CODE_COVERAGE_HTML, 'coverage_html')):
       file_paths = [
           full_path(x) for x in metadata.objects
           if x.WhichOneof('firmware_object_info') == name

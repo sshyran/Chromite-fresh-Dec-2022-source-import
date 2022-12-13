@@ -150,7 +150,7 @@ class ChromeSDKTest(cros_test_lib.RunCommandTempDirTestCase):
 
   def MockGetDefaultTarget(self):
     self.rc.AddCmdResult(partial_mock.In('qlist-%s' % self.BOARD),
-                         output='%s' % constants.CHROME_CP)
+                         stdout='%s' % constants.CHROME_CP)
 
   def testNinjaWithRunArgs(self):
     """Test that running ninja with run_args.
@@ -248,7 +248,7 @@ class SkylabHWLabCommandsTest(cros_test_lib.RunCommandTestCase):
     ]
 
     self.rc.AddCmdResult(
-        create_cmd, output=self._fakeCreateJson(task_id, 'foo://foo'))
+        create_cmd, stdout=self._fakeCreateJson(task_id, 'foo://foo'))
 
     result = commands.RunSkylabHWTestSuite(
         build, suite, board, pool=pool, extra_dims=extra_dims,
@@ -286,9 +286,9 @@ class SkylabHWLabCommandsTest(cros_test_lib.RunCommandTestCase):
         task_id
     ]
     self.rc.AddCmdResult(
-        create_cmd, output=self._fakeCreateJson(task_id, 'foo://foo'))
+        create_cmd, stdout=self._fakeCreateJson(task_id, 'foo://foo'))
     self.rc.AddCmdResult(
-        wait_cmd, output=self._fakeWaitJson('COMPLETED', False))
+        wait_cmd, stdout=self._fakeWaitJson('COMPLETED', False))
 
     result = commands.RunSkylabHWTestSuite(
         build, suite, board, pool=pool, timeout_mins=None,
@@ -324,8 +324,8 @@ class SkylabHWLabCommandsTest(cros_test_lib.RunCommandTestCase):
         task_id,
     ]
     self.rc.AddCmdResult(
-        create_cmd, output=self._fakeCreateJson(task_id, 'foo://foo'))
-    self.rc.AddCmdResult(wait_cmd, output=self._fakeWaitJson('COMPLETED', True))
+        create_cmd, stdout=self._fakeCreateJson(task_id, 'foo://foo'))
+    self.rc.AddCmdResult(wait_cmd, stdout=self._fakeWaitJson('COMPLETED', True))
 
     result = commands.RunSkylabHWTestSuite(
         build, suite, board, pool=pool, timeout_mins=None,
@@ -366,7 +366,7 @@ class SkylabHWLabCommandsTest(cros_test_lib.RunCommandTestCase):
     ]
 
     self.rc.AddCmdResult(
-        create_cmd, output=self._fakeCreateJson(task_id, 'foo://foo'))
+        create_cmd, stdout=self._fakeCreateJson(task_id, 'foo://foo'))
 
     result = commands.RunSkylabHWTestPlan(
         test_plan=test_plan, build=build, pool=pool,
@@ -509,9 +509,9 @@ The suite job has another 2:39:39.789250 till timeout.
     self.wait_cmd = base_cmd + ['-m', '26960110']
     self.json_dump_cmd = base_cmd + ['--json_dump', '-m', '26960110']
     create_results = iter([
-        cros_build_lib.CommandResult(returncode=create_return_code,
-                                     output=self.JOB_ID_OUTPUT,
-                                     error=''),
+        cros_build_lib.CompletedProcess(returncode=create_return_code,
+                                        stdout=self.JOB_ID_OUTPUT,
+                                        stderr=''),
     ])
     self.rc.AddCmdResult(
         self.create_cmd,
@@ -519,16 +519,16 @@ The suite job has another 2:39:39.789250 till timeout.
     )
     wait_results_list = []
     if wait_retry:
-      r = cros_build_lib.CommandResult(
+      r = cros_build_lib.CompletedProcess(
           returncode=self.internal_failure_exit_code,
-          output=self.WAIT_RETRY_OUTPUT,
-          error='')
+          stdout=self.WAIT_RETRY_OUTPUT,
+          stderr='')
       wait_results_list.append(r)
 
     wait_results_list.append(
-        cros_build_lib.CommandResult(
-            returncode=wait_return_code, output=self.WAIT_OUTPUT,
-            error='')
+        cros_build_lib.CompletedProcess(
+            returncode=wait_return_code, stdout=self.WAIT_OUTPUT,
+            stderr='')
     )
     wait_results = iter(wait_results_list)
 
@@ -540,9 +540,9 @@ The suite job has another 2:39:39.789250 till timeout.
     # Json dump will only run when wait_cmd fails
     if wait_return_code != 0:
       dump_json_results = iter([
-          cros_build_lib.CommandResult(returncode=dump_json_return_code,
-                                       output=self.JSON_OUTPUT,
-                                       error=''),
+          cros_build_lib.CompletedProcess(returncode=dump_json_return_code,
+                                          stdout=self.JSON_OUTPUT,
+                                          stderr=''),
       ])
       self.rc.AddCmdResult(
           self.json_dump_cmd,
@@ -643,7 +643,7 @@ The suite job has another 2:39:39.789250 till timeout.
   def testRunHWTestSuiteFailure(self):
     """Test RunHWTestSuite when ERROR is returned."""
     self.PatchJson([(self.JOB_ID_OUTPUT, False, None)])
-    self.rc.SetDefaultCmdResult(returncode=1, output=self.JOB_ID_OUTPUT)
+    self.rc.SetDefaultCmdResult(returncode=1, stdout=self.JOB_ID_OUTPUT)
     with self.OutputCapturer():
       cmd_result = self.RunHWTestSuite()
       self.assertIsInstance(cmd_result.to_raise, failures_lib.TestFailure)
@@ -651,7 +651,7 @@ The suite job has another 2:39:39.789250 till timeout.
   def testRunHWTestSuiteTimedOut(self):
     """Test RunHWTestSuite when SUITE_TIMEOUT is returned."""
     self.PatchJson([(self.JOB_ID_OUTPUT, False, None)])
-    self.rc.SetDefaultCmdResult(returncode=4, output=self.JOB_ID_OUTPUT)
+    self.rc.SetDefaultCmdResult(returncode=4, stdout=self.JOB_ID_OUTPUT)
     with self.OutputCapturer():
       cmd_result = self.RunHWTestSuite()
       self.assertIsInstance(cmd_result.to_raise, failures_lib.SuiteTimedOut)
@@ -659,7 +659,7 @@ The suite job has another 2:39:39.789250 till timeout.
   def testRunHWTestSuiteInfraFail(self):
     """Test RunHWTestSuite when INFRA_FAILURE is returned."""
     self.PatchJson([(self.JOB_ID_OUTPUT, False, None)])
-    self.rc.SetDefaultCmdResult(returncode=3, output=self.JOB_ID_OUTPUT)
+    self.rc.SetDefaultCmdResult(returncode=3, stdout=self.JOB_ID_OUTPUT)
     with self.OutputCapturer():
       cmd_result = self.RunHWTestSuite()
       self.assertIsInstance(cmd_result.to_raise, failures_lib.TestLabFailure)
@@ -674,9 +674,9 @@ The suite job has another 2:39:39.789250 till timeout.
     ])
 
     def fail_swarming_cmd(cmd, *_args, **_kwargs):
-      result = swarming_lib.SwarmingCommandResult(None, cmd=cmd,
-                                                  error='injected error',
-                                                  output='', returncode=3)
+      result = swarming_lib.SwarmingCommandResult(None, args=cmd,
+                                                  stderr='injected error',
+                                                  stdout='', returncode=3)
       raise cros_build_lib.RunCommandError('injected swarming failure',
                                            result, None)
 
@@ -693,7 +693,7 @@ The suite job has another 2:39:39.789250 till timeout.
   def testRunHWTestBoardNotAvailable(self):
     """Test RunHWTestSuite when BOARD_NOT_AVAILABLE is returned."""
     self.PatchJson([(self.JOB_ID_OUTPUT, False, None)])
-    self.rc.SetDefaultCmdResult(returncode=5, output=self.JOB_ID_OUTPUT)
+    self.rc.SetDefaultCmdResult(returncode=5, stdout=self.JOB_ID_OUTPUT)
     with self.OutputCapturer():
       cmd_result = self.RunHWTestSuite()
       self.assertIsInstance(cmd_result.to_raise, failures_lib.BoardNotAvailable)
@@ -701,7 +701,7 @@ The suite job has another 2:39:39.789250 till timeout.
   def testRunHWTestTestWarning(self):
     """Test RunHWTestSuite when WARNING is returned."""
     self.PatchJson([(self.JOB_ID_OUTPUT, False, None)])
-    self.rc.SetDefaultCmdResult(returncode=2, output=self.JOB_ID_OUTPUT)
+    self.rc.SetDefaultCmdResult(returncode=2, stdout=self.JOB_ID_OUTPUT)
     with self.OutputCapturer():
       cmd_result = self.RunHWTestSuite()
       self.assertIsInstance(cmd_result.to_raise, failures_lib.TestWarning)
@@ -710,7 +710,7 @@ The suite job has another 2:39:39.789250 till timeout.
     """Test RunHWTestSuite when no summary file is generated."""
     unknown_failure = 'Unknown failure'
     self.PatchJson(task_outputs=[])
-    self.rc.SetDefaultCmdResult(returncode=1, output=unknown_failure)
+    self.rc.SetDefaultCmdResult(returncode=1, stdout=unknown_failure)
     with self.OutputCapturer() as output:
       cmd_result = self.RunHWTestSuite()
       self.assertIsInstance(cmd_result.to_raise,
@@ -722,7 +722,7 @@ The suite job has another 2:39:39.789250 till timeout.
     unknown_failure = 'Unknown failure'
     self.PatchJson(
         task_outputs=[(self.JOB_ID_OUTPUT, True, self.swarming_code)])
-    self.rc.SetDefaultCmdResult(returncode=1, output=unknown_failure)
+    self.rc.SetDefaultCmdResult(returncode=1, stdout=unknown_failure)
     with self.OutputCapturer() as output:
       cmd_result = self.RunHWTestSuite()
       self.assertIsInstance(cmd_result.to_raise,
@@ -852,7 +852,7 @@ class CBuildBotTest(cros_test_lib.RunCommandTempDirTestCase):
     """Test case where binpkg is missing."""
     self.rc.AddCmdResult(
         partial_mock.ListRegex(r'emerge'),
-        output='\n[ebuild] %s' % constants.CHROME_CP)
+        stdout='\n[ebuild] %s' % constants.CHROME_CP)
     self.assertRaises(
         commands.MissingBinpkg, commands.VerifyBinpkg,
         self._buildroot, self._board, constants.CHROME_CP, packages=())
@@ -861,7 +861,7 @@ class CBuildBotTest(cros_test_lib.RunCommandTempDirTestCase):
     """Test case where binpkg is present."""
     self.rc.AddCmdResult(
         partial_mock.ListRegex(r'emerge'),
-        output='\n[binary] %s' % constants.CHROME_CP)
+        stdout='\n[binary] %s' % constants.CHROME_CP)
     commands.VerifyBinpkg(self._buildroot, self._board, constants.CHROME_CP,
                           packages=())
 
@@ -880,7 +880,7 @@ class CBuildBotTest(cros_test_lib.RunCommandTempDirTestCase):
     self.assertCommandContains(['./build_packages'])
 
   def testGetFirmwareVersions(self):
-    self.rc.SetDefaultCmdResult(output="""
+    self.rc.SetDefaultCmdResult(stdout="""
 
 flashrom(8): a8f99c2e61e7dc09c4b25ef5a76ef692 */build/kevin/usr/sbin/flashrom
              ELF 32-bit LSB executable, ARM, EABI5 version 1 (SYSV), statically linked, for GNU/Linux 2.d
@@ -917,7 +917,7 @@ c98ca54db130886142ad582a58e90ddc *./common.sh
 
   def testGetFirmwareVersionsMixedImage(self):
     """Verify that can extract the right version from a mixed RO+RW bundle."""
-    self.rc.SetDefaultCmdResult(output="""
+    self.rc.SetDefaultCmdResult(stdout="""
 
 flashrom(8): 29c9ec509aaa9c1f575cca883d90980c */build/caroline/usr/sbin/flashrom
              ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, for GNU/Linux 2.6.32, BuildID[sha1]=eb6af9bb9e14e380676ad9607760c54addec4a3a, stripped
@@ -969,7 +969,7 @@ ae8cf9fca3165a1c1f12decfd910c4fe *./vpd
 
   def testGetAllFirmwareVersions(self):
     """Verify that all model firmware versions can be extracted"""
-    self.rc.SetDefaultCmdResult(output="""
+    self.rc.SetDefaultCmdResult(stdout="""
 
 flashrom(8): 68935ee2fcfcffa47af81b966269cd2b */build/reef/usr/sbin/flashrom
              ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, for GNU/Linux 2.6.32, BuildID[sha1]=e102cc98d45300b50088999d53775acbeff407dc, stripped
@@ -1087,7 +1087,7 @@ fe5d699f2e9e4a7de031497953313dbd *./models/snappy/setvars.sh
             'reef_v1.1.5909-bd1f0c9'))
 
   def testGetModels(self):
-    self.rc.SetDefaultCmdResult(output='pyro\nreef\nsnappy\n')
+    self.rc.SetDefaultCmdResult(stdout='pyro\nreef\nsnappy\n')
     build_bin = os.path.join(self._buildroot, constants.DEFAULT_CHROOT_DIR,
                              'usr', 'bin')
     osutils.Touch(os.path.join(build_bin, 'cros_config_host'), makedirs=True)
@@ -1155,8 +1155,8 @@ fe5d699f2e9e4a7de031497953313dbd *./models/snappy/setvars.sh
   def testExportToGCloudParentKey(self):
     """Test ExportToGCloud with parent_key"""
     build_root = '/buildroot'
-    creds_file = 'dummy.cert'
-    json_file = 'dummy.json'
+    creds_file = 'stub.cert'
+    json_file = 'stub.json'
     parent_key = ('MyParent', 42)
     parent_key_str = repr(parent_key)
     commands.ExportToGCloud(build_root, creds_file, json_file,
@@ -1440,6 +1440,8 @@ class BuildTarballTests(cros_test_lib.RunCommandTempDirTestCase):
 class UnmockedTests(cros_test_lib.TempDirTestCase):
   """Test cases which really run tests, instead of using mocks."""
 
+  _TEST_BOARD = 'board'
+
   def testBuildFirmwareArchive(self):
     """Verifies that the archiver creates a tarfile with the expected files."""
     # Set of files to tar up
@@ -1483,15 +1485,13 @@ class UnmockedTests(cros_test_lib.TempDirTestCase):
         'bloonchipper/test_rsa.bin',
         'dartmonkey/test_utils.bin',
     )
-    board = 'hatch'
     unittest_files_root = os.path.join(
         self.tempdir,
-        'chroot/build/%s/firmware/chromeos-fpmcu-unittests' % board)
+        f'chroot/build/{self._TEST_BOARD}/firmware/chromeos-fpmcu-unittests')
     cros_test_lib.CreateOnDiskHierarchy(unittest_files_root, unittest_files)
 
-    returned_archive_name = commands.BuildFpmcuUnittestsArchive(self.tempdir,
-                                                                board,
-                                                                self.tempdir)
+    returned_archive_name = commands.BuildFpmcuUnittestsArchive(
+        self.tempdir, self._TEST_BOARD, self.tempdir)
     self.assertEqual(
         returned_archive_name,
         os.path.join(self.tempdir, constants.FPMCU_UNITTESTS_ARCHIVE_NAME))
@@ -1703,7 +1703,8 @@ class UnmockedTests(cros_test_lib.TempDirTestCase):
     # GCE expects the tarball to be in a particular format.
     cros_test_lib.VerifyTarball(output_path, ['disk.raw'])
 
-  def testBuildEbuildLogsTarballPositive(self):
+  @mock.patch('chromite.lib.cros_build_lib.IsInsideChroot', return_value=False)
+  def testBuildEbuildLogsTarballPositive(self, _):
     """Verifies that the ebuild logs archiver builds correct logs"""
     # Names of log files typically found in a build directory.
     log_files = (
@@ -1720,15 +1721,15 @@ class UnmockedTests(cros_test_lib.TempDirTestCase):
         'x11-proto:xproto-7.0.31:20170816-174849.log',
     )
     tarred_files = [os.path.join('logs', x) for x in log_files]
-    board = 'hatch'
-    log_files_root = os.path.join(self.tempdir,
-                                  'chroot/build/%s/tmp/portage/logs' % board)
+    log_files_root = os.path.join(
+        self.tempdir, f'chroot/build/{self._TEST_BOARD}/tmp/portage/logs')
     # Generate a representative set of log files produced by a typical build.
     cros_test_lib.CreateOnDiskHierarchy(log_files_root, log_files)
     # Create an archive from the simulated logs directory
-    tarball = os.path.join(self.tempdir,
-                           commands.BuildEbuildLogsTarball(self.tempdir, board,
-                                                           self.tempdir))
+    tarball = os.path.join(
+        self.tempdir,
+        commands.BuildEbuildLogsTarball(self.tempdir, self._TEST_BOARD,
+                                        self.tempdir))
     # Verify the tarball contents.
     cros_test_lib.VerifyTarball(tarball, tarred_files)
 
@@ -1749,21 +1750,21 @@ class UnmockedTests(cros_test_lib.TempDirTestCase):
         'x11-proto:xproto-7.0.31:20170816-174849.log',
     )
 
-    board = 'hatch'
     # Create a malformed directory name.
-    log_files_root = os.path.join(self.tempdir,
-                                  '%s/tmp/portage/wrong_dir_name' % board)
+    log_files_root = os.path.join(
+        self.tempdir, f'{self._TEST_BOARD}/tmp/portage/wrong_dir_name')
     # Generate a representative set of log files produced by a typical build.
     cros_test_lib.CreateOnDiskHierarchy(log_files_root, log_files)
 
     # Create an archive from the simulated logs directory
-    wrong_board = 'chell'
+    wrong_board = 'wrongboard'
     tarball_rel_path = commands.BuildEbuildLogsTarball(self.tempdir,
                                                        wrong_board,
                                                        self.tempdir)
     self.assertEqual(tarball_rel_path, None)
     tarball_rel_path = commands.BuildEbuildLogsTarball(self.tempdir,
-                                                       board, self.tempdir)
+                                                       self._TEST_BOARD,
+                                                       self.tempdir)
     self.assertEqual(tarball_rel_path, None)
 
 
@@ -1818,7 +1819,7 @@ class GenerateAFDOArtifactsTests(
                      return_value=self.tempdir)
     input_proto_file = os.path.join(self.tempdir, 'input.json')
     output_proto_file = os.path.join(self.tempdir, 'output.json')
-    # Write dummy outputs to output JSON file
+    # Write stub outputs to output JSON file
     with open(output_proto_file, 'w') as f:
       output_proto = {
           'artifacts': [
@@ -1881,7 +1882,7 @@ class VerifyAFDOArtifactsTests(
                      return_value=self.tempdir)
     input_proto_file = os.path.join(self.tempdir, 'input.json')
     output_proto_file = os.path.join(self.tempdir, 'output.json')
-    # Write dummy outputs to output JSON file
+    # Write stub outputs to output JSON file
     with open(output_proto_file, 'w') as f:
       output_proto = {
           'status': True

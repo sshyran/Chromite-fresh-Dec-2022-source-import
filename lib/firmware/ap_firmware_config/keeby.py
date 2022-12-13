@@ -6,6 +6,7 @@
 
 from chromite.lib.firmware import servo_lib
 
+
 _COMMON_PACKAGES = (
     'chromeos-ec',
     'coreboot',

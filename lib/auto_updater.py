@@ -322,11 +322,11 @@ class ChromiumOSUpdater(BaseUpdater):
     result = device.run([cls.REMOTE_UPDATE_ENGINE_BIN_FILENAME, '--status'],
                         capture_output=True, log_output=True)
 
-    if not result.output:
+    if not result.stdout:
       raise Exception('Cannot get update status')
 
     try:
-      status = key_value_store.LoadData(result.output)
+      status = key_value_store.LoadData(result.stdout)
     except ValueError:
       raise ValueError('Cannot parse update status')
 
@@ -357,7 +357,8 @@ class ChromiumOSUpdater(BaseUpdater):
       if 'start/running' in result:
         logging.info('update engine was not running, so we started it.')
     except cros_build_lib.RunCommandError as e:
-      if e.result.returncode != 1 or 'is already running' not in e.result.error:
+      if (e.result.returncode != 1 or
+          'is already running' not in e.result.stderr):
         raise e
 
   def SetupRootfsUpdate(self):
@@ -387,7 +388,7 @@ class ChromiumOSUpdater(BaseUpdater):
     """Get python sys.path of the given |device|."""
     sys_path = self.device.run(
         ['python', '-c', '"import json, sys; json.dump(sys.path, sys.stdout)"'],
-        capture_output=True, log_output=True).output
+        capture_output=True, log_output=True).stdout
     return json.loads(sys_path)
 
   def _FindDevicePythonPackagesDir(self):
@@ -684,7 +685,7 @@ class ChromiumOSUpdater(BaseUpdater):
     """Return numeric cgpt value for the specified flag, kernel, device."""
     cmd = ['cgpt', 'show', '-n', '-i', '%d' % kernel['kernel'], flag, dev]
     return int(self._RetryCommand(
-        cmd, capture_output=True, log_output=True).output.strip())
+        cmd, capture_output=True, log_output=True).stdout.strip())
 
   def _GetKernelPriority(self, kernel):
     """Return numeric priority for the specified kernel.
@@ -725,7 +726,7 @@ class ChromiumOSUpdater(BaseUpdater):
     """Get release version of the device."""
     lsb_release_content = self._RetryCommand(
         ['cat', '/etc/lsb-release'],
-        capture_output=True, log_output=True).output.strip()
+        capture_output=True, log_output=True).stdout.strip()
     regex = r'^CHROMEOS_RELEASE_VERSION=(.+)$'
     return auto_update_util.GetChromeosBuildInfo(
         lsb_release_content=lsb_release_content, regex=regex)
@@ -734,7 +735,7 @@ class ChromiumOSUpdater(BaseUpdater):
     """Get release version of the device."""
     lsb_release_content = self._RetryCommand(
         ['cat', '/etc/lsb-release'],
-        capture_output=True, log_output=True).output.strip()
+        capture_output=True, log_output=True).stdout.strip()
     regex = r'^CHROMEOS_RELEASE_BUILDER_PATH=(.+)$'
     return auto_update_util.GetChromeosBuildInfo(
         lsb_release_content=lsb_release_content, regex=regex)
@@ -793,7 +794,7 @@ class ChromiumOSUpdater(BaseUpdater):
     except timeout_util.TimeoutError:
       services_status = self.device.run(
           ['status', 'system-services'], capture_output=True,
-          log_output=True).output
+          log_output=True).stdout
       logging.debug('System services_status: %r', services_status)
       if services_status != 'system-services start/running\n':
         event = ('Chrome failed to reach login screen')

@@ -14,6 +14,7 @@ from chromite.cbuildbot import builders
 from chromite.cbuildbot.builders import generic_builders
 from chromite.config import chromeos_config
 from chromite.config import chromeos_test_config as chromeos_test
+from chromite.format import formatters
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -54,7 +55,13 @@ class ConfigDumpTest(ChromeosConfigTestBase):
     cmd = os.path.join(constants.CHROMITE_BIN_DIR, 'cros_show_waterfall_layout')
     result = cros_build_lib.run([cmd], capture_output=True, encoding='utf-8')
 
-    new_dump = result.output
+    # Capturing cros_show_waterfall_layout gives 2 newlines at the end, but
+    # cros format wants 1, which refresh_generated_files uses to prevent
+    # presubmit hook errors, so format the data.
+    new_dump_raw = result.stdout
+    new_dump = formatters.whitespace.Data(new_dump_raw)
+    # Quick verification of above comment.
+    self.assertEqual(new_dump_raw.strip(), new_dump.strip())
     old_dump = osutils.ReadFile(constants.WATERFALL_CONFIG_FILE)
 
     if new_dump != old_dump:
@@ -66,7 +73,7 @@ class ConfigDumpTest(ChromeosConfigTestBase):
     cmd = os.path.join(constants.CHROMITE_DIR, 'scripts', 'gen_luci_scheduler')
     result = cros_build_lib.run([cmd], capture_output=True, encoding='utf-8')
 
-    new_dump = result.output
+    new_dump = result.stdout
     old_dump = osutils.ReadFile(constants.LUCI_SCHEDULER_CONFIG_FILE)
 
     if new_dump != old_dump:
@@ -478,19 +485,6 @@ class CBuildBotTest(ChromeosConfigTestBase):
               vm_test.test_suite is not None,
               'Config %s: has unexpected vm test suite value.' % build_name)
 
-  def testValidGCETestType(self):
-    """Verify gce_tests has an expected value"""
-    for build_name, config in self.site_config.items():
-      if config['gce_tests'] is None:
-        continue
-      for gce_test in config['gce_tests']:
-        self.assertTrue(
-            gce_test.test_type == constants.GCE_SUITE_TEST_TYPE,
-            'Config %s: has unexpected gce test type value.' % build_name)
-        self.assertTrue(
-            gce_test.test_suite in constants.VALID_GCE_TEST_SUITES,
-            'Config %s: has unexpected gce test suite value.' % build_name)
-
   def testImageTestMustHaveBaseImage(self):
     """Verify image_test build is only enabled with 'base' in images."""
     for build_name, config in self.site_config.items():
@@ -648,7 +642,7 @@ class CBuildBotTest(ChromeosConfigTestBase):
           self.assertEqual(config['overlays'], constants.PUBLIC_OVERLAYS, error)
 
   def testGetSlaves(self):
-    """Make sure every master has a sane list of slaves"""
+    """Make sure every master has a valid list of slaves"""
     for build_name, config in self.site_config.items():
       if config.master:
         configs = self.site_config.GetSlavesForMaster(config)
@@ -665,7 +659,7 @@ class CBuildBotTest(ChromeosConfigTestBase):
     return [self.site_config[n] for n in master_config.slave_configs]
 
   def testGetSlavesOnTrybot(self):
-    """Make sure every master has a sane list of slaves"""
+    """Make sure every master has a valid list of slaves"""
     mock_options = mock.Mock()
     mock_options.remote_trybot = True
     for _, config in self.site_config.items():
@@ -697,7 +691,7 @@ class CBuildBotTest(ChromeosConfigTestBase):
     Ensure now new users are created. See crbug.com/691810.
     """
     for build_name, config in self.site_config.items():
-      # These group builders are whitelisted, for now.
+      # These group builders are allowlisted, for now.
       if not (build_name in ('test-ap-group',
                              'test-ap-group-tryjob',
                              'mixed-wificell-pre-cq') or
@@ -931,14 +925,14 @@ class CBuildBotTest(ChromeosConfigTestBase):
     for build_name, config in self.site_config.items():
       if config.build_type != constants.CANARY_TYPE:
         continue
-      expected = 12 * 60 * 60
+      expected = 18 * 60 * 60
 
       self.assertEqual(
           config.build_timeout, expected,
           msg % (build_name, config.build_timeout, expected))
 
   def testBuildTimeouts(self):
-    """Verify that timeout values are sane."""
+    """Verify that timeout values are sensible."""
     for build_name, config in self.site_config.items():
       # Chrome infra has a hard limit of 24h.
       self.assertLessEqual(
@@ -1048,9 +1042,6 @@ class BoardConfigsTest(ChromeosConfigTestBase):
       self.assertFalse(
           'vm_tests_override' in template and template.vm_tests_override,
           'Per-board template for %s defining vm_tests_override' % board)
-      self.assertFalse(
-          'gce_tests' in template and template.gce_tests,
-          'Per-board template for %s defining gce_tests' % board)
       self.assertFalse(
           'hw_tests' in template and template.hw_tests,
           'Per-board template for %s defining hw_tests' % board)

@@ -38,7 +38,17 @@ import subprocess
 import sys
 import tempfile
 import traceback
-from typing import Any, Dict, Iterable, List, NamedTuple, Optional, Set, Tuple, Union
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    List,
+    NamedTuple,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+)
 
 import yaml  # pylint: disable=import-error
 
@@ -352,11 +362,13 @@ Clang-tidy apparently crashed; dumping lots of invocation info:
 """)
 
     yaml_file = json_file.with_suffix('.yaml')
-    # If this happened, clang-tidy was probably killed. Dump output as part of
-    # the exception so it's easier to reason about what happened.
+    # If there is no yaml file, clang-tidy was either killed or found no lints.
     if not yaml_file.exists():
-      raise RuntimeError("clang-tidy didn't produce an output file for "
-                         f'{json_file}. Output:\n{meta.stdstreams}')
+      if meta.exit_code:
+        raise RuntimeError("clang-tidy didn't produce an output file for "
+                           f'{json_file}. Output:\n{meta.stdstreams}')
+      else:
+        return meta, []
 
     with yaml_file.open('rb') as f:
       yaml_data = yaml.safe_load(f)

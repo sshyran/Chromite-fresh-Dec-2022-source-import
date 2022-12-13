@@ -9,9 +9,11 @@ import contextlib
 import io
 import logging
 import os
+from pathlib import Path
 import re
 import sys
 import time
+from typing import List, Union
 import unittest
 from unittest import mock
 
@@ -97,7 +99,10 @@ def CreateOnDiskHierarchy(base_path, dir_struct):
       osutils.Touch(f, makedirs=True)
 
 
-def _VerifyDirectoryIterables(existing, expected):
+def _VerifyDirectoryIterables(
+    existing: List[Union[str, os.PathLike]],
+    expected: List[Union[str, os.PathLike]],
+) -> None:
   """Compare two iterables representing contents of a directory.
 
   Paths in |existing| and |expected| will be compared for exact match.
@@ -113,8 +118,8 @@ def _VerifyDirectoryIterables(existing, expected):
   def FormatPaths(paths):
     return '\n'.join(sorted(paths))
 
-  existing = set(existing)
-  expected = set(expected)
+  existing = set(str(x) for x in existing)
+  expected = set(str(x) for x in expected)
 
   unexpected = existing - expected
   if unexpected:
@@ -137,8 +142,11 @@ def VerifyOnDiskHierarchy(base_path, dir_struct):
     AssertionError when there is any divergence between the on-disk
     structure and the structure specified by 'dir_struct'.
   """
+  # Make sure the arg ends with a / if it's a dir to more reliably assert.
+  existing = [str(x) + '/' if x.is_dir() else str(x)
+              for x in osutils.DirectoryIterator(base_path)]
   expected = _FlattenStructure(base_path, dir_struct)
-  _VerifyDirectoryIterables(osutils.DirectoryIterator(base_path), expected)
+  _VerifyDirectoryIterables(existing, expected)
 
 
 def VerifyTarball(tarball, dir_struct):
@@ -484,7 +492,7 @@ class LoggingCapturer(object):
 class TestCase(unittest.TestCase, metaclass=StackedSetup):
   """Basic chromite test case.
 
-  Provides sane setUp/tearDown logic so that tearDown is correctly cleaned up.
+  Provides setUp/tearDown logic so that tearDown is correctly cleaned up.
 
   Takes care of saving/restoring process-wide settings like the environment so
   that sub-tests don't have to worry about gettings this right.
@@ -513,9 +521,9 @@ class TestCase(unittest.TestCase, metaclass=StackedSetup):
     # cause errors in tests that expect their own setUp to run before their own
     # tearDown executes.  By failing in the core funcs, we violate that.
     st = os.stat('/')
-    if st.st_mode & 0o7777 != 0o755:
+    if st.st_mode & 0o007 != 0o005:
       print('%s %s\nError: The root directory has broken permissions: %o\n'
-            'Fix with: sudo chmod 755 /' % (sys.argv[0], msg, st.st_mode),
+            'Fix with: sudo chmod o+rx-w /' % (sys.argv[0], msg, st.st_mode),
             file=sys.stderr)
       sys.exit(1)
     if st.st_uid or st.st_gid:
@@ -1023,7 +1031,7 @@ class TempDirTestCase(TestCase):
   def setUp(self):
     self._tempdir_obj = osutils.TempDir(prefix='chromite.test', set_global=True,
                                         delete=self.DELETE)
-    self.tempdir = self._tempdir_obj.tempdir
+    self.tempdir = Path(self._tempdir_obj.tempdir)
     # We must use addCleanup here so that inheriting TestCase classes can use
     # addCleanup with the guarantee that the tempdir will be cleand up _after_
     # their addCleanup has run. TearDown runs before cleanup functions.
@@ -1479,8 +1487,8 @@ class PopenMock(partial_mock.PartialCmdMock):
     # to use the same encoding with the mocks.
     def _MaybeEncode(src):
       return src.encode('utf-8') if isinstance(src, str) else src
-    osutils.WriteFile(stdout, _MaybeEncode(result.output), mode='wb')
-    osutils.WriteFile(stderr, _MaybeEncode(result.error), mode='wb')
+    osutils.WriteFile(stdout, _MaybeEncode(result.stdout), mode='wb')
+    osutils.WriteFile(stderr, _MaybeEncode(result.stderr), mode='wb')
     osutils.WriteFile(
         script,
         ['#!/bin/bash\n', 'cat %s\n' % stdout, 'cat %s >&2\n' % stderr,
@@ -1506,13 +1514,16 @@ class RunCommandMock(partial_mock.PartialCmdMock):
     return self._called
 
   def run(self, cmd, *args, **kwargs):
+    if isinstance(cmd, (tuple, list)):
+      cmd = list(str(x) if isinstance(x, os.PathLike) else x
+                 for x in cmd)
     self._called = True
     result = self._results['run'].LookupResult(
         (cmd,), kwargs=kwargs, hook_args=(cmd,) + args, hook_kwargs=kwargs)
 
     popen_mock = PopenMock()
     popen_mock.AddCmdResult(partial_mock.Ignore(), result.returncode,
-                            result.output, result.error)
+                            stdout=result.stdout, stderr=result.stderr)
     with popen_mock:
       return self.backup['run'](cmd, *args, **kwargs)
 

@@ -351,8 +351,7 @@ class MasterSlaveSyncCompletionStage(ManifestVersionedSyncCompletionStage):
             if cancel_reason:
               text += ' [cancelation_reason] %s' % cancel_reason
 
-          dashboard_url = '{}{}'.format(constants.CHROMEOS_MILO_HOST,
-                                        build.id)
+          dashboard_url = constants.CHROMEOS_MILO_HOST + build.id
           if dashboard_url:
             cbuildbot_alerts.PrintBuildbotLink(text, dashboard_url)
           else:
@@ -747,5 +746,3 @@ class PublishUprevChangesStage(generic_stages.BuilderStage):
         self._build_root,
         overlay_type=self._run.config.push_overlays,
         dryrun=self._run.options.debug)
-    if config_lib.IsMasterAndroidPFQ(self._run.config) and self.success:
-      self._run.attrs.metadata.UpdateWithDict({'UprevvedAndroid': True})

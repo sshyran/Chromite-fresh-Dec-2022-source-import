@@ -26,20 +26,6 @@ vmtest_boards = frozenset([
 ])
 
 
-def getInfoVMTest():
-  suites = [
-      'vmtest-informational4'
-  ]
-  ret = []
-  for suite in suites:
-    ret.append(config_lib.VMTestConfig(
-        constants.VM_SUITE_TEST_TYPE,
-        test_suite=suite,
-        warn_only=True,
-        timeout=12 * 60 * 60))
-  return ret
-
-
 class HWTestList(object):
   """Container for methods to generate HWTest lists."""
 
@@ -415,9 +401,7 @@ def GeneralTemplates(site_config, ge_build_config):
       'no_vmtest_builder',
       vm_tests=[],
       vm_tests_override=None,
-      gce_tests=[],
       tast_vm_tests=[],
-      moblab_vm_tests=[],
   )
 
   site_config.AddTemplate(
@@ -517,24 +501,11 @@ def GeneralTemplates(site_config, ge_build_config):
   )
   # END Termina
 
-  # BEGIN Unittest Stress
-  site_config.templates.unittest_stress.apply(
-      site_config.templates.no_vmtest_builder,
-      site_config.templates.no_hwtest_builder,
-  )
-  # END Unittest Stress
-
   # BEGIN Ubsan
   site_config.templates.ubsan.apply(
       site_config.templates.default_hw_tests_override,
   )
   # END Ubsan
-
-  # BEGIN x30evb
-  site_config.templates.x30evb.apply(
-      site_config.templates.no_hwtest_builder,
-  )
-  # END x30evb
 
 
 def ApplyConfig(site_config, boards_dict, ge_build_config):

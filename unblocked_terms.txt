@@ -4,12 +4,7 @@
 #
 # See repohooks/README.md for more details.
 
-black.?list
-dummy
-\bhe\b
-\bhis\b
 master
-\bnative
 \b(in)?sane(\b|\d)
 sanity
 slave

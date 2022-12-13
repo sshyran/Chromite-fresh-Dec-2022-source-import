@@ -29,13 +29,13 @@ class TestGitMetricCollector(cros_test_lib.TestCase):
 
   def test_collect(self):
     with mock.patch.object(git_metrics, '_GitRepo', autospec=True) as _GitRepo:
-      instance = _GitRepo('dummy')
+      instance = _GitRepo('stub')
       instance.get_commit_hash.return_value = (
           '2b1ce059425edc91e013c260e59019195f927a07')
       instance.get_commit_time.return_value = 1483257600
       instance.get_unstaged_changes.return_value = (0, 3)
 
-      collector = git_metrics._GitMetricCollector('~/solciel', 'dummy')
+      collector = git_metrics._GitMetricCollector('~/solciel', 'stub')
       collector.collect()
 
     setter = self.store.set
@@ -62,11 +62,11 @@ class TestGitRepoWithTempdir(cros_test_lib.TempDirTestCase):
   def setUp(self):
     self.git_dir = os.path.join(self.tempdir, '.git')
 
-    devnull = open(os.devnull, 'w')
-    self.addCleanup(devnull.close)
-
     def call(args, **kwargs):
-      subprocess.check_call(args, stdout=devnull, stderr=devnull, **kwargs)
+      subprocess.check_call(args,
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL,
+                            **kwargs)
 
     with osutils.ChdirContext(self.tempdir):
       call(['git', 'init'])

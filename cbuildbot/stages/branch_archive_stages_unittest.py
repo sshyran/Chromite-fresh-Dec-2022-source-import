@@ -9,11 +9,11 @@ import shutil
 from unittest import mock
 
 from chromite.cbuildbot import commands
-from chromite.cbuildbot import manifest_version
 from chromite.cbuildbot.builders import workspace_builders_unittest
 from chromite.cbuildbot.stages import branch_archive_stages
 from chromite.cbuildbot.stages import generic_stages
 from chromite.cbuildbot.stages import workspace_stages_unittest
+from chromite.lib import chromeos_version
 from chromite.lib import cros_build_lib
 from chromite.lib import gs
 from chromite.lib import gs_unittest
@@ -73,9 +73,15 @@ class FactoryArchiveStageTest(BranchArchiveStageTestBase):
         return_value='/factory.zip')
     self.create_tar_mock = self.PatchObject(
         cros_build_lib, 'CreateTarball')
+    self.build_autotest_mock = self.PatchObject(
+        commands, 'BuildAutotestTarballsForHWTest',
+        return_value=[])
+    self.build_tast_mock = self.PatchObject(
+        commands, 'BuildTastBundleTarball',
+        return_value=None)
 
   def ConstructStage(self):
-    self._run.attrs.version_info = manifest_version.VersionInfo(
+    self._run.attrs.version_info = chromeos_version.VersionInfo(
         '10.0.0', chrome_branch='10')
     self._run.attrs.release_tag = 'infra-tag'
 
@@ -91,11 +97,11 @@ class FactoryArchiveStageTest(BranchArchiveStageTestBase):
     self.RunStage()
 
     # Validate properties.
-    self.assertEqual(self.stage.dummy_config,
+    self.assertEqual(self.stage.branch_config,
                      'board-factory')
-    self.assertEqual(self.stage.dummy_version,
+    self.assertEqual(self.stage.branch_version,
                      'R1-1.2.3')
-    self.assertEqual(self.stage.dummy_archive_url,
+    self.assertEqual(self.stage.branch_archive_url,
                      'gs://chromeos-image-archive/board-factory/R1-1.2.3')
 
     self.assertEqual(self.build_image_mock.call_args_list, [
@@ -127,7 +133,7 @@ class FactoryArchiveStageTest(BranchArchiveStageTestBase):
         mock.call(
             '/tempdir/chromiumos_test_image.tar.xz',
             inputs=['chromiumos_test_image.bin'],
-            compression=1,
+            compression=cros_build_lib.COMP_XZ,
             cwd=os.path.join(self.workspace,
                              'src/build/images/board/latest')),
     ])
@@ -193,6 +199,20 @@ class FactoryArchiveStageTest(BranchArchiveStageTestBase):
             board='board'),
     ])
 
+    self.assertEqual(self.build_autotest_mock.call_args_list, [
+        mock.call(
+            self.workspace,
+            os.path.join(self.workspace, 'chroot/build/board/usr/local/build'),
+            '/tempdir'),
+    ])
+
+    self.assertEqual(self.build_tast_mock.call_args_list, [
+        mock.call(
+            self.workspace,
+            os.path.join(self.workspace, 'chroot/build/board/build'),
+            '/tempdir'),
+    ])
+
   def testDebug(self):
     """Tests sync command used by default."""
     self._Prepare(
@@ -203,11 +223,11 @@ class FactoryArchiveStageTest(BranchArchiveStageTestBase):
     self.RunStage()
 
     # Validate properties.
-    self.assertEqual(self.stage.dummy_config,
+    self.assertEqual(self.stage.branch_config,
                      'board-factory-tryjob')
-    self.assertEqual(self.stage.dummy_version,
+    self.assertEqual(self.stage.branch_version,
                      'R1-1.2.3-bNone')
-    self.assertEqual(self.stage.dummy_archive_url,
+    self.assertEqual(self.stage.branch_archive_url,
                      'gs://chromeos-image-archive/board-factory-tryjob/'
                      'R1-1.2.3-bNone')
 
@@ -240,7 +260,7 @@ class FactoryArchiveStageTest(BranchArchiveStageTestBase):
         mock.call(
             '/tempdir/chromiumos_test_image.tar.xz',
             inputs=['chromiumos_test_image.bin'],
-            compression=1,
+            compression=cros_build_lib.COMP_XZ,
             cwd=os.path.join(self.workspace,
                              'src/build/images/board/latest')),
     ])
@@ -305,4 +325,18 @@ class FactoryArchiveStageTest(BranchArchiveStageTestBase):
             archive_url=('gs://chromeos-image-archive/'
                          'board-factory-tryjob/R1-1.2.3-bNone'),
             board='board'),
+    ])
+
+    self.assertEqual(self.build_autotest_mock.call_args_list, [
+        mock.call(
+            self.workspace,
+            os.path.join(self.workspace, 'chroot/build/board/usr/local/build'),
+            '/tempdir'),
+    ])
+
+    self.assertEqual(self.build_tast_mock.call_args_list, [
+        mock.call(
+            self.workspace,
+            os.path.join(self.workspace, 'chroot/build/board/build'),
+            '/tempdir'),
     ])

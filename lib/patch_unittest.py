@@ -271,7 +271,7 @@ I am the first commit.
     if cwd is None:
       cwd = self.default_cwd
 
-    return cros_build_lib.run(cmd, cwd=cwd, **kwargs).output.strip()
+    return cros_build_lib.run(cmd, cwd=cwd, **kwargs).stdout.strip()
 
   def _GetSha1(self, cwd, refspec):
     return self._run(['git', 'rev-list', '-n1', refspec], cwd=cwd)
@@ -805,9 +805,9 @@ class TestApplyAgainstManifest(GitRepoPatchTestCase,
   def testApplyAgainstManifest(self):
     git1, git2, _ = self._CommonGitSetup()
 
-    readme_text = 'Dummy README text.'
+    readme_text = 'Stub README text.'
     readme1 = self.CommitFile(git1, 'README', readme_text)
-    readme_text += ' Even more dummy README text.'
+    readme_text += ' Even more stub README text.'
     readme2 = self.CommitFile(git1, 'README', readme_text)
     readme_text += ' Even more README text.'
     readme3 = self.CommitFile(git1, 'README', readme_text)
@@ -1195,7 +1195,7 @@ class PrepareLocalPatchesTests(cros_test_lib.RunCommandTestCase):
   def PrepareLocalPatches(self, output):
     """Check the returned GitRepoPatchInfo against golden values."""
     output_obj = mock.MagicMock()
-    output_obj.output = output
+    output_obj.stdout = output
     self.PatchObject(cros_patch.LocalPatch, 'Fetch', return_value=output_obj)
     self.PatchObject(git, 'RunGit', return_value=output_obj)
     patch_info = cros_patch.PrepareLocalPatches(self.manifest, self.patches)[0]

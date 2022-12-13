@@ -12,6 +12,7 @@ import sys
 
 from chromite.lib import metrics
 
+
 _os_name_metric = metrics.StringMetric(
     'proc/os/name',
     description='OS name on the machine')

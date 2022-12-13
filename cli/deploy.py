@@ -291,12 +291,12 @@ print(json.dumps(pkg_info))
           # Make the first available choice the default, for use in case that
           # no option is installed.
           if (not default_deps and avail_db is not None and
-              all([cls._InDB(cp, slot, avail_db) for cp, slot in sub_deps])):
+              all(cls._InDB(cp, slot, avail_db) for cp, slot in sub_deps)):
             default_deps = sub_deps
 
           # If not all sub-deps are installed, then don't consider them.
-          if not all([cls._InDB(cp, slot, installed_db)
-                      for cp, slot in sub_deps]):
+          if not all(cls._InDB(cp, slot, installed_db)
+                     for cp, slot in sub_deps):
             sub_deps = set()
 
         deps.update(sub_deps)
@@ -386,11 +386,11 @@ print(json.dumps(pkg_info))
       result = device.GetAgent().RemoteSh(['python'], remote_sudo=True,
                                           input=get_vartree_script)
     except cros_build_lib.RunCommandError as e:
-      logging.error('Cannot get target vartree:\n%s', e.result.error)
+      logging.error('Cannot get target vartree:\n%s', e.result.stderr)
       raise
 
     try:
-      self.target_db = self._BuildDB(json.loads(result.output),
+      self.target_db = self._BuildDB(json.loads(result.stdout),
                                      process_rdeps, process_rev_rdeps)
     except ValueError as e:
       raise self.VartreeError(str(e))
@@ -842,7 +842,7 @@ def _Emerge(device, pkg_paths, root, extra_args=None):
 
     pattern = ('A requested package will not be merged because '
                'it is listed in package.provided')
-    output = result.error.replace('\n', ' ').replace('\r', '')
+    output = result.stderr.replace('\n', ' ').replace('\r', '')
     if pattern in output:
       error = ('Package failed to emerge: %s\n'
                'Remove %s from /etc/portage/make.profile/'
@@ -1052,7 +1052,7 @@ def _DeployDLCImage(device, sysroot, board, dlc_id, dlc_package):
     device.run(['dlcservice_util', '--uninstall', '--id=%s' % dlc_id])
   except cros_build_lib.RunCommandError as e:
     logging.info('Failed to uninstall DLC:%s. Continue anyway.',
-                 e.result.error)
+                 e.result.stderr)
   except Exception:
     logging.error('Failed to uninstall DLC.')
     raise
@@ -1158,7 +1158,7 @@ def Deploy(device, packages, board=None, emerge=True, update=False, deep=False,
     emerge_args: Extra arguments to pass to emerge.
     ssh_private_key: Path to an SSH private key file; None to use test keys.
     ping: True to ping the device before trying to connect.
-    force: Ignore sanity checks and prompts.
+    force: Ignore confidence checks and prompts.
     dry_run: Print deployment plan but do not deploy anything.
 
   Raises:

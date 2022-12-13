@@ -10,11 +10,14 @@ import logging
 import os
 
 from chromite.third_party.google.protobuf import field_mask_pb2
-from chromite.third_party.infra_libs.buildbucket.proto import builder_pb2, builds_service_pb2, common_pb2
+from chromite.third_party.infra_libs.buildbucket.proto import (
+    builder_common_pb2,
+    builds_service_pb2,
+    common_pb2,
+)
 
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import commands
-from chromite.cbuildbot import goma_util
 from chromite.cbuildbot import repository
 from chromite.cbuildbot.stages import generic_stages
 from chromite.cbuildbot.stages import test_stages
@@ -26,6 +29,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_sdk_lib
 from chromite.lib import failures_lib
 from chromite.lib import git
+from chromite.lib import goma_lib
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import portage_util
@@ -209,7 +213,7 @@ class CleanUpStage(generic_stages.BuilderStage):
           constants.BUILDBUCKET_BUILDER_STATUS_SUCCESS,
       ]:
         build_predicate = builds_service_pb2.BuildPredicate(
-            builder=builder_pb2.BuilderID(
+            builder=builder_common_pb2.BuilderID(
                 project='chromeos',
                 bucket=bucket),
             status=status,
@@ -238,7 +242,7 @@ class CleanUpStage(generic_stages.BuilderStage):
           constants.BUILDBUCKET_BUILDER_STATUS_SCHEDULED,
           constants.BUILDBUCKET_BUILDER_STATUS_STARTED]:
         child_predicate = builds_service_pb2.BuildPredicate(
-            builder=builder_pb2.BuilderID(
+            builder=builder_common_pb2.BuilderID(
                 project='chromeos',
                 bucket=bucket),
             status=status,
@@ -419,9 +423,11 @@ class CleanUpStage(generic_stages.BuilderStage):
       if self._run.options.workspace:
         tasks.append(self._CleanWorkspace)
 
+      # TODO(b/201081848): Don't cancel for now, paygen going on too long.
+      #
       # CancelObsoleteSlaveBuilds, if there are slave builds to cancel.
-      if self._run.config.slave_configs:
-        tasks.append(self.CancelObsoleteSlaveBuilds)
+      # if self._run.config.slave_configs:
+      #  tasks.append(self.CancelObsoleteSlaveBuilds)
 
       parallel.RunParallelSteps(tasks)
 
@@ -660,8 +666,8 @@ class BuildPackagesStage(generic_stages.BoardSpecificBuilderStage,
     # TODO(crbug.com/751010): Revisit to enable DepsCache for non-chrome-pfq
     # bots, too.
     use_goma_deps_cache = self._run.config.name.endswith('chrome-pfq')
-    goma_approach = goma_util.GomaApproach('?cros', 'goma.chromium.org', True)
-    goma = goma_util.Goma(
+    goma_approach = goma_lib.GomaApproach('?cros', 'goma.chromium.org', True)
+    goma = goma_lib.Goma(
         self._run.options.goma_dir,
         self._run.options.goma_client_json,
         stage_name=self.StageNamePrefix() if use_goma_deps_cache else None,
@@ -674,13 +680,14 @@ class BuildPackagesStage(generic_stages.BoardSpecificBuilderStage,
     self._portage_extra_env.update(goma.GetChrootExtraEnv())
 
     # Keep GOMA_TMP_DIR for Report stage to upload logs.
-    self._run.attrs.metadata.UpdateWithDict({'goma_tmp_dir': goma.goma_tmp_dir})
+    self._run.attrs.metadata.UpdateWithDict(
+        {'goma_tmp_dir': str(goma.goma_tmp_dir)})
 
     # Mount goma directory and service account json file (if necessary)
     # into chroot.
-    chroot_args = ['--goma_dir', goma.chromeos_goma_dir]
+    chroot_args = ['--goma_dir', str(goma.chromeos_goma_dir)]
     if goma.goma_client_json:
-      chroot_args.extend(['--goma_client_json', goma.goma_client_json])
+      chroot_args.extend(['--goma_client_json', str(goma.goma_client_json)])
     return chroot_args
 
   def PerformStage(self):
@@ -865,7 +872,7 @@ class BuildImageStage(BuildPackagesStage):
     compute images create" command. This will convert them into images that can
     be used to create GCE VM instances.
     """
-    if self._run.config.gce_tests or self._run.config.gce_image:
+    if self._run.config.gce_image:
       image_bins = []
       if 'base' in self._run.config['images']:
         image_bins.append(constants.IMAGE_TYPE_TO_NAME['base'])
@@ -904,8 +911,8 @@ class BuildImageStage(BuildPackagesStage):
   def _FindKernelVersion(self):
     """Returns a string containing the kernel version for this build."""
     try:
-      packages = portage_util.GetPackageDependencies(self._current_board,
-                                                     'virtual/linux-sources')
+      packages = portage_util.GetPackageDependencies(
+          'virtual/linux-sources', board=self._current_board)
     except cros_build_lib.RunCommandError:
       logging.warning('Unable to get package list for metadata.')
       return None

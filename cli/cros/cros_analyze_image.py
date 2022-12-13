@@ -55,6 +55,7 @@ WATCHED_PATHS = [
     '/opt/google/chrome/resources.pak',
     '/opt/google/chrome/resources/chromeos/accessibility/chromevox',
     '/opt/google/containers/android',
+    '/opt/google/vms/android',
     '/usr/bin',
     '/usr/lib',
     '/usr/lib64',  # on 32-bit systems this check will come up as -1.

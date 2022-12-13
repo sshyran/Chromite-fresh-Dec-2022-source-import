@@ -190,8 +190,8 @@ def _ShortenGutsTicket(o):
   return o._replace(scheme='http', netloc='t')
 
 
-# Map sites to the shortener.  Use a tuple to keep rule ordering sane (even if
-# we don't have rules atm relying on it).
+# Map sites to the shortener.  Use a tuple to keep rule ordering correct (even
+# if we don't have rules atm relying on it).
 _SHORTENERS = (
     (re.compile(r'^[a-z0-9-]+-review\.googlesource\.com$'), _ShortenGob),
     (re.compile(r'^crosreview\.com$'), _ShortenCrosReview),

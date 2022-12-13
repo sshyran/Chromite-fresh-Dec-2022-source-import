@@ -4,15 +4,14 @@
 
 """Manage projects in the local manifest."""
 
-import platform
 import os
+import platform
 import xml.etree.ElementTree as ElementTree
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import git
 from chromite.lib import osutils
-from chromite.lib import repo_manifest
 
 
 class LocalManifest(object):
@@ -65,8 +64,7 @@ class LocalManifest(object):
     # Fix manifest tag text and tail.
     self.nodes.text = '\n  '
     self.nodes.tail = '\n'
-    return ElementTree.tostring(
-        self.nodes, encoding=repo_manifest.TOSTRING_ENCODING)
+    return ElementTree.tostring(self.nodes, encoding='unicode')
 
   def GetProjects(self):
     return list(self.nodes.findall('project'))
@@ -80,7 +78,7 @@ def _AddProjectsToManifestGroups(options, new_group):
   git_config = options.git_config
 
   cmd = ['config', '-f', git_config, '--get', 'manifest.groups']
-  enabled_groups = git.RunGit('.', cmd, check=False).output.split(',')
+  enabled_groups = git.RunGit('.', cmd, check=False).stdout.rstrip().split(',')
 
   # Note that ordering actually matters, thus why the following code
   # is written this way.
