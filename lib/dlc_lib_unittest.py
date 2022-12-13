@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 """Unit tests for dlc_lib."""
 
+import itertools
 import json
 import os
 from unittest import mock
@@ -440,8 +441,23 @@ class DlcGeneratorTest(
                 "critical-update": False,
                 "loadpin-verity-digest": False,
                 "scaled": False,
+                "use-logical-volume": False,
             },
         )
+
+    def testLogicalVolumeJson(self):
+        """Test that GetImageloaderJsonContent logical volume value is set."""
+        gen = self.GetDlcGenerator()
+
+        # Values should always be what `scaled` is set to.
+        for pr in list(itertools.product((False, True), repeat=2)):
+            gen.ebuild_params.scaled = pr[0]
+            gen.ebuild_params.use_logical_volume = pr[1]
+
+            content = gen.GetImageloaderJsonContent("", "", 100)
+
+            self.assertEqual(content["scaled"], pr[0])
+            self.assertEqual(content["use-logical-volume"], pr[0])
 
     def testVerifyImageSize(self):
         """Test that VerifyImageSize throws exception on errors only."""

@@ -610,6 +610,9 @@ class DlcGenerator(object):
             "critical-update": self.ebuild_params.critical_update,
             "loadpin-verity-digest": self.ebuild_params.loadpin_verity_digest,
             "scaled": self.ebuild_params.scaled,
+            # Initial rollout is to have all scaled DLCs use logical volumes on
+            # devices that support LVM stateful.
+            "use-logical-volume": self.ebuild_params.scaled,
         }
 
     def GenerateVerity(self):
