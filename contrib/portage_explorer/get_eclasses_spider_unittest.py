@@ -15,17 +15,17 @@ def test_execute(monkeypatch, tmp_path):
     Ensure the get_eclasses_spider gets all the eclasses in the overlay's eclass
     directory and sorts them.
     """
-    test_oak, overlay_oak = spider_testables.create_overlays(tmp_path, "oak")
+    test_elm, overlay_elm = spider_testables.create_overlays(tmp_path, "elm")
     _test_brya, overlay_brya = spider_testables.create_overlays(
         tmp_path, "brya"
     )
     eclasses, _eclass_inherit = spider_testables.create_eclasses(
         tmp_path,
-        test_oak,
+        test_elm,
         ["eclass", "ssalce", "abcd"],
     )
     monkeypatch.setattr("chromite.lib.constants.SOURCE_ROOT", str(tmp_path))
-    test_output = spiderlib.SpiderOutput([], [overlay_brya, overlay_oak])
+    test_output = spiderlib.SpiderOutput([], [overlay_brya, overlay_elm])
     get_eclasses_spider.execute(test_output)
     assert test_output.build_targets == []
     assert test_output.overlays[0].eclasses == []

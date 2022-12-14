@@ -15,14 +15,14 @@ def test_execute(monkeypatch, tmp_path):
     Ensure that we are getting all the correct ebuilds and that each ebuild has
     the right src path, category, PN, version, and revision.
     """
-    test_oak, overlay_oak = spider_testables.create_overlays(tmp_path, "oak")
+    test_elm, overlay_elm = spider_testables.create_overlays(tmp_path, "elm")
     (
         _test_ebuilds,
         spider_ebuilds,
         _spider_ebuilds_metadata,
     ) = spider_testables.create_ebuilds(
         tmp_path,
-        test_oak,
+        test_elm,
         {
             "category/name-1": spiderlib.TestEbuild(),
             "category/name-1-r4": spiderlib.TestEbuild(),
@@ -30,7 +30,7 @@ def test_execute(monkeypatch, tmp_path):
             "yrogetac/foo-5.4_alpha0": spiderlib.TestEbuild(),
         },
     )
-    test_output = spiderlib.SpiderOutput([], [overlay_oak])
+    test_output = spiderlib.SpiderOutput([], [overlay_elm])
     monkeypatch.setattr("chromite.lib.constants.SOURCE_ROOT", str(tmp_path))
     get_ebuilds_spider.execute(test_output)
     assert test_output.build_targets == []

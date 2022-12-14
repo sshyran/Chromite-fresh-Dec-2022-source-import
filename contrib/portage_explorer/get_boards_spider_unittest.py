@@ -13,7 +13,7 @@ from chromite.contrib.portage_explorer import spiderlib
 def test_get_board_name():
     """Test that get_board_name returns the correct board name."""
     assert get_boards_spider.get_board_name("overlay-brya") == "brya"
-    assert get_boards_spider.get_board_name("overlay-oak-private") == "oak"
+    assert get_boards_spider.get_board_name("overlay-elm-private") == "elm"
     assert get_boards_spider.get_board_name("chromeos-overlay-oak") == ""
     assert get_boards_spider.get_board_name("baseboard-asuka") == ""
 
@@ -23,8 +23,8 @@ def test_execute():
     with mock.patch(
         "chromite.lib.portage_util.FindOverlays",
         return_value=[
-            "/mnt/host/source/src/overlays/overlay-oak",
-            "/mnt/host/source/src/private-overlays/overlay-oak-private",
+            "/mnt/host/source/src/overlays/overlay-elm",
+            "/mnt/host/source/src/private-overlays/overlay-elm-private",
             "/mnt/host/source/src/private-overlays/chipset-tgl-private",
             "/mnt/host/source/src/private-overlays/overlay-soraka-private",
             "/mnt/host/source/src/overlays/overlay-asuka",
@@ -34,6 +34,6 @@ def test_execute():
         get_boards_spider.execute(test_output)
         assert test_output.build_targets == [
             spiderlib.BuildTarget("asuka"),
-            spiderlib.BuildTarget("oak"),
+            spiderlib.BuildTarget("elm"),
             spiderlib.BuildTarget("soraka"),
         ]

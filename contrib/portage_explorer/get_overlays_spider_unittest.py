@@ -21,8 +21,8 @@ def test_execute():
     with mock.patch(
         "chromite.lib.portage_util.FindOverlays",
         return_value=[
-            "/mnt/host/source/src/overlays/overlay-oak",
-            "/mnt/host/source/src/private-overlays/overlay-oak-private",
+            "/mnt/host/source/src/overlays/overlay-elm",
+            "/mnt/host/source/src/private-overlays/overlay-elm-private",
             "/mnt/host/source/src/overlays/baseboard-brya",
             "/mnt/host/source/src/private-overlays/chipset-picasso-private",
             "/mnt/host/source/src/third_party/portage-stable",
@@ -34,13 +34,13 @@ def test_execute():
             spiderlib.Overlay(
                 Path("src/overlays/baseboard-brya"), "baseboard-brya"
             ),
-            spiderlib.Overlay(Path("src/overlays/overlay-oak"), "oak"),
+            spiderlib.Overlay(Path("src/overlays/overlay-elm"), "elm"),
             spiderlib.Overlay(
                 Path("src/private-overlays/chipset-picasso-private"),
                 "chipset-picasso-private",
             ),
             spiderlib.Overlay(
-                Path("src/private-overlays/overlay-oak-private"), "oak-private"
+                Path("src/private-overlays/overlay-elm-private"), "elm-private"
             ),
             spiderlib.Overlay(
                 Path("src/third_party/portage-stable"), "portage-stable"
