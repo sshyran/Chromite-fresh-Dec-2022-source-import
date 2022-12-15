@@ -108,10 +108,7 @@ def _BreakoutDataByTool(map_to_return, path):
                 # If the file doesn't have a shebang, nothing to do.
                 return
 
-            prog = result.command
-            if prog == "/usr/bin/env":
-                prog = result.args
-            basename = os.path.basename(prog)
+            basename = os.path.basename(result.real_command)
             if basename.startswith("python") or basename.startswith("vpython"):
                 for tool in _EXT_TOOL_MAP[frozenset({".py"})]:
                     map_to_return.setdefault(tool, []).append(path)

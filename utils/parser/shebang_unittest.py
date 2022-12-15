@@ -57,3 +57,20 @@ class SplitShebangTest(cros_test_lib.TestCase):
         self.assertRaises(ValueError, shebang.parse, "/bin/sh -i")
         self.assertRaises(ValueError, shebang.parse, "#!")
         self.assertRaises(ValueError, shebang.parse, "#!env python")
+
+    def testRealCommand(self):
+        """Test real_command helper."""
+        # If /usr/bin/env has an arg, that's the real command.
+        result = shebang.parse("#!/usr/bin/env ls")
+        assert result.command == "/usr/bin/env"
+        assert result.real_command == "ls"
+
+        # If /usr/bin/env doesn't have an arg, then env is the real command.
+        result = shebang.parse("#!/usr/bin/env")
+        assert result.command == "/usr/bin/env"
+        assert result.real_command == "/usr/bin/env"
+
+        # Don't skip non-wrapper tools.
+        result = shebang.parse("#!/bin/foo -x")
+        assert result.command == "/bin/foo"
+        assert result.real_command == "/bin/foo"

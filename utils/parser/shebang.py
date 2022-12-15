@@ -21,6 +21,13 @@ class Shebang(NamedTuple):
     # Arguments to the interpreter.
     args: Optional[str]
 
+    @property
+    def real_command(self) -> str:
+        """Try to find the 'real' command by ignoring common wrappers."""
+        if self.args and self.command in {"/bin/env", "/usr/bin/env"}:
+            return self.args
+        return self.command
+
 
 def parse(data: Union[bytes, str]) -> Shebang:
     r"""Splits a shebang (#!) into command and arguments.
