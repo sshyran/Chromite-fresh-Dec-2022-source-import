@@ -222,29 +222,28 @@ class CleanCommand(command.CliCommand):
                 return
             logging.notice("would have cleaned: %s (%s)", path, _GetSize(path))
 
-        def Clean(path):
+        def Clean(path, ignore_mount=False):
             """Helper wrapper for the dry-run checks"""
-            if self.options.dry_run:
+            if ignore_mount and os.path.ismount(path):
+                logging.debug("Ignoring bind mounted dir: %s", path)
+            elif self.options.dry_run:
                 _LogClean(path)
             else:
                 osutils.RmDir(path, ignore_missing=True, sudo=True)
 
-        def Empty(path):
+        def _LogEmpty(path):
+            if not os.path.exists(path):
+                return
+            logging.notice("would have emptied: %s (%s)", path, _GetSize(path))
+
+        def Empty(path, ignore_mount=False):
             """Helper wrapper for the dry-run checks"""
-            if self.options.dry_run:
-                if os.path.exists(path):
-                    logging.notice(
-                        "would have emptied: %s (%s)", path, _GetSize(path)
-                    )
+            if ignore_mount and os.path.ismount(path):
+                logging.debug("Ignoring bind mounted dir: %s", path)
+            elif self.options.dry_run:
+                _LogEmpty(path)
             else:
                 osutils.EmptyDir(path, ignore_missing=True, sudo=True)
-
-        def CleanNoBindMount(path):
-            # This test is a convenience for developers that bind mount these dirs.
-            if not os.path.ismount(path):
-                Clean(path)
-            else:
-                logging.debug("Ignoring bind mounted dir: %s", path)
 
         # Delete this first since many of the caches below live in the chroot.
         if self.options.chroot:
@@ -279,22 +278,26 @@ class CleanCommand(command.CliCommand):
         if self.options.cache:
             logging.debug("Clean the common cache.")
             with timer.timer("Clean the common cache", logging.debug):
-                CleanNoBindMount(self.options.cache_dir)
+                Empty(self.options.cache_dir, ignore_mount=True)
 
             # Recreate dirs that cros_sdk does when entering.
-            # TODO: When sdk_lib/enter_chroot.sh is moved to chromite, we should unify
-            # with those code paths.
+            # TODO: When sdk_lib/enter_chroot.sh is moved to chromite, we should
+            # unify with those code paths.
             if not self.options.dry_run:
+                # Prior to recreating the distfiles directory we must ensure
+                # that the cache directory is not root.
+                osutils.SafeMakedirsNonRoot(self.options.cache_dir)
                 distfiles_dir = os.path.join(
                     self.options.cache_dir, "distfiles"
                 )
                 osutils.SafeMakedirs(distfiles_dir)
                 os.chmod(distfiles_dir, 0o2775)
 
-                # The host & target subdirs aren't used anymore since we unified them,
-                # but if the cache is shared with older branches, we don't want to have
-                # files duplicated in them.  The unification happened in Jul 2020 for
-                # 13360.0.0+ / R86+, so we can prob drop this logic ~Jul 2028?
+                # The host & target subdirs aren't used anymore since we unified
+                # them, # but if the cache is shared with older branches, we
+                # don't want to have files duplicated in them.  The unification
+                # happened in Jul 2020 for # 13360.0.0+ / R86+, so we can prob
+                # drop this logic ~Jul 2028?
                 for subdir in ("host", "target"):
                     subdir = os.path.join(distfiles_dir, subdir)
                     # Recreate the path if it isn't a symlink.
@@ -337,7 +340,7 @@ class CleanCommand(command.CliCommand):
             logging.debug("Clean the images cache.")
             cache_dir = os.path.join(constants.SOURCE_ROOT, "src", "build")
             with timer.timer("Clean the images cache", logging.debug):
-                CleanNoBindMount(cache_dir)
+                Clean(cache_dir, ignore_mount=True)
 
         if self.options.incrementals:
             logging.debug("Clean package incremental objects.")
