@@ -1,2 +1,1 @@
-kinaba@chromium.org
-shaochuan@chromium.org
+include chromiumos/owners:v1:/arc/OWNERS.infra
