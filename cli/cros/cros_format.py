@@ -57,7 +57,9 @@ _EXT_TOOL_MAP = {
 _FILENAME_PATTERNS_TOOL_MAP = {
     frozenset({".gn"}): (formatters.gn.Data,),
     frozenset({"BUILD", "BUILD.bazel"}): (formatters.star.BuildData,),
-    frozenset({"WORKSPACE"}): (formatters.star.WorkspaceData,),
+    frozenset({"WORKSPACE", "WORKSPACE.bazel"}): (
+        formatters.star.WorkspaceData,
+    ),
     # These are plain text files.
     frozenset(
         {
