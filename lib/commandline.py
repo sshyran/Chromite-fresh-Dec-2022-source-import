@@ -17,12 +17,11 @@ import optparse  # pylint: disable=deprecated-module
 import os
 import signal
 import sys
-from typing import List
+from typing import List, NamedTuple, Optional
 import urllib.parse
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_collections
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import path_util
@@ -30,6 +29,7 @@ from chromite.lib import terminal
 from chromite.utils import attrs_freezer
 
 
+# TODO(build): Convert this to enum module.
 DEVICE_SCHEME_FILE = "file"
 DEVICE_SCHEME_SERVO = "servo"
 DEVICE_SCHEME_SSH = "ssh"
@@ -172,28 +172,35 @@ def NormalizeUri(value):
         return NormalizeLocalOrGSPath(value)
 
 
-# A Device object holds information parsed from the command line input:
-#   scheme: DEVICE_SCHEME_SSH, DEVICE_SCHEME_USB, DEVICE_SCHEME_SERVO,
-#     or DEVICE_SCHEME_FILE.
-#   username: String SSH username or None.
-#   hostname: String SSH hostname or None.
-#   port: Int SSH or Servo port or None.
-#   path: String USB/file path or None.
-#   raw: String raw input from the command line.
-#   serial_number: String Servo serial number or None.
-# For now this is a superset of all information for USB, SSH, or file devices.
-# If functionality diverges based on type, it may be useful to split this into
-# separate device classes instead.
-Device = cros_collections.Collection(
-    "Device",
-    scheme=None,
-    username=None,
-    hostname=None,
-    port=None,
-    path=None,
-    raw=None,
-    serial_number=None,
-)
+class Device(NamedTuple):
+    """A Device object holds information parsed from the command line input.
+
+    For now this is a superset of all information for USB, SSH, or file devices.
+    If functionality diverges based on type, it may be useful to split this into
+    separate device classes instead.
+    """
+
+    # DEVICE_SCHEME_SSH, DEVICE_SCHEME_USB, DEVICE_SCHEME_SERVO, or
+    # DEVICE_SCHEME_FILE.
+    scheme: str
+
+    # SSH username.
+    username: Optional[str] = None
+
+    # SSH hostname.
+    hostname: Optional[str] = None
+
+    # SSH or Servo port.
+    port: Optional[int] = None
+
+    # USB/file path.
+    path: Optional[str] = None
+
+    # Raw input from the command line.
+    raw: Optional[str] = None
+
+    # Servo serial number.
+    serial_number: Optional[str] = None
 
 
 class DeviceParser(object):
