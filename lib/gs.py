@@ -25,7 +25,6 @@ import urllib.parse
 from chromite.lib import cache
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_collections
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import retry_stats
@@ -230,13 +229,13 @@ class GSListResult(NamedTuple):
     metageneration: Optional[int] = None
 
 
-ErrorDetails = cros_collections.Collection(
-    "ErrorDetails",
-    type=None,
-    message_pattern="",
-    retriable=None,
-    exception=None,
-)
+class ErrorDetails(NamedTuple):
+    """Detailed errors for internal gsutil output processing."""
+
+    type: str
+    retriable: bool
+    message_pattern: Optional[str] = ""
+    exception: Optional[GSContextException] = None
 
 
 class GSCounter(object):
