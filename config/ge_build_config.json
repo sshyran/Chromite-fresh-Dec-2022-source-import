@@ -2452,7 +2452,6 @@
           "release_builder_test_pool": "bvt",
           "board_id": 7187,
           "is_active": true,
-          "stable_target_milestone": 110,
           "is_experimental": false
         },
         {
@@ -2492,7 +2491,6 @@
           "release_builder_test_pool": "bvt",
           "board_id": 7187,
           "is_active": true,
-          "stable_target_milestone": 109,
           "is_experimental": false
         },
         {
@@ -2552,7 +2550,6 @@
           "release_builder_test_pool": "bvt",
           "board_id": 7187,
           "is_active": true,
-          "stable_target_milestone": 130,
           "is_experimental": false
         },
         {
@@ -2610,7 +2607,6 @@
           "release_builder_test_pool": "bvt",
           "board_id": 7187,
           "is_active": true,
-          "stable_target_milestone": 109,
           "is_experimental": false
         },
         {
@@ -2633,7 +2629,6 @@
           "release_builder_test_pool": "bvt",
           "board_id": 7187,
           "is_active": true,
-          "stable_target_milestone": 110,
           "is_experimental": false
         },
         {
@@ -2737,7 +2732,7 @@
         }
       ],
       "rubik_target_milestone": 103,
-      "stable_target_milestone": 109
+      "stable_target_milestone": 130
     },
     {
       "name": "brya-nopkvm",
