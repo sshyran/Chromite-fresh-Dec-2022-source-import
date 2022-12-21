@@ -4,24 +4,36 @@
 
 """Baselines for user/group tests."""
 
-from chromite.lib import cros_collections
+from typing import NamedTuple, Set
 
 
-# firewall:!:236:236:firewall daemon:/dev/null:/bin/false
-UserEntry = cros_collections.Collection(
-    "UserEntry",
-    user=None,
-    encpasswd="!",
-    uid=None,
-    gid=None,
-    home="/dev/null",
-    shell="/bin/false",
-)
+class UserEntry(NamedTuple):
+    """User details matching typical account database (e.g. /etc/passwd).
 
-# tty:!:5:xorg,power,brltty
-GroupEntry = cros_collections.Collection(
-    "GroupEntry", group=None, encpasswd="!", gid=None, users=set()
-)
+    Example GECOS entry:
+    firewall:!:236:236:firewall daemon:/dev/null:/bin/false
+    """
+
+    user: str
+    encpasswd: str = "!"
+    uid: int = None
+    gid: int = None
+    home: str = "/dev/null"
+    shell: str = "/bin/false"
+
+
+class GroupEntry(NamedTuple):
+    """Group details matching typical account database (e.g. /etc/group).
+
+    Example GECOS entry:
+    tty:!:5:xorg,power,brltty
+    """
+
+    group: str
+    encpasswd: str = "!"
+    gid: int = None
+    users: Set[str] = set()
+
 
 # For users that we allow to login to the system, allow a number of alternative
 # shells.  These are equivalent from a security POV.
