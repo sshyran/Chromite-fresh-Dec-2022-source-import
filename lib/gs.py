@@ -19,7 +19,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from typing import Union
+from typing import NamedTuple, Optional, Union
 import urllib.parse
 
 from chromite.lib import cache
@@ -220,11 +220,14 @@ GSStatResult = collections.namedtuple(
 )
 
 
-# Detailed results of GSContext.List.
-GSListResult = collections.namedtuple(
-    "GSListResult",
-    ("url", "creation_time", "content_length", "generation", "metageneration"),
-)
+class GSListResult(NamedTuple):
+    """Detailed results of GSContext.List."""
+
+    url: str
+    creation_time: Optional[int] = None
+    content_length: Optional[int] = None
+    generation: Optional[int] = None
+    metageneration: Optional[int] = None
 
 
 ErrorDetails = cros_collections.Collection(
