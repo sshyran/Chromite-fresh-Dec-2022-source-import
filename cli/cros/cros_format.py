@@ -248,6 +248,17 @@ Supported file names: %s
             logging.warning("No files provided to format.  Doing nothing.")
             return 0
 
+        # Ignore symlinks.
+        files = []
+        syms = []
+        for f in self.options.files:
+            if os.path.islink(f):
+                syms.append(f)
+            else:
+                files.append(f)
+        if syms:
+            logging.info("Ignoring symlinks: %s", syms)
+
         tool_map = _BreakoutFilesByTool(files)
         dispatcher = functools.partial(
             _Dispatcher,

@@ -527,9 +527,19 @@ Supported file names: %s
             logging.warning("No files provided to lint.  Doing nothing.")
             return 0
 
+        files = []
+        syms = []
+        for f in self.options.files:
+            if os.path.islink(f):
+                syms.append(f)
+            else:
+                files.append(f)
+        if syms:
+            logging.info("Ignoring symlinks: %s", syms)
+
         # Ignore generated files.  Some tools can do this for us, but not all, and
         # it'd be faster if we just never spawned the tools in the first place.
-        files = [x for x in self.options.files if not x.endswith("_pb2.py")]
+        files = [x for x in files if not x.endswith("_pb2.py")]
 
         tool_map = _BreakoutFilesByTool(files)
         dispatcher = functools.partial(
