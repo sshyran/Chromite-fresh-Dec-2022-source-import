@@ -473,7 +473,11 @@ def _BreakoutFilesByTool(files):
 
 def _Dispatcher(output_format, debug, relaxed: bool, tool, path):
     """Call |tool| on |path| and take care of coalescing exit codes/output."""
-    result = tool(path, output_format, debug, relaxed)
+    try:
+        result = tool(path, output_format, debug, relaxed)
+    except UnicodeDecodeError:
+        logging.error("%s: file is not UTF-8 compatible", path)
+        return 1
     return 1 if result.returncode else 0
 
 
