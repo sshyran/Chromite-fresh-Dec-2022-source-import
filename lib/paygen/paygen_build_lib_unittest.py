@@ -2292,7 +2292,7 @@ SUITE = 'paygen_au_foo'
 source_payload_uri = 'foo-channel_1.0.0_uri'
 source_archive_uri = 'gs://crt/foo-channel/foo-board/1.0.0'
 payload_type = 'OMAHA'
-# Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
+# Copyright 2012 The ChromiumOS Authors
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -2317,7 +2317,7 @@ SUITE = 'paygen_au_foo'
 source_payload_uri = 'foo-channel_1.2.3_uri'
 source_archive_uri = 'gs://crt/foo-channel/foo-board/1.2.3'
 payload_type = 'N2N'
-# Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
+# Copyright 2012 The ChromiumOS Authors
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
